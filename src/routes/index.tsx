@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ArrowUpRight, Building2, Coins, Database, Globe2, Landmark, Radio, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BixShell } from '@/components/BixShell';
 import { getHomeMarketData } from '@/lib/market.functions';
 import { money } from '@/lib/bixlink';
+import { MemberGate } from '@/components/MemberGate';
+import { useMember } from '@/lib/useMember';
 
 const homeQuery = queryOptions({ queryKey: ['bix-home-market'], queryFn: () => getHomeMarketData(), staleTime: 60_000, refetchInterval: 60_000 });
 const bixSeries = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'].map(time => ({ time, price: 0.1 }));
@@ -23,10 +24,11 @@ export const Route = createFileRoute('/')({
 function HomeError() { return <BixShell><main className="mx-auto max-w-4xl px-5 py-24 text-center"><h1 className="section-title">HOME DATA <span>UNAVAILABLE</span></h1><p className="mt-4 text-muted-foreground">The market feed could not load. Please refresh shortly.</p></main></BixShell>; }
 
 function Home() {
+  const { user, ready } = useMember();
   const { data } = useSuspenseQuery(homeQuery);
   const stats = (data.stats ?? {}) as { active_stakes?: number; total_staked_usd?: number; members?: number; average_apy?: number; income?: Array<{ category: string; amount_usd: number }> };
   const income = stats.income ?? [];
-  return <BixShell><main>
+  return <BixShell><MemberGate ready={ready} signedIn={!!user} title="HOME"><main>
     <section className="border-b border-border"><div className="mx-auto max-w-7xl px-5 py-10 md:px-8 md:py-16"><div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end"><div><div className="eyebrow"><Radio size={13} className="text-chart-2"/> BIXLINK MARKET INTELLIGENCE</div><h1 className="section-title">STAKING & <span>MARKET HOME</span></h1><p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">Internal BIX market reference, recorded staking activity, global crypto prices, tokenomics, and the RWA roadmap in one view.</p></div><div className="rounded-full border border-chart-3/50 bg-card px-5 py-3 text-sm font-bold text-chart-3">21 JUTA BIX TOKEN</div></div>
       <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[["Active stakes",String(stats.active_stakes ?? 0),TrendingUp],["Recorded stake",money(Number(stats.total_staked_usd ?? 0)),Landmark],["Network members",String(stats.members ?? 0),Globe2],["Average active APY",`${Number(stats.average_apy ?? 0).toFixed(2)}%`,Coins]].map(([label,value,Icon],i) => { const I = Icon as typeof Coins; return <div className={`stat-card accent-${i%3}`} key={String(label)}><div className="flex items-center justify-between text-sm text-muted-foreground"><span>{String(label)}</span><I size={17}/></div><strong className="mt-4 block text-3xl">{String(value)}</strong></div>; })}</div>
     </div></section>
@@ -35,5 +37,5 @@ function Home() {
     </section>
     <section className="border-y border-border bg-card/35"><div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 md:px-8 lg:grid-cols-2"><div><div className="eyebrow">SUPPLY DESIGN</div><h2 className="section-title">BIX <span>TOKENOMICS</span></h2><div className="mt-7 flex h-4 overflow-hidden rounded-full">{tokenomics.map(item => <div key={item.label} className={item.color} style={{ width: `${item.value}%` }}/>)}</div><div className="mt-5 grid grid-cols-2 gap-3">{tokenomics.map(item => <div key={item.label} className="flex items-center justify-between border-b border-border py-2 text-sm"><span className="text-muted-foreground">{item.label}</span><b>{item.value}%</b></div>)}</div><p className="mt-4 text-xs text-muted-foreground">Conceptual allocation of the fixed 21,000,000 BIX supply; this is not evidence of an issued on-chain supply.</p></div><div><div className="eyebrow">REAL-WORLD ASSET NARRATIVE</div><h2 className="section-title">RWA <span>MODEL</span></h2><p className="mt-5 text-sm leading-7 text-muted-foreground">BIXLINK’s RWA phase is designed to connect verified off-chain income categories with transparent ecosystem reporting. Each source remains an administrative record until independently verified and integrated.</p><div className="mt-6 grid grid-cols-2 gap-3">{['FOREX','CRYPTO','RWA','ADVERTISING'].map((label,i) => <div className={`stat-card accent-${i%3}`} key={label}><Building2 size={17}/><b className="mt-3 block">{label}</b><span className="text-xs text-muted-foreground">Planned income category</span></div>)}</div></div></div></section>
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]"><div><div className="eyebrow"><Database size={13}/> RECORDED SOURCES</div><h2 className="section-title">INCOME <span>OVERVIEW</span></h2><div className="mt-6 space-y-2">{income.length ? income.map(row => <div className="flex justify-between rounded-lg border border-border bg-card p-4" key={row.category}><span>{row.category}</span><b className="text-chart-3">{money(Number(row.amount_usd))}</b></div>) : <p className="text-sm text-muted-foreground">No verified income source has been recorded by the owner yet.</p>}</div><p className="mt-4 text-xs text-muted-foreground">Values shown are owner-entered internal records, not audited revenue.</p></div><div><div className="eyebrow">PHASE ROADMAP</div><h2 className="section-title">FROM LAUNCH TO <span>DAO</span></h2><div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{milestones.map(([quarter,label],i) => <div className="roadmap-item" key={quarter}><span className="text-xs font-bold text-chart-2">PHASE {i+1} · {quarter}</span><h3 className="mt-4 font-display text-lg font-bold">{label}</h3></div>)}</div></div></div></section>
-  </main></BixShell>;
+  </main></MemberGate></BixShell>;
 }
