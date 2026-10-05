@@ -9,13 +9,23 @@ const verifyAdmin = async (context: { supabase: any; userId: string; claims?: an
 };
 
 export const getMyData = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const [stakes, referral] = await Promise.all([
+  const [stakes, referral, tree] = await Promise.all([
     context.supabase.from('stakes').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
     context.supabase.from('referral_codes').select('*').eq('user_id', context.userId).maybeSingle(),
+    context.supabase.rpc('bix_referral_tree'),
   ]);
   if (stakes.error) throw stakes.error;
-  return { stakes: stakes.data ?? [], referral: referral.data };
+  if (tree.error) throw tree.error;
+  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [] };
 });
+
+export const assignReferral = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { code: string }) => z.object({ code: z.string().regex(/^BIX-\d{6}$/i) }).parse(data))
+  .handler(async ({ context, data }) => {
+    const { data: linked, error } = await context.supabase.rpc('assign_bix_referrer', { p_code: data.code });
+    if (error) throw error;
+    return { linked: Boolean(linked) };
+  });
 
 export const requestStake = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { packageId: string }) => z.object({ packageId: z.string().min(1).max(40) }).parse(data))
