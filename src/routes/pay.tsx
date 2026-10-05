@@ -15,7 +15,7 @@ export const Route = createFileRoute('/pay')({
   component: PayPage,
 });
 
-type Payload = { code: string; amount?: number; note?: string };
+type Payload = { code: string; amount?: number | undefined; note?: string | undefined };
 const parse = (raw: string): Payload | null => {
   const text = raw.trim();
   if (/^BIX-\d{6}$/i.test(text)) return { code: text.toUpperCase() };
