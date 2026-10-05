@@ -4,13 +4,15 @@ import splashBackground from '@/assets/bixlink-splash-bg.jpg';
 const SPLASH_DURATION_MS = 2800;
 
 export function AppSplash() {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    if (window.sessionStorage.getItem('bixlink-splash-seen') === '1') return;
+    if (window.sessionStorage.getItem('bixlink-splash-seen') === '1') {
+      setVisible(false);
+      return;
+    }
 
-    setVisible(true);
 
     const leaveTimer = window.setTimeout(() => setLeaving(true), SPLASH_DURATION_MS - 450);
     const removeTimer = window.setTimeout(() => {
