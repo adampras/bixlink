@@ -64,6 +64,13 @@
       "when": 1791217077172,
       "tag": "0008_bix_pay_internal_transfers",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791219145383,
+      "tag": "0009_profiles_clones_allocations",
+      "breakpoints": true
     }
   ]
 }
