@@ -302,3 +302,38 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .network-benefit b span { font-family: "JetBrains Mono", monospace; color: var(--chart-3); }
 .network-benefit p { margin-top: 5px; font-size: 11px; color: var(--muted-foreground); }
 @media (max-width: 480px) { .site-header .brand-mark { font-size: 1rem; } .site-header img { width: 34px; height: 34px; } .site-header > div { padding-left: 14px; padding-right: 14px; } .language-picker { padding: 0 6px; } .language-picker svg { display: none; } .network-stat { min-height: 78px; padding: 12px; } .network-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } .network-stat { display: block; } .network-stat-icon { width: 30px; height: 30px; margin-bottom: 9px; } .network-stat strong { font-size: 1.25rem; } .network-stat span:not(.network-stat-icon) { min-height: 30px; font-size: 9px; line-height: 1.25; } .network-tree-panel { padding: 6px 10px 12px; } }
+
+/* Paket 7: professional crypto terminal HOME */
+.terminal-hero { background: linear-gradient(180deg, oklch(0.18 0.065 287 / 66%), transparent); }
+.terminal-supply { display: inline-flex; align-items: center; gap: 7px; align-self: flex-start; border: 1px solid oklch(0.88 0.19 95 / 52%); border-radius: 999px; padding: 9px 13px; background: oklch(0.88 0.19 95 / 7%); color: var(--chart-3); font-size: 10px; font-weight: 800; }
+.terminal-overview { display: grid; gap: 12px; }
+.terminal-balance, .terminal-kpi, .terminal-market { border: 1px solid var(--line); background: linear-gradient(145deg, oklch(0.235 0.072 287 / 94%), oklch(0.155 0.045 285 / 98%)); box-shadow: var(--sh-2), inset 0 1px 0 oklch(1 0 0 / 5%); }
+.terminal-balance { border-radius: var(--r-card); padding: 20px; }
+.terminal-status, .terminal-live { display: inline-flex; align-items: center; gap: 6px; color: var(--chart-2); font-size: 9px; font-weight: 800; }
+.terminal-status i, .terminal-live i { width: 6px; height: 6px; border-radius: 50%; background: var(--chart-2); box-shadow: 0 0 9px var(--chart-2); animation: core-pulse 1.5s infinite; }
+.terminal-action { min-width: 0; border-radius: 10px; font-size: 10px; }
+.terminal-action svg { width: 13px; }
+.terminal-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.terminal-kpi { min-width: 0; border-radius: var(--r-control); padding: 13px; }
+.terminal-kpi svg { width: 15px; color: var(--primary); }
+.terminal-kpi span { display: block; min-height: 28px; margin-top: 10px; font-size: 9px; line-height: 1.25; color: var(--muted-foreground); }
+.terminal-kpi strong { display: block; overflow: hidden; font-family: "JetBrains Mono", monospace; font-size: 1.1rem; color: var(--foreground); text-overflow: ellipsis; }
+.terminal-market { border-radius: var(--r-card); padding: 18px; }
+.terminal-market-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.terminal-market-head h2 { margin-top: 6px; font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; }
+.terminal-market-head > div:last-child > strong { display: block; color: var(--chart-3); font-family: "JetBrains Mono", monospace; font-size: 1.65rem; }
+.terminal-market-head > div:last-child > span { display: block; font-size: 9px; color: var(--muted-foreground); }
+.terminal-chart { height: 220px; margin-top: 18px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--r-control); background: oklch(0.11 0.035 285 / 72%); }
+.terminal-disclosure { display: flex; gap: 9px; margin-top: 14px; font-size: 10px; line-height: 1.55; color: var(--muted-foreground); }
+.terminal-disclosure svg { flex: 0 0 auto; color: var(--chart-3); }
+.terminal-watchlist { margin-top: 15px; }
+.terminal-asset { display: grid; grid-template-columns: 34px minmax(62px, 1fr) 90px auto; align-items: center; gap: 9px; border-bottom: 1px solid var(--line); padding: 11px 0; }
+.terminal-asset:last-child { border-bottom: 0; }
+.asset-mark { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--secondary); font-size: 11px; font-weight: 900; color: var(--chart-3); }
+.terminal-asset b { display: block; font-size: 12px; }
+.terminal-asset > div:nth-child(2) span { display: block; overflow: hidden; font-size: 9px; color: var(--muted-foreground); text-overflow: ellipsis; }
+.terminal-asset svg { width: 100%; height: 26px; }
+.terminal-asset > div:last-child strong, .terminal-asset > div:last-child span { display: block; font-size: 10px; }
+.terminal-foot { display: flex; align-items: center; gap: 6px; border-top: 1px solid var(--line); padding-top: 12px; font-size: 9px; color: var(--muted-foreground); }
+@media (min-width: 768px) { .terminal-overview { grid-template-columns: minmax(360px, .9fr) 1.6fr; } .terminal-kpi { padding: 18px; } .terminal-kpi strong { font-size: 1.55rem; } }
+@media (max-width: 480px) { .terminal-balance { padding: 17px; } .terminal-asset { grid-template-columns: 32px minmax(58px, 1fr) 64px auto; gap: 7px; } .terminal-chart { height: 180px; } .terminal-market { padding: 15px; } }
