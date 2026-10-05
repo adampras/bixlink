@@ -2,47 +2,40 @@ import { createServerFn } from '@tanstack/react-start';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
-export type GlobalMarket = {
-  id: string;
-  symbol: string;
-  name: string;
-  price: number;
-  change24h: number;
-  marketCap: number;
-};
+export type GlobalMarket = { id: string; symbol: string; name: string; price: number; change24h: number; marketCap: number; sparkline: number[] };
+
+const ASSETS = [
+  { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin', pair: 'BTCUSDT' },
+  { id: 'ethereum', symbol: 'ETH', name: 'Ethereum', pair: 'ETHUSDT' },
+  { id: 'binancecoin', symbol: 'BNB', name: 'BNB', pair: 'BNBUSDT' },
+  { id: 'solana', symbol: 'SOL', name: 'Solana', pair: 'SOLUSDT' },
+  { id: 'dogecoin', symbol: 'DOGE', name: 'Dogecoin', pair: 'DOGEUSDT' },
+] as const;
+
+async function getGlobalMarkets(): Promise<GlobalMarket[]> {
+  try {
+    const symbols = encodeURIComponent(JSON.stringify(ASSETS.map(asset => asset.pair)));
+    const [tickerResponse, ...chartResponses] = await Promise.all([
+      fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${symbols}`, { headers: { accept: 'application/json', 'user-agent': 'BIXLINK-Market/1.0' } }),
+      ...ASSETS.map(asset => fetch(`https://api.binance.com/api/v3/klines?symbol=${asset.pair}&interval=1h&limit=24`, { headers: { accept: 'application/json', 'user-agent': 'BIXLINK-Market/1.0' } })),
+    ]);
+    if (!tickerResponse.ok || chartResponses.some(response => !response.ok)) return [];
+    const tickers = await tickerResponse.json() as Array<Record<string, string>>;
+    const charts = await Promise.all(chartResponses.map(response => response.json() as Promise<Array<Array<number | string>>>));
+    return ASSETS.map((asset, index) => {
+      const ticker = tickers.find(row => row['symbol'] === asset.pair);
+      return { id: asset.id, symbol: asset.symbol, name: asset.name, price: Number(ticker?.['lastPrice'] ?? 0), change24h: Number(ticker?.['priceChangePercent'] ?? 0), marketCap: 0, sparkline: charts[index]?.map(row => Number(row[4])).filter(Number.isFinite) ?? [] };
+    }).filter(asset => asset.price > 0);
+  } catch (error) {
+    console.error('Global market feed unavailable', error);
+    return [];
+  }
+}
 
 export const getHomeMarketData = createServerFn({ method: 'GET' }).handler(async () => {
   const key = process.env['SUPABASE_PUBLISHABLE_KEY']!;
-  const client = createClient<Database>(process.env['SUPABASE_URL']!, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: { fetch: (input, init) => {
-      const headers = new Headers(init?.headers);
-      if (key.startsWith('sb_') && headers.get('Authorization') === `Bearer ${key}`) headers.delete('Authorization');
-      headers.set('apikey', key);
-      return fetch(input, { ...init, headers });
-    } },
-  });
-  const { data: stats, error } = await client.rpc('bix_public_home_stats');
+  const client = createClient<Database>(process.env['SUPABASE_URL']!, key, { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: (input, init) => { const headers = new Headers(init?.headers); if (key.startsWith('sb_') && headers.get('Authorization') === `Bearer ${key}`) headers.delete('Authorization'); headers.set('apikey', key); return fetch(input, { ...init, headers }); } } });
+  const [{ data: stats, error }, markets] = await Promise.all([client.rpc('bix_public_home_stats'), getGlobalMarkets()]);
   if (error) throw error;
-
-  let markets: GlobalMarket[] = [];
-  let marketUpdatedAt: string | null = null;
-  try {
-    const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,binancecoin,solana,tether&order=market_cap_desc&sparkline=false&price_change_percentage=24h', { headers: { accept: 'application/json' } });
-    if (response.ok) {
-      const raw = await response.json() as Array<Record<string, unknown>>;
-      markets = raw.map(item => ({
-        id: String(item['id']),
-        symbol: String(item['symbol']).toUpperCase(),
-        name: String(item['name']),
-        price: Number(item['current_price']),
-        change24h: Number(item['price_change_percentage_24h'] ?? 0),
-        marketCap: Number(item['market_cap'] ?? 0),
-      }));
-      marketUpdatedAt = new Date().toISOString();
-    }
-  } catch {
-    markets = [];
-  }
-  return { stats, markets, marketUpdatedAt };
+  return { stats, markets, marketUpdatedAt: markets.length ? new Date().toISOString() : null };
 });
