@@ -8,10 +8,10 @@
 - [x] Replace HOME with staking statistics, BIX/USDT fixed-price chart, live major-token market data, tokenomics, RWA, income sources, and roadmap.
 - [x] Add a two-way BIX/USDT simulated swap flow with wallet history and admin review.
 - [x] Make the member referral URL directly copyable from the member experience.
-- [ ] Verify signed-in flows end-to-end with the available confirmed owner session.
+- [x] Verify signed-in HOME, WALLET closed-swap, BOOST APY, and admin access with the confirmed owner session.
 - [x] Hide member navigation from public landing and show it only after sign-in.
 - [x] Automatically assign referral codes after registration or first sign-in.
 - [x] Add admin-controlled swap availability with a Coming soon closed state.
 - [x] Restore reliable live major-asset charts with explicit fallback states.
 - [x] Rebuild BOOST APY around BIX stake volume, duration, 30% BIX allocation, and a premium animated robot fox.
-- [ ] Audit and repair incomplete menu and button flows end-to-end.
+- [x] Audit and repair incomplete menu and button flows end-to-end.

@@ -98,7 +98,7 @@ export const updateStake = createServerFn({ method: 'POST' }).middleware([requir
   });
 
 export const updatePackage = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { id: string; price_usd: number; apy: number; lock_days: number; daily_profit_enabled: boolean }) => z.object({ id: z.string(), price_usd: z.number().positive(), apy: z.number().min(0).max(100), lock_days: z.number().int().positive(), daily_profit_enabled: z.boolean() }).parse(data))
+  .inputValidator((data: { id: string; price_usd: number; apy: number; lock_days: number; daily_profit_enabled: boolean }) => z.object({ id: z.string(), price_usd: z.number().positive(), apy: z.number().min(0).max(25), lock_days: z.number().int().positive(), daily_profit_enabled: z.boolean() }).parse(data))
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
     const { id, ...values } = data;
