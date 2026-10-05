@@ -35,7 +35,9 @@ async function getGlobalMarkets(): Promise<GlobalMarket[]> {
 export const getHomeMarketData = createServerFn({ method: 'GET' }).handler(async () => {
   const key = process.env['SUPABASE_PUBLISHABLE_KEY']!;
   const client = createClient<Database>(process.env['SUPABASE_URL']!, key, { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: (input, init) => { const headers = new Headers(init?.headers); if (key.startsWith('sb_') && headers.get('Authorization') === `Bearer ${key}`) headers.delete('Authorization'); headers.set('apikey', key); return fetch(input, { ...init, headers }); } } });
-  const [{ data: stats, error }, markets] = await Promise.all([client.rpc('bix_public_home_stats'), getGlobalMarkets()]);
+  const [{ data: stats, error }, { data: marketSetting }, markets] = await Promise.all([client.rpc('bix_public_home_stats'), client.from('app_settings').select('value').eq('key', 'bix_market').maybeSingle(), getGlobalMarkets()]);
   if (error) throw error;
-  return { stats, markets, marketUpdatedAt: markets.length ? new Date().toISOString() : null };
+  const configuredPrice = Number((marketSetting?.value as { priceUsd?: number } | null)?.priceUsd ?? 0.84291);
+  const bixPriceUsd = Number.isFinite(configuredPrice) && configuredPrice > 0 ? configuredPrice : 0.84291;
+  return { stats, bixPriceUsd, markets, marketUpdatedAt: markets.length ? new Date().toISOString() : null };
 });
