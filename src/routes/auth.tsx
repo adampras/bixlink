@@ -14,7 +14,7 @@ function Auth() {
   const [mode, setMode] = useState<'signin'|'signup'|'forgot'>('signin');
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const navigate = useNavigate(); const { data: config } = usePublicConfig();
-  useEffect(() => { const incoming = new URLSearchParams(window.location.search).get('ref'); if (incoming && /^BIX-\d{6}$/i.test(incoming)) window.sessionStorage.setItem('bixlink-ref', incoming.toUpperCase()); }, []);
+  useEffect(() => { const incoming = new URLSearchParams(window.location.search).get('ref'); if (incoming && /^BIX-\d{6}$/i.test(incoming)) window.localStorage.setItem('bixlink-ref', incoming.toUpperCase()); }, []);
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setNotice('');
     try {

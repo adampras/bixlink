@@ -9,14 +9,14 @@ const verifyAdmin = async (context: { supabase: any; userId: string; claims?: an
 };
 
 export const getMyData = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const [stakes, referral, tree] = await Promise.all([
+  const [stakes, referral, tree, admin] = await Promise.all([
     context.supabase.from('stakes').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
     context.supabase.from('referral_codes').select('*').eq('user_id', context.userId).maybeSingle(),
-    context.supabase.rpc('bix_referral_tree'),
+    context.supabase.rpc('bix_referral_tree'), context.supabase.rpc('is_bix_admin'),
   ]);
   if (stakes.error) throw stakes.error;
   if (tree.error) throw tree.error;
-  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [] };
+  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [], isAdmin: Boolean(admin.data) };
 });
 
 export const assignReferral = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
@@ -98,7 +98,7 @@ export const updateStake = createServerFn({ method: 'POST' }).middleware([requir
   });
 
 export const updatePackage = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { id: string; price_usd: number; apy: number; lock_days: number; daily_profit_enabled: boolean }) => z.object({ id: z.string(), price_usd: z.number().positive(), apy: z.number().min(0).max(100), lock_days: z.number().int().positive(), daily_profit_enabled: z.boolean() }).parse(data))
+  .inputValidator((data: { id: string; price_usd: number; apy: number; lock_days: number; daily_profit_enabled: boolean }) => z.object({ id: z.string(), price_usd: z.number().positive(), apy: z.number().min(0).max(25), lock_days: z.number().int().positive(), daily_profit_enabled: z.boolean() }).parse(data))
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
     const { id, ...values } = data;
@@ -108,7 +108,7 @@ export const updatePackage = createServerFn({ method: 'POST' }).middleware([requ
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'referrals' | 'wallet'; value: Record<string, unknown> }) => z.object({ key: z.enum(['booster','referrals','wallet']), value: z.record(z.unknown()) }).parse(data))
+  .inputValidator((data: { key: 'booster' | 'referrals' | 'wallet' | 'swap'; value: Record<string, unknown> }) => z.object({ key: z.enum(['booster','referrals','wallet','swap']), value: z.record(z.unknown()) }).parse(data))
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
     const { error } = await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });

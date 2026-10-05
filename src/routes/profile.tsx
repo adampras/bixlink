@@ -31,7 +31,7 @@ function ProfilePage() {
       </section>
       <section className="mt-6 grid gap-3">
         <Button variant="outline" className="justify-start rounded-full" onClick={async () => { if (!user?.email) return; const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` }); setNotice(error ? error.message : 'Password reset email sent.'); }}><KeyRound/> Change password</Button>
-        <Button asChild variant="outline" className="justify-start rounded-full"><Link to="/admin"><Shield/> Admin panel (owner only)</Link></Button>
+        {data?.isAdmin && <Button asChild variant="outline" className="justify-start rounded-full"><Link to="/admin"><Shield/> Admin panel (owner only)</Link></Button>}
         <Button variant="outline" className="justify-start rounded-full text-destructive" onClick={signOut}><LogOut/> Sign out</Button>
       </section>
       {notice && <p role="status" className="mt-5 text-chart-2">{notice}</p>}
