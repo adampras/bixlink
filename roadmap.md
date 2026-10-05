@@ -1,5 +1,7 @@
 - [x] Connect Cloud authentication and database.
 - [x] Create staking, package, referral, and settings schema.
 - [x] Build landing, member, admin, and sign-in pages.
-- [x] Verify public pages and account creation feedback in the live preview.
-- [ ] Verify signed-in staking, referrals, and admin flows (blocked: no confirmed test account exists; reserved-domain test signup was rejected).
+- [x] Navigation HOME/WALLET/STAKE/BOOST APY/NETWORK/PROFILE.
+- [x] Wallet deposit (copy/QR), withdraw with fees, history + filters; admin review.
+- [x] NETWORK page: plan, matching unlock rule, sun tree.
+- [ ] Verify signed-in flows (blocked: no confirmed test account exists).

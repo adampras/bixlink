@@ -1,0 +1,38 @@
+import { useState } from 'react';
+import { useServerFn } from '@tanstack/react-start';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getAdminWallet, reviewWalletTx, addReward, updateSetting } from '@/lib/bixlink.functions';
+import { money } from '@/lib/bixlink';
+import { Button } from '@/components/ui/button';
+import { Check, X, Save } from 'lucide-react';
+
+export function AdminWallet({ members, wallet, onMessage }: { members: { id: string; email: string }[]; wallet?: { address?: string; network?: string }; onMessage: (m: string) => void }) {
+  const fetchTx = useServerFn(getAdminWallet); const review = useServerFn(reviewWalletTx); const reward = useServerFn(addReward); const save = useServerFn(updateSetting);
+  const qc = useQueryClient();
+  const { data: txs = [] } = useQuery({ queryKey: ['admin-wallet'], queryFn: () => fetchTx() });
+  const [filter, setFilter] = useState('pending');
+  const email = (id: string) => members.find(m => m.id === id)?.email ?? id.slice(0, 8);
+  const refresh = () => qc.invalidateQueries({ queryKey: ['admin-wallet'] });
+  const list = txs.filter(t => filter === 'all' || t.status === filter);
+  return <div className="mt-8 space-y-10">
+    <form className="grid max-w-2xl gap-3 sm:grid-cols-[1fr_2fr_auto]" onSubmit={async e => { e.preventDefault(); const f = new FormData(e.currentTarget); try { await save({ data: { key: 'wallet', value: { network: String(f.get('network')), address: String(f.get('address')).trim() } } }); onMessage('Deposit wallet saved.'); } catch { onMessage('Could not save wallet.'); } }}>
+      <input name="network" className="form-input" defaultValue={wallet?.network ?? 'USDT BEP20'} placeholder="Network"/>
+      <input name="address" className="form-input" defaultValue={wallet?.address ?? ''} placeholder="Deposit wallet address"/>
+      <Button className="rounded-full"><Save/> Save</Button>
+    </form>
+    <div>
+      <div className="flex flex-wrap gap-2">{['pending', 'approved', 'rejected', 'all'].map(s => <Button key={s} size="sm" variant={filter === s ? 'default' : 'outline'} className="rounded-full capitalize" onClick={() => setFilter(s)}>{s}</Button>)}</div>
+      <div className="mt-4 space-y-2">{list.map(t => <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4 text-xs">
+        <div className="min-w-0"><b className="text-sm capitalize">{t.type}</b> · {email(t.user_id)}<div className="text-muted-foreground">{new Date(t.created_at).toLocaleString()}</div><div className="break-all font-mono text-muted-foreground">{t.tx_hash ?? t.address ?? t.note}</div></div>
+        <div className="flex items-center gap-3"><div className="text-right"><div className="text-chart-3">{money(Number(t.amount_usd))}</div>{Number(t.fee_usd) > 0 && <div className="text-muted-foreground">send {money(Number(t.net_usd))}</div>}<div className="capitalize">{t.status}</div></div>
+          {t.status === 'pending' && <><Button size="icon" className="rounded-full" title="Approve" onClick={async () => { try { await review({ data: { id: t.id, status: 'approved' } }); await refresh(); } catch { onMessage('Could not approve.'); } }}><Check/></Button><Button size="icon" variant="destructive" className="rounded-full" title="Reject" onClick={async () => { try { await review({ data: { id: t.id, status: 'rejected' } }); await refresh(); } catch { onMessage('Could not reject.'); } }}><X/></Button></>}</div>
+      </div>)}{!list.length && <p className="text-sm text-muted-foreground">No transactions.</p>}</div>
+    </div>
+    <form className="grid max-w-2xl gap-3 sm:grid-cols-4" onSubmit={async e => { e.preventDefault(); const form = e.currentTarget; const f = new FormData(form); try { await reward({ data: { userId: String(f.get('user')), amount: Number(f.get('amount')), note: String(f.get('note')) } }); await refresh(); onMessage('Reward credited.'); form.reset(); } catch { onMessage('Could not credit reward.'); } }}>
+      <select name="user" className="form-input" required>{members.map(m => <option key={m.id} value={m.id}>{m.email}</option>)}</select>
+      <input name="amount" type="number" min="0.01" step="0.01" className="form-input" placeholder="Amount USD" required/>
+      <input name="note" className="form-input" placeholder="e.g. Matching LV1" required/>
+      <Button className="rounded-full">Credit reward</Button>
+    </form>
+  </div>;
+}
