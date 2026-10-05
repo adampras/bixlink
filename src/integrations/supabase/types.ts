@@ -162,6 +162,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_bix_referrer: { Args: { p_code: string }; Returns: boolean }
+      bix_referral_tree: {
+        Args: never
+        Returns: {
+          depth: number
+          parent_id: string
+          user_id: string
+        }[]
+      }
       is_bix_admin: { Args: never; Returns: boolean }
       request_bix_stake: { Args: { p_package: string }; Returns: string }
     }

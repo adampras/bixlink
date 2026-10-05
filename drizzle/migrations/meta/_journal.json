@@ -8,6 +8,13 @@
       "when": 1791172334010,
       "tag": "0000_bixlink_staking_core",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791172643997,
+      "tag": "0001_bixlink_referral_assignment",
+      "breakpoints": true
     }
   ]
 }
