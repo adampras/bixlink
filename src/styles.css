@@ -193,7 +193,7 @@ body { font-family: var(--font-sans); }
 .package-card.accent-1:hover { border-color: var(--chart-2); }
 .package-card.accent-2:hover { border-color: var(--chart-3); }
 .booster-band { background: oklch(0.17 0.06 284); }
-.metric-panel, .stat-card, .roadmap-item { border: 1px solid var(--border); border-radius: 20px; background: var(--card); padding: 20px; }
+.metric-panel, .stat-card, .roadmap-item, .market-panel { border: 1px solid var(--border); border-radius: 20px; background: var(--card); padding: 20px; }
 .roadmap-item { min-height: 124px; }
 .form-input { display: block; width: 100%; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--foreground); padding: 12px 14px; outline: none; }
 .form-input:focus { border-color: var(--primary); }

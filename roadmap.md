@@ -4,8 +4,8 @@
 - [x] Navigation HOME/WALLET/STAKE/BOOST APY/NETWORK/PROFILE.
 - [x] Wallet deposit (copy/QR), withdraw with fees, history + filters; admin review.
 - [x] NETWORK page: plan, matching unlock rule, sun tree.
-- [ ] Move the public landing experience to the pre-login/register entry.
-- [ ] Replace HOME with staking statistics, BIX/USDT fixed-price chart, live major-token market data, tokenomics, RWA, income sources, and roadmap.
-- [ ] Add a two-way BIX/USDT simulated swap flow with wallet history and admin review.
-- [ ] Make the member referral URL directly copyable from the member experience.
+- [x] Move the public landing experience to the pre-login/register entry.
+- [x] Replace HOME with staking statistics, BIX/USDT fixed-price chart, live major-token market data, tokenomics, RWA, income sources, and roadmap.
+- [x] Add a two-way BIX/USDT simulated swap flow with wallet history and admin review.
+- [x] Make the member referral URL directly copyable from the member experience.
 - [ ] Verify signed-in flows (blocked: no confirmed test account exists).
