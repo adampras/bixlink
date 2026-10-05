@@ -15,3 +15,4 @@
 - Treat BIX/USDT conversion as an admin-reviewed internal ledger request at the fixed reference price; this prevents implied exchange execution or custody.
 - Store owner-selected presentation options in public app settings and validate updates through authenticated admin server functions, so members see one centrally controlled experience.
 - Show the startup splash once per browser session from the root layout, so navigation inside the member area remains uninterrupted.
+- Resolve the member session once per app load from a shared module-level store and reuse it across routes, so switching menus never re-queries auth or flashes a raw loader; show a layout-shaped placeholder instead.
