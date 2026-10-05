@@ -19,6 +19,7 @@ function BoostPage() {
   const { data: cfg } = usePublicConfig();
   const packages = cfg?.packages ?? [];
   const longestLock = packages.reduce((max, p) => Math.max(max, Number(p.lock_days) || 0), 0);
+  const bixPrice = Number(cfg?.bixMarket.priceUsd ?? 0.84291);
   const visualKey = cfg?.boosterVisual.visual ?? 'fox';
   const visual = boosterVisuals[visualKey] ?? boosterVisuals.fox;
   return <BixShell><main>
@@ -63,14 +64,14 @@ function BoostPage() {
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8">
       <div className="eyebrow"><Gauge size={14}/> VOLUME + DURATION</div>
       <h2 className="section-title">BIX STAKING <span>TIERS</span></h2>
-      <p className="mt-4 max-w-2xl text-sm text-muted-foreground">The package amount represents BIXCOIN staking value at the internal ${Number(config?.bixMarket.priceUsd ?? 0.84291).toFixed(6)} reference. Higher volume and longer lock periods unlock the next APY tier.</p>
+      <p className="mt-4 max-w-2xl text-sm text-muted-foreground">The package amount represents BIXCOIN staking value at the internal ${bixPrice.toFixed(6)} reference. Higher volume and longer lock periods unlock the next APY tier.</p>
       <div className="boost-ladder mt-8">
         {packages.map((pkg, index) => (
           <Link key={pkg.id} to="/stake" className="boost-tier">
             <span className="boost-tier-rank numeric">TIER {String(index + 1).padStart(2, '0')}</span>
             <div className="min-w-0">
               <h3 className="font-display text-lg font-black">{pkg.id}</h3>
-              <span className="numeric">{(Number(pkg.price_usd) / Number(config?.bixMarket.priceUsd ?? 0.84291)).toLocaleString(undefined, { maximumFractionDigits: 2 })} BIX · {pkg.lock_days} days lock</span>
+              <span className="numeric">{(Number(pkg.price_usd) / bixPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })} BIX · {pkg.lock_days} days lock</span>
             </div>
             <div className="boost-tier-meter">
               <div className="apy-meter"><i style={{ width: `${Math.min(100, (Number(pkg.apy) / 25) * 100)}%` }}/></div>
