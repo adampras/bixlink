@@ -9,14 +9,14 @@ const verifyAdmin = async (context: { supabase: any; userId: string; claims?: an
 };
 
 export const getMyData = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const [stakes, referral, tree] = await Promise.all([
+  const [stakes, referral, tree, admin] = await Promise.all([
     context.supabase.from('stakes').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
     context.supabase.from('referral_codes').select('*').eq('user_id', context.userId).maybeSingle(),
     context.supabase.rpc('bix_referral_tree'),
   ]);
   if (stakes.error) throw stakes.error;
   if (tree.error) throw tree.error;
-  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [] };
+  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [], isAdmin: Boolean(admin.data) };
 });
 
 export const assignReferral = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
