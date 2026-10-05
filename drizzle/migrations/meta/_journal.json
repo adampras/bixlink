@@ -43,6 +43,13 @@
       "when": 1791198221609,
       "tag": "0005_public_home_staking_statistics",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791202052657,
+      "tag": "0006_enforce_admin_controlled_swap_availability",
+      "breakpoints": true
     }
   ]
 }
