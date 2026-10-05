@@ -14,13 +14,156 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_settings: {
+        Row: {
+          key: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      income_sources: {
+        Row: {
+          amount_usd: number
+          category: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          amount_usd?: number
+          category: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          amount_usd?: number
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      packages: {
+        Row: {
+          apy: number
+          daily_profit_enabled: boolean
+          id: string
+          lock_days: number
+          price_usd: number
+        }
+        Insert: {
+          apy: number
+          daily_profit_enabled?: boolean
+          id: string
+          lock_days: number
+          price_usd: number
+        }
+        Update: {
+          apy?: number
+          daily_profit_enabled?: boolean
+          id?: string
+          lock_days?: number
+          price_usd?: number
+        }
+        Relationships: []
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          referred_by: string | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          referred_by?: string | null
+          user_id?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          referred_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stakes: {
+        Row: {
+          activated_at: string | null
+          amount_usd: number
+          apy: number
+          created_at: string
+          id: string
+          lock_days: number
+          package_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string | null
+          amount_usd: number
+          apy: number
+          created_at?: string
+          id?: string
+          lock_days: number
+          package_id: string
+          status?: string
+          user_id?: string
+        }
+        Update: {
+          activated_at?: string | null
+          amount_usd?: number
+          apy?: number
+          created_at?: string
+          id?: string
+          lock_days?: number
+          package_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stakes_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          role: string
+          user_id: string
+        }
+        Insert: {
+          role: string
+          user_id: string
+        }
+        Update: {
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_bix_admin: { Args: never; Returns: boolean }
+      request_bix_stake: { Args: { p_package: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
