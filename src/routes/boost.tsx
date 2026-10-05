@@ -3,7 +3,7 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { usePublicConfig } from '@/lib/useMember';
 import { ArrowUpRight, Coins, Gauge, ShieldCheck, Zap } from 'lucide-react';
-import robotFox from '@/assets/bixlink-robot-fox.png';
+import robotFox from '@/assets/booster-concept-fox.png';
 
 export const Route = createFileRoute('/boost')({ head: () => ({ meta: [{ title: 'BIXCOIN Boost APY — BIXLINK' }, { name: 'description', content: 'Increase BIXCOIN staking APY through higher volume and longer lock periods, up to 25%.' }, { property: 'og:title', content: 'BIXCOIN Boost APY — BIXLINK' }, { property: 'og:description', content: 'BIXCOIN staking tiers, passive and active profit, with a 70% USDT and 30% BIX profit split.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: BoostPage });
 
@@ -38,7 +38,7 @@ function BoostPage() {
             <div className="robot-core"/>
             <div className="robot-ring robot-ring-one"/>
             <div className="robot-ring robot-ring-two"/>
-            <img src={robotFox} loading="lazy" width={1024} height={1024} alt="BIXLINK robotic blue fox APY engine" className="robot-fox"/>
+            <img src={robotFox} loading="lazy" width={1024} height={1024} alt="BIXLINK robotic fox guardian beside the APY reactor engine" className="robot-fox robot-fox--reactor"/>
             <div className="robot-status"><span className="pulse-dot"/> YIELD ENGINE {cfg?.booster.enabled ? 'ACTIVE' : 'PAUSED'}</div>
           </div>
           <div className="boost-readouts">
