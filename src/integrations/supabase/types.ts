@@ -157,6 +157,51 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          address: string | null
+          amount_usd: number
+          created_at: string
+          fee_usd: number
+          id: string
+          net_usd: number
+          note: string | null
+          reviewed_at: string | null
+          status: string
+          tx_hash: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          amount_usd: number
+          created_at?: string
+          fee_usd?: number
+          id?: string
+          net_usd: number
+          note?: string | null
+          reviewed_at?: string | null
+          status?: string
+          tx_hash?: string | null
+          type: string
+          user_id?: string
+        }
+        Update: {
+          address?: string | null
+          amount_usd?: number
+          created_at?: string
+          fee_usd?: number
+          id?: string
+          net_usd?: number
+          note?: string | null
+          reviewed_at?: string | null
+          status?: string
+          tx_hash?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -171,8 +216,17 @@ export type Database = {
           user_id: string
         }[]
       }
+      bix_wallet_balance: { Args: { p_user: string }; Returns: number }
       is_bix_admin: { Args: never; Returns: boolean }
+      request_bix_deposit: {
+        Args: { p_amount: number; p_tx_hash: string }
+        Returns: string
+      }
       request_bix_stake: { Args: { p_package: string }; Returns: string }
+      request_bix_withdraw: {
+        Args: { p_address: string; p_amount: number }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
