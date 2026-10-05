@@ -23,3 +23,4 @@
 - [x] Remove the duplicated HOME opening section below the header so members enter directly into the market overview.
 - [x] Add a premium first-visit BIXLINK splash screen from the supplied fox artwork.
 - [x] Polish the member-route transition: shared session cache, branded layout-shaped placeholder, and intent-based page preloading.
+- [x] Replace the monotonous internal BIX market with Dark Ledger Premium and add owner-managed reference pricing.

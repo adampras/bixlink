@@ -12,7 +12,7 @@
 - Keep staking requests as non-custodial, pending records with no automatic payout or fabricated wallet balance; this app does not integrate a payment rail.
 - Grant owner access only after server-validated identity and a matching verified owner email; client state is never an authority for admin actions.
 - Read public package and settings data with RLS and run account-specific operations with authenticated server functions; this separates public browsing from private records.
-- Treat BIX/USDT conversion as an admin-reviewed internal ledger request at the fixed reference price; this prevents implied exchange execution or custody.
+- Treat BIX/USDT conversion as an admin-reviewed internal ledger request at the owner-managed reference price; this prevents implied exchange execution or custody while keeping display and calculations consistent.
 - Store owner-selected presentation options in public app settings and validate updates through authenticated admin server functions, so members see one centrally controlled experience.
 - Show the startup splash once per browser session from the root layout, so navigation inside the member area remains uninterrupted.
 - Resolve the member session once per app load from a shared module-level store and reuse it across routes, so switching menus never re-queries auth or flashes a raw loader; show a layout-shaped placeholder instead.

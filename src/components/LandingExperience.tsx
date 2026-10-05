@@ -7,7 +7,7 @@ import fox from '@/assets/bixlink-fox.png';
 
 const milestones = [['Q1 2026','Launch'],['Q2 2026','Staking App Beta'],['Q3 2026','RWA Listing'],['Q4 2026','Ecosystem'],['Q1 2027','DAO'],['Q2 2027','21 JUTA MILESTONE']];
 
-export function LandingExperience({ packages = fallbackPackages, booster = true, compact = false }: { packages?: Package[]; booster?: boolean; compact?: boolean }) {
+export function LandingExperience({ packages = fallbackPackages, booster = true, compact = false, bixPrice = 0.84291 }: { packages?: Package[]; booster?: boolean; compact?: boolean; bixPrice?: number }) {
   return <div>
     <section className="hero-section relative overflow-hidden border-b border-border">
       <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-primary/20 blur-[110px]"/>
@@ -28,7 +28,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
         <div className="z-10 mt-6 grid w-full grid-cols-3 gap-2">
           <div className="flex flex-col items-center rounded-xl border border-border/60 bg-card/60 p-3 shadow-lg backdrop-blur-md"><span className="mb-1 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Supply</span><span className="font-display text-[13px] font-bold">21.000.000</span></div>
           <div className="relative flex flex-col items-center overflow-hidden rounded-xl border border-primary/30 bg-card/60 p-3 shadow-lg backdrop-blur-md"><div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent"/><span className="relative z-10 mb-1 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Staking APY</span><span className="relative z-10 font-display text-[13px] font-bold text-primary">8% – 25%</span></div>
-          <div className="flex flex-col items-center rounded-xl border border-border/60 bg-card/60 p-3 shadow-lg backdrop-blur-md"><span className="mb-1 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Price</span><span className="font-display text-[13px] font-bold text-chart-2">$0.10</span></div>
+          <div className="flex flex-col items-center rounded-xl border border-border/60 bg-card/60 p-3 shadow-lg backdrop-blur-md"><span className="mb-1 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Reference</span><span className="numeric font-display text-[13px] font-bold text-chart-2">${bixPrice.toFixed(6)}</span></div>
         </div>
       </div>
     </section>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Home, Wallet, Layers, Zap, User, Network, LogIn, ShieldCheck, Lock, BadgeCheck, Languages } from 'lucide-react';
-import { useMember } from '@/lib/useMember';
+import { useMember, usePublicConfig } from '@/lib/useMember';
 import fox from '@/assets/bixlink-fox.png';
 
 const NAV = [
@@ -25,6 +25,7 @@ const LANGUAGES = [
 
 export function BixShell({ children }: { children: React.ReactNode }) {
   const { user } = useMember();
+  const { data: publicConfig } = usePublicConfig();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const path = useRouterState({ select: s => s.location.pathname });
@@ -53,7 +54,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
       <div className="trust-panel text-xs">
         <div><ShieldCheck size={18} className="shrink-0 text-chart-2"/><div><strong className="block text-foreground">Admin-verified</strong><span className="text-muted-foreground">Every deposit, withdrawal and swap is reviewed manually.</span></div></div>
         <div><Lock size={18} className="shrink-0 text-chart-3"/><div><strong className="block text-foreground">Non-custodial preview</strong><span className="text-muted-foreground">No live funds are held or paid out automatically.</span></div></div>
-        <div><BadgeCheck size={18} className="shrink-0 text-primary"/><div><strong className="block text-foreground">Fixed reference price</strong><span className="text-muted-foreground">BIX internal ledger at $0.10 per BIX.</span></div></div>
+        <div><BadgeCheck size={18} className="shrink-0 text-primary"/><div><strong className="block text-foreground">Internal reference</strong><span className="text-muted-foreground">Owner-managed BIX ledger reference at ${Number(publicConfig?.bixMarket.priceUsd ?? 0.84291).toFixed(6)}.</span></div></div>
       </div>
       <div className="mt-6 flex flex-col justify-between gap-2 text-xs text-muted-foreground md:flex-row"><span>© 2026 BIXLINK · 21 JUTA BIX TOKEN</span><span>bixlink.io &nbsp;·&nbsp; @bixlink_official</span></div>
     </div></footer>
