@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { ArrowRight, ArrowUpRight, Check, Coins, Zap } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PackageGrid } from '@/components/PackageGrid';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
