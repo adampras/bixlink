@@ -6,7 +6,7 @@ import { money } from '@/lib/bixlink';
 import { Button } from '@/components/ui/button';
 import { Check, X, Save } from 'lucide-react';
 
-export function AdminWallet({ members, wallet, onMessage }: { members: { id: string; email: string }[]; wallet?: { address?: string; network?: string }; onMessage: (m: string) => void }) {
+export function AdminWallet({ members, wallet, onMessage }: { members: { id: string; email: string }[]; wallet?: { address?: string; network?: string } | undefined; onMessage: (m: string) => void }) {
   const fetchTx = useServerFn(getAdminWallet); const review = useServerFn(reviewWalletTx); const reward = useServerFn(addReward); const save = useServerFn(updateSetting);
   const qc = useQueryClient();
   const { data: txs = [] } = useQuery({ queryKey: ['admin-wallet'], queryFn: () => fetchTx() });
