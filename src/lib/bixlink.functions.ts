@@ -67,9 +67,14 @@ export const getAdminData = createServerFn({ method: 'GET' }).middleware([requir
     context.supabase.from('referral_codes').select('*'),
   ]);
   for (const result of [stakes, packages, settings, sources, referrals]) if (result.error) throw result.error;
-  const { data: members, error: membersError } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  if (membersError) throw membersError;
-  return { stakes: stakes.data ?? [], packages: packages.data ?? [], settings: settings.data ?? [], sources: sources.data ?? [], referrals: referrals.data ?? [], members: members.users.map(user => ({ id: user.id, email: user.email ?? '', created_at: user.created_at, banned_until: user.banned_until ?? null })) };
+  const members: { id: string; email: string; created_at: string; banned_until: string | null }[] = [];
+  for (let page = 1; page <= 100; page++) {
+    const { data: batch, error: membersError } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (membersError) throw membersError;
+    members.push(...batch.users.map(user => ({ id: user.id, email: user.email ?? '', created_at: user.created_at, banned_until: user.banned_until ?? null })));
+    if (batch.users.length < 1000) break;
+  }
+  return { stakes: stakes.data ?? [], packages: packages.data ?? [], settings: settings.data ?? [], sources: sources.data ?? [], referrals: referrals.data ?? [], members };
 });
 
 export const manageMember = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
