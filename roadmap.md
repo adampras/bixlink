@@ -24,3 +24,4 @@
 - [x] Add a premium first-visit BIXLINK splash screen from the supplied fox artwork.
 - [x] Polish the member-route transition: shared session cache, branded layout-shaped placeholder, and intent-based page preloading.
 - [x] Replace the monotonous internal BIX market with Dark Ledger Premium and add owner-managed reference pricing.
+- [x] BIX PAY: QR member-to-member instant BIX payments with owner open/close (Coming soon) and reversal.
