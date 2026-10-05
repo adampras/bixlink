@@ -9,7 +9,6 @@ import { MemberGate } from '@/components/MemberGate';
 import { useMember } from '@/lib/useMember';
 
 const homeQuery = queryOptions({ queryKey: ['bix-home-market'], queryFn: () => getHomeMarketData(), staleTime: 60_000, refetchInterval: 60_000 });
-const bixSeries = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'].map(time => ({ time, price: 0.1 }));
 const milestones = [['Q1 2026','Launch'],['Q2 2026','Staking App Beta'],['Q3 2026','RWA Listing'],['Q4 2026','Ecosystem'],['Q1 2027','DAO'],['Q2 2027','21 JUTA MILESTONE']];
 const tokenomics = [{ label: 'Staking ecosystem', value: 40, color: 'bg-primary' }, { label: 'RWA treasury', value: 25, color: 'bg-chart-2' }, { label: 'Liquidity plan', value: 20, color: 'bg-chart-3' }, { label: 'Community & operations', value: 15, color: 'bg-muted-foreground' }];
 
