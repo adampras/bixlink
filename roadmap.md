@@ -17,3 +17,4 @@
 - [x] Audit and repair incomplete menu and button flows end-to-end.
 - [x] Polish NETWORK statistics and referral tree for desktop and mobile readability.
 - [x] Move PROFILE to the top-right header with a five-language selector and remove it from bottom navigation.
+- [ ] Apply Paket Hemat 7 professional crypto-terminal polish to HOME for local and global market credibility.
