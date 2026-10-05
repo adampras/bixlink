@@ -71,6 +71,13 @@
       "when": 1791219145383,
       "tag": "0009_profiles_clones_allocations",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791220822307,
+      "tag": "0010_leader_program_virtual_pool",
+      "breakpoints": true
     }
   ]
 }

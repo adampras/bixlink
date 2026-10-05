@@ -307,3 +307,42 @@ export const allocateBix = createServerFn({ method: 'POST' }).middleware([requir
     if (error) throw error;
     return { ok: true };
   });
+
+type LeaderStatus = { status: string | null; virtual_usd: number; require_turnover: boolean; multiple: number; own_stake: number; turnover: number; target: number; qualified: boolean };
+
+export const getMyLeader = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data, error } = await context.supabase.rpc('bix_leader_status', { p_user: context.userId });
+  if (error) throw error;
+  return data as unknown as LeaderStatus;
+});
+
+export const applyLeader = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { error } = await context.supabase.rpc('apply_bix_leader');
+  if (error) throw new Error(error.message);
+  return { ok: true };
+});
+
+export const getAdminLeaders = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await verifyAdmin(context);
+  const [leaders, profiles, pool] = await Promise.all([
+    context.supabase.from('bix_leaders').select('*').order('created_at'),
+    context.supabase.from('profiles').select('user_id, full_name, username'),
+    context.supabase.from('app_settings').select('value').eq('key', 'leader_pool').maybeSingle(),
+  ]);
+  if (leaders.error) throw leaders.error;
+  const rows = await Promise.all((leaders.data ?? []).map(async l => {
+    const { data: s } = await context.supabase.rpc('bix_leader_status', { p_user: l.user_id });
+    const p = profiles.data?.find(x => x.user_id === l.user_id);
+    return { ...l, full_name: p?.full_name ?? '', username: p?.username ?? '', stats: s as unknown as LeaderStatus };
+  }));
+  return { leaders: rows, poolUsd: Number((pool.data?.value as { poolUsd?: number } | null)?.poolUsd ?? 1000000) };
+});
+
+export const reviewLeader = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { userId: string; status: 'approved' | 'rejected'; virtualUsd: number; requireTurnover: boolean }) => z.object({ userId: z.string().uuid(), status: z.enum(['approved', 'rejected']), virtualUsd: z.number().min(0).max(1_000_000), requireTurnover: z.boolean() }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { error } = await context.supabase.rpc('admin_review_bix_leader', { p_user: data.userId, p_status: data.status, p_virtual: data.virtualUsd, p_require: data.requireTurnover });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

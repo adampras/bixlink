@@ -80,6 +80,36 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_leaders: {
+        Row: {
+          created_at: string
+          require_turnover: boolean
+          reviewed_at: string | null
+          status: string
+          turnover_multiple: number
+          user_id: string
+          virtual_usd: number
+        }
+        Insert: {
+          created_at?: string
+          require_turnover?: boolean
+          reviewed_at?: string | null
+          status?: string
+          turnover_multiple?: number
+          user_id: string
+          virtual_usd?: number
+        }
+        Update: {
+          created_at?: string
+          require_turnover?: boolean
+          reviewed_at?: string | null
+          status?: string
+          turnover_multiple?: number
+          user_id?: string
+          virtual_usd?: number
+        }
+        Relationships: []
+      }
       bix_transfers: {
         Row: {
           amount_bix: number
@@ -354,6 +384,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_review_bix_leader: {
+        Args: {
+          p_require: boolean
+          p_status: string
+          p_user: string
+          p_virtual: number
+        }
+        Returns: undefined
+      }
+      apply_bix_leader: { Args: never; Returns: undefined }
       assign_bix_referrer: { Args: { p_code: string }; Returns: boolean }
       bix_asset_balances: {
         Args: { p_user: string }
@@ -362,6 +402,7 @@ export type Database = {
           usdt_balance: number
         }[]
       }
+      bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_pay_lookup: { Args: { p_code: string }; Returns: boolean }
       bix_pay_send: {
         Args: { p_amount: number; p_code: string; p_note: string }

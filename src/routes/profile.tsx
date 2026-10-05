@@ -9,6 +9,7 @@ import { useMember } from '@/lib/useMember';
 import { createReferral, assignReferral } from '@/lib/bixlink.functions';
 import { supabase } from '@/integrations/supabase/client';
 import { Copy, KeyRound, LogOut, Shield } from 'lucide-react';
+import { LeaderCard } from '@/components/LeaderCard';
 import fox from '@/assets/bixlink-fox.png';
 
 export const Route = createFileRoute('/profile')({ head: () => ({ meta: [{ title: 'Profile — BIXLINK' }, { name: 'description', content: 'Your BIXLINK account, referral code and network.' }, { property: 'og:title', content: 'Profile — BIXLINK' }, { property: 'og:description', content: 'Manage your BIXLINK member profile.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: ProfilePage });
@@ -29,6 +30,7 @@ function ProfilePage() {
         {data && !data.referral?.referred_by && <form className="mt-4 flex gap-2" onSubmit={async e => { e.preventDefault(); try { const r = await link({ data: { code: code.trim().toUpperCase() } }); setNotice(r.linked ? 'Referrer linked.' : 'Code unavailable.'); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Invalid code.'); } }}><input className="form-input max-w-44" placeholder="BIX-123456" value={code} onChange={e => setCode(e.target.value)}/><Button type="submit" className="rounded-full">Apply referrer</Button></form>}
         <Link to="/network" className="mt-4 block text-xs text-chart-2">View my network →</Link>
       </section>
+      <LeaderCard/>
       <section className="mt-6 grid gap-3">
         <Button variant="outline" className="justify-start rounded-full" onClick={async () => { if (!user?.email) return; const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` }); setNotice(error ? error.message : 'Password reset email sent.'); }}><KeyRound/> Change password</Button>
         {data?.isAdmin && <Button asChild variant="outline" className="justify-start rounded-full"><Link to="/admin"><Shield/> Admin panel (owner only)</Link></Button>}
