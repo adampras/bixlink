@@ -108,7 +108,11 @@ export const updatePackage = createServerFn({ method: 'POST' }).middleware([requ
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market'; value: Record<string, unknown> }) => z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market']), value: z.record(z.unknown()) }).parse(data))
+  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market'; value: Record<string, unknown> }) => {
+    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market']), value: z.record(z.unknown()) }).parse(data);
+    if (parsed.key === 'bix_market') z.object({ priceUsd: z.number().positive().max(1_000_000) }).parse(parsed.value);
+    return parsed;
+  })
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
     const { error } = await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });

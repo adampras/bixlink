@@ -63,14 +63,14 @@ function BoostPage() {
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8">
       <div className="eyebrow"><Gauge size={14}/> VOLUME + DURATION</div>
       <h2 className="section-title">BIX STAKING <span>TIERS</span></h2>
-      <p className="mt-4 max-w-2xl text-sm text-muted-foreground">The package amount represents BIXCOIN staking value at the internal $0.10 reference. Higher volume and longer lock periods unlock the next APY tier.</p>
+      <p className="mt-4 max-w-2xl text-sm text-muted-foreground">The package amount represents BIXCOIN staking value at the internal ${Number(config?.bixMarket.priceUsd ?? 0.84291).toFixed(6)} reference. Higher volume and longer lock periods unlock the next APY tier.</p>
       <div className="boost-ladder mt-8">
         {packages.map((pkg, index) => (
           <Link key={pkg.id} to="/stake" className="boost-tier">
             <span className="boost-tier-rank numeric">TIER {String(index + 1).padStart(2, '0')}</span>
             <div className="min-w-0">
               <h3 className="font-display text-lg font-black">{pkg.id}</h3>
-              <span className="numeric">{(Number(pkg.price_usd) / 0.1).toLocaleString()} BIX · {pkg.lock_days} days lock</span>
+              <span className="numeric">{(Number(pkg.price_usd) / Number(config?.bixMarket.priceUsd ?? 0.84291)).toLocaleString(undefined, { maximumFractionDigits: 2 })} BIX · {pkg.lock_days} days lock</span>
             </div>
             <div className="boost-tier-meter">
               <div className="apy-meter"><i style={{ width: `${Math.min(100, (Number(pkg.apy) / 25) * 100)}%` }}/></div>
@@ -103,7 +103,7 @@ function BoostPage() {
           <div className="boost-legend mt-4">
             <div className="boost-legend-item"><span><i className="bg-chart-3"/> USDT portion</span><b className="numeric text-chart-3">70%</b></div>
             <div className="boost-legend-item"><span><i className="bg-primary"/> BIX portion</span><b className="numeric text-primary">30%</b></div>
-            <div className="boost-legend-item"><span><i className="bg-chart-2"/> Paid at internal $0.10 reference</span><b className="numeric">30% BIX</b></div>
+            <div className="boost-legend-item"><span><i className="bg-chart-2"/> At current internal reference</span><b className="numeric">30% BIX</b></div>
           </div>
           <p className="terminal-disclosure"><ShieldCheck size={14}/> Recorded staking profit is split at approval in the owner console. No automatic payout is performed and the split is a reference allocation, not an exchange.</p>
         </div>
