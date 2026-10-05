@@ -19,3 +19,4 @@
 - [x] Move PROFILE to the top-right header with a five-language selector and remove it from bottom navigation.
 - [x] Apply Paket Hemat 7 professional crypto-terminal polish to HOME for local and global market credibility.
 - [x] Paket Hemat 8: rebuild BOOST APY as an exclusive yield-engine terminal (engine readout panel, tier ladder, 70/30 allocation panel).
+- [x] Add owner control to switch the BOOST APY visual between fox robot, reactor engine, and fox emblem.

@@ -209,6 +209,8 @@ body { font-family: var(--font-sans); }
 .robot-ring-two { width: 55%; border-color: oklch(0.67 0.23 305 / 55%); border-top-color: transparent; animation: machine-spin-reverse 8s linear infinite; }
 .robot-fox { position: relative; z-index: 2; width: min(84%, 410px); height: 390px; object-fit: contain; filter: drop-shadow(0 25px 34px oklch(0.3 0.18 270 / 60%)); animation: machine-idle 3.2s ease-in-out infinite; }
 .robot-fox--reactor { width: min(100%, 640px); height: clamp(300px, 52vw, 400px); animation: machine-idle-reactor 3.6s ease-in-out infinite; }
+.robot-fox--machine { width: min(86%, 490px); height: clamp(285px, 48vw, 380px); animation: core-pulse 3.4s ease-in-out infinite; }
+.robot-fox--emblem { width: min(62%, 330px); height: clamp(250px, 40vw, 340px); animation: machine-idle 4.2s ease-in-out infinite; filter: drop-shadow(0 0 30px oklch(0.88 0.19 95 / 24%)) drop-shadow(0 22px 34px oklch(0.67 0.23 305 / 38%)); }
 @keyframes machine-idle-reactor { 0%,100% { transform: translateY(3px); } 50% { transform: translateY(-9px); } }
 .robot-status { position: absolute; z-index: 3; bottom: 10px; border: 1px solid var(--chart-2); border-radius: 999px; background: var(--card); padding: 9px 14px; font-size: 10px; font-weight: 800; color: var(--chart-2); }
 .pulse-dot { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--chart-2); box-shadow: 0 0 12px var(--chart-2); animation: core-pulse 1.2s infinite; }
@@ -381,6 +383,12 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .boost-fact svg { width: 16px; margin-top: 2px; }
 .boost-fact b { font-size: 12px; }
 .boost-fact p { margin-top: 4px; font-size: 10px; line-height: 1.55; color: var(--muted-foreground); }
+.admin-visual-option { height: auto; min-width: 0; flex-direction: column; align-items: stretch; gap: 10px; border-radius: var(--r-control); padding: 10px; white-space: normal; }
+.admin-visual-option--active { border-color: var(--chart-3); background: oklch(0.88 0.19 95 / 7%); box-shadow: inset 0 0 0 1px oklch(0.88 0.19 95 / 28%), 0 0 24px oklch(0.67 0.23 305 / 16%); }
+.admin-visual-thumb { width: 100%; aspect-ratio: 16 / 10; border-radius: 9px; background: var(--background); object-fit: contain; }
+.admin-visual-copy { display: block; text-align: left; }
+.admin-visual-copy b { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--foreground); }
+.admin-visual-copy small { display: block; margin-top: 4px; font-size: 9px; color: var(--muted-foreground); }
 @media (max-width: 640px) {
   .boost-tier { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "rank text apy" "meter meter meter"; gap: 12px; padding: 14px; }
   .boost-tier-rank { grid-area: rank; }
