@@ -22,3 +22,4 @@
 - [x] Add owner control to switch the BOOST APY visual between fox robot, reactor engine, and fox emblem.
 - [x] Remove the duplicated HOME opening section below the header so members enter directly into the market overview.
 - [x] Add a premium first-visit BIXLINK splash screen from the supplied fox artwork.
+- [x] Polish the member-route transition: shared session cache, branded layout-shaped placeholder, and intent-based page preloading.

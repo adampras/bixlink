@@ -23,6 +23,10 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    // Warm the next page (code + loader data) as soon as a nav item is hovered
+    // or pressed, so switching menus opens already-loaded content.
+    defaultPreload: "intent",
+    defaultPreloadDelay: 60,
     defaultPreloadStaleTime: 0,
     defaultOnCatch: (err: unknown) => { const error = err as Error;
       if (typeof window !== "undefined" && /dynamically imported module|Importing a module script failed/.test(error?.message ?? "") && !sessionStorage.getItem("bix-chunk-reload")) {

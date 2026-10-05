@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import type { User } from '@supabase/supabase-js';
@@ -6,29 +6,65 @@ import { supabase } from '@/integrations/supabase/client';
 import { getMyData, assignReferral } from '@/lib/bixlink.functions';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
 
+// The member session is resolved once per app load and shared by every route, so
+// switching menus reuses the known session instead of re-asking the auth service
+// on each page mount (that re-ask is what used to flash a loader on every tab).
+type AuthSnapshot = { user: User | null; ready: boolean };
+
+const PENDING: AuthSnapshot = { user: null, ready: false };
+let snapshot: AuthSnapshot = PENDING;
+let watching = false;
+const listeners = new Set<() => void>();
+
+function publish(user: User | null) {
+  const unchanged =
+    snapshot.ready &&
+    snapshot.user?.id === user?.id &&
+    snapshot.user?.updated_at === user?.updated_at;
+  if (unchanged) return;
+  snapshot = { user, ready: true };
+  listeners.forEach(listener => listener());
+}
+
+function watchSession(listener: () => void) {
+  if (!watching) {
+    watching = true;
+    supabase.auth
+      .getUser()
+      .then(({ data }) => publish(data.user ?? null))
+      .catch(() => publish(null));
+    supabase.auth.onAuthStateChange((_event, session) => publish(session?.user ?? null));
+  }
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function useSession() {
+  return useSyncExternalStore(
+    watchSession,
+    () => snapshot,
+    () => PENDING,
+  );
+}
+
 export function useMember() {
-  const [user, setUser] = useState<User | null>(null);
-  const [ready, setReady] = useState(false);
+  const { user, ready } = useSession();
   const fetchMine = useServerFn(getMyData);
   const link = useServerFn(assignReferral);
   const qc = useQueryClient();
 
-  useEffect(() => { 
-    supabase.auth.getUser().then(({ data }) => { 
-      setUser(data.user ?? null); 
-      setReady(true); 
-    }); 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const query = useQuery({ 
-    queryKey: ['my-bixlink', user?.id], 
-    queryFn: () => fetchMine(), 
-    enabled: !!user 
+  const query = useQuery({
+    queryKey: ['my-bixlink', user?.id],
+    queryFn: () => fetchMine(),
+    enabled: !!user,
+    staleTime: 15_000,
   });
+
+  // A disabled query (no session yet) stays "pending" forever, so only count
+  // data loading when there actually is a signed-in member to load for.
+  const dataPending = !!user && query.isPending;
 
   useEffect(() => {
     if (ready && user && query.data && !query.data.referral?.referred_by) {
@@ -48,7 +84,7 @@ export function useMember() {
     }
   }, [ready, user, query.data, link, qc]);
 
-  return { user, ready, ...query };
+  return { user, ready: ready && !dataPending, ...query };
 }
 
 export function usePublicConfig() {
