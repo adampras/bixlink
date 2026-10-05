@@ -215,3 +215,18 @@ body { font-family: var(--font-sans); }
 @keyframes machine-idle { 0%,100% { transform: translateY(4px) rotate(-0.7deg); } 50% { transform: translateY(-8px) rotate(0.7deg); } }
 @keyframes core-pulse { 50% { opacity: .55; transform: scale(.94); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+/* Premium polish */
+.metric-panel, .stat-card, .roadmap-item, .market-panel, .package-card { background: linear-gradient(160deg, oklch(0.24 0.08 290 / 92%), oklch(0.17 0.06 282 / 96%)); box-shadow: inset 0 1px 0 oklch(1 0 0 / 7%), 0 10px 30px oklch(0.05 0.03 280 / 35%); }
+.stat-card, .roadmap-item, .metric-panel { transition: transform .25s, box-shadow .25s, border-color .25s; }
+.stat-card:hover, .roadmap-item:hover, .metric-panel:hover { transform: translateY(-8px); border-color: oklch(0.88 0.19 95 / 55%); box-shadow: 0 16px 40px oklch(0.88 0.19 95 / 14%); }
+.nav-link.active { background: linear-gradient(135deg, oklch(0.67 0.23 305 / 28%), oklch(0.88 0.19 95 / 12%)); box-shadow: inset 0 0 0 1px oklch(0.88 0.19 95 / 40%); }
+.site-header::after { content: ""; position: absolute; inset: auto 0 -1px 0; height: 1px; background: linear-gradient(90deg, transparent, var(--primary), var(--chart-3), var(--chart-2), transparent); opacity: .7; }
+.mobile-nav-on { position: relative; color: var(--chart-3); }
+.mobile-nav-on::before { content: ""; position: absolute; top: 0; left: 25%; right: 25%; height: 2px; border-radius: 2px; background: var(--chart-3); box-shadow: 0 0 12px var(--chart-3); }
+.trust-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 28px; }
+.trust-strip div { border: 1px solid var(--border); border-radius: 16px; padding: 12px; background: oklch(0.2 0.07 285 / 70%); backdrop-filter: blur(10px); }
+.trust-strip strong { display: block; font-family: var(--font-display); font-size: 1.35rem; color: var(--chart-3); }
+.trust-strip span { font-size: 10px; letter-spacing: .1em; color: var(--muted-foreground); font-weight: 700; }
+.trust-panel { display: grid; gap: 12px; }
+.trust-panel > div { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--border); border-radius: 16px; padding: 14px; background: var(--card); }
+@media (min-width: 768px) { .trust-panel { grid-template-columns: repeat(3, 1fr); } }
