@@ -24,7 +24,7 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
-    defaultOnCatch: (error: Error) => {
+    defaultOnCatch: (err: unknown) => { const error = err as Error;
       if (typeof window !== "undefined" && /dynamically imported module|Importing a module script failed/.test(error?.message ?? "") && !sessionStorage.getItem("bix-chunk-reload")) {
         sessionStorage.setItem("bix-chunk-reload", "1");
         window.location.reload();
