@@ -19,7 +19,7 @@ function Home() {
   useEffect(() => {
     supabase.from('packages').select('*').order('price_usd').then(({ data }) => { if (data?.length) setPackages(data as Package[]); });
     supabase.from('app_settings').select('value').eq('key','booster').maybeSingle().then(({ data }) => {
-      if (data?.value && typeof data.value === 'object' && !Array.isArray(data.value) && 'enabled' in data.value) setBooster(Boolean(data.value.enabled));
+      if (data?.value && typeof data.value === 'object' && !Array.isArray(data.value) && 'enabled' in data.value) setBooster(Boolean(data.value['enabled']));
     });
   }, []);
   return <BixShell><main>
