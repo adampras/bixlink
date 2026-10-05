@@ -36,6 +36,13 @@
       "when": 1791198086934,
       "tag": "0004_add_bix_usdt_swap_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791198221609,
+      "tag": "0005_public_home_staking_statistics",
+      "breakpoints": true
     }
   ]
 }

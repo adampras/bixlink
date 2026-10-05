@@ -251,6 +251,7 @@ export type Database = {
           usdt_balance: number
         }[]
       }
+      bix_public_home_stats: { Args: never; Returns: Json }
       bix_referral_tree: {
         Args: never
         Returns: {
