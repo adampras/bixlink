@@ -108,7 +108,7 @@ export const updatePackage = createServerFn({ method: 'POST' }).middleware([requ
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'referrals' | 'wallet'; value: Record<string, unknown> }) => z.object({ key: z.enum(['booster','referrals','wallet']), value: z.record(z.unknown()) }).parse(data))
+  .inputValidator((data: { key: 'booster' | 'referrals' | 'wallet' | 'swap'; value: Record<string, unknown> }) => z.object({ key: z.enum(['booster','referrals','wallet','swap']), value: z.record(z.unknown()) }).parse(data))
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
     const { error } = await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });

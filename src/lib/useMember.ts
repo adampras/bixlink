@@ -32,12 +32,12 @@ export function useMember() {
 
   useEffect(() => {
     if (ready && user && query.data && !query.data.referral?.referred_by) {
-      const storedRef = window.sessionStorage.getItem('bixlink-ref');
+      const storedRef = window.localStorage.getItem('bixlink-ref');
       if (storedRef && /^BIX-\d{6}$/i.test(storedRef)) {
         link({ data: { code: storedRef.toUpperCase() } })
           .then(r => {
             if (r.linked) {
-              window.sessionStorage.removeItem('bixlink-ref');
+              window.localStorage.removeItem('bixlink-ref');
               qc.invalidateQueries({ queryKey: ['my-bixlink', user.id] });
             }
           })
@@ -64,6 +64,7 @@ export function usePublicConfig() {
         packages: (p.data?.length ? p.data : fallbackPackages) as Package[],
         booster: (settings['booster'] ?? { enabled: true, rate: 25 }) as { enabled: boolean; rate: number },
         wallet: (settings['wallet'] ?? { address: '', network: 'USDT BEP20' }) as { address: string; network: string },
+        swap: (settings['swap'] ?? { enabled: false }) as { enabled: boolean },
         referrals: (settings['referrals'] ?? { direct: 10, levels: [12, 6, 3, 2, 1], rewardPlus: 5, minimumDirect: 3, splitUsdt: 70, splitBix: 30 }) as { direct: number; levels: number[]; rewardPlus: number; minimumDirect: number; splitUsdt: number; splitBix: number },
       };
     },
