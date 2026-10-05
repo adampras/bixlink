@@ -29,6 +29,45 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_transfers: {
+        Row: {
+          amount_bix: number
+          created_at: string
+          id: string
+          note: string | null
+          recipient_code: string
+          recipient_id: string
+          reversed_at: string | null
+          sender_code: string
+          sender_id: string
+          status: string
+        }
+        Insert: {
+          amount_bix: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          recipient_code: string
+          recipient_id: string
+          reversed_at?: string | null
+          sender_code: string
+          sender_id: string
+          status?: string
+        }
+        Update: {
+          amount_bix?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          recipient_code?: string
+          recipient_id?: string
+          reversed_at?: string | null
+          sender_code?: string
+          sender_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       income_sources: {
         Row: {
           amount_usd: number
@@ -250,6 +289,11 @@ export type Database = {
           bix_balance: number
           usdt_balance: number
         }[]
+      }
+      bix_pay_lookup: { Args: { p_code: string }; Returns: boolean }
+      bix_pay_send: {
+        Args: { p_amount: number; p_code: string; p_note: string }
+        Returns: string
       }
       bix_public_home_stats: { Args: never; Returns: Json }
       bix_referral_tree: {
