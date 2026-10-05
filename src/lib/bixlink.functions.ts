@@ -126,14 +126,24 @@ export const addIncomeSource = createServerFn({ method: 'POST' }).middleware([re
   });
 
 export const getMyWallet = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const [txs, balance] = await Promise.all([
+  const [txs, balances, swaps] = await Promise.all([
     context.supabase.from('wallet_transactions').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
-    context.supabase.rpc('bix_wallet_balance', { p_user: context.userId }),
+    context.supabase.rpc('bix_asset_balances', { p_user: context.userId }).single(),
+    context.supabase.from('swap_requests').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
   ]);
   if (txs.error) throw txs.error;
-  if (balance.error) throw balance.error;
-  return { transactions: txs.data ?? [], balance: Number(balance.data ?? 0) };
+  if (balances.error) throw balances.error;
+  if (swaps.error) throw swaps.error;
+  return { transactions: txs.data ?? [], swaps: swaps.data ?? [], balance: Number(balances.data?.usdt_balance ?? 0), usdtBalance: Number(balances.data?.usdt_balance ?? 0), bixBalance: Number(balances.data?.bix_balance ?? 0) };
 });
+
+export const requestSwap = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { direction: 'USDT_TO_BIX' | 'BIX_TO_USDT'; amount: number }) => z.object({ direction: z.enum(['USDT_TO_BIX','BIX_TO_USDT']), amount: z.number().positive().max(100000000) }).parse(data))
+  .handler(async ({ context, data }) => {
+    const { data: id, error } = await context.supabase.rpc('request_bix_swap', { p_direction: data.direction, p_amount: data.amount });
+    if (error) throw new Error(error.message);
+    return { id };
+  });
 
 export const requestDeposit = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { amount: number; txHash: string }) => z.object({ amount: z.number().min(1).max(1000000), txHash: z.string().trim().min(8).max(200) }).parse(data))
@@ -153,9 +163,13 @@ export const requestWithdraw = createServerFn({ method: 'POST' }).middleware([re
 
 export const getAdminWallet = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   await verifyAdmin(context);
-  const { data, error } = await context.supabase.from('wallet_transactions').select('*').order('created_at', { ascending: false });
-  if (error) throw error;
-  return data ?? [];
+  const [transactions, swaps] = await Promise.all([
+    context.supabase.from('wallet_transactions').select('*').order('created_at', { ascending: false }),
+    context.supabase.from('swap_requests').select('*').order('created_at', { ascending: false }),
+  ]);
+  if (transactions.error) throw transactions.error;
+  if (swaps.error) throw swaps.error;
+  return { transactions: transactions.data ?? [], swaps: swaps.data ?? [] };
 });
 
 export const reviewWalletTx = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
@@ -163,6 +177,15 @@ export const reviewWalletTx = createServerFn({ method: 'POST' }).middleware([req
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
     const { error } = await context.supabase.from('wallet_transactions').update({ status: data.status, reviewed_at: new Date().toISOString() }).eq('id', data.id).eq('status', 'pending');
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const reviewSwap = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string; status: 'approved' | 'rejected' }) => z.object({ id: z.string().uuid(), status: z.enum(['approved', 'rejected']) }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { error } = await context.supabase.from('swap_requests').update({ status: data.status, reviewed_at: new Date().toISOString() }).eq('id', data.id).eq('status', 'pending');
     if (error) throw error;
     return { ok: true };
   });
