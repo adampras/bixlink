@@ -58,6 +58,7 @@ export const bootstrapOwner = createServerFn({ method: 'POST' }).middleware([req
 
 export const getAdminData = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   await verifyAdmin(context);
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
   const [stakes, packages, settings, sources, referrals] = await Promise.all([
     context.supabase.from('stakes').select('*').order('created_at', { ascending: false }),
     context.supabase.from('packages').select('*').order('price_usd'),
@@ -66,8 +67,21 @@ export const getAdminData = createServerFn({ method: 'GET' }).middleware([requir
     context.supabase.from('referral_codes').select('*'),
   ]);
   for (const result of [stakes, packages, settings, sources, referrals]) if (result.error) throw result.error;
-  return { stakes: stakes.data ?? [], packages: packages.data ?? [], settings: settings.data ?? [], sources: sources.data ?? [], referrals: referrals.data ?? [] };
+  const { data: members, error: membersError } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  if (membersError) throw membersError;
+  return { stakes: stakes.data ?? [], packages: packages.data ?? [], settings: settings.data ?? [], sources: sources.data ?? [], referrals: referrals.data ?? [], members: members.users.map(user => ({ id: user.id, email: user.email ?? '', created_at: user.created_at, banned_until: user.banned_until ?? null })) };
 });
+
+export const manageMember = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string; action: 'ban' | 'unban' }) => z.object({ id: z.string().uuid(), action: z.enum(['ban', 'unban']) }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    if (data.id === context.userId) throw new Error('Cannot change your own access');
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.id, { ban_duration: data.action === 'ban' ? '876000h' : 'none' });
+    if (error) throw error;
+    return { ok: true };
+  });
 
 export const updateStake = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { id: string; status: 'active' | 'rejected' }) => z.object({ id: z.string().uuid(), status: z.enum(['active','rejected']) }).parse(data))
