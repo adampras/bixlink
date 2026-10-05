@@ -1,4 +1,5 @@
 - [x] Connect Cloud authentication and database.
 - [x] Create staking, package, referral, and settings schema.
 - [x] Build landing, member, admin, and sign-in pages.
-- [ ] Verify live pages and account flows.
+- [x] Verify public pages and account creation feedback in the live preview.
+- [ ] Verify signed-in staking, referrals, and admin flows (blocked: no confirmed test account exists; reserved-domain test signup was rejected).
