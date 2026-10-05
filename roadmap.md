@@ -1,0 +1,4 @@
+- [x] Connect Cloud authentication and database.
+- [x] Create staking, package, referral, and settings schema.
+- [ ] Build landing, member, admin, and sign-in pages.
+- [ ] Verify live pages and account flows.
