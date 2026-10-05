@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { z } from 'zod';
+import type { Json } from '@/integrations/supabase/types';
 
 const verifyAdmin = async (context: { supabase: any; userId: string; claims?: any }) => {
   const { data: admin, error } = await context.supabase.rpc('is_bix_admin');
@@ -34,8 +35,8 @@ export const createReferral = createServerFn({ method: 'POST' }).middleware([req
 });
 
 export const bootstrapOwner = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const email = String(context.claims?.email ?? '').toLowerCase();
-  if (email !== 'bixdevpras@gmail.com' || !context.claims?.email_verified) return { owner: false };
+  const { data: identity, error: identityError } = await context.supabase.auth.getUser();
+  if (identityError || identity.user?.id !== context.userId || identity.user.email?.toLowerCase() !== 'bixdevpras@gmail.com' || !identity.user.email_confirmed_at) return { owner: false };
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
   const { error } = await supabaseAdmin.from('user_roles').upsert({ user_id: context.userId, role: 'admin' }, { onConflict: 'user_id,role' });
   if (error) throw error;
@@ -78,7 +79,7 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
   .inputValidator((data: { key: 'booster' | 'referrals'; value: Record<string, unknown> }) => z.object({ key: z.enum(['booster','referrals']), value: z.record(z.unknown()) }).parse(data))
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
-    const { error } = await context.supabase.from('app_settings').upsert(data);
+    const { error } = await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
     if (error) throw error;
     return { ok: true };
   });
