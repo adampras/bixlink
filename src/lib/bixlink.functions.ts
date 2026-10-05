@@ -12,7 +12,7 @@ export const getMyData = createServerFn({ method: 'GET' }).middleware([requireSu
   const [stakes, referral, tree, admin] = await Promise.all([
     context.supabase.from('stakes').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
     context.supabase.from('referral_codes').select('*').eq('user_id', context.userId).maybeSingle(),
-    context.supabase.rpc('bix_referral_tree'),
+    context.supabase.rpc('bix_referral_tree'), context.supabase.rpc('is_bix_admin'),
   ]);
   if (stakes.error) throw stakes.error;
   if (tree.error) throw tree.error;
