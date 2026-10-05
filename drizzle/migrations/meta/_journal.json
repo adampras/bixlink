@@ -29,6 +29,13 @@
       "when": 1791196517145,
       "tag": "0003_wallet_balance_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791198086934,
+      "tag": "0004_add_bix_usdt_swap_requests",
+      "breakpoints": true
     }
   ]
 }
