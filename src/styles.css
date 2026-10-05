@@ -380,8 +380,11 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .boost-fact b { font-size: 12px; }
 .boost-fact p { margin-top: 4px; font-size: 10px; line-height: 1.55; color: var(--muted-foreground); }
 @media (max-width: 640px) {
-  .boost-tier { grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; padding: 14px; }
-  .boost-tier-meter { grid-column: 1 / -1; }
+  .boost-tier { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "rank text apy" "meter meter meter"; gap: 12px; padding: 14px; }
+  .boost-tier-rank { grid-area: rank; }
+  .boost-tier > div:nth-child(2) { grid-area: text; }
+  .boost-tier-meter { grid-area: meter; }
+  .boost-tier-apy { grid-area: apy; }
   .boost-tier > svg:last-child { display: none; }
   .boost-engine .robot-stage { min-height: 260px; }
   .boost-readout strong { font-size: .85rem; }
