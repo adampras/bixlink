@@ -240,3 +240,22 @@ body { font-family: var(--font-sans); }
 .apy-meter { height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; }
 .apy-meter > i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--primary), var(--chart-3), var(--chart-2)); box-shadow: 0 0 12px var(--chart-2); }
 .robot-stage::after { content: ""; position: absolute; bottom: 30px; width: 60%; height: 24px; border-radius: 50%; background: radial-gradient(ellipse, oklch(0.85 0.17 90 / 45%), transparent 70%); filter: blur(6px); animation: core-pulse 2.8s ease-in-out infinite; }
+
+/* Paket 4: unified design system — radius, border, shadow, type, numerals */
+:root { --r-control: 14px; --r-card: 20px; --line: oklch(0.42 0.08 290 / 45%);
+  --sh-1: 0 2px 10px oklch(0.05 0.02 280 / 35%); --sh-2: 0 10px 30px oklch(0.05 0.02 280 / 45%); --sh-3: 0 22px 70px oklch(0.05 0.02 280 / 60%);
+  --ease: cubic-bezier(.2,.8,.2,1); }
+body { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1, "zero" 1; }
+.form-input, select, textarea, input:not([type=checkbox]):not([type=radio]) { border-radius: var(--r-control); }
+.form-input { border-color: var(--line); transition: border-color 150ms var(--ease), box-shadow 150ms var(--ease); }
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px oklch(0.67 0.23 305 / 22%); }
+.trust-strip div, .trust-panel > div, .market-panel .grid.border-b { border-radius: var(--r-control); }
+.package-card, .metric-panel, .stat-card, .roadmap-item, .market-panel, .modal-panel { border-radius: var(--r-card); border-color: var(--line); box-shadow: var(--sh-1); transition: transform 250ms var(--ease), box-shadow 250ms var(--ease), border-color 250ms var(--ease); }
+.modal-panel { box-shadow: var(--sh-3); }
+.package-card:hover, .metric-panel:hover, .stat-card:hover { box-shadow: var(--sh-2), 0 0 26px oklch(0.67 0.23 305 / 22%); }
+h1, h2, h3 { font-family: "Space Grotesk", sans-serif; letter-spacing: -0.015em; line-height: 1.1; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 5vw, 4rem); } h2 { font-size: clamp(1.5rem, 3.2vw, 2.5rem); } h3 { font-size: clamp(1.1rem, 1.8vw, 1.5rem); }
+body { font-size: 15px; line-height: 1.6; }
+.text-muted-foreground { color: oklch(0.78 0.03 285); }
+.eyebrow, label { letter-spacing: .12em; }
+label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
