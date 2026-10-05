@@ -102,6 +102,7 @@ export function usePublicConfig() {
         boosterVisual: (settings['booster_visual'] ?? { visual: 'fox' }) as { visual: 'fox' | 'reactor' | 'emblem' },
         wallet: (settings['wallet'] ?? { address: '', network: 'USDT BEP20' }) as { address: string; network: string },
         swap: (settings['swap'] ?? { enabled: false }) as { enabled: boolean },
+        bixPay: (settings['bix_pay'] ?? { enabled: false }) as { enabled: boolean },
         bixMarket: (settings['bix_market'] ?? { priceUsd: 0.84291 }) as { priceUsd: number },
         referrals: (settings['referrals'] ?? { direct: 10, levels: [12, 6, 3, 2, 1], rewardPlus: 5, minimumDirect: 3, splitUsdt: 70, splitBix: 30 }) as { direct: number; levels: number[]; rewardPlus: number; minimumDirect: number; splitUsdt: number; splitBix: number },
       };

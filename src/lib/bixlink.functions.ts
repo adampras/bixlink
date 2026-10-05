@@ -108,8 +108,8 @@ export const updatePackage = createServerFn({ method: 'POST' }).middleware([requ
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market'; value: Record<string, unknown> }) => {
-    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market']), value: z.record(z.unknown()) }).parse(data);
+  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay'; value: Record<string, unknown> }) => {
+    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay']), value: z.record(z.unknown()) }).parse(data);
     if (parsed.key === 'bix_market') z.object({ priceUsd: z.number().positive().max(1_000_000) }).parse(parsed.value);
     return parsed;
   })
@@ -199,6 +199,48 @@ export const addReward = createServerFn({ method: 'POST' }).middleware([requireS
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
     const { error } = await context.supabase.from('wallet_transactions').insert({ user_id: data.userId, type: 'reward', amount_usd: data.amount, fee_usd: 0, net_usd: data.amount, status: 'approved', note: data.note, reviewed_at: new Date().toISOString() });
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const getBixPay = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const [me, list, bal] = await Promise.all([
+    context.supabase.from('referral_codes').select('code').eq('user_id', context.userId).maybeSingle(),
+    context.supabase.from('bix_transfers').select('*').or(`sender_id.eq.${context.userId},recipient_id.eq.${context.userId}`).order('created_at', { ascending: false }).limit(100),
+    context.supabase.rpc('bix_asset_balances', { p_user: context.userId }).single(),
+  ]);
+  if (list.error) throw list.error;
+  return { code: me.data?.code ?? null, bixBalance: Number(bal.data?.bix_balance ?? 0), transfers: (list.data ?? []).map(t => ({ ...t, outgoing: t.sender_id === context.userId })) };
+});
+
+export const lookupBixPay = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { code: string }) => z.object({ code: z.string().trim().regex(/^BIX-\d{6}$/i) }).parse(data))
+  .handler(async ({ context, data }) => {
+    const { data: ok, error } = await context.supabase.rpc('bix_pay_lookup', { p_code: data.code });
+    if (error) throw new Error(error.message);
+    return { valid: Boolean(ok) };
+  });
+
+export const sendBixPay = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { code: string; amount: number; note?: string }) => z.object({ code: z.string().trim().regex(/^BIX-\d{6}$/i), amount: z.number().positive().max(100000), note: z.string().max(120).optional() }).parse(data))
+  .handler(async ({ context, data }) => {
+    const { data: id, error } = await context.supabase.rpc('bix_pay_send', { p_code: data.code, p_amount: data.amount, p_note: data.note ?? '' });
+    if (error) throw new Error(error.message);
+    return { id };
+  });
+
+export const getAdminTransfers = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await verifyAdmin(context);
+  const { data, error } = await context.supabase.from('bix_transfers').select('*').order('created_at', { ascending: false }).limit(300);
+  if (error) throw error;
+  return data ?? [];
+});
+
+export const reverseTransfer = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { error } = await context.supabase.from('bix_transfers').update({ status: 'reversed', reversed_at: new Date().toISOString() }).eq('id', data.id).eq('status', 'completed');
     if (error) throw error;
     return { ok: true };
   });
