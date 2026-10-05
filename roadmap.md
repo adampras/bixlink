@@ -25,3 +25,4 @@
 - [x] Polish the member-route transition: shared session cache, branded layout-shaped placeholder, and intent-based page preloading.
 - [x] Replace the monotonous internal BIX market with Dark Ledger Premium and add owner-managed reference pricing.
 - [x] BIX PAY: QR member-to-member instant BIX payments with owner open/close (Coming soon) and reversal.
+- [x] Register FULL NAME + username; admin Clones tab: L1 clone accounts with BIX allocations, top-up anytime.
