@@ -4,6 +4,14 @@ import { Button } from '@/components/ui/button';
 import { usePublicConfig } from '@/lib/useMember';
 import { ArrowUpRight, Coins, Gauge, ShieldCheck, Zap } from 'lucide-react';
 import robotFox from '@/assets/booster-concept-fox.png';
+import reactorEngine from '@/assets/booster-concept-reactor.png';
+import foxEmblem from '@/assets/booster-concept-emblem.png';
+
+const boosterVisuals = {
+  fox: { src: robotFox, alt: 'BIXLINK robotic fox guardian beside the APY reactor engine', className: 'robot-fox--reactor' },
+  reactor: { src: reactorEngine, alt: 'BIXLINK tricolor APY reactor engine', className: 'robot-fox--machine' },
+  emblem: { src: foxEmblem, alt: 'BIXLINK tricolor fox emblem', className: 'robot-fox--emblem' },
+} as const;
 
 export const Route = createFileRoute('/boost')({ head: () => ({ meta: [{ title: 'BIXCOIN Boost APY — BIXLINK' }, { name: 'description', content: 'Increase BIXCOIN staking APY through higher volume and longer lock periods, up to 25%.' }, { property: 'og:title', content: 'BIXCOIN Boost APY — BIXLINK' }, { property: 'og:description', content: 'BIXCOIN staking tiers, passive and active profit, with a 70% USDT and 30% BIX profit split.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: BoostPage });
 
@@ -11,6 +19,8 @@ function BoostPage() {
   const { data: cfg } = usePublicConfig();
   const packages = cfg?.packages ?? [];
   const longestLock = packages.reduce((max, p) => Math.max(max, Number(p.lock_days) || 0), 0);
+  const visualKey = cfg?.boosterVisual.visual ?? 'fox';
+  const visual = boosterVisuals[visualKey] ?? boosterVisuals.fox;
   return <BixShell><main>
 
     <section className="booster-vault overflow-hidden border-b border-border">
@@ -38,7 +48,7 @@ function BoostPage() {
             <div className="robot-core"/>
             <div className="robot-ring robot-ring-one"/>
             <div className="robot-ring robot-ring-two"/>
-            <img src={robotFox} loading="lazy" width={1024} height={1024} alt="BIXLINK robotic fox guardian beside the APY reactor engine" className="robot-fox robot-fox--reactor"/>
+            <img src={visual.src} loading="lazy" width={1024} height={1024} alt={visual.alt} className={`robot-fox ${visual.className}`}/>
             <div className="robot-status"><span className="pulse-dot"/> YIELD ENGINE {cfg?.booster.enabled ? 'ACTIVE' : 'PAUSED'}</div>
           </div>
           <div className="boost-readouts">
