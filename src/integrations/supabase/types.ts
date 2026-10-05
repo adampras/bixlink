@@ -29,6 +29,57 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_allocations: {
+        Row: {
+          amount_bix: number
+          created_at: string
+          created_by: string
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_bix: number
+          created_at?: string
+          created_by: string
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_bix?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bix_clone_accounts: {
+        Row: {
+          created_at: string
+          created_by: string
+          email: string
+          label: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          email: string
+          label: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          email?: string
+          label?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_transfers: {
         Row: {
           amount_bix: number
@@ -113,6 +164,27 @@ export type Database = {
           id?: string
           lock_days?: number
           price_usd?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          user_id?: string
+          username?: string
         }
         Relationships: []
       }
@@ -304,7 +376,9 @@ export type Database = {
           user_id: string
         }[]
       }
+      bix_username_available: { Args: { p_username: string }; Returns: boolean }
       bix_wallet_balance: { Args: { p_user: string }; Returns: number }
+      ensure_bix_profile: { Args: never; Returns: undefined }
       is_bix_admin: { Args: never; Returns: boolean }
       request_bix_deposit: {
         Args: { p_amount: number; p_tx_hash: string }

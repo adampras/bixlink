@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { getMyData, assignReferral } from '@/lib/bixlink.functions';
+import { getMyData, assignReferral, ensureProfile } from '@/lib/bixlink.functions';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
 
 // The member session is resolved once per app load and shared by every route, so
@@ -53,6 +53,7 @@ export function useMember() {
   const { user, ready } = useSession();
   const fetchMine = useServerFn(getMyData);
   const link = useServerFn(assignReferral);
+  const profile = useServerFn(ensureProfile);
   const qc = useQueryClient();
 
   const query = useQuery({
@@ -65,6 +66,8 @@ export function useMember() {
   // A disabled query (no session yet) stays "pending" forever, so only count
   // data loading when there actually is a signed-in member to load for.
   const dataPending = !!user && query.isPending;
+
+  useEffect(() => { if (ready && user) profile().catch(() => {}); }, [ready, user?.id]);
 
   useEffect(() => {
     if (ready && user && query.data && !query.data.referral?.referred_by) {

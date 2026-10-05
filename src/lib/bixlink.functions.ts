@@ -244,3 +244,66 @@ export const reverseTransfer = createServerFn({ method: 'POST' }).middleware([re
     if (error) throw error;
     return { ok: true };
   });
+
+export const ensureProfile = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await context.supabase.rpc('ensure_bix_profile');
+  const { data } = await context.supabase.from('profiles').select('full_name, username').eq('user_id', context.userId).maybeSingle();
+  return data;
+});
+
+export const getAdminClones = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await verifyAdmin(context);
+  const [clones, allocs, codes, profiles] = await Promise.all([
+    context.supabase.from('bix_clone_accounts').select('*').order('created_at'),
+    context.supabase.from('bix_allocations').select('*').order('created_at', { ascending: false }),
+    context.supabase.from('referral_codes').select('user_id, code'),
+    context.supabase.from('profiles').select('user_id, full_name, username'),
+  ]);
+  for (const r of [clones, allocs, codes, profiles]) if (r.error) throw r.error;
+  return (clones.data ?? []).map(c => ({
+    ...c,
+    code: codes.data?.find(x => x.user_id === c.user_id)?.code ?? '—',
+    username: profiles.data?.find(x => x.user_id === c.user_id)?.username ?? '',
+    allocated: (allocs.data ?? []).filter(a => a.user_id === c.user_id).reduce((s, a) => s + Number(a.amount_bix), 0),
+  }));
+});
+
+export const createClones = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { count: number; amount: number }) => z.object({ count: z.number().int().min(1).max(50), amount: z.number().min(0).max(10_000_000) }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { count: existing } = await supabaseAdmin.from('bix_clone_accounts').select('user_id', { count: 'exact', head: true });
+    let n = existing ?? 0; let made = 0;
+    for (let i = 0; i < data.count; i++) {
+      n++;
+      const tag = String(n).padStart(3, '0');
+      const email = `clone${tag}.${Date.now().toString(36)}@bixlink.internal`;
+      const password = crypto.randomUUID() + 'Aa1!';
+      const { data: created, error } = await supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { full_name: `BIX Clone ${tag}`, username: `clone${tag}`, clone: true } });
+      if (error || !created.user) throw error ?? new Error('Could not create clone');
+      const id = created.user.id;
+      const code = `BIX-${Math.floor(100000 + Math.random() * 900000)}`;
+      const results = await Promise.all([
+        supabaseAdmin.from('bix_clone_accounts').insert({ user_id: id, email, label: `BIX Clone ${tag}`, created_by: context.userId }),
+        supabaseAdmin.from('referral_codes').insert({ user_id: id, code, referred_by: context.userId }),
+        supabaseAdmin.from('profiles').insert({ user_id: id, full_name: `BIX Clone ${tag}`, username: `clone${tag}_${id.slice(0, 4)}` }),
+        data.amount > 0 ? supabaseAdmin.from('bix_allocations').insert({ user_id: id, amount_bix: data.amount, note: 'Clone account initial allocation', created_by: context.userId }) : Promise.resolve({ error: null }),
+      ]);
+      for (const r of results) if (r.error) throw r.error;
+      made++;
+    }
+    return { created: made };
+  });
+
+export const allocateBix = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { userId: string; amount: number; note: string }) => z.object({ userId: z.string().uuid(), amount: z.number().positive().max(10_000_000), note: z.string().trim().min(1).max(120) }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: clone } = await supabaseAdmin.from('bix_clone_accounts').select('user_id').eq('user_id', data.userId).maybeSingle();
+    if (!clone) throw new Error('Allocations are limited to clone accounts');
+    const { error } = await supabaseAdmin.from('bix_allocations').insert({ user_id: data.userId, amount_bix: data.amount, note: data.note, created_by: context.userId });
+    if (error) throw error;
+    return { ok: true };
+  });
