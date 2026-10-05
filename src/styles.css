@@ -208,6 +208,8 @@ body { font-family: var(--font-sans); }
 .robot-ring-one { animation: machine-spin 12s linear infinite; border-left-color: transparent; border-right-color: var(--chart-3); }
 .robot-ring-two { width: 55%; border-color: oklch(0.67 0.23 305 / 55%); border-top-color: transparent; animation: machine-spin-reverse 8s linear infinite; }
 .robot-fox { position: relative; z-index: 2; width: min(84%, 410px); height: 390px; object-fit: contain; filter: drop-shadow(0 25px 34px oklch(0.3 0.18 270 / 60%)); animation: machine-idle 3.2s ease-in-out infinite; }
+.robot-fox--reactor { width: min(100%, 640px); height: clamp(300px, 52vw, 400px); animation: machine-idle-reactor 3.6s ease-in-out infinite; }
+@keyframes machine-idle-reactor { 0%,100% { transform: translateY(3px); } 50% { transform: translateY(-9px); } }
 .robot-status { position: absolute; z-index: 3; bottom: 10px; border: 1px solid var(--chart-2); border-radius: 999px; background: var(--card); padding: 9px 14px; font-size: 10px; font-weight: 800; color: var(--chart-2); }
 .pulse-dot { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--chart-2); box-shadow: 0 0 12px var(--chart-2); animation: core-pulse 1.2s infinite; }
 @keyframes machine-spin { to { transform: rotate(360deg); } }
