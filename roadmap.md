@@ -15,3 +15,5 @@
 - [x] Restore reliable live major-asset charts with explicit fallback states.
 - [x] Rebuild BOOST APY around BIX stake volume, duration, 30% BIX allocation, and a premium animated robot fox.
 - [x] Audit and repair incomplete menu and button flows end-to-end.
+- [x] Polish NETWORK statistics and referral tree for desktop and mobile readability.
+- [x] Move PROFILE to the top-right header with a five-language selector and remove it from bottom navigation.

@@ -271,3 +271,34 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .stake-request { border: 1px solid var(--line); border-radius: var(--r-control); background: linear-gradient(150deg, oklch(0.24 0.08 290 / 70%), var(--card)); box-shadow: var(--sh-1); }
 .stake-progress { height: 5px; overflow: hidden; border-radius: 999px; background: var(--border); }
 .stake-progress > i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--primary), var(--chart-3), var(--chart-2)); }
+
+/* NETWORK premium readability + compact header language control */
+.language-picker { display: inline-flex; height: 36px; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; background: var(--secondary); color: var(--muted-foreground); }
+.language-picker select { width: 48px; appearance: none; border: 0; background: transparent; color: var(--foreground); font-size: 11px; font-weight: 800; outline: none; text-align: center; }
+.language-picker option { background: var(--card); color: var(--foreground); }
+.network-stat { display: flex; min-height: 104px; align-items: center; gap: 14px; border: 1px solid var(--line); border-radius: var(--r-card); padding: 18px; background: linear-gradient(145deg, oklch(0.25 0.08 290 / 90%), var(--card)); box-shadow: var(--sh-1); }
+.network-stat-icon { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: var(--r-control); background: var(--secondary); color: var(--primary); }
+.network-stat-icon svg { width: 18px; }
+.network-stat span:not(.network-stat-icon) { display: block; font-size: 11px; color: var(--muted-foreground); }
+.network-stat strong { display: block; margin-top: 3px; font-family: "JetBrains Mono", monospace; font-size: 1.75rem; line-height: 1; color: var(--foreground); }
+.network-stat strong small { font-size: .8rem; color: var(--muted-foreground); }
+.network-tree-panel, .network-plan { border: 1px solid var(--line); border-radius: var(--r-card); background: linear-gradient(150deg, oklch(0.24 0.08 290 / 86%), var(--card)); box-shadow: var(--sh-2); }
+.network-tree-panel { position: relative; overflow: hidden; padding: 14px; }
+.network-tree-panel::before { content: ""; position: absolute; inset: 20% 20%; border-radius: 50%; background: oklch(0.67 0.23 305 / 12%); filter: blur(45px); }
+.network-tree { position: relative; z-index: 1; max-width: 520px; }
+.network-ring-counts { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; border-top: 1px solid var(--line); padding-top: 12px; }
+.network-ring-counts span { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; color: var(--muted-foreground); }
+.network-ring-counts i { width: 5px; height: 5px; border-radius: 999px; }
+.network-ring-counts b { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--foreground); }
+.network-plan { padding: 20px; }
+.network-level { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: var(--r-control); padding: 10px; opacity: .55; }
+.network-level b { display: block; font-size: 12px; }
+.network-level p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; color: var(--muted-foreground); }
+.network-level > strong { font-family: "JetBrains Mono", monospace; color: var(--muted-foreground); }
+.network-level-on { border-color: oklch(0.89 0.31 142 / 50%); background: oklch(0.89 0.31 142 / 7%); opacity: 1; }
+.network-level-on > strong, .network-level-on svg { color: var(--chart-2); }
+.network-benefit { border: 1px solid var(--line); border-radius: var(--r-control); padding: 16px; background: var(--card); }
+.network-benefit b { display: flex; justify-content: space-between; gap: 8px; }
+.network-benefit b span { font-family: "JetBrains Mono", monospace; color: var(--chart-3); }
+.network-benefit p { margin-top: 5px; font-size: 11px; color: var(--muted-foreground); }
+@media (max-width: 480px) { .site-header .brand-mark { font-size: 1rem; } .site-header img { width: 34px; height: 34px; } .site-header > div { padding-left: 14px; padding-right: 14px; } .language-picker { padding: 0 6px; } .language-picker svg { display: none; } .network-stat { min-height: 78px; padding: 12px; } .network-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } .network-stat { display: block; } .network-stat-icon { width: 30px; height: 30px; margin-bottom: 9px; } .network-stat strong { font-size: 1.25rem; } .network-stat span:not(.network-stat-icon) { min-height: 30px; font-size: 9px; line-height: 1.25; } .network-tree-panel { padding: 6px 10px 12px; } }
