@@ -142,6 +142,42 @@ export type Database = {
           },
         ]
       }
+      swap_requests: {
+        Row: {
+          amount_in: number
+          amount_out: number
+          created_at: string
+          direction: string
+          id: string
+          price_usd: number
+          reviewed_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_in: number
+          amount_out: number
+          created_at?: string
+          direction: string
+          id?: string
+          price_usd?: number
+          reviewed_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Update: {
+          amount_in?: number
+          amount_out?: number
+          created_at?: string
+          direction?: string
+          id?: string
+          price_usd?: number
+          reviewed_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           role: string
@@ -208,6 +244,13 @@ export type Database = {
     }
     Functions: {
       assign_bix_referrer: { Args: { p_code: string }; Returns: boolean }
+      bix_asset_balances: {
+        Args: { p_user: string }
+        Returns: {
+          bix_balance: number
+          usdt_balance: number
+        }[]
+      }
       bix_referral_tree: {
         Args: never
         Returns: {
@@ -223,6 +266,10 @@ export type Database = {
         Returns: string
       }
       request_bix_stake: { Args: { p_package: string }; Returns: string }
+      request_bix_swap: {
+        Args: { p_amount: number; p_direction: string }
+        Returns: string
+      }
       request_bix_withdraw: {
         Args: { p_address: string; p_amount: number }
         Returns: string
