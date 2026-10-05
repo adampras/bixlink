@@ -11,10 +11,12 @@ export function AppSplash() {
     if (window.sessionStorage.getItem('bixlink-splash-seen') === '1') return;
 
     setVisible(true);
-    window.sessionStorage.setItem('bixlink-splash-seen', '1');
 
     const leaveTimer = window.setTimeout(() => setLeaving(true), SPLASH_DURATION_MS - 450);
-    const removeTimer = window.setTimeout(() => setVisible(false), SPLASH_DURATION_MS);
+    const removeTimer = window.setTimeout(() => {
+      window.sessionStorage.setItem('bixlink-splash-seen', '1');
+      setVisible(false);
+    }, SPLASH_DURATION_MS);
 
     return () => {
       window.clearTimeout(leaveTimer);
@@ -23,6 +25,7 @@ export function AppSplash() {
   }, []);
 
   const dismiss = () => {
+    window.sessionStorage.setItem('bixlink-splash-seen', '1');
     setLeaving(true);
     window.setTimeout(() => setVisible(false), 420);
   };
