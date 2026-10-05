@@ -7,9 +7,9 @@ import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
-import { getMyWallet, requestDeposit, requestWithdraw } from '@/lib/bixlink.functions';
+import { getMyWallet, requestDeposit, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
 import { money } from '@/lib/bixlink';
-import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X } from 'lucide-react';
+import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight } from 'lucide-react';
 
 export const Route = createFileRoute('/wallet')({ head: () => ({ meta: [{ title: 'Wallet — BIXLINK' }, { name: 'description', content: 'BIXLINK wallet: deposit, withdraw and staking reward history.' }, { property: 'og:title', content: 'Wallet — BIXLINK' }, { property: 'og:description', content: 'Deposit, withdraw and track BIXLINK rewards.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: WalletPage });
 
@@ -20,13 +20,14 @@ const STATUS: Record<string, string> = { pending: 'text-chart-3', approved: 'tex
 function WalletPage() {
   const { user, ready } = useMember();
   const { data: cfg } = usePublicConfig();
-  const fetchWallet = useServerFn(getMyWallet); const deposit = useServerFn(requestDeposit); const withdraw = useServerFn(requestWithdraw);
+  const fetchWallet = useServerFn(getMyWallet); const deposit = useServerFn(requestDeposit); const withdraw = useServerFn(requestWithdraw); const swap = useServerFn(requestSwap);
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ['my-wallet', user?.id], queryFn: () => fetchWallet(), enabled: !!user });
   const [modal, setModal] = useState<'deposit' | 'withdraw' | null>(null);
   const [depMode, setDepMode] = useState<'copy' | 'qr'>('copy');
   const [amount, setAmount] = useState(''); const [field, setField] = useState('');
   const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
+  const [swapDirection, setSwapDirection] = useState<'USDT_TO_BIX'|'BIX_TO_USDT'>('USDT_TO_BIX'); const [swapAmount, setSwapAmount] = useState('');
   const [type, setType] = useState('all'); const [from, setFrom] = useState(''); const [to, setTo] = useState('');
   const txs = useMemo(() => (data?.transactions ?? []).filter(t => (type === 'all' || t.type === type) && (!from || t.created_at.slice(0, 10) >= from) && (!to || t.created_at.slice(0, 10) <= to)), [data, type, from, to]);
   const addr = cfg?.wallet.address ?? '';
@@ -52,6 +53,14 @@ function WalletPage() {
         <div className="mt-5 grid grid-cols-2 gap-3"><Button className="rounded-full bg-chart-2 text-background" onClick={() => setModal('deposit')}><ArrowDownToLine/> Deposit</Button><Button variant="outline" className="rounded-full" onClick={() => setModal('withdraw')}><ArrowUpFromLine/> Withdraw</Button></div>
       </div>
       {notice && <p role="status" className="mt-4 text-sm text-chart-2">{notice}</p>}
+
+      <section className="mt-8 rounded-[20px] border border-primary bg-card p-6"><div className="flex items-center justify-between"><div><div className="eyebrow"><ArrowLeftRight size={14}/> INTERNAL SWAP</div><h2 className="mt-2 font-display text-2xl font-black">BIX / USDT</h2></div><span className="text-sm font-bold text-chart-3">1 BIX = $0.10</span></div>
+        <div className="mt-5 grid grid-cols-2 gap-3"><div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">USDT balance</span><b className="mt-1 block text-xl">{money(data?.usdtBalance ?? 0)}</b></div><div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">BIX balance</span><b className="mt-1 block text-xl text-chart-3">{Number(data?.bixBalance ?? 0).toLocaleString()} BIX</b></div></div>
+        <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-end gap-2"><label className="text-xs text-muted-foreground">YOU SEND<input className="form-input mt-2" type="number" min="0.00000001" step="any" value={swapAmount} onChange={e=>setSwapAmount(e.target.value)} placeholder="0.00"/><b className="mt-1 block text-foreground">{swapDirection === 'USDT_TO_BIX' ? 'USDT' : 'BIX'}</b></label><Button size="icon" variant="outline" className="mb-6 rounded-full" title="Reverse swap" onClick={()=>setSwapDirection(v=>v==='USDT_TO_BIX'?'BIX_TO_USDT':'USDT_TO_BIX')}><ArrowLeftRight/></Button><label className="text-xs text-muted-foreground">YOU RECEIVE<input className="form-input mt-2" readOnly value={(swapDirection === 'USDT_TO_BIX' ? (Number(swapAmount)||0)/0.1 : (Number(swapAmount)||0)*0.1).toFixed(8)}/><b className="mt-1 block text-foreground">{swapDirection === 'USDT_TO_BIX' ? 'BIX' : 'USDT'}</b></label></div>
+        <p className="mt-4 text-xs text-muted-foreground">This creates a pending internal ledger request. It does not execute an on-chain trade or transfer funds.</p><Button disabled={busy || !(Number(swapAmount)>0)} className="mt-5 w-full rounded-full bg-primary" onClick={async()=>{setBusy(true);try{await swap({data:{direction:swapDirection,amount:Number(swapAmount)}});setSwapAmount('');setNotice('Swap request submitted for admin review.');await qc.invalidateQueries({queryKey:['my-wallet']});}catch(e){setNotice(e instanceof Error?e.message:'Swap failed.');}setBusy(false);}}>Request swap</Button>
+      </section>
+
+      <h2 className="mt-10 font-display text-xl font-black">Swap history</h2><div className="mt-4 space-y-2">{(data?.swaps ?? []).length ? data?.swaps.map(s=><div key={s.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 text-sm"><div><b>{s.direction === 'USDT_TO_BIX' ? 'USDT → BIX' : 'BIX → USDT'}</b><div className="text-xs text-muted-foreground">{new Date(s.created_at).toLocaleString()}</div></div><div className="text-right"><div>{Number(s.amount_in).toLocaleString()} → <b className="text-chart-3">{Number(s.amount_out).toLocaleString()}</b></div><span className={`text-xs capitalize ${STATUS[s.status]}`}>{s.status}</span></div></div>) : <p className="text-sm text-muted-foreground">No swap requests yet.</p>}</div>
 
       <h2 className="mt-10 font-display text-xl font-black">Transaction history</h2>
       <div className="mt-4 flex flex-wrap gap-2">
