@@ -108,7 +108,7 @@ export const updatePackage = createServerFn({ method: 'POST' }).middleware([requ
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'referrals'; value: Record<string, unknown> }) => z.object({ key: z.enum(['booster','referrals']), value: z.record(z.unknown()) }).parse(data))
+  .inputValidator((data: { key: 'booster' | 'referrals' | 'wallet'; value: Record<string, unknown> }) => z.object({ key: z.enum(['booster','referrals','wallet']), value: z.record(z.unknown()) }).parse(data))
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
     const { error } = await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
@@ -121,6 +121,57 @@ export const addIncomeSource = createServerFn({ method: 'POST' }).middleware([re
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
     const { error } = await context.supabase.from('income_sources').insert(data);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const getMyWallet = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const [txs, balance] = await Promise.all([
+    context.supabase.from('wallet_transactions').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
+    context.supabase.rpc('bix_wallet_balance', { p_user: context.userId }),
+  ]);
+  if (txs.error) throw txs.error;
+  if (balance.error) throw balance.error;
+  return { transactions: txs.data ?? [], balance: Number(balance.data ?? 0) };
+});
+
+export const requestDeposit = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { amount: number; txHash: string }) => z.object({ amount: z.number().min(1).max(1000000), txHash: z.string().trim().min(8).max(200) }).parse(data))
+  .handler(async ({ context, data }) => {
+    const { data: id, error } = await context.supabase.rpc('request_bix_deposit', { p_amount: data.amount, p_tx_hash: data.txHash });
+    if (error) throw new Error(error.message);
+    return { id };
+  });
+
+export const requestWithdraw = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { amount: number; address: string }) => z.object({ amount: z.number().min(5).max(1000000), address: z.string().trim().min(20).max(120) }).parse(data))
+  .handler(async ({ context, data }) => {
+    const { data: id, error } = await context.supabase.rpc('request_bix_withdraw', { p_amount: data.amount, p_address: data.address });
+    if (error) throw new Error(error.message);
+    return { id };
+  });
+
+export const getAdminWallet = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await verifyAdmin(context);
+  const { data, error } = await context.supabase.from('wallet_transactions').select('*').order('created_at', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+});
+
+export const reviewWalletTx = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string; status: 'approved' | 'rejected' }) => z.object({ id: z.string().uuid(), status: z.enum(['approved', 'rejected']) }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { error } = await context.supabase.from('wallet_transactions').update({ status: data.status, reviewed_at: new Date().toISOString() }).eq('id', data.id).eq('status', 'pending');
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const addReward = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { userId: string; amount: number; note: string }) => z.object({ userId: z.string().uuid(), amount: z.number().positive().max(1000000), note: z.string().trim().min(1).max(120) }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { error } = await context.supabase.from('wallet_transactions').insert({ user_id: data.userId, type: 'reward', amount_usd: data.amount, fee_usd: 0, net_usd: data.amount, status: 'approved', note: data.note, reviewed_at: new Date().toISOString() });
     if (error) throw error;
     return { ok: true };
   });

@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BoostRouteImport } from './routes/boost'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as NetworkRouteImport } from './routes/network'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as StakeRouteImport } from './routes/stake'
@@ -43,6 +44,11 @@ const BoostRoute = BoostRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NetworkRoute = NetworkRouteImport.update({
+  id: '/network',
+  path: '/network',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/dashboard': typeof DashboardRoute
+  '/network': typeof NetworkRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/stake': typeof StakeRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/dashboard': typeof DashboardRoute
+  '/network': typeof NetworkRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/stake': typeof StakeRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/dashboard': typeof DashboardRoute
+  '/network': typeof NetworkRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/stake': typeof StakeRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boost'
     | '/dashboard'
+    | '/network'
     | '/profile'
     | '/reset-password'
     | '/stake'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boost'
     | '/dashboard'
+    | '/network'
     | '/profile'
     | '/reset-password'
     | '/stake'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boost'
     | '/dashboard'
+    | '/network'
     | '/profile'
     | '/reset-password'
     | '/stake'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BoostRoute: typeof BoostRoute
   DashboardRoute: typeof DashboardRoute
+  NetworkRoute: typeof NetworkRoute
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   StakeRoute: typeof StakeRoute
@@ -195,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/network': {
+      id: '/network'
+      path: '/network'
+      fullPath: '/network'
+      preLoaderRoute: typeof NetworkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BoostRoute: BoostRoute,
   DashboardRoute: DashboardRoute,
+  NetworkRoute: NetworkRoute,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   StakeRoute: StakeRoute,
