@@ -1,4 +1,5 @@
-import { Link, useRouterState } from '@tanstack/react-router';
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,8 @@ import fox from '@/assets/bixlink-fox.png';
 
 export function BixShell({ children }: { children: React.ReactNode }) {
   const [signedIn, setSignedIn] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const path = useRouterState({ select: s => s.location.pathname });
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setSignedIn(!!data.user));
@@ -20,7 +23,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
         <Link to="/" className={`nav-link ${path === '/' ? 'active' : ''}`}>Explore</Link>
         <Link to="/dashboard" className={`nav-link ${path === '/dashboard' ? 'active' : ''}`}><LayoutDashboard size={15}/><span className="hidden sm:inline">Dashboard</span></Link>
         {signedIn && <Link to="/admin" className={`nav-link ${path === '/admin' ? 'active' : ''}`}><Shield size={15}/><span className="hidden sm:inline">Admin</span></Link>}
-        {signedIn ? <Button title="Sign out" variant="ghost" size="icon" className="rounded-full" onClick={async () => { await supabase.auth.signOut(); window.location.assign('/'); }}><LogOut/></Button> : <Button asChild size="sm" className="rounded-full bg-primary text-primary-foreground"><Link to="/auth"><LogIn/> <span className="hidden sm:inline">Sign in</span></Link></Button>}
+        {signedIn ? <Button title="Sign out" variant="ghost" size="icon" className="rounded-full" onClick={async () => { await queryClient.cancelQueries(); queryClient.clear(); await supabase.auth.signOut(); navigate({to:'/auth',replace:true}); }}><LogOut/></Button> : <Button asChild size="sm" className="rounded-full bg-primary text-primary-foreground"><Link to="/auth"><LogIn/> <span className="hidden sm:inline">Sign in</span></Link></Button>}
       </nav>
     </div></header>{children}
     <footer className="border-t border-border py-9"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 px-5 text-xs text-muted-foreground md:flex-row md:px-8"><span>© 2026 BIXLINK. Staking preview • No live deposits or payouts.</span><span>bixlink.io &nbsp;·&nbsp; @bixlink_official</span></div></footer>
