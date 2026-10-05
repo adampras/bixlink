@@ -27,6 +27,7 @@ export function usePublicConfig() {
       return {
         packages: (p.data?.length ? p.data : fallbackPackages) as Package[],
         booster: (settings['booster'] ?? { enabled: true, rate: 25 }) as { enabled: boolean; rate: number },
+        wallet: (settings['wallet'] ?? { address: '', network: 'USDT BEP20' }) as { address: string; network: string },
         referrals: (settings['referrals'] ?? { direct: 10, levels: [12, 6, 3, 2, 1], rewardPlus: 5, minimumDirect: 3, splitUsdt: 70, splitBix: 30 }) as { direct: number; levels: number[]; rewardPlus: number; minimumDirect: number; splitUsdt: number; splitBix: number },
       };
     },
