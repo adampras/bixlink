@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { getMyWallet, requestDeposit, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
 import { money } from '@/lib/bixlink';
-import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox } from 'lucide-react';
+import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, ScanLine } from 'lucide-react';
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
   return <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border bg-card/60 p-8 text-center"><span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary"><Inbox size={22}/></span><p className="text-sm text-muted-foreground">{text}</p>{action && onAction && <Button size="sm" variant="outline" className="rounded-full" onClick={onAction}>{action}</Button>}</div>;
@@ -58,6 +58,7 @@ function WalletPage() {
         <p className="mt-1 text-xs text-muted-foreground">Counts admin-approved deposits and rewards, minus withdrawals.</p>
         <div className="mt-5 grid grid-cols-2 gap-3"><Button className="rounded-full bg-chart-2 text-background" onClick={() => setModal('deposit')}><ArrowDownToLine/> Deposit</Button><Button variant="outline" className="rounded-full" onClick={() => setModal('withdraw')}><ArrowUpFromLine/> Withdraw</Button></div>
       </div>
+      <Link to="/pay" className="mt-4 flex items-center justify-between gap-3 rounded-[20px] border border-chart-2/60 bg-card p-4 transition hover:border-chart-2"><span className="flex items-center gap-3"><span className="grid size-11 place-items-center rounded-full bg-chart-2/15 text-chart-2"><ScanLine size={20}/></span><span><b className="block font-display">BIX PAY</b><span className="text-xs text-muted-foreground">Scan QR to pay other members in BIX</span></span></span>{!cfg?.bixPay.enabled ? <span className="inline-flex items-center gap-1 rounded-full border border-chart-3 bg-chart-3/10 px-3 py-1 text-[11px] font-bold text-chart-3"><Lock size={12}/> Coming soon</span> : <span className="text-xs font-bold text-chart-2">OPEN →</span>}</Link>
       {notice && <p role="status" className="mt-4 text-sm text-chart-2">{notice}</p>}
 
       <section className="mt-8 rounded-[20px] border border-primary bg-card p-6"><div className="flex items-center justify-between"><div><div className="eyebrow"><ArrowLeftRight size={14}/> INTERNAL SWAP</div><h2 className="mt-2 font-display text-2xl font-black">BIX / USDT</h2></div><div className="flex flex-col items-end gap-1"><span className="numeric text-sm font-bold text-chart-3">1 BIX = ${bixPrice.toFixed(6)}</span>{!swapEnabled && <span className="inline-flex items-center gap-1 rounded-full border border-chart-3 bg-chart-3/10 px-3 py-1 text-[11px] font-bold text-chart-3"><Lock size={12}/> Coming soon</span>}</div></div>

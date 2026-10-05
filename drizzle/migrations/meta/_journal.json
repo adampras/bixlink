@@ -57,6 +57,13 @@
       "when": 1791215985453,
       "tag": "0007_owner_managed_bix_reference_price",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791217077172,
+      "tag": "0008_bix_pay_internal_transfers",
+      "breakpoints": true
     }
   ]
 }
