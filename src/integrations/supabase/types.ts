@@ -56,6 +56,36 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_announcements: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          id: string
+          published_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          category?: string
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bix_clone_accounts: {
         Row: {
           created_at: string
@@ -510,6 +540,7 @@ export type Database = {
           usdt_balance: number
         }[]
       }
+      bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_owner_vault: { Args: never; Returns: Json }
       bix_pay_lookup: { Args: { p_code: string }; Returns: boolean }

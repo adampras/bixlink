@@ -2,17 +2,20 @@ import { useEffect, useState } from 'react';
 import { BadgeCheck, Clock, ShieldAlert } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { usePublicConfig } from '@/lib/useMember';
 
 type Kyc = { status: string; full_name: string; country: string; document_type: string; document_last4: string };
 
 export function KycCard({ userId, compact = false }: { userId?: string | undefined; compact?: boolean }) {
+  const { data: config } = usePublicConfig();
+  const enabled = config?.readiness.kycEnabled === true;
   const [kyc, setKyc] = useState<Kyc | null>(null);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ full_name: '', country: '', document_type: 'passport', document_last4: '' });
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
-  useEffect(() => { if (!userId) return; supabase.from('kyc_submissions').select('status,full_name,country,document_type,document_last4').eq('user_id', userId).maybeSingle().then(({ data }) => setKyc(data)); }, [userId]);
-  if (!userId) return null;
+  useEffect(() => { if (!userId || !enabled) return; supabase.from('kyc_submissions').select('status,full_name,country,document_type,document_last4').eq('user_id', userId).maybeSingle().then(({ data }) => setKyc(data)); }, [userId, enabled]);
+  if (!userId || !enabled) return null;
   const submit = async () => {
     setMsg('');
     if (form.full_name.trim().length < 3 || form.country.trim().length < 2 || !/^[A-Za-z0-9]{4}$/.test(form.document_last4)) { setMsg('Fill in full name, country and the last 4 characters of your document.'); return; }

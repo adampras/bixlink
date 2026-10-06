@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BoostRouteImport } from './routes/boost'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as MarketRouteImport } from './routes/market'
 import { Route as NetworkRouteImport } from './routes/network'
 import { Route as PayRouteImport } from './routes/pay'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -58,6 +59,11 @@ const BoostRoute = BoostRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketRoute = MarketRouteImport.update({
+  id: '/market',
+  path: '/market',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NetworkRoute = NetworkRouteImport.update({
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/dashboard': typeof DashboardRoute
+  '/market': typeof MarketRoute
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
   '/privacy': typeof PrivacyRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/dashboard': typeof DashboardRoute
+  '/market': typeof MarketRoute
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
   '/privacy': typeof PrivacyRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/dashboard': typeof DashboardRoute
+  '/market': typeof MarketRoute
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
   '/privacy': typeof PrivacyRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boost'
     | '/dashboard'
+    | '/market'
     | '/network'
     | '/pay'
     | '/privacy'
@@ -229,6 +239,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boost'
     | '/dashboard'
+    | '/market'
     | '/network'
     | '/pay'
     | '/privacy'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boost'
     | '/dashboard'
+    | '/market'
     | '/network'
     | '/pay'
     | '/privacy'
@@ -274,6 +286,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BoostRoute: typeof BoostRoute
   DashboardRoute: typeof DashboardRoute
+  MarketRoute: typeof MarketRoute
   NetworkRoute: typeof NetworkRoute
   PayRoute: typeof PayRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market': {
+      id: '/market'
+      path: '/market'
+      fullPath: '/market'
+      preLoaderRoute: typeof MarketRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/network': {
@@ -442,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BoostRoute: BoostRoute,
   DashboardRoute: DashboardRoute,
+  MarketRoute: MarketRoute,
   NetworkRoute: NetworkRoute,
   PayRoute: PayRoute,
   PrivacyRoute: PrivacyRoute,

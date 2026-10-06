@@ -63,8 +63,7 @@ function WalletPage() {
     <MemberGate ready={ready} signedIn={!!user} title="WALLET">
       <div className="relative overflow-hidden rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-3/10 p-6 shadow-[0_0_40px_color-mix(in_oklab,var(--chart-3)_18%,transparent)]">
         <div className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet size={16}/> Available balance</div>
-        <strong className="numeric mt-2 block text-5xl font-black text-foreground">{money(data?.balance ?? 0)}</strong>
-        <p className="mt-1 text-xs text-muted-foreground">Includes deposits, rewards and test USDT transfers, minus stakes and withdrawals.</p>
+        <strong className="numeric mt-2 block break-all text-[28px] leading-snug font-black text-foreground md:text-[32px]">{money(data?.balance ?? 0)}</strong>
         <div className="mt-5 grid grid-cols-2 gap-3"><Button className="rounded-full bg-foreground text-background hover:bg-foreground/90" onClick={() => setModal('deposit')}><ArrowDownToLine/> Deposit</Button><Button variant="outline" className="rounded-full" onClick={() => setModal('withdraw')}><ArrowUpFromLine/> Withdraw</Button></div>
       </div>
       <Link to="/pay" className="mt-4 flex items-center justify-between gap-3 rounded-[20px] border border-chart-2/60 bg-card p-4 transition hover:border-chart-2"><span className="flex items-center gap-3"><span className="grid size-11 place-items-center rounded-full bg-chart-2/15 text-chart-2"><ScanLine size={20}/></span><span><b className="block font-display">BIX PAY</b><span className="text-xs text-muted-foreground">Scan QR to pay other members in BIX</span></span></span>{!cfg?.bixPay.enabled ? <span className="inline-flex items-center gap-1 rounded-full border border-chart-3 bg-chart-3/10 px-3 py-1 text-[11px] font-bold text-chart-3"><Lock size={12}/> Coming soon</span> : <span className="text-xs font-bold text-chart-2">OPEN →</span>}</Link>

@@ -1,0 +1,2 @@
+export type Readiness = { legalEnabled: boolean; kycEnabled: boolean; readinessEnabled: boolean; marketEnabled: boolean };
+export const defaultReadiness: Readiness = { legalEnabled: false, kycEnabled: false, readinessEnabled: false, marketEnabled: true };
