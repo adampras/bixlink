@@ -10,7 +10,7 @@ import { createReferral, assignReferral } from '@/lib/bixlink.functions';
 import { supabase } from '@/integrations/supabase/client';
 import { Copy, KeyRound, LogOut, Shield } from 'lucide-react';
 import { LeaderCard } from '@/components/LeaderCard';
-import fox from '@/assets/bixlink-fox.png';
+import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 
 export const Route = createFileRoute('/profile')({ head: () => ({ meta: [{ title: 'Profile — BIXLINK' }, { name: 'description', content: 'Your BIXLINK account, referral code and network.' }, { property: 'og:title', content: 'Profile — BIXLINK' }, { property: 'og:description', content: 'Manage your BIXLINK member profile.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: ProfilePage });
 
@@ -23,7 +23,7 @@ function ProfilePage() {
   const signOut = async () => { await qc.cancelQueries(); qc.clear(); await supabase.auth.signOut(); navigate({ to: '/auth', replace: true }); };
   return <BixShell><main className="mx-auto max-w-3xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="PROFILE">
-      <div className="flex items-center gap-4"><img src={fox} alt="" className="h-16 w-16 rounded-full border border-chart-3 bg-card object-cover object-top"/><div><div className="eyebrow">MEMBER</div><h1 className="font-display text-2xl font-black">{user?.email}</h1><p className="text-xs text-muted-foreground">Joined {user && new Date(user.created_at).toLocaleDateString()}</p></div></div>
+      <div className="flex items-center gap-4"><img src={headerMark.url} alt="" className="h-16 w-16 rounded-full border border-chart-3 bg-card object-cover"/><div><div className="eyebrow">MEMBER</div><h1 className="font-display text-2xl font-black">{user?.email}</h1><p className="text-xs text-muted-foreground">Joined {user && new Date(user.created_at).toLocaleDateString()}</p></div></div>
       <section className="mt-8 rounded-[20px] border border-border bg-card p-6"><h2 className="font-bold">Referral code</h2>
         <div className="mt-3 flex flex-wrap gap-3">{data?.referral?.code ? <><span className="rounded-full border border-border px-5 py-2 font-mono text-chart-3">{data.referral.code}</span><Button className="rounded-full" onClick={async () => { await navigator.clipboard.writeText(referralUrl); setNotice('Referral link copied.'); }}><Copy/> Copy link</Button></> : <Button className="rounded-full bg-chart-3 text-background" onClick={async () => { try { await makeCode(); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Could not create code.'); } }}>Generate code</Button>}</div>
         {referralUrl && <div className="mt-3 flex items-center gap-2 rounded-xl border border-border bg-background p-3"><input readOnly aria-label="Full referral URL" className="min-w-0 flex-1 bg-transparent font-mono text-xs text-muted-foreground outline-none" value={referralUrl}/><Button size="icon" variant="ghost" title="Copy referral URL" onClick={async()=>{await navigator.clipboard.writeText(referralUrl);setNotice('Referral link copied.');}}><Copy/></Button></div>}
