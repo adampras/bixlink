@@ -109,6 +109,7 @@ export function usePublicConfig() {
         swap: (settings['swap'] ?? { enabled: false }) as { enabled: boolean },
         bixPay: (settings['bix_pay'] ?? { enabled: false }) as { enabled: boolean },
         usdtTransfer: (settings['usdt_transfer'] ?? { enabled: false }) as { enabled: boolean },
+        unstake: (settings['unstake'] ?? { tiers: [{ days: 30, pct: 20 }, { days: 60, pct: 15 }, { days: 90, pct: 10 }, { days: 180, pct: 8 }, { days: 360, pct: 5 }] }) as { tiers: { days: number; pct: number }[] },
         bixMarket: (settings['bix_market'] ?? { priceUsd: 0.84291 }) as { priceUsd: number },
         referrals: (settings['referrals'] ?? { direct: 10, levels: [12, 6, 3, 2, 1], rewardPlus: 5, minimumDirect: 3, splitUsdt: 70, splitBix: 30 }) as { direct: number; levels: number[]; rewardPlus: number; minimumDirect: number; splitUsdt: number; splitBix: number },
         landingContent: (settings['landing_content'] ?? defaultLandingContent) as LandingContent,
