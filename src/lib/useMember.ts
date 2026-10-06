@@ -104,6 +104,7 @@ export function usePublicConfig() {
         booster: (settings['booster'] ?? { enabled: true, rate: 25 }) as { enabled: boolean; rate: number },
         boosterVisual: (settings['booster_visual'] ?? { visual: 'fox' }) as { visual: 'fox' | 'reactor' | 'emblem' },
         wallet: (settings['wallet'] ?? { address: '', network: 'USDT BEP20' }) as { address: string; network: string },
+        depositWallets: (((settings['deposit_wallets'] as { wallets?: { code: string; label: string; network: 'BEP20' | 'TRC20' | 'ERC20'; address: string; enabled: boolean }[] } | undefined)?.wallets) ?? []).filter(w => w.enabled && w.address),
         swap: (settings['swap'] ?? { enabled: false }) as { enabled: boolean },
         bixPay: (settings['bix_pay'] ?? { enabled: false }) as { enabled: boolean },
         bixMarket: (settings['bix_market'] ?? { priceUsd: 0.84291 }) as { priceUsd: number },
