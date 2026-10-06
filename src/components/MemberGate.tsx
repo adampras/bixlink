@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
-import fox from '@/assets/bixlink-fox.png';
+import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 
 export function MemberGate({ ready, signedIn, title, children }: { ready: boolean; signedIn: boolean; title: string; children: React.ReactNode }) {
   if (!ready) return <MemberSkeleton />;
@@ -15,7 +15,7 @@ function MemberSkeleton() {
     <main className="mx-auto max-w-7xl px-5 py-8 md:px-8 md:py-10" aria-busy="true">
       <span className="sr-only">Restoring your BIXLINK session</span>
       <div className="session-boot">
-        <img src={fox} width={34} height={34} alt="" className="session-boot__mark" />
+        <img src={headerMark.url} width={34} height={34} alt="" className="session-boot__mark" />
         <div className="min-w-0">
           <b>Restoring your session</b>
           <span>Opening the BIXLINK member terminal</span>
