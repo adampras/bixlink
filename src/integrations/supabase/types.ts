@@ -342,12 +342,15 @@ export type Database = {
           fee_usd: number
           id: string
           net_usd: number
+          network: string | null
           note: string | null
           reviewed_at: string | null
           status: string
           tx_hash: string | null
           type: string
           user_id: string
+          verified_at: string | null
+          wallet_code: string | null
         }
         Insert: {
           address?: string | null
@@ -356,12 +359,15 @@ export type Database = {
           fee_usd?: number
           id?: string
           net_usd: number
+          network?: string | null
           note?: string | null
           reviewed_at?: string | null
           status?: string
           tx_hash?: string | null
           type: string
           user_id?: string
+          verified_at?: string | null
+          wallet_code?: string | null
         }
         Update: {
           address?: string | null
@@ -370,12 +376,15 @@ export type Database = {
           fee_usd?: number
           id?: string
           net_usd?: number
+          network?: string | null
           note?: string | null
           reviewed_at?: string | null
           status?: string
           tx_hash?: string | null
           type?: string
           user_id?: string
+          verified_at?: string | null
+          wallet_code?: string | null
         }
         Relationships: []
       }
