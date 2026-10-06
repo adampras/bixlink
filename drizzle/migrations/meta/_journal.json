@@ -92,6 +92,13 @@
       "when": 1791261378056,
       "tag": "0012_unlimited_referral_tree_depth",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791272288955,
+      "tag": "0013_virtual_usdt_transfers",
+      "breakpoints": true
     }
   ]
 }
