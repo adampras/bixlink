@@ -493,6 +493,6 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .stake-lux-stat small { font-size: 10px; font-weight: 700; opacity: .8; }
 .stake-lux-stat--end { text-align: right; }
 .stake-lux-stat b { white-space: nowrap; }
-.stake-lux-btn { height: auto; padding: 14px 20px; color: var(--primary-foreground); font-weight: 700; letter-spacing: .02em; box-shadow: 0 0 20px oklch(0.67 0.23 305 / 30%); }
+.stake-lux-btn { height: auto; padding: 14px 20px; color: var(--foreground); font-weight: 700; letter-spacing: .02em; box-shadow: 0 0 20px oklch(0.67 0.23 305 / 30%); }
 .stake-lux-card--pop .stake-lux-btn { background: linear-gradient(90deg, var(--primary), oklch(0.55 0.23 305)); box-shadow: 0 4px 20px oklch(0.67 0.23 305 / 40%); }
 @media (max-width: 640px) { .stake-lux-price { font-size: 1.7rem; } .stake-lux-stat b { font-size: 1.2rem; } }
