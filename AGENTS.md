@@ -23,3 +23,4 @@
 - Render the referral network as a cycle-safe recursively expandable tree without a fixed depth cap, so deep generations remain navigable without loading every branch at once.
 - Keep interface translations in the shared local i18n provider and persist member language preferences in browser storage, so all routes switch together without a paid translation dependency.
 - Keep member Settings on its dedicated route but expose it through Profile rather than primary navigation, so the main trading navigation stays focused.
+- Calculate staking yield as a live display-only ledger projection from active stakes; never add projected USDT or BIX profit to spendable balances without a separate settlement rule.

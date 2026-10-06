@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Home, Wallet, Layers, Zap, User, Network, LogIn, ShieldCheck, Lock, BadgeCheck, Bell, CheckCheck, ChevronDown } from 'lucide-react';
+import { Home, Wallet, Layers, Zap, User, Network, LogIn, ShieldCheck, Lock, BadgeCheck, Bell, CheckCheck, ChevronDown, TrendingUp } from 'lucide-react';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 import { LANGUAGES, type Language, useI18n } from '@/lib/i18n';
@@ -12,6 +12,7 @@ const NAV = [
   { to: '/', label: 'HOME', icon: Home },
   { to: '/wallet', label: 'WALLET', icon: Wallet },
   { to: '/stake', label: 'STAKE', icon: Layers },
+  { to: '/profit', label: 'PROFIT', icon: TrendingUp },
   { to: '/boost', label: 'BOOST APY', icon: Zap },
   { to: '/network', label: 'NETWORK', icon: Network },
 ] as const;
@@ -60,7 +61,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     <header className="site-header" data-no-translate><div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-3 md:px-8">
       <Link to={user ? "/" : "/auth"} className="header-brand"><img src={headerMark.url} width={42} height={42} alt="BIXLINK fox emblem" className="rounded-full object-cover"/><span className="brand-mark" aria-label="BIXLINK"><i>BIX</i><i>LI</i><i>NK</i></span></Link>
       {user && <nav className="hidden items-center gap-3 md:flex">
-        {NAV.map(n => <Link key={n.to} to={n.to} className={`nav-link ${path === n.to ? 'active' : ''}`}><n.icon size={15}/>{t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>)}
+        {NAV.map(n => <Link key={n.to} to={n.to} className={`nav-link ${path === n.to ? 'active' : ''}`}><n.icon size={15}/>{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>)}
       </nav>}
       <div className="header-tools">
         <div className="language-control" ref={languageRef}><Button type="button" variant="ghost" className="language-trigger" aria-label={t('language')} aria-haspopup="menu" aria-expanded={languagesOpen} onClick={() => setLanguagesOpen(value => !value)}><span className={`flag-symbol flag-${selectedLanguage.flag}`} aria-hidden/><ChevronDown/></Button>{languagesOpen && <div className="language-menu" role="menu" aria-label={t('language')}>{LANGUAGES.map(item => <Button key={item.code} type="button" variant="ghost" role="menuitemradio" aria-checked={language === item.code} title={item.label} className={language === item.code ? 'is-active' : ''} onClick={() => { setLanguage(item.code as Language); setLanguagesOpen(false); }}><span className={`flag-symbol flag-${item.flag}`} aria-hidden/><span className="sr-only">{item.label}</span></Button>)}</div>}</div>
@@ -75,8 +76,8 @@ export function BixShell({ children }: { children: React.ReactNode }) {
       </div>
       <div className="mt-6 flex flex-col justify-between gap-2 text-xs text-muted-foreground md:flex-row"><span>© 2026 BIXLINK · 21 JUTA BIX TOKEN</span><span>bixlink.io &nbsp;·&nbsp; @bixlink_official</span></div>
     </div></footer>
-    {user && <nav aria-label="Main" data-no-translate className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card/95 backdrop-blur md:hidden">
-      {NAV.map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} className={`flex flex-col items-center gap-1 py-2 text-[9px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={20}/>{t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>; })}
+    {user && <nav aria-label="Main" data-no-translate className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-card/95 backdrop-blur md:hidden">
+      {NAV.map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} className={`flex min-w-0 flex-col items-center gap-1 py-2 text-[8px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19}/>{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>; })}
     </nav>}
   </div>;
 }
