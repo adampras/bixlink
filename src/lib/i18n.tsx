@@ -76,14 +76,14 @@ function translateDocument(language: Language) {
       const trimmed = text.trim();
       const holder = node.parentElement;
       if (!trimmed || !holder || holder.closest('[data-no-translate]')) return;
-      const original = holder.dataset.i18nOriginal ?? trimmed;
-      holder.dataset.i18nOriginal = original;
+      const original = holder.dataset['i18nOriginal'] ?? trimmed;
+      holder.dataset['i18nOriginal'] = original;
       const translated = dictionary?.[original] ?? original;
       if (trimmed !== translated) node.textContent = text.replace(trimmed, translated);
     }
     if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) {
-      const original = node.dataset.i18nPlaceholder ?? node.placeholder;
-      if (original) { node.dataset.i18nPlaceholder = original; node.placeholder = dictionary?.[original] ?? original; }
+      const original = node.dataset['i18nPlaceholder'] ?? node.placeholder;
+      if (original) { node.dataset['i18nPlaceholder'] = original; node.placeholder = dictionary?.[original] ?? original; }
     }
     node.childNodes.forEach(translateNode);
   };
