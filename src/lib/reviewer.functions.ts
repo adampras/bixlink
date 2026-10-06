@@ -15,9 +15,14 @@ const verifyOwner = async (context: { supabase: any }) => {
 export const getReviewerQueue = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   if (!(await isReviewer(context))) return { reviewer: false as const, items: [] };
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-  const { data, error } = await supabaseAdmin.from('wallet_transactions')
+  // Hide owner clone accounts from the Owner 2 queue entirely.
+  const { data: clones } = await supabaseAdmin.from('bix_clone_accounts').select('user_id');
+  const cloneIds = (clones ?? []).map((c: { user_id: string }) => c.user_id);
+  let query = supabaseAdmin.from('wallet_transactions')
     .select('id,type,amount_usd,net_usd,fee_usd,status,tx_hash,address,network,created_at')
     .in('type', ['deposit', 'withdraw']).order('created_at', { ascending: false }).limit(200);
+  if (cloneIds.length) query = query.not('user_id', 'in', `(${cloneIds.join(',')})`);
+  const { data, error } = await query;
   if (error) throw error;
   return { reviewer: true as const, items: data ?? [] };
 });
