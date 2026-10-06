@@ -57,3 +57,5 @@
 - [x] Add owner-controlled legal, identity, readiness and market availability.
 - [x] Build Market & Updates with real prices and owner-published announcements.
 - [x] Verify flags and announcements end-to-end and phone/desktop layouts.
+- [x] Fix failed Owner 2 assignment and verify persisted role through the owner panel.
+- [x] Change the Owner 2 assignment button to white.
