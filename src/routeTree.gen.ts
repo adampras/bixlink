@@ -19,6 +19,7 @@ import { Route as PayRouteImport } from './routes/pay'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StakeRouteImport } from './routes/stake'
 import { Route as TransferRouteImport } from './routes/transfer'
 import { Route as WalletRouteImport } from './routes/wallet'
@@ -74,6 +75,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StakeRoute = StakeRouteImport.update({
   id: '/stake',
   path: '/stake',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/reset-password'
+    | '/settings'
     | '/stake'
     | '/transfer'
     | '/wallet'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/reset-password'
+    | '/settings'
     | '/stake'
     | '/transfer'
     | '/wallet'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/reset-password'
+    | '/settings'
     | '/stake'
     | '/transfer'
     | '/wallet'
@@ -206,6 +218,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SettingsRoute: typeof SettingsRoute
   StakeRoute: typeof StakeRoute
   TransferRoute: typeof TransferRoute
   WalletRoute: typeof WalletRoute
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stake': {
       id: '/stake'
       path: '/stake'
@@ -326,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SettingsRoute: SettingsRoute,
   StakeRoute: StakeRoute,
   TransferRoute: TransferRoute,
   WalletRoute: WalletRoute,
