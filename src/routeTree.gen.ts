@@ -17,6 +17,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as NetworkRouteImport } from './routes/network'
 import { Route as PayRouteImport } from './routes/pay'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ProfitRouteImport } from './routes/profit'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -65,6 +66,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfitRoute = ProfitRouteImport.update({
+  id: '/profit',
+  path: '/profit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
   '/profile': typeof ProfileRoute
+  '/profit': typeof ProfitRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
   '/profile': typeof ProfileRoute
+  '/profit': typeof ProfitRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
   '/profile': typeof ProfileRoute
+  '/profit': typeof ProfitRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/network'
     | '/pay'
     | '/profile'
+    | '/profit'
     | '/register'
     | '/reset-password'
     | '/settings'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/network'
     | '/pay'
     | '/profile'
+    | '/profit'
     | '/register'
     | '/reset-password'
     | '/settings'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/network'
     | '/pay'
     | '/profile'
+    | '/profit'
     | '/register'
     | '/reset-password'
     | '/settings'
@@ -216,6 +228,7 @@ export interface RootRouteChildren {
   NetworkRoute: typeof NetworkRoute
   PayRoute: typeof PayRoute
   ProfileRoute: typeof ProfileRoute
+  ProfitRoute: typeof ProfitRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
@@ -283,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profit': {
+      id: '/profit'
+      path: '/profit'
+      fullPath: '/profit'
+      preLoaderRoute: typeof ProfitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -344,6 +364,7 @@ const rootRouteChildren: RootRouteChildren = {
   NetworkRoute: NetworkRoute,
   PayRoute: PayRoute,
   ProfileRoute: ProfileRoute,
+  ProfitRoute: ProfitRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { usePublicConfig } from '@/lib/useMember';
-import { ArrowUpRight, Coins, Gauge, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowUpRight, Coins, Gauge, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
 import robotFox from '@/assets/booster-concept-fox.png';
 import reactorEngine from '@/assets/booster-concept-reactor.png';
 import foxEmblem from '@/assets/booster-concept-emblem.png';
@@ -38,7 +38,7 @@ function BoostPage() {
         </div>
         <div className="mt-7 flex flex-wrap gap-3">
           <Button asChild className="rounded-full bg-chart-3 text-background"><Link to="/stake">Stake BIXCOIN <ArrowUpRight/></Link></Button>
-          <Button asChild variant="outline" className="rounded-full border-chart-2 text-chart-2 hover:bg-chart-2/10"><Link to="/stake">View tier ladder</Link></Button>
+          <Button asChild variant="outline" className="rounded-full border-chart-2 text-chart-2 hover:bg-chart-2/10"><Link to="/profit"><TrendingUp/> View live profit</Link></Button>
         </div>
 
         <div className="boost-engine mt-8">
@@ -107,12 +107,12 @@ function BoostPage() {
             <div className="boost-legend-item"><span><i className="bg-primary"/> BIX portion</span><b className="numeric text-primary">30%</b></div>
             <div className="boost-legend-item"><span><i className="bg-chart-2"/> At current internal reference</span><b className="numeric">30% BIX</b></div>
           </div>
-          <p className="terminal-disclosure"><ShieldCheck size={14}/> Recorded staking profit is split at approval in the owner console. No automatic payout is performed and the split is a reference allocation, not an exchange.</p>
+          <p className="terminal-disclosure"><ShieldCheck size={14}/> Active staking profit is projected automatically every minute. No automatic payout is performed and the split is a reference allocation, not an exchange.</p>
         </div>
         <div className="grid content-start gap-3">
           <div className="boost-fact"><Coins className="text-chart-2"/><div><b>Passive staking profit</b><p>Calculated from the approved package APY and lock duration.</p></div></div>
           <div className="boost-fact"><Zap className="text-primary"/><div><b>Active BIX profit</b><p>Thirty percent of recorded profit is allocated in BIX at the internal reference value.</p></div></div>
-          <div className="boost-fact"><ShieldCheck className="text-chart-3"/><div><b>Admin validation</b><p>Stake activation and reward records remain pending until reviewed by the owner.</p></div></div>
+          <div className="boost-fact"><ShieldCheck className="text-chart-3"/><div><b>Automatic activation</b><p>Eligible stakes activate instantly from the available virtual USDT testing balance.</p></div></div>
         </div>
       </div>
     </section>
