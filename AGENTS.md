@@ -27,3 +27,4 @@
 - Keep the 1,000,000 BIX reserve in an owner-only singleton vault initialized idempotently; never expose it in member balances or allow repeated generation.
 - Gate optional readiness surfaces through centralized app settings, and enforce identity availability and published announcement access with RLS; essential risk disclosures remain visible regardless of presentation toggles.
 - Keep market updates in a dedicated route using the existing public price feed and owner-authenticated announcement writes, so prices and official project communications remain clearly separated.
+- Dehydrate and hydrate the per-request QueryClient through the router so SSR and browser initially render the same market snapshot rather than fetching conflicting quotes.

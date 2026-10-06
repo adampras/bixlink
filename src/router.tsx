@@ -1,4 +1,4 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, dehydrate, hydrate } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
@@ -22,6 +22,10 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     context: { queryClient },
+    dehydrate: () => ({ queryState: dehydrate(queryClient) }),
+    hydrate: (dehydrated) => {
+      if (dehydrated && typeof dehydrated === 'object' && 'queryState' in dehydrated) hydrate(queryClient, dehydrated.queryState);
+    },
     scrollRestoration: true,
     // Warm the next page (code + loader data) as soon as a nav item is hovered
     // or pressed, so switching menus opens already-loaded content.
