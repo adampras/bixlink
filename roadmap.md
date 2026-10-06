@@ -49,3 +49,7 @@
 - [x] Rebuild NETWORK as package-avatar member boxes with ID, staking value, and unlimited-depth turnover totals.
 - [x] Add weekly qualification marker and weekly turnover reward display that resets at 12 AM.
 - [x] Add withdrawal copy and limits: minimum $10, maximum $10,000 per day per account.
+- [ ] Apply compact wallet balance and remove its explanatory sentence.
+- [ ] Add owner-controlled legal, identity, readiness and market availability.
+- [ ] Build Market & Updates with real prices and owner-published announcements.
+- [ ] Verify flags and announcements end-to-end and phone/desktop layouts.

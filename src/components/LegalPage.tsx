@@ -1,9 +1,13 @@
 import { Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
+import { useMember, usePublicConfig } from '@/lib/useMember';
 
 export type LegalSection = { title: string; body: string[] };
 
 export function LegalPage({ eyebrow, title, updated, sections }: { eyebrow: string; title: string; updated: string; sections: LegalSection[] }) {
+  const { data: config, isPending } = usePublicConfig();
+  const { data: member } = useMember();
+  if (!config?.readiness.legalEnabled && !member?.isAdmin) return <BixShell><main className="mx-auto min-h-[50vh] max-w-3xl px-5 py-12"><h1 className="section-title">{isPending ? 'BIXLINK' : 'COMING SOON'}</h1><p className="mt-4 text-muted-foreground">{isPending ? 'Loading availability…' : 'This page is not open yet.'}</p><Link to="/" className="mt-6 inline-block text-chart-3">Return home →</Link></main></BixShell>;
   return <BixShell><main className="mx-auto w-full max-w-3xl px-5 py-12 md:py-20">
     <div className="eyebrow">{eyebrow}</div>
     <h1 className="section-title break-words">{title}</h1>
