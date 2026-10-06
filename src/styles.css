@@ -552,3 +552,61 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .register-page { position: relative; }
 @media (max-width: 480px) { .ref-tree { padding: 4px; } .ref-tree-children { margin-left: 10px; padding-left: 18px; } .ref-tree-branch::before { left: -18px; width: 18px; } .ref-tree-node { min-width: 210px; } .ecosystem-column { padding: 20px; } }
 @media (prefers-reduced-motion: reduce) { .ref-tree-node { transition: none; } }
+
+/* PROFILE — Obsidian glass luxury */
+.profile-page { font-family: "Sora", var(--font-sans); }
+.profile-identity { display: flex; align-items: center; gap: 16px; padding: 4px 2px 10px; }
+.profile-avatar { width: 68px; height: 68px; flex: 0 0 auto; border-radius: 50%; padding: 2px; background: linear-gradient(145deg, var(--primary), var(--chart-2), var(--chart-3)); box-shadow: 0 0 24px oklch(0.67 0.23 305 / 22%); }
+.profile-avatar img { width: 100%; height: 100%; border: 3px solid var(--background); border-radius: inherit; object-fit: cover; }
+.profile-identity h1 { overflow: hidden; margin-top: 4px; color: var(--foreground); font-size: 1.1rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.profile-identity p { margin-top: 2px; color: var(--muted-foreground); font-size: 11px; }
+.profile-referral, .profile-leader { position: relative; overflow: hidden; margin-top: 24px; border: 1px solid var(--line); border-radius: var(--r-card); padding: 20px; background: linear-gradient(155deg, oklch(0.24 0.075 290 / 76%), oklch(0.15 0.04 285 / 88%)); box-shadow: var(--sh-2), inset 0 1px 0 oklch(1 0 0 / 5%); }
+.profile-referral::after { content: ""; position: absolute; top: -70px; right: -65px; width: 150px; height: 150px; border-radius: 50%; background: oklch(0.67 0.23 305 / 11%); filter: blur(32px); pointer-events: none; }
+.profile-section-head { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.profile-section-head h2, .profile-leader-title h2 { font-size: 1.15rem; font-weight: 700; }
+.profile-section-head > span { display: inline-flex; align-items: center; gap: 4px; border: 1px solid oklch(0.89 0.31 142 / 28%); border-radius: 6px; padding: 4px 7px; color: var(--chart-2); background: oklch(0.89 0.31 142 / 7%); font-size: 8px; font-weight: 800; text-transform: uppercase; }
+.profile-code-row { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin-top: 16px; }
+.profile-code { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 7px; border: 1px solid var(--line); border-radius: 12px; padding: 7px 8px 7px 14px; background: oklch(0.08 0.025 285 / 68%); }
+.profile-code b { overflow: hidden; color: var(--chart-3); font-family: "JetBrains Mono", monospace; font-size: 13px; text-overflow: ellipsis; }
+.profile-code svg { color: var(--primary); }
+.profile-code-row > button, .profile-generate { border-radius: 12px; }
+.profile-personal-link { position: relative; z-index: 1; margin-top: 12px; border: 1px solid oklch(1 0 0 / 6%); border-radius: 10px; padding: 10px 12px; background: oklch(0.08 0.025 285 / 42%); }
+.profile-personal-link > span { display: block; color: var(--muted-foreground); font-size: 8px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.profile-personal-link > div { display: flex; align-items: center; gap: 4px; }
+.profile-personal-link input { min-width: 0; flex: 1; border: 0; background: transparent; color: var(--muted-foreground); font-family: "JetBrains Mono", monospace; font-size: 10px; outline: none; }
+.profile-personal-link svg { width: 14px; }
+.profile-apply { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin-top: 14px; }
+.profile-apply .form-input { padding-block: 10px; font-size: 11px; }
+.profile-apply button { height: auto; border-radius: 12px; }
+.profile-network-link { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; color: var(--chart-2); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.profile-network-link svg { width: 13px; }
+.profile-leader { border-color: oklch(0.88 0.19 95 / 28%); }
+.profile-leader::after { content: ""; position: absolute; top: -35px; right: -35px; width: 110px; height: 110px; border: 1px solid oklch(0.88 0.19 95 / 8%); border-radius: 50%; box-shadow: 0 0 45px oklch(0.88 0.19 95 / 8%); }
+.profile-leader-title { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; }
+.profile-leader-title > span { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid oklch(0.88 0.19 95 / 25%); border-radius: 10px; background: oklch(0.88 0.19 95 / 9%); color: var(--chart-3); }
+.profile-leader-title svg { width: 17px; }
+.profile-leader-body { position: relative; z-index: 1; margin-top: 17px; }
+.profile-leader-balance { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+.profile-leader-balance span { display: block; color: var(--muted-foreground); font-size: 8px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.profile-leader-balance b { display: block; margin-top: 4px; color: var(--chart-3); font-family: "JetBrains Mono", monospace; font-size: 1.4rem; text-shadow: 0 0 14px oklch(0.88 0.19 95 / 24%); }
+.profile-leader-balance strong { display: block; margin-top: 4px; text-align: right; font-family: "JetBrains Mono", monospace; font-size: 13px; }
+.profile-leader-progress { width: 100%; height: 9px; margin-top: 15px; overflow: hidden; border: 1px solid var(--line); border-radius: 999px; background: var(--background); }
+.profile-leader-progress::-webkit-progress-bar { background: var(--background); }
+.profile-leader-progress::-webkit-progress-value { border-radius: 999px; background: linear-gradient(90deg, var(--chart-3), var(--primary), var(--chart-2)); box-shadow: 0 0 12px oklch(0.88 0.19 95 / 35%); }
+.profile-leader-progress::-moz-progress-bar { border-radius: 999px; background: linear-gradient(90deg, var(--chart-3), var(--primary), var(--chart-2)); }
+.profile-leader-range { display: flex; justify-content: space-between; margin-top: 3px; color: var(--muted-foreground); font-family: "JetBrains Mono", monospace; font-size: 9px; }
+.profile-leader-note { display: flex; align-items: flex-start; gap: 7px; margin-top: 13px; border: 1px solid oklch(1 0 0 / 5%); border-radius: 10px; padding: 10px; background: oklch(0.08 0.025 285 / 40%); color: var(--muted-foreground); font-size: 9px; line-height: 1.6; }
+.profile-leader-note svg { width: 13px; flex: 0 0 auto; color: var(--primary); }
+.profile-qualified { margin-top: 8px; color: var(--chart-2); font-size: 11px; font-weight: 700; }
+.profile-actions { display: grid; gap: 10px; margin-top: 24px; }
+.profile-actions > button, .profile-actions > a { height: 54px; justify-content: flex-start; border-radius: 13px; background: oklch(0.19 0.05 286 / 48%); }
+.profile-actions a { display: flex; width: 100%; }
+.profile-actions button > span:nth-child(2), .profile-actions a > span:nth-child(2) { text-align: left; }
+.profile-actions small { display: block; color: var(--muted-foreground); font-size: 8px; font-weight: 500; text-transform: uppercase; }
+.profile-action-icon { display: grid; width: 32px; height: 32px; flex: 0 0 auto; place-items: center; border-radius: 9px; background: oklch(0.67 0.23 305 / 10%); color: var(--primary); }
+.profile-action-icon--admin { background: oklch(0.89 0.31 142 / 8%); color: var(--chart-2); }
+.profile-action-icon svg { width: 16px; }
+.profile-action-arrow { width: 15px; margin-left: auto; color: var(--muted-foreground); opacity: .5; }
+.profile-actions .profile-signout { margin-top: 4px; border-color: oklch(0.65 0.23 25 / 20%); color: var(--destructive); background: oklch(0.65 0.23 25 / 5%); }
+.profile-signout .profile-action-icon { background: oklch(0.65 0.23 25 / 10%); color: var(--destructive); }
+@media (max-width: 480px) { .profile-page { padding-top: 24px; } .profile-identity h1 { font-size: .95rem; } .profile-referral, .profile-leader { padding: 17px; } .profile-code-row > button { padding-inline: 12px; font-size: 11px; } }
