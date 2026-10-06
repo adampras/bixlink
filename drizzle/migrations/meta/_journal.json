@@ -155,6 +155,13 @@
       "when": 1791296383365,
       "tag": "0021_deposit_intents",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1791298046414,
+      "tag": "0022_deposit_intent_claims",
+      "breakpoints": true
     }
   ]
 }
