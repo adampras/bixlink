@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 type Kyc = { status: string; full_name: string; country: string; document_type: string; document_last4: string };
 
-export function KycCard({ userId, compact = false }: { userId?: string; compact?: boolean }) {
+export function KycCard({ userId, compact = false }: { userId?: string | undefined; compact?: boolean }) {
   const [kyc, setKyc] = useState<Kyc | null>(null);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ full_name: '', country: '', document_type: 'passport', document_last4: '' });
