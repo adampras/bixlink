@@ -108,6 +108,7 @@ export function usePublicConfig() {
         depositWallets: (((settings['deposit_wallets'] as { wallets?: { code: string; label: string; network: 'BEP20' | 'TRC20' | 'ERC20'; address: string; enabled: boolean }[] } | undefined)?.wallets) ?? []).filter(w => w.enabled && w.address),
         swap: (settings['swap'] ?? { enabled: false }) as { enabled: boolean },
         bixPay: (settings['bix_pay'] ?? { enabled: false }) as { enabled: boolean },
+        usdtTransfer: (settings['usdt_transfer'] ?? { enabled: false }) as { enabled: boolean },
         bixMarket: (settings['bix_market'] ?? { priceUsd: 0.84291 }) as { priceUsd: number },
         referrals: (settings['referrals'] ?? { direct: 10, levels: [12, 6, 3, 2, 1], rewardPlus: 5, minimumDirect: 3, splitUsdt: 70, splitBix: 30 }) as { direct: number; levels: number[]; rewardPlus: number; minimumDirect: number; splitUsdt: number; splitBix: number },
         landingContent: (settings['landing_content'] ?? defaultLandingContent) as LandingContent,

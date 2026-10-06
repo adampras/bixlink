@@ -15,7 +15,10 @@ export const Route = createFileRoute('/stake')({ head: () => ({ meta: [{ title: 
 function StakePage() {
   const { user, ready, data } = useMember();
   const { data: cfg } = usePublicConfig();
-  const [chosen, setChosen] = useState<Package | null>(null);
+  const [chosen, setChosenRaw] = useState<Package | null>(null);
+  const [agree, setAgree] = useState(false);
+  const [congrats, setCongrats] = useState<Package | null>(null);
+  const setChosen = (p: Package | null) => { setAgree(false); setChosenRaw(p); };
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState<number | null>(null);
@@ -72,7 +75,18 @@ function StakePage() {
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm"><div>APY <b className="numeric block text-chart-2">{chosen.apy}%</b></div><div>Lock <b className="numeric block">{chosen.lock_days} days</b></div><div>Est. daily <b className="numeric block">${daily(chosen).toFixed(4)}</b></div><div>Est. lock return <b className="numeric block">{money(daily(chosen) * chosen.lock_days)}</b></div></div>
         <div className="mt-4 rounded-xl border border-border p-3 text-xs"><div className="flex justify-between"><span className="text-muted-foreground">Estimated annual profit</span><b className="numeric">{money(chosen.price_usd * chosen.apy / 100)}</b></div><div className="mt-2 flex justify-between"><span className="text-muted-foreground">70% USDT allocation</span><b className="numeric text-chart-2">{money(chosen.price_usd * chosen.apy / 100 * .7)}</b></div><div className="mt-2 flex justify-between"><span className="text-muted-foreground">30% BIX allocation</span><b className="numeric text-chart-3">{(chosen.price_usd * chosen.apy / 100 * .3 / .1).toLocaleString()} BIX</b></div></div>
         <p className="mt-4 text-xs text-muted-foreground">Request goes to admin for review. No funds are charged or transferred, and displayed profit remains an estimate until recorded.</p>
-        <Button disabled={busy} className="mt-6 w-full rounded-full bg-chart-3 text-background" onClick={async () => { setBusy(true); try { await submit({ data: { packageId: chosen.id } }); setNotice('Stake request submitted for admin review.'); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch (e) { setNotice(e instanceof Error ? e.message : 'Request failed.'); } setBusy(false); setChosen(null); }}>Submit stake request</Button>
+        <label className="mt-4 flex items-start gap-2 rounded-xl border border-border p-3 text-xs"><input type="checkbox" className="mt-0.5" checked={agree} onChange={e => setAgree(e.target.checked)}/> I agree to the staking terms: lock period, APY estimate and admin review.</label>
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <Button variant="outline" className="rounded-full" onClick={() => { setChosen(null); setNotice('Stake cancelled — you did not agree.'); }}>Disagree</Button>
+          <Button disabled={busy || !agree} className="rounded-full bg-chart-3 text-background" onClick={async () => { setBusy(true); try { await submit({ data: { packageId: chosen.id } }); setCongrats(chosen); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch (e) { setNotice(e instanceof Error ? e.message : 'Request failed.'); } setBusy(false); setChosen(null); }}>Agree & stake</Button>
+        </div>
+      </div></div>}
+      {congrats && <div className="modal-backdrop" onClick={() => setCongrats(null)}><div role="dialog" aria-modal="true" className="modal-panel deposit-success text-center" onClick={e => e.stopPropagation()}>
+        <CheckCircle2 size={56} className="mx-auto text-chart-2"/>
+        <h3 className="mt-4 font-display text-3xl font-black text-chart-2">CONGRATULATION!</h3>
+        <p className="mt-2 text-sm">Your <b className="text-chart-3">{congrats.id}</b> stake of <b className="numeric text-chart-3">{money(congrats.price_usd)}</b> was submitted successfully.</p>
+        <p className="mt-2 text-xs text-muted-foreground">It becomes active after admin review.</p>
+        <Button className="mt-6 w-full rounded-full bg-chart-2 text-background" onClick={() => setCongrats(null)}>Done</Button>
       </div></div>}
     </MemberGate>
   </main></BixShell>;

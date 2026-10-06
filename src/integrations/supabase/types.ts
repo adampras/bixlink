@@ -334,6 +334,39 @@ export type Database = {
         }
         Relationships: []
       }
+      vusdt_transfers: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          id: string
+          note: string | null
+          recipient_code: string
+          recipient_id: string
+          sender_code: string
+          sender_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          recipient_code: string
+          recipient_id: string
+          sender_code: string
+          sender_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          recipient_code?: string
+          recipient_id?: string
+          sender_code?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       wallet_transactions: {
         Row: {
           address: string | null
@@ -427,6 +460,11 @@ export type Database = {
         }[]
       }
       bix_username_available: { Args: { p_username: string }; Returns: boolean }
+      bix_vusdt_balance: { Args: { p_user: string }; Returns: number }
+      bix_vusdt_send: {
+        Args: { p_amount: number; p_code: string; p_note: string }
+        Returns: string
+      }
       bix_wallet_balance: { Args: { p_user: string }; Returns: number }
       ensure_bix_profile: { Args: never; Returns: undefined }
       is_bix_admin: { Args: never; Returns: boolean }
