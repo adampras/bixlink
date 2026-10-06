@@ -113,6 +113,13 @@
       "when": 1791282363815,
       "tag": "0015_unify_wallet_and_virtual_usdt",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791286109391,
+      "tag": "0016_owner_bix_reserve_vault",
+      "breakpoints": true
     }
   ]
 }
