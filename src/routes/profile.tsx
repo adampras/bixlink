@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useMember } from '@/lib/useMember';
 import { createReferral, assignReferral } from '@/lib/bixlink.functions';
 import { supabase } from '@/integrations/supabase/client';
-import { Copy, KeyRound, LogOut, Shield } from 'lucide-react';
+import { ArrowRight, Check, ChevronRight, Copy, KeyRound, LogOut, Shield } from 'lucide-react';
 import { LeaderCard } from '@/components/LeaderCard';
 import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 
@@ -21,20 +21,22 @@ function ProfilePage() {
   const qc = useQueryClient(); const navigate = useNavigate();
   const referralUrl = data?.referral?.code && typeof window !== 'undefined' ? `${window.location.origin}/register?ref=${data.referral.code}` : '';
   const signOut = async () => { await qc.cancelQueries(); qc.clear(); await supabase.auth.signOut(); navigate({ to: '/auth', replace: true }); };
-  return <BixShell><main className="mx-auto max-w-3xl px-5 py-10 md:px-8">
+  const copyReferral = async () => { if (!referralUrl) return; await navigator.clipboard.writeText(referralUrl); setNotice('Referral link copied.'); };
+  return <BixShell><main className="profile-page mx-auto max-w-3xl px-5 py-8 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="PROFILE">
-      <div className="flex items-center gap-4"><img src={headerMark.url} alt="" className="h-16 w-16 rounded-full border border-chart-3 bg-card object-cover"/><div><div className="eyebrow">MEMBER</div><h1 className="font-display text-2xl font-black">{user?.email}</h1><p className="text-xs text-muted-foreground">Joined {user && new Date(user.created_at).toLocaleDateString()}</p></div></div>
-      <section className="mt-8 rounded-[20px] border border-border bg-card p-6"><h2 className="font-bold">Referral code</h2>
-        <div className="mt-3 flex flex-wrap gap-3">{data?.referral?.code ? <><span className="rounded-full border border-border px-5 py-2 font-mono text-chart-3">{data.referral.code}</span><Button className="rounded-full" onClick={async () => { await navigator.clipboard.writeText(referralUrl); setNotice('Referral link copied.'); }}><Copy/> Copy link</Button></> : <Button className="rounded-full bg-chart-3 text-background" onClick={async () => { try { await makeCode(); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Could not create code.'); } }}>Generate code</Button>}</div>
-        {referralUrl && <div className="mt-3 flex items-center gap-2 rounded-xl border border-border bg-background p-3"><input readOnly aria-label="Full referral URL" className="min-w-0 flex-1 bg-transparent font-mono text-xs text-muted-foreground outline-none" value={referralUrl}/><Button size="icon" variant="ghost" title="Copy referral URL" onClick={async()=>{await navigator.clipboard.writeText(referralUrl);setNotice('Referral link copied.');}}><Copy/></Button></div>}
-        {data && !data.referral?.referred_by && <form className="mt-4 flex gap-2" onSubmit={async e => { e.preventDefault(); try { const r = await link({ data: { code: code.trim().toUpperCase() } }); setNotice(r.linked ? 'Referrer linked.' : 'Code unavailable.'); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Invalid code.'); } }}><input className="form-input max-w-44" placeholder="BIX-123456" value={code} onChange={e => setCode(e.target.value)}/><Button type="submit" className="rounded-full">Apply referrer</Button></form>}
-        <Link to="/network" className="mt-4 block text-xs text-chart-2">View my network →</Link>
+      <header className="profile-identity"><div className="profile-avatar"><img src={headerMark.url} alt="BIXLINK member emblem"/></div><div className="min-w-0"><div className="eyebrow">VERIFIED MEMBER</div><h1>{user?.email}</h1><p>Active since {user && new Date(user.created_at).toLocaleDateString()}</p></div></header>
+      <section className="profile-referral">
+        <div className="profile-section-head"><h2>Referral code</h2>{data?.referral?.code && <span><Check size={11}/> Active</span>}</div>
+        {data?.referral?.code ? <div className="profile-code-row"><div className="profile-code"><b>{data.referral.code}</b><Button size="icon" variant="ghost" title="Copy referral link" onClick={copyReferral}><Copy/></Button></div><Button onClick={copyReferral}>Copy link</Button></div> : <Button className="profile-generate" onClick={async () => { try { await makeCode(); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Could not create code.'); } }}>Generate referral code</Button>}
+        {referralUrl && <div className="profile-personal-link"><span>Personal link</span><div><input readOnly aria-label="Full referral URL" value={referralUrl}/><Button size="icon" variant="ghost" title="Copy personal link" onClick={copyReferral}><Copy/></Button></div></div>}
+        {data && !data.referral?.referred_by && <form className="profile-apply" onSubmit={async e => { e.preventDefault(); try { const r = await link({ data: { code: code.trim().toUpperCase() } }); setNotice(r.linked ? 'Referrer linked.' : 'Code unavailable.'); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Invalid code.'); } }}><input className="form-input" placeholder="Apply referrer code" aria-label="Apply referrer code" value={code} onChange={e => setCode(e.target.value)}/><Button type="submit" variant="outline">Apply</Button></form>}
+        <Link to="/network" className="profile-network-link">View my network <ArrowRight/></Link>
       </section>
       <LeaderCard/>
-      <section className="mt-6 grid gap-3">
-        <Button variant="outline" className="justify-start rounded-full" onClick={async () => { if (!user?.email) return; const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` }); setNotice(error ? error.message : 'Password reset email sent.'); }}><KeyRound/> Change password</Button>
-        {data?.isAdmin && <Button asChild variant="outline" className="justify-start rounded-full"><Link to="/admin"><Shield/> Admin panel (owner only)</Link></Button>}
-        <Button variant="outline" className="justify-start rounded-full text-destructive" onClick={signOut}><LogOut/> Sign out</Button>
+      <section className="profile-actions">
+        <Button variant="outline" onClick={async () => { if (!user?.email) return; const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` }); setNotice(error ? error.message : 'Password reset email sent.'); }}><span className="profile-action-icon"><KeyRound/></span><span>Change password</span><ChevronRight className="profile-action-arrow"/></Button>
+        {data?.isAdmin && <Button asChild variant="outline"><Link to="/admin"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Admin panel <small>Owner only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
+        <Button variant="outline" className="profile-signout" onClick={signOut}><span className="profile-action-icon"><LogOut/></span><span>Sign out</span></Button>
       </section>
       {notice && <p role="status" className="mt-5 text-chart-2">{notice}</p>}
     </MemberGate>

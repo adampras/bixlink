@@ -6,14 +6,16 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 
 export const Route = createFileRoute('/register')({
+  validateSearch: (search: Record<string, unknown>) => ({ ref: typeof search.ref === 'string' ? search.ref : '' }),
   head: () => ({ meta: [{ title: 'Create a BIXLINK Account' }, { name: 'description', content: 'Create your BIXLINK member account with an optional referral code.' }, { property: 'og:title', content: 'Create a BIXLINK Account' }, { property: 'og:description', content: 'Register as a BIXLINK member and attach your inviter code.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
   component: RegisterPage,
 });
 
 function RegisterPage() {
   const [email, setEmail] = useState(''); const [fullName, setFullName] = useState(''); const [username, setUsername] = useState(''); const [password, setPassword] = useState(''); const [referral, setReferral] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
+  const { ref } = Route.useSearch();
   const navigate = useNavigate();
-  useEffect(() => { const incoming = new URLSearchParams(window.location.search).get('ref') ?? window.localStorage.getItem('bixlink-ref') ?? ''; if (/^BIX-\d{6}$/i.test(incoming)) setReferral(incoming.toUpperCase()); }, []);
+  useEffect(() => { const incoming = ref || window.localStorage.getItem('bixlink-ref') || ''; if (/^BIX-\d{6}$/i.test(incoming)) { const normalized = incoming.toUpperCase(); setReferral(normalized); window.localStorage.setItem('bixlink-ref', normalized); } }, [ref]);
   const submit = async (event: React.FormEvent) => {
     event.preventDefault(); setBusy(true); setNotice('');
     try {
