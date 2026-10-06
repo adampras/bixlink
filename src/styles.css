@@ -850,3 +850,14 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .theme-miniature-panels>span { display: block; min-width: 0; padding: 8px; border: 1px solid var(--border); border-radius: 5px; background: var(--card); text-align: left; }
 .theme-miniature-panels small { display: block; font-size: 6px; color: var(--primary); }.theme-miniature-panels b { display: block; margin-top: 7px; font-size: 8px; }.theme-miniature-panels i { display: block; height: 3px; margin-top: 8px; background: var(--border); }
 .theme-miniature-chart { display: block; height: 15px; margin-top: 10px; border-bottom: 2px solid var(--chart-2); transform: skewY(-8deg); }
+/* Theme-specific refinements found during signed-in phone checks. */
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .network-tree-panel { max-width: 100%; overflow-x: auto; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) main .grid>section { min-width: 0; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.stake-lux-btn,.stake-lux-card--pop .stake-lux-btn) { background: var(--primary); color: var(--primary-foreground); box-shadow: var(--sh-1); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .stake-pool { background: linear-gradient(90deg, color-mix(in oklab, var(--chart-3) 12%, transparent), transparent 72%); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .stake-pool-ico { background: color-mix(in oklab, var(--chart-3) 12%, transparent); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.stake-lux-title span,.brand-mark) { text-shadow: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.stake-lux-notch,.stake-lux-notch--gold) { color: var(--background); box-shadow: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.profile-code,.profile-personal-link,.ref-tree-metrics b) { background: var(--background); border-color: var(--border); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .profile-referral::after { display: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .profile-action-icon { background: color-mix(in oklab, var(--primary) 12%, transparent); }
