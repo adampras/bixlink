@@ -169,6 +169,13 @@
       "when": 1791298150530,
       "tag": "0023_enable_cron",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791302683731,
+      "tag": "0024_content_image_access",
+      "breakpoints": true
     }
   ]
 }

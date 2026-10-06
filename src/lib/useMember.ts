@@ -5,7 +5,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { getMyData, assignReferral, ensureProfile } from '@/lib/bixlink.functions';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
-import { defaultLandingContent, type LandingContent } from '@/components/LandingExperience';
+import { defaultLandingContent, type LandingContent } from '@/lib/landing-content';
 import { defaultReadiness, type Readiness } from '@/lib/readiness';
 
 // The member session is resolved once per app load and shared by every route, so
