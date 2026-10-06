@@ -95,7 +95,17 @@ const phrases: Record<Exclude<Language, 'en'>, Record<string, string>> = {
 
 type ProductUpdate = { id: string; title: string; body: string };
 type I18nValue = { language: Language; setLanguage: (language: Language) => void; t: (key: UiKey) => string; updates: ProductUpdate[] };
-const I18nContext = createContext<I18nValue | null>(null);
+const fallbackI18n: I18nValue = {
+  language: 'en',
+  setLanguage: next => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('bixlink-language', next);
+    document.documentElement.lang = next;
+  },
+  t: key => ui.en[key],
+  updates: [...updates.en],
+};
+const I18nContext = createContext<I18nValue>(fallbackI18n);
 const originalText = new WeakMap<Node, string>();
 const originalPlaceholder = new WeakMap<HTMLInputElement | HTMLTextAreaElement, string>();
 
@@ -145,7 +155,5 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useI18n() {
-  const value = useContext(I18nContext);
-  if (!value) throw new Error('useI18n must be used inside I18nProvider');
-  return value;
+  return useContext(I18nContext);
 }
