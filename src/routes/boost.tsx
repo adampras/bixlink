@@ -35,7 +35,7 @@ function BoostPage() {
         <div className="terminal-supply"><ShieldCheck size={13}/> 21 JUTA BIX TOKEN</div>
         <div className="eyebrow mt-5"><Zap size={15} className="text-chart-2"/> BIXCOIN YIELD ENGINE</div>
         <h1 className="section-title">BOOST YOUR <span>APY</span></h1>
-        <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">The BIXCOIN Booster converts each active staking package into a live yield projection. Larger packages and longer lock periods unlock higher fixed APY tiers, from 8% up to 25%.</p>
+        <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">The BIXCOIN Booster converts each active staking package into a live yield projection. Larger packages and longer lock periods unlock higher fixed APY tiers, from 10% up to 25%. All figures are projections, not guaranteed returns.</p>
         <div className="boost-chips mt-6">
           <div className="booster-chip"><b className="text-chart-2">70%</b> profit in USDT</div>
           <div className="booster-chip"><b className="text-chart-3">30%</b> profit in BIX</div>

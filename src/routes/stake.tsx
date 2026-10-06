@@ -43,7 +43,7 @@ function StakePage() {
           <span className="stake-lux-chip">Instant · Virtual USDT</span>
         </div>
         <h1 className="section-title stake-lux-title">STAKE <span>BIXCOIN</span></h1>
-        {cfg?.booster.enabled && <p className="stake-lux-boost"><i aria-hidden />APY Booster active — up to {cfg.booster.rate}%</p>}
+        {cfg?.booster.enabled && <p className="stake-lux-boost"><i aria-hidden />APY Booster active — projected up to {cfg.booster.rate}%, not guaranteed</p>}
       </div>
       <div className="stake-pool">
         <div><span className="stake-pool-label">BIX supply</span><p className="stake-pool-value">21 JUTA BIX TOKEN</p></div>
