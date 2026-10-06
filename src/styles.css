@@ -769,3 +769,84 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .register-numbered-submit:hover { background: var(--register-gold-light); }
 .register-access-link { margin-left: 4px; color: var(--register-gold); border-bottom: 1px solid color-mix(in srgb, var(--register-gold) 30%, transparent); }
 @media (prefers-reduced-motion: reduce) { .register-numbered * { transition: none; } }
+
+/* Owner-selected spacious glass themes; original styling is left untouched. */
+[data-presentation-theme="emerald"] {
+  --background: oklch(0.2017 0.015 166.49); /* #101916 */
+  --primary: oklch(0.7729 0.1535 163.22); /* #34D399 */
+  --chart-2: var(--primary);
+  --chart-3: oklch(0.7869 0.1172 91.75); /* #D6B85A */
+  --card: oklch(0.244 0.013 166);
+  --secondary: oklch(0.29 0.017 166);
+  --muted-foreground: oklch(0.75 0.017 166);
+}
+[data-presentation-theme="graphite"] {
+  --background: oklch(0.2125 0.0069 258.36); /* #17191C */
+  --primary: oklch(0.8508 0.0119 259.82); /* #C9CED6 */
+  --chart-2: oklch(0.7173 0.0534 198.06); /* #7BAFB1 */
+  --chart-3: var(--primary);
+  --card: oklch(0.255 0.007 258);
+  --secondary: oklch(0.3 0.009 258);
+  --muted-foreground: oklch(0.75 0.011 258);
+}
+[data-presentation-theme="emerald"], [data-presentation-theme="graphite"] {
+  --foreground: oklch(0.97 0.004 160);
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--secondary);
+  --accent: var(--secondary);
+  --accent-foreground: var(--foreground);
+  --border: color-mix(in oklab, var(--primary) 17%, transparent);
+  --input: color-mix(in oklab, var(--foreground) 18%, transparent);
+  --ring: var(--primary);
+  --chart-1: var(--primary);
+  --chart-4: var(--chart-2);
+  --chart-5: var(--chart-3);
+  --line: var(--border);
+  --destructive: oklch(0.72 0.17 20);
+  --destructive-foreground: var(--background);
+  --r-card: 16px;
+  --sh-1: 0 4px 14px color-mix(in oklab, var(--background) 60%, transparent);
+  --sh-2: 0 12px 36px color-mix(in oklab, var(--background) 80%, transparent);
+  --sh-3: 0 20px 55px color-mix(in oklab, var(--background) 90%, transparent);
+  --theme-glass: linear-gradient(145deg, color-mix(in oklab, var(--card) 96%, var(--primary) 4%), var(--card));
+  --theme-inset: inset 0 1px 0 color-mix(in oklab, var(--foreground) 5%, transparent);
+  --settings-blue: var(--primary);
+}
+.site-shell:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) { background-image: none; font-family: 'Manrope', sans-serif; }
+.site-shell:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(h1,h2,h3,.font-display,.brand-mark) { font-family: 'Sora', sans-serif; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .site-header { background: color-mix(in oklab, var(--background) 94%, transparent); backdrop-filter: blur(10px); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .site-header::after { background: linear-gradient(90deg, var(--primary), var(--chart-3), var(--chart-2)); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.metric-panel,.stat-card,.roadmap-item,.market-panel,.package-card,.terminal-balance,.terminal-kpi,.terminal-market,.boost-engine,.boost-tier,.boost-fact,.stake-lux-card,.bix-ledger,.stake-request,.network-stat,.network-tree-panel,.network-plan,.profile-identity,.profile-referral,.profile-leader,.settings-panel,.ecosystem-column) { background: var(--theme-glass); border-color: var(--border); box-shadow: var(--sh-1), var(--theme-inset); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.hero-section,.booster-band,.booster-vault,.terminal-hero,.settings-console) { background: var(--background); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.bix-ledger-metrics,.terminal-chart,.profile-actions>a,.profile-actions>button,.settings-rail,.profile-leader-note) { background: var(--secondary); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.hero-halo,.bix-ledger-glow,.bix-ledger-scan) { display: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.bix-ledger-mark i,.boost-engine-live i,.terminal-live i,.mobile-nav-on::before) { animation: none; box-shadow: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.nav-link.active,.bix-ledger-status,.boost-tier-rank,.admin-visual-option--active) { background: color-mix(in oklab, var(--chart-3) 9%, var(--background)); border-color: color-mix(in oklab, var(--chart-3) 30%, transparent); box-shadow: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .form-input:focus { border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 15%, transparent); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.package-card:hover,.boost-tier:hover,.stat-card:hover) { border-color: var(--primary); box-shadow: var(--sh-2); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .boost-split-bar i:first-child { background: var(--chart-3); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.bix-ledger-mark,.profile-action-icon) { border-color: var(--border); box-shadow: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .register-numbered {
+  --register-background: var(--background); --register-surface: var(--card); --register-foreground: var(--foreground); --register-muted: var(--muted-foreground); --register-border: var(--border); --register-gold: var(--chart-3); --register-gold-light: var(--chart-3); --register-gold-deep: var(--primary); --register-submit-shadow: var(--sh-1); font-family: 'Manrope', sans-serif;
+}
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) .terminal-asset { padding-block: 15px; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.terminal-market,.terminal-balance) { padding: 22px; }
+@media (min-width: 768px) {
+  :is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) main>section { padding-top: 48px; padding-bottom: 48px; }
+  :is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.package-grid,.boost-ladder,.profile-actions) { gap: 18px; }
+}
+@media (max-width: 480px) { :is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"]) :is(.terminal-market,.terminal-balance) { padding: 17px; } }
+.theme-option { height: auto; min-width: 0; display: flex; flex-direction: column; align-items: stretch; gap: 15px; padding: 14px; border-radius: 8px; white-space: normal; }
+.theme-option[aria-pressed="true"] { border-color: var(--ring); box-shadow: inset 0 0 0 1px var(--ring); }
+.theme-miniature { display: block; width: 100%; aspect-ratio: 1.7; overflow: hidden; border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--background); color: var(--foreground); }
+.theme-miniature[data-presentation-theme="original"] { --background: oklch(0.13 0.05 285); --card: oklch(0.21 0.07 282); --foreground: oklch(0.97 0.01 280); --primary: oklch(0.67 0.23 305); --chart-2: oklch(0.89 0.31 142); --chart-3: oklch(0.88 0.19 95); --border: oklch(0.39 0.08 285 / 55%); }
+.theme-miniature-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 9px; font-weight: 800; color: var(--chart-3); }
+.theme-swatches { display: flex; gap: 4px; }.theme-swatches i { width: 9px; height: 9px; border-radius: 50%; background: var(--primary); }.theme-swatches i:nth-child(2) { background: var(--chart-2); }.theme-swatches i:nth-child(3) { background: var(--chart-3); }
+.theme-miniature-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
+.theme-miniature-panels>span { display: block; min-width: 0; padding: 8px; border: 1px solid var(--border); border-radius: 5px; background: var(--card); text-align: left; }
+.theme-miniature-panels small { display: block; font-size: 6px; color: var(--primary); }.theme-miniature-panels b { display: block; margin-top: 7px; font-size: 8px; }.theme-miniature-panels i { display: block; height: 3px; margin-top: 8px; background: var(--border); }
+.theme-miniature-chart { display: block; height: 15px; margin-top: 10px; border-bottom: 2px solid var(--chart-2); transform: skewY(-8deg); }

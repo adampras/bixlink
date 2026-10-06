@@ -61,3 +61,5 @@
 - [x] Change the Owner 2 assignment button to white.
 - [x] Add contextual category imagery with selected glass panels to HOME and landing, preserving admin edits and visibility.
 - [x] Add matching Phase 1–6 roadmap images with glass captions and admin upload overrides.
+- [ ] Add original/Emerald/Graphite theme selection to the main admin, shared across public and member pages.
+- [ ] Verify saved themes persist and work across desktop/mobile main menus, restoring the original selection after testing.

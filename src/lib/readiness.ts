@@ -1,2 +1,3 @@
-export type Readiness = { legalEnabled: boolean; kycEnabled: boolean; readinessEnabled: boolean; marketEnabled: boolean; homeOverviewEnabled: boolean };
+import type { PresentationTheme } from '@/lib/presentation-theme';
+export type Readiness = { legalEnabled: boolean; kycEnabled: boolean; readinessEnabled: boolean; marketEnabled: boolean; homeOverviewEnabled: boolean; presentationTheme?: PresentationTheme };
 export const defaultReadiness: Readiness = { legalEnabled: false, kycEnabled: false, readinessEnabled: false, marketEnabled: true, homeOverviewEnabled: false };

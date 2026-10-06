@@ -36,3 +36,5 @@
 - Include reviewer in the user_roles database constraint and verify role writes by reading them back before reporting success, so Owner 2 assignments cannot silently fail.
 - Render income-category cards through one shared component with bundled contextual image defaults and owner-upload overrides, so HOME and landing stay visually consistent without overwriting saved content.
 - Render roadmap phases through a shared glass-caption card with title-matched default illustrations and owner-upload overrides, so both public and member views preserve the same editable roadmap.
+
+- Store the owner-selected presentation theme inside the existing public readiness setting and apply semantic CSS overrides in the shared shell, so all visitors receive the same lightweight theme without widening database access.

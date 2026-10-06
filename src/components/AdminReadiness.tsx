@@ -8,7 +8,8 @@ import { getOwnerAnnouncements, saveAnnouncement } from '@/lib/updates.functions
 import { defaultReadiness, type Readiness } from '@/lib/readiness';
 import { dateTime } from '@/lib/bixlink';
 
-const controls: { key: keyof Readiness; label: string; detail: string }[] = [
+type AvailabilityKey = Exclude<keyof Readiness, 'presentationTheme'>;
+const controls: { key: AvailabilityKey; label: string; detail: string }[] = [
   { key: 'legalEnabled', label: 'Legal & About pages', detail: 'Terms, Privacy, Risk Disclosure, About & Support.' },
   { key: 'kycEnabled', label: 'Optional identity check', detail: 'Identity submissions in Settings and Withdraw.' },
   { key: 'readinessEnabled', label: 'Readiness information', detail: 'Additional footer information about the project.' },
@@ -26,7 +27,7 @@ export function AdminReadiness({ initial, onMessage, onSaved }: { initial?: Read
   const save = useServerFn(saveAnnouncement);
   const qc = useQueryClient();
   const posts = useQuery({ queryKey: ['owner-announcements'], queryFn: () => list() });
-  async function toggle(key: keyof Readiness) {
+  async function toggle(key: AvailabilityKey) {
     const next = { ...flags, [key]: !flags[key] };
     setBusy(true);
     try { await change({ data: { key: 'readiness', value: next } }); setFlags(next); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); await qc.invalidateQueries({ queryKey: ['bix-market-updates'] }); onMessage(`${controls.find(c => c.key === key)?.label}: ${next[key] ? 'OPEN' : 'CLOSED'}.`); }
