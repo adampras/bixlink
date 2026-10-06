@@ -35,3 +35,4 @@
 - Surface the limited Owner 2 review console only when the signed-in account has the database-backed reviewer role, so client state never grants or advertises reviewer access.
 - Include reviewer in the user_roles database constraint and verify role writes by reading them back before reporting success, so Owner 2 assignments cannot silently fail.
 - Render income-category cards through one shared component with bundled contextual image defaults and owner-upload overrides, so HOME and landing stay visually consistent without overwriting saved content.
+- Render roadmap phases through a shared glass-caption card with title-matched default illustrations and owner-upload overrides, so both public and member views preserve the same editable roadmap.

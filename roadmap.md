@@ -60,3 +60,4 @@
 - [x] Fix failed Owner 2 assignment and verify persisted role through the owner panel.
 - [x] Change the Owner 2 assignment button to white.
 - [x] Add contextual category imagery with selected glass panels to HOME and landing, preserving admin edits and visibility.
+- [x] Add matching Phase 1–6 roadmap images with glass captions and admin upload overrides.
