@@ -179,6 +179,48 @@ export type Database = {
         }
         Relationships: []
       }
+      deposit_intents: {
+        Row: {
+          address: string
+          amount_exact: number
+          created_at: string
+          credited_at: string | null
+          expires_at: string
+          id: string
+          network: string
+          status: string
+          tx_hash: string | null
+          user_id: string
+          wallet_code: string
+        }
+        Insert: {
+          address: string
+          amount_exact: number
+          created_at?: string
+          credited_at?: string | null
+          expires_at?: string
+          id?: string
+          network: string
+          status?: string
+          tx_hash?: string | null
+          user_id: string
+          wallet_code: string
+        }
+        Update: {
+          address?: string
+          amount_exact?: number
+          created_at?: string
+          credited_at?: string | null
+          expires_at?: string
+          id?: string
+          network?: string
+          status?: string
+          tx_hash?: string | null
+          user_id?: string
+          wallet_code?: string
+        }
+        Relationships: []
+      }
       income_sources: {
         Row: {
           amount_usd: number

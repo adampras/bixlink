@@ -68,3 +68,30 @@ export async function verifyUsdtDeposit(net: DepositNetwork, hash: string, to: s
     return { ok: false, reason: 'Blockchain explorer is busy. Please try again in a moment.' };
   }
 }
+
+export type IncomingTransfer = { hash: string; amount: number; timestamp: number };
+
+/** Recent confirmed USDT transfers into `to`, newest first. */
+export async function listIncomingUsdt(net: DepositNetwork, to: string): Promise<IncomingTransfer[] | { error: string }> {
+  try {
+    if (net === 'TRC20') {
+      const r = await fetch(`https://apilist.tronscanapi.com/api/token_trc20/transfers?limit=50&start=0&toAddress=${to}&contract_address=${TRON_USDT}&confirm=true`);
+      if (!r.ok) throw new Error('explorer');
+      const j = (await r.json()) as any;
+      return (j.token_transfers ?? []).filter((t: any) => t.to_address === to && t.confirmed !== false && (t.finalResult ?? 'SUCCESS') === 'SUCCESS')
+        .map((t: any) => ({ hash: String(t.transaction_id), amount: units(BigInt(t.quant ?? '0'), 6), timestamp: Number(t.block_ts) }));
+    }
+    const key = process.env['ETHERSCAN_API_KEY'];
+    if (!key) return { error: 'Automatic detection for this network is not configured yet.' };
+    const cfg = EVM[net];
+    const r = await fetch(`https://api.etherscan.io/v2/api?chainid=${cfg.chainId}&module=account&action=tokentx&contractaddress=${cfg.contract}&address=${to}&page=1&offset=50&sort=desc&apikey=${key}`);
+    if (!r.ok) throw new Error('explorer');
+    const j = (await r.json()) as any;
+    if (!Array.isArray(j.result)) return [];
+    return j.result.filter((t: any) => String(t.to).toLowerCase() === to.toLowerCase() && Number(t.confirmations) >= cfg.minConf)
+      .map((t: any) => ({ hash: String(t.hash), amount: units(BigInt(t.value), cfg.decimals), timestamp: Number(t.timeStamp) * 1000 }));
+  } catch (e) {
+    console.error('deposit scan failed', e);
+    return { error: 'Blockchain explorer is busy. Checking again shortly.' };
+  }
+}
