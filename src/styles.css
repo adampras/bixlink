@@ -169,7 +169,7 @@
   --destructive: oklch(0.65 0.23 25);
   --destructive-foreground: oklch(0.97 0.01 280);
 }
-@theme inline { --font-display: 'Space Grotesk', sans-serif; --font-sans: 'DM Sans', sans-serif; }
+@theme inline { --font-display: 'Sora', sans-serif; --font-sans: 'Manrope', sans-serif; }
 html { scroll-behavior: smooth; }
 body { font-family: var(--font-sans); }
 .site-shell { background-image: radial-gradient(ellipse at 52% 8%, oklch(0.3 0.14 297 / 26%), transparent 37%); }
