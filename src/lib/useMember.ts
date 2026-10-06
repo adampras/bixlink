@@ -5,6 +5,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { getMyData, assignReferral, ensureProfile } from '@/lib/bixlink.functions';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
+import { defaultLandingContent, type LandingContent } from '@/components/LandingExperience';
 
 // The member session is resolved once per app load and shared by every route, so
 // switching menus reuses the known session instead of re-asking the auth service
@@ -109,6 +110,7 @@ export function usePublicConfig() {
         bixPay: (settings['bix_pay'] ?? { enabled: false }) as { enabled: boolean },
         bixMarket: (settings['bix_market'] ?? { priceUsd: 0.84291 }) as { priceUsd: number },
         referrals: (settings['referrals'] ?? { direct: 10, levels: [12, 6, 3, 2, 1], rewardPlus: 5, minimumDirect: 3, splitUsdt: 70, splitBix: 30 }) as { direct: number; levels: number[]; rewardPlus: number; minimumDirect: number; splitUsdt: number; splitBix: number },
+        landingContent: (settings['landing_content'] ?? defaultLandingContent) as LandingContent,
       };
     },
   });
