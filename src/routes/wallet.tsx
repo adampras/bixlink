@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { KycCard } from '@/components/KycCard';
 import { getMyWallet, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
-import { verifyDeposit } from '@/lib/deposit.functions';
+import { createDepositIntent, checkDepositIntent } from '@/lib/deposit.functions';
 import { dateTime, money, number } from '@/lib/bixlink';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, ScanLine, CheckCircle2, Clock } from 'lucide-react';
 
@@ -26,13 +26,14 @@ const STATUS: Record<string, string> = { pending: 'text-chart-3', approved: 'tex
 function WalletPage() {
   const { user, ready } = useMember();
   const { data: cfg } = usePublicConfig();
-  const fetchWallet = useServerFn(getMyWallet); const deposit = useServerFn(verifyDeposit); const withdraw = useServerFn(requestWithdraw); const swap = useServerFn(requestSwap);
+  const fetchWallet = useServerFn(getMyWallet); const createIntent = useServerFn(createDepositIntent); const checkIntent = useServerFn(checkDepositIntent); const withdraw = useServerFn(requestWithdraw); const swap = useServerFn(requestSwap);
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ['my-wallet', user?.id], queryFn: () => fetchWallet(), enabled: !!user });
   const [modal, setModal] = useState<'deposit' | 'withdraw' | null>(null);
   const [depMode, setDepMode] = useState<'copy' | 'qr'>('copy');
   const [amount, setAmount] = useState(''); const [field, setField] = useState('');
   const [notice, setNotice] = useState(''); const [walletCode, setWalletCode] = useState(''); const [success, setSuccess] = useState<{ amount: number; walletCode: string; network: string; txHash: string } | null>(null); const [busy, setBusy] = useState(false);
+  const [intent, setIntent] = useState<{ id: string; amount: number; network: string; address: string; walletCode: string } | null>(null);
   const [swapDirection, setSwapDirection] = useState<'USDT_TO_BIX'|'BIX_TO_USDT'>('USDT_TO_BIX'); const [swapAmount, setSwapAmount] = useState('');
   const [type, setType] = useState('all'); const [from, setFrom] = useState(''); const [to, setTo] = useState('');
   const txs = useMemo(() => (data?.transactions ?? []).filter(t => (type === 'all' || t.type === type) && (!from || t.created_at.slice(0, 10) >= from) && (!to || t.created_at.slice(0, 10) <= to)), [data, type, from, to]);
@@ -42,7 +43,14 @@ function WalletPage() {
   const swapEnabled = cfg?.swap.enabled ?? false;
   const bixPrice = Number(cfg?.bixMarket.priceUsd ?? 0.84291);
   const amt = Number(amount) || 0;
-  const close = () => { setModal(null); setAmount(''); setField(''); setNotice(''); };
+  const close = () => { setModal(null); setAmount(''); setField(''); setNotice(''); setIntent(null); };
+  const poll = async (id: string) => {
+    const r = await checkIntent({ data: { id } });
+    if (r.status === 'credited') { setSuccess({ amount: r.amount, walletCode: r.walletCode, network: r.network, txHash: r.txHash }); close(); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); }
+    else if (r.status === 'expired' || r.status === 'missing') { setIntent(null); setNotice('This deposit request expired. Create a new one.'); }
+    else if (r.reason) setNotice(r.reason);
+  };
+  useEffect(() => { if (!intent) return; const t = setInterval(() => { poll(intent.id).catch(() => {}); }, 15000); return () => clearInterval(t); }, [intent?.id]);
   const submit = async () => {
     if (modal === 'withdraw' && (amt < 10 || amt > 10000)) {
       setNotice('Withdrawal amount must be between $10 and $10,000 per day per account.');
@@ -51,9 +59,9 @@ function WalletPage() {
     setBusy(true);
     try {
       if (modal === 'deposit') {
-        const r = await deposit({ data: { walletCode: selWallet?.code ?? '', txHash: field } });
-        if (!r.ok) { setNotice(r.reason); setBusy(false); return; }
-        setSuccess({ amount: r.amount, walletCode: r.walletCode, network: r.network, txHash: r.txHash }); setNotice('');
+        if (intent) { await poll(intent.id); setBusy(false); return; }
+        const r = await createIntent({ data: { walletCode: selWallet?.code ?? '', amount: Math.floor(amt) } });
+        setIntent(r); setNotice(''); setBusy(false); return;
       } else { await withdraw({ data: { amount: amt, address: field } }); }
       close(); await qc.invalidateQueries({ queryKey: ['my-wallet'] });
     } catch (e) { setNotice(e instanceof Error ? e.message : 'Request failed.'); }
@@ -96,8 +104,9 @@ function WalletPage() {
           <div className="mt-4 grid grid-cols-2 gap-2"><Button variant={depMode === 'copy' ? 'default' : 'outline'} className="rounded-full" onClick={() => setDepMode('copy')}><Copy/> Copy wallet</Button><Button variant={depMode === 'qr' ? 'default' : 'outline'} className="rounded-full" onClick={() => setDepMode('qr')}><QrCode/> Scan QR</Button></div>
           {depMode === 'copy' ? <div className="mt-3 rounded-2xl border border-border p-3"><div className="text-xs text-muted-foreground">{selWallet?.code} · USDT {selWallet?.network}</div><div className="mt-1 break-all font-mono text-sm text-chart-3">{addr}</div><Button size="sm" className="mt-3 rounded-full" onClick={async () => { await navigator.clipboard.writeText(addr); setNotice('Wallet address copied.'); }}><Copy/> Copy address</Button></div>
             : <div className="mt-3 flex flex-col items-center gap-2"><div className="rounded-2xl bg-foreground p-3"><QRCodeSVG value={addr} size={180}/></div><div className="text-xs text-muted-foreground">{selWallet?.code} · USDT {selWallet?.network}</div></div>}
-          <p className="mt-4 text-xs text-muted-foreground">2. Send only USDT on {selWallet?.network} to this address. 3. Paste the transaction hash — the amount is read from the blockchain and credited automatically.</p>
-          <input className="form-input mt-3 font-mono text-xs" placeholder="Transaction hash (TxID)" value={field} onChange={e => setField(e.target.value.trim())}/>
+          {!intent ? <><p className="mt-4 text-xs text-muted-foreground">2. Enter how much USDT you want to deposit.</p>
+          <input className="form-input mt-2" type="number" min="1" step="1" placeholder="Amount USDT (e.g. 50)" value={amount} onChange={e => setAmount(e.target.value)}/></>
+          : <div className="mt-4 rounded-2xl border border-chart-2 bg-chart-2/10 p-3 text-center"><div className="text-xs text-muted-foreground">Send EXACTLY this amount of USDT {intent.network}</div><div className="numeric mt-1 text-2xl font-black text-chart-2">{intent.amount.toFixed(4)}</div><Button size="sm" variant="outline" className="mt-2 rounded-full" onClick={async () => { await navigator.clipboard.writeText(intent.amount.toFixed(4)); setNotice('Exact amount copied.'); }}><Copy/> Copy amount</Button><p className="mt-2 text-[11px] text-muted-foreground">The unique decimals identify your deposit. Balance is credited automatically once the blockchain confirms. Valid for 2 hours.</p></div>}
           {notice && <p className="mt-2 text-xs text-destructive">{notice}</p>}
           </>}
         </> : <>
@@ -109,7 +118,7 @@ function WalletPage() {
           <div className="mt-4 space-y-1 rounded-2xl border border-border p-3 text-xs"><div className="flex justify-between"><span>Admin fee</span><span>$1.00</span></div><div className="flex justify-between"><span>Gas fee (0.5%)</span><span>{money(Math.round(amt * 0.5) / 100)}</span></div><div className="flex justify-between border-t border-border pt-1 font-bold"><span>You receive</span><span className="text-chart-2">{money(Math.max(0, amt - (amt ? fee(amt) : 0)))}</span></div></div>
           {notice && <p className="mt-2 text-xs text-destructive">{notice}</p>}
         </>}
-        <Button disabled={busy || !field || (modal === 'deposit' ? !addr : !amt || amt < 10 || amt > 10000)} className="mt-5 w-full rounded-full bg-chart-3 text-background" onClick={submit}>{busy ? 'Checking blockchain…' : modal === 'deposit' ? 'Verify & credit deposit' : 'Submit withdraw'}</Button>
+        <Button disabled={busy || (modal === 'deposit' ? !addr || (!intent && !(amt >= 1)) : !field || !amt || amt < 10 || amt > 10000)} className="mt-5 w-full rounded-full bg-chart-3 text-background" onClick={submit}>{busy ? 'Checking blockchain…' : modal === 'deposit' ? (intent ? 'Waiting for transfer… Check now' : 'Get exact deposit amount') : 'Submit withdraw'}</Button>
       </div></div>}
       {success && <div className="modal-backdrop" onClick={() => setSuccess(null)}><div role="dialog" aria-modal="true" className="deposit-success" onClick={e => e.stopPropagation()}>
         <div className="deposit-success-ring"><CheckCircle2 size={56}/></div>
