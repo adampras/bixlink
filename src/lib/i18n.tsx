@@ -1,11 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 export const LANGUAGES = [
-  { code: 'en', short: '🇬🇧 EN', label: 'English' },
-  { code: 'id', short: '🇮🇩 ID', label: 'Indonesia' },
-  { code: 'zh', short: '🇨🇳 ZH', label: '中文' },
-  { code: 'ja', short: '🇯🇵 JA', label: '日本語' },
-  { code: 'ko', short: '🇰🇷 KO', label: '한국어' },
+  { code: 'en', short: 'GB · EN', label: 'English' },
+  { code: 'id', short: 'ID · ID', label: 'Indonesia' },
+  { code: 'zh', short: 'CN · ZH', label: '中文' },
+  { code: 'ja', short: 'JP · JA', label: '日本語' },
+  { code: 'ko', short: 'KR · KO', label: '한국어' },
 ] as const;
 
 export type Language = (typeof LANGUAGES)[number]['code'];
@@ -66,6 +66,8 @@ const phrases: Record<Exclude<Language, 'en'>, Record<string, string>> = {
 type ProductUpdate = { id: string; title: string; body: string };
 type I18nValue = { language: Language; setLanguage: (language: Language) => void; t: (key: UiKey) => string; updates: ProductUpdate[] };
 const I18nContext = createContext<I18nValue | null>(null);
+const originalText = new WeakMap<Node, string>();
+const originalPlaceholder = new WeakMap<HTMLInputElement | HTMLTextAreaElement, string>();
 
 function translateDocument(language: Language) {
   if (typeof document === 'undefined') return;
@@ -76,14 +78,14 @@ function translateDocument(language: Language) {
       const trimmed = text.trim();
       const holder = node.parentElement;
       if (!trimmed || !holder || holder.closest('[data-no-translate]')) return;
-      const original = holder.dataset['i18nOriginal'] ?? trimmed;
-      holder.dataset['i18nOriginal'] = original;
+      const original = originalText.get(node) ?? trimmed;
+      originalText.set(node, original);
       const translated = dictionary?.[original] ?? original;
       if (trimmed !== translated) node.textContent = text.replace(trimmed, translated);
     }
     if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) {
-      const original = node.dataset['i18nPlaceholder'] ?? node.placeholder;
-      if (original) { node.dataset['i18nPlaceholder'] = original; node.placeholder = dictionary?.[original] ?? original; }
+      const original = originalPlaceholder.get(node) ?? node.placeholder;
+      if (original) { originalPlaceholder.set(node, original); node.placeholder = dictionary?.[original] ?? original; }
     }
     node.childNodes.forEach(translateNode);
   };
