@@ -24,6 +24,7 @@ function BoostPage() {
   const bixPrice = Number(cfg?.bixMarket.priceUsd ?? 0.84291);
   const visualKey = cfg?.boosterVisual.visual ?? 'fox';
   const visual = boosterVisuals[visualKey] ?? boosterVisuals.fox;
+  const boosterEnabled = cfg?.booster.enabled !== false;
   const activeStakes = (memberData?.stakes ?? []).filter(stake => stake.status === 'active');
   const activeValue = activeStakes.reduce((sum, stake) => sum + Number(stake.amount_usd), 0);
   const annualYield = activeStakes.reduce((sum, stake) => sum + Number(stake.amount_usd) * Number(stake.apy) / 100, 0);
@@ -46,7 +47,7 @@ function BoostPage() {
         </div>
 
         <section className="booster-member-status mt-6">
-          <div><span>YOUR BOOSTER</span><strong className={cfg?.booster.enabled && activeStakes.length ? 'text-chart-2' : 'text-muted-foreground'}>{cfg?.booster.enabled ? (activeStakes.length ? 'ACTIVE' : 'READY') : 'PAUSED'}</strong></div>
+          <div><span>YOUR BOOSTER</span><strong className={boosterEnabled && activeStakes.length ? 'text-chart-2' : 'text-muted-foreground'}>{boosterEnabled ? (activeStakes.length ? 'ACTIVE' : 'READY') : 'PAUSED'}</strong></div>
           <div><span>ACTIVE POSITIONS</span><strong className="numeric">{activeStakes.length}</strong></div>
           <div><span>STAKING VALUE</span><strong className="numeric">${number(activeValue, { maximumFractionDigits: 2 })}</strong></div>
           <div><span>ANNUAL PROJECTION</span><strong className="numeric">${number(annualYield, { maximumFractionDigits: 2 })}</strong></div>
@@ -55,14 +56,14 @@ function BoostPage() {
         <div className="boost-engine mt-8">
           <div className="boost-engine-head">
             <span className="boost-engine-live"><i/> YIELD ENGINE · LIVE READOUT</span>
-            <strong>{cfg?.booster.enabled ? 'ENGINE ACTIVE' : 'ENGINE PAUSED'}</strong>
+             <strong>{boosterEnabled ? 'ENGINE ACTIVE' : 'ENGINE PAUSED'}</strong>
           </div>
           <div className="robot-stage">
             <div className="robot-core"/>
             <div className="robot-ring robot-ring-one"/>
             <div className="robot-ring robot-ring-two"/>
             <img src={visual.src} loading="lazy" width={1024} height={1024} alt={visual.alt} className={`robot-fox ${visual.className}`}/>
-            <div className="robot-status"><span className="pulse-dot"/> YIELD ENGINE {cfg?.booster.enabled ? 'ACTIVE' : 'PAUSED'}</div>
+             <div className="robot-status"><span className="pulse-dot"/> YIELD ENGINE {boosterEnabled ? 'ACTIVE' : 'PAUSED'}</div>
           </div>
           <div className="boost-readouts">
             <div className="boost-readout boost-readout--apy"><span>Maximum APY</span><strong>25.00%</strong></div>

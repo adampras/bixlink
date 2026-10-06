@@ -38,7 +38,7 @@ function ProfitPage() {
   const splitUsdt = Number(cfg?.referrals.splitUsdt ?? 70) / 100;
   const splitBix = Number(cfg?.referrals.splitBix ?? 30) / 100;
   const bixPrice = Math.max(Number(cfg?.bixMarket.priceUsd ?? 0.84291), 0.000001);
-  const boosterActive = Boolean(cfg?.booster.enabled);
+  const boosterActive = cfg?.booster.enabled !== false;
   const active = useMemo(() => boosterActive ? (data?.stakes ?? []).filter(stake => stake.status === 'active' && stake.activated_at) : [], [boosterActive, data?.stakes]);
   const rows = useMemo(() => active.map(stake => {
     const started = new Date(stake.activated_at ?? stake.created_at).getTime();
