@@ -127,6 +127,13 @@
       "when": 1791287296690,
       "tag": "0017_owner_vault_in_bix_balance",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791289062547,
+      "tag": "0018_network_metrics_v2_and_withdraw_limits",
+      "breakpoints": true
     }
   ]
 }
