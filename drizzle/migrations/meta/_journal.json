@@ -120,6 +120,13 @@
       "when": 1791286109391,
       "tag": "0016_owner_bix_reserve_vault",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791287296690,
+      "tag": "0017_owner_vault_in_bix_balance",
+      "breakpoints": true
     }
   ]
 }
