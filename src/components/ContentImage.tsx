@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export function ContentImage({ path, alt }: { path?: string; alt: string }) {
+export function ContentImage({ path, alt }: { path?: string | undefined; alt: string }) {
   const [url, setUrl] = useState<string>();
   useEffect(() => {
     if (!path) { setUrl(undefined); return; }
