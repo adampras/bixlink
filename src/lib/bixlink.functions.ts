@@ -12,7 +12,7 @@ export const getMyData = createServerFn({ method: 'GET' }).middleware([requireSu
   const [stakes, referral, tree, admin] = await Promise.all([
     context.supabase.from('stakes').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
     context.supabase.from('referral_codes').select('*').eq('user_id', context.userId).maybeSingle(),
-    context.supabase.rpc('bix_referral_tree'), context.supabase.rpc('is_bix_admin'),
+    context.supabase.rpc('bix_referral_tree_metrics'), context.supabase.rpc('is_bix_admin'),
   ]);
   if (stakes.error) throw stakes.error;
   if (tree.error) throw tree.error;
@@ -175,7 +175,7 @@ export const requestDeposit = createServerFn({ method: 'POST' }).middleware([req
   });
 
 export const requestWithdraw = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { amount: number; address: string }) => z.object({ amount: z.number().min(5).max(1000000), address: z.string().trim().min(20).max(120) }).parse(data))
+  .inputValidator((data: { amount: number; address: string }) => z.object({ amount: z.number().min(10).max(10000), address: z.string().trim().min(20).max(120) }).parse(data))
   .handler(async ({ context, data }) => {
     const { data: id, error } = await context.supabase.rpc('request_bix_withdraw', { p_amount: data.amount, p_address: data.address });
     if (error) throw new Error(error.message);
