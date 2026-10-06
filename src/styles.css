@@ -301,6 +301,36 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .language-picker { display: inline-flex; height: 36px; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; background: var(--secondary); color: var(--muted-foreground); }
 .language-picker select { width: 48px; appearance: none; border: 0; background: transparent; color: var(--foreground); font-size: 11px; font-weight: 800; outline: none; text-align: center; }
 .language-picker option { background: var(--card); color: var(--foreground); }
+.header-tools { display: flex; align-items: center; gap: 5px; }
+.header-icon { position: relative; width: 36px; height: 36px; border-radius: 999px; }
+.header-signin { border-radius: 999px; background: var(--primary); color: var(--primary-foreground); }
+.notification-control { position: relative; }
+.notification-count { position: absolute; top: 1px; right: 0; display: grid; min-width: 15px; height: 15px; place-items: center; border: 2px solid var(--background); border-radius: 999px; background: var(--chart-2); color: var(--background); font-family: "JetBrains Mono", monospace; font-size: 8px; font-weight: 900; }
+.notification-menu { position: absolute; top: calc(100% + 10px); right: -78px; width: min(330px, calc(100vw - 24px)); overflow: hidden; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--popover); box-shadow: var(--sh-3); }
+.notification-menu-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding: 14px 14px 10px; }
+.notification-menu-head span { display: block; color: var(--primary); font-size: 8px; font-weight: 800; letter-spacing: .12em; }
+.notification-menu-head b { display: block; margin-top: 2px; font-size: 15px; }
+.notification-list article { display: flex; gap: 10px; border-bottom: 1px solid var(--line); padding: 12px 14px; }
+.notification-list article > i { width: 7px; height: 7px; flex: 0 0 auto; margin-top: 5px; border-radius: 50%; background: var(--chart-2); box-shadow: 0 0 8px var(--chart-2); }
+.notification-list article.is-read { opacity: .55; }
+.notification-list article.is-read > i { background: var(--muted-foreground); box-shadow: none; }
+.notification-list b { display: block; font-size: 11px; }
+.notification-list p { margin-top: 3px; color: var(--muted-foreground); font-size: 10px; line-height: 1.45; }
+.notification-empty { padding: 28px 14px; text-align: center; color: var(--muted-foreground); font-size: 11px; }
+.notification-settings { width: 100%; justify-content: flex-start; border-radius: 0; }
+.settings-panel { border: 1px solid var(--line); border-radius: var(--r-card); padding: 20px; background: linear-gradient(145deg, oklch(0.235 0.072 287 / 94%), oklch(0.155 0.045 285 / 98%)); box-shadow: var(--sh-2); }
+.settings-heading { display: flex; align-items: center; gap: 12px; }
+.settings-heading > span { display: grid; width: 40px; height: 40px; flex: 0 0 auto; place-items: center; border-radius: var(--r-control); background: var(--primary)/15; color: var(--primary); }
+.settings-heading svg { width: 18px; }
+.settings-heading h2 { font-family: var(--font-display); font-size: 16px; font-weight: 800; }
+.settings-heading p { margin-top: 2px; color: var(--muted-foreground); font-size: 11px; line-height: 1.5; }
+.settings-language-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 18px; }
+.settings-language { position: relative; height: 70px; flex-direction: column; gap: 3px; }
+.settings-language > span { font-size: 13px; }
+.settings-language small { color: var(--muted-foreground); font-size: 9px; }
+.settings-language svg { position: absolute; top: 5px; right: 5px; width: 12px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.settings-toggle { min-width: 86px; border-radius: 999px; }
 .network-stat { display: flex; min-height: 104px; align-items: center; gap: 14px; border: 1px solid var(--line); border-radius: var(--r-card); padding: 18px; background: linear-gradient(145deg, oklch(0.25 0.08 290 / 90%), var(--card)); box-shadow: var(--sh-1); }
 .network-stat-icon { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: var(--r-control); background: var(--secondary); color: var(--primary); }
 .network-stat-icon svg { width: 18px; }
@@ -326,7 +356,7 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .network-benefit b { display: flex; justify-content: space-between; gap: 8px; }
 .network-benefit b span { font-family: "JetBrains Mono", monospace; color: var(--chart-3); }
 .network-benefit p { margin-top: 5px; font-size: 11px; color: var(--muted-foreground); }
-@media (max-width: 480px) { .site-header .brand-mark { font-size: 1rem; } .site-header img { width: 34px; height: 34px; } .site-header > div { padding-left: 14px; padding-right: 14px; } .language-picker { padding: 0 6px; } .language-picker svg { display: none; } .network-stat { min-height: 78px; padding: 12px; } .network-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } .network-stat { display: block; } .network-stat-icon { width: 30px; height: 30px; margin-bottom: 9px; } .network-stat strong { font-size: 1.25rem; } .network-stat span:not(.network-stat-icon) { min-height: 30px; font-size: 9px; line-height: 1.25; } .network-tree-panel { padding: 6px 10px 12px; } }
+@media (max-width: 480px) { .site-header .brand-mark { display: none; } .site-header img { width: 34px; height: 34px; } .site-header > div { padding-left: 12px; padding-right: 12px; } .language-picker { padding: 0 5px; } .language-picker svg { display: none; } .language-picker select { width: 52px; font-size: 10px; } .header-tools { gap: 2px; } .header-icon { width: 32px; height: 32px; } .header-signin { width: 34px; padding: 0; } .header-signin span { display: none; } .notification-menu { position: fixed; top: 62px; right: 12px; } .settings-language-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .settings-row { align-items: flex-start; } .network-stat { min-height: 78px; padding: 12px; } .network-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } .network-stat { display: block; } .network-stat-icon { width: 30px; height: 30px; margin-bottom: 9px; } .network-stat strong { font-size: 1.25rem; } .network-stat span:not(.network-stat-icon) { min-height: 30px; font-size: 9px; line-height: 1.25; } .network-tree-panel { padding: 6px 10px 12px; } }
 
 /* Paket 7: professional crypto terminal HOME */
 .terminal-hero { background: linear-gradient(180deg, oklch(0.18 0.065 287 / 66%), transparent); }

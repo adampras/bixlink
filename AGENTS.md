@@ -21,3 +21,4 @@
 - Leader virtual balances live in bix_leaders and are added inside bix_wallet_balance; withdraw RPC blocks the virtual portion until bix_leader_status reports qualified — one server-side gate for the turnover rule.
 - Member USDT deposits are credited only after server-side on-chain verification (receipt, recipient = owner wallet, USDT contract, confirmations) with one credit per TxID; amount comes from chain, never from user input — prevents fabricated balances.
 - Render the referral network as a cycle-safe recursively expandable tree without a fixed depth cap, so deep generations remain navigable without loading every branch at once.
+- Keep interface translations in the shared local i18n provider and persist member language preferences in browser storage, so all routes switch together without a paid translation dependency.

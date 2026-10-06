@@ -63,7 +63,8 @@ const phrases: Record<Exclude<Language, 'en'>, Record<string, string>> = {
   },
 };
 
-type I18nValue = { language: Language; setLanguage: (language: Language) => void; t: (key: UiKey) => string; updates: (typeof updates.en)[number][] };
+type ProductUpdate = { id: string; title: string; body: string };
+type I18nValue = { language: Language; setLanguage: (language: Language) => void; t: (key: UiKey) => string; updates: ProductUpdate[] };
 const I18nContext = createContext<I18nValue | null>(null);
 
 function translateDocument(language: Language) {
@@ -78,7 +79,7 @@ function translateDocument(language: Language) {
       const original = holder.dataset.i18nOriginal ?? trimmed;
       holder.dataset.i18nOriginal = original;
       const translated = dictionary?.[original] ?? original;
-      node.textContent = text.replace(trimmed, translated);
+      if (trimmed !== translated) node.textContent = text.replace(trimmed, translated);
     }
     if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) {
       const original = node.dataset.i18nPlaceholder ?? node.placeholder;

@@ -35,3 +35,4 @@
 - [x] Move registration to a dedicated page with a pasteable referral-code field; keep sign-in separate from the landing page.
 - [x] Fix owner referral links so `/register?ref=...` always renders and pre-fills the code.
 - [x] Present and implement the selected premium PROFILE redesign (Obsidian glass luxury).
+- [x] Make English the default, activate five translated language choices, and add aligned Settings and update notifications in the header.
