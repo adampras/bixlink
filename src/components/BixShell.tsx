@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Home, Wallet, Layers, Zap, User, Network, LogIn, ShieldCheck, Lock, BadgeCheck, Languages } from 'lucide-react';
 import { useMember, usePublicConfig } from '@/lib/useMember';
-import fox from '@/assets/bixlink-fox.png';
+import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
@@ -44,7 +44,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
 
   return <div className="site-shell min-h-screen bg-background pb-20 text-foreground md:pb-0">
     <header className="site-header"><div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-3 md:px-8">
-      <Link to={user ? "/" : "/auth"} className="flex items-center gap-2"><img src={fox} width={42} height={42} alt="BIXLINK blue fox" className="h-10 w-10 object-contain"/><span className="brand-mark text-xl font-black">BIXLINK</span></Link>
+      <Link to={user ? "/" : "/auth"} className="flex items-center gap-2"><img src={headerMark.url} width={42} height={42} alt="BIXLINK fox emblem" className="h-10 w-10 rounded-full object-cover"/><span className="brand-mark text-xl font-black">BIXLINK</span></Link>
       {user && <nav className="hidden items-center gap-3 md:flex">
         {NAV.map(n => <Link key={n.to} to={n.to} className={`nav-link ${path === n.to ? 'active' : ''}`}><n.icon size={15}/>{n.label}</Link>)}
       </nav>}

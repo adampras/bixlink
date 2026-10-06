@@ -10,7 +10,6 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { getMyWallet, requestDeposit, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
 import { money } from '@/lib/bixlink';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, ScanLine } from 'lucide-react';
-import walletLogo from '@/assets/bixlink-wallet-logo.jpg.asset.json';
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
   return <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border bg-card/60 p-8 text-center"><span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary"><Inbox size={22}/></span><p className="text-sm text-muted-foreground">{text}</p>{action && onAction && <Button size="sm" variant="outline" className="rounded-full" onClick={onAction}>{action}</Button>}</div>;
@@ -52,8 +51,7 @@ function WalletPage() {
   };
   return <BixShell><main className="mx-auto max-w-5xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="WALLET">
-      <div className="flex justify-center"><img src={walletLogo.url} alt="BIXLINK Crypto Wallet" className="aspect-square w-44 rounded-full object-cover shadow-[0_0_36px_color-mix(in_oklab,var(--primary)_35%,transparent)] md:w-52" /></div>
-      <div className="relative mt-7 overflow-hidden rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-3/10 p-6 shadow-[0_0_40px_color-mix(in_oklab,var(--chart-3)_18%,transparent)]">
+      <div className="relative overflow-hidden rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-3/10 p-6 shadow-[0_0_40px_color-mix(in_oklab,var(--chart-3)_18%,transparent)]">
         <div className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet size={16}/> Available balance</div>
         <strong className="numeric mt-2 block text-5xl font-black text-foreground">{money(data?.balance ?? 0)}</strong>
         <p className="mt-1 text-xs text-muted-foreground">Counts admin-approved deposits and rewards, minus withdrawals.</p>
