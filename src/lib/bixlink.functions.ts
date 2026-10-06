@@ -128,7 +128,10 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
     if (parsed.key === 'readiness') z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean(), homeOverviewEnabled: z.boolean().optional() }).strict().parse(parsed.value);
     if (parsed.key === 'unstake') z.object({ tiers: z.array(z.object({ days: z.number().int().min(1).max(3650), pct: z.number().min(0).max(100) })).min(1).max(10) }).parse(parsed.value);
     if (parsed.key === 'bix_market') z.object({ priceUsd: z.number().positive().max(1_000_000) }).parse(parsed.value);
-    if (parsed.key === 'landing_content') z.object({ ecosystem: z.array(z.object({ title: z.string().trim().min(1).max(60), description: z.string().trim().min(1).max(240) })).min(1).max(12), income: z.array(z.object({ title: z.string().trim().min(1).max(60), description: z.string().trim().min(1).max(240) })).min(1).max(12) }).parse(parsed.value);
+    if (parsed.key === 'landing_content') {
+      const item = z.object({ title: z.string().trim().min(1).max(60), description: z.string().trim().max(240), image: z.string().regex(/^images\/[a-f0-9-]+\.(jpg|jpeg|png|webp)$/).optional(), enabled: z.boolean().optional(), quarter: z.string().max(40).optional() }).strict();
+      parsed.value = z.object({ ecosystem: z.array(item).max(12), income: z.array(item).max(12), spaces: z.array(item).max(12).optional(), roadmap: z.array(item).max(12).optional() }).strict().parse(parsed.value);
+    }
     return parsed;
   })
   .handler(async ({ context, data }) => {

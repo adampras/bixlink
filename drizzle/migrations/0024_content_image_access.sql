@@ -1,0 +1,3 @@
+CREATE POLICY "Content image reads" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'bix-content');
+CREATE POLICY "Owner content image uploads" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'bix-content' AND public.is_bix_admin() AND lower(storage.extension(name)) IN ('jpg','jpeg','png','webp'));
+CREATE POLICY "Owner content image removal" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'bix-content' AND public.is_bix_admin());
