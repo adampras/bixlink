@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export function ContentImage({ path, alt, fallbackSrc, className = 'mb-4 aspect-video w-full rounded-lg object-cover' }: { path?: string | undefined; alt: string; fallbackSrc?: string; className?: string }) {
+export function ContentImage({ path, alt, fallbackSrc, className = 'mb-4 aspect-video w-full rounded-lg object-cover' }: { path?: string | undefined; alt: string; fallbackSrc?: string | undefined; className?: string }) {
   const [url, setUrl] = useState<string>();
   useEffect(() => {
     if (!path) { setUrl(undefined); return; }

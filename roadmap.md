@@ -59,4 +59,4 @@
 - [x] Verify flags and announcements end-to-end and phone/desktop layouts.
 - [x] Fix failed Owner 2 assignment and verify persisted role through the owner panel.
 - [x] Change the Owner 2 assignment button to white.
-- [ ] Add contextual category imagery with selected glass panels to HOME and landing, preserving admin edits and visibility.
+- [x] Add contextual category imagery with selected glass panels to HOME and landing, preserving admin edits and visibility.
