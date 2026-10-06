@@ -23,6 +23,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProfitRouteImport } from './routes/profit'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ReviewRouteImport } from './routes/review'
 import { Route as RiskRouteImport } from './routes/risk'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StakeRouteImport } from './routes/stake'
@@ -102,6 +103,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewRoute = ReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RiskRoute = RiskRouteImport.update({
   id: '/risk',
   path: '/risk',
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/profit': typeof ProfitRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/review': typeof ReviewRoute
   '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
@@ -183,6 +190,7 @@ export interface FileRoutesByTo {
   '/profit': typeof ProfitRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/review': typeof ReviewRoute
   '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/profit': typeof ProfitRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/review': typeof ReviewRoute
   '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/profit'
     | '/register'
     | '/reset-password'
+    | '/review'
     | '/risk'
     | '/settings'
     | '/stake'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/profit'
     | '/register'
     | '/reset-password'
+    | '/review'
     | '/risk'
     | '/settings'
     | '/stake'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/profit'
     | '/register'
     | '/reset-password'
+    | '/review'
     | '/risk'
     | '/settings'
     | '/stake'
@@ -307,6 +319,7 @@ export interface RootRouteChildren {
   ProfitRoute: typeof ProfitRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ReviewRoute: typeof ReviewRoute
   RiskRoute: typeof RiskRoute
   SettingsRoute: typeof SettingsRoute
   StakeRoute: typeof StakeRoute
@@ -417,6 +430,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/review': {
+      id: '/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/risk': {
       id: '/risk'
       path: '/risk'
@@ -491,6 +511,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfitRoute: ProfitRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ReviewRoute: ReviewRoute,
   RiskRoute: RiskRoute,
   SettingsRoute: SettingsRoute,
   StakeRoute: StakeRoute,
