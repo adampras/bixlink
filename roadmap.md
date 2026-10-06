@@ -29,3 +29,4 @@
 - [x] Leader program: members apply, owner approves/rejects up to 100 leaders with manual virtual USD from a $1,000,000 pool; WD of virtual balance gated by optional 3× direct turnover.
 - [x] Replace the WALLET title with the supplied BIXLINK fox logo and switch the balance and Deposit button to white.
 - [x] Move the supplied fox emblem into the header as the app-wide brand mark (header, profile avatar, loading placeholder) and open WALLET directly on the balance panel.
+- [x] Redesign the STAKE page as Obsidian luxury pro: gold BIXCOIN glow title, 21 JUTA BIX TOKEN supply strip, luxury package cards with gold prices, Popular/Max yield notches, violet Stake Now buttons.

@@ -4,12 +4,11 @@ import { useServerFn } from '@tanstack/react-start';
 import { useQueryClient } from '@tanstack/react-query';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
-import { PackageGrid } from '@/components/PackageGrid';
 import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { requestStake } from '@/lib/bixlink.functions';
 import { money, type Package } from '@/lib/bixlink';
-import { CheckCircle2, Clock3, ShieldCheck, X, XCircle } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, Clock3, LockKeyhole, ShieldCheck, X, XCircle, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/stake')({ head: () => ({ meta: [{ title: 'Stake — BIXLINK' }, { name: 'description', content: 'Choose a BIXLINK staking package and submit a request.' }, { property: 'og:title', content: 'Stake — BIXLINK' }, { property: 'og:description', content: 'Eight BIXLINK staking packages from $10 to $10,000.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: StakePage });
 
@@ -26,9 +25,37 @@ function StakePage() {
   useEffect(() => { setNow(Date.now()); }, []);
   return <BixShell><main className="mx-auto max-w-7xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="STAKE">
-      <div className="eyebrow">CHOOSE PACKAGE</div><h1 className="section-title">STAKE <span>BIXCOIN</span></h1>
-      {cfg?.booster.enabled && <p className="mt-3 text-sm text-chart-2">APY Booster active — up to {cfg.booster.rate}%</p>}
-      <div className="mt-8"><PackageGrid packages={cfg?.packages ?? []} onStake={setChosen}/></div>
+      <div className="stake-lux-head">
+        <div className="stake-lux-headrow">
+          <div className="eyebrow">CHOOSE PACKAGE</div>
+          <span className="stake-lux-chip">Admin-reviewed</span>
+        </div>
+        <h1 className="section-title stake-lux-title">STAKE <span>BIXCOIN</span></h1>
+        {cfg?.booster.enabled && <p className="stake-lux-boost"><i aria-hidden />APY Booster active — up to {cfg.booster.rate}%</p>}
+      </div>
+      <div className="stake-pool">
+        <div><span className="stake-pool-label">BIX supply</span><p className="stake-pool-value">21 JUTA BIX TOKEN</p></div>
+        <span className="stake-pool-ico" aria-hidden><Zap size={15} /></span>
+      </div>
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {(cfg?.packages ?? []).map((p, i) => {
+          const popular = p.id === 'BUILDER';
+          const maxYield = p.id === 'LEGEND';
+          return <article key={p.id} className={`stake-lux-card${popular ? ' stake-lux-card--pop' : ''}${maxYield ? ' stake-lux-card--gold' : ''}`}>
+            {popular && <span className="stake-lux-notch">Popular</span>}
+            {maxYield && <span className="stake-lux-notch stake-lux-notch--gold">Max yield</span>}
+            <div className="stake-lux-cardrow">
+              <div><p className="stake-lux-kicker">Package {String(i + 1).padStart(2, '0')}</p><h3 className="stake-lux-name">{p.id}</h3></div>
+              <strong className="stake-lux-price numeric">{money(p.price_usd)}</strong>
+            </div>
+            <div className="stake-lux-stats">
+              <div className="stake-lux-stat"><span>Annual yield</span><b className="numeric text-chart-2">{p.apy}% <small>APY</small></b></div>
+              <div className="stake-lux-stat stake-lux-stat--end"><span>Lock period</span><b className="numeric flex items-center justify-end gap-1.5 text-sm"><LockKeyhole size={12} />{p.lock_days} days</b></div>
+            </div>
+            <Button className="stake-lux-btn w-full rounded-xl" onClick={() => setChosen(p)}>Stake Now <ArrowUpRight /></Button>
+          </article>;
+        })}
+      </div>
       <div className="mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span></div>
       <div className="mt-4 space-y-3">{(data?.stakes ?? []).map(s => {
         const started = s.activated_at ? new Date(s.activated_at).getTime() : null;
