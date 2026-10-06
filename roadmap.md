@@ -33,3 +33,5 @@
 - [x] Replace the NETWORK sun diagram with an unlimited-depth referral tree selected from visual previews.
 - [x] Replace landing marketing-plan content with an admin-editable ecosystem and income narrative selected from visual previews.
 - [x] Move registration to a dedicated page with a pasteable referral-code field; keep sign-in separate from the landing page.
+- [ ] Fix owner referral links so `/register?ref=...` always renders and pre-fills the code.
+- [ ] Present and implement the selected premium PROFILE redesign.
