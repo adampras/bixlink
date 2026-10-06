@@ -42,7 +42,8 @@ export const reviewerDecide = createServerFn({ method: 'POST' }).middleware([req
 export const listReviewers = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   await verifyOwner(context);
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-  const { data } = await supabaseAdmin.from('user_roles').select('user_id').eq('role', 'reviewer');
+  const { data, error } = await supabaseAdmin.from('user_roles').select('user_id').eq('role', 'reviewer');
+  if (error) throw error;
   return (data ?? []).map(r => r.user_id as string);
 });
 
@@ -63,5 +64,8 @@ export const setReviewer = createServerFn({ method: 'POST' }).middleware([requir
       const { error } = await supabaseAdmin.from('user_roles').delete().eq('user_id', data.userId).eq('role', 'reviewer');
       if (error) throw error;
     }
+    const { data: savedRole, error: verifyError } = await supabaseAdmin.from('user_roles').select('role').eq('user_id', data.userId).eq('role', 'reviewer').maybeSingle();
+    if (verifyError) throw verifyError;
+    if (Boolean(savedRole) !== data.enabled) throw new Error('Owner 2 change was not saved. Please try again.');
     return { ok: true };
   });

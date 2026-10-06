@@ -33,3 +33,4 @@
 - Share HOME and landing image/visibility content through landing_content; keep image objects in the private bix-content bucket with public read policy and owner-only upload/delete policies, so workspace public-bucket restrictions remain respected.
 - Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
 - Surface the limited Owner 2 review console only when the signed-in account has the database-backed reviewer role, so client state never grants or advertises reviewer access.
+- Include reviewer in the user_roles database constraint and verify role writes by reading them back before reporting success, so Owner 2 assignments cannot silently fail.

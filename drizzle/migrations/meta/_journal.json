@@ -183,6 +183,13 @@
       "when": 1791304237952,
       "tag": "0025_tighten_settings_packages_content_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791311160145,
+      "tag": "0026_allow_limited_reviewer_role",
+      "breakpoints": true
     }
   ]
 }
