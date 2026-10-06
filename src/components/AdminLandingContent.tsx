@@ -7,6 +7,7 @@ import { defaultLandingContent, defaultRoadmap, defaultSpaces, type LandingConte
 import { supabase } from '@/integrations/supabase/client';
 import { ContentImage } from '@/components/ContentImage';
 import { useQueryClient } from '@tanstack/react-query';
+import { categoryImage } from '@/lib/category-images';
 
 type Group = 'ecosystem' | 'income' | 'spaces' | 'roadmap';
 
@@ -49,7 +50,7 @@ export function AdminLandingContent({ initialContent, onMessage, onSaved }: { in
     <div className="flex items-center justify-between gap-3"><h3 className="font-display text-xl font-bold">{label}</h3><Button type="button" size="sm" variant="outline" disabled={(content[group]?.length ?? 0) >= 12} onClick={() => addItem(group)}><Plus/> Add</Button></div>
     <div className="mt-5 space-y-5">{(content[group] ?? []).map((item, index) => <div className="min-w-0 space-y-3 border-b border-border pb-5" key={`${group}-${index}`}>
       <div className="flex items-center justify-between gap-3"><span className="text-xs text-muted-foreground">{index + 1} · {item.title || 'New item'}</span><div className="flex gap-2"><Button type="button" size="sm" variant={item.enabled === false ? 'outline' : 'default'} aria-label={`${label} visibility ${index + 1}`} aria-pressed={item.enabled !== false} onClick={() => updateItem(group, index, 'enabled', item.enabled === false)}>{item.enabled === false ? <EyeOff/> : <Eye/>}{item.enabled === false ? 'CLOSED' : 'OPEN'}</Button><Button type="button" size="icon" variant="ghost" className="text-destructive" aria-label={`Remove ${label} item ${index + 1}`} onClick={() => removeItem(group, index)}><Trash2/></Button></div></div>
-      <ContentImage path={item.image} alt={item.title}/>
+      <ContentImage path={item.image} alt={item.title} fallbackSrc={group === 'spaces' ? categoryImage(item.title) : undefined}/>
       <input className="form-input" aria-label={`${label} title ${index + 1}`} maxLength={60} placeholder="Title" value={item.title} onChange={event => updateItem(group, index, 'title', event.target.value)}/>
       {group === 'roadmap' && <input className="form-input" aria-label={`${label} quarter ${index + 1}`} maxLength={40} placeholder="Quarter / phase" value={item.quarter ?? ''} onChange={event => updateItem(group, index, 'quarter', event.target.value)}/>}
       <textarea className="form-input min-h-24 resize-y" aria-label={`${label} description ${index + 1}`} maxLength={240} placeholder="Short factual description" value={item.description} onChange={event => updateItem(group, index, 'description', event.target.value)}/>
