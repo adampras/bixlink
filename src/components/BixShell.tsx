@@ -29,7 +29,9 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   const reviewerRole = useQuery({
     queryKey: ['my-reviewer-role', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('user_roles').select('role').eq('user_id', user?.id).eq('role', 'reviewer').maybeSingle();
+      const userId = user?.id;
+      if (!userId) return false;
+      const { data, error } = await supabase.from('user_roles').select('role').eq('user_id', userId).eq('role', 'reviewer').maybeSingle();
       if (error) throw error;
       return Boolean(data);
     },
