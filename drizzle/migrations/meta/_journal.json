@@ -148,6 +148,13 @@
       "when": 1791292373009,
       "tag": "0020_readiness_controls_and_announcements",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791296383365,
+      "tag": "0021_deposit_intents",
+      "breakpoints": true
     }
   ]
 }
