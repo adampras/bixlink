@@ -8,7 +8,7 @@ import type { DepositWallet } from '@/lib/deposit.functions';
 import { Button } from '@/components/ui/button';
 import { Check, X, Save, ArrowLeftRight } from 'lucide-react';
 
-export function AdminWallet({ members, depositWallets, swapEnabled = false, onMessage }: { members: { id: string; email: string }[]; depositWallets?: DepositWallet[]; swapEnabled?: boolean; onMessage: (m: string) => void }) {
+export function AdminWallet({ members, depositWallets, swapEnabled = false, onMessage }: { members: { id: string; email: string }[]; depositWallets?: DepositWallet[] | undefined; swapEnabled?: boolean; onMessage: (m: string) => void }) {
   const fetchData = useServerFn(getAdminWallet); const review = useServerFn(reviewWalletTx); const reviewExchange = useServerFn(reviewSwap); const reward = useServerFn(addReward); const save = useServerFn(updateSetting);
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ['admin-wallet'], queryFn: () => fetchData() });

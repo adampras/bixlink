@@ -7,7 +7,7 @@ import { Save, Wallet } from 'lucide-react';
 
 const blank = (i: number): DepositWallet => ({ code: `WLT-0${i + 1}`, label: '', network: 'BEP20', address: '', enabled: false });
 
-export function AdminDepositWallets({ initial, onMessage }: { initial?: DepositWallet[]; onMessage: (m: string) => void }) {
+export function AdminDepositWallets({ initial, onMessage }: { initial?: DepositWallet[] | undefined; onMessage: (m: string) => void }) {
   const save = useServerFn(saveDepositWallets);
   const qc = useQueryClient();
   const [rows, setRows] = useState<DepositWallet[]>(() => Array.from({ length: 5 }, (_, i) => initial?.[i] ?? blank(i)));
