@@ -9,7 +9,6 @@ import { useMember } from '@/lib/useMember';
 import { createReferral, assignReferral } from '@/lib/bixlink.functions';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight, Check, ChevronRight, Copy, KeyRound, LogOut, Shield } from 'lucide-react';
-import { LeaderCard } from '@/components/LeaderCard';
 import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 
 export const Route = createFileRoute('/profile')({ head: () => ({ meta: [{ title: 'Profile — BIXLINK' }, { name: 'description', content: 'Your BIXLINK account, referral code and network.' }, { property: 'og:title', content: 'Profile — BIXLINK' }, { property: 'og:description', content: 'Manage your BIXLINK member profile.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: ProfilePage });
@@ -32,7 +31,6 @@ function ProfilePage() {
         {data && !data.referral?.referred_by && <form className="profile-apply" onSubmit={async e => { e.preventDefault(); try { const r = await link({ data: { code: code.trim().toUpperCase() } }); setNotice(r.linked ? 'Referrer linked.' : 'Code unavailable.'); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Invalid code.'); } }}><input className="form-input" placeholder="Apply referrer code" aria-label="Apply referrer code" value={code} onChange={e => setCode(e.target.value)}/><Button type="submit" variant="outline">Apply</Button></form>}
         <Link to="/network" className="profile-network-link">View my network <ArrowRight/></Link>
       </section>
-      <LeaderCard/>
       <section className="profile-actions">
         <Button variant="outline" onClick={async () => { if (!user?.email) return; const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` }); setNotice(error ? error.message : 'Password reset email sent.'); }}><span className="profile-action-icon"><KeyRound/></span><span>Change password</span><ChevronRight className="profile-action-arrow"/></Button>
         {data?.isAdmin && <Button asChild variant="outline"><Link to="/admin"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Admin panel <small>Owner only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
