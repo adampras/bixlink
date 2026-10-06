@@ -28,3 +28,4 @@
 - [x] Register FULL NAME + username; admin Clones tab: L1 clone accounts with BIX allocations, top-up anytime.
 - [x] Leader program: members apply, owner approves/rejects up to 100 leaders with manual virtual USD from a $1,000,000 pool; WD of virtual balance gated by optional 3× direct turnover.
 - [x] Replace the WALLET title with the supplied BIXLINK fox logo and switch the balance and Deposit button to white.
+- [x] Move the supplied fox emblem into the header as the app-wide brand mark (header, profile avatar, loading placeholder) and open WALLET directly on the balance panel.
