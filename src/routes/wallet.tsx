@@ -10,6 +10,7 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { getMyWallet, requestDeposit, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
 import { money } from '@/lib/bixlink';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, ScanLine } from 'lucide-react';
+import walletLogo from '@/assets/bixlink-wallet-logo.jpg.asset.json';
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
   return <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border bg-card/60 p-8 text-center"><span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary"><Inbox size={22}/></span><p className="text-sm text-muted-foreground">{text}</p>{action && onAction && <Button size="sm" variant="outline" className="rounded-full" onClick={onAction}>{action}</Button>}</div>;
@@ -51,12 +52,12 @@ function WalletPage() {
   };
   return <BixShell><main className="mx-auto max-w-5xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="WALLET">
-      <div className="eyebrow">MY WALLET</div><h1 className="section-title">BIXLINK <span>WALLET</span></h1>
-      <div className="relative mt-8 overflow-hidden rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-3/10 p-6 shadow-[0_0_40px_color-mix(in_oklab,var(--chart-3)_18%,transparent)]">
+      <div className="flex justify-center"><img src={walletLogo.url} alt="BIXLINK Crypto Wallet" className="aspect-square w-44 rounded-full object-cover shadow-[0_0_36px_color-mix(in_oklab,var(--primary)_35%,transparent)] md:w-52" /></div>
+      <div className="relative mt-7 overflow-hidden rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-3/10 p-6 shadow-[0_0_40px_color-mix(in_oklab,var(--chart-3)_18%,transparent)]">
         <div className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet size={16}/> Available balance</div>
-        <strong className="numeric mt-2 block text-5xl font-black text-chart-3">{money(data?.balance ?? 0)}</strong>
+        <strong className="numeric mt-2 block text-5xl font-black text-foreground">{money(data?.balance ?? 0)}</strong>
         <p className="mt-1 text-xs text-muted-foreground">Counts admin-approved deposits and rewards, minus withdrawals.</p>
-        <div className="mt-5 grid grid-cols-2 gap-3"><Button className="rounded-full bg-chart-2 text-background" onClick={() => setModal('deposit')}><ArrowDownToLine/> Deposit</Button><Button variant="outline" className="rounded-full" onClick={() => setModal('withdraw')}><ArrowUpFromLine/> Withdraw</Button></div>
+        <div className="mt-5 grid grid-cols-2 gap-3"><Button className="rounded-full bg-foreground text-background hover:bg-foreground/90" onClick={() => setModal('deposit')}><ArrowDownToLine/> Deposit</Button><Button variant="outline" className="rounded-full" onClick={() => setModal('withdraw')}><ArrowUpFromLine/> Withdraw</Button></div>
       </div>
       <Link to="/pay" className="mt-4 flex items-center justify-between gap-3 rounded-[20px] border border-chart-2/60 bg-card p-4 transition hover:border-chart-2"><span className="flex items-center gap-3"><span className="grid size-11 place-items-center rounded-full bg-chart-2/15 text-chart-2"><ScanLine size={20}/></span><span><b className="block font-display">BIX PAY</b><span className="text-xs text-muted-foreground">Scan QR to pay other members in BIX</span></span></span>{!cfg?.bixPay.enabled ? <span className="inline-flex items-center gap-1 rounded-full border border-chart-3 bg-chart-3/10 px-3 py-1 text-[11px] font-bold text-chart-3"><Lock size={12}/> Coming soon</span> : <span className="text-xs font-bold text-chart-2">OPEN →</span>}</Link>
       {notice && <p role="status" className="mt-4 text-sm text-chart-2">{notice}</p>}
