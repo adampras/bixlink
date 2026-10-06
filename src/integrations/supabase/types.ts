@@ -245,10 +245,14 @@ export type Database = {
           amount_usd: number
           apy: number
           created_at: string
+          funded_vusdt: boolean
           id: string
           lock_days: number
           package_id: string
+          penalty_pct: number
+          refund_usd: number
           status: string
+          unstaked_at: string | null
           user_id: string
         }
         Insert: {
@@ -256,10 +260,14 @@ export type Database = {
           amount_usd: number
           apy: number
           created_at?: string
+          funded_vusdt?: boolean
           id?: string
           lock_days: number
           package_id: string
+          penalty_pct?: number
+          refund_usd?: number
           status?: string
+          unstaked_at?: string | null
           user_id?: string
         }
         Update: {
@@ -267,10 +275,14 @@ export type Database = {
           amount_usd?: number
           apy?: number
           created_at?: string
+          funded_vusdt?: boolean
           id?: string
           lock_days?: number
           package_id?: string
+          penalty_pct?: number
+          refund_usd?: number
           status?: string
+          unstaked_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -458,6 +470,11 @@ export type Database = {
           parent_id: string
           user_id: string
         }[]
+      }
+      bix_unstake: { Args: { p_stake: string }; Returns: Json }
+      bix_unstake_penalty: {
+        Args: { p_days: number; p_lock: number }
+        Returns: number
       }
       bix_username_available: { Args: { p_username: string }; Returns: boolean }
       bix_vusdt_balance: { Args: { p_user: string }; Returns: number }
