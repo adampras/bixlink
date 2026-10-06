@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { z } from 'zod';
 import type { Json } from '@/integrations/supabase/types';
+import { PRESENTATION_THEMES } from '@/lib/presentation-theme';
 
 const verifyAdmin = async (context: { supabase: any; userId: string; claims?: any }) => {
   const { data: admin, error } = await context.supabase.rpc('is_bix_admin');
@@ -125,7 +126,7 @@ export const updatePackage = createServerFn({ method: 'POST' }).middleware([requ
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness'; value: Record<string, unknown> }) => {
     const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness']), value: z.record(z.unknown()) }).parse(data);
-    if (parsed.key === 'readiness') z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean(), homeOverviewEnabled: z.boolean().optional() }).strict().parse(parsed.value);
+    if (parsed.key === 'readiness') z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean(), homeOverviewEnabled: z.boolean().optional(), presentationTheme: z.enum(PRESENTATION_THEMES).optional() }).strict().parse(parsed.value);
     if (parsed.key === 'unstake') z.object({ tiers: z.array(z.object({ days: z.number().int().min(1).max(3650), pct: z.number().min(0).max(100) })).min(1).max(10) }).parse(parsed.value);
     if (parsed.key === 'bix_market') z.object({ priceUsd: z.number().positive().max(1_000_000) }).parse(parsed.value);
     if (parsed.key === 'landing_content') {
@@ -139,6 +140,20 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
     const { error } = await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
     if (error) throw error;
     return { ok: true };
+  });
+
+export const updatePresentationTheme = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { theme: typeof PRESENTATION_THEMES[number] }) => z.object({ theme: z.enum(PRESENTATION_THEMES) }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { data: current, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', 'readiness').maybeSingle();
+    if (readError) throw readError;
+    const value = { ...(current?.value && typeof current.value === 'object' && !Array.isArray(current.value) ? current.value : {}), presentationTheme: data.theme };
+    const { error } = await context.supabase.from('app_settings').upsert({ key: 'readiness', value: value as Json });
+    if (error) throw error;
+    const { data: saved, error: verifyError } = await context.supabase.from('app_settings').select('value').eq('key', 'readiness').single();
+    if (verifyError || (saved?.value as Record<string, unknown> | undefined)?.['presentationTheme'] !== data.theme) throw new Error('Could not confirm the saved theme.');
+    return { theme: data.theme };
   });
 
 export const addIncomeSource = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])

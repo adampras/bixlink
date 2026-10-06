@@ -8,6 +8,7 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 import { LANGUAGES, type Language, useI18n } from '@/lib/i18n';
 import { getMarketUpdates } from '@/lib/updates.functions';
+import { resolvePresentationTheme } from '@/lib/presentation-theme';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
@@ -21,6 +22,10 @@ const NAV = [
 export function BixShell({ children }: { children: React.ReactNode }) {
   const { user } = useMember();
   const { data: publicConfig } = usePublicConfig();
+  const presentationTheme = resolvePresentationTheme(publicConfig?.readiness.presentationTheme);
+  useEffect(() => {
+    document.documentElement.dataset['presentationTheme'] = presentationTheme;
+  }, [presentationTheme]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const path = useRouterState({ select: s => s.location.pathname });
@@ -73,7 +78,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   };
   const selectedLanguage = LANGUAGES.find(item => item.code === language) ?? LANGUAGES[0];
 
-  return <div className="site-shell min-h-screen bg-background pb-20 text-foreground md:pb-0">
+  return <div data-presentation-theme={presentationTheme} className="site-shell min-h-screen bg-background pb-20 text-foreground md:pb-0">
     <header className="site-header" data-no-translate><div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-3 md:px-8">
       <Link to={"/"} className="header-brand"><img src={headerMark.url} width={42} height={42} alt="BIXLINK fox emblem" className="rounded-full object-cover"/><span className="brand-mark" aria-label="BIXLINK"><i>BIX</i><i>LI</i><i>NK</i></span></Link>
       {user && <nav className="hidden items-center gap-3 md:flex">
