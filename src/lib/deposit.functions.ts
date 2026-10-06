@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { z } from 'zod';
 import type { Json } from '@/integrations/supabase/types';
-import { verifyUsdtDeposit, listIncomingUsdt, type DepositNetwork } from './deposit.server';
+import { verifyUsdtDeposit, type DepositNetwork } from './deposit.server';
 
 export type DepositWallet = { code: string; label: string; network: DepositNetwork; address: string; enabled: boolean };
 
@@ -74,7 +74,7 @@ export const createDepositIntent = createServerFn({ method: 'POST' }).middleware
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const now = new Date().toISOString();
     await supabaseAdmin.from('deposit_intents').update({ status: 'expired' }).eq('status', 'pending').lt('expires_at', now);
-    await supabaseAdmin.from('deposit_intents').update({ status: 'cancelled' }).eq('status', 'pending').eq('user_id', context.userId);
+    await supabaseAdmin.from('deposit_intents').update({ status: 'cancelled' }).eq('status', 'pending').eq('user_id', context.userId).is('claim_tx_id', null);
     for (let i = 0; i < 8; i++) {
       const cents = 1 + Math.floor(Math.random() * 9998); // 0.0001–0.9999
       const exact = Number((data.amount + cents / 10000).toFixed(4));
@@ -88,24 +88,27 @@ export const checkDepositIntent = createServerFn({ method: 'POST' }).middleware(
   .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { matchIntent } = await import('./deposit-match.server');
     const { data: intent } = await supabaseAdmin.from('deposit_intents').select('*').eq('id', data.id).eq('user_id', context.userId).maybeSingle();
     if (!intent) return { status: 'missing' as const };
-    if (intent.status === 'credited') return { status: 'credited' as const, amount: Number(intent.amount_exact), txHash: intent.tx_hash ?? '', walletCode: intent.wallet_code, network: intent.network };
+    if (intent.status === 'credited') return { status: 'credited' as const, amount: Math.floor(Number(intent.amount_exact) * 100) / 100, txHash: intent.tx_hash ?? '', walletCode: intent.wallet_code, network: intent.network };
     if (intent.status !== 'pending') return { status: 'expired' as const };
-    if (new Date(intent.expires_at) < new Date()) { await supabaseAdmin.from('deposit_intents').update({ status: 'expired' }).eq('id', intent.id); return { status: 'expired' as const }; }
-    const list = await listIncomingUsdt(intent.network as DepositNetwork, intent.address);
-    if (!Array.isArray(list)) return { status: 'waiting' as const, reason: list.error };
-    const since = new Date(intent.created_at).getTime() - 60_000;
-    const target = Number(intent.amount_exact);
-    for (const t of list) {
-      if (t.timestamp < since || Math.abs(t.amount - target) > 0.00005) continue;
-      const { data: used } = await supabaseAdmin.from('wallet_transactions').select('id').eq('type', 'deposit').ilike('tx_hash', t.hash).limit(1);
-      if (used?.length) continue;
-      const amount = Math.floor(t.amount * 100) / 100; const now = new Date().toISOString();
-      const { error } = await supabaseAdmin.from('wallet_transactions').insert({ user_id: context.userId, type: 'deposit', amount_usd: amount, fee_usd: 0, net_usd: amount, status: 'approved', tx_hash: t.hash, wallet_code: intent.wallet_code, network: intent.network, address: intent.address, note: `Auto-detected · ${intent.wallet_code}`, verified_at: now, reviewed_at: now });
-      if (error) continue;
-      await supabaseAdmin.from('deposit_intents').update({ status: 'credited', tx_hash: t.hash, credited_at: now }).eq('id', intent.id);
-      return { status: 'credited' as const, amount, txHash: t.hash, walletCode: intent.wallet_code, network: intent.network };
-    }
-    return { status: 'waiting' as const, reason: '' };
+    const r = await matchIntent(supabaseAdmin, intent);
+    return r.status === 'waiting' ? { status: 'waiting' as const, reason: r.reason, claimed: !!intent.claim_tx_id } : r;
+  });
+
+/** Member taps "I have transferred": records a pending deposit for owner review and keeps auto-detection running for 24h. */
+export const claimDepositIntent = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: intent } = await supabaseAdmin.from('deposit_intents').select('*').eq('id', data.id).eq('user_id', context.userId).eq('status', 'pending').maybeSingle();
+    if (!intent) throw new Error('This deposit request is no longer active.');
+    if (intent.claim_tx_id) return { ok: true };
+    const amount = Math.floor(Number(intent.amount_exact) * 100) / 100;
+    const { data: tx, error } = await supabaseAdmin.from('wallet_transactions').insert({ user_id: context.userId, type: 'deposit', amount_usd: amount, fee_usd: 0, net_usd: amount, status: 'pending', wallet_code: intent.wallet_code, network: intent.network, address: intent.address, note: `Member reported transfer · exact ${Number(intent.amount_exact).toFixed(4)} USDT · ${intent.wallet_code}` }).select('id').single();
+    if (error || !tx) throw new Error('Could not record your transfer.');
+    const expires = new Date(Date.now() + 24 * 3600_000).toISOString();
+    await supabaseAdmin.from('deposit_intents').update({ claim_tx_id: tx.id, claimed_at: new Date().toISOString(), expires_at: expires }).eq('id', intent.id);
+    return { ok: true };
   });
