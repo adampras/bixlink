@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { z } from 'zod';
 import type { Json } from '@/integrations/supabase/types';
-import { verifyUsdtDeposit, type DepositNetwork } from './deposit.server';
+import { verifyUsdtDeposit, listIncomingUsdt, type DepositNetwork } from './deposit.server';
 
 export type DepositWallet = { code: string; label: string; network: DepositNetwork; address: string; enabled: boolean };
 
