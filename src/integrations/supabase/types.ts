@@ -588,6 +588,7 @@ export type Database = {
           usdt_balance: number
         }[]
       }
+      bix_content_published: { Args: { p_name: string }; Returns: boolean }
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_owner_vault: { Args: never; Returns: Json }
