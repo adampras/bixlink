@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Bell, Check, ChevronRight, KeyRound, Languages, Settings2, ShieldCheck, UserRound } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
@@ -31,7 +31,7 @@ function SettingsPage() {
         <nav><a href="#account"><ShieldCheck/>Account</a><a href="#language" className="active"><Languages/>{t('language')}</a><a href="#notifications"><Bell/>{t('notifications')}</a></nav>
       </aside>
       <div className="settings-content">
-        <section id="account" className="settings-section"><div className="settings-heading"><span className="is-secure"><ShieldCheck/></span><div><h2>Account &amp; security</h2><p>Your verified account and password controls.</p></div></div><Button asChild variant="ghost" className="settings-account-row"><a href="/reset-password"><span><KeyRound/>Change password</span><ChevronRight/></a></Button></section>
+        <section id="account" className="settings-section"><div className="settings-heading"><span className="is-secure"><ShieldCheck/></span><div><h2>Account &amp; security</h2><p>Your verified account and password controls.</p></div></div><Button asChild variant="ghost" className="settings-account-row"><Link to="/reset-password"><span><KeyRound/>Change password</span><ChevronRight/></Link></Button></section>
         <section id="language" className="settings-section"><div className="settings-heading"><span><Languages/></span><div><h2>{t('language')}</h2><p>{t('savedHere')}</p></div></div><div className="settings-language-grid">{LANGUAGES.map(item => <Button key={item.code} variant="ghost" className={`settings-language${language === item.code ? ' is-active' : ''}`} onClick={() => setLanguage(item.code as Language)}><span className={`flag-symbol flag-${item.flag}`} aria-hidden/><small>{item.label}</small>{language === item.code && <Check/>}</Button>)}</div></section>
         <section id="notifications" className="settings-section"><div className="settings-row"><div className="settings-heading"><span className="is-notice"><Bell/></span><div><h2>{t('updatePrefs')}</h2><p>{t('updatePrefsHelp')}</p></div></div><Button type="button" variant="ghost" className={`settings-switch${notifications ? ' is-on' : ''}`} aria-pressed={notifications} aria-label={t('updatePrefs')} onClick={toggleNotifications}><i/></Button></div></section>
       </div>

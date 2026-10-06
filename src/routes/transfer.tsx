@@ -6,7 +6,7 @@ import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useMember, usePublicConfig } from '@/lib/useMember';
-import { money } from '@/lib/bixlink';
+import { dateTime, money } from '@/lib/bixlink';
 import { ArrowDownLeft, ArrowUpRight, Lock, Send } from 'lucide-react';
 
 export const Route = createFileRoute('/transfer')({ head: () => ({ meta: [{ title: 'Transfer — BIXLINK' }, { name: 'description', content: 'Send virtual test USDT to other BIXLINK members.' }, { property: 'og:title', content: 'Transfer — BIXLINK' }, { property: 'og:description', content: 'Virtual USDT member transfers for testing.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: TransferPage });
@@ -39,7 +39,7 @@ function TransferPage() {
     </form>}
     {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
     <h2 className="mt-10 font-display text-2xl font-black">History</h2>
-    <div className="mt-4 space-y-2">{(q.data?.list ?? []).map(t => { const out = t.sender_id === user?.id; return <div key={t.id} className="flex items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4 text-xs"><div className="flex items-center gap-3">{out ? <ArrowUpRight className="text-destructive"/> : <ArrowDownLeft className="text-chart-2"/>}<div><b className="text-sm">{out ? `To ${t.recipient_code}` : `From ${t.sender_code}`}</b><div className="text-muted-foreground">{new Date(t.created_at).toLocaleString()}{t.note ? ` · ${t.note}` : ''}</div></div></div><b className={`numeric text-sm ${out ? 'text-destructive' : 'text-chart-2'}`}>{out ? '-' : '+'}{money(Number(t.amount_usd))}</b></div>; })}{!q.data?.list.length && <p className="text-sm text-muted-foreground">No transfers yet.</p>}</div>
+    <div className="mt-4 space-y-2">{(q.data?.list ?? []).map(t => { const out = t.sender_id === user?.id; return <div key={t.id} className="flex items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4 text-xs"><div className="flex items-center gap-3">{out ? <ArrowUpRight className="text-destructive"/> : <ArrowDownLeft className="text-chart-2"/>}<div><b className="text-sm">{out ? `To ${t.recipient_code}` : `From ${t.sender_code}`}</b><div className="text-muted-foreground">{dateTime(t.created_at)}{t.note ? ` · ${t.note}` : ''}</div></div></div><b className={`numeric text-sm ${out ? 'text-destructive' : 'text-chart-2'}`}>{out ? '-' : '+'}{money(Number(t.amount_usd))}</b></div>; })}{!q.data?.list.length && <p className="text-sm text-muted-foreground">No transfers yet.</p>}</div>
     <Link to="/wallet" className="mt-8 block text-center text-xs text-muted-foreground">← Back to WALLET</Link>
   </MemberGate></main></BixShell>;
 }
