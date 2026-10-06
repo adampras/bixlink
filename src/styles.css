@@ -733,3 +733,39 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .settings-language-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }.settings-language { height: 44px; justify-content: flex-start; gap: 10px; border: 1px solid oklch(1 0 0 / 6%); border-radius: 11px; background: oklch(1 0 0 / 3%); color: var(--muted-foreground); }.settings-language small { min-width: 0; overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }.settings-language > svg { width: 13px; margin-left: auto; }.settings-language.is-active { border-color: color-mix(in oklab, var(--primary) 48%, transparent); background: color-mix(in oklab, var(--primary) 16%, transparent); color: var(--foreground); box-shadow: inset 0 0 18px color-mix(in oklab, var(--primary) 7%, transparent); }
 .settings-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; }.settings-switch { position: relative; width: 43px; height: 24px; flex: 0 0 auto; border-radius: 999px; padding: 3px; background: var(--secondary); }.settings-switch i { display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--muted-foreground); transition: transform 180ms var(--ease), background 180ms var(--ease); }.settings-switch.is-on { background: var(--primary); box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 26%, transparent); }.settings-switch.is-on i { transform: translateX(19px); background: var(--foreground); }
 @media (max-width: 700px) { .settings-page { padding-top: 24px; }.settings-console { display: block; border: 0; background: transparent; box-shadow: none; }.settings-rail { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; padding: 10px; }.settings-member { display: none; }.settings-rail nav { grid-template-columns: repeat(3, minmax(max-content, 1fr)); }.settings-rail nav a { justify-content: center; }.settings-content { padding: 18px 0 0; }.settings-section { border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: oklch(1 0 0 / 3%); }.settings-section + .settings-section { margin-top: 12px; }.settings-section:first-child, .settings-section:last-child { padding: 18px; }.settings-heading h2 { font-size: 13px; } }
+
+/* Selected numbered registration direction: scoped to account creation. */
+.register-numbered {
+  --register-background: #06060c;
+  --register-surface: #0f0f1d;
+  --register-foreground: #ffffff;
+  --register-muted: #94a3b8;
+  --register-gold: #f59e0b;
+  --register-gold-light: #fbbf24;
+  --register-gold-deep: #d97706;
+  --register-border: color-mix(in srgb, var(--register-foreground) 8%, transparent);
+  --register-submit-shadow: 0 12px 40px -10px color-mix(in srgb, var(--register-gold) 50%, transparent);
+  background: var(--register-background); color: var(--register-foreground);
+  display: flex; justify-content: center; padding: 48px 24px;
+  font-family: Inter, sans-serif; letter-spacing: 0;
+}
+.register-numbered-inner { width: 100%; max-width: 360px; }
+.register-numbered-brand { display: flex; flex-direction: column; align-items: center; margin-bottom: 36px; }
+.register-numbered-brand h1 { font: 800 36px/1.2 'Space Grotesk', sans-serif; letter-spacing: 0; }
+.register-numbered-brand h1 span { background: linear-gradient(to right, var(--register-gold-light), var(--register-gold-deep)); background-clip: text; color: transparent; }
+.register-numbered-brand i { width: 32px; height: 4px; margin-top: 4px; border-radius: 4px; background: color-mix(in srgb, var(--register-gold) 40%, transparent); }
+.register-numbered-step { position: relative; padding-left: 40px; min-width: 0; }
+.register-numbered-step h2 { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--register-muted); line-height: 16px; letter-spacing: 0; }
+.register-step-number { position: absolute; top: 2px; left: 0; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--register-border); background: color-mix(in srgb, var(--register-foreground) 5%, transparent); color: var(--register-muted); font: 700 11px 'Space Grotesk', sans-serif; transition: color .2s, border-color .2s, background .2s; }
+.register-numbered-step:first-of-type .register-step-number { background: color-mix(in srgb, var(--register-gold) 10%, transparent); border-color: color-mix(in srgb, var(--register-gold) 40%, transparent); color: var(--register-gold); }
+.register-numbered-step:focus-within .register-step-number { border-color: var(--register-gold); color: var(--register-gold); }
+.register-numbered-input { display: block; width: 100%; height: 48px; background: var(--register-surface); border: 1px solid var(--register-border); border-radius: 12px; padding: 0 16px; color: var(--register-foreground); font-size: 14px; outline: none; transition: border-color .2s, box-shadow .2s; }
+.register-numbered-input::placeholder { color: var(--register-muted); opacity: .75; }
+.register-numbered-input:focus { border-color: color-mix(in srgb, var(--register-gold) 50%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--register-gold) 5%, transparent); }
+.register-network-code { background: color-mix(in srgb, var(--register-gold) 5%, var(--register-background)); border-color: color-mix(in srgb, var(--register-gold) 20%, transparent); color: var(--register-gold); font-weight: 700; }
+.register-password-toggle { position: absolute; right: 8px; top: 6px; width: 36px; height: 36px; color: var(--register-muted); }
+.register-password-toggle:hover { background: transparent; color: var(--register-gold); }
+.register-numbered-submit { width: 100%; height: 52px; border-radius: 12px; background: var(--register-gold); color: var(--register-background); box-shadow: var(--register-submit-shadow); font: 700 12px 'Space Grotesk', sans-serif; text-transform: uppercase; }
+.register-numbered-submit:hover { background: var(--register-gold-light); }
+.register-access-link { margin-left: 4px; color: var(--register-gold); border-bottom: 1px solid color-mix(in srgb, var(--register-gold) 30%, transparent); }
+@media (prefers-reduced-motion: reduce) { .register-numbered * { transition: none; } }

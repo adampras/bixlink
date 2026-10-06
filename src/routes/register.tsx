@@ -1,20 +1,21 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { ArrowRight, BadgeCheck } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 
 export const Route = createFileRoute('/register')({
   validateSearch: (search: Record<string, unknown>): { ref?: string | undefined } => ({ ref: typeof search['ref'] === 'string' ? search['ref'] : undefined }),
-  head: () => ({ meta: [{ title: 'Create a BIXLINK Account' }, { name: 'description', content: 'Create your BIXLINK member account with an optional referral code.' }, { property: 'og:title', content: 'Create a BIXLINK Account' }, { property: 'og:description', content: 'Register as a BIXLINK member and attach your inviter code.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
+  head: () => ({ links: [{ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap' }], meta: [{ title: 'Create a BIXLINK Account' }, { name: 'description', content: 'Create your BIXLINK member account with an optional referral code.' }, { property: 'og:title', content: 'Create a BIXLINK Account' }, { property: 'og:description', content: 'Register as a BIXLINK member and attach your inviter code.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
   component: RegisterPage,
+
 });
 
 function RegisterPage() {
   const [email, setEmail] = useState(''); const [fullName, setFullName] = useState(''); const [username, setUsername] = useState(''); const [password, setPassword] = useState(''); const [referral, setReferral] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const { ref } = Route.useSearch();
-  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   useEffect(() => { const incoming = ref || window.localStorage.getItem('bixlink-ref') || ''; if (/^BIX-\d{6}$/i.test(incoming)) { const normalized = incoming.toUpperCase(); setReferral(normalized); window.localStorage.setItem('bixlink-ref', normalized); } }, [ref]);
   const submit = async (event: React.FormEvent) => {
     event.preventDefault(); setBusy(true); setNotice('');
@@ -31,5 +32,22 @@ function RegisterPage() {
       setNotice('Check your email to confirm your account, then sign in.');
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
-  return <BixShell><main className="register-page mx-auto grid min-h-[78vh] max-w-5xl items-center gap-10 px-5 py-12 md:grid-cols-[.8fr_1.2fr] md:px-8"><section><div className="eyebrow">NEW MEMBER</div><h1 className="section-title">CREATE YOUR <span>ACCOUNT</span></h1><p className="mt-4 max-w-sm text-sm leading-7 text-muted-foreground">Your referral code is optional. Paste it here if another BIXLINK member invited you.</p><div className="mt-6 flex items-center gap-2 text-xs text-chart-2"><BadgeCheck size={16}/> Referral is attached after your first confirmed sign-in.</div></section><form onSubmit={submit} className="register-panel space-y-4"><label className="block text-xs font-bold text-muted-foreground">FULL NAME<input required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={event => setFullName(event.target.value)} className="form-input mt-2" placeholder="Your full name"/></label><label className="block text-xs font-bold text-muted-foreground">USERNAME<input required pattern="[A-Za-z0-9_.]{3,24}" maxLength={24} autoComplete="username" value={username} onChange={event => setUsername(event.target.value)} className="form-input mt-2 lowercase" placeholder="e.g. foxtrader"/></label><label className="block text-xs font-bold text-muted-foreground">EMAIL<input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} className="form-input mt-2" placeholder="you@example.com"/></label><label className="block text-xs font-bold text-muted-foreground">PASSWORD<input required minLength={6} type="password" autoComplete="new-password" value={password} onChange={event => setPassword(event.target.value)} className="form-input mt-2" placeholder="••••••••"/></label><label className="block text-xs font-bold text-muted-foreground">REFERRAL CODE <span className="font-normal text-muted-foreground/70">(OPTIONAL)</span><input inputMode="text" maxLength={10} value={referral} onChange={event => setReferral(event.target.value.toUpperCase())} className="form-input numeric mt-2 uppercase" placeholder="BIX-123456"/></label>{notice && <p role="status" className="text-sm text-chart-2">{notice}</p>}<Button disabled={busy} className="h-12 w-full rounded-full bg-chart-3 font-bold text-background hover:bg-chart-3/90">{busy ? 'Please wait…' : 'Create account'} <ArrowRight/></Button><Button type="button" variant="link" className="w-full text-muted-foreground" onClick={() => navigate({ to: '/auth' })}>Already a member? Sign in</Button><Link to="/auth" className="block text-center text-xs text-muted-foreground">← Back to BIXLINK</Link></form></main></BixShell>;
+  return <BixShell><main className="register-numbered"><div className="register-numbered-inner">
+    <header className="register-numbered-brand"><h1>BIX<span>LINK</span></h1><i/></header>
+    <form onSubmit={submit} className="space-y-6" aria-label="Create BIXLINK account">
+      <fieldset className="register-numbered-step"><legend className="sr-only">Personal profile</legend><span className="register-step-number" aria-hidden>01</span><div className="space-y-2.5"><h2>Personal profile</h2>
+        <input aria-label="Full name" required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={event => setFullName(event.target.value)} className="register-numbered-input" placeholder="Full Name"/>
+        <input aria-label="Username" required pattern="[A-Za-z0-9_.]{3,24}" maxLength={24} autoComplete="username" value={username} onChange={event => setUsername(event.target.value)} className="register-numbered-input" placeholder="Username"/>
+      </div></fieldset>
+      <fieldset className="register-numbered-step"><legend className="sr-only">Account security</legend><span className="register-step-number" aria-hidden>02</span><div className="space-y-2.5"><h2>Security hub</h2>
+        <input aria-label="Email address" required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} className="register-numbered-input" placeholder="Email Address"/>
+        <div className="relative"><input aria-label="Password" required minLength={6} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={event => setPassword(event.target.value)} className="register-numbered-input pr-12" placeholder="Secure Password"/><Button type="button" variant="ghost" size="icon" className="register-password-toggle" title={showPassword ? 'Hide password' : 'Show password'} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(current => !current)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div>
+      </div></fieldset>
+      <fieldset className="register-numbered-step"><legend className="sr-only">Referral</legend><span className="register-step-number" aria-hidden>03</span><div className="space-y-2.5"><div className="flex items-center justify-between gap-2"><h2>Network code</h2><span className="text-[9px] font-bold uppercase text-muted-foreground">Optional</span></div>
+        <input aria-label="Referral code" inputMode="text" maxLength={10} value={referral} onChange={event => setReferral(event.target.value.toUpperCase())} className="register-numbered-input register-network-code" placeholder="BIX-123456"/>
+      </div></fieldset>
+      {notice && <p role="status" className="text-sm leading-6 text-chart-2">{notice}</p>}
+      <div className="space-y-4 pt-4"><Button type="submit" disabled={busy} className="register-numbered-submit">{busy ? 'Please wait…' : 'Create account'}<ArrowRight/></Button><p className="text-center text-[11px] font-semibold uppercase text-muted-foreground">Member already? <Link to="/auth" className="register-access-link">Sign in</Link></p></div>
+    </form>
+  </div></main></BixShell>;
 }
