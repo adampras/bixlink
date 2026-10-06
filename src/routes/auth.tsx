@@ -6,7 +6,7 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
-export const Route = createFileRoute('/auth')({ head: () => ({ meta: [{ title: 'Discover & Join BIXLINK' }, { name: 'description', content: 'Explore BIXLINK staking, rewards and roadmap before creating your member account.' }, { property: 'og:title', content: 'Discover & Join BIXLINK' }, { property: 'og:description', content: 'Explore the BIXLINK ecosystem and access member registration.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: Auth });
+export const Route = createFileRoute('/auth')({ head: () => ({ meta: [{ title: 'Member Access — BIXLINK' }, { name: 'description', content: 'Sign in to your BIXLINK member account or request a password reset.' }, { property: 'og:title', content: 'Member Access — BIXLINK' }, { property: 'og:description', content: 'Access your BIXLINK account and member services.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: Auth });
 
 function Auth() {
   const [mode, setMode] = useState<'signin'|'forgot'>('signin');
