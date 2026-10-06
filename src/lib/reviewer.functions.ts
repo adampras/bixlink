@@ -52,10 +52,16 @@ export const setReviewer = createServerFn({ method: 'POST' }).middleware([requir
     await verifyOwner(context);
     if (data.userId === context.userId) throw new Error('Cannot change your own role');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const q = data.enabled
-      ? supabaseAdmin.from('user_roles').upsert({ user_id: data.userId, role: 'reviewer' }, { onConflict: 'user_id,role' })
-      : supabaseAdmin.from('user_roles').delete().eq('user_id', data.userId).eq('role', 'reviewer');
-    const { error } = await q;
-    if (error) throw error;
+    if (data.enabled) {
+      const { data: existing, error: readError } = await supabaseAdmin.from('user_roles').select('role').eq('user_id', data.userId).eq('role', 'reviewer').maybeSingle();
+      if (readError) throw readError;
+      if (!existing) {
+        const { error } = await supabaseAdmin.from('user_roles').insert({ user_id: data.userId, role: 'reviewer' });
+        if (error) throw error;
+      }
+    } else {
+      const { error } = await supabaseAdmin.from('user_roles').delete().eq('user_id', data.userId).eq('role', 'reviewer');
+      if (error) throw error;
+    }
     return { ok: true };
   });
