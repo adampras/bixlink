@@ -39,6 +39,6 @@
 - [x] Restore the tricolor BIXLINK header wordmark, switch language selection to flag symbols, and add Malay, Vietnamese, and Thai.
 - [x] Standardize locale-aware number/date presentation and complete route-specific search/social metadata.
 - [x] Move Settings access into Profile and apply the selected Professional mobile console v2 design.
-- [ ] Show active staking profit in USDT and BIX with one-minute updates.
-- [ ] Add a dedicated PROFIT menu and clearer insufficient-balance staking feedback.
-- [ ] Restyle the BIXLINK header wordmark in one premium brand color.
+- [x] Show active staking profit in USDT and BIX with one-minute updates.
+- [x] Add a dedicated PROFIT menu and clearer insufficient-balance staking feedback.
+- [x] Restyle the BIXLINK header wordmark in one premium brand color.
