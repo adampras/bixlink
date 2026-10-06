@@ -478,6 +478,7 @@ export type Database = {
       }
       bix_username_available: { Args: { p_username: string }; Returns: boolean }
       bix_vusdt_balance: { Args: { p_user: string }; Returns: number }
+      bix_vusdt_component: { Args: { p_user: string }; Returns: number }
       bix_vusdt_send: {
         Args: { p_amount: number; p_code: string; p_note: string }
         Returns: string
