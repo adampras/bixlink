@@ -38,7 +38,8 @@ function ProfitPage() {
   const splitUsdt = Number(cfg?.referrals.splitUsdt ?? 70) / 100;
   const splitBix = Number(cfg?.referrals.splitBix ?? 30) / 100;
   const bixPrice = Math.max(Number(cfg?.bixMarket.priceUsd ?? 0.84291), 0.000001);
-  const active = useMemo(() => (data?.stakes ?? []).filter(stake => stake.status === 'active' && stake.activated_at), [data?.stakes]);
+  const boosterActive = cfg?.booster.enabled !== false;
+  const active = useMemo(() => boosterActive ? (data?.stakes ?? []).filter(stake => stake.status === 'active' && stake.activated_at) : [], [boosterActive, data?.stakes]);
   const rows = useMemo(() => active.map(stake => {
     const started = new Date(stake.activated_at ?? stake.created_at).getTime();
     const elapsed = minuteNow === null ? 0 : Math.max(0, Math.min(minuteNow - started, Number(stake.lock_days) * 24 * 60 * MINUTE));
@@ -60,8 +61,8 @@ function ProfitPage() {
   return <BixShell><main className="mx-auto max-w-7xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="PROFIT">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div><div className="eyebrow"><Activity size={14}/> ACTIVE YIELD LEDGER</div><h1 className="section-title">STAKING <span>PROFIT</span></h1><p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Your active staking projection is recalculated every minute and allocated between USDT and BIX.</p></div>
-        <span className="inline-flex items-center gap-2 rounded-full border border-chart-2/40 bg-chart-2/10 px-3 py-2 text-xs font-bold text-chart-2"><i className="h-2 w-2 animate-pulse rounded-full bg-chart-2"/> LIVE · {nextRefresh}s</span>
+        <div><div className="eyebrow"><Activity size={14}/> ACTIVE YIELD LEDGER</div><h1 className="section-title">STAKING <span>PROFIT</span></h1><p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Your active BIXCOIN staking projection is recalculated every minute and allocated between USDT and BIX.</p></div>
+        <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-bold ${boosterActive ? 'border-chart-2/40 bg-chart-2/10 text-chart-2' : 'border-border bg-muted text-muted-foreground'}`}><i className={`h-2 w-2 rounded-full ${boosterActive ? 'animate-pulse bg-chart-2' : 'bg-muted-foreground'}`}/> {boosterActive ? `BOOSTER LIVE · ${nextRefresh}s` : 'BOOSTER PAUSED'}</span>
       </div>
 
       <section className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

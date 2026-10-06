@@ -36,7 +36,7 @@ export function AdminBoosterVisual({ initialVisual, enabled, onMessage, onSaved 
   return <div className="mt-8 max-w-4xl space-y-5">
     <div className="rounded-[20px] border border-chart-2 bg-card p-6">
       <h2 className="font-display text-xl font-black">BIXCOIN yield engine</h2>
-      <p className="my-5 text-sm leading-6 text-muted-foreground">Package volume and lock duration set APY from 8% to 25%. Every recorded staking profit is allocated 70% USDT and 30% BIX.</p>
+      <p className="my-5 text-sm leading-6 text-muted-foreground">When active, every eligible BIXCOIN staking position receives a live minute-by-minute profit projection. Package volume and lock duration set APY from 8% to 25%, allocated 70% USDT and 30% BIX.</p>
       <label className="flex items-center gap-3"><input type="checkbox" defaultChecked={enabled} onChange={async event => { try { await saveSetting({ data: { key: 'booster', value: { enabled: event.target.checked, rate: 25 } } }); onMessage('Booster updated.'); await onSaved(); } catch { onMessage('Could not update booster.'); } }}/> APY BOOSTER ACTIVE · up to 25%</label>
     </div>
 

@@ -85,6 +85,13 @@ export const getAdminData = createServerFn({ method: 'GET' }).middleware([requir
   return { stakes: stakes.data ?? [], packages: packages.data ?? [], settings: settings.data ?? [], sources: sources.data ?? [], referrals: referrals.data ?? [], members };
 });
 
+export const getOwnerBixVault = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await verifyAdmin(context);
+  const { data, error } = await context.supabase.rpc('bix_owner_vault');
+  if (error) throw new Error(error.message);
+  return data as unknown as { balance_bix: number; generated_at: string; updated_at: string };
+});
+
 export const manageMember = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { id: string; action: 'ban' | 'unban' }) => z.object({ id: z.string().uuid(), action: z.enum(['ban', 'unban']) }).parse(data))
   .handler(async ({ context, data }) => {

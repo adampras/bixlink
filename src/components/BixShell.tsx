@@ -70,9 +70,9 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     </div></header>{children}
     <footer className="border-t border-border py-9"><div className="mx-auto max-w-7xl px-5 md:px-8">
       <div className="trust-panel text-xs">
-        <div><ShieldCheck size={18} className="shrink-0 text-chart-2"/><div><strong className="block text-foreground">Admin-verified</strong><span className="text-muted-foreground">Every deposit, withdrawal and swap is reviewed manually.</span></div></div>
-        <div><Lock size={18} className="shrink-0 text-chart-3"/><div><strong className="block text-foreground">Non-custodial preview</strong><span className="text-muted-foreground">No live funds are held or paid out automatically.</span></div></div>
-        <div><BadgeCheck size={18} className="shrink-0 text-primary"/><div><strong className="block text-foreground">Internal reference</strong><span className="text-muted-foreground">Owner-managed BIX ledger reference at ${Number(publicConfig?.bixMarket.priceUsd ?? 0.84291).toFixed(6)}.</span></div></div>
+        <div><ShieldCheck size={18} className="shrink-0 text-chart-2"/><div><strong className="block text-foreground">Automated staking ledger</strong><span className="text-muted-foreground">Staking, profit projections and internal transfers are processed automatically.</span></div></div>
+        <div><Lock size={18} className="shrink-0 text-chart-3"/><div><strong className="block text-foreground">Withdrawal review</strong><span className="text-muted-foreground">Only withdrawal requests remain subject to owner review and network verification.</span></div></div>
+        <div><BadgeCheck size={18} className="shrink-0 text-primary"/><div><strong className="block text-foreground">BIXCOIN · No SC</strong><span className="text-muted-foreground">BIX currently operates as an internal ledger asset without a deployed smart contract.</span></div></div>
       </div>
       <div className="mt-6 flex flex-col justify-between gap-2 text-xs text-muted-foreground md:flex-row"><span>© 2026 BIXLINK · 21 JUTA BIX TOKEN</span><span>bixlink.io &nbsp;·&nbsp; @bixlink_official</span></div>
     </div></footer>

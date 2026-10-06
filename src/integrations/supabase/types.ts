@@ -173,6 +173,27 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_bix_vault: {
+        Row: {
+          balance_bix: number
+          generated_at: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          balance_bix?: number
+          generated_at?: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          balance_bix?: number
+          generated_at?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       packages: {
         Row: {
           apy: number
@@ -457,6 +478,7 @@ export type Database = {
         }[]
       }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
+      bix_owner_vault: { Args: never; Returns: Json }
       bix_pay_lookup: { Args: { p_code: string }; Returns: boolean }
       bix_pay_send: {
         Args: { p_amount: number; p_code: string; p_note: string }
