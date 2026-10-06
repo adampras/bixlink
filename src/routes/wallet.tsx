@@ -7,6 +7,7 @@ import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
+import { KycCard } from '@/components/KycCard';
 import { getMyWallet, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
 import { verifyDeposit } from '@/lib/deposit.functions';
 import { dateTime, money, number } from '@/lib/bixlink';
@@ -104,6 +105,7 @@ function WalletPage() {
           <p className="mt-3 text-sm">Available: <b className="text-chart-3">{money(data?.balance ?? 0)}</b></p>
           <input className="form-input mt-3" type="number" min="10" max="10000" placeholder="Amount USD (min $10 · max $10,000/day)" value={amount} onChange={e => setAmount(e.target.value)}/>
           <input className="form-input mt-2" placeholder={`Your ${cfg?.wallet.network ?? 'USDT'} address`} value={field} onChange={e => setField(e.target.value)}/>
+          <KycCard compact userId={user?.id}/>
           <p className="mt-3 flex items-center gap-2 rounded-xl border border-chart-3/50 bg-chart-3/10 p-2 text-xs text-chart-3"><Clock size={14}/> Minimum withdrawal is $10. Maximum withdrawal is $10,000 per day per account. USDT withdrawals are reviewed manually by admin within 1×24 hours.</p>
           <div className="mt-4 space-y-1 rounded-2xl border border-border p-3 text-xs"><div className="flex justify-between"><span>Admin fee</span><span>$1.00</span></div><div className="flex justify-between"><span>Gas fee (0.5%)</span><span>{money(Math.round(amt * 0.5) / 100)}</span></div><div className="flex justify-between border-t border-border pt-1 font-bold"><span>You receive</span><span className="text-chart-2">{money(Math.max(0, amt - (amt ? fee(amt) : 0)))}</span></div></div>
           {notice && <p className="mt-2 text-xs text-destructive">{notice}</p>}
