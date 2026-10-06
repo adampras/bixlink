@@ -125,7 +125,7 @@ export const updatePackage = createServerFn({ method: 'POST' }).middleware([requ
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness'; value: Record<string, unknown> }) => {
     const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness']), value: z.record(z.unknown()) }).parse(data);
-    if (parsed.key === 'readiness') z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean() }).strict().parse(parsed.value);
+    if (parsed.key === 'readiness') z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean(), homeOverviewEnabled: z.boolean().optional() }).strict().parse(parsed.value);
     if (parsed.key === 'unstake') z.object({ tiers: z.array(z.object({ days: z.number().int().min(1).max(3650), pct: z.number().min(0).max(100) })).min(1).max(10) }).parse(parsed.value);
     if (parsed.key === 'bix_market') z.object({ priceUsd: z.number().positive().max(1_000_000) }).parse(parsed.value);
     if (parsed.key === 'landing_content') z.object({ ecosystem: z.array(z.object({ title: z.string().trim().min(1).max(60), description: z.string().trim().min(1).max(240) })).min(1).max(12), income: z.array(z.object({ title: z.string().trim().min(1).max(60), description: z.string().trim().min(1).max(240) })).min(1).max(12) }).parse(parsed.value);
