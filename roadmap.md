@@ -1,4 +1,7 @@
 - [x] Connect Cloud authentication and database.
+- [ ] Add admin-editable image and visibility controls for HOME spaces and landing columns.
+- [ ] Separate landing from account access with LAUNCH APP in the header.
+- [ ] Present registration design previews for selection.
 - [x] Create staking, package, referral, and settings schema.
 - [x] Build landing, member, admin, and sign-in pages.
 - [x] Navigation HOME/WALLET/STAKE/BOOST APY/NETWORK/PROFILE.
