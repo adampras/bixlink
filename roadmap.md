@@ -37,3 +37,5 @@
 - [x] Present and implement the selected premium PROFILE redesign (Obsidian glass luxury).
 - [x] Make English the default, activate five translated language choices, and add aligned Settings and update notifications in the header.
 - [x] Restore the tricolor BIXLINK header wordmark, switch language selection to flag symbols, and add Malay, Vietnamese, and Thai.
+- [x] Standardize locale-aware number/date presentation and complete route-specific search/social metadata.
+- [x] Move Settings access into Profile and apply the selected Professional mobile console v2 design.

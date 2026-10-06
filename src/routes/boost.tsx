@@ -6,6 +6,7 @@ import { ArrowUpRight, Coins, Gauge, ShieldCheck, Zap } from 'lucide-react';
 import robotFox from '@/assets/booster-concept-fox.png';
 import reactorEngine from '@/assets/booster-concept-reactor.png';
 import foxEmblem from '@/assets/booster-concept-emblem.png';
+import { number } from '@/lib/bixlink';
 
 const boosterVisuals = {
   fox: { src: robotFox, alt: 'BIXLINK robotic fox guardian beside the APY reactor engine', className: 'robot-fox--reactor' },
@@ -71,7 +72,7 @@ function BoostPage() {
             <span className="boost-tier-rank numeric">TIER {String(index + 1).padStart(2, '0')}</span>
             <div className="min-w-0">
               <h3 className="font-display text-lg font-black">{pkg.id}</h3>
-              <span className="numeric">{(Number(pkg.price_usd) / bixPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })} BIX · {pkg.lock_days} days lock</span>
+              <span className="numeric">{number(Number(pkg.price_usd) / bixPrice, { maximumFractionDigits: 2 })} BIX · {pkg.lock_days} days lock</span>
             </div>
             <div className="boost-tier-meter">
               <div className="apy-meter"><i style={{ width: `${Math.min(100, (Number(pkg.apy) / 25) * 100)}%` }}/></div>

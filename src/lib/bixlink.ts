@@ -9,4 +9,8 @@ export const fallbackPackages = [
   { id: 'LEGEND', price_usd: 10000, lock_days: 540, apy: 25 },
 ];
 export type Package = typeof fallbackPackages[number] & { daily_profit_enabled?: boolean };
-export const money = (n: number) => '$' + Number(n).toLocaleString('en-US');
+const locale = () => typeof document === 'undefined' ? 'en-US' : ({ en: 'en-US', id: 'id-ID', ms: 'ms-MY', vi: 'vi-VN', th: 'th-TH', zh: 'zh-CN', ja: 'ja-JP', ko: 'ko-KR' }[document.documentElement.lang] ?? 'en-US');
+export const number = (value: number, options?: Intl.NumberFormatOptions) => new Intl.NumberFormat(locale(), options).format(Number(value));
+export const money = (value: number) => new Intl.NumberFormat(locale(), { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value));
+export const dateTime = (value: string | number | Date) => new Intl.DateTimeFormat(locale(), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+export const date = (value: string | number | Date) => new Intl.DateTimeFormat(locale(), { dateStyle: 'medium' }).format(new Date(value));
