@@ -18,6 +18,7 @@ import { AdminBixMarket } from '@/components/AdminBixMarket';
 import { AdminLandingContent } from '@/components/AdminLandingContent';
 import { AdminBixVault } from '@/components/AdminBixVault';
 import { AdminReadiness } from '@/components/AdminReadiness';
+import { AdminReviewers } from '@/components/AdminReviewers';
 import type { Readiness } from '@/lib/readiness';
 import type { LandingContent } from '@/components/LandingExperience';
 
@@ -40,6 +41,7 @@ function Admin() {
     {tab === 'Wallet' && <AdminBixPay enabled={Boolean((data?.settings.find(s=>s.key==='bix_pay')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>}
     {tab === 'Wallet' && <AdminTransferToggle enabled={Boolean((data?.settings.find(s=>s.key==='usdt_transfer')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>}
     {tab === 'Clones' && <AdminClones onMessage={setMessage}/>}
+    {tab === 'Users' && <AdminReviewers members={data?.members ?? []} onMessage={setMessage}/>}
     {tab === 'Updates' && <AdminReadiness initial={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} onMessage={setMessage} onSaved={refresh}/>}
     {tab === 'Market' && <AdminBixMarket initialPrice={Number((data?.settings.find(s=>s.key==='bix_market')?.value as {priceUsd?: number} | undefined)?.priceUsd ?? 0.84291)} onMessage={setMessage} onSaved={refresh}/>} 
     {tab === 'Packages' && <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{data?.packages.map(p => <form key={p.id} className="package-card" onSubmit={async e => {e.preventDefault(); const f = new FormData(e.currentTarget); try {await savePackage({data:{id:p.id,price_usd:Number(f.get('price')),apy:Number(f.get('apy')),lock_days:Number(f.get('days')),daily_profit_enabled:f.get('daily') === 'on'}});setMessage(`${p.id} saved.`);await refresh();} catch {setMessage('Unable to save package.');}}}><h3 className="font-bold text-chart-3">{p.id}</h3>{[['Price USD','price',p.price_usd],['APY % (max 25)','apy',p.apy],['Lock days','days',p.lock_days]].map(([label,name,value]) => <label key={String(name)} className="mt-3 block text-xs text-muted-foreground">{label}<input name={String(name)} type="number" min="0" max={name === 'apy' ? 25 : undefined} step={name === 'days' ? '1' : '0.01'} defaultValue={Number(value)} className="form-input mt-1"/></label>)}<label className="mt-4 flex gap-2 text-xs"><input name="daily" type="checkbox" defaultChecked={p.daily_profit_enabled}/> Daily profit after 24h</label><Button className="mt-5 w-full rounded-full" size="sm"><Save/> Save</Button></form>)}</div>}
