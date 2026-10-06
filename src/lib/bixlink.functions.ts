@@ -108,9 +108,10 @@ export const updatePackage = createServerFn({ method: 'POST' }).middleware([requ
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay'; value: Record<string, unknown> }) => {
-    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay']), value: z.record(z.unknown()) }).parse(data);
+  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content'; value: Record<string, unknown> }) => {
+    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content']), value: z.record(z.unknown()) }).parse(data);
     if (parsed.key === 'bix_market') z.object({ priceUsd: z.number().positive().max(1_000_000) }).parse(parsed.value);
+    if (parsed.key === 'landing_content') z.object({ ecosystem: z.array(z.object({ title: z.string().trim().min(1).max(60), description: z.string().trim().min(1).max(240) })).min(1).max(12), income: z.array(z.object({ title: z.string().trim().min(1).max(60), description: z.string().trim().min(1).max(240) })).min(1).max(12) }).parse(parsed.value);
     return parsed;
   })
   .handler(async ({ context, data }) => {

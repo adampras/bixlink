@@ -1,13 +1,26 @@
 import { Link } from '@tanstack/react-router';
-import { ArrowRight, ArrowUpRight, Check, Zap } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Building2, CircleDollarSign, Globe2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PackageGrid } from '@/components/PackageGrid';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
 import fox from '@/assets/bixlink-fox.png';
 
 const milestones = [['Q1 2026','Launch'],['Q2 2026','Staking App Beta'],['Q3 2026','RWA Listing'],['Q4 2026','Ecosystem'],['Q1 2027','DAO'],['Q2 2027','21 JUTA MILESTONE']];
+export type LandingContent = { ecosystem: Array<{ title: string; description: string }>; income: Array<{ title: string; description: string }> };
+export const defaultLandingContent: LandingContent = {
+  ecosystem: [
+    { title: 'BIX Staking', description: 'Structured lock periods and owner-reviewed reward records across eight staking tiers.' },
+    { title: 'BIX PAY', description: 'Internal member-to-member BIX utility with account-level transaction records.' },
+    { title: 'RWA Roadmap', description: 'A planned framework for reporting verified real-world income categories transparently.' },
+  ],
+  income: [
+    { title: 'Recorded operations', description: 'Owner-entered income sources are displayed only after they are recorded in the system.' },
+    { title: 'Ecosystem utility', description: 'BIX utilities are developed as internal product functions, not represented as external market activity.' },
+    { title: 'Transparent review', description: 'Staking, swaps, and withdrawals retain reviewable records and clear status disclosures.' },
+  ],
+};
 
-export function LandingExperience({ packages = fallbackPackages, booster = true, compact = false, bixPrice = 0.84291 }: { packages?: Package[]; booster?: boolean; compact?: boolean; bixPrice?: number }) {
+export function LandingExperience({ packages = fallbackPackages, booster = true, compact = false, bixPrice = 0.84291, content = defaultLandingContent }: { packages?: Package[]; booster?: boolean; compact?: boolean; bixPrice?: number; content?: LandingContent }) {
   return <div>
     <section className="hero-section relative overflow-hidden border-b border-border">
       <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-primary/20 blur-[110px]"/>
@@ -22,7 +35,8 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
           {booster && <div className="absolute -right-1 top-2 z-20 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-primary via-chart-2 to-chart-3 p-[2px] shadow-[0_0_20px_oklch(0.87_0.29_142/30%)] md:-right-6"><div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-background p-2 text-center"><span className="text-[8px] font-bold uppercase leading-tight text-foreground/80">APY Booster</span><span className="mt-1 font-display text-sm font-bold leading-none text-chart-2">UP TO 25%</span></div></div>}
         </div>
         <div className="z-10 mt-2 flex w-full max-w-sm flex-col gap-3">
-          <Button asChild size="lg" className="w-full rounded-xl bg-chart-3 py-6 font-display text-sm font-bold uppercase tracking-wider text-background shadow-[0_8px_25px_-5px_oklch(0.88_0.19_95/50%)] transition-all hover:brightness-110 active:scale-[0.98]"><Link to="/auth">REGISTER / LOGIN <ArrowRight/></Link></Button>
+          <Button asChild size="lg" className="w-full rounded-xl bg-chart-3 py-6 font-display text-sm font-bold uppercase tracking-wider text-background shadow-[0_8px_25px_-5px_oklch(0.88_0.19_95/50%)] transition-all hover:brightness-110 active:scale-[0.98]"><Link to="/register">REGISTER <ArrowRight/></Link></Button>
+          <Button asChild size="lg" variant="outline" className="w-full rounded-xl border-primary/50 bg-primary/5 py-6 font-display text-sm font-bold uppercase tracking-wider text-primary transition-all hover:bg-primary/10 hover:text-primary active:scale-[0.98]"><a href="#member-access">MEMBER LOGIN</a></Button>
           <Button asChild size="lg" variant="outline" className="w-full rounded-xl border-chart-2/50 bg-chart-2/5 py-6 font-display text-sm font-bold uppercase tracking-wider text-chart-2 transition-all hover:bg-chart-2/10 hover:text-chart-2 active:scale-[0.98]"><Link to="/whitepaper">WHITEPAPER <ArrowUpRight/></Link></Button>
         </div>
         <div className="z-10 mt-6 grid w-full grid-cols-3 gap-2">
@@ -33,7 +47,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
       </div>
     </section>
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="mb-8"><div className="eyebrow">CHOOSE YOUR PATH</div><h2 className="section-title">8 STAKING <span>PACKAGES</span></h2></div><PackageGrid packages={packages}/></section>
-    <section className="booster-band border-y border-border py-14"><div className="mx-auto grid max-w-7xl gap-8 px-5 md:grid-cols-2 md:px-8"><div><div className="eyebrow text-chart-2"><Zap size={15}/> REWARDS ECOSYSTEM</div><h2 className="section-title">APY BOOSTER <span className="text-chart-2">ACTIVE</span></h2><p className="mt-4 text-sm leading-7 text-muted-foreground">Up to 25% APY, 10% direct rewards, five matching-profit levels, and 5% RewardPlus for qualified weekly turnover.</p></div><div className="grid grid-cols-3 gap-3">{[12,6,3,2,1].map((rate, i) => <div className="metric-panel" key={rate}><span className="text-xs text-muted-foreground">LV{i+1}</span><strong className="block text-2xl text-chart-2">{rate}%</strong></div>)}</div></div><p className="mx-auto mt-7 max-w-7xl px-5 text-xs text-muted-foreground md:px-8"><Check size={14} className="mr-2 inline text-chart-2"/>Minimum 3 direct members for RewardPlus. Rewards are planned and require admin validation.</p></section>
+    <section className="landing-ecosystem border-y border-border"><div className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="eyebrow">THE BIXLINK ADVANTAGE</div><h2 className="section-title">PREMIUM <span>ECOSYSTEM</span></h2><div className="mt-8 grid gap-5 lg:grid-cols-2"><article className="ecosystem-column"><header><span className="ecosystem-icon text-primary"><Globe2/></span><div><small>CONNECTED UTILITY</small><h3>Ecosystem core</h3></div></header><div className="ecosystem-list">{content.ecosystem.map((item, index) => <div key={`${item.title}-${index}`}><i/><div><h4>{item.title}</h4><p>{item.description}</p></div></div>)}</div></article><article className="ecosystem-column ecosystem-column--income"><header><span className="ecosystem-icon text-chart-3"><CircleDollarSign/></span><div><small>DISCLOSED SOURCES</small><h3>Income narrative</h3></div></header><div className="ecosystem-list">{content.income.map((item, index) => <div key={`${item.title}-${index}`}><i/><div><h4>{item.title}</h4><p>{item.description}</p></div></div>)}</div></article></div><div className="ecosystem-disclosure"><ShieldCheck/><span>Public narratives are owner-managed. Recorded income is not presented as audited revenue or guaranteed return.</span><Building2/></div></div></section>
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="eyebrow">WHAT'S AHEAD</div><h2 className="section-title">THE <span>ROADMAP</span></h2><div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{milestones.map(([quarter,label], i) => <div className="roadmap-item" key={quarter}><span className="text-xs font-bold text-chart-2">0{i+1} / {quarter}</span><h3 className="mt-4 font-display text-xl font-bold">{label}</h3></div>)}</div></section>
   </div>;
 }

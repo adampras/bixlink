@@ -503,3 +503,52 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 @keyframes deposit-pop { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes deposit-pulse { 50% { box-shadow: 0 0 0 14px color-mix(in oklab, var(--chart-2) 6%, transparent), 0 0 60px color-mix(in oklab, var(--chart-2) 65%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .deposit-success, .deposit-success-ring { animation: none; } }
+
+/* NETWORK unlimited threaded hierarchy */
+.ref-tree { position: relative; z-index: 1; min-width: 280px; padding: 10px; }
+.ref-tree ul { list-style: none; }
+.ref-tree-root { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 10px; border: 2px solid transparent; border-radius: 12px; padding: 9px 14px; background: linear-gradient(var(--background), var(--background)) padding-box, linear-gradient(90deg, var(--primary), var(--chart-2)) border-box; box-shadow: 0 0 24px oklch(0.67 0.23 305 / 24%); }
+.ref-tree-root > span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: oklch(0.67 0.23 305 / 18%); color: var(--primary); font-size: 9px; font-weight: 900; }
+.ref-tree-root small, .ref-tree-node span:not(.ref-tree-level):not(.ref-tree-count) { display: block; font-size: 8px; color: var(--muted-foreground); }
+.ref-tree-root strong, .ref-tree-node strong { display: block; font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--foreground); }
+.ref-tree-children { position: relative; margin-left: 16px; border-left: 1px dashed var(--line); padding: 10px 0 0 24px; }
+.ref-tree-children--root { margin-top: 0; }
+.ref-tree-branch { position: relative; padding-top: 10px; }
+.ref-tree-branch::before { content: ""; position: absolute; top: 31px; left: -24px; width: 24px; border-top: 1px dashed var(--line); }
+.ref-tree-node { display: flex; min-width: 220px; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: oklch(1 0 0 / 4%); transition: border-color 200ms var(--ease), background 200ms var(--ease); }
+.ref-tree-node:hover { border-color: oklch(0.67 0.23 305 / 52%); background: oklch(1 0 0 / 7%); }
+.ref-tree-level { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; border: 1px solid oklch(0.89 0.31 142 / 38%); border-radius: 50%; background: oklch(0.89 0.31 142 / 10%); color: var(--chart-2); font-size: 9px; font-weight: 900; }
+.ref-tree-toggle { width: 28px; height: 28px; flex: 0 0 auto; color: var(--primary); }
+.ref-tree-count { min-width: 28px; color: var(--chart-2); font-family: "JetBrains Mono", monospace; font-size: 10px; font-weight: 800; text-align: right; }
+.ref-tree-count small { display: block; color: var(--muted-foreground); font-family: var(--font-sans); font-size: 7px; font-weight: 600; }
+.ref-tree-footer { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; border-top: 1px solid var(--line); padding: 14px 10px 2px; }
+.ref-tree-footer span { display: flex; align-items: center; gap: 5px; color: var(--muted-foreground); font-size: 9px; }
+.ref-tree-footer i { width: 6px; height: 6px; border-radius: 50%; }
+.ref-tree-footer b { color: var(--foreground); font-family: "JetBrains Mono", monospace; }
+.network-tree-panel { overflow-x: auto; }
+
+/* Public landing institutional ecosystem columns */
+.landing-ecosystem { background: linear-gradient(180deg, oklch(0.14 0.045 286 / 78%), var(--background)); }
+.ecosystem-column { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: var(--r-card); padding: 24px; background: linear-gradient(145deg, oklch(0.235 0.072 287 / 94%), oklch(0.155 0.045 285 / 98%)); box-shadow: var(--sh-2), inset 0 1px 0 oklch(1 0 0 / 5%); }
+.ecosystem-column::after { content: ""; position: absolute; top: -60px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: oklch(0.67 0.23 305 / 10%); filter: blur(28px); }
+.ecosystem-column--income::after { top: auto; right: auto; bottom: -60px; left: -50px; background: oklch(0.88 0.19 95 / 9%); }
+.ecosystem-column header { position: relative; z-index: 1; display: flex; align-items: center; gap: 13px; border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+.ecosystem-icon { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border: 1px solid currentColor; border-radius: 10px; background: oklch(1 0 0 / 4%); }
+.ecosystem-icon svg { width: 19px; }
+.ecosystem-column header small { display: block; font-size: 8px; letter-spacing: .14em; color: var(--muted-foreground); }
+.ecosystem-column h3 { margin-top: 3px; font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
+.ecosystem-list { position: relative; z-index: 1; display: grid; gap: 18px; margin-top: 20px; }
+.ecosystem-list > div { display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 12px; }
+.ecosystem-list i { width: 6px; height: 6px; margin-top: 6px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 9px var(--primary); }
+.ecosystem-column--income .ecosystem-list i { background: var(--chart-3); box-shadow: 0 0 9px var(--chart-3); }
+.ecosystem-list h4 { font-size: 13px; font-weight: 700; }
+.ecosystem-list p { margin-top: 4px; font-size: 11px; line-height: 1.6; color: var(--muted-foreground); }
+.ecosystem-disclosure { display: flex; align-items: center; gap: 10px; margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; color: var(--muted-foreground); font-size: 10px; line-height: 1.5; }
+.ecosystem-disclosure svg { width: 15px; flex: 0 0 auto; color: var(--chart-2); }
+.ecosystem-disclosure svg:last-child { margin-left: auto; color: var(--chart-3); }
+.admin-content-column, .register-panel { border: 1px solid var(--line); border-radius: var(--r-card); padding: 20px; background: linear-gradient(150deg, oklch(0.24 0.08 290 / 86%), var(--card)); box-shadow: var(--sh-2); }
+.admin-content-item { position: relative; display: grid; gap: 8px; border-bottom: 1px solid var(--line); padding: 0 38px 14px 0; }
+.admin-content-item > button { position: absolute; top: 4px; right: 0; }
+.register-page { position: relative; }
+@media (max-width: 480px) { .ref-tree { padding: 4px; } .ref-tree-children { margin-left: 10px; padding-left: 18px; } .ref-tree-branch::before { left: -18px; width: 18px; } .ref-tree-node { min-width: 210px; } .ecosystem-column { padding: 20px; } }
+@media (prefers-reduced-motion: reduce) { .ref-tree-node { transition: none; } }

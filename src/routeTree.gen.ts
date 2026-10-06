@@ -17,6 +17,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as NetworkRouteImport } from './routes/network'
 import { Route as PayRouteImport } from './routes/pay'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as StakeRouteImport } from './routes/stake'
 import { Route as WalletRouteImport } from './routes/wallet'
@@ -62,6 +63,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
   '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/stake': typeof StakeRoute
   '/wallet': typeof WalletRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
   '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/stake': typeof StakeRoute
   '/wallet': typeof WalletRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
   '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/stake': typeof StakeRoute
   '/wallet': typeof WalletRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/network'
     | '/pay'
     | '/profile'
+    | '/register'
     | '/reset-password'
     | '/stake'
     | '/wallet'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/network'
     | '/pay'
     | '/profile'
+    | '/register'
     | '/reset-password'
     | '/stake'
     | '/wallet'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/network'
     | '/pay'
     | '/profile'
+    | '/register'
     | '/reset-password'
     | '/stake'
     | '/wallet'
@@ -180,6 +192,7 @@ export interface RootRouteChildren {
   NetworkRoute: typeof NetworkRoute
   PayRoute: typeof PayRoute
   ProfileRoute: typeof ProfileRoute
+  RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   StakeRoute: typeof StakeRoute
   WalletRoute: typeof WalletRoute
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -284,6 +304,7 @@ const rootRouteChildren: RootRouteChildren = {
   NetworkRoute: NetworkRoute,
   PayRoute: PayRoute,
   ProfileRoute: ProfileRoute,
+  RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   StakeRoute: StakeRoute,
   WalletRoute: WalletRoute,

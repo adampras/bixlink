@@ -19,7 +19,7 @@ function ProfilePage() {
   const [notice, setNotice] = useState(''); const [code, setCode] = useState('');
   const makeCode = useServerFn(createReferral); const link = useServerFn(assignReferral);
   const qc = useQueryClient(); const navigate = useNavigate();
-  const referralUrl = data?.referral?.code && typeof window !== 'undefined' ? `${window.location.origin}/auth?ref=${data.referral.code}` : '';
+  const referralUrl = data?.referral?.code && typeof window !== 'undefined' ? `${window.location.origin}/register?ref=${data.referral.code}` : '';
   const signOut = async () => { await qc.cancelQueries(); qc.clear(); await supabase.auth.signOut(); navigate({ to: '/auth', replace: true }); };
   return <BixShell><main className="mx-auto max-w-3xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="PROFILE">

@@ -20,3 +20,4 @@
 - Owner clone accounts are tracked in bix_clone_accounts and funded only via bix_allocations, excluded from public member stats — keeps internal accounts auditable and separate from real members.
 - Leader virtual balances live in bix_leaders and are added inside bix_wallet_balance; withdraw RPC blocks the virtual portion until bix_leader_status reports qualified — one server-side gate for the turnover rule.
 - Member USDT deposits are credited only after server-side on-chain verification (receipt, recipient = owner wallet, USDT contract, confirmations) with one credit per TxID; amount comes from chain, never from user input — prevents fabricated balances.
+- Render the referral network as a cycle-safe recursively expandable tree without a fixed depth cap, so deep generations remain navigable without loading every branch at once.
