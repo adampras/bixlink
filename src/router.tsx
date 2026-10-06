@@ -22,9 +22,9 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     context: { queryClient },
-    dehydrate: () => ({ queryState: dehydrate(queryClient) }),
+    dehydrate: () => ({ queryState: JSON.stringify(dehydrate(queryClient)) }),
     hydrate: (dehydrated) => {
-      if (dehydrated && typeof dehydrated === 'object' && 'queryState' in dehydrated) hydrate(queryClient, dehydrated.queryState);
+      if (dehydrated && typeof dehydrated === 'object' && 'queryState' in dehydrated && typeof dehydrated.queryState === 'string') hydrate(queryClient, JSON.parse(dehydrated.queryState));
     },
     scrollRestoration: true,
     // Warm the next page (code + loader data) as soon as a nav item is hovered
