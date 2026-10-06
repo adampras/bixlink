@@ -493,6 +493,25 @@ export type Database = {
           user_id: string
         }[]
       }
+      bix_referral_tree_metrics: {
+        Args: never
+        Returns: {
+          depth: number
+          full_name: string
+          member_code: string
+          parent_id: string
+          stake_value_usd: number
+          top_package: string
+          total_turnover_usd: number
+          user_id: string
+          username: string
+          weekly_direct_count: number
+          weekly_qualified: boolean
+          weekly_reward_usd: number
+          weekly_stake_usd: number
+          weekly_turnover_usd: number
+        }[]
+      }
       bix_unstake: { Args: { p_stake: string }; Returns: Json }
       bix_unstake_penalty: {
         Args: { p_days: number; p_lock: number }
