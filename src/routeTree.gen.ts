@@ -10,18 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BoostRouteImport } from './routes/boost'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as NetworkRouteImport } from './routes/network'
 import { Route as PayRouteImport } from './routes/pay'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProfitRouteImport } from './routes/profit'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RiskRouteImport } from './routes/risk'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StakeRouteImport } from './routes/stake'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TransferRouteImport } from './routes/transfer'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as WhitepaperRouteImport } from './routes/whitepaper'
@@ -29,6 +33,11 @@ import { Route as WhitepaperRouteImport } from './routes/whitepaper'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -61,6 +70,11 @@ const PayRoute = PayRouteImport.update({
   path: '/pay',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -81,6 +95,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RiskRoute = RiskRouteImport.update({
+  id: '/risk',
+  path: '/risk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -89,6 +108,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const StakeRoute = StakeRouteImport.update({
   id: '/stake',
   path: '/stake',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TransferRoute = TransferRouteImport.update({
@@ -109,36 +133,44 @@ const WhitepaperRoute = WhitepaperRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/dashboard': typeof DashboardRoute
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/profit': typeof ProfitRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
+  '/terms': typeof TermsRoute
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/dashboard': typeof DashboardRoute
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/profit': typeof ProfitRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
+  '/terms': typeof TermsRoute
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
@@ -146,18 +178,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/dashboard': typeof DashboardRoute
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/profit': typeof ProfitRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
+  '/terms': typeof TermsRoute
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
@@ -166,54 +202,66 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/admin'
     | '/auth'
     | '/boost'
     | '/dashboard'
     | '/network'
     | '/pay'
+    | '/privacy'
     | '/profile'
     | '/profit'
     | '/register'
     | '/reset-password'
+    | '/risk'
     | '/settings'
     | '/stake'
+    | '/terms'
     | '/transfer'
     | '/wallet'
     | '/whitepaper'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/admin'
     | '/auth'
     | '/boost'
     | '/dashboard'
     | '/network'
     | '/pay'
+    | '/privacy'
     | '/profile'
     | '/profit'
     | '/register'
     | '/reset-password'
+    | '/risk'
     | '/settings'
     | '/stake'
+    | '/terms'
     | '/transfer'
     | '/wallet'
     | '/whitepaper'
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/admin'
     | '/auth'
     | '/boost'
     | '/dashboard'
     | '/network'
     | '/pay'
+    | '/privacy'
     | '/profile'
     | '/profit'
     | '/register'
     | '/reset-password'
+    | '/risk'
     | '/settings'
     | '/stake'
+    | '/terms'
     | '/transfer'
     | '/wallet'
     | '/whitepaper'
@@ -221,18 +269,22 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   BoostRoute: typeof BoostRoute
   DashboardRoute: typeof DashboardRoute
   NetworkRoute: typeof NetworkRoute
   PayRoute: typeof PayRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ProfitRoute: typeof ProfitRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RiskRoute: typeof RiskRoute
   SettingsRoute: typeof SettingsRoute
   StakeRoute: typeof StakeRoute
+  TermsRoute: typeof TermsRoute
   TransferRoute: typeof TransferRoute
   WalletRoute: typeof WalletRoute
   WhitepaperRoute: typeof WhitepaperRoute
@@ -245,6 +297,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -289,6 +348,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -317,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/risk': {
+      id: '/risk'
+      path: '/risk'
+      fullPath: '/risk'
+      preLoaderRoute: typeof RiskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -329,6 +402,13 @@ declare module '@tanstack/react-router' {
       path: '/stake'
       fullPath: '/stake'
       preLoaderRoute: typeof StakeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/transfer': {
@@ -357,18 +437,22 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   BoostRoute: BoostRoute,
   DashboardRoute: DashboardRoute,
   NetworkRoute: NetworkRoute,
   PayRoute: PayRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ProfitRoute: ProfitRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RiskRoute: RiskRoute,
   SettingsRoute: SettingsRoute,
   StakeRoute: StakeRoute,
+  TermsRoute: TermsRoute,
   TransferRoute: TransferRoute,
   WalletRoute: WalletRoute,
   WhitepaperRoute: WhitepaperRoute,

@@ -173,6 +173,39 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_submissions: {
+        Row: {
+          country: string
+          created_at: string
+          document_last4: string
+          document_type: string
+          full_name: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          document_last4: string
+          document_type: string
+          full_name: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          document_last4?: string
+          document_type?: string
+          full_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       owner_bix_vault: {
         Row: {
           balance_bix: number
