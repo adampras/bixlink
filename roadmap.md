@@ -30,6 +30,6 @@
 - [x] Replace the WALLET title with the supplied BIXLINK fox logo and switch the balance and Deposit button to white.
 - [x] Move the supplied fox emblem into the header as the app-wide brand mark (header, profile avatar, loading placeholder) and open WALLET directly on the balance panel.
 - [x] Redesign the STAKE page as Obsidian luxury pro: gold BIXCOIN glow title, 21 JUTA BIX TOKEN supply strip, luxury package cards with gold prices, Popular/Max yield notches, violet Stake Now buttons.
-- [ ] Replace the NETWORK sun diagram with an unlimited-depth referral tree selected from visual previews.
-- [ ] Replace landing marketing-plan content with an admin-editable ecosystem and income narrative selected from visual previews.
-- [ ] Move registration to a dedicated page with a pasteable referral-code field; keep sign-in separate from the landing page.
+- [x] Replace the NETWORK sun diagram with an unlimited-depth referral tree selected from visual previews.
+- [x] Replace landing marketing-plan content with an admin-editable ecosystem and income narrative selected from visual previews.
+- [x] Move registration to a dedicated page with a pasteable referral-code field; keep sign-in separate from the landing page.
