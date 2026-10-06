@@ -42,3 +42,6 @@
 - [x] Show active staking profit in USDT and BIX with one-minute updates.
 - [x] Add a dedicated PROFIT menu and clearer insufficient-balance staking feedback.
 - [x] Restyle the BIXLINK header wordmark in one premium brand color.
+- [x] Replace the footer trust narrative with international-standard automated-ledger, withdrawal-review, and BIXCOIN No SC disclosures.
+- [x] Activate the BIXCOIN staking Booster with member status, focused actions, and a clear four-step explanation.
+- [x] Add a one-time 1,000,000 BIX reserve vault visible only to the verified owner.

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
-import { usePublicConfig } from '@/lib/useMember';
+import { useMember, usePublicConfig } from '@/lib/useMember';
 import { ArrowUpRight, Coins, Gauge, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
 import robotFox from '@/assets/booster-concept-fox.png';
 import reactorEngine from '@/assets/booster-concept-reactor.png';
@@ -18,11 +18,15 @@ export const Route = createFileRoute('/boost')({ head: () => ({ meta: [{ title: 
 
 function BoostPage() {
   const { data: cfg } = usePublicConfig();
+  const { data: memberData } = useMember();
   const packages = cfg?.packages ?? [];
   const longestLock = packages.reduce((max, p) => Math.max(max, Number(p.lock_days) || 0), 0);
   const bixPrice = Number(cfg?.bixMarket.priceUsd ?? 0.84291);
   const visualKey = cfg?.boosterVisual.visual ?? 'fox';
   const visual = boosterVisuals[visualKey] ?? boosterVisuals.fox;
+  const activeStakes = (memberData?.stakes ?? []).filter(stake => stake.status === 'active');
+  const activeValue = activeStakes.reduce((sum, stake) => sum + Number(stake.amount_usd), 0);
+  const annualYield = activeStakes.reduce((sum, stake) => sum + Number(stake.amount_usd) * Number(stake.apy) / 100, 0);
   return <BixShell><main>
 
     <section className="booster-vault overflow-hidden border-b border-border">
@@ -30,16 +34,23 @@ function BoostPage() {
         <div className="terminal-supply"><ShieldCheck size={13}/> 21 JUTA BIX TOKEN</div>
         <div className="eyebrow mt-5"><Zap size={15} className="text-chart-2"/> BIXCOIN YIELD ENGINE</div>
         <h1 className="section-title">BOOST YOUR <span>APY</span></h1>
-        <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">Stake more BIXCOIN for longer. Each package increases the fixed staking APY tier—from 8% up to 25%—for recorded passive and active staking profit.</p>
+        <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">The BIXCOIN Booster converts each active staking package into a live yield projection. Larger packages and longer lock periods unlock higher fixed APY tiers, from 8% up to 25%.</p>
         <div className="boost-chips mt-6">
           <div className="booster-chip"><b className="text-chart-2">70%</b> profit in USDT</div>
           <div className="booster-chip"><b className="text-chart-3">30%</b> profit in BIX</div>
           <div className="booster-chip"><b className="text-primary">25%</b> maximum APY</div>
         </div>
         <div className="mt-7 flex flex-wrap gap-3">
-          <Button asChild className="rounded-full bg-chart-3 text-background"><Link to="/stake">Stake BIXCOIN <ArrowUpRight/></Link></Button>
+          <Button asChild className="rounded-full bg-chart-3 text-background"><Link to="/stake">Activate with BIXCOIN staking <ArrowUpRight/></Link></Button>
           <Button asChild variant="outline" className="rounded-full border-chart-2 text-chart-2 hover:bg-chart-2/10"><Link to="/profit"><TrendingUp/> View live profit</Link></Button>
         </div>
+
+        <section className="booster-member-status mt-6">
+          <div><span>YOUR BOOSTER</span><strong className={cfg?.booster.enabled && activeStakes.length ? 'text-chart-2' : 'text-muted-foreground'}>{cfg?.booster.enabled ? (activeStakes.length ? 'ACTIVE' : 'READY') : 'PAUSED'}</strong></div>
+          <div><span>ACTIVE POSITIONS</span><strong className="numeric">{activeStakes.length}</strong></div>
+          <div><span>STAKING VALUE</span><strong className="numeric">${number(activeValue, { maximumFractionDigits: 2 })}</strong></div>
+          <div><span>ANNUAL PROJECTION</span><strong className="numeric">${number(annualYield, { maximumFractionDigits: 2 })}</strong></div>
+        </section>
 
         <div className="boost-engine mt-8">
           <div className="boost-engine-head">
@@ -63,6 +74,18 @@ function BoostPage() {
     </section>
 
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8">
+      <div className="eyebrow"><ShieldCheck size={14}/> HOW IT WORKS</div>
+      <h2 className="section-title">BIXCOIN BOOSTER <span>IN 4 STEPS</span></h2>
+      <div className="booster-steps mt-8">
+        <article><b>01</b><h3>Choose a BIXCOIN package</h3><p>Select the staking value, APY and lock duration that match your plan. The package value is paid from your virtual USDT testing balance.</p></article>
+        <article><b>02</b><h3>Stake activates instantly</h3><p>When your balance is sufficient, the position becomes active automatically. No owner approval is needed for staking.</p></article>
+        <article><b>03</b><h3>Booster tracks every minute</h3><p>Profit is projected from the package value × APY × elapsed time. Seventy percent is displayed as USDT and thirty percent as BIX at the internal reference.</p></article>
+        <article><b>04</b><h3>Review in PROFIT</h3><p>Open the PROFIT menu to see every active position. Early unstaking ends the projection and applies the owner-configured penalty schedule.</p></article>
+      </div>
+      <div className="mt-7 flex flex-wrap gap-3"><Button asChild className="rounded-full"><Link to="/stake">Start BIXCOIN staking <ArrowUpRight/></Link></Button><Button asChild variant="outline" className="rounded-full"><Link to="/profit"><TrendingUp/> Open profit tracker</Link></Button></div>
+    </section>
+
+    <section className="mx-auto max-w-7xl border-t border-border px-5 py-14 md:px-8">
       <div className="eyebrow"><Gauge size={14}/> VOLUME + DURATION</div>
       <h2 className="section-title">BIX STAKING <span>TIERS</span></h2>
       <p className="mt-4 max-w-2xl text-sm text-muted-foreground">The package amount represents BIXCOIN staking value at the internal ${bixPrice.toFixed(6)} reference. Higher volume and longer lock periods unlock the next APY tier.</p>
