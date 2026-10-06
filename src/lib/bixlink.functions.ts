@@ -200,6 +200,9 @@ export const reviewWalletTx = createServerFn({ method: 'POST' }).middleware([req
     await verifyAdmin(context);
     const { error } = await context.supabase.from('wallet_transactions').update({ status: data.status, reviewed_at: new Date().toISOString() }).eq('id', data.id).eq('status', 'pending');
     if (error) throw error;
+    // Stop auto-detection for a reported deposit once the owner decided it.
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    await supabaseAdmin.from('deposit_intents').update({ status: 'reviewed' }).eq('claim_tx_id', data.id).eq('status', 'pending');
     return { ok: true };
   });
 

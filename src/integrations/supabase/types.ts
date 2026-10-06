@@ -183,6 +183,8 @@ export type Database = {
         Row: {
           address: string
           amount_exact: number
+          claim_tx_id: string | null
+          claimed_at: string | null
           created_at: string
           credited_at: string | null
           expires_at: string
@@ -196,6 +198,8 @@ export type Database = {
         Insert: {
           address: string
           amount_exact: number
+          claim_tx_id?: string | null
+          claimed_at?: string | null
           created_at?: string
           credited_at?: string | null
           expires_at?: string
@@ -209,6 +213,8 @@ export type Database = {
         Update: {
           address?: string
           amount_exact?: number
+          claim_tx_id?: string | null
+          claimed_at?: string | null
           created_at?: string
           credited_at?: string | null
           expires_at?: string
