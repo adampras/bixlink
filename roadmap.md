@@ -45,7 +45,7 @@
 - [x] Replace the footer trust narrative with international-standard automated-ledger, withdrawal-review, and BIXCOIN No SC disclosures.
 - [x] Activate the BIXCOIN staking Booster with member status, focused actions, and a clear four-step explanation.
 - [x] Add a one-time 1,000,000 BIX reserve vault visible only to the verified owner.
-- [ ] Remove the NETWORK eyebrow text above the page title.
-- [ ] Rebuild NETWORK as package-avatar member boxes with ID, staking value, and unlimited-depth turnover totals.
-- [ ] Add weekly qualification marker and weekly turnover reward display that resets at 12 AM.
-- [ ] Add withdrawal copy and limits: minimum $10, maximum $10,000 per day per account.
+- [x] Remove the NETWORK eyebrow text above the page title.
+- [x] Rebuild NETWORK as package-avatar member boxes with ID, staking value, and unlimited-depth turnover totals.
+- [x] Add weekly qualification marker and weekly turnover reward display that resets at 12 AM.
+- [x] Add withdrawal copy and limits: minimum $10, maximum $10,000 per day per account.

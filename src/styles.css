@@ -392,7 +392,7 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .network-stat-icon { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: var(--r-control); background: var(--secondary); color: var(--primary); }
 .network-stat-icon svg { width: 18px; }
 .network-stat span:not(.network-stat-icon) { display: block; font-size: 11px; color: var(--muted-foreground); }
-.network-stat strong { display: block; margin-top: 3px; font-family: "JetBrains Mono", monospace; font-size: 1.75rem; line-height: 1; color: var(--foreground); }
+.network-stat strong { display: block; margin-top: 3px; font-family: "JetBrains Mono", monospace; font-size: clamp(1.05rem, 3vw, 1.75rem); line-height: 1; color: var(--foreground); }
 .network-stat strong small { font-size: .8rem; color: var(--muted-foreground); }
 .network-tree-panel, .network-plan { border: 1px solid var(--line); border-radius: var(--r-card); background: linear-gradient(150deg, oklch(0.24 0.08 290 / 86%), var(--card)); box-shadow: var(--sh-2); }
 .network-tree-panel { position: relative; overflow: hidden; padding: 14px; }
