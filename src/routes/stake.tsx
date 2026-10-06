@@ -31,7 +31,7 @@ function StakePage() {
   const tiers = [...(cfg?.unstake.tiers ?? [])].sort((a, b) => a.days - b.days);
   const elapsedDays = (s: { activated_at: string | null; created_at: string }) => now ? (now - new Date(s.activated_at ?? s.created_at).getTime()) / 86400000 : 0;
   const penaltyFor = (s: { activated_at: string | null; created_at: string; lock_days: number }) => { const d = elapsedDays(s); if (d >= s.lock_days) return 0; return tiers.find(t => d < t.days)?.pct ?? 0; };
-  const refreshAll = async () => { await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); await bal.refetch(); };
+  const refreshAll = async () => { await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); await bal.refetch(); };
   const qc = useQueryClient();
   const daily = (p: Package) => (p.price_usd * p.apy / 100 / 365);
   useEffect(() => { setNow(Date.now()); }, []);
@@ -49,7 +49,7 @@ function StakePage() {
         <div><span className="stake-pool-label">BIX supply</span><p className="stake-pool-value">21 JUTA BIX TOKEN</p></div>
         <span className="stake-pool-ico" aria-hidden><Zap size={15} /></span>
       </div>
-      <div className="stake-pool mt-3"><div><span className="stake-pool-label">Your virtual USDT balance</span><p className="stake-pool-value numeric">{money(bal.data ?? 0)}</p></div></div>
+      <div className="stake-pool mt-3"><div><span className="stake-pool-label">Available balance</span><p className="stake-pool-value numeric">{money(bal.data ?? 0)}</p></div></div>
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {(cfg?.packages ?? []).map((p, i) => {
           const popular = p.id === 'BUILDER';
