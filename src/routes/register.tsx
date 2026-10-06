@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 
 export const Route = createFileRoute('/register')({
-  validateSearch: (search: Record<string, unknown>): { ref?: string } => ({ ref: typeof search['ref'] === 'string' ? search['ref'] : undefined }),
+  validateSearch: (search: Record<string, unknown>): { ref?: string | undefined } => ({ ref: typeof search['ref'] === 'string' ? search['ref'] : undefined }),
   head: () => ({ meta: [{ title: 'Create a BIXLINK Account' }, { name: 'description', content: 'Create your BIXLINK member account with an optional referral code.' }, { property: 'og:title', content: 'Create a BIXLINK Account' }, { property: 'og:description', content: 'Register as a BIXLINK member and attach your inviter code.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
   component: RegisterPage,
 });
