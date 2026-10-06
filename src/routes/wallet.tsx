@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { KycCard } from '@/components/KycCard';
 import { getMyWallet, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
-import { createDepositIntent, checkDepositIntent } from '@/lib/deposit.functions';
+import { createDepositIntent, checkDepositIntent, claimDepositIntent } from '@/lib/deposit.functions';
 import { dateTime, money, number } from '@/lib/bixlink';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, ScanLine, CheckCircle2, Clock } from 'lucide-react';
 
@@ -26,7 +26,7 @@ const STATUS: Record<string, string> = { pending: 'text-chart-3', approved: 'tex
 function WalletPage() {
   const { user, ready } = useMember();
   const { data: cfg } = usePublicConfig();
-  const fetchWallet = useServerFn(getMyWallet); const createIntent = useServerFn(createDepositIntent); const checkIntent = useServerFn(checkDepositIntent); const withdraw = useServerFn(requestWithdraw); const swap = useServerFn(requestSwap);
+  const fetchWallet = useServerFn(getMyWallet); const createIntent = useServerFn(createDepositIntent); const checkIntent = useServerFn(checkDepositIntent); const claimIntent = useServerFn(claimDepositIntent); const [claimed, setClaimed] = useState(false); const withdraw = useServerFn(requestWithdraw); const swap = useServerFn(requestSwap);
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ['my-wallet', user?.id], queryFn: () => fetchWallet(), enabled: !!user });
   const [modal, setModal] = useState<'deposit' | 'withdraw' | null>(null);
@@ -43,7 +43,7 @@ function WalletPage() {
   const swapEnabled = cfg?.swap.enabled ?? false;
   const bixPrice = Number(cfg?.bixMarket.priceUsd ?? 0.84291);
   const amt = Number(amount) || 0;
-  const close = () => { setModal(null); setAmount(''); setField(''); setNotice(''); setIntent(null); };
+  const close = () => { setModal(null); setAmount(''); setField(''); setNotice(''); setIntent(null); setClaimed(false); };
   const poll = async (id: string) => {
     const r = await checkIntent({ data: { id } });
     if (r.status === 'credited') { setSuccess({ amount: r.amount, walletCode: r.walletCode, network: r.network, txHash: r.txHash }); close(); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); }
@@ -106,7 +106,7 @@ function WalletPage() {
             : <div className="mt-3 flex flex-col items-center gap-2"><div className="rounded-2xl bg-foreground p-3"><QRCodeSVG value={addr} size={180}/></div><div className="text-xs text-muted-foreground">{selWallet?.code} · USDT {selWallet?.network}</div></div>}
           {!intent ? <><p className="mt-4 text-xs text-muted-foreground">2. Enter how much USDT you want to deposit.</p>
           <input className="form-input mt-2" type="number" min="1" step="1" placeholder="Amount USDT (e.g. 50)" value={amount} onChange={e => setAmount(e.target.value)}/></>
-          : <div className="mt-4 rounded-2xl border border-chart-2 bg-chart-2/10 p-3 text-center"><div className="text-xs text-muted-foreground">Send EXACTLY this amount of USDT {intent.network}</div><div className="numeric mt-1 text-2xl font-black text-chart-2">{intent.amount.toFixed(4)}</div><Button size="sm" variant="outline" className="mt-2 rounded-full" onClick={async () => { await navigator.clipboard.writeText(intent.amount.toFixed(4)); setNotice('Exact amount copied.'); }}><Copy/> Copy amount</Button><p className="mt-2 text-[11px] text-muted-foreground">The unique decimals identify your deposit. Balance is credited automatically once the blockchain confirms. Valid for 2 hours.</p></div>}
+          : <div className="mt-4 rounded-2xl border border-chart-2 bg-chart-2/10 p-3 text-center"><div className="text-xs text-muted-foreground">Send EXACTLY this amount of USDT {intent.network}</div><div className="numeric mt-1 text-2xl font-black text-chart-2">{intent.amount.toFixed(4)}</div><Button size="sm" variant="outline" className="mt-2 rounded-full" onClick={async () => { await navigator.clipboard.writeText(intent.amount.toFixed(4)); setNotice('Exact amount copied.'); }}><Copy/> Copy amount</Button><p className="mt-2 text-[11px] text-muted-foreground">The unique decimals identify your deposit. Balance is credited automatically once the blockchain confirms. Valid for 2 hours.</p>{claimed ? <p className="mt-3 rounded-xl border border-chart-3/50 bg-chart-3/10 p-2 text-xs text-chart-3">Transfer reported. You can close this page — we keep checking the blockchain every 5 minutes for 24 hours, and the owner can approve it manually.</p> : <Button size="sm" className="mt-3 w-full rounded-full bg-chart-2 text-background" disabled={busy} onClick={async () => { setBusy(true); try { await claimIntent({ data: { id: intent.id } }); setClaimed(true); setNotice(''); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); } catch (e) { setNotice(e instanceof Error ? e.message : 'Could not record your transfer.'); } setBusy(false); }}>I have transferred</Button>}</div>}
           {notice && <p className="mt-2 text-xs text-destructive">{notice}</p>}
           </>}
         </> : <>
