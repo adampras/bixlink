@@ -36,3 +36,4 @@
 - [x] Fix owner referral links so `/register?ref=...` always renders and pre-fills the code.
 - [x] Present and implement the selected premium PROFILE redesign (Obsidian glass luxury).
 - [x] Make English the default, activate five translated language choices, and add aligned Settings and update notifications in the header.
+- [x] Restore the tricolor BIXLINK header wordmark, switch language selection to flag symbols, and add Malay, Vietnamese, and Thai.
