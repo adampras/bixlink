@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { getBixPay, lookupBixPay, sendBixPay } from '@/lib/bixlink.functions';
 import { ScanLine, QrCode, Lock, ArrowUpRight, ArrowDownLeft, Copy, ShieldCheck, ArrowLeft, X } from 'lucide-react';
+import { dateTime, number } from '@/lib/bixlink';
 
 export const Route = createFileRoute('/pay')({
   head: () => ({ meta: [{ title: 'BIX PAY — BIXLINK' }, { name: 'description', content: 'Scan a QR code to pay other BIXLINK members in BIX.' }, { property: 'og:title', content: 'BIX PAY — BIXLINK' }, { property: 'og:description', content: 'Member-to-member BIX payments by QR scan.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
@@ -76,7 +77,7 @@ function PayPage() {
   };
   const pay = async () => {
     setBusy(true);
-    try { await send({ data: { code, amount: Number(amount), note } }); setMsg(`Paid ${Number(amount).toLocaleString()} BIX to ${code.toUpperCase()}.`); setConfirm(false); setAmount(''); setNote(''); await qc.invalidateQueries({ queryKey: ['bix-pay'] }); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); }
+    try { await send({ data: { code, amount: Number(amount), note } }); setMsg(`Paid ${number(Number(amount), { maximumFractionDigits: 8 })} BIX to ${code.toUpperCase()}.`); setConfirm(false); setAmount(''); setNote(''); await qc.invalidateQueries({ queryKey: ['bix-pay'] }); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); }
     catch (e) { setMsg(e instanceof Error ? e.message : 'Payment failed.'); setConfirm(false); }
     setBusy(false);
   };
@@ -86,7 +87,7 @@ function PayPage() {
       <Link to="/wallet" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"><ArrowLeft size={14}/> Wallet</Link>
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3"><div><div className="eyebrow"><ScanLine size={14}/> BIX UTILITY</div><h1 className="section-title">BIX <span>PAY</span></h1></div>{!enabled && <span className="inline-flex items-center gap-1 rounded-full border border-chart-3 bg-chart-3/10 px-3 py-1 text-xs font-bold text-chart-3"><Lock size={12}/> Coming soon</span>}</div>
 
-      <div className="mt-6 rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-2/10 p-5"><span className="text-xs text-muted-foreground">BIX balance</span><strong className="numeric mt-1 block text-4xl font-black text-chart-3">{Number(data?.bixBalance ?? 0).toLocaleString(undefined, { maximumFractionDigits: 8 })} BIX</strong><span className="mt-1 block text-xs text-muted-foreground">Your code: <b className="numeric text-foreground">{data?.code ?? '—'}</b></span></div>
+      <div className="mt-6 rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-2/10 p-5"><span className="text-xs text-muted-foreground">BIX balance</span><strong className="numeric mt-1 block text-4xl font-black text-chart-3">{number(Number(data?.bixBalance ?? 0), { maximumFractionDigits: 8 })} BIX</strong><span className="mt-1 block text-xs text-muted-foreground">Your code: <b className="numeric text-foreground">{data?.code ?? '—'}</b></span></div>
 
       <div className="mt-6 grid grid-cols-2 gap-2 rounded-full border border-border bg-card p-1">{(['pay', 'receive'] as const).map(t => <button key={t} onClick={() => setTab(t)} className={`rounded-full py-2 text-sm font-bold ${tab === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>{t === 'pay' ? 'Pay' : 'Receive'}</button>)}</div>
 
@@ -110,13 +111,13 @@ function PayPage() {
       {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
 
       <h2 className="mt-10 font-display text-xl font-black">BIX PAY history</h2>
-      <div className="mt-4 space-y-2">{(data?.transfers ?? []).length ? data!.transfers.map(t => <div key={t.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-sm"><div className="flex items-center gap-3"><span className={`grid size-9 place-items-center rounded-full ${t.outgoing ? 'bg-primary/15 text-primary' : 'bg-chart-2/15 text-chart-2'}`}>{t.outgoing ? <ArrowUpRight size={16}/> : <ArrowDownLeft size={16}/>}</span><div><b>{t.outgoing ? `To ${t.recipient_code}` : `From ${t.sender_code}`}</b><div className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}{t.note ? ` · ${t.note}` : ''}</div></div></div><div className="text-right"><b className={`numeric ${t.outgoing ? '' : 'text-chart-2'}`}>{t.outgoing ? '−' : '+'}{Number(t.amount_bix).toLocaleString()} BIX</b><div className={`text-xs capitalize ${t.status === 'reversed' ? 'text-destructive' : 'text-muted-foreground'}`}>{t.status}</div></div></div>)
+      <div className="mt-4 space-y-2">{(data?.transfers ?? []).length ? data?.transfers.map(t => <div key={t.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-sm"><div className="flex items-center gap-3"><span className={`grid size-9 place-items-center rounded-full ${t.outgoing ? 'bg-primary/15 text-primary' : 'bg-chart-2/15 text-chart-2'}`}>{t.outgoing ? <ArrowUpRight size={16}/> : <ArrowDownLeft size={16}/>}</span><div><b>{t.outgoing ? `To ${t.recipient_code}` : `From ${t.sender_code}`}</b><div className="text-xs text-muted-foreground">{dateTime(t.created_at)}{t.note ? ` · ${t.note}` : ''}</div></div></div><div className="text-right"><b className={`numeric ${t.outgoing ? '' : 'text-chart-2'}`}>{t.outgoing ? '−' : '+'}{number(Number(t.amount_bix), { maximumFractionDigits: 8 })} BIX</b><div className={`text-xs capitalize ${t.status === 'reversed' ? 'text-destructive' : 'text-muted-foreground'}`}>{t.status}</div></div></div>)
         : <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border bg-card/60 p-8 text-center"><QrCode className="text-primary"/><p className="text-sm text-muted-foreground">No BIX PAY transactions yet.</p></div>}</div>
 
       {scan && <Scanner onClose={() => setScan(false)} onResult={raw => { setScan(false); const p = parse(raw); if (!p) { setMsg('That QR is not a BIX PAY code.'); return; } setCode(p.code); if (p.amount) setAmount(String(p.amount)); if (p.note) setNote(p.note); }}/>}
       {confirm && <div className="fixed inset-0 z-50 grid place-items-center bg-background/90 p-4 backdrop-blur"><div className="w-full max-w-sm rounded-[20px] border border-chart-3 bg-card p-6 text-center">
         <ShieldCheck className="mx-auto text-chart-2" size={32}/><h3 className="mt-3 font-display text-lg font-black">Confirm payment</h3>
-        <strong className="numeric mt-3 block text-3xl font-black text-chart-3">{Number(amount).toLocaleString()} BIX</strong>
+        <strong className="numeric mt-3 block text-3xl font-black text-chart-3">{number(Number(amount), { maximumFractionDigits: 8 })} BIX</strong>
         <p className="mt-2 text-sm text-muted-foreground">to <b className="text-foreground">{code.toUpperCase()}</b>{note ? ` · ${note}` : ''}</p>
         <div className="mt-6 grid grid-cols-2 gap-3"><Button variant="outline" className="rounded-full" onClick={() => setConfirm(false)}>Cancel</Button><Button disabled={busy} className="rounded-full bg-chart-2 text-background" onClick={pay}>Pay now</Button></div>
       </div></div>}
