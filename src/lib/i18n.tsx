@@ -94,7 +94,8 @@ const phrases: Record<Exclude<Language, 'en'>, Record<string, string>> = {
 };
 
 type ProductUpdate = { id: string; title: string; body: string };
-type I18nValue = { language: Language; setLanguage: (language: Language) => void; t: (key: UiKey) => string; updates: ProductUpdate[] };
+const locales: Record<Language, string> = { en: 'en-US', id: 'id-ID', ms: 'ms-MY', vi: 'vi-VN', th: 'th-TH', zh: 'zh-CN', ja: 'ja-JP', ko: 'ko-KR' };
+type I18nValue = { language: Language; setLanguage: (language: Language) => void; t: (key: UiKey) => string; updates: ProductUpdate[]; formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string; formatDate: (value: string | number | Date, options?: Intl.DateTimeFormatOptions) => string; };
 const fallbackI18n: I18nValue = {
   language: 'en',
   setLanguage: next => {
@@ -104,6 +105,8 @@ const fallbackI18n: I18nValue = {
   },
   t: key => ui.en[key],
   updates: [...updates.en],
+  formatNumber: (value, options) => new Intl.NumberFormat('en-US', options).format(value),
+  formatDate: (value, options) => new Intl.DateTimeFormat('en-US', options ?? { dateStyle: 'medium' }).format(new Date(value)),
 };
 const I18nContext = createContext<I18nValue>(fallbackI18n);
 const originalText = new WeakMap<Node, string>();
@@ -150,7 +153,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, [language]);
-  const value = useMemo(() => ({ language, setLanguage, t: (key: UiKey) => ui[language][key], updates: [...updates[language]] }), [language, setLanguage]);
+  const value = useMemo(() => ({ language, setLanguage, t: (key: UiKey) => ui[language][key], updates: [...updates[language]], formatNumber: (value: number, options?: Intl.NumberFormatOptions) => new Intl.NumberFormat(locales[language], options).format(value), formatDate: (value: string | number | Date, options?: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locales[language], options ?? { dateStyle: 'medium' }).format(new Date(value)) }), [language, setLanguage]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 

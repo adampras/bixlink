@@ -22,3 +22,4 @@
 - Member USDT deposits are credited only after server-side on-chain verification (receipt, recipient = owner wallet, USDT contract, confirmations) with one credit per TxID; amount comes from chain, never from user input — prevents fabricated balances.
 - Render the referral network as a cycle-safe recursively expandable tree without a fixed depth cap, so deep generations remain navigable without loading every branch at once.
 - Keep interface translations in the shared local i18n provider and persist member language preferences in browser storage, so all routes switch together without a paid translation dependency.
+- Keep member Settings on its dedicated route but expose it through Profile rather than primary navigation, so the main trading navigation stays focused.
