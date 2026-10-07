@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Home, Wallet, Layers, Zap, User, Network, LogIn, ShieldCheck, Lock, BadgeCheck, Bell, CheckCheck, ChevronDown, TrendingUp, ClipboardCheck } from 'lucide-react';
-import { useMember, usePublicConfig } from '@/lib/useMember';
+import { useMember, usePublicConfig, useReviewerAccess } from '@/lib/useMember';
 import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 import { LANGUAGES, type Language, useI18n } from '@/lib/i18n';
 import { getMarketUpdates } from '@/lib/updates.functions';
@@ -31,18 +31,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   const path = useRouterState({ select: s => s.location.pathname });
   const { language, setLanguage, t, updates } = useI18n();
   const marketEnabled = publicConfig?.readiness.marketEnabled === true;
-  const reviewerRole = useQuery({
-    queryKey: ['my-reviewer-role', user?.id],
-    queryFn: async () => {
-      const userId = user?.id;
-      if (!userId) return false;
-      const { data, error } = await supabase.from('user_roles').select('role').eq('user_id', userId).eq('role', 'reviewer').maybeSingle();
-      if (error) throw error;
-      return Boolean(data);
-    },
-    enabled: Boolean(user),
-    staleTime: 30_000,
-  });
+  const reviewerRole = useReviewerAccess(user?.id);
   const official = useQuery({ queryKey: ['bix-market-updates'], queryFn: () => getMarketUpdates(), enabled: Boolean(user) && marketEnabled, staleTime: 60_000, refetchInterval: 60_000 });
   const visibleUpdates = marketEnabled && official.data?.announcements.length ? official.data.announcements.map(post => ({ id: `${post.id}:${post.published_at}`, title: post.title, body: post.body })) : updates;
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -85,7 +74,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
         {NAV.map(n => <Link key={n.to} to={n.to} className={`nav-link ${path === n.to ? 'active' : ''}`}><n.icon size={15}/>{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>)}
       </nav>}
       <div className="header-tools">
-        {user && reviewerRole.data && <Button asChild title="Owner 2 Panel" variant={path === '/review' ? 'default' : 'ghost'} size="icon" className="header-icon"><Link to="/review" aria-label="Owner 2 Panel"><ClipboardCheck/></Link></Button>}
+        {user && reviewerRole.data && <Button asChild title="Owner 2 Panel" variant="outline" size="sm" className="header-reviewer"><Link to="/review" aria-label="Owner 2 Panel"><ClipboardCheck/><span>Owner 2</span></Link></Button>}
         {user && marketEnabled && <Button asChild title="Market & Updates" variant="ghost" size="icon" className="header-icon"><Link to="/market" aria-label="Market & Updates"><TrendingUp/></Link></Button>}
         <div className="language-control" ref={languageRef}><Button type="button" variant="ghost" className="language-trigger" aria-label={t('language')} aria-haspopup="menu" aria-expanded={languagesOpen} onClick={() => setLanguagesOpen(value => !value)}><span className={`flag-symbol flag-${selectedLanguage.flag}`} aria-hidden/><ChevronDown/></Button>{languagesOpen && <div className="language-menu" role="menu" aria-label={t('language')}>{LANGUAGES.map(item => <Button key={item.code} type="button" variant="ghost" role="menuitemradio" aria-checked={language === item.code} title={item.label} className={language === item.code ? 'is-active' : ''} onClick={() => { setLanguage(item.code as Language); setLanguagesOpen(false); }}><span className={`flag-symbol flag-${item.flag}`} aria-hidden/><span className="sr-only">{item.label}</span></Button>)}</div>}</div>
         {user ? <><div className="notification-control" ref={notificationRef}><Button title={t('notifications')} variant="ghost" size="icon" className="header-icon" aria-label={t('notifications')} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen(value => !value)}><Bell/>{unread > 0 && <span className="notification-count">{unread}</span>}</Button>{notificationsOpen && <div className="notification-menu"><div className="notification-menu-head"><div><span>{t('latestUpdates')}</span><b>{t('notifications')}</b></div>{unread > 0 && <Button size="icon" variant="ghost" title={t('markRead')} onClick={markAllRead}><CheckCheck/></Button>}</div>{notificationsEnabled ? <div className="notification-list">{visibleUpdates.map(item => <article key={item.id} className={readIds.includes(item.id) ? 'is-read' : ''}><i/><div><b>{item.title}</b><p>{item.body}</p></div></article>)}{marketEnabled && <Link to="/market" className="block px-4 py-3 text-xs font-bold text-chart-3" onClick={() => setNotificationsOpen(false)}>Market &amp; Updates →</Link>}</div> : <p className="notification-empty">{t('noUpdates')}</p>}</div>}</div><Button asChild title={t('profile')} variant={path === '/profile' || path === '/settings' ? 'default' : 'ghost'} size="icon" className="header-icon"><Link to="/profile" aria-label={t('profile')}><User/></Link></Button></> : <Button asChild size="sm" className="header-signin max-[480px]:w-auto! max-[480px]:px-3!"><Link to="/auth" aria-label="LAUNCH APP"><LogIn/> <span className="max-[480px]:inline!">LAUNCH APP</span></Link></Button>}

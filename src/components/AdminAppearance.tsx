@@ -10,6 +10,7 @@ const options: { id: PresentationTheme; name: string; detail: string }[] = [
   { id: 'original', name: 'BIXLINK Original', detail: 'Tricolor · Violet / Green / Gold' },
   { id: 'emerald', name: 'Obsidian Emerald', detail: 'Emerald / Champagne · Spacious glass' },
   { id: 'graphite', name: 'Graphite Silver', detail: 'Silver / Teal · Spacious glass' },
+  { id: 'royal', name: 'Royal Gold & Jade', detail: 'Pearl / Gold / Jade · Violet accents' },
 ];
 export function AdminAppearance({ initialTheme, onSaved, onMessage }: { initialTheme?: PresentationTheme | undefined; onSaved: () => Promise<void>; onMessage: (message: string) => void }) {
   const current = resolvePresentationTheme(initialTheme);
@@ -20,7 +21,7 @@ export function AdminAppearance({ initialTheme, onSaved, onMessage }: { initialT
   useEffect(() => { setSelected(current); }, [current]);
   return <section className="mt-8 max-w-5xl" data-no-translate>
     <div className="flex items-center gap-2 text-primary"><Palette size={18}/><h2 className="font-display text-xl font-bold">Project appearance</h2></div>
-    <div className="mt-6 grid gap-5 md:grid-cols-3" role="group" aria-label="Project theme">
+    <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4" role="group" aria-label="Project theme">
       {options.map(option => <Button key={option.id} type="button" variant="outline" className="theme-option" aria-label={`Select ${option.name}`} aria-pressed={selected === option.id} disabled={saving} onClick={() => setSelected(option.id)}>
         <span className="theme-miniature" data-presentation-theme={option.id}>
           <span className="theme-miniature-bar"><span>BIXLINK</span><span className="theme-swatches"><i/><i/><i/></span></span>

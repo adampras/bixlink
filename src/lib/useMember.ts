@@ -119,3 +119,20 @@ export function usePublicConfig() {
     },
   });
 }
+
+// One role query shared by the header, profile and owner entry. UI discovery
+// never replaces the independently authenticated reviewer action checks.
+export function useReviewerAccess(userId?: string) {
+  return useQuery({
+    queryKey: ['my-reviewer-role', userId],
+    queryFn: async () => {
+      if (!userId) return false;
+      const { data, error } = await supabase.from('user_roles').select('role').eq('user_id', userId).eq('role', 'reviewer').maybeSingle();
+      if (error) throw error;
+      return Boolean(data);
+    },
+    enabled: Boolean(userId),
+    staleTime: 0,
+    refetchInterval: 30_000,
+  });
+}

@@ -31,7 +31,7 @@
 - Deposits: unique exact amount matched on chain by one shared matcher (page polling + 5-min cron route); "I have transferred" adds a pending row the owner can approve — one credit path, no double credit.
 - Share HOME/landing content through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
 - Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
-- Owner 2 console shows only for the database-backed reviewer role (in the user_roles constraint); verify role writes by reading back, so client state never grants access.
+- Owner 2 entry in header and Profile shares a database-backed reviewer query; independently validate reviewer actions and exclude clone transactions on both reads and writes, so discovery never grants owner authority.
 - Render income-category and roadmap cards through shared components with bundled default images and owner-upload overrides, so public and member views stay consistent.
 - Store the owner-selected presentation theme inside the existing public readiness setting and apply semantic CSS overrides in the shared shell, so all visitors receive the same lightweight theme without widening database access.
 - BIXCOIN on-chain token is deployed only from the owner's own injected wallet (TokenPocket) with a fixed-supply bytecode compiled in src/lib; the app stores only the resulting address in app_settings and never holds keys or converts internal balances.
