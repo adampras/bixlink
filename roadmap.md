@@ -74,5 +74,5 @@
 - [x] Preview replacement for landing packages, then implement selected admin-editable BIXLINK narrative section.
 - [x] REWARD PLUS VIP 1–10 (team sales, one-time, owner review)
 - [x] Full translation pass for 7 non-English languages
-- [ ] Add reference-inspired Royal Gold & Jade appearance without changing workflows; verify saved theme.
-- [ ] Make Owner 2 entry visible for the selected reviewer, preserving limited actions and clone isolation.
+- [x] Add reference-inspired Royal Gold & Jade appearance without changing workflows; verify saved theme.
+- [x] Make Owner 2 entry visible for the selected reviewer, preserving limited actions and clone isolation.

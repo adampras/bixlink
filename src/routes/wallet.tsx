@@ -69,7 +69,7 @@ function WalletPage() {
   };
   return <BixShell><main className="mx-auto max-w-5xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="WALLET">
-      <div className="relative overflow-hidden rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-3/10 p-6 shadow-[0_0_40px_color-mix(in_oklab,var(--chart-3)_18%,transparent)]">
+      <div className="wallet-summary relative overflow-hidden rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-3/10 p-6 shadow-[0_0_40px_color-mix(in_oklab,var(--chart-3)_18%,transparent)]">
         <div className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet size={16}/> Available balance</div>
         <strong className="numeric mt-2 block break-all text-[28px] leading-snug font-black text-foreground md:text-[32px]">{money(data?.balance ?? 0)}</strong>
         <div className="mt-5 grid grid-cols-2 gap-3"><Button className="rounded-full bg-foreground text-background hover:bg-foreground/90" onClick={() => setModal('deposit')}><ArrowDownToLine/> Deposit</Button><Button variant="outline" className="rounded-full" onClick={() => setModal('withdraw')}><ArrowUpFromLine/> Withdraw</Button></div>
