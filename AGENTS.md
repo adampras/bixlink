@@ -39,3 +39,4 @@
 - Render roadmap phases through a shared glass-caption card with title-matched default illustrations and owner-upload overrides, so both public and member views preserve the same editable roadmap.
 
 - Store the owner-selected presentation theme inside the existing public readiness setting and apply semantic CSS overrides in the shared shell, so all visitors receive the same lightweight theme without widening database access.
+- BIXCOIN on-chain token is deployed only from the owner's own injected wallet (TokenPocket) with a fixed-supply bytecode compiled in src/lib; the app stores only the resulting address in app_settings and never holds keys or converts internal balances.
