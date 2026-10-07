@@ -218,6 +218,13 @@
       "when": 1791371711417,
       "tag": "0030_vip_reward_plus",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1791377130133,
+      "tag": "0031_credit_usdt_direct_sponsor_bonus",
+      "breakpoints": true
     }
   ]
 }
