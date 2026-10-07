@@ -391,21 +391,27 @@ export type Database = {
       packages: {
         Row: {
           apy: number
+          clone_of: string | null
           daily_profit_enabled: boolean
+          enabled: boolean
           id: string
           lock_days: number
           price_usd: number
         }
         Insert: {
           apy: number
+          clone_of?: string | null
           daily_profit_enabled?: boolean
+          enabled?: boolean
           id: string
           lock_days: number
           price_usd: number
         }
         Update: {
           apy?: number
+          clone_of?: string | null
           daily_profit_enabled?: boolean
+          enabled?: boolean
           id?: string
           lock_days?: number
           price_usd?: number
