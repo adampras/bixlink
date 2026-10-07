@@ -1,6 +1,6 @@
 - [x] Connect Cloud authentication and database.
 - [ ] Present lightweight splash previews and implement selected visual (awaiting selection).
-- [ ] Prevent splash interruptions while writing announcements and verify draft saving.
+- [x] Prevent splash interruptions while writing announcements and verify draft saving.
 - [x] Present clearer NETWORK tree previews and implement the chosen design after selection.
 - [x] Synchronize BIXCOIN staking direct-referral bonuses with owner controls and verify ledger results.
 - [x] Add admin-editable image and visibility controls for HOME spaces and landing columns.
