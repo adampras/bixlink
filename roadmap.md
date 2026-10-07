@@ -67,3 +67,5 @@
 - [x] Add matching Phase 1–6 roadmap images with glass captions and admin upload overrides.
 - [x] Add original/Emerald/Graphite theme selection to the main admin, shared across public and member pages.
 - [x] Verify saved themes persist and work across desktop/mobile main menus, restoring the original selection after testing.
+
+- [x] Create eight persistent USDT package clones and verify owner editing, open/close, and member visibility.
