@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Coins, LockKeyhole, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { confirmPin, txFeedback } from '@/components/TxFeedback';
 import { number } from '@/lib/bixlink';
 import { usePublicConfig } from '@/lib/useMember';
 import { useServerFn } from '@tanstack/react-start';
@@ -47,21 +48,23 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   const live = active.reduce((sum, s) => sum + Number(s.amount_bix) * Number(s.apy) / 100 * Math.min((now - new Date(s.created_at).getTime()) / 86400000, s.lock_days) / 365, 0);
 
   async function stake() {
+    if (!(await confirmPin())) return;
     setBusy(true); setMsg('');
     try {
       await stakeBix({ data: { amount: amt, days } });
-      setMsg(`CONGRATULATION — ${number(amt)} BIX staked at ${apy}% APY.`);
+      setMsg(`CONGRATULATION — ${number(amt)} BIX staked at ${apy}% APY.`); txFeedback.success('BIX staked', `${number(amt)} BIX at ${apy}% APY`);
       await qc.invalidateQueries();
-    } catch (error) { setMsg(error instanceof Error ? error.message : 'Could not stake BIX.'); }
+    } catch (error) { setMsg(error instanceof Error ? error.message : 'Could not stake BIX.'); txFeedback.fail('BIX staking failed', error); }
     finally { setBusy(false); }
   }
   async function unstake(id: string) {
+    if (!(await confirmPin())) return;
     setBusy(true);
     try {
       const data = await unstakeBix({ data: { id } });
-      setMsg(data.penalty > 0 ? `Unstaked early. Penalty ${number(data.penalty)} BIX.` : 'Unstaked. Principal returned.');
+      setMsg(data.penalty > 0 ? `Unstaked early. Penalty ${number(data.penalty)} BIX.` : 'Unstaked. Principal returned.'); txFeedback.success('BIX unstaked', data.penalty > 0 ? `Penalty ${number(data.penalty)} BIX` : 'Principal returned.');
       await qc.invalidateQueries();
-    } catch (error) { setMsg(error instanceof Error ? error.message : 'Could not unstake.'); }
+    } catch (error) { setMsg(error instanceof Error ? error.message : 'Could not unstake.'); txFeedback.fail('Unstake failed', error); }
     finally { setBusy(false); }
   }
 

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
+import { confirmPin, txFeedback } from '@/components/TxFeedback';
 import { supabase } from '@/integrations/supabase/client';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { dateTime, money } from '@/lib/bixlink';
@@ -21,10 +22,11 @@ function TransferPage() {
   const open = !!cfg?.usdtTransfer.enabled;
   const myCode = mine?.referral?.code;
   async function send(e: React.FormEvent) {
-    e.preventDefault(); setBusy(true); setMsg('');
+    e.preventDefault(); if (!(await confirmPin())) return; setBusy(true); setMsg('');
     const { error } = await supabase.rpc('bix_vusdt_send', { p_code: code.trim().toUpperCase(), p_amount: Number(amount), p_note: note });
     setBusy(false);
-    if (error) return setMsg(error.message);
+    if (error) { txFeedback.fail('Transfer failed', error.message); return setMsg(error.message); }
+    txFeedback.success('Transfer sent', `${money(Number(amount))} to ${code.toUpperCase()}`);
     setMsg(`Sent ${money(Number(amount))} to ${code.toUpperCase()}.`); setAmount(''); setNote(''); q.refetch();
   }
   return <BixShell><main className="mx-auto max-w-3xl px-5 py-10 md:px-8"><MemberGate ready={ready} signedIn={!!user} title="TRANSFER">
