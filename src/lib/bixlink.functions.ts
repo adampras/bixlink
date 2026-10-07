@@ -128,10 +128,11 @@ export const updatePackage = createServerFn({ method: 'POST' }).middleware([requ
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness'; value: Record<string, unknown> }) => {
-    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness']), value: z.record(z.unknown()) }).parse(data);
+  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token'; value: Record<string, unknown> }) => {
+    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token']), value: z.record(z.unknown()) }).parse(data);
     if (parsed.key === 'readiness') z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean(), homeOverviewEnabled: z.boolean().optional(), presentationTheme: z.enum(PRESENTATION_THEMES).optional() }).strict().parse(parsed.value);
     if (parsed.key === 'unstake') z.object({ tiers: z.array(z.object({ days: z.number().int().min(1).max(3650), pct: z.number().min(0).max(100) })).min(1).max(10) }).parse(parsed.value);
+    if (parsed.key === 'bix_token') z.object({ chainId: z.union([z.literal(56), z.literal(97)]), address: z.string().regex(/^0x[a-fA-F0-9]{40}$/), txHash: z.string().regex(/^0x[a-fA-F0-9]{64}$/), deployer: z.string().regex(/^0x[a-fA-F0-9]{40}$/), supply: z.number().int().positive().max(1_000_000_000_000), deployedAt: z.string().max(40) }).strict().parse(parsed.value);
     if (parsed.key === 'bix_market') z.object({ priceUsd: z.number().positive().max(1_000_000) }).parse(parsed.value);
     if (parsed.key === 'referrals') z.object({ direct: z.number().min(0).max(100), levels: z.array(z.number().min(0).max(100)).length(5), rewardPlus: z.number().min(0).max(100), minimumDirect: z.number().int().min(1), splitUsdt: z.number().min(0).max(100), splitBix: z.number().min(0).max(100), bixDirectPct: z.number().min(0).max(100).optional(), bixDirectEnabled: z.boolean().optional() }).refine(v => v.splitUsdt + v.splitBix === 100, 'USDT and BIX split must total 100%').parse(parsed.value);
     if (parsed.key === 'landing_content') {
