@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
+import { confirmPin, txFeedback } from '@/components/TxFeedback';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { requestStake, unstakeStake } from '@/lib/bixlink.functions';
 import { date, money, number, type Package } from '@/lib/bixlink';
@@ -90,7 +91,7 @@ function StakePage() {
         <label className="mt-4 flex items-start gap-2 rounded-xl border border-border p-3 text-xs"><input type="checkbox" className="mt-0.5" checked={agree} onChange={e => setAgree(e.target.checked)}/> I agree to the staking terms: lock period, APY estimate and early-unstake penalties.</label>
         <div className="mt-5 grid grid-cols-2 gap-3">
           <Button variant="outline" className="rounded-full" onClick={() => { setChosen(null); setNotice('Stake cancelled — you did not agree.'); }}>Disagree</Button>
-          <Button disabled={busy || !agree || Number(bal.data ?? 0) < Number(chosen.price_usd)} className="rounded-full bg-chart-3 text-background" onClick={async () => { setBusy(true); try { await submit({ data: { packageId: chosen.id } }); setCongrats(chosen); await refreshAll(); } catch (e) { const message = e instanceof Error ? e.message : 'Request failed.'; setNotice(message.toLowerCase().includes('insufficient') ? `Insufficient balance. Add more virtual USDT before staking ${chosen.id}.` : message); } setBusy(false); setChosen(null); }}>Agree & stake</Button>
+          <Button disabled={busy || !agree || Number(bal.data ?? 0) < Number(chosen.price_usd)} className="rounded-full bg-chart-3 text-background" onClick={async () => { if (!(await confirmPin())) return; setBusy(true); try { await submit({ data: { packageId: chosen.id } }); setCongrats(chosen); await refreshAll(); } catch (e) { const message = e instanceof Error ? e.message : 'Request failed.'; const m2 = message.toLowerCase().includes('insufficient') ? `Insufficient balance. Add more virtual USDT before staking ${chosen.id}.` : message; setNotice(m2); txFeedback.fail('Staking failed', m2); } setBusy(false); setChosen(null); }}>Agree & stake</Button>
         </div>
       </div></div>}
       {congrats && <div className="modal-backdrop" onClick={() => setCongrats(null)}><div role="dialog" aria-modal="true" className="modal-panel deposit-success text-center" onClick={e => e.stopPropagation()}>
@@ -106,7 +107,7 @@ function StakePage() {
         <div className="mt-4 rounded-xl border border-destructive/50 bg-destructive/10 p-3 text-xs"><b className="text-destructive">Consequences of unstaking early</b><ul className="mt-2 list-disc space-y-1 pl-4 text-muted-foreground"><li>The penalty is deducted from your principal and cannot be refunded.</li><li>Your stake stops immediately and all future estimated APY profit is forfeited.</li><li>Booster / referral qualification based on this stake may be lost.</li><li>This action is final — to stake again you must start a new lock period.</li></ul>
           <p className="mt-2 text-muted-foreground">Penalty schedule: {tiers.map(t => `<${t.days}d ${t.pct}%`).join(' · ')} · after lock ends 0%</p></div>
         <label className="mt-4 flex items-start gap-2 rounded-xl border border-border p-3 text-xs"><input type="checkbox" className="mt-0.5" checked={unAgree} onChange={e => setUnAgree(e.target.checked)}/> I understand the consequences and accept the {pct}% penalty.</label>
-        <div className="mt-5 grid grid-cols-2 gap-3"><Button variant="outline" className="rounded-full" onClick={() => setUnstaking(null)}>Keep staking</Button><Button variant="destructive" disabled={busy || !unAgree} className="rounded-full" onClick={async () => { setBusy(true); try { const r = await doUnstake({ data: { stakeId: unstaking.id } }); setNotice(`Unstaked — ${money(Number(r.refund_usd))} returned to your virtual USDT balance (penalty ${r.penalty_pct}%).`); await refreshAll(); } catch (e) { setNotice(e instanceof Error ? e.message : 'Unstake failed.'); } setBusy(false); setUnstaking(null); }}>Confirm unstake</Button></div>
+        <div className="mt-5 grid grid-cols-2 gap-3"><Button variant="outline" className="rounded-full" onClick={() => setUnstaking(null)}>Keep staking</Button><Button variant="destructive" disabled={busy || !unAgree} className="rounded-full" onClick={async () => { if (!(await confirmPin())) return; setBusy(true); try { const r = await doUnstake({ data: { stakeId: unstaking.id } }); setNotice(`Unstaked — ${money(Number(r.refund_usd))} returned to your virtual USDT balance (penalty ${r.penalty_pct}%).`); txFeedback.success('Unstake completed', `${money(Number(r.refund_usd))} returned (penalty ${r.penalty_pct}%).`); await refreshAll(); } catch (e) { setNotice(e instanceof Error ? e.message : 'Unstake failed.'); txFeedback.fail('Unstake failed', e); } setBusy(false); setUnstaking(null); }}>Confirm unstake</Button></div>
       </div></div>; })()}
     </MemberGate>
   </main></BixShell>;

@@ -9,6 +9,7 @@ import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 import { LANGUAGES, type Language, useI18n } from '@/lib/i18n';
 import { getMarketUpdates } from '@/lib/updates.functions';
 import { resolvePresentationTheme } from '@/lib/presentation-theme';
+import { TxFeedbackHost } from '@/components/TxFeedback';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
@@ -80,6 +81,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
         {user ? <><div className="notification-control" ref={notificationRef}><Button title={t('notifications')} variant="ghost" size="icon" className="header-icon" aria-label={t('notifications')} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen(value => !value)}><Bell/>{unread > 0 && <span className="notification-count">{unread}</span>}</Button>{notificationsOpen && <div className="notification-menu"><div className="notification-menu-head"><div><span>{t('latestUpdates')}</span><b>{t('notifications')}</b></div>{unread > 0 && <Button size="icon" variant="ghost" title={t('markRead')} onClick={markAllRead}><CheckCheck/></Button>}</div>{notificationsEnabled ? <div className="notification-list">{visibleUpdates.map(item => <article key={item.id} className={readIds.includes(item.id) ? 'is-read' : ''}><i/><div><b>{item.title}</b><p>{item.body}</p></div></article>)}{marketEnabled && <Link to="/market" className="block px-4 py-3 text-xs font-bold text-chart-3" onClick={() => setNotificationsOpen(false)}>Market &amp; Updates →</Link>}</div> : <p className="notification-empty">{t('noUpdates')}</p>}</div>}</div><Button asChild title={t('profile')} variant={path === '/profile' || path === '/settings' ? 'default' : 'ghost'} size="icon" className="header-icon"><Link to="/profile" aria-label={t('profile')}><User/></Link></Button></> : <Button asChild size="sm" className="header-signin max-[480px]:w-auto! max-[480px]:px-3!"><Link to="/auth" aria-label="LAUNCH APP"><LogIn/> <span className="max-[480px]:inline!">LAUNCH APP</span></Link></Button>}
       </div>
     </div></header>{children}
+    <TxFeedbackHost/>
     <footer className="border-t border-border py-9"><div className="mx-auto max-w-7xl px-5 md:px-8">
       {publicConfig?.readiness.readinessEnabled && <div className="trust-panel text-xs">
         <div><ShieldCheck size={18} className="shrink-0 text-chart-2"/><div><strong className="block text-foreground">Automated staking ledger</strong><span className="text-muted-foreground">Staking, profit projections and internal transfers are processed automatically.</span></div></div>

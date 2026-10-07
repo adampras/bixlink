@@ -8,8 +8,9 @@ import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { getBixPay, lookupBixPay, sendBixPay } from '@/lib/bixlink.functions';
-import { ScanLine, QrCode, Lock, ArrowUpRight, ArrowDownLeft, Copy, ShieldCheck, ArrowLeft, X } from 'lucide-react';
+import { ScanLine, QrCode, Lock, ArrowUpRight, ArrowDownLeft, Copy, ShieldCheck, ArrowLeft, X, ImageUp } from 'lucide-react';
 import { dateTime, number } from '@/lib/bixlink';
+import { confirmPin, txFeedback } from '@/components/TxFeedback';
 
 export const Route = createFileRoute('/pay')({
   head: () => ({ meta: [{ title: 'BIX PAY — BIXLINK' }, { name: 'description', content: 'Scan a QR code to pay other BIXLINK members in BIX.' }, { property: 'og:title', content: 'BIX PAY — BIXLINK' }, { property: 'og:description', content: 'Member-to-member BIX payments by QR scan.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
@@ -38,7 +39,7 @@ function Scanner({ onResult, onClose }: { onResult: (v: string) => void; onClose
       if (stopped) return;
       const s = new Html5Qrcode('bix-scanner'); ref.current = s;
       s.start({ facingMode: 'environment' }, { fps: 10, qrbox: 230 }, text => { s.stop().catch(() => {}); ref.current = null; onResult(text); }, () => {})
-        .catch(() => setErr('Camera unavailable. Allow camera access or enter the member code manually.'));
+        .catch(() => setErr('Camera unavailable. Choose a QR image from your gallery or enter the code manually.'));
     });
     return () => { stopped = true; ref.current?.stop().catch(() => {}); };
   }, [onResult]);
@@ -46,6 +47,10 @@ function Scanner({ onResult, onClose }: { onResult: (v: string) => void; onClose
     <div className="flex items-center justify-between"><b className="font-display">Scan BIX PAY QR</b><Button size="icon" variant="ghost" onClick={onClose} aria-label="Close"><X/></Button></div>
     <div id="bix-scanner" className="mt-4 aspect-square overflow-hidden rounded-xl bg-background"/>
     {err && <p className="mt-3 text-xs text-destructive">{err}</p>}
+    <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-full border border-chart-3 py-2.5 text-sm font-bold text-chart-3"><ImageUp size={16}/> Choose QR from gallery
+      <input type="file" accept="image/*" className="hidden" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; setErr(''); try { await ref.current?.stop().catch(() => {}); ref.current = null; const { Html5Qrcode } = await import('html5-qrcode'); const reader = new Html5Qrcode('bix-file-reader'); const text = await reader.scanFile(file, false); reader.clear(); onResult(text); } catch { setErr('No QR code found in that image. Try a clearer screenshot.'); } e.target.value = ''; }}/>
+    </label>
+    <div id="bix-file-reader" className="hidden"/>
   </div></div>;
 }
 
@@ -76,9 +81,10 @@ function PayPage() {
     setBusy(false);
   };
   const pay = async () => {
+    if (!(await confirmPin())) return;
     setBusy(true);
-    try { await send({ data: { code, amount: Number(amount), note } }); setMsg(`Paid ${number(Number(amount), { maximumFractionDigits: 8 })} BIX to ${code.toUpperCase()}.`); setConfirm(false); setAmount(''); setNote(''); await qc.invalidateQueries({ queryKey: ['bix-pay'] }); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); }
-    catch (e) { setMsg(e instanceof Error ? e.message : 'Payment failed.'); setConfirm(false); }
+    try { await send({ data: { code, amount: Number(amount), note } }); txFeedback.success('Payment sent', `${number(Number(amount), { maximumFractionDigits: 8 })} BIX to ${code.toUpperCase()}`); setMsg(`Paid ${number(Number(amount), { maximumFractionDigits: 8 })} BIX to ${code.toUpperCase()}.`); setConfirm(false); setAmount(''); setNote(''); await qc.invalidateQueries({ queryKey: ['bix-pay'] }); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); }
+    catch (e) { setMsg(e instanceof Error ? e.message : 'Payment failed.'); txFeedback.fail('Payment failed', e); setConfirm(false); }
     setBusy(false);
   };
 

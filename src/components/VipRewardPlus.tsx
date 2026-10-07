@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Crown, Check, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { txFeedback } from '@/components/TxFeedback';
 import { claimVip, getVipStatus } from '@/lib/network.functions';
 import { money, number } from '@/lib/bixlink';
 
@@ -25,7 +26,7 @@ export function VipRewardPlus() {
         <p className="numeric mt-1 text-sm font-bold">{number(t.rewardBix)} BIX</p>
         <div className="mt-2">{t.status === 'approved' ? <span className="inline-flex items-center gap-1 text-xs font-bold text-chart-2"><Check size={12}/>Received</span>
           : t.status === 'pending' ? <span className="text-xs font-bold text-chart-3">Pending review</span>
-          : t.qualified && !claimed ? <Button size="sm" className="h-7 rounded-full px-3 text-xs" disabled={busy === t.level} onClick={async () => { setBusy(t.level); try { await claim({ data: { level: t.level } }); await refetch(); setMsg('Reward claimed. Awaiting owner review.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Could not claim.'); } setBusy(null); }}>Claim</Button>
+          : t.qualified && !claimed ? <Button size="sm" className="h-7 rounded-full px-3 text-xs" disabled={busy === t.level} onClick={async () => { setBusy(t.level); try { await claim({ data: { level: t.level } }); await refetch(); setMsg('Reward claimed. Awaiting owner review.'); txFeedback.success('VIP reward claimed', 'Awaiting owner review.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Could not claim.'); txFeedback.fail('Claim failed', e); } setBusy(null); }}>Claim</Button>
           : <span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><Lock size={11}/>Locked</span>}</div>
       </div>; })}</div>
     {msg && <p className="mt-3 text-xs text-chart-2">{msg}</p>}
