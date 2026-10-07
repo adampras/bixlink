@@ -232,6 +232,13 @@
       "when": 1791380710503,
       "tag": "0032_usdt_network_bonus_split_and_daily_matching",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1791388225867,
+      "tag": "0033_team_accounts",
+      "breakpoints": true
     }
   ]
 }

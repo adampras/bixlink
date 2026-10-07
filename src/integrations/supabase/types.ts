@@ -223,6 +223,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_team_accounts: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          label: string
+          region: string
+          sponsor_id: string | null
+          team_role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          label: string
+          region?: string
+          sponsor_id?: string | null
+          team_role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          label?: string
+          region?: string
+          sponsor_id?: string | null
+          team_role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_transfers: {
         Row: {
           amount_bix: number

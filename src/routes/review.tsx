@@ -7,6 +7,7 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { Check, X } from 'lucide-react';
 import { dateTime, money } from '@/lib/bixlink';
+import { AdminTeams } from '@/components/AdminTeams';
 
 export const Route = createFileRoute('/review')({
   head: () => ({ meta: [{ title: 'ADMIN PANEL BIX — BIXLINK' }, { name: 'description', content: 'Limited BIXLINK review console.' }, { property: 'og:title', content: 'ADMIN PANEL BIX — BIXLINK' }, { property: 'og:description', content: 'Limited review console.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }),
@@ -36,6 +37,7 @@ function Review() {
           <div className="flex items-center gap-3"><div className="text-right"><div className="text-chart-3">{money(Number(t.amount_usd))}</div>{Number(t.fee_usd) > 0 && <div className="text-muted-foreground">send {money(Number(t.net_usd))}</div>}<div className="capitalize">{t.status}</div></div>
             {t.status === 'pending' && (['approved', 'rejected'] as const).map(s => <Button key={s} size="icon" variant={s === 'approved' ? 'default' : 'destructive'} className="rounded-full" title={s} onClick={async () => { try { await decide({ data: { id: t.id, status: s } }); await refresh(); setMsg(`Marked ${s}.`); } catch { setMsg('Could not update.'); } }}>{s === 'approved' ? <Check /> : <X />}</Button>)}</div>
         </div>)}{!list.length && <p className="text-sm text-muted-foreground">No transactions.</p>}</div>
+        <AdminTeams onMessage={setMsg}/>
       </>}
   </main></BixShell>;
 }
