@@ -4,7 +4,8 @@ import { z } from 'zod';
 
 // Owner 2 = 'reviewer' role: may only approve/reject pending deposits and withdrawals.
 const isReviewer = async (context: { supabase: any; userId: string }) => {
-  const { data } = await context.supabase.from('user_roles').select('role').eq('user_id', context.userId).eq('role', 'reviewer').maybeSingle();
+  const { data, error } = await context.supabase.from('user_roles').select('role').eq('user_id', context.userId).eq('role', 'reviewer').maybeSingle();
+  if (error) throw error;
   return Boolean(data);
 };
 const verifyOwner = async (context: { supabase: any }) => {
@@ -16,7 +17,8 @@ export const getReviewerQueue = createServerFn({ method: 'GET' }).middleware([re
   if (!(await isReviewer(context))) return { reviewer: false as const, items: [] };
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
   // Hide owner clone accounts from the Owner 2 queue entirely.
-  const { data: clones } = await supabaseAdmin.from('bix_clone_accounts').select('user_id');
+  const { data: clones, error: cloneError } = await supabaseAdmin.from('bix_clone_accounts').select('user_id');
+  if (cloneError) throw cloneError;
   const cloneIds = (clones ?? []).map((c: { user_id: string }) => c.user_id);
   let query = supabaseAdmin.from('wallet_transactions')
     .select('id,type,amount_usd,net_usd,fee_usd,status,tx_hash,address,network,created_at')
@@ -32,9 +34,15 @@ export const reviewerDecide = createServerFn({ method: 'POST' }).middleware([req
   .handler(async ({ context, data }) => {
     if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { error } = await supabaseAdmin.from('wallet_transactions').update({ status: data.status, reviewed_at: new Date().toISOString() })
+    const { data: clones, error: cloneError } = await supabaseAdmin.from('bix_clone_accounts').select('user_id');
+    if (cloneError) throw cloneError;
+    const cloneIds = (clones ?? []).map(c => c.user_id);
+    let query = supabaseAdmin.from('wallet_transactions').update({ status: data.status, reviewed_at: new Date().toISOString() })
       .eq('id', data.id).eq('status', 'pending').in('type', ['deposit', 'withdraw']);
+    if (cloneIds.length) query = query.not('user_id', 'in', `(${cloneIds.join(',')})`);
+    const { data: changed, error } = await query.select('id').maybeSingle();
     if (error) throw error;
+    if (!changed) throw new Error('Transaction unavailable or already reviewed.');
     await supabaseAdmin.from('deposit_intents').update({ status: 'reviewed' }).eq('claim_tx_id', data.id).eq('status', 'pending');
     return { ok: true };
   });
