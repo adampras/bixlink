@@ -140,6 +140,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_stakes: {
+        Row: {
+          amount_bix: number
+          apy: number
+          created_at: string
+          ended_at: string | null
+          id: string
+          lock_days: number
+          penalty_bix: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_bix: number
+          apy: number
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          lock_days: number
+          penalty_bix?: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_bix?: number
+          apy?: number
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          lock_days?: number
+          penalty_bix?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_transfers: {
         Row: {
           amount_bix: number
@@ -625,7 +661,16 @@ export type Database = {
           weekly_turnover_usd: number
         }[]
       }
+      bix_stake_apy: {
+        Args: { p_amount: number; p_days: number }
+        Returns: number
+      }
+      bix_stake_bix: {
+        Args: { p_amount: number; p_days: number }
+        Returns: string
+      }
       bix_unstake: { Args: { p_stake: string }; Returns: Json }
+      bix_unstake_bix: { Args: { p_stake: string }; Returns: number }
       bix_unstake_penalty: {
         Args: { p_days: number; p_lock: number }
         Returns: number
