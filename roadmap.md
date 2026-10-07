@@ -68,4 +68,4 @@
 - [x] Add original/Emerald/Graphite theme selection to the main admin, shared across public and member pages.
 - [x] Verify saved themes persist and work across desktop/mobile main menus, restoring the original selection after testing.
 
-- [ ] Create eight persistent USDT package clones and verify owner editing, open/close, and member visibility.
+- [x] Create eight persistent USDT package clones and verify owner editing, open/close, and member visibility.
