@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { z } from 'zod';
 import type { Json } from '@/integrations/supabase/types';
 import { PRESENTATION_THEMES } from '@/lib/presentation-theme';
+import { canonicalJson } from '@/lib/json-content';
 
 const verifyAdmin = async (context: { supabase: any; userId: string; claims?: any }) => {
   const { data: admin, error } = await context.supabase.rpc('is_bix_admin');
@@ -161,7 +162,7 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
     if (parsed.key === 'referrals') z.object({ direct: z.number().min(0).max(100), levels: z.array(z.number().min(0).max(100)).length(5), rewardPlus: z.number().min(0).max(100), minimumDirect: z.number().int().min(1), splitUsdt: z.number().min(0).max(100), splitBix: z.number().min(0).max(100), bixDirectPct: z.number().min(0).max(100).optional(), bixDirectEnabled: z.boolean().optional() }).refine(v => v.splitUsdt + v.splitBix === 100, 'USDT and BIX split must total 100%').parse(parsed.value);
     if (parsed.key === 'landing_content') {
       const item = z.object({ title: z.string().trim().min(1).max(60), description: z.string().trim().max(240), image: z.string().regex(/^images\/[a-f0-9-]+\.(jpg|jpeg|png|webp)$/).optional(), enabled: z.boolean().optional(), quarter: z.string().max(40).optional() }).strict();
-      parsed.value = z.object({ ecosystem: z.array(item).max(12), income: z.array(item).max(12), spaces: z.array(item).max(12).optional(), roadmap: z.array(item).max(12).optional() }).strict().parse(parsed.value);
+      parsed.value = z.object({ ecosystem: z.array(item).max(12), income: z.array(item).max(12), spaces: z.array(item).max(12).optional(), roadmap: z.array(item).max(12).optional(), narrative: z.array(item).max(12).optional(), narrativeTitle: z.string().trim().max(60).optional(), narrativeIntro: z.string().trim().max(240).optional(), narrativeEnabled: z.boolean().optional() }).strict().parse(parsed.value);
     }
     return parsed;
   })
@@ -170,7 +171,7 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
     const { error } = await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
     if (error) throw error;
     const { data: saved, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', data.key).single();
-    if (readError || !saved || Object.entries(data.value).some(([key, value]) => JSON.stringify((saved.value as Record<string, unknown>)[key]) !== JSON.stringify(value))) throw new Error('Could not confirm saved settings');
+    if (readError || !saved || canonicalJson(saved.value) !== canonicalJson(data.value)) throw new Error('Could not confirm saved settings');
     return { ok: true };
   });
 

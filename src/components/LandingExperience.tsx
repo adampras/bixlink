@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, ArrowUpRight, Building2, CircleDollarSign, Globe2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PackageGrid } from '@/components/PackageGrid';
+import { LandingNarrative } from '@/components/LandingNarrative';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
 import fox from '@/assets/bixlink-fox.png';
 
@@ -32,7 +32,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
         </div>
       </div>
     </section>
-    <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="mb-8"><div className="eyebrow">CHOOSE YOUR PATH</div><h2 className="section-title">8 STAKING <span>PACKAGES</span></h2></div><PackageGrid packages={packages}/></section>
+    <LandingNarrative content={content}/>
     <section className="landing-ecosystem border-y border-border"><div className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="eyebrow">THE BIXLINK ADVANTAGE</div><h2 className="section-title">PREMIUM <span>ECOSYSTEM</span></h2><div className="mt-8 grid gap-5 lg:grid-cols-2"><article className="ecosystem-column"><header><span className="ecosystem-icon text-primary"><Globe2/></span><div><small>CONNECTED UTILITY</small><h3>Ecosystem core</h3></div></header><div className="ecosystem-list">{content.ecosystem.filter(item => item.enabled !== false).map((item, index) => <div key={`${item.title}-${index}`}><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div>)}</div></article><article className="ecosystem-column ecosystem-column--income"><header><span className="ecosystem-icon text-chart-3"><CircleDollarSign/></span><div><small>DISCLOSED SOURCES</small><h3>Income narrative</h3></div></header><div className="ecosystem-list">{content.income.filter(item => item.enabled !== false).map((item, index) => <div key={`${item.title}-${index}`}><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div>)}</div></article></div><div className="ecosystem-disclosure"><ShieldCheck/><span>Public narratives are owner-managed. Recorded income is not presented as audited revenue or guaranteed return.</span><Building2/></div></div></section>
     <section className="mx-auto max-w-7xl px-5 py-8 md:px-8"><div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{(content.spaces ?? defaultSpaces).filter(item => item.enabled !== false).map((item, index) => <IncomeCategoryCard item={item} key={`${item.title}-${index}`}/>)}</div></section>
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="eyebrow">WHAT'S AHEAD</div><h2 className="section-title">THE <span>ROADMAP</span></h2><div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3">{(content.roadmap ?? defaultRoadmap).map((item, i) => item.enabled !== false ? <RoadmapCard item={item} index={i} key={`${item.title}-${i}`}/> : null)}</div></section>

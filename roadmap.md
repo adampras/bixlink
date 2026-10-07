@@ -71,4 +71,4 @@
 - [x] Create eight persistent USDT package clones and verify owner editing, open/close, and member visibility.
 
 - [x] Add show/hide My requests and verify signed-in staking history.
-- [ ] Preview replacement for landing packages, then implement selected admin-editable BIXLINK narrative section.
+- [x] Preview replacement for landing packages, then implement selected admin-editable BIXLINK narrative section.

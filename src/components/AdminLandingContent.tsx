@@ -3,17 +3,17 @@ import { useServerFn } from '@tanstack/react-start';
 import { Plus, Save, Trash2, Upload, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { updateSetting } from '@/lib/bixlink.functions';
-import { defaultLandingContent, defaultRoadmap, defaultSpaces, type LandingContent, type ContentItem } from '@/lib/landing-content';
+import { defaultLandingContent, defaultNarrative, defaultNarrativeTitle, defaultNarrativeIntro, defaultRoadmap, defaultSpaces, type LandingContent, type ContentItem } from '@/lib/landing-content';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentImage } from '@/components/ContentImage';
 import { useQueryClient } from '@tanstack/react-query';
 import { categoryImage } from '@/lib/category-images';
 import { roadmapImage } from '@/lib/roadmap-images';
 
-type Group = 'ecosystem' | 'income' | 'spaces' | 'roadmap';
+type Group = 'ecosystem' | 'income' | 'spaces' | 'roadmap' | 'narrative';
 
 export function AdminLandingContent({ initialContent, onMessage, onSaved }: { initialContent?: LandingContent; onMessage: (message: string) => void; onSaved: () => Promise<void> }) {
-  const [content, setContent] = useState<LandingContent>({ ...(initialContent ?? defaultLandingContent), spaces: initialContent?.spaces ?? defaultSpaces, roadmap: initialContent?.roadmap ?? defaultRoadmap });
+  const [content, setContent] = useState<LandingContent>({ ...(initialContent ?? defaultLandingContent), spaces: initialContent?.spaces ?? defaultSpaces, roadmap: initialContent?.roadmap ?? defaultRoadmap, narrative: initialContent?.narrative ?? defaultNarrative, narrativeTitle: initialContent?.narrativeTitle ?? defaultNarrativeTitle, narrativeIntro: initialContent?.narrativeIntro ?? defaultNarrativeIntro, narrativeEnabled: initialContent?.narrativeEnabled ?? true });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string>();
   const qc = useQueryClient();
@@ -58,5 +58,5 @@ export function AdminLandingContent({ initialContent, onMessage, onSaved }: { in
       <div className="flex flex-wrap items-center gap-2"><Button asChild size="sm" variant="outline" disabled={Boolean(uploading)}><label className="cursor-pointer"><Upload/>{uploading === `${group}-${index}` ? 'Uploading…' : 'Upload image'}<input disabled={Boolean(uploading)} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" aria-label={`${label} image ${index + 1}`} onChange={event => { void upload(group, index, event.target.files?.[0]); event.target.value = ''; }}/></label></Button>{item.image && <Button type="button" size="sm" variant="ghost" onClick={() => updateItem(group, index, 'image', undefined)}>Remove image</Button>}</div>
     </div>)}</div>
   </section>;
-  return <div className="mt-8"><div className="grid gap-x-8 lg:grid-cols-2">{editor('ecosystem', 'ECOSYSTEM')}{editor('income', 'INCOME SOURCES')}{editor('spaces', 'HOME & LANDING SPACES')}{editor('roadmap', 'ROADMAP')}</div><div className="sticky bottom-20 mt-5 flex justify-end bg-background py-4 md:bottom-0"><Button type="button" disabled={saving || Boolean(uploading)} onClick={save}><Save/> {saving ? 'Saving…' : 'Save landing content'}</Button></div></div>;
+  return <div className="mt-8"><section className="border-t border-border py-6"><div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-display text-xl font-bold">LANDING NARRATIVE</h3><Button type="button" size="sm" variant={content.narrativeEnabled === false ? 'outline' : 'default'} aria-label="Landing narrative visibility" aria-pressed={content.narrativeEnabled !== false} onClick={() => setContent(current => ({ ...current, narrativeEnabled: current.narrativeEnabled === false }))}>{content.narrativeEnabled === false ? <EyeOff/> : <Eye/>}{content.narrativeEnabled === false ? 'CLOSED' : 'OPEN'}</Button></div><label className="mt-5 block text-xs text-muted-foreground">Section title<input className="form-input mt-2" aria-label="Narrative section title" maxLength={60} value={content.narrativeTitle ?? ''} onChange={event => setContent(current => ({ ...current, narrativeTitle: event.target.value }))}/></label><label className="mt-4 block text-xs text-muted-foreground">Introduction<textarea className="form-input mt-2 min-h-24" aria-label="Narrative introduction" maxLength={240} value={content.narrativeIntro ?? ''} onChange={event => setContent(current => ({ ...current, narrativeIntro: event.target.value }))}/></label>{editor('narrative', 'NARRATIVE BLOCKS')}</section><div className="grid gap-x-8 lg:grid-cols-2">{editor('ecosystem', 'ECOSYSTEM')}{editor('income', 'INCOME SOURCES')}{editor('spaces', 'HOME & LANDING SPACES')}{editor('roadmap', 'ROADMAP')}</div><div className="sticky bottom-20 mt-5 flex justify-end bg-background py-4 md:bottom-0"><Button type="button" disabled={saving || Boolean(uploading)} onClick={save}><Save/> {saving ? 'Saving…' : 'Save landing content'}</Button></div></div>;
 }
