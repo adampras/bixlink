@@ -13,7 +13,7 @@ const CHAINS = {
   97: { hex: '0x61', name: 'BNB Testnet', rpc: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545', explorer: 'https://testnet.bscscan.com', symbol: 'tBNB' },
 } as const;
 
-export function AdminBixToken({ saved, onMessage }: { saved?: Record<string, unknown>; onMessage: (m: string) => void }) {
+export function AdminBixToken({ saved, onMessage }: { saved?: { chainId?: number; address?: string; supply?: number } | undefined; onMessage: (m: string) => void }) {
   const [chainId, setChainId] = useState<56 | 97>(97);
   const [supply, setSupply] = useState('21000000');
   const [account, setAccount] = useState('');
