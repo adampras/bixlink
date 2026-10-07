@@ -7,7 +7,7 @@ import { updateSetting } from '@/lib/bixlink.functions';
 import { getBixBonusReviews, reviewBixBonus } from '@/lib/network.functions';
 import { number } from '@/lib/bixlink';
 
-export function AdminReferrals({ initial, onSaved, onMessage }: { initial?: Record<string, unknown>; onSaved: () => Promise<void>; onMessage: (message: string) => void }) {
+export function AdminReferrals({ initial, onSaved, onMessage }: { initial: Record<string, unknown> | undefined; onSaved: () => Promise<void>; onMessage: (message: string) => void }) {
  const save = useServerFn(updateSetting); const fetch = useServerFn(getBixBonusReviews); const review = useServerFn(reviewBixBonus); const qc = useQueryClient();
  const [busy, setBusy] = useState(false);
  const { data: bonuses = [] } = useQuery({ queryKey: ['admin-bix-bonuses'], queryFn: () => fetch() });
