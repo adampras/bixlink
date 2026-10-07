@@ -76,3 +76,7 @@
 - [x] Full translation pass for 7 non-English languages
 - [x] Add reference-inspired Royal Gold & Jade appearance without changing workflows; verify saved theme.
 - [x] Make Owner 2 entry visible for the selected reviewer, preserving limited actions and clone isolation.
+- [x] Credit one idempotent 10% virtual-USDT direct sponsor bonus per active referred stake.
+- [x] Add editable footer content with an owner OPEN/CLOSED control while retaining risk disclosure.
+- [x] Translate the 21 million BIX supply label and show IDR/MYR/CNY/INR/SGD/AED/ZAR wallet references.
+- [x] Improve Royal Gold & Jade with clearer multicolor card accents and theme preview.

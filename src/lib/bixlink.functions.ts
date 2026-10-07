@@ -11,18 +11,20 @@ const verifyAdmin = async (context: { supabase: any; userId: string; claims?: an
 };
 
 export const getMyData = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const [stakes, referral, tree, admin, bixMetrics, bonuses] = await Promise.all([
+  const [stakes, referral, tree, admin, bixMetrics, bonuses, usdtBonuses] = await Promise.all([
     context.supabase.from('stakes').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
     context.supabase.from('referral_codes').select('*').eq('user_id', context.userId).maybeSingle(),
     context.supabase.rpc('bix_referral_tree_metrics'), context.supabase.rpc('is_bix_admin'),
      context.supabase.rpc('bix_network_bix_metrics'),
      context.supabase.from('bix_referral_bonuses').select('*').eq('referrer_id', context.userId).order('created_at', { ascending: false }),
+     context.supabase.from('wallet_transactions').select('id,amount_usd,reward_rate_pct,created_at,status').eq('user_id', context.userId).eq('type', 'reward').not('source_stake_id', 'is', null).order('created_at', { ascending: false }),
   ]);
   if (stakes.error) throw stakes.error;
   if (tree.error) throw tree.error;
   if (bixMetrics.error) throw bixMetrics.error;
   if (bonuses.error) throw bonuses.error;
-  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [], bixMetrics: bixMetrics.data, bonuses: bonuses.data ?? [], isAdmin: Boolean(admin.data) };
+  if (usdtBonuses.error) throw usdtBonuses.error;
+  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [], bixMetrics: bixMetrics.data, bonuses: bonuses.data ?? [], usdtBonuses: usdtBonuses.data ?? [], isAdmin: Boolean(admin.data) };
 });
 
 export const assignReferral = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
@@ -155,7 +157,7 @@ export const setPackageEnabled = createServerFn({ method: 'POST' }).middleware([
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token'; value: Record<string, unknown> }) => {
     const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token']), value: z.record(z.unknown()) }).parse(data);
-    if (parsed.key === 'readiness') z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean(), homeOverviewEnabled: z.boolean().optional(), presentationTheme: z.enum(PRESENTATION_THEMES).optional() }).strict().parse(parsed.value);
+    if (parsed.key === 'readiness') parsed.value = z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean(), homeOverviewEnabled: z.boolean().optional(), footerEnabled: z.boolean().optional(), footerTitle: z.string().trim().max(80).optional(), footerBody: z.string().trim().max(320).optional(), footerContact: z.string().trim().max(120).optional(), presentationTheme: z.enum(PRESENTATION_THEMES).optional() }).strict().parse(parsed.value);
     if (parsed.key === 'unstake') z.object({ tiers: z.array(z.object({ days: z.number().int().min(1).max(3650), pct: z.number().min(0).max(100) })).min(1).max(10) }).parse(parsed.value);
     if (parsed.key === 'bix_token') z.object({ chainId: z.union([z.literal(56), z.literal(97)]), address: z.string().regex(/^0x[a-fA-F0-9]{40}$/), txHash: z.string().regex(/^0x[a-fA-F0-9]{64}$/), deployer: z.string().regex(/^0x[a-fA-F0-9]{40}$/), supply: z.number().int().positive().max(1_000_000_000_000), deployedAt: z.string().max(40) }).strict().parse(parsed.value);
     if (parsed.key === 'bix_market') z.object({ priceUsd: z.number().positive().max(1_000_000) }).parse(parsed.value);

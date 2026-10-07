@@ -8,13 +8,14 @@ import { getOwnerAnnouncements, saveAnnouncement } from '@/lib/updates.functions
 import { defaultReadiness, type Readiness } from '@/lib/readiness';
 import { dateTime } from '@/lib/bixlink';
 
-type AvailabilityKey = Exclude<keyof Readiness, 'presentationTheme'>;
+type AvailabilityKey = 'legalEnabled' | 'kycEnabled' | 'readinessEnabled' | 'homeOverviewEnabled' | 'marketEnabled' | 'footerEnabled';
 const controls: { key: AvailabilityKey; label: string; detail: string }[] = [
   { key: 'legalEnabled', label: 'Legal & About pages', detail: 'Terms, Privacy, Risk Disclosure, About & Support.' },
   { key: 'kycEnabled', label: 'Optional identity check', detail: 'Identity submissions in Settings and Withdraw.' },
   { key: 'readinessEnabled', label: 'Readiness information', detail: 'Additional footer information about the project.' },
   { key: 'homeOverviewEnabled', label: 'HOME top overview', detail: 'Recorded staking value, Deposit/Withdraw/Swap buttons and the 3 stat cards at the top of HOME.' },
   { key: 'marketEnabled', label: 'Market & Updates', detail: 'Major coin prices and published owner announcements.' },
+  { key: 'footerEnabled', label: 'Editable footer content', detail: 'Owner-written footer title, description and contact line.' },
 ];
 const empty = { title: '', body: '', category: 'ANNOUNCEMENT', published: false };
 export function AdminReadiness({ initial, onMessage, onSaved }: { initial?: Readiness | undefined; onMessage: (s: string) => void; onSaved: () => Promise<void> }) {
@@ -22,6 +23,7 @@ export function AdminReadiness({ initial, onMessage, onSaved }: { initial?: Read
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState<string | undefined>();
   const [form, setForm] = useState(empty);
+  const [footer, setFooter] = useState({ title: flags.footerTitle, body: flags.footerBody, contact: flags.footerContact });
   const change = useServerFn(updateSetting);
   const list = useServerFn(getOwnerAnnouncements);
   const save = useServerFn(saveAnnouncement);
@@ -38,6 +40,13 @@ export function AdminReadiness({ initial, onMessage, onSaved }: { initial?: Read
     <div className="eyebrow"><ShieldCheck size={14}/> OWNER CONTROLS</div><h2 className="mt-3 font-display text-2xl font-bold">Readiness & Updates</h2>
     <div className="mt-5">{controls.map(item => <div key={item.key} className="flex items-center justify-between gap-4 border-b border-border py-5"><div className="min-w-0"><b className="text-sm">{item.label}</b><p className="mt-1 text-xs leading-5 text-muted-foreground">{item.detail}</p></div><Button size="sm" variant="outline" className={`shrink-0 ${flags[item.key] ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'}`} aria-label={`${item.label} ${flags[item.key] ? 'open' : 'closed'}`} aria-pressed={flags[item.key]} disabled={busy} onClick={() => toggle(item.key)}>{flags[item.key] ? <ShieldCheck size={14}/> : <Lock size={14}/>} {flags[item.key] ? 'OPEN' : 'CLOSED'}</Button></div>)}</div>
     <p className="mt-4 text-xs leading-6 text-muted-foreground">Essential transaction risks, projection notices and BIXCOIN · No SC disclosures remain visible. Closing optional pages does not replace legal or regulatory obligations.</p>
+    <form className="mt-8 space-y-3 border-y border-border py-6" onSubmit={async event => { event.preventDefault(); const next = { ...flags, footerTitle: footer.title.trim(), footerBody: footer.body.trim(), footerContact: footer.contact.trim() }; setBusy(true); try { await change({ data: { key: 'readiness', value: next } }); setFlags(next); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Footer content saved.'); } catch (error) { onMessage(error instanceof Error ? error.message : 'Could not save footer.'); } finally { setBusy(false); } }}>
+      <h3 className="font-display text-lg font-bold">Footer content</h3>
+      <label className="block text-xs text-muted-foreground">Title<input className="form-input mt-2" maxLength={80} value={footer.title} onChange={event => setFooter({ ...footer, title: event.target.value })}/></label>
+      <label className="block text-xs text-muted-foreground">Description<textarea className="form-input mt-2 min-h-24" maxLength={320} value={footer.body} onChange={event => setFooter({ ...footer, body: event.target.value })}/></label>
+      <label className="block text-xs text-muted-foreground">Contact line<input className="form-input mt-2" maxLength={120} value={footer.contact} onChange={event => setFooter({ ...footer, contact: event.target.value })}/></label>
+      <Button disabled={busy} type="submit"><Save/> Save footer</Button>
+    </form>
     <div className="mt-10 flex items-center justify-between gap-3"><h2 className="font-display text-xl font-bold">Official announcements</h2><Button variant="ghost" size="sm" onClick={() => { setEditing(undefined); setForm(empty); }}><Plus/> New</Button></div>
     <form className="mt-5 space-y-3" onSubmit={async e => { e.preventDefault(); setBusy(true); try { await save({ data: { ...form, ...(editing ? { id: editing } : {}) } }); setEditing(undefined); setForm(empty); await qc.invalidateQueries({ queryKey: ['owner-announcements'] }); await qc.invalidateQueries({ queryKey: ['bix-market-updates'] }); onMessage(form.published ? 'Announcement published.' : 'Draft saved.'); } catch (error) { onMessage(error instanceof Error ? error.message : 'Could not save announcement.'); } finally { setBusy(false); } }}>
       <label className="block text-xs text-muted-foreground">Title<input className="form-input mt-2" aria-label="Announcement title" maxLength={120} required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}/></label>

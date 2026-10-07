@@ -650,6 +650,8 @@ export type Database = {
           network: string | null
           note: string | null
           reviewed_at: string | null
+          reward_rate_pct: number | null
+          source_stake_id: string | null
           status: string
           tx_hash: string | null
           type: string
@@ -667,6 +669,8 @@ export type Database = {
           network?: string | null
           note?: string | null
           reviewed_at?: string | null
+          reward_rate_pct?: number | null
+          source_stake_id?: string | null
           status?: string
           tx_hash?: string | null
           type: string
@@ -684,6 +688,8 @@ export type Database = {
           network?: string | null
           note?: string | null
           reviewed_at?: string | null
+          reward_rate_pct?: number | null
+          source_stake_id?: string | null
           status?: string
           tx_hash?: string | null
           type?: string
@@ -691,7 +697,15 @@ export type Database = {
           verified_at?: string | null
           wallet_code?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_source_stake_id_fkey"
+            columns: ["source_stake_id"]
+            isOneToOne: false
+            referencedRelation: "stakes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
