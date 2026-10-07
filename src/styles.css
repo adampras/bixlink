@@ -972,13 +972,6 @@ html[data-color-mode="light"], html[data-color-mode="light"] [data-presentation-
   --theme-glass: oklch(1 0 0);
   color-scheme: light;
 }
-html[data-color-mode="dark"] [data-presentation-theme="royal"] {
-  --background: oklch(0.16 0.03 160); --foreground: oklch(0.96 0.01 95);
-  --card: oklch(0.22 0.04 160); --card-foreground: oklch(0.96 0.01 95);
-  --popover: oklch(0.22 0.04 160); --secondary: oklch(0.27 0.04 160); --muted: oklch(0.27 0.04 160);
-  --muted-foreground: oklch(0.78 0.02 120); --border: oklch(0.4 0.05 140 / 60%); --input: oklch(0.4 0.05 140 / 60%);
-  --theme-glass: oklch(0.22 0.04 160);
-}
 html[data-color-mode="light"] .site-shell { background-image: none; }
 html[data-color-mode="light"] .site-header { background: color-mix(in oklab, var(--background) 92%, transparent); }
 .mode-toggle { border-radius: 999px; color: var(--chart-3); }
