@@ -58,7 +58,7 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   return <section className="rounded-[20px] border border-chart-2/40 bg-card p-5 sm:p-6">
     <div className="eyebrow"><Coins size={14} className="text-chart-2"/> STAKE BIX DIRECTLY</div>
     <h2 className="mt-2 font-display text-2xl font-black">BIX Booster Staking</h2>
-    <p className="mt-2 text-sm text-muted-foreground">Stake your BIX balance here. Volume and lock period set your APY (8–25%). Profit split: 70% passive USDT · 30% active BIX — projection only.</p>
+    <p className="mt-2 text-sm text-muted-foreground">Stake your BIX balance here. Volume and lock period set your APY (8–25%). Profit split: 70% passive BIX · 30% active USDT — projection only.</p>
     <div className="mt-4 flex items-center justify-between rounded-xl border border-border p-3 text-sm"><span>Available BIX</span><b className="numeric">{number(q.data?.bal ?? 0, { maximumFractionDigits: 2 })} BIX</b></div>
     <label className="mt-4 block text-xs font-bold uppercase text-muted-foreground">Amount (BIX, min 10)</label>
     <div className="mt-1 flex gap-2">
@@ -70,8 +70,8 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
     <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
       <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">APY</span><b className="numeric block text-chart-2 text-xl">{apy}%</b></div>
       <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Est. profit / period</span><b className="numeric block">{number(periodProfit, { maximumFractionDigits: 2 })} BIX</b></div>
-      <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Passive 70% USDT</span><b className="numeric block text-chart-3">${number(periodProfit * 0.7 * bixPrice, { maximumFractionDigits: 2 })}</b></div>
-      <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Active 30% BIX</span><b className="numeric block text-primary">{number(periodProfit * 0.3, { maximumFractionDigits: 2 })} BIX</b></div>
+      <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Passive 70% BIX</span><b className="numeric block text-primary">{number(periodProfit * 0.7, { maximumFractionDigits: 2 })} BIX</b></div>
+      <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Active 30% USDT</span><b className="numeric block text-chart-3">${number(periodProfit * 0.3 * bixPrice, { maximumFractionDigits: 2 })}</b></div>
     </div>
     <Button className="mt-4 w-full rounded-xl" disabled={busy || amt < 10 || amt > (q.data?.bal ?? 0)} onClick={stake}><Zap/> {busy ? 'Staking…' : amt > (q.data?.bal ?? 0) ? 'Insufficient BIX balance' : 'Stake BIX now'}</Button>
     <p className="mt-2 text-xs text-muted-foreground">Early unstake before lock end applies a 10% BIX penalty. Figures are projections, not guaranteed.</p>
