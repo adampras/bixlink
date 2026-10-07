@@ -110,7 +110,9 @@ const fallbackI18n: I18nValue = {
 };
 const I18nContext = createContext<I18nValue>(fallbackI18n);
 const originalText = new WeakMap<Node, string>();
+const renderedText = new WeakMap<Node, string>();
 const originalPlaceholder = new WeakMap<HTMLInputElement | HTMLTextAreaElement, string>();
+const renderedPlaceholder = new WeakMap<HTMLInputElement | HTMLTextAreaElement, string>();
 
 function translateDocument(language: Language) {
   if (typeof document === 'undefined') return;
@@ -121,14 +123,15 @@ function translateDocument(language: Language) {
       const trimmed = text.trim();
       const holder = node.parentElement;
       if (!trimmed || !holder || holder.closest('[data-no-translate]')) return;
-      const original = originalText.get(node) ?? trimmed;
+      const original = renderedText.get(node) === trimmed ? originalText.get(node) ?? trimmed : trimmed;
       originalText.set(node, original);
       const translated = dictionary?.[original] ?? original;
+      renderedText.set(node, translated);
       if (trimmed !== translated) node.textContent = text.replace(trimmed, translated);
     }
     if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) {
-      const original = originalPlaceholder.get(node) ?? node.placeholder;
-      if (original) { originalPlaceholder.set(node, original); node.placeholder = dictionary?.[original] ?? original; }
+      const original = renderedPlaceholder.get(node) === node.placeholder ? originalPlaceholder.get(node) ?? node.placeholder : node.placeholder;
+      if (original) { originalPlaceholder.set(node, original); node.placeholder = dictionary?.[original] ?? original; renderedPlaceholder.set(node, node.placeholder); }
     }
     node.childNodes.forEach(translateNode);
   };
