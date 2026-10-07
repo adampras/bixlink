@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { requestStake, unstakeStake } from '@/lib/bixlink.functions';
 import { date, money, number, type Package } from '@/lib/bixlink';
-import { ArrowUpRight, CheckCircle2, Clock3, LockKeyhole, ShieldCheck, X, XCircle, Zap } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, ChevronDown, ChevronUp, Clock3, LockKeyhole, ShieldCheck, X, XCircle, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/stake')({ head: () => ({ meta: [{ title: 'Stake — BIXLINK' }, { name: 'description', content: 'Choose a BIXLINK staking package and submit a request.' }, { property: 'og:title', content: 'Stake — BIXLINK' }, { property: 'og:description', content: 'Eight BIXLINK staking packages from $10 to $10,000.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: StakePage });
 
@@ -22,6 +22,7 @@ function StakePage() {
   const setChosen = (p: Package | null) => { setAgree(false); setChosenRaw(p); };
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [requestsVisible, setRequestsVisible] = useState(false);
   const [now, setNow] = useState<number | null>(null);
   const submit = useServerFn(requestStake);
   const doUnstake = useServerFn(unstakeStake);
@@ -69,8 +70,8 @@ function StakePage() {
           </article>;
         })}
       </div>
-      <div className="mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span></div>
-      <div className="mt-4 space-y-3">{(data?.stakes ?? []).map(s => {
+      <div className="mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><div className="flex items-center gap-2"><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span><Button variant="outline" size="icon" aria-label={requestsVisible ? "Hide my requests" : "Show my requests"} aria-expanded={requestsVisible} aria-controls="stake-requests" onClick={() => setRequestsVisible(current => !current)}>{requestsVisible ? <ChevronUp/> : <ChevronDown/>}</Button></div></div>
+      <div id="stake-requests" hidden={!requestsVisible} className="mt-4 space-y-3">{(data?.stakes ?? []).map(s => {
         const started = s.activated_at ? new Date(s.activated_at).getTime() : null;
         const end = started ? started + s.lock_days * 86400000 : null;
         const progress = now && started && end ? Math.max(0, Math.min(100, ((now - started) / (end - started)) * 100)) : 0;
