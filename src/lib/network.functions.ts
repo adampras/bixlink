@@ -31,3 +31,31 @@ export const unstakeNativeBix = createServerFn({ method: 'POST' }).middleware([r
   if (error) throw new Error(error.message);
   return { penalty: Number(penalty) };
  });
+
+export type VipTier = { level: number; targetUsd: number; rewardBix: number; qualified: boolean; status: 'pending' | 'approved' | 'rejected' | null };
+export const getVipStatus = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data, error } = await context.supabase.rpc('bix_vip_status');
+  if (error) throw new Error(error.message);
+  return data as unknown as { teamSalesUsd: number; tiers: VipTier[] };
+});
+export const claimVip = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((input: { level: number }) => z.object({ level: z.number().int().min(1).max(10) }).parse(input))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.rpc('bix_claim_vip', { p_level: data.level });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+export const getVipReviews = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data: owner } = await context.supabase.rpc('is_bix_admin');
+  if (!owner) throw new Error('Owner access required');
+  const { data, error } = await context.supabase.from('bix_vip_rewards').select('*').order('created_at', { ascending: false }).limit(200);
+  if (error) throw error;
+  return data ?? [];
+});
+export const reviewVip = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string; approve: boolean }) => z.object({ id: z.string().uuid(), approve: z.boolean() }).parse(input))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.rpc('bix_review_vip', { p_reward: data.id, p_approve: data.approve });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
