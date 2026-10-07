@@ -47,7 +47,7 @@ function StakePage() {
         {cfg?.booster.enabled && <p className="stake-lux-boost"><i aria-hidden />APY Booster active — projected up to {cfg.booster.rate}%, not guaranteed</p>}
       </div>
       <div className="stake-pool">
-        <div><span className="stake-pool-label">BIX supply</span><p className="stake-pool-value">21 JUTA BIX TOKEN</p></div>
+        <div><span className="stake-pool-label">BIX supply</span><p className="stake-pool-value">21 MILLION BIX TOKEN</p></div>
         <span className="stake-pool-ico" aria-hidden><Zap size={15} /></span>
       </div>
       <div className="stake-pool mt-3"><div><span className="stake-pool-label">Available balance</span><p className="stake-pool-value numeric">{money(bal.data ?? 0)}</p></div></div>

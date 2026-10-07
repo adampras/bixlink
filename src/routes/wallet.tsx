@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { KycCard } from '@/components/KycCard';
 import { getMyWallet, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
+import { getFiatRates } from '@/lib/market.functions';
 import { createDepositIntent, checkDepositIntent, claimDepositIntent } from '@/lib/deposit.functions';
 import { dateTime, money, number } from '@/lib/bixlink';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, ScanLine, CheckCircle2, Clock } from 'lucide-react';
@@ -26,9 +27,10 @@ const STATUS: Record<string, string> = { pending: 'text-chart-3', approved: 'tex
 function WalletPage() {
   const { user, ready } = useMember();
   const { data: cfg } = usePublicConfig();
-  const fetchWallet = useServerFn(getMyWallet); const createIntent = useServerFn(createDepositIntent); const checkIntent = useServerFn(checkDepositIntent); const claimIntent = useServerFn(claimDepositIntent); const [claimed, setClaimed] = useState(false); const withdraw = useServerFn(requestWithdraw); const swap = useServerFn(requestSwap);
+  const fetchWallet = useServerFn(getMyWallet); const fetchFiat = useServerFn(getFiatRates); const createIntent = useServerFn(createDepositIntent); const checkIntent = useServerFn(checkDepositIntent); const claimIntent = useServerFn(claimDepositIntent); const [claimed, setClaimed] = useState(false); const withdraw = useServerFn(requestWithdraw); const swap = useServerFn(requestSwap);
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ['my-wallet', user?.id], queryFn: () => fetchWallet(), enabled: !!user });
+  const fiat = useQuery({ queryKey: ['wallet-fiat-rates'], queryFn: () => fetchFiat(), staleTime: 3_600_000 });
   const [modal, setModal] = useState<'deposit' | 'withdraw' | null>(null);
   const [depMode, setDepMode] = useState<'copy' | 'qr'>('copy');
   const [amount, setAmount] = useState(''); const [field, setField] = useState('');
@@ -71,7 +73,9 @@ function WalletPage() {
     <MemberGate ready={ready} signedIn={!!user} title="WALLET">
       <div className="wallet-summary relative overflow-hidden rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-3/10 p-6 shadow-[0_0_40px_color-mix(in_oklab,var(--chart-3)_18%,transparent)]">
         <div className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet size={16}/> Available balance</div>
-        <strong className="numeric mt-2 block break-all text-[28px] leading-snug font-black text-foreground md:text-[32px]">{money(data?.balance ?? 0)}</strong>
+        <strong className="numeric mt-2 block break-all text-[28px] leading-snug font-black text-foreground md:text-[32px]">{number(data?.balance ?? 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT</strong>
+        <div className="wallet-fx-grid mt-4">{fiat.data?.map(item => <div key={item.code}><span>{item.label}</span><b className="numeric">{item.code} {number((data?.balance ?? 0) * item.rate, { maximumFractionDigits: item.code === 'IDR' ? 0 : 2 })}</b></div>)}</div>
+        <p className="mt-3 text-[10px] text-foreground/70">Display-only USD reference conversions. Rates may be delayed.</p>
         <div className="mt-5 grid grid-cols-2 gap-3"><Button className="rounded-full bg-foreground text-background hover:bg-foreground/90" onClick={() => setModal('deposit')}><ArrowDownToLine/> Deposit</Button><Button variant="outline" className="rounded-full" onClick={() => setModal('withdraw')}><ArrowUpFromLine/> Withdraw</Button></div>
       </div>
       <Link to="/pay" className="mt-4 flex items-center justify-between gap-3 rounded-[20px] border border-chart-2/60 bg-card p-4 transition hover:border-chart-2"><span className="flex items-center gap-3"><span className="grid size-11 place-items-center rounded-full bg-chart-2/15 text-chart-2"><ScanLine size={20}/></span><span><b className="block font-display">BIX PAY</b><span className="text-xs text-muted-foreground">Scan QR to pay other members in BIX</span></span></span>{!cfg?.bixPay.enabled ? <span className="inline-flex items-center gap-1 rounded-full border border-chart-3 bg-chart-3/10 px-3 py-1 text-[11px] font-bold text-chart-3"><Lock size={12}/> Coming soon</span> : <span className="text-xs font-bold text-chart-2">OPEN →</span>}</Link>

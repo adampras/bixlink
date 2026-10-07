@@ -943,5 +943,8 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 [data-presentation-theme="royal"] :is(.metric-panel,.stat-card,.roadmap-item,.market-panel,.package-card,.terminal-kpi,.boost-tier,.stake-lux-card,.nx-member,.ecosystem-column):nth-child(3n) { border-top-color: var(--royal-gold); }
 [data-presentation-theme="royal"] .theme-miniature-panels>span:first-child { background:color-mix(in oklab,var(--royal-jade) 16%,var(--card)); }
 [data-presentation-theme="royal"] .theme-miniature-panels>span:last-child { background:color-mix(in oklab,var(--royal-violet) 11%,var(--card)); }
+.wallet-fx-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;overflow:hidden;border:1px solid color-mix(in oklab,var(--foreground) 18%,transparent);border-radius:8px;background:color-mix(in oklab,var(--foreground) 18%,transparent); }
+.wallet-fx-grid>div { min-width:0;padding:8px 10px;background:color-mix(in oklab,var(--background) 16%,transparent); }.wallet-fx-grid span { display:block;font-size:9px;color:color-mix(in oklab,var(--foreground) 72%,transparent); }.wallet-fx-grid b { display:block;margin-top:2px;font-size:11px;overflow-wrap:anywhere;color:var(--foreground); }
+@media(min-width:640px){.wallet-fx-grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
 .header-reviewer { flex-shrink: 0; gap: 6px; }
 @media (max-width: 480px) { .header-reviewer { width: 34px; height: 34px; padding: 0; } .header-reviewer span { display: none; } }
