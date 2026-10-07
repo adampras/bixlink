@@ -17,7 +17,7 @@ export const savePin = async (pin: string) => localStorage.setItem(PIN_KEY, awai
 export const clearPin = () => localStorage.removeItem(PIN_KEY);
 export const checkPin = async (pin: string) => (await hash(pin)) === localStorage.getItem(PIN_KEY);
 
-type Result = { ok: boolean; title: string; detail?: string };
+type Result = { ok: boolean; title: string; detail?: string | undefined };
 let showResult: (r: Result) => void = () => {};
 let askPin: (resolve: (ok: boolean) => void) => void = r => r(true);
 
