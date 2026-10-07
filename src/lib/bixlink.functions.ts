@@ -11,18 +11,20 @@ const verifyAdmin = async (context: { supabase: any; userId: string; claims?: an
 };
 
 export const getMyData = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const [stakes, referral, tree, admin, bixMetrics, bonuses] = await Promise.all([
+  const [stakes, referral, tree, admin, bixMetrics, bonuses, usdtBonuses] = await Promise.all([
     context.supabase.from('stakes').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
     context.supabase.from('referral_codes').select('*').eq('user_id', context.userId).maybeSingle(),
     context.supabase.rpc('bix_referral_tree_metrics'), context.supabase.rpc('is_bix_admin'),
      context.supabase.rpc('bix_network_bix_metrics'),
      context.supabase.from('bix_referral_bonuses').select('*').eq('referrer_id', context.userId).order('created_at', { ascending: false }),
+     context.supabase.from('wallet_transactions').select('id,amount_usd,reward_rate_pct,created_at,status').eq('user_id', context.userId).eq('type', 'reward').not('source_stake_id', 'is', null).order('created_at', { ascending: false }),
   ]);
   if (stakes.error) throw stakes.error;
   if (tree.error) throw tree.error;
   if (bixMetrics.error) throw bixMetrics.error;
   if (bonuses.error) throw bonuses.error;
-  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [], bixMetrics: bixMetrics.data, bonuses: bonuses.data ?? [], isAdmin: Boolean(admin.data) };
+  if (usdtBonuses.error) throw usdtBonuses.error;
+  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [], bixMetrics: bixMetrics.data, bonuses: bonuses.data ?? [], usdtBonuses: usdtBonuses.data ?? [], isAdmin: Boolean(admin.data) };
 });
 
 export const assignReferral = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
