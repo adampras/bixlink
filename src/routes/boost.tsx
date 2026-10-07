@@ -15,7 +15,7 @@ const boosterVisuals = {
   emblem: { src: foxEmblem, alt: 'BIXLINK tricolor fox emblem', className: 'robot-fox--emblem' },
 } as const;
 
-export const Route = createFileRoute('/boost')({ head: () => ({ meta: [{ title: 'BIXCOIN Boost APY — BIXLINK' }, { name: 'description', content: 'Increase BIXCOIN staking APY through higher volume and longer lock periods, up to 25%.' }, { property: 'og:title', content: 'BIXCOIN Boost APY — BIXLINK' }, { property: 'og:description', content: 'BIXCOIN staking tiers, passive and active profit, with a 70% USDT and 30% BIX profit split.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: BoostPage });
+export const Route = createFileRoute('/boost')({ head: () => ({ meta: [{ title: 'BIXCOIN Boost APY — BIXLINK' }, { name: 'description', content: 'Increase BIXCOIN staking APY through higher volume and longer lock periods, up to 25%.' }, { property: 'og:title', content: 'BIXCOIN Boost APY — BIXLINK' }, { property: 'og:description', content: 'BIXCOIN staking tiers, passive and active profit, with a 70% BIX and 30% USDT profit split.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: BoostPage });
 
 function BoostPage() {
   const { data: cfg } = usePublicConfig();
@@ -38,8 +38,8 @@ function BoostPage() {
         <h1 className="section-title">BOOST YOUR <span>APY</span></h1>
         <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">The BIXCOIN Booster converts each active staking package into a live yield projection. Larger packages and longer lock periods unlock higher fixed APY tiers, from 10% up to 25%. All figures are projections, not guaranteed returns.</p>
         <div className="boost-chips mt-6">
-          <div className="booster-chip"><b className="text-chart-2">70%</b> profit in USDT</div>
-          <div className="booster-chip"><b className="text-chart-3">30%</b> profit in BIX</div>
+          <div className="booster-chip"><b className="text-chart-2">70%</b> profit in BIX</div>
+          <div className="booster-chip"><b className="text-chart-3">30%</b> profit in USDT</div>
           <div className="booster-chip"><b className="text-primary">25%</b> maximum APY</div>
         </div>
         <div className="mt-7"><BixStakePanel bixPrice={bixPrice}/></div>
@@ -120,14 +120,14 @@ function BoostPage() {
             </div>
             <div className="text-right">
               <strong>70 / 30</strong>
-              <span>USDT / BIX split</span>
+              <span>BIX / USDT split</span>
             </div>
           </div>
           <div className="boost-split-bar mt-5"><i/><i/></div>
           <div className="boost-legend mt-4">
-            <div className="boost-legend-item"><span><i className="bg-chart-3"/> USDT portion</span><b className="numeric text-chart-3">70%</b></div>
-            <div className="boost-legend-item"><span><i className="bg-primary"/> BIX portion</span><b className="numeric text-primary">30%</b></div>
-            <div className="boost-legend-item"><span><i className="bg-chart-2"/> At current internal reference</span><b className="numeric">30% BIX</b></div>
+            <div className="boost-legend-item"><span><i className="bg-primary"/> BIX portion</span><b className="numeric text-primary">70%</b></div>
+            <div className="boost-legend-item"><span><i className="bg-chart-3"/> USDT portion</span><b className="numeric text-chart-3">30%</b></div>
+            <div className="boost-legend-item"><span><i className="bg-chart-2"/> At current internal reference</span><b className="numeric">70% BIX</b></div>
           </div>
           <p className="terminal-disclosure"><ShieldCheck size={14}/> Active staking profit is projected automatically every minute. No automatic payout is performed and the split is a reference allocation, not an exchange.</p>
         </div>
