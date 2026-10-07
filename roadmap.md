@@ -80,3 +80,5 @@
 - [x] Add editable footer content with an owner OPEN/CLOSED control while retaining risk disclosure.
 - [x] Translate the 21 million BIX supply label and show IDR/MYR/CNY/INR/SGD/AED/ZAR wallet references.
 - [x] Improve Royal Gold & Jade with clearer multicolor card accents and theme preview.
+- [x] USDT direct 10% split 70/30, daily matching, bonus history toggle
+- [x] Day/night mode toggle
