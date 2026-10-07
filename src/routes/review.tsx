@@ -23,7 +23,7 @@ function Review() {
   useEffect(() => { supabase.auth.getUser().then(({ data }) => { if (!data.user) setState('signin'); else refresh().catch(() => setState('denied')); }); }, []);
   const list = items.filter(t => filter === 'all' || t.status === filter);
   return <BixShell><main className="mx-auto min-h-[75vh] max-w-4xl px-5 py-12">
-    <div className="eyebrow">OWNER 2</div><h1 className="section-title">REVIEW <span>CONSOLE</span></h1>
+    <div className="eyebrow">ADMIN PANEL BIX</div><h1 className="section-title">REVIEW <span>CONSOLE</span></h1><Link to="/wallet" className="mt-3 inline-block rounded-full border border-chart-3 px-4 py-1.5 text-xs font-bold text-chart-3">Open WALLET →</Link>
     {state === 'loading' ? <p className="mt-8 text-muted-foreground">Checking access…</p>
       : state === 'signin' ? <Button asChild className="mt-8 rounded-full"><Link to="/auth">Sign in</Link></Button>
       : state === 'denied' ? <p className="mt-8 text-destructive">This account is not an ADMIN PANEL BIX account.</p>
