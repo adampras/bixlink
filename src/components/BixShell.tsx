@@ -10,6 +10,7 @@ import { LANGUAGES, type Language, useI18n } from '@/lib/i18n';
 import { getMarketUpdates } from '@/lib/updates.functions';
 import { resolvePresentationTheme } from '@/lib/presentation-theme';
 import { TxFeedbackHost } from '@/components/TxFeedback';
+import { Sun, Moon } from 'lucide-react';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
@@ -41,6 +42,10 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   const notificationRef = useRef<HTMLDivElement>(null);
   const languageRef = useRef<HTMLDivElement>(null);
   const [languagesOpen, setLanguagesOpen] = useState(false);
+  const [colorMode, setColorMode] = useState<'dark' | 'light'>('dark');
+  useEffect(() => { setColorMode(localStorage.getItem('bixlink-color-mode') === 'light' ? 'light' : 'dark'); }, []);
+  useEffect(() => { document.documentElement.dataset['colorMode'] = colorMode; }, [colorMode]);
+  const toggleMode = () => setColorMode(m => { const next = m === 'dark' ? 'light' : 'dark'; localStorage.setItem('bixlink-color-mode', next); return next; });
 
   useEffect(() => {
     const syncPreferences = () => {
@@ -77,7 +82,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
       <div className="header-tools">
         {user && reviewerRole.data && <Button asChild title="Owner 2 Panel" variant="outline" size="sm" className="header-reviewer"><Link to="/review" aria-label="Owner 2 Panel"><ClipboardCheck/><span>Owner 2</span></Link></Button>}
         {user && marketEnabled && <Button asChild title="Market & Updates" variant="ghost" size="icon" className="header-icon"><Link to="/market" aria-label="Market & Updates"><TrendingUp/></Link></Button>}
-        <div className="language-control" ref={languageRef}><Button type="button" variant="ghost" className="language-trigger" aria-label={t('language')} aria-haspopup="menu" aria-expanded={languagesOpen} onClick={() => setLanguagesOpen(value => !value)}><span className={`flag-symbol flag-${selectedLanguage.flag}`} aria-hidden/><ChevronDown/></Button>{languagesOpen && <div className="language-menu" role="menu" aria-label={t('language')}>{LANGUAGES.map(item => <Button key={item.code} type="button" variant="ghost" role="menuitemradio" aria-checked={language === item.code} title={item.label} className={language === item.code ? 'is-active' : ''} onClick={() => { setLanguage(item.code as Language); setLanguagesOpen(false); }}><span className={`flag-symbol flag-${item.flag}`} aria-hidden/><span className="sr-only">{item.label}</span></Button>)}</div>}</div>
+        <Button type="button" variant="ghost" size="icon" className="mode-toggle" aria-label={colorMode === 'dark' ? 'Switch to day mode' : 'Switch to night mode'} onClick={toggleMode}>{colorMode === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</Button><div className="language-control" ref={languageRef}><Button type="button" variant="ghost" className="language-trigger" aria-label={t('language')} aria-haspopup="menu" aria-expanded={languagesOpen} onClick={() => setLanguagesOpen(value => !value)}><span className={`flag-symbol flag-${selectedLanguage.flag}`} aria-hidden/><ChevronDown/></Button>{languagesOpen && <div className="language-menu" role="menu" aria-label={t('language')}>{LANGUAGES.map(item => <Button key={item.code} type="button" variant="ghost" role="menuitemradio" aria-checked={language === item.code} title={item.label} className={language === item.code ? 'is-active' : ''} onClick={() => { setLanguage(item.code as Language); setLanguagesOpen(false); }}><span className={`flag-symbol flag-${item.flag}`} aria-hidden/><span className="sr-only">{item.label}</span></Button>)}</div>}</div>
         {user ? <><div className="notification-control" ref={notificationRef}><Button title={t('notifications')} variant="ghost" size="icon" className="header-icon" aria-label={t('notifications')} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen(value => !value)}><Bell/>{unread > 0 && <span className="notification-count">{unread}</span>}</Button>{notificationsOpen && <div className="notification-menu"><div className="notification-menu-head"><div><span>{t('latestUpdates')}</span><b>{t('notifications')}</b></div>{unread > 0 && <Button size="icon" variant="ghost" title={t('markRead')} onClick={markAllRead}><CheckCheck/></Button>}</div>{notificationsEnabled ? <div className="notification-list">{visibleUpdates.map(item => <article key={item.id} className={readIds.includes(item.id) ? 'is-read' : ''}><i/><div><b>{item.title}</b><p>{item.body}</p></div></article>)}{marketEnabled && <Link to="/market" className="block px-4 py-3 text-xs font-bold text-chart-3" onClick={() => setNotificationsOpen(false)}>Market &amp; Updates →</Link>}</div> : <p className="notification-empty">{t('noUpdates')}</p>}</div>}</div><Button asChild title={t('profile')} variant={path === '/profile' || path === '/settings' ? 'default' : 'ghost'} size="icon" className="header-icon"><Link to="/profile" aria-label={t('profile')}><User/></Link></Button></> : <Button asChild size="sm" className="header-signin max-[480px]:w-auto! max-[480px]:px-3!"><Link to="/auth" aria-label="LAUNCH APP"><LogIn/> <span className="max-[480px]:inline!">LAUNCH APP</span></Link></Button>}
       </div>
     </div></header>{children}

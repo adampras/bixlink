@@ -262,6 +262,65 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_usdt_network_bonuses: {
+        Row: {
+          base_usd: number
+          bix_amount: number
+          bix_price_usd: number
+          bonus_date: string
+          created_at: string
+          id: string
+          kind: string
+          level: number
+          member_id: string
+          rate_pct: number
+          source_stake_id: string
+          total_usd: number
+          usdt_amount: number
+          user_id: string
+        }
+        Insert: {
+          base_usd: number
+          bix_amount: number
+          bix_price_usd: number
+          bonus_date?: string
+          created_at?: string
+          id?: string
+          kind: string
+          level?: number
+          member_id: string
+          rate_pct: number
+          source_stake_id: string
+          total_usd: number
+          usdt_amount: number
+          user_id: string
+        }
+        Update: {
+          base_usd?: number
+          bix_amount?: number
+          bix_price_usd?: number
+          bonus_date?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          level?: number
+          member_id?: string
+          rate_pct?: number
+          source_stake_id?: string
+          total_usd?: number
+          usdt_amount?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_usdt_network_bonuses_source_stake_id_fkey"
+            columns: ["source_stake_id"]
+            isOneToOne: false
+            referencedRelation: "stakes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bix_vip_rewards: {
         Row: {
           amount_bix: number
@@ -735,6 +794,10 @@ export type Database = {
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_network_bix_metrics: { Args: never; Returns: Json }
+      bix_network_bonus_split: {
+        Args: { p_total: number }
+        Returns: Record<string, unknown>
+      }
       bix_owner_vault: { Args: never; Returns: Json }
       bix_pay_lookup: { Args: { p_code: string }; Returns: boolean }
       bix_pay_send: {
@@ -777,6 +840,7 @@ export type Database = {
         Args: { p_approve: boolean; p_reward: string }
         Returns: undefined
       }
+      bix_settle_matching_daily: { Args: { p_day?: string }; Returns: number }
       bix_stake_apy: {
         Args: { p_amount: number; p_days: number }
         Returns: number

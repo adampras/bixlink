@@ -225,6 +225,13 @@
       "when": 1791377130133,
       "tag": "0031_credit_usdt_direct_sponsor_bonus",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1791380710503,
+      "tag": "0032_usdt_network_bonus_split_and_daily_matching",
+      "breakpoints": true
     }
   ]
 }
