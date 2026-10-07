@@ -82,6 +82,7 @@ export async function listIncomingUsdt(net: DepositNetwork, to: string): Promise
         .map((t: any) => ({ hash: String(t.transaction_id), amount: units(BigInt(t.quant ?? '0'), 6), timestamp: Number(t.block_ts) }));
     }
     const key = process.env['ETHERSCAN_API_KEY'];
+    if (net === 'BEP20' && !key) return await listBscViaRpc(to);
     if (!key) return { error: 'Automatic detection for this network is not configured yet.' };
     const cfg = EVM[net];
     const r = await fetch(`https://api.etherscan.io/v2/api?chainid=${cfg.chainId}&module=account&action=tokentx&contractaddress=${cfg.contract}&address=${to}&page=1&offset=50&sort=desc&apikey=${key}`);
@@ -94,4 +95,32 @@ export async function listIncomingUsdt(net: DepositNetwork, to: string): Promise
     console.error('deposit scan failed', e);
     return { error: 'Blockchain explorer is busy. Checking again shortly.' };
   }
+}
+
+const BSC_RPC = ['https://bsc-rpc.publicnode.com', 'https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io'];
+async function rpc(url: string, method: string, params: unknown[]) {
+  const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) });
+  if (!r.ok) throw new Error('rpc');
+  const j = (await r.json()) as { result?: any; error?: { message: string } };
+  if (j.error) throw new Error(j.error.message);
+  return j.result;
+}
+/** Keyless BNB Chain scan of recent USDT Transfer logs into `to` (about the last 30 minutes). */
+async function listBscViaRpc(to: string): Promise<IncomingTransfer[] | { error: string }> {
+  const cfg = EVM.BEP20;
+  const topic = '0x' + to.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+  for (const url of BSC_RPC) {
+    try {
+      const latest = parseInt(await rpc(url, 'eth_blockNumber', []), 16);
+      const span = url.includes('publicnode') ? 4000 : 900;
+      const logs = await rpc(url, 'eth_getLogs', [{ address: cfg.contract, fromBlock: '0x' + (latest - span).toString(16), toBlock: '0x' + (latest - cfg.minConf).toString(16), topics: [TRANSFER_TOPIC, null, topic] }]) as any[];
+      const out: IncomingTransfer[] = [];
+      for (const l of logs.slice(-50)) {
+        const block = await rpc(url, 'eth_getBlockByNumber', [l.blockNumber, false]);
+        out.push({ hash: String(l.transactionHash), amount: units(BigInt(l.data), cfg.decimals), timestamp: parseInt(block.timestamp, 16) * 1000 });
+      }
+      return out.reverse();
+    } catch (e) { console.error('bsc rpc failed', url, e); }
+  }
+  return { error: 'Blockchain network is busy. Checking again shortly.' };
 }
