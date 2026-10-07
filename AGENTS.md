@@ -22,7 +22,7 @@
 - Member USDT deposits are credited only after server-side on-chain verification (receipt, recipient = owner wallet, USDT contract, confirmations) with one credit per TxID; amount comes from chain, never from user input — prevents fabricated balances.
 - Use cycle-safe NETWORK generation exploration and ancestry breadcrumbs with separate BIX/USDT metrics to keep unlimited depth readable.
 - Native BIX direct bonuses use a unique source-stake ledger, owner review and existing reserve funding to prevent duplicate or fabricated credits.
-- Keep interface translations in the shared local i18n provider and persist member language preferences in browser storage, so all routes switch together without a paid translation dependency.
+- Use shared local i18n with stored language preferences; track source versus translated output so React updates never restore stale content.
 - Keep member Settings on its dedicated route but expose it through Profile rather than primary navigation, so the main trading navigation stays focused.
 - Calculate staking yield as a live display-only ledger projection from active stakes; never add projected USDT or BIX profit to spendable balances without a separate settlement rule.
 - Keep the 1,000,000 BIX reserve in an owner-only singleton vault initialized idempotently; never expose it in member balances or allow repeated generation.
@@ -37,4 +37,4 @@
 - Store the owner-selected presentation theme inside the existing public readiness setting and apply semantic CSS overrides in the shared shell, so all visitors receive the same lightweight theme without widening database access.
 - BIXCOIN on-chain token is deployed only from the owner's own injected wallet (TokenPocket) with a fixed-supply bytecode compiled in src/lib; the app stores only the resulting address in app_settings and never holds keys or converts internal balances.
 
-- Render the public landing narrative from optional fields in landing_content with bundled visual fallbacks and authenticated owner editing, so the package catalog stays member-only without a new data-access surface.
+- Render landing narratives from landing_content with bundled fallbacks and authenticated owner editing; keep package catalogs member-only.
