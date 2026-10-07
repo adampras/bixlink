@@ -1,0 +1,1 @@
+- i18n: shared local i18n with stored language; track source vs translated text so React updates never restore stale content. Extra phrases in i18n-phrases.json (generated from rendered English) merge under hand-written ones — re-collect after adding pages.

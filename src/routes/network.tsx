@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { ArrowLeft, ArrowUpRight, BadgeCheck, ChevronRight, Coins, GitBranch, Lock, Search, ShieldCheck, UserRound, Users } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
+import { VipRewardPlus } from '@/components/VipRewardPlus';
 import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { money, number } from '@/lib/bixlink';
@@ -56,6 +57,7 @@ function NetworkPage() {
  {!visible.length && <div className="py-10 text-center text-sm text-muted-foreground">{term ? 'No matching members.' : focus ? 'No direct members in this branch yet.' : 'Your network starts here.'}{!tree.length && <Button asChild className="mt-4"><Link to="/profile">Referral link <ArrowUpRight/></Link></Button>}</div>}
  <div className="nx-controls"><div className="flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Back one generation" disabled={!focus && !generation} onClick={() => {setSelected(focus?.parent_id===user?.id ? null : focus?.parent_id ?? null);setGeneration(null);}}><ArrowLeft size={16}/></Button><span className="text-xs text-muted-foreground">{focus ? `L${focus.depth+1}` : generation ? `L${generation}` : 'L1'} · Unlimited depth</span></div><label className="flex items-center gap-2 text-xs text-muted-foreground">Generation<select aria-label="Select generation" className="form-input" value={generation ?? ''} onChange={e => {setGeneration(e.target.value ? Number(e.target.value) : null);setSelected(null);setSearch('');}}><option value="">Branch view</option>{Array.from({length:deepest},(_,i) => <option key={i} value={i+1}>L{i+1}</option>)}</select></label></div>
  </section>
+ <VipRewardPlus/>
  <section className="nx-plan"><div><h2 className="font-display text-lg font-bold">BIX direct referral</h2><p className="mt-2 text-2xl font-bold text-chart-3">{cfg?.referrals.bixDirectEnabled===false ? 'Closed' : `${cfg?.referrals.bixDirectPct ?? cfg?.referrals.direct ?? 10}%`} <span className="text-sm text-muted-foreground">· 100% BIX</span></p><p className="mt-2 text-xs text-muted-foreground">New BIX Booster stakes create one bonus record per stake. Owner-approved credits use the existing reserve; pending bonuses are not spendable.</p></div><div><h2 className="font-display text-lg font-bold">Weekly qualification · USDT</h2><p className="mt-2 flex items-center gap-2 text-chart-2"><BadgeCheck size={18}/>{weeklyDirect>=minimum ? 'Qualified' : `${weeklyDirect}/${minimum} direct`} <b>{money(weeklyReward)}</b></p><p className="mt-2 text-xs text-muted-foreground">RewardPlus {cfg?.referrals.rewardPlus ?? 5}% · USDT package weekly turnover. Resets Monday 12 AM Makassar. Projection only.</p></div></section>
  <p className="mt-5 flex items-start gap-2 text-xs text-muted-foreground"><ShieldCheck size={15} className="shrink-0"/>BIX is an internal ledger asset. USDT package rules remain separate; no automatic payout or guaranteed profit.</p>
  </MemberGate></main></BixShell>;

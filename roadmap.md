@@ -72,3 +72,5 @@
 
 - [x] Add show/hide My requests and verify signed-in staking history.
 - [x] Preview replacement for landing packages, then implement selected admin-editable BIXLINK narrative section.
+- [x] REWARD PLUS VIP 1–10 (team sales, one-time, owner review)
+- [x] Full translation pass for 7 non-English languages

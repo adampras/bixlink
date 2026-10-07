@@ -262,6 +262,45 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_vip_rewards: {
+        Row: {
+          amount_bix: number
+          created_at: string
+          id: string
+          level: number
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          target_usd: number
+          team_sales_usd: number
+          user_id: string
+        }
+        Insert: {
+          amount_bix: number
+          created_at?: string
+          id?: string
+          level: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          target_usd: number
+          team_sales_usd: number
+          user_id: string
+        }
+        Update: {
+          amount_bix?: number
+          created_at?: string
+          id?: string
+          level?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          target_usd?: number
+          team_sales_usd?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       deposit_intents: {
         Row: {
           address: string
@@ -677,6 +716,7 @@ export type Database = {
           usdt_balance: number
         }[]
       }
+      bix_claim_vip: { Args: { p_level: number }; Returns: string }
       bix_content_published: { Args: { p_name: string }; Returns: boolean }
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
@@ -719,6 +759,10 @@ export type Database = {
         Args: { p_approve: boolean; p_bonus: string }
         Returns: undefined
       }
+      bix_review_vip: {
+        Args: { p_approve: boolean; p_reward: string }
+        Returns: undefined
+      }
       bix_stake_apy: {
         Args: { p_amount: number; p_days: number }
         Returns: number
@@ -727,6 +771,7 @@ export type Database = {
         Args: { p_amount: number; p_days: number }
         Returns: string
       }
+      bix_team_sales_usd: { Args: { p_user: string }; Returns: number }
       bix_unstake: { Args: { p_stake: string }; Returns: Json }
       bix_unstake_bix: { Args: { p_stake: string }; Returns: number }
       bix_unstake_penalty: {
@@ -734,6 +779,15 @@ export type Database = {
         Returns: number
       }
       bix_username_available: { Args: { p_username: string }; Returns: boolean }
+      bix_vip_status: { Args: never; Returns: Json }
+      bix_vip_tiers: {
+        Args: never
+        Returns: {
+          level: number
+          reward_bix: number
+          target_usd: number
+        }[]
+      }
       bix_vusdt_balance: { Args: { p_user: string }; Returns: number }
       bix_vusdt_component: { Args: { p_user: string }; Returns: number }
       bix_vusdt_send: {
