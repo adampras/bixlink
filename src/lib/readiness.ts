@@ -1,3 +1,3 @@
 import type { PresentationTheme } from '@/lib/presentation-theme';
-export type Readiness = { legalEnabled: boolean; kycEnabled: boolean; readinessEnabled: boolean; marketEnabled: boolean; homeOverviewEnabled: boolean; presentationTheme?: PresentationTheme };
-export const defaultReadiness: Readiness = { legalEnabled: false, kycEnabled: false, readinessEnabled: false, marketEnabled: true, homeOverviewEnabled: false };
+export type Readiness = { legalEnabled: boolean; kycEnabled: boolean; readinessEnabled: boolean; marketEnabled: boolean; homeOverviewEnabled: boolean; footerEnabled: boolean; footerTitle: string; footerBody: string; footerContact: string; presentationTheme?: PresentationTheme };
+export const defaultReadiness: Readiness = { legalEnabled: false, kycEnabled: false, readinessEnabled: false, marketEnabled: true, homeOverviewEnabled: false, footerEnabled: true, footerTitle: 'BIXCOIN · No SC', footerBody: 'Internal ledger asset without a deployed smart contract. Withdrawals require owner review.', footerContact: 'bixlink.io · @bixlink_official' };
