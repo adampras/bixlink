@@ -8,7 +8,7 @@ export const fallbackPackages = [
   { id: 'TITAN', price_usd: 5000, lock_days: 360, apy: 22 },
   { id: 'LEGEND', price_usd: 10000, lock_days: 540, apy: 25 },
 ];
-export type Package = typeof fallbackPackages[number] & { daily_profit_enabled?: boolean };
+export type Package = typeof fallbackPackages[number] & { daily_profit_enabled?: boolean; duration_apys?: Record<string, number>; enabled?: boolean; retired?: boolean };
 const locale = () => typeof document === 'undefined' ? 'en-US' : ({ en: 'en-US', id: 'id-ID', ms: 'ms-MY', vi: 'vi-VN', th: 'th-TH', zh: 'zh-CN', ja: 'ja-JP', ko: 'ko-KR' }[document.documentElement.lang] ?? 'en-US');
 export const number = (value: number, options?: Intl.NumberFormatOptions) => new Intl.NumberFormat(locale(), options).format(Number(value));
 export const money = (value: number, options?: Intl.NumberFormatOptions) => new Intl.NumberFormat(locale(), { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2, ...options }).format(Number(value));

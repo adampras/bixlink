@@ -527,28 +527,34 @@ export type Database = {
           apy: number
           clone_of: string | null
           daily_profit_enabled: boolean
+          duration_apys: Json
           enabled: boolean
           id: string
           lock_days: number
           price_usd: number
+          retired: boolean
         }
         Insert: {
           apy: number
           clone_of?: string | null
           daily_profit_enabled?: boolean
+          duration_apys?: Json
           enabled?: boolean
           id: string
           lock_days: number
           price_usd: number
+          retired?: boolean
         }
         Update: {
           apy?: number
           clone_of?: string | null
           daily_profit_enabled?: boolean
+          duration_apys?: Json
           enabled?: boolean
           id?: string
           lock_days?: number
           price_usd?: number
+          retired?: boolean
         }
         Relationships: []
       }
@@ -825,8 +831,18 @@ export type Database = {
           usdt_balance: number
         }[]
       }
+      bix_can_manage_packages: { Args: never; Returns: boolean }
       bix_claim_vip: { Args: { p_level: number }; Returns: string }
       bix_content_published: { Args: { p_name: string }; Returns: boolean }
+      bix_edit_duration_package: {
+        Args: {
+          p_apys: Json
+          p_enabled: boolean
+          p_id: string
+          p_price: number
+        }
+        Returns: undefined
+      }
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_network_bix_metrics: { Args: never; Returns: Json }
@@ -913,6 +929,10 @@ export type Database = {
       is_bix_admin: { Args: never; Returns: boolean }
       request_bix_deposit: {
         Args: { p_amount: number; p_tx_hash: string }
+        Returns: string
+      }
+      request_bix_duration_stake: {
+        Args: { p_days: number; p_package: string }
         Returns: string
       }
       request_bix_stake: { Args: { p_package: string }; Returns: string }

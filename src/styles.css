@@ -975,3 +975,49 @@ html[data-color-mode="light"], html[data-color-mode="light"] [data-presentation-
 html[data-color-mode="light"] .site-shell { background-image: none; }
 html[data-color-mode="light"] .site-header { background: color-mix(in oklab, var(--background) 92%, transparent); }
 .mode-toggle { border-radius: 999px; color: var(--chart-3); }
+
+/* Duration packages: Presisi Ringkas v5, scoped to package surfaces. */
+:root {
+  --package-surface: #161E31;
+  --package-ink: oklch(0.98 0 0);
+  --package-muted: oklch(0.74 0.025 260);
+  --package-control: oklch(0.27 0.035 260);
+  --package-border: oklch(0.4 0.035 260);
+  --package-emerald: oklch(0.57 0.15 160);
+  --package-cyan: oklch(0.57 0.12 220);
+  --package-blue: oklch(0.5 0.19 260);
+  --package-indigo: oklch(0.49 0.2 285);
+  --package-violet: oklch(0.5 0.21 305);
+  --package-fuchsia: oklch(0.52 0.2 330);
+  --package-rose: oklch(0.53 0.2 15);
+  --package-gold: oklch(0.8 0.15 80);
+  --package-gold-ink: oklch(0.2 0.025 80);
+  --package-shadow: 0 8px 24px oklch(0.05 0.02 260 / 12%);
+}
+.duration-package { --tier-color: var(--package-emerald); --tier-ink: var(--package-ink); min-width:0; overflow:hidden; border:1px solid var(--package-border); border-radius:8px; background:var(--package-surface); color:var(--package-ink); box-shadow:var(--package-shadow); font-family:'DM Sans',sans-serif; letter-spacing:0; }
+.tier-tone-1 { --tier-color:var(--package-cyan); }
+.tier-tone-2 { --tier-color:var(--package-blue); }
+.tier-tone-3 { --tier-color:var(--package-indigo); }
+.tier-tone-4 { --tier-color:var(--package-violet); }
+.tier-tone-5 { --tier-color:var(--package-fuchsia); }
+.tier-tone-6 { --tier-color:var(--package-rose); }
+.tier-tone-7 { --tier-color:var(--package-gold); --tier-ink:var(--package-gold-ink); }
+.duration-package-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:20px; background:var(--tier-color); color:var(--tier-ink); }
+.duration-package h3,.duration-price,.duration-apy { font-family:'Space Grotesk',sans-serif; letter-spacing:0; }
+.duration-package h3 { overflow-wrap:anywhere; }
+.duration-price { flex-shrink:0; max-width:52%; padding:7px 9px; border:1px solid color-mix(in oklab,var(--tier-ink) 20%,transparent); border-radius:8px; background:color-mix(in oklab,var(--tier-ink) 12%,transparent); font-size:13px; overflow-wrap:anywhere; }
+.duration-package-body { padding:20px; }
+.duration-label { color:var(--package-muted); font-size:10px; font-weight:700; text-transform:uppercase; }
+.duration-options { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; margin-top:10px; }
+.duration-package .duration-option { width:100%; min-width:0; height:38px; padding:0; border-radius:6px; background:var(--package-control); border-color:var(--package-border); color:var(--package-muted); font-size:11px; font-weight:700; }
+.duration-package .duration-option[aria-pressed="true"] { background:var(--tier-color); border-color:var(--tier-color); color:var(--tier-ink); }
+.duration-package .duration-option:hover { border-color:var(--tier-color); }
+.duration-package-action { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:24px; }
+.duration-apy { display:block; margin-top:3px; font-size:26px; font-weight:700; color:color-mix(in oklab,var(--tier-color) 64%,var(--package-ink)); }
+.duration-apy small { font-size:10px; }
+.duration-package .duration-stake { height:42px; border-radius:8px; background:var(--tier-color); color:var(--tier-ink); padding-inline:18px; font-size:13px; }
+.duration-package .duration-stake:hover { filter:brightness(1.08); }
+.duration-package .form-input { background:var(--package-control); color:var(--package-ink); border-color:var(--package-border); border-radius:6px; font-family:'DM Sans',sans-serif; }
+html[data-color-mode="light"] .duration-package { --package-surface:var(--card); --package-ink:var(--foreground); --package-muted:var(--muted-foreground); --package-control:var(--secondary); --package-border:var(--border); --tier-ink:oklch(0.99 0 0); }
+html[data-color-mode="light"] .duration-apy { color:var(--tier-color); }
+html[data-color-mode="light"] .tier-tone-7 { --tier-ink:var(--package-gold-ink); }

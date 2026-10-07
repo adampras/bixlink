@@ -1,0 +1,3 @@
+CREATE OR REPLACE FUNCTION public.request_bix_stake(p_package text) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE d integer; BEGIN SELECT CASE WHEN lock_days=ANY(ARRAY[30,60,90,180,360]) THEN lock_days ELSE 30 END INTO d FROM public.packages WHERE id=p_package AND enabled AND NOT retired; IF NOT FOUND THEN RAISE EXCEPTION 'Package unavailable or closed'; END IF; RETURN public.request_bix_duration_stake(p_package,d); END $$;
+REVOKE ALL ON FUNCTION public.request_bix_stake(text) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.request_bix_stake(text) TO authenticated;

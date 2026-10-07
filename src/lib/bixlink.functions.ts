@@ -36,9 +36,9 @@ export const assignReferral = createServerFn({ method: 'POST' }).middleware([req
   });
 
 export const requestStake = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { packageId: string }) => z.object({ packageId: z.string().min(1).max(40) }).parse(data))
+  .inputValidator((data: { packageId: string; days: number }) => z.object({ packageId: z.string().min(1).max(40), days: z.number().int().refine(d => [30, 60, 90, 180, 360].includes(d)) }).parse(data))
   .handler(async ({ data, context }) => {
-    const { data: id, error } = await context.supabase.rpc('request_bix_stake', { p_package: data.packageId });
+    const { data: id, error } = await context.supabase.rpc('request_bix_duration_stake', { p_package: data.packageId, p_days: data.days });
     if (error) throw new Error(error.message);
     return { id };
   });
@@ -134,7 +134,7 @@ export const clonePackage = createServerFn({ method: 'POST' }).middleware([requi
   .inputValidator((data: { sourceId: string; price_usd: number; apy: number; lock_days: number }) => z.object({ sourceId: z.string().min(1).max(40), price_usd: z.number().positive().max(10_000_000), apy: z.number().min(0).max(25), lock_days: z.number().int().min(1).max(3650) }).parse(data))
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
-    const base = data.sourceId.split('-')[0]!;
+    const base = data.sourceId.split('-')[0] ?? data.sourceId;
     const { data: rows, error: listError } = await context.supabase.from('packages').select('id').like('id', `${base}-%`);
     if (listError) throw listError;
     const used = new Set((rows ?? []).map(r => r.id));

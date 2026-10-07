@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { DurationPackageCard } from '@/components/DurationPackageCard';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
@@ -52,24 +53,8 @@ function StakePage() {
         <span className="stake-pool-ico" aria-hidden><Zap size={15} /></span>
       </div>
       <div className="stake-pool mt-3"><div><span className="stake-pool-label">Available balance</span><p className="stake-pool-value numeric">{money(bal.data ?? 0)}</p></div></div>
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {(cfg?.packages ?? []).map((p, i) => {
-          const popular = p.id === 'BUILDER';
-          const maxYield = p.id === 'LEGEND';
-          return <article key={p.id} className={`stake-lux-card${popular ? ' stake-lux-card--pop' : ''}${maxYield ? ' stake-lux-card--gold' : ''}`}>
-            {popular && <span className="stake-lux-notch">Popular</span>}
-            {maxYield && <span className="stake-lux-notch stake-lux-notch--gold">Max yield</span>}
-            <div className="stake-lux-cardrow">
-              <div><p className="stake-lux-kicker">Package {String(i + 1).padStart(2, '0')}</p><h3 className="stake-lux-name">{p.id}</h3></div>
-              <strong className="stake-lux-price numeric">{money(p.price_usd)}</strong>
-            </div>
-            <div className="stake-lux-stats">
-              <div className="stake-lux-stat"><span>Annual yield</span><b className="numeric text-chart-2">{p.apy}% <small>APY</small></b></div>
-              <div className="stake-lux-stat stake-lux-stat--end"><span>Lock period</span><b className="numeric flex items-center justify-end gap-1.5 text-sm"><LockKeyhole size={12} />{p.lock_days} days</b></div>
-            </div>
-            <Button className="stake-lux-btn w-full rounded-xl" onClick={() => setChosen(p)}>Stake Now <ArrowUpRight /></Button>
-          </article>;
-        })}
+      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        {(cfg?.packages ?? []).map((p, i) => <DurationPackageCard key={p.id} pkg={p} index={i} onStake={setChosen}/>)}
       </div>
       <div className="mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><div className="flex items-center gap-2"><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span><Button variant="outline" size="icon" aria-label={requestsVisible ? "Hide my requests" : "Show my requests"} aria-expanded={requestsVisible} aria-controls="stake-requests" onClick={() => setRequestsVisible(current => !current)}>{requestsVisible ? <ChevronUp/> : <ChevronDown/>}</Button></div></div>
       <div id="stake-requests" hidden={!requestsVisible} className="mt-4 space-y-3">{(data?.stakes ?? []).map(s => {
@@ -85,13 +70,13 @@ function StakePage() {
         <div className="flex justify-between"><h3 className="font-display text-2xl font-black">{chosen.id}</h3><Button variant="ghost" size="icon" onClick={() => setChosen(null)}><X/></Button></div>
         <p className="numeric mt-4 text-4xl font-black text-chart-3">{money(chosen.price_usd)}</p>
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm"><div>APY <b className="numeric block text-chart-2">{chosen.apy}%</b></div><div>Lock <b className="numeric block">{chosen.lock_days} days</b></div><div>Est. daily <b className="numeric block">${daily(chosen).toFixed(4)}</b></div><div>Est. lock return <b className="numeric block">{money(daily(chosen) * chosen.lock_days)}</b></div></div>
-        <div className="mt-4 rounded-xl border border-border p-3 text-xs"><div className="flex justify-between"><span className="text-muted-foreground">Estimated annual profit</span><b className="numeric">{money(chosen.price_usd * chosen.apy / 100)}</b></div><div className="mt-2 flex justify-between"><span className="text-muted-foreground">70% USDT allocation</span><b className="numeric text-chart-2">{money(chosen.price_usd * chosen.apy / 100 * .7)}</b></div><div className="mt-2 flex justify-between"><span className="text-muted-foreground">30% BIX allocation</span><b className="numeric text-chart-3">{number(chosen.price_usd * chosen.apy / 100 * .3 / .1, { maximumFractionDigits: 8 })} BIX</b></div></div>
+        <div className="mt-4 rounded-xl border border-border p-3 text-xs"><div className="flex justify-between"><span className="text-muted-foreground">Estimated annual profit</span><b className="numeric">{money(chosen.price_usd * chosen.apy / 100)}</b></div><div className="mt-2 flex justify-between"><span className="text-muted-foreground">70% USDT allocation</span><b className="numeric text-chart-2">{money(chosen.price_usd * chosen.apy / 100 * .7)}</b></div><div className="mt-2 flex justify-between"><span className="text-muted-foreground">30% BIX allocation</span><b className="numeric text-chart-3">{number(chosen.price_usd * chosen.apy / 100 * .3 / (cfg?.bixMarket.priceUsd ?? .84291), { maximumFractionDigits: 8 })} BIX</b></div></div>
         <p className="mt-4 text-xs text-muted-foreground">{money(chosen.price_usd)} {data?.isAdmin ? 'virtual USDT is deducted instantly and the stake activates immediately (testing balance).' : 'USDT is deducted instantly and the stake activates immediately.'} Displayed profit is an estimate. Your balance: <b className="numeric">{money(bal.data ?? 0)}</b></p>
         {Number(bal.data ?? 0) < Number(chosen.price_usd) && <div role="alert" className="mt-4 rounded-xl border border-destructive/50 bg-destructive/10 p-3 text-xs text-destructive"><b>Insufficient balance.</b> You need {money(Number(chosen.price_usd) - Number(bal.data ?? 0))} more USDT to activate this package.</div>}
         <label className="mt-4 flex items-start gap-2 rounded-xl border border-border p-3 text-xs"><input type="checkbox" className="mt-0.5" checked={agree} onChange={e => setAgree(e.target.checked)}/> I agree to the staking terms: lock period, APY estimate and early-unstake penalties.</label>
         <div className="mt-5 grid grid-cols-2 gap-3">
           <Button variant="outline" className="rounded-full" onClick={() => { setChosen(null); setNotice('Stake cancelled — you did not agree.'); }}>Disagree</Button>
-          <Button disabled={busy || !agree || Number(bal.data ?? 0) < Number(chosen.price_usd)} className="rounded-full bg-chart-3 text-background" onClick={async () => { if (!(await confirmPin())) return; setBusy(true); try { await submit({ data: { packageId: chosen.id } }); setCongrats(chosen); await refreshAll(); } catch (e) { const message = e instanceof Error ? e.message : 'Request failed.'; const m2 = message.toLowerCase().includes('insufficient') ? `Insufficient balance. Add more USDT before staking ${chosen.id}.` : message; setNotice(m2); txFeedback.fail('Staking failed', m2); } setBusy(false); setChosen(null); }}>Agree & stake</Button>
+          <Button disabled={busy || !agree || Number(bal.data ?? 0) < Number(chosen.price_usd)} className="rounded-full bg-chart-3 text-background" onClick={async () => { if (!(await confirmPin())) return; setBusy(true); try { await submit({ data: { packageId: chosen.id, days: chosen.lock_days } }); setCongrats(chosen); await refreshAll(); } catch (e) { const message = e instanceof Error ? e.message : 'Request failed.'; const m2 = message.toLowerCase().includes('insufficient') ? `Insufficient balance. Add more USDT before staking ${chosen.id}.` : message; setNotice(m2); txFeedback.fail('Staking failed', m2); } setBusy(false); setChosen(null); }}>Agree & stake</Button>
         </div>
       </div></div>}
       {congrats && <div className="modal-backdrop" onClick={() => setCongrats(null)}><div role="dialog" aria-modal="true" className="modal-panel deposit-success text-center" onClick={e => e.stopPropagation()}>

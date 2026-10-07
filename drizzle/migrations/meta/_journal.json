@@ -239,6 +239,20 @@
       "when": 1791388225867,
       "tag": "0033_team_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1791415071545,
+      "tag": "0034_package_duration_options_and_reviewer_editor",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1791415272195,
+      "tag": "0035_legacy_stake_uses_duration_options",
+      "breakpoints": true
     }
   ]
 }
