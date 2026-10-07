@@ -12,8 +12,8 @@
 - Keep staking requests as non-custodial, pending records with no automatic payout or fabricated wallet balance; this app does not integrate a payment rail.
 - Grant owner access only after server-validated identity and a matching verified owner email; client state is never an authority for admin actions.
 - Read public package and settings data with RLS and run account-specific operations with authenticated server functions; this separates public browsing from private records.
-- Treat BIX/USDT conversion as an admin-reviewed internal ledger request at the owner-managed reference price; this prevents implied exchange execution or custody while keeping display and calculations consistent.
-- Store owner-selected presentation options in public app settings and validate updates through authenticated admin server functions, so members see one centrally controlled experience.
+- BIX/USDT conversions are reviewed internal ledger requests at the owner reference, never exchange execution or custody.
+- Public presentation settings are centrally controlled through authenticated owner writes.
 - Claim splash session before display; hydrate on public entry pages only, never in admin, so remounts cannot interrupt editing.
 - Share one session store across routes; use layout-shaped placeholders.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
@@ -26,13 +26,13 @@
 - Gate optional readiness surfaces through centralized app settings, and enforce identity availability and published announcement access with RLS; essential risk disclosures remain visible regardless of presentation toggles.
 - Market updates use a dedicated route with the public price feed and owner-authenticated announcement writes.
 - Dehydrate and hydrate the per-request QueryClient through the router so SSR and browser initially render the same market snapshot rather than fetching conflicting quotes.
-- Deposits: credited only after server-side on-chain verification (amount from chain, one credit per TxID); unique exact amount matched on chain by one shared matcher (page polling + 5-min cron route); "I have transferred" adds a pending row the owner can approve — one credit path, no double credit.
+- Deposits use one on-chain matcher (polling and cron), chain amounts and one credit per TxID; transfer reports stay pending for review.
 - Share HOME/landing content and narratives (bundled fallbacks) through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
 - Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
 - Owner 2 discovery uses a shared role query; reviewer actions exclude clone transactions on reads and writes. Package editing uses a separate authenticated, narrowly scoped RPC; wallet-address and vault privileges remain owner-only.
-- Render income-category and roadmap cards through shared components with bundled default images and owner-upload overrides, so public and member views stay consistent.
+- Share category/roadmap cards, bundled images and owner overrides across public/member views.
 - Store the owner-selected presentation theme inside the existing public readiness setting and apply semantic CSS overrides in the shared shell, so all visitors receive the same lightweight theme without widening database access.
-- BIXCOIN on-chain token is deployed only from the owner's own injected wallet (TokenPocket) with a fixed-supply bytecode compiled in src/lib; the app stores only the resulting address in app_settings and never holds keys or converts internal balances.
+- On-chain deployment uses only the owner injected TokenPocket wallet and fixed-supply bytecode; store the address, never keys or internal-balance conversions.
 - VIP tiers live in SQL; team sales = active downline USDT stakes minus clones; one owner-reviewed, vault-funded row per user+level — server-enforced one-time rewards.
 - Network bonuses are source-stake-idempotent; native BIX ones stay owner-reviewed. USDT direct + daily matching live in bix_usdt_network_bonuses (unique per stake/receiver/level/day), split USDT/BIX by referral settings and summed into balance functions; a pg_cron job settles matching daily — one idempotent ledger for network rewards.
 
