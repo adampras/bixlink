@@ -82,3 +82,6 @@
 - [x] Improve Royal Gold & Jade with clearer multicolor card accents and theme preview.
 - [x] USDT direct 10% split 70/30, daily matching, bonus history toggle
 - [x] Day/night mode toggle
+- [ ] Replace old/clone offerings with eight duration-selectable staking packages; preserve existing stake contracts.
+- [ ] Add five editable duration APYs and availability controls to Owner 1 and Owner 2; verify permission boundaries and saved member display.
+- [ ] Apply selected Presisi Ringkas v5 and verify duration selection and staking flow.
