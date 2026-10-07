@@ -30,8 +30,8 @@ function TransferPage() {
     setMsg(`Sent ${money(Number(amount))} to ${code.toUpperCase()}.`); setAmount(''); setNote(''); q.refetch();
   }
   return <BixShell><main className="mx-auto max-w-3xl px-5 py-10 md:px-8"><MemberGate ready={ready} signedIn={!!user} title="TRANSFER">
-    <div className="eyebrow">VIRTUAL USDT · TESTING</div><h1 className="section-title">TRANSFER <span>USDT</span></h1>
-    <div className="terminal-balance mt-6"><span className="text-xs text-muted-foreground">Virtual USDT balance</span><strong className="numeric mt-2 block text-4xl font-black text-foreground">{money(q.data?.balance ?? 0)}</strong><p className="mt-2 text-xs text-muted-foreground">Test balance only — separate from your real wallet and cannot be withdrawn. Your code: <b className="numeric text-chart-3">{myCode ?? '—'}</b></p></div>
+    {mine?.isAdmin && <div className="eyebrow">VIRTUAL USDT · TESTING</div>}<h1 className="section-title">TRANSFER <span>USDT</span></h1>
+    <div className="terminal-balance mt-6"><span className="text-xs text-muted-foreground">{mine?.isAdmin ? 'Virtual USDT balance' : 'USDT balance'}</span><strong className="numeric mt-2 block text-4xl font-black text-foreground">{money(q.data?.balance ?? 0)}</strong><p className="mt-2 text-xs text-muted-foreground">{mine?.isAdmin && 'Test balance only — separate from your real wallet and cannot be withdrawn. '}Your code: <b className="numeric text-chart-3">{myCode ?? '—'}</b></p></div>
     {!open ? <div className="mt-6 flex items-center gap-3 rounded-[20px] border border-chart-3 bg-chart-3/10 p-5 text-sm font-bold text-chart-3"><Lock size={18}/> Coming soon — transfer is not open yet.</div> :
     <form onSubmit={send} className="register-panel mt-6 space-y-4">
       <label className="block text-xs font-bold text-muted-foreground">RECIPIENT CODE<input required value={code} onChange={e => setCode(e.target.value.toUpperCase())} className="form-input numeric mt-2 uppercase" placeholder="BIX-123456"/></label>
