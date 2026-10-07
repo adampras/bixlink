@@ -30,12 +30,9 @@
 - Keep market updates in a dedicated route using the existing public price feed and owner-authenticated announcement writes, so prices and official project communications remain clearly separated.
 - Dehydrate and hydrate the per-request QueryClient through the router so SSR and browser initially render the same market snapshot rather than fetching conflicting quotes.
 - Deposits: unique exact amount matched on chain by one shared matcher (page polling + 5-min cron route); "I have transferred" adds a pending row the owner can approve — one credit path, no double credit.
-
 - Share HOME/landing content through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
 - Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
-- Surface the limited Owner 2 review console only when the signed-in account has the database-backed reviewer role, so client state never grants or advertises reviewer access.
-- Include reviewer in the user_roles database constraint and verify role writes by reading them back before reporting success, so Owner 2 assignments cannot silently fail.
-- Render income-category cards through one shared component with bundled contextual image defaults and owner-upload overrides, so HOME and landing stay visually consistent without overwriting saved content.
-- Render roadmap phases through a shared glass-caption card with title-matched default illustrations and owner-upload overrides, so both public and member views preserve the same editable roadmap.
-
+- Owner 2 console shows only for the database-backed reviewer role (in the user_roles constraint); verify role writes by reading back, so client state never grants access.
+- Render income-category and roadmap cards through shared components with bundled default images and owner-upload overrides, so public and member views stay consistent.
 - Store the owner-selected presentation theme inside the existing public readiness setting and apply semantic CSS overrides in the shared shell, so all visitors receive the same lightweight theme without widening database access.
+- BIXCOIN on-chain token is deployed only from the owner's own injected wallet (TokenPocket) with a fixed-supply bytecode compiled in src/lib; the app stores only the resulting address in app_settings and never holds keys or converts internal balances.
