@@ -97,7 +97,7 @@ export function usePublicConfig() {
     queryKey: ['bix-public-config'],
     queryFn: async () => {
       const [p, s] = await Promise.all([
-        supabase.from('packages').select('*').order('price_usd'),
+        supabase.from('packages').select('*').eq('enabled', true).order('price_usd'),
         supabase.from('app_settings').select('*'),
       ]);
       const settings = Object.fromEntries((s.data ?? []).map(r => [r.key, r.value as Record<string, any>]));
