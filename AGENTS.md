@@ -14,7 +14,7 @@
 - Read public package and settings data with RLS and run account-specific operations with authenticated server functions; this separates public browsing from private records.
 - Treat BIX/USDT conversion as an admin-reviewed internal ledger request at the owner-managed reference price; this prevents implied exchange execution or custody while keeping display and calculations consistent.
 - Store owner-selected presentation options in public app settings and validate updates through authenticated admin server functions, so members see one centrally controlled experience.
-- Show the startup splash once per browser session from the root layout, so navigation inside the member area remains uninterrupted.
+- Claim splash session before display; hydrate on public entry pages only, never in admin, so remounts cannot interrupt editing.
 - Share one session store across routes to avoid repeated auth requests and loader flashes; use layout-shaped placeholders.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
 - Owner clone accounts are tracked in bix_clone_accounts and funded only via bix_allocations, excluded from public member stats — keeps internal accounts auditable and separate from real members.
