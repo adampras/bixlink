@@ -927,7 +927,10 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
   --theme-inset: inset 0 1px 0 var(--card);
 }
 [data-presentation-theme="royal"] :is(.terminal-balance,.wallet-summary) { background: var(--royal-jade); color: var(--royal-on-color); }
-[data-presentation-theme="royal"] .terminal-balance :is(h1,h2,h3,b,strong,.text-foreground,.text-muted-foreground,.wallet-balance) { color: var(--royal-on-color); }
+[data-presentation-theme="royal"] :is(.terminal-balance,.wallet-summary) :is(h1,h2,h3,b,strong,.text-foreground,.text-muted-foreground,.wallet-balance) { color: var(--royal-on-color); }
+[data-presentation-theme="royal"] .wallet-summary button { background: var(--card); color: var(--foreground); border-color: var(--card); }
+[data-presentation-theme="royal"] .wallet-summary button:last-child { background: var(--royal-violet); color: var(--royal-on-color); border-color: var(--royal-violet); }
+[data-presentation-theme="royal"] .wallet-summary button:hover { opacity: 0.9; }
 [data-presentation-theme="royal"] .terminal-balance :is(button,a) { color: var(--foreground); background: var(--card); border-color: var(--border); }
 [data-presentation-theme="royal"] .terminal-balance :is(button,a):hover { background: var(--secondary); }
 [data-presentation-theme="royal"] :is(.boost-split-bar,.vip-progress-track) { background: var(--secondary); }
