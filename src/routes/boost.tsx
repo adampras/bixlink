@@ -7,6 +7,7 @@ import robotFox from '@/assets/booster-concept-fox.png';
 import reactorEngine from '@/assets/booster-concept-reactor.png';
 import foxEmblem from '@/assets/booster-concept-emblem.png';
 import { number } from '@/lib/bixlink';
+import { BixStakePanel } from '@/components/BixStakePanel';
 
 const boosterVisuals = {
   fox: { src: robotFox, alt: 'BIXLINK robotic fox guardian beside the APY reactor engine', className: 'robot-fox--reactor' },
@@ -41,10 +42,7 @@ function BoostPage() {
           <div className="booster-chip"><b className="text-chart-3">30%</b> profit in BIX</div>
           <div className="booster-chip"><b className="text-primary">25%</b> maximum APY</div>
         </div>
-        <div className="mt-7 flex flex-wrap gap-3">
-          <Button asChild className="rounded-full bg-chart-3 text-background"><Link to="/stake">Activate with BIXCOIN staking <ArrowUpRight/></Link></Button>
-          <Button asChild variant="outline" className="rounded-full border-chart-2 text-chart-2 hover:bg-chart-2/10"><Link to="/profit"><TrendingUp/> View live profit</Link></Button>
-        </div>
+        <div className="mt-7"><BixStakePanel bixPrice={bixPrice}/></div>
 
         <section className="booster-member-status mt-6">
           <div><span>YOUR BOOSTER</span><strong className={boosterEnabled && activeStakes.length ? 'text-chart-2' : 'text-muted-foreground'}>{boosterEnabled ? (activeStakes.length ? 'ACTIVE' : 'READY') : 'PAUSED'}</strong></div>
