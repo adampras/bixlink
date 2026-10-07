@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
 import splashBackground from '@/assets/bixlink-splash-bg.jpg';
+import { Button } from '@/components/ui/button';
 
-const SPLASH_DURATION_MS = 2800;
+const SPLASH_DURATION_MS = 900;
+let startedThisLoad = false;
 
 export function AppSplash() {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    if (window.sessionStorage.getItem('bixlink-splash-seen') === '1') {
-      setVisible(false);
-      return;
-    }
-
-
-    const leaveTimer = window.setTimeout(() => setLeaving(true), SPLASH_DURATION_MS - 450);
+    let seen = false;
+    try { seen = window.sessionStorage.getItem('bixlink-splash-seen') === '1'; } catch { /* Storage can be restricted. */ }
+    if (startedThisLoad || seen) return;
+    startedThisLoad = true;
+    try { window.sessionStorage.setItem('bixlink-splash-seen', '1'); } catch { /* In-memory guard covers this load. */ }
+    if (!['/', '/auth', '/register'].includes(window.location.pathname)) return;
+    setVisible(true);
+    const leaveTimer = window.setTimeout(() => setLeaving(true), SPLASH_DURATION_MS - 180);
     const removeTimer = window.setTimeout(() => {
-      window.sessionStorage.setItem('bixlink-splash-seen', '1');
       setVisible(false);
     }, SPLASH_DURATION_MS);
 
@@ -27,9 +29,7 @@ export function AppSplash() {
   }, []);
 
   const dismiss = () => {
-    window.sessionStorage.setItem('bixlink-splash-seen', '1');
-    setLeaving(true);
-    window.setTimeout(() => setVisible(false), 420);
+    setVisible(false);
   };
 
   if (!visible) return null;
@@ -51,7 +51,7 @@ export function AppSplash() {
         </div>
         <div className="app-splash__status"><span /> Initializing secure member experience</div>
         <div className="app-splash__track"><i /></div>
-        <button type="button" className="app-splash__skip" onClick={dismiss}>Skip</button>
+        <Button type="button" variant="ghost" className="app-splash__skip" onClick={dismiss}>Skip</Button>
       </div>
     </div>
   );
