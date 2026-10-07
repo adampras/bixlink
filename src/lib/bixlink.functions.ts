@@ -10,14 +10,18 @@ const verifyAdmin = async (context: { supabase: any; userId: string; claims?: an
 };
 
 export const getMyData = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const [stakes, referral, tree, admin] = await Promise.all([
+  const [stakes, referral, tree, admin, bixMetrics, bonuses] = await Promise.all([
     context.supabase.from('stakes').select('*').eq('user_id', context.userId).order('created_at', { ascending: false }),
     context.supabase.from('referral_codes').select('*').eq('user_id', context.userId).maybeSingle(),
     context.supabase.rpc('bix_referral_tree_metrics'), context.supabase.rpc('is_bix_admin'),
+     context.supabase.rpc('bix_network_bix_metrics'),
+     context.supabase.from('bix_referral_bonuses').select('*').eq('referrer_id', context.userId).order('created_at', { ascending: false }),
   ]);
   if (stakes.error) throw stakes.error;
   if (tree.error) throw tree.error;
-  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [], isAdmin: Boolean(admin.data) };
+  if (bixMetrics.error) throw bixMetrics.error;
+  if (bonuses.error) throw bonuses.error;
+  return { stakes: stakes.data ?? [], referral: referral.data, tree: tree.data ?? [], bixMetrics: bixMetrics.data, bonuses: bonuses.data ?? [], isAdmin: Boolean(admin.data) };
 });
 
 export const assignReferral = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
@@ -129,6 +133,7 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
     if (parsed.key === 'readiness') z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean(), homeOverviewEnabled: z.boolean().optional(), presentationTheme: z.enum(PRESENTATION_THEMES).optional() }).strict().parse(parsed.value);
     if (parsed.key === 'unstake') z.object({ tiers: z.array(z.object({ days: z.number().int().min(1).max(3650), pct: z.number().min(0).max(100) })).min(1).max(10) }).parse(parsed.value);
     if (parsed.key === 'bix_market') z.object({ priceUsd: z.number().positive().max(1_000_000) }).parse(parsed.value);
+    if (parsed.key === 'referrals') z.object({ direct: z.number().min(0).max(100), levels: z.array(z.number().min(0).max(100)).length(5), rewardPlus: z.number().min(0).max(100), minimumDirect: z.number().int().min(1), splitUsdt: z.number().min(0).max(100), splitBix: z.number().min(0).max(100), bixDirectPct: z.number().min(0).max(100).optional(), bixDirectEnabled: z.boolean().optional() }).refine(v => v.splitUsdt + v.splitBix === 100, 'USDT and BIX split must total 100%').parse(parsed.value);
     if (parsed.key === 'landing_content') {
       const item = z.object({ title: z.string().trim().min(1).max(60), description: z.string().trim().max(240), image: z.string().regex(/^images\/[a-f0-9-]+\.(jpg|jpeg|png|webp)$/).optional(), enabled: z.boolean().optional(), quarter: z.string().max(40).optional() }).strict();
       parsed.value = z.object({ ecosystem: z.array(item).max(12), income: z.array(item).max(12), spaces: z.array(item).max(12).optional(), roadmap: z.array(item).max(12).optional() }).strict().parse(parsed.value);
@@ -139,6 +144,8 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
     await verifyAdmin(context);
     const { error } = await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
     if (error) throw error;
+    const { data: saved, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', data.key).single();
+    if (readError || !saved || Object.entries(data.value).some(([key, value]) => JSON.stringify((saved.value as Record<string, unknown>)[key]) !== JSON.stringify(value))) throw new Error('Could not confirm saved settings');
     return { ok: true };
   });
 
