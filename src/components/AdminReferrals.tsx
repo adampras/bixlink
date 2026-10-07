@@ -4,6 +4,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { Save, Check, X, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { updateSetting } from '@/lib/bixlink.functions';
+import { AdminVip } from '@/components/AdminVip';
 import { getBixBonusReviews, reviewBixBonus } from '@/lib/network.functions';
 import { number } from '@/lib/bixlink';
 
@@ -36,5 +37,6 @@ export function AdminReferrals({ initial, onSaved, onMessage }: { initial: Recor
  <div className="min-w-0 text-sm"><strong className="text-chart-3">{number(Number(b.amount_bix))} BIX</strong><span className="ml-2 text-muted-foreground">{number(Number(b.rate_pct))}% · {b.status}</span><p className="mt-1 text-xs text-muted-foreground">Member {b.member_id.slice(0,8)} → Sponsor {b.referrer_id.slice(0,8)}</p></div>
   {b.status === 'pending' && <div className="flex gap-2">{[true,false].map(approve => <Button key={String(approve)} size="sm" variant={approve ? 'default' : 'outline'} disabled={busy} onClick={async () => {setBusy(true);try {await review({data:{id:b.id,approve}});qc.setQueryData(['admin-bix-bonuses'], bonuses.map(item => item.id === b.id ? {...item,status:approve ? 'approved' : 'rejected'} : item));await qc.invalidateQueries();onMessage(approve ? 'Bonus approved and credited in BIX.' : 'Bonus rejected.');} catch(err){onMessage(err instanceof Error ? err.message : 'Could not review bonus.');} finally{setBusy(false);}}}>{approve ? <Check/> : <X/>}{approve ? 'Approve' : 'Reject'}</Button>)}</div>}
  </div>)}{!bonuses.length && <p className="text-sm text-muted-foreground">No BIX referral bonuses yet.</p>}</div></div>
+ <AdminVip/>
  </section>;
 }
