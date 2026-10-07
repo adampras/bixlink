@@ -38,3 +38,5 @@
 - BIXCOIN on-chain token is deployed only from the owner's own injected wallet (TokenPocket) with a fixed-supply bytecode compiled in src/lib; the app stores only the resulting address in app_settings and never holds keys or converts internal balances.
 
 - Render landing narratives from landing_content with bundled fallbacks and authenticated owner editing; keep package catalogs member-only.
+- REWARD PLUS VIP tiers are fixed in SQL (bix_vip_tiers); team sales = active USDT stakes of the full cycle-safe downline excluding clones; one row per user+level, owner-reviewed and funded from the BIX vault — keeps one-time rewards server-enforced.
+- Extra UI translations live in src/lib/i18n-phrases.json (generated from rendered English text) and are merged under hand-written phrases in i18n.tsx — re-collect when adding new pages.
