@@ -97,12 +97,12 @@ export function usePublicConfig() {
     queryKey: ['bix-public-config'],
     queryFn: async () => {
       const [p, s] = await Promise.all([
-        supabase.from('packages').select('*').eq('enabled', true).order('price_usd'),
+        supabase.from('packages').select('*').eq('enabled', true).eq('retired', false).order('price_usd'),
         supabase.from('app_settings').select('*'),
       ]);
       const settings = Object.fromEntries((s.data ?? []).map(r => [r.key, r.value as Record<string, any>]));
       return {
-        packages: (p.data?.length ? p.data : fallbackPackages) as Package[],
+        packages: (p.data ?? []) as Package[],
         booster: (settings['booster'] ?? { enabled: true, rate: 25 }) as { enabled: boolean; rate: number },
         boosterVisual: (settings['booster_visual'] ?? { visual: 'fox' }) as { visual: 'fox' | 'reactor' | 'emblem' },
         wallet: (settings['wallet'] ?? { address: '', network: 'USDT BEP20' }) as { address: string; network: string },
