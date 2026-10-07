@@ -140,6 +140,53 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_referral_bonuses: {
+        Row: {
+          amount_bix: number
+          created_at: string
+          id: string
+          member_id: string
+          rate_pct: number
+          referrer_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          stake_id: string
+          status: string
+        }
+        Insert: {
+          amount_bix: number
+          created_at?: string
+          id?: string
+          member_id: string
+          rate_pct: number
+          referrer_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          stake_id: string
+          status?: string
+        }
+        Update: {
+          amount_bix?: number
+          created_at?: string
+          id?: string
+          member_id?: string
+          rate_pct?: number
+          referrer_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          stake_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_referral_bonuses_stake_id_fkey"
+            columns: ["stake_id"]
+            isOneToOne: true
+            referencedRelation: "bix_stakes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bix_stakes: {
         Row: {
           amount_bix: number
@@ -627,6 +674,7 @@ export type Database = {
       bix_content_published: { Args: { p_name: string }; Returns: boolean }
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
+      bix_network_bix_metrics: { Args: never; Returns: Json }
       bix_owner_vault: { Args: never; Returns: Json }
       bix_pay_lookup: { Args: { p_code: string }; Returns: boolean }
       bix_pay_send: {
@@ -660,6 +708,10 @@ export type Database = {
           weekly_stake_usd: number
           weekly_turnover_usd: number
         }[]
+      }
+      bix_review_referral_bonus: {
+        Args: { p_approve: boolean; p_bonus: string }
+        Returns: undefined
       }
       bix_stake_apy: {
         Args: { p_amount: number; p_days: number }

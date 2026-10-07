@@ -4,6 +4,9 @@ import { Coins, LockKeyhole, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { number } from '@/lib/bixlink';
+import { usePublicConfig } from '@/lib/useMember';
+import { useServerFn } from '@tanstack/react-start';
+import { stakeNativeBix, unstakeNativeBix } from '@/lib/network.functions';
 
 const LOCKS = [30, 90, 180, 360, 540];
 function apyFor(amount: number, days: number) {
@@ -14,6 +17,8 @@ function apyFor(amount: number, days: number) {
 
 export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   const qc = useQueryClient();
+  const stakeBix = useServerFn(stakeNativeBix); const unstakeBix = useServerFn(unstakeNativeBix);
+  const { data: cfg } = usePublicConfig();
   const [amount, setAmount] = useState('100');
   const [days, setDays] = useState(90);
   const [busy, setBusy] = useState(false);
@@ -43,16 +48,21 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
 
   async function stake() {
     setBusy(true); setMsg('');
-    const { error } = await supabase.rpc('bix_stake_bix', { p_amount: amt, p_days: days });
-    setBusy(false);
-    if (error) return setMsg(error.message);
-    setMsg(`CONGRATULATION — ${number(amt)} BIX staked at ${apy}% APY.`);
-    qc.invalidateQueries({ queryKey: ['bix-native-stakes'] });
+    try {
+      await stakeBix({ data: { amount: amt, days } });
+      setMsg(`CONGRATULATION — ${number(amt)} BIX staked at ${apy}% APY.`);
+      await qc.invalidateQueries();
+    } catch (error) { setMsg(error instanceof Error ? error.message : 'Could not stake BIX.'); }
+    finally { setBusy(false); }
   }
   async function unstake(id: string) {
-    const { data, error } = await supabase.rpc('bix_unstake_bix', { p_stake: id });
-    setMsg(error ? error.message : Number(data) > 0 ? `Unstaked early. Penalty ${number(Number(data))} BIX.` : 'Unstaked. Principal returned.');
-    qc.invalidateQueries({ queryKey: ['bix-native-stakes'] });
+    setBusy(true);
+    try {
+      const data = await unstakeBix({ data: { id } });
+      setMsg(data.penalty > 0 ? `Unstaked early. Penalty ${number(data.penalty)} BIX.` : 'Unstaked. Principal returned.');
+      await qc.invalidateQueries();
+    } catch (error) { setMsg(error instanceof Error ? error.message : 'Could not unstake.'); }
+    finally { setBusy(false); }
   }
 
   return <section className="rounded-[20px] border border-chart-2/40 bg-card p-5 sm:p-6">
@@ -74,6 +84,7 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
       <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Active 30% USDT</span><b className="numeric block text-chart-3">${number(periodProfit * 0.3 * bixPrice, { maximumFractionDigits: 2 })}</b></div>
     </div>
     <Button className="mt-4 w-full rounded-xl" disabled={busy || amt < 10 || amt > (q.data?.bal ?? 0)} onClick={stake}><Zap/> {busy ? 'Staking…' : amt > (q.data?.bal ?? 0) ? 'Insufficient BIX balance' : 'Stake BIX now'}</Button>
+    <p className="mt-3 text-xs text-chart-3">Direct referral bonus: {cfg?.referrals.bixDirectEnabled === false ? 'Closed' : `${cfg?.referrals.bixDirectPct ?? cfg?.referrals.direct ?? 10}% · 100% BIX · pending owner approval`}</p>
     <p className="mt-2 text-xs text-muted-foreground">Early unstake before lock end applies a 10% BIX penalty. Figures are projections, not guaranteed.</p>
     {msg && <p className="mt-3 rounded-xl border border-chart-2/40 bg-chart-2/10 p-3 text-sm font-bold text-chart-2">{msg}</p>}
 
