@@ -9,7 +9,7 @@ import { Check, X } from 'lucide-react';
 import { dateTime, money } from '@/lib/bixlink';
 
 export const Route = createFileRoute('/review')({
-  head: () => ({ meta: [{ title: 'Owner 2 Review — BIXLINK' }, { name: 'description', content: 'Limited BIXLINK review console.' }, { property: 'og:title', content: 'Owner 2 Review — BIXLINK' }, { property: 'og:description', content: 'Limited review console.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }),
+  head: () => ({ meta: [{ title: 'ADMIN PANEL BIX — BIXLINK' }, { name: 'description', content: 'Limited BIXLINK review console.' }, { property: 'og:title', content: 'ADMIN PANEL BIX — BIXLINK' }, { property: 'og:description', content: 'Limited review console.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }),
   component: Review,
 });
 
@@ -26,7 +26,7 @@ function Review() {
     <div className="eyebrow">OWNER 2</div><h1 className="section-title">REVIEW <span>CONSOLE</span></h1>
     {state === 'loading' ? <p className="mt-8 text-muted-foreground">Checking access…</p>
       : state === 'signin' ? <Button asChild className="mt-8 rounded-full"><Link to="/auth">Sign in</Link></Button>
-      : state === 'denied' ? <p className="mt-8 text-destructive">This account is not an Owner 2 reviewer.</p>
+      : state === 'denied' ? <p className="mt-8 text-destructive">This account is not an ADMIN PANEL BIX account.</p>
       : <>
         <p className="mt-3 text-sm text-muted-foreground">Approve or reject member deposits and withdrawals only.</p>
         {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
