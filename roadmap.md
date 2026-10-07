@@ -1,4 +1,6 @@
 - [x] Connect Cloud authentication and database.
+- [ ] Present clearer NETWORK tree previews and implement the chosen design after selection.
+- [ ] Synchronize BIXCOIN staking direct-referral bonuses with owner controls and verify ledger results.
 - [x] Add admin-editable image and visibility controls for HOME spaces and landing columns.
 - [x] Separate landing from account access with LAUNCH APP in the header.
 - [x] Present registration design previews for selection.
