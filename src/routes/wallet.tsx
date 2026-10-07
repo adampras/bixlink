@@ -54,7 +54,7 @@ function WalletPage() {
     const r = await checkIntent({ data: { id } });
     if (r.status === 'credited') { setSuccess({ amount: r.amount, walletCode: r.walletCode, network: r.network, txHash: r.txHash }); close(); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); }
     else if (r.status === 'expired' || r.status === 'missing') { setIntent(null); setNotice('This deposit request expired. Create a new one.'); }
-    else if (r.reason) setNotice(r.reason);
+    else setNotice('Still waiting for the blockchain to confirm your transfer. This updates automatically.');
   };
   useEffect(() => { if (!intent) return; const t = setInterval(() => { poll(intent.id).catch(() => {}); }, 15000); return () => clearInterval(t); }, [intent?.id]);
   const submit = async () => {
@@ -115,7 +115,7 @@ function WalletPage() {
           {!intent ? <><p className="mt-4 text-xs text-muted-foreground">2. Enter how much USDT you want to deposit.</p>
           <input className="form-input mt-2" type="number" min="1" step="1" placeholder="Amount USDT (e.g. 50)" value={amount} onChange={e => setAmount(e.target.value)}/></>
           : <div className="mt-4 rounded-2xl border border-chart-2 bg-chart-2/10 p-3 text-center"><div className="text-xs text-muted-foreground">Send EXACTLY this amount of USDT {intent.network}</div><div className="numeric mt-1 text-2xl font-black text-chart-2">{intent.amount.toFixed(4)}</div><Button size="sm" variant="outline" className="mt-2 rounded-full" onClick={async () => { await navigator.clipboard.writeText(intent.amount.toFixed(4)); setNotice('Exact amount copied.'); }}><Copy/> Copy amount</Button><p className="mt-2 text-[11px] text-muted-foreground">The unique decimals identify your deposit. Balance is credited automatically once the blockchain confirms. Valid for 2 hours.</p>{claimed ? <p className="mt-3 rounded-xl border border-chart-3/50 bg-chart-3/10 p-2 text-xs text-chart-3">Transfer reported. You can close this page — we keep checking the blockchain every 5 minutes for 24 hours, and the owner can approve it manually.</p> : <Button size="sm" className="mt-3 w-full rounded-full bg-chart-2 text-background" disabled={busy} onClick={async () => { setBusy(true); try { await claimIntent({ data: { id: intent.id } }); setClaimed(true); setNotice(''); txFeedback.success('Transfer reported', 'We will credit your balance once the blockchain confirms.'); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); } catch (e) { setNotice(e instanceof Error ? e.message : 'Could not record your transfer.'); txFeedback.fail('Could not record your transfer', e); } setBusy(false); }}>I have transferred</Button>}</div>}
-          {notice && <p className="mt-2 text-xs text-destructive">{notice}</p>}
+          {notice && <p className={`mt-2 text-xs ${intent ? 'text-chart-3' : 'text-destructive'}`}>{notice}</p>}
           </>}
         </> : <>
           <p className="mt-3 text-sm">Available: <b className="text-chart-3">{money(data?.balance ?? 0)}</b></p>
