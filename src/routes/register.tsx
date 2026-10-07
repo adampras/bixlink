@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
+import { passwordValid, PASSWORD_HINT } from '@/lib/password-rule';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -27,6 +28,7 @@ function RegisterPage() {
       const { data: free } = await supabase.rpc('bix_username_available', { p_username: uname });
       if (!free) throw new Error('That username is already taken.');
       if (code) window.localStorage.setItem('bixlink-ref', code); else window.localStorage.removeItem('bixlink-ref');
+      if (!passwordValid(password)) throw new Error(PASSWORD_HINT);
       const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: fullName.trim().slice(0, 80), username: uname } } });
       if (error) throw error;
       setNotice('Check your email to confirm your account, then sign in.');
