@@ -15,7 +15,7 @@
 - Treat BIX/USDT conversion as an admin-reviewed internal ledger request at the owner-managed reference price; this prevents implied exchange execution or custody while keeping display and calculations consistent.
 - Store owner-selected presentation options in public app settings and validate updates through authenticated admin server functions, so members see one centrally controlled experience.
 - Claim splash session before display; hydrate on public entry pages only, never in admin, so remounts cannot interrupt editing.
-- Share one session store across routes to avoid repeated auth requests and loader flashes; use layout-shaped placeholders.
+- Share one session store across routes; use layout-shaped placeholders.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
 - Owner clone accounts are tracked in bix_clone_accounts and funded only via bix_allocations, excluded from public member stats — keeps internal accounts auditable and separate from real members.
 - Leader virtual balances live in bix_leaders and are added inside bix_wallet_balance; withdraw RPC blocks the virtual portion until bix_leader_status reports qualified — one server-side gate for the turnover rule.
@@ -24,7 +24,7 @@
 - Calculate staking yield as a live display-only ledger projection from active stakes; never add projected USDT or BIX profit to spendable balances without a separate settlement rule.
 - Keep the 1,000,000 BIX reserve in an owner-only singleton vault initialized idempotently; never expose it in member balances or allow repeated generation.
 - Gate optional readiness surfaces through centralized app settings, and enforce identity availability and published announcement access with RLS; essential risk disclosures remain visible regardless of presentation toggles.
-- Keep market updates in a dedicated route using the existing public price feed and owner-authenticated announcement writes, so prices and official project communications remain clearly separated.
+- Market updates use a dedicated route with the public price feed and owner-authenticated announcement writes.
 - Dehydrate and hydrate the per-request QueryClient through the router so SSR and browser initially render the same market snapshot rather than fetching conflicting quotes.
 - Deposits: credited only after server-side on-chain verification (amount from chain, one credit per TxID); unique exact amount matched on chain by one shared matcher (page polling + 5-min cron route); "I have transferred" adds a pending row the owner can approve — one credit path, no double credit.
 - Share HOME/landing content and narratives (bundled fallbacks) through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
