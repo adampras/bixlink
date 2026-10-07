@@ -1,5 +1,5 @@
 - [x] Connect Cloud authentication and database.
-- [ ] Present lightweight splash previews and implement selected visual (awaiting selection).
+- [x] Present lightweight splash previews and implement selected Cyber pulse minimalist v4 visual.
 - [x] Prevent splash interruptions while writing announcements and verify draft saving.
 - [x] Present clearer NETWORK tree previews and implement the chosen design after selection.
 - [x] Synchronize BIXCOIN staking direct-referral bonuses with owner controls and verify ledger results.
