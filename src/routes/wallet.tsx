@@ -42,7 +42,7 @@ function WalletPage() {
   useEffect(() => { const load = () => setFiat(getFiatCodes()); load(); window.addEventListener('bixlink-preferences', load); return () => window.removeEventListener('bixlink-preferences', load); }, []);
   const fiatShown = (fiat.data ?? []).filter(f => fiatCodes.includes(f.code));
   const [type, setType] = useState('all'); const [from, setFrom] = useState(''); const [to, setTo] = useState('');
-  const txs = useMemo(() => (data?.transactions ?? []).filter(t => (type === 'all' || t.type === type) && (!from || t.created_at.slice(0, 10) >= from) && (!to || t.created_at.slice(0, 10) <= to)), [data, type, from, to]);
+  const txs = useMemo(() => (data?.transactions ?? []).filter(t => t.note !== 'Moved to 70/30 network bonus ledger' && (type === 'all' || t.type === type) && (!from || t.created_at.slice(0, 10) >= from) && (!to || t.created_at.slice(0, 10) <= to)), [data, type, from, to]);
   const depWallets = cfg?.depositWallets ?? [];
   const selWallet = depWallets.find(w => w.code === walletCode) ?? depWallets[0];
   const addr = selWallet?.address ?? '';

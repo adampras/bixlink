@@ -17,7 +17,7 @@ export const getMyData = createServerFn({ method: 'GET' }).middleware([requireSu
     context.supabase.rpc('bix_referral_tree_metrics'), context.supabase.rpc('is_bix_admin'),
      context.supabase.rpc('bix_network_bix_metrics'),
      context.supabase.from('bix_referral_bonuses').select('*').eq('referrer_id', context.userId).order('created_at', { ascending: false }),
-     context.supabase.from('wallet_transactions').select('id,amount_usd,reward_rate_pct,created_at,status').eq('user_id', context.userId).eq('type', 'reward').not('source_stake_id', 'is', null).order('created_at', { ascending: false }),
+     context.supabase.from('bix_usdt_network_bonuses').select('id,kind,level,bonus_date,base_usd,rate_pct,total_usd,usdt_amount,bix_amount,member_id,created_at').eq('user_id', context.userId).order('created_at', { ascending: false }).limit(500),
   ]);
   if (stakes.error) throw stakes.error;
   if (tree.error) throw tree.error;
