@@ -127,6 +127,30 @@ export const updatePackage = createServerFn({ method: 'POST' }).middleware([requ
     return { ok: true };
   });
 
+export const clonePackage = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { sourceId: string; price_usd: number; apy: number; lock_days: number }) => z.object({ sourceId: z.string().min(1).max(40), price_usd: z.number().positive().max(10_000_000), apy: z.number().min(0).max(25), lock_days: z.number().int().min(1).max(3650) }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const base = data.sourceId.split('-')[0]!;
+    const { data: rows, error: listError } = await context.supabase.from('packages').select('id').like('id', `${base}-%`);
+    if (listError) throw listError;
+    const used = new Set((rows ?? []).map(r => r.id));
+    let n = 2; while (used.has(`${base}-${n}`)) n++;
+    const id = `${base}-${n}`;
+    const { error } = await context.supabase.from('packages').insert({ id, price_usd: data.price_usd, apy: data.apy, lock_days: data.lock_days, daily_profit_enabled: true, enabled: true, clone_of: base });
+    if (error) throw error;
+    return { id };
+  });
+
+export const setPackageEnabled = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string; enabled: boolean }) => z.object({ id: z.string().min(1).max(40), enabled: z.boolean() }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { data: saved, error } = await context.supabase.from('packages').update({ enabled: data.enabled }).eq('id', data.id).select('enabled').single();
+    if (error || saved?.enabled !== data.enabled) throw error ?? new Error('Could not confirm package status');
+    return { ok: true };
+  });
+
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token'; value: Record<string, unknown> }) => {
     const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token']), value: z.record(z.unknown()) }).parse(data);
