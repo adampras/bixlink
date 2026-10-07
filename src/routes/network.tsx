@@ -1,101 +1,62 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
+import { ArrowLeft, ArrowUpRight, BadgeCheck, ChevronRight, Coins, GitBranch, Lock, Search, ShieldCheck, UserRound, Users } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
-import { useMember, usePublicConfig } from '@/lib/useMember';
-import { ArrowUpRight, BadgeCheck, ChevronDown, ChevronRight, GitBranch, Lock, Medal, Share2, Sparkles, Unlock, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from '@tanstack/react-router';
+import { useMember, usePublicConfig } from '@/lib/useMember';
 import { money, number } from '@/lib/bixlink';
 
-export const Route = createFileRoute('/network')({ head: () => ({ meta: [{ title: 'Network Tree — BIXLINK' }, { name: 'description', content: 'Explore your BIXLINK referral tree across every recorded generation.' }, { property: 'og:title', content: 'Network Tree — BIXLINK' }, { property: 'og:description', content: 'Navigate your complete BIXLINK referral hierarchy and matching access.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: NetworkPage });
+export const Route = createFileRoute('/network')({ head: () => ({ meta: [{ title: 'Network Explorer — BIXLINK' }, { name: 'description', content: 'Explore every referral generation, USDT and BIX stakes, and owner-reviewed BIX direct bonuses.' }, { property: 'og:title', content: 'Network Explorer — BIXLINK' }, { property: 'og:description', content: 'Your BIXLINK referral hierarchy, staking activity and BIX direct bonus records.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: NetworkPage });
 
-type Node = {
-  user_id: string;
-  parent_id: string | null;
-  depth: number;
-  member_code?: string | null;
-  username?: string | null;
-  full_name?: string | null;
-  top_package?: string | null;
-  stake_value_usd?: number | null;
-  weekly_stake_usd?: number | null;
-  total_turnover_usd?: number | null;
-  weekly_turnover_usd?: number | null;
-  weekly_direct_count?: number | null;
-  weekly_reward_usd?: number | null;
-  weekly_qualified?: boolean | null;
-};
-
-const packageAvatar = (pkg?: string | null) => {
-  const id = (pkg ?? 'NONE').toUpperCase();
-  const label = id === 'NONE' ? 'N' : id.slice(0, 2);
-  const tier = ['SEED', 'SPARK', 'EXPLORER', 'PIONEER', 'BUILDER', 'GUARDIAN', 'TITAN', 'LEGEND'].indexOf(id);
-  return { label, tier: tier >= 0 ? tier : 0 };
-};
-
-function TreeBranch({ node, childrenByParent }: { node: Node; childrenByParent: Map<string, Node[]> }) {
-  const children = childrenByParent.get(node.user_id) ?? [];
-  const [open, setOpen] = useState(node.depth < 2);
-  const avatar = packageAvatar(node.top_package);
-  const identity = node.username || node.full_name || node.member_code || node.user_id.slice(0, 8).toUpperCase();
-  return <li className="ref-tree-branch"><div className="ref-tree-node"><span className={`ref-tree-avatar ref-tree-avatar-${avatar.tier}`}>{avatar.label}</span><div className="ref-tree-copy"><span>LV{node.depth} · {node.member_code ?? 'Member'}</span><strong>{identity}</strong><em className="ref-tree-package">{node.top_package ?? 'No active package'}</em><div className="ref-tree-metrics"><b>{money(Number(node.stake_value_usd ?? 0))}<small>Stake</small></b><b>{money(Number(node.total_turnover_usd ?? 0))}<small>Total turnover</small></b><b>{money(Number(node.weekly_turnover_usd ?? 0))}<small>Weekly</small></b></div>{node.weekly_qualified ? <span className="ref-tree-qualified"><BadgeCheck size={12}/> Qualified · {money(Number(node.weekly_reward_usd ?? 0))}</span> : <span className="ref-tree-pending"><Sparkles size={12}/> {Number(node.weekly_direct_count ?? 0)}/3 direct this week</span>}</div>{children.length > 0 && <Button type="button" size="icon" variant="ghost" className="ref-tree-toggle" aria-label={`${open ? 'Collapse' : 'Expand'} member branch`} aria-expanded={open} onClick={() => setOpen(value => !value)}>{open ? <ChevronDown/> : <ChevronRight/>}</Button>}<span className="ref-tree-count">+{children.length}<small>direct</small></span></div>{open && children.length > 0 && <ul className="ref-tree-children">{children.map(child => <TreeBranch node={child} childrenByParent={childrenByParent} key={child.user_id}/>)}</ul>}</li>;
-}
-
-function ReferralTree({ tree, me, root }: { tree: Node[]; me: string; root: { weeklyDirect: number; weeklyReward: number; weeklyTurnover: number; totalTurnover: number } }) {
-  const childrenByParent = useMemo(() => {
-    const grouped = new Map<string, Node[]>();
-    tree.forEach(node => { const parent = node.parent_id ?? me; grouped.set(parent, [...(grouped.get(parent) ?? []), node]); });
-    return grouped;
-  }, [tree, me]);
-  const roots = childrenByParent.get(me) ?? [];
-  return <div className="ref-tree" role="tree" aria-label="Referral network tree"><div className="ref-tree-root"><span>YOU</span><div><small>ROOT ACCOUNT</small><strong>{me.slice(0, 8).toUpperCase()}</strong><em>Total turnover {money(root.totalTurnover)}</em></div>{root.weeklyDirect >= 3 ? <Button type="button" variant="ghost" className="ref-tree-root-qual"><BadgeCheck size={13}/> Qualified {money(root.weeklyReward)}</Button> : <Button type="button" variant="ghost" className="ref-tree-root-wait"><Medal size={13}/> {root.weeklyDirect}/3 weekly</Button>}</div><ul className="ref-tree-children ref-tree-children--root">{roots.map(node => <TreeBranch node={node} childrenByParent={childrenByParent} key={node.user_id}/>)}</ul></div>;
-}
+type Node = { user_id: string; parent_id: string | null; depth: number; member_code?: string | null; username?: string | null; full_name?: string | null; top_package?: string | null; stake_value_usd?: number | null; weekly_stake_usd?: number | null; total_turnover_usd?: number | null; weekly_turnover_usd?: number | null; weekly_direct_count?: number | null };
+type BixMetric = { user_id: string; stake_bix: number; weekly_bix: number; turnover_bix: number; direct_bonus_bix: number; pending_bonus_bix: number };
+const bix = (v: number) => `${number(v, { maximumFractionDigits: 2 })} BIX`;
+function identity(n: Node) { return n.username || n.full_name || n.member_code || n.user_id.slice(0,8); }
 
 function NetworkPage() {
-  const { user, ready, data } = useMember();
-  const { data: cfg } = usePublicConfig();
-  const r = cfg?.referrals; const levels = r?.levels ?? [12, 6, 3, 2, 1];
-  const tree = (data?.tree ?? []) as Node[];
-  const direct = tree.filter(n => n.depth === 1).length;
-  const weeklyDirectNodes = tree.filter(n => n.parent_id === user?.id && Number(n.weekly_stake_usd ?? 0) > 0);
-  const weeklyDirect = weeklyDirectNodes.length;
-  const weeklyDirectTurnover = weeklyDirectNodes.reduce((sum, node) => sum + Number(node.weekly_stake_usd ?? 0), 0);
-  const weeklyReward = weeklyDirect >= 3 ? weeklyDirectTurnover * Number(r?.rewardPlus ?? 5) / 100 : 0;
-  const totalTurnover = tree.filter(n => n.depth >= 1).reduce((sum, node) => sum + Number(node.stake_value_usd ?? 0), 0);
-  const weeklyTurnover = tree.filter(n => n.depth >= 1).reduce((sum, node) => sum + Number(node.weekly_stake_usd ?? 0), 0);
-  const unlocked = Math.min(5, direct);
-  const deepest = tree.reduce((maximum, node) => Math.max(maximum, node.depth), 0);
-  const memberId = user?.id;
-  return <BixShell><main className="mx-auto max-w-5xl px-5 py-10 md:px-8">
-    <MemberGate ready={ready} signedIn={!!user} title="NETWORK">
-      <h1 className="section-title">MY <span>NETWORK</span></h1>
-      <div className="network-stats mt-8 grid gap-3 sm:grid-cols-3">
-        <div className="network-stat accent-0"><span className="network-stat-icon"><Share2/></span><div><span>Direct referrals</span><strong>{direct}</strong></div></div>
-        <div className="network-stat accent-1"><span className="network-stat-icon"><Users/></span><div><span>Total turnover</span><strong>{money(totalTurnover)}</strong></div></div>
-        <div className="network-stat accent-2"><span className="network-stat-icon"><GitBranch/></span><div><span>Deepest generation</span><strong>{deepest || '—'}</strong></div></div>
-      </div>
-
-      <div className="mt-10 grid items-start gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,.85fr)]">
-        <section><div className="flex items-end justify-between gap-3"><div><div className="eyebrow">LIVE STRUCTURE</div><h2 className="mt-2 font-display text-2xl font-black">Network tree</h2></div><span className="package-label package-label-gold"><GitBranch size={11}/> Unlimited depth</span></div>
-        <div className="network-tree-panel mt-4">{tree.length && memberId ? <ReferralTree tree={tree} me={memberId} root={{ weeklyDirect, weeklyReward, weeklyTurnover, totalTurnover }}/> : <div className="py-14 text-center text-sm text-muted-foreground"><span className="mx-auto grid size-14 place-items-center rounded-full bg-primary/15 text-primary"><Users/></span><b className="mt-4 block text-foreground">Your network starts here</b><p className="mx-auto mt-1 max-w-xs text-xs">Share your referral link to place your first direct member on LV1.</p><Button asChild size="sm" className="mt-5 rounded-full"><Link to="/profile">Open referral link <ArrowUpRight/></Link></Button></div>}
-          {tree.length > 0 && <div className="ref-tree-footer"><span><i className="bg-primary"/>Direct <b>{direct}</b></span><span><i className="bg-chart-2"/>Weekly <b>{money(weeklyTurnover)}</b></span><span><i className="bg-chart-3"/>Depth <b>{deepest}</b></span></div>}
-        </div></section>
-
-        <aside className="network-plan"><div className="eyebrow">WEEKLY RESET 12 AM</div><h2 className="mt-2 font-display text-2xl font-black">Qualification</h2><p className="mt-2 text-xs text-muted-foreground">When three direct members stake inside the current week, this marker turns qualified and shows the RewardPlus value from weekly direct turnover.</p>
-          <Button type="button" variant="ghost" className={weeklyDirect >= 3 ? 'weekly-qual weekly-qual-on' : 'weekly-qual'}><BadgeCheck size={18}/><span>{weeklyDirect >= 3 ? 'Qualified' : `${weeklyDirect}/3 direct`}</span><b>{money(weeklyReward)}</b></Button>
-          <div className="mt-4 grid grid-cols-2 gap-2 text-xs"><div className="weekly-mini"><span>Weekly turnover</span><b>{money(weeklyTurnover)}</b></div><div className="weekly-mini"><span>RewardPlus</span><b>{number(Number(r?.rewardPlus ?? 5), { maximumFractionDigits: 2 })}%</b></div></div>
-          <div className="mt-6 border-t border-border pt-5"><div className="eyebrow">ACTIVE PLAN</div><h3 className="mt-2 font-display text-xl font-black">Matching access</h3><p className="mt-2 text-xs text-muted-foreground">Each direct referral unlocks one matching-profit level, up to five levels.</p></div>
-          <div className="mt-5 space-y-2">{levels.map((percent, i) => { const on = i < unlocked; return <div key={i} className={`network-level ${on ? 'network-level-on' : ''}`}><span className="grid size-8 place-items-center rounded-full bg-secondary">{on ? <Unlock size={14}/> : <Lock size={14}/>}</span><div className="min-w-0 flex-1"><b>Level {i + 1}</b><p>{i + 1} direct referral{i ? 's' : ''} required</p></div><strong>{percent}%</strong></div>; })}</div>
-          <div className="stake-progress mt-5"><i style={{ width: `${unlocked / 5 * 100}%` }}/></div><div className="numeric mt-2 flex justify-between text-[10px] text-muted-foreground"><span>{unlocked} unlocked</span><span>5 maximum</span></div>
-        </aside>
-      </div>
-
-      <h2 className="mt-10 font-display text-xl font-black">Plan benefits</h2><div className="mt-4 grid gap-3 sm:grid-cols-3 text-sm">
-        <div className="network-benefit"><b>Direct bonus <span>{r?.direct ?? 10}%</span></b><p>{r?.splitUsdt ?? 70}% USDT · {r?.splitBix ?? 30}% BIX</p></div>
-        <div className="network-benefit"><b>Matching profit <span>5 levels</span></b><p>Based on recorded network staking profit</p></div>
-        <div className="network-benefit"><b>RewardPlus <span>{r?.rewardPlus ?? 5}%</span></b><p>Weekly turnover · minimum {r?.minimumDirect ?? 3} direct</p></div>
-      </div><div className="mt-4 rounded-[14px] border border-border bg-secondary/50 px-4 py-3 text-xs text-muted-foreground"><b className="text-foreground">Admin-reviewed records.</b> Commission credits appear as staking rewards in WALLET; no automatic payout is executed.</div>
-    </MemberGate>
-  </main></BixShell>;
+ const { user, ready, data, error } = useMember(); const { data: cfg } = usePublicConfig();
+ const [selected, setSelected] = useState<string | null>(null); const [search, setSearch] = useState(''); const [generation, setGeneration] = useState<number | null>(null);
+ const tree = (data?.tree ?? []) as Node[];
+ const metrics = useMemo(() => new Map((Array.isArray(data?.bixMetrics) ? data.bixMetrics as unknown as BixMetric[] : []).map(m => [m.user_id,m])),[data?.bixMetrics]);
+ const children = useMemo(() => {const map = new Map<string, Node[]>();for(const node of tree){const parent=node.parent_id ?? user?.id;if(parent)map.set(parent,[...(map.get(parent) ?? []),node]);}return map;},[tree,user?.id]);
+ const directNodes = tree.filter(n => n.parent_id === user?.id);
+ const totalUsdt = tree.reduce((sum,n) => sum+Number(n.stake_value_usd ?? 0),0);
+ const totalBix = tree.reduce((sum,n) => sum+Number(metrics.get(n.user_id)?.stake_bix ?? 0),0);
+ const weeklyDirect = directNodes.filter(n => Number(n.weekly_stake_usd ?? 0)>0).length;
+ const minimum = cfg?.referrals.minimumDirect ?? 3;
+ const weeklyUsdt = directNodes.reduce((sum,n) => sum+Number(n.weekly_stake_usd ?? 0),0);
+ const weeklyReward = weeklyDirect >= minimum ? weeklyUsdt*(cfg?.referrals.rewardPlus ?? 5)/100 : 0;
+ const levels = cfg?.referrals.levels ?? [12,6,3,2,1]; const unlocked = Math.min(levels.length,directNodes.length);
+ const deepest = tree.reduce((max,n) => Math.max(max,n.depth),0);
+ const focus = tree.find(n => n.user_id === selected);
+ const ancestors: Node[] = []; const seen = new Set<string>(); let current = focus;
+ while(current && !seen.has(current.user_id)){seen.add(current.user_id);ancestors.unshift(current);current=tree.find(n => n.user_id === current?.parent_id);}
+ const term=search.trim().toLowerCase();
+ const visible = term ? tree.filter(n => `${n.member_code ?? ''} ${identity(n)}`.toLowerCase().includes(term)) : generation ? tree.filter(n => n.depth === generation) : children.get(focus?.user_id ?? user?.id ?? '') ?? [];
+ const bonuses = data?.bonuses ?? [];
+ const approved = bonuses.filter(b => b.status==='approved').reduce((s,b) => s+Number(b.amount_bix),0);
+ const pending = bonuses.filter(b => b.status==='pending').reduce((s,b) => s+Number(b.amount_bix),0);
+ return <BixShell><main className="network-explorer mx-auto max-w-6xl px-4 py-8 md:px-8">
+ <MemberGate ready={ready} signedIn={!!user} title="NETWORK">
+ <header className="nx-header"><div><div className="eyebrow">MY NETWORK</div><h1 className="mt-2 font-display text-2xl font-bold md:text-3xl">Network <span className="text-chart-3">Explorer</span></h1></div><label className="nx-search"><Search size={18}/><input aria-label="Search network members" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search member ID or name"/>{search && <Button variant="ghost" size="sm" onClick={() => setSearch('')}>Clear</Button>}</label></header>
+ {error && <p role="alert" className="mt-4 text-destructive">Network records could not load. Please refresh.</p>}
+ <section className="nx-root"><div className="nx-root-avatar"><UserRound size={40}/><span>YOU</span></div><h2>{data?.referral?.code ?? user?.id.slice(0,8).toUpperCase()}</h2><div className="nx-root-status"><Users size={14}/>{directNodes.length} direct referrals <span>·</span><GitBranch size={14}/>{deepest} generations</div>
+ <dl className="nx-totals"><div><dt>Network USDT stakes</dt><dd>{money(totalUsdt)}</dd></div><div><dt>Network BIX stakes</dt><dd>{bix(totalBix)}</dd></div><div><dt>Credited direct bonus</dt><dd className="text-chart-3">{bix(approved)}</dd></div><div><dt>Pending owner review</dt><dd>{bix(pending)}</dd></div></dl>
+ <div className="nx-milestone-heading"><h3>Matching access</h3><span>{unlocked}/{levels.length} unlocked</span></div>
+ <div className="nx-levels">{levels.map((pct,i) => <div key={i} className={i<unlocked ? 'nx-level nx-level-active' : 'nx-level'}><span>LEVEL {i+1}</span><strong>{pct}%</strong><small>{i+1} direct</small>{i<unlocked ? <BadgeCheck size={16}/> : <Lock size={14}/>}</div>)}</div>
+ </section>
+ <section className="nx-matrix"><div className="nx-matrix-heading"><h2>{term ? 'Search results' : generation ? `Generation L${generation}` : focus ? `${identity(focus)} · Direct members` : 'Your direct members · L1'}</h2><span>{visible.length} members</span></div>
+ <nav className="nx-breadcrumb" aria-label="Network ancestry"><Button size="sm" variant="ghost" onClick={() => {setSelected(null);setGeneration(null);setSearch('');}}>YOU</Button>{ancestors.map(n => <span key={n.user_id}><ChevronRight size={12}/><Button size="sm" variant="ghost" onClick={() => {setSelected(n.user_id);setGeneration(null);setSearch('');}}>{identity(n)}</Button></span>)}</nav>
+ {focus && !term && !generation && <div className="nx-focus"><UserRound size={20}/><div><b>{identity(focus)}</b><p>{focus.member_code} · L{focus.depth}</p></div><div className="ml-auto text-right text-xs"><p>{money(Number(focus.stake_value_usd ?? 0))} USDT stake</p><p className="text-chart-3">{bix(Number(metrics.get(focus.user_id)?.stake_bix ?? 0))} stake</p></div></div>}
+ <div className="nx-grid">{visible.map(n => {
+ const m=metrics.get(n.user_id);const count=children.get(n.user_id)?.length ?? 0;const active=Number(n.stake_value_usd ?? 0)>0 || Number(m?.stake_bix ?? 0)>0;const pkg=n.top_package && n.top_package!=='NONE' ? n.top_package : Number(m?.stake_bix ?? 0)>0 ? 'BIX BOOSTER' : 'NO STAKE';
+ return <article key={n.user_id} className={`nx-member ${active ? 'nx-member-active' : ''}`}><div className="nx-member-top"><span className="nx-package-avatar">{pkg==='BIX BOOSTER' ? <Coins size={18}/> : pkg==='NO STAKE' ? <UserRound size={18}/> : pkg.slice(0,2)}</span><span className="nx-package">{pkg}</span></div><span className="nx-member-code">L{n.depth} · {n.member_code ?? n.user_id.slice(0,8)}</span><h3>{identity(n)}</h3><dl><div><dt>USDT stake</dt><dd>{money(Number(n.stake_value_usd ?? 0))}</dd></div><div><dt>BIX stake</dt><dd>{bix(Number(m?.stake_bix ?? 0))}</dd></div><div><dt>Team USDT</dt><dd>{money(Number(n.total_turnover_usd ?? 0))}</dd></div><div><dt>Team BIX</dt><dd>{bix(Number(m?.turnover_bix ?? 0))}</dd></div></dl>{n.parent_id===user?.id && <div className="nx-member-bonus"><span>Your direct bonus</span><b>{bix(Number(m?.direct_bonus_bix ?? 0))}</b>{Number(m?.pending_bonus_bix ?? 0)>0 && <small>{bix(Number(m?.pending_bonus_bix))} pending</small>}</div>}<Button variant="ghost" className="nx-branch-button" aria-label={`Open branch ${identity(n)}`} onClick={() => {setSelected(n.user_id);setGeneration(null);setSearch('');}}><span>{count} direct members</span><ChevronRight size={16}/></Button></article>;
+ })}</div>
+ {!visible.length && <div className="py-10 text-center text-sm text-muted-foreground">{term ? 'No matching members.' : focus ? 'No direct members in this branch yet.' : 'Your network starts here.'}{!tree.length && <Button asChild className="mt-4"><Link to="/profile">Referral link <ArrowUpRight/></Link></Button>}</div>}
+ <div className="nx-controls"><div className="flex items-center gap-2"><Button size="icon" variant="outline" aria-label="Back one generation" disabled={!focus && !generation} onClick={() => {setSelected(focus?.parent_id===user?.id ? null : focus?.parent_id ?? null);setGeneration(null);}}><ArrowLeft size={16}/></Button><span className="text-xs text-muted-foreground">{focus ? `L${focus.depth+1}` : generation ? `L${generation}` : 'L1'} · Unlimited depth</span></div><label className="flex items-center gap-2 text-xs text-muted-foreground">Generation<select aria-label="Select generation" className="form-input" value={generation ?? ''} onChange={e => {setGeneration(e.target.value ? Number(e.target.value) : null);setSelected(null);setSearch('');}}><option value="">Branch view</option>{Array.from({length:deepest},(_,i) => <option key={i} value={i+1}>L{i+1}</option>)}</select></label></div>
+ </section>
+ <section className="nx-plan"><div><h2 className="font-display text-lg font-bold">BIX direct referral</h2><p className="mt-2 text-2xl font-bold text-chart-3">{cfg?.referrals.bixDirectEnabled===false ? 'Closed' : `${cfg?.referrals.bixDirectPct ?? cfg?.referrals.direct ?? 10}%`} <span className="text-sm text-muted-foreground">· 100% BIX</span></p><p className="mt-2 text-xs text-muted-foreground">New BIX Booster stakes create one bonus record per stake. Owner-approved credits use the existing reserve; pending bonuses are not spendable.</p></div><div><h2 className="font-display text-lg font-bold">Weekly qualification · USDT</h2><p className="mt-2 flex items-center gap-2 text-chart-2"><BadgeCheck size={18}/>{weeklyDirect>=minimum ? 'Qualified' : `${weeklyDirect}/${minimum} direct`} <b>{money(weeklyReward)}</b></p><p className="mt-2 text-xs text-muted-foreground">RewardPlus {cfg?.referrals.rewardPlus ?? 5}% · USDT package weekly turnover. Resets Monday 12 AM Makassar. Projection only.</p></div></section>
+ <p className="mt-5 flex items-start gap-2 text-xs text-muted-foreground"><ShieldCheck size={15} className="shrink-0"/>BIX is an internal ledger asset. USDT package rules remain separate; no automatic payout or guaranteed profit.</p>
+ </MemberGate></main></BixShell>;
 }

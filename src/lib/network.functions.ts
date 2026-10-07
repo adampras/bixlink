@@ -16,3 +16,18 @@ export const reviewBixBonus = createServerFn({ method: 'POST' }).middleware([req
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const stakeNativeBix = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+ .inputValidator((input: { amount: number; days: number }) => z.object({ amount: z.number().finite().min(10), days: z.number().refine(d => [30,90,180,360,540].includes(d)) }).parse(input))
+ .handler(async ({ context, data }) => {
+  const { data: id, error } = await context.supabase.rpc('bix_stake_bix', { p_amount: data.amount, p_days: data.days });
+  if (error) throw new Error(error.message);
+  return { id };
+ });
+export const unstakeNativeBix = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+ .inputValidator((input: { id: string }) => z.object({ id: z.string().uuid() }).parse(input))
+ .handler(async ({ context, data }) => {
+  const { data: penalty, error } = await context.supabase.rpc('bix_unstake_bix', { p_stake: data.id });
+  if (error) throw new Error(error.message);
+  return { penalty: Number(penalty) };
+ });
