@@ -4,7 +4,7 @@ import poster from '@/assets/bixcoin-tokenomics-poster.jpg.asset.json';
 import { tokenomicsPlan, tokenomicsSupply, tokenomicsVision, tokenomicsMissions } from '@/lib/tokenomics-plan';
 import type { LandingContent } from '@/lib/landing-content';
 
-export function LandingTokenomics({ content, member = false }: { content?: LandingContent; member?: boolean }) {
+export function LandingTokenomics({ content, member = false }: { content?: LandingContent | undefined; member?: boolean }) {
   if (content?.tokenomicsEnabled === false) return null;
   return <section className={`landing-tokenomics border-y border-border${member ? ' member-tokenomics' : ''}`} aria-labelledby="landing-tokenomics-title">
     <div className="mx-auto max-w-7xl px-5 py-12 md:px-8 md:py-16">
