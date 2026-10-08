@@ -40,3 +40,4 @@
 - Package terms use duration_apys on eight original rows; retire clones without deleting historical stakes. RPCs snapshot stake terms; native BIX alone uses owner maxApy with matching SQL/UI formulas, preserving USDT terms and existing contracts.
 
 - Store time-based market movement in bix_market as display-only simulation with server-verified owner writes; preserve the ledger reference to avoid changing settlement or fabricating trading.
+- Keep landing tokenomics in a presentation-only module, honoring visibility without changing member terms.
