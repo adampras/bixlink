@@ -4,9 +4,9 @@ import poster from '@/assets/bixcoin-tokenomics-poster.jpg.asset.json';
 import { tokenomicsPlan, tokenomicsSupply, tokenomicsVision, tokenomicsMissions } from '@/lib/tokenomics-plan';
 import type { LandingContent } from '@/lib/landing-content';
 
-export function LandingTokenomics({ content }: { content?: LandingContent }) {
+export function LandingTokenomics({ content, member = false }: { content?: LandingContent | undefined; member?: boolean }) {
   if (content?.tokenomicsEnabled === false) return null;
-  return <section className="landing-tokenomics border-y border-border" aria-labelledby="landing-tokenomics-title">
+  return <section className={`landing-tokenomics border-y border-border${member ? ' member-tokenomics' : ''}`} aria-labelledby="landing-tokenomics-title">
     <div className="mx-auto max-w-7xl px-5 py-12 md:px-8 md:py-16">
       <header className="tokenomics-heading"><div><span className="eyebrow">FROM LAUNCH TO DAO</span><h2 id="landing-tokenomics-title" className="font-display text-3xl font-bold leading-tight md:text-4xl">BIXCOIN <span>TOKENOMICS</span></h2></div><span className="tokenomics-status">RANCANGAN TOKENOMICS</span></header>
       <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">Pasokan terbatas, distribusi bertahap, dan partisipasi komunitas menjadi arah pengembangan BIXCOIN. Alokasi berikut merupakan rancangan, bukan bukti penguncian token di smart contract.</p>
