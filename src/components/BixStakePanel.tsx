@@ -5,16 +5,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { confirmPin, txFeedback } from '@/components/TxFeedback';
 import { number } from '@/lib/bixlink';
+import { nativeBixApy, boosterMaximum } from '@/lib/booster-apy';
 import { usePublicConfig } from '@/lib/useMember';
 import { useServerFn } from '@tanstack/react-start';
 import { stakeNativeBix, unstakeNativeBix } from '@/lib/network.functions';
 
 const LOCKS = [30, 90, 180, 360, 540];
-function apyFor(amount: number, days: number) {
-  const base = days >= 540 ? 20 : days >= 360 ? 17 : days >= 180 ? 14 : days >= 90 ? 11 : 8;
-  const vol = amount >= 10000 ? 5 : amount >= 5000 ? 4 : amount >= 1000 ? 3 : amount >= 500 ? 2 : amount >= 100 ? 1 : 0;
-  return Math.min(25, base + vol);
-}
 
 export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   const qc = useQueryClient();
@@ -41,7 +37,8 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   });
 
   const amt = Number(amount) || 0;
-  const apy = apyFor(amt, days);
+  const maximum = boosterMaximum(cfg?.booster.maxApy);
+  const apy = nativeBixApy(amt, days, maximum);
   const yearly = amt * apy / 100;
   const periodProfit = yearly * days / 365;
   const active = (q.data?.stakes ?? []).filter(s => s.status === 'active');
@@ -71,7 +68,7 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   return <section className="rounded-[20px] border border-chart-2/40 bg-card p-5 sm:p-6">
     <div className="eyebrow"><Coins size={14} className="text-chart-2"/> STAKE BIX DIRECTLY</div>
     <h2 className="mt-2 font-display text-2xl font-black">BIX Booster Staking</h2>
-    <p className="mt-2 text-sm text-muted-foreground">Stake your BIX balance here. Volume and lock period set your APY (8–25%). Profit split: 70% passive BIX · 30% active USDT — projection only.</p>
+    <p className="mt-2 text-sm text-muted-foreground">Stake your BIX balance here. Volume and lock period set your annual APY (8–{maximum}%). Profit split: 70% passive BIX · 30% active USDT — projection only.</p>
     <div className="mt-4 flex items-center justify-between rounded-xl border border-border p-3 text-sm"><span>Available BIX</span><b className="numeric">{number(q.data?.bal ?? 0, { maximumFractionDigits: 2 })} BIX</b></div>
     <label className="mt-4 block text-xs font-bold uppercase text-muted-foreground">Amount (BIX, min 10)</label>
     <div className="mt-1 flex gap-2">

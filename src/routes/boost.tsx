@@ -3,19 +3,12 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { ArrowUpRight, Coins, Gauge, ShieldCheck, TrendingUp, Zap } from 'lucide-react';
-import robotFox from '@/assets/booster-concept-fox.png';
-import reactorEngine from '@/assets/booster-concept-reactor.png';
-import foxEmblem from '@/assets/booster-concept-emblem.png';
+import { ReactorVideo } from '@/components/ReactorVideo';
+import { boosterMaximum } from '@/lib/booster-apy';
 import { number } from '@/lib/bixlink';
 import { BixStakePanel } from '@/components/BixStakePanel';
 
-const boosterVisuals = {
-  fox: { src: robotFox, alt: 'BIXLINK robotic fox guardian beside the APY reactor engine', className: 'robot-fox--reactor' },
-  reactor: { src: reactorEngine, alt: 'BIXLINK tricolor APY reactor engine', className: 'robot-fox--machine' },
-  emblem: { src: foxEmblem, alt: 'BIXLINK tricolor fox emblem', className: 'robot-fox--emblem' },
-} as const;
-
-export const Route = createFileRoute('/boost')({ head: () => ({ meta: [{ title: 'BIXCOIN Boost APY — BIXLINK' }, { name: 'description', content: 'Increase BIXCOIN staking APY through higher volume and longer lock periods, up to 25%.' }, { property: 'og:title', content: 'BIXCOIN Boost APY — BIXLINK' }, { property: 'og:description', content: 'BIXCOIN staking tiers, passive and active profit, with a 70% BIX and 30% USDT profit split.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: BoostPage });
+export const Route = createFileRoute('/boost')({ head: () => ({ meta: [{ title: 'BIXCOIN Boost APY — BIXLINK' }, { name: 'description', content: 'Increase BIXCOIN staking APY through higher volume and longer lock periods, up to 45%.' }, { property: 'og:title', content: 'BIXCOIN Boost APY — BIXLINK' }, { property: 'og:description', content: 'BIXCOIN staking tiers, passive and active profit, with a 70% BIX and 30% USDT profit split.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: BoostPage });
 
 function BoostPage() {
   const { data: cfg } = usePublicConfig();
@@ -23,8 +16,7 @@ function BoostPage() {
   const packages = cfg?.packages ?? [];
   const longestLock = packages.reduce((max, p) => Math.max(max, Number(p.lock_days) || 0), 0);
   const bixPrice = Number(cfg?.bixMarket.priceUsd ?? 0.84291);
-  const visualKey = cfg?.boosterVisual.visual ?? 'fox';
-  const visual = boosterVisuals[visualKey] ?? boosterVisuals.fox;
+  const maximum = boosterMaximum(cfg?.booster.maxApy);
   const boosterEnabled = cfg?.booster.enabled !== false;
   const activeStakes = (memberData?.stakes ?? []).filter(stake => stake.status === 'active');
   const activeValue = activeStakes.reduce((sum, stake) => sum + Number(stake.amount_usd), 0);
@@ -36,11 +28,11 @@ function BoostPage() {
         <div className="terminal-supply"><ShieldCheck size={13}/> 21 JUTA BIX TOKEN</div>
         <div className="eyebrow mt-5"><Zap size={15} className="text-chart-2"/> BIXCOIN YIELD ENGINE</div>
         <h1 className="section-title">BOOST YOUR <span>APY</span></h1>
-        <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">The BIXCOIN Booster converts each active staking package into a live yield projection. Larger packages and longer lock periods unlock higher fixed APY tiers, from 10% up to 25%. All figures are projections, not guaranteed returns.</p>
+        <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">The BIXCOIN Booster converts each active BIX position into a live yield projection. Larger amounts and longer lock periods unlock annual APY tiers, from 8% up to {maximum}%. Existing contracts keep their recorded APY. All figures are projections, not guaranteed returns.</p>
         <div className="boost-chips mt-6">
           <div className="booster-chip"><b className="text-chart-2">70%</b> profit in BIX</div>
           <div className="booster-chip"><b className="text-chart-3">30%</b> profit in USDT</div>
-          <div className="booster-chip"><b className="text-primary">25%</b> maximum APY</div>
+          <div className="booster-chip"><b className="text-primary">{maximum}%</b> maximum annual APY</div>
         </div>
         <div className="mt-7"><BixStakePanel bixPrice={bixPrice}/></div>
 
@@ -56,16 +48,10 @@ function BoostPage() {
             <span className="boost-engine-live"><i/> YIELD ENGINE · LIVE READOUT</span>
              <strong>{boosterEnabled ? 'ENGINE ACTIVE' : 'ENGINE PAUSED'}</strong>
           </div>
-          <div className="robot-stage">
-            <div className="robot-core"/>
-            <div className="robot-ring robot-ring-one"/>
-            <div className="robot-ring robot-ring-two"/>
-            <img src={visual.src} loading="lazy" width={1024} height={1024} alt={visual.alt} className={`robot-fox ${visual.className}`}/>
-             <div className="robot-status"><span className="pulse-dot"/> YIELD ENGINE {boosterEnabled ? 'ACTIVE' : 'PAUSED'}</div>
-          </div>
+          <ReactorVideo maximum={maximum}/>
           <div className="boost-readouts">
-            <div className="boost-readout boost-readout--apy"><span>Maximum APY</span><strong>25.00%</strong></div>
-            <div className="boost-readout boost-readout--split"><span>Profit split USDT / BIX</span><strong>70 / 30</strong></div>
+            <div className="boost-readout boost-readout--apy"><span>Maximum APY</span><strong>{maximum.toFixed(2)}%</strong></div>
+            <div className="boost-readout boost-readout--split"><span>Profit split BIX / USDT</span><strong>70 / 30</strong></div>
             <div className="boost-readout boost-readout--lock"><span>Longest lock</span><strong>{longestLock} DAYS</strong></div>
           </div>
         </div>
@@ -78,7 +64,7 @@ function BoostPage() {
       <div className="booster-steps mt-8">
         <article><b>01</b><h3>Choose a BIXCOIN package</h3><p>Select the staking value, APY and lock duration that match your plan. The package value is paid from your virtual USDT testing balance.</p></article>
         <article><b>02</b><h3>Stake activates instantly</h3><p>When your balance is sufficient, the position becomes active automatically. No owner approval is needed for staking.</p></article>
-        <article><b>03</b><h3>Booster tracks every minute</h3><p>Profit is projected from the package value × APY × elapsed time. Seventy percent is displayed as USDT and thirty percent as BIX at the internal reference.</p></article>
+        <article><b>03</b><h3>Booster tracks every minute</h3><p>Profit is projected from the package value × APY × elapsed time. Seventy percent is displayed as BIX and thirty percent as USDT at the internal reference.</p></article>
         <article><b>04</b><h3>Review in PROFIT</h3><p>Open the PROFIT menu to see every active position. Early unstaking ends the projection and applies the owner-configured penalty schedule.</p></article>
       </div>
       <div className="mt-7 flex flex-wrap gap-3"><Button asChild className="rounded-full"><Link to="/stake">Start BIXCOIN staking <ArrowUpRight/></Link></Button><Button asChild variant="outline" className="rounded-full"><Link to="/profit"><TrendingUp/> Open profit tracker</Link></Button></div>
@@ -133,7 +119,7 @@ function BoostPage() {
         </div>
         <div className="grid content-start gap-3">
           <div className="boost-fact"><Coins className="text-chart-2"/><div><b>Passive staking profit</b><p>Calculated from the approved package APY and lock duration.</p></div></div>
-          <div className="boost-fact"><Zap className="text-primary"/><div><b>Active BIX profit</b><p>Thirty percent of recorded profit is allocated in BIX at the internal reference value.</p></div></div>
+          <div className="boost-fact"><Zap className="text-primary"/><div><b>Active BIX profit</b><p>Seventy percent of recorded profit is allocated in BIX at the internal reference value.</p></div></div>
           <div className="boost-fact"><ShieldCheck className="text-chart-3"/><div><b>Automatic activation</b><p>Eligible stakes activate instantly from the available virtual USDT testing balance.</p></div></div>
         </div>
       </div>

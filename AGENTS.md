@@ -30,10 +30,10 @@
 - Share HOME/landing content and narratives (bundled fallbacks) through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
 - Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
 - Owner 2 discovery uses a shared role query; reviewer actions exclude clone transactions on reads and writes. Package editing uses a separate authenticated, narrowly scoped RPC; wallet-address and vault privileges remain owner-only.
-- Share category/roadmap cards, bundled images and owner overrides across public/member views.
+- Share category/roadmap cards and owner overrides across public/member views; reuse one CDN-backed reactor video on landing and Booster to keep playback consistent.
 - Store the owner-selected presentation theme inside the existing public readiness setting and apply semantic CSS overrides in the shared shell, so all visitors receive the same lightweight theme without widening database access.
 - On-chain deployment uses only the owner injected TokenPocket wallet and fixed-supply bytecode; store the address, never keys or internal-balance conversions.
 - VIP tiers live in SQL; team sales = active downline USDT stakes minus clones; one owner-reviewed, vault-funded row per user+level — server-enforced one-time rewards.
 - Network bonuses are source-stake-idempotent; native BIX ones stay owner-reviewed. USDT direct + daily matching live in bix_usdt_network_bonuses (unique per stake/receiver/level/day), split USDT/BIX by referral settings and summed into balance functions; a pg_cron job settles matching daily — one idempotent ledger for network rewards.
 
-- Package terms use duration_apys on eight original rows; retire clones without deleting historical stakes. A duration-aware atomic RPC snapshots APY/lock/price into new stakes, preserving existing contracts and bonus triggers.
+- Package terms use duration_apys on eight original rows; retire clones without deleting historical stakes. RPCs snapshot stake terms; native BIX alone uses owner maxApy with matching SQL/UI formulas, preserving USDT terms and existing contracts.
