@@ -1152,6 +1152,8 @@ html[data-color-mode="light"] [data-presentation-theme="glass"] {
   --glass-clear: oklch(1 0 0 / 45%); --glass-edge: oklch(0.3 0.025 164 / 22%); --glass-sheen: oklch(1 0 0 / 80%);
 }
 html[data-color-mode="light"] [data-presentation-theme="glass"] .duration-apy { color: color-mix(in oklab,var(--tier-color) 60%,var(--foreground)); }
+html[data-color-mode="light"] [data-presentation-theme="glass"] .duration-package { --tier-ink: var(--foreground); }
+html[data-color-mode="light"] [data-presentation-theme="glass"] .duration-package :is(.duration-stake,.duration-option[aria-pressed="true"]) { color: var(--package-gold-ink); }
 @media(max-width:480px) {
   [data-presentation-theme="glass"] .brand-mark { font-size: 11px; padding: 6px 4px; }
   [data-presentation-theme="glass"] .header-brand { gap: 4px; }
