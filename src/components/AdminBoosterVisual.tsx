@@ -5,10 +5,15 @@ import { updateSetting } from '@/lib/bixlink.functions';
 import { Button } from '@/components/ui/button';
 import { usePublicConfig } from '@/lib/useMember';
 import { boosterMaximum } from '@/lib/booster-apy';
+import { BOOSTER_VIDEOS, resolveBoosterVisual, type BoosterVisual } from '@/lib/booster-visual';
+import { ReactorVideo } from '@/components/ReactorVideo';
+import { useQueryClient } from '@tanstack/react-query';
 
-export type BoosterVisual = 'fox' | 'reactor' | 'emblem';
+export type { BoosterVisual } from '@/lib/booster-visual';
 
-export function AdminBoosterVisual({ enabled, onMessage, onSaved }: { initialVisual: BoosterVisual; enabled: boolean; onMessage: (message: string) => void; onSaved: () => Promise<void> }) {
+export function AdminBoosterVisual({ initialVisual, enabled, onMessage, onSaved }: { initialVisual: BoosterVisual; enabled: boolean; onMessage: (message: string) => void; onSaved: () => Promise<void> }) {
+  const [visual, setVisual] = useState(() => resolveBoosterVisual(initialVisual));
+  const qc = useQueryClient();
   const saveSetting = useServerFn(updateSetting);
   const [saving, setSaving] = useState(false);
   const { data: cfg } = usePublicConfig();
@@ -20,6 +25,7 @@ export function AdminBoosterVisual({ enabled, onMessage, onSaved }: { initialVis
   const cap = maximum ?? boosterMaximum(cfg?.booster.maxApy);
 
   return <div className="mt-8 max-w-4xl space-y-5">
+    <section className="border-b border-border pb-6"><h2 className="font-display text-xl font-bold">Video BOOSTER APY</h2><div className="mt-4 flex flex-wrap gap-2">{BOOSTER_VIDEOS.map(v => <Button key={v} variant={visual === v ? 'default' : 'outline'} aria-pressed={visual === v} onClick={() => setVisual(v)}>{v === 'video' ? 'Video pengganti' : 'Video reactor'}</Button>)}</div><div className="max-w-lg"><ReactorVideo maximum={cap} visual={visual}/></div><Button disabled={saving} onClick={async () => { setSaving(true); try { await saveSetting({ data: { key: 'booster_visual', value: { visual } } }); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Video BOOSTER tersimpan.'); } catch { onMessage('Video gagal disimpan.'); } finally { setSaving(false); } }}>Simpan video BOOSTER</Button></section>
     <div className="rounded-[20px] border border-chart-2 bg-card p-6">
       <h2 className="font-display text-xl font-black">BIXCOIN yield engine</h2>
       <p className="my-5 text-sm leading-6 text-muted-foreground">When active, every eligible BIXCOIN staking position receives a live second-by-second profit projection. Package volume and lock duration set a monthly rate from 8% to the owner-selected maximum, allocated 70% BIX and 30% USDT. Existing stakes and USDT packages do not change.</p>

@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import splashCoin from '@/assets/bixcoin-splash-coin.jpg';
-import { Button } from '@/components/ui/button';
+import splashImage from '@/assets/bixcoin-reactor-splash.jpg.asset.json';
+import { SPLASH_DURATION_MS } from '@/lib/booster-visual';
 
-const SPLASH_DURATION_MS = 900;
 let startedThisLoad = false;
 
 export function AppSplash() {
@@ -41,24 +40,7 @@ export function AppSplash() {
       aria-modal="true"
       aria-label="BIXCOIN is loading"
     >
-      <div className="app-splash__frame">
-      <div className="app-splash__topline">Official · BIXCOIN</div>
-      <div className="app-splash__focus">
-        <div className="app-splash__rings" aria-hidden="true"><i/><i/><i/></div>
-        <img className="app-splash__coin" src={splashCoin} width={256} height={256} alt="Gold BIXCOIN emblem" decoding="async" />
-      </div>
-      <div className="app-splash__content">
-        <div className="app-splash__brand">BIXCOIN</div>
-        <div className="app-splash__tagline">
-          <span>Ecosystem</span><i>|</i><span>Asset</span><i>|</i><span>Vault</span>
-        </div>
-        <div className="app-splash__loading">
-          <div className="app-splash__status"><span>System status</span><b>Opening BIXCOIN…</b></div>
-          <div className="app-splash__track" aria-hidden="true"><i /></div>
-        </div>
-        <Button type="button" variant="ghost" className="app-splash__skip" onClick={dismiss}>Enter Vault</Button>
-      </div>
-      </div>
+      <img className="h-auto max-h-[85dvh] w-full max-w-4xl object-contain" src={splashImage.url} width={1152} height={768} alt="BIXCOIN reactor" loading="eager" onClick={dismiss}/>
     </div>
   );
 }
