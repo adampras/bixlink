@@ -50,7 +50,7 @@ function StakePage() {
           <span className="stake-lux-chip">Instant · {data?.isAdmin ? 'Virtual USDT' : 'USDT'}</span>
         </div>
         <h1 className="section-title stake-lux-title">STAKING <span>CRYPTO</span></h1>
-        {cfg?.booster.enabled && <p className="stake-lux-boost"><i aria-hidden />APY Booster active — projected up to {cfg.booster.rate}%, not guaranteed</p>}
+        
       </div>
       <div className="stake-pool">
         <div><span className="stake-pool-label">BIX supply</span><p className="stake-pool-value">21 MILLION BIX TOKEN</p></div>
