@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ContentLink } from '@/components/ContentLink';
@@ -11,6 +11,18 @@ export function ContentCarousel({ items, group, title }: { items: ContentItem[];
   const [position, setPosition] = useState(0);
   const [atEnd, setAtEnd] = useState(false);
   const visible = items.map((item, index) => ({ item, index })).filter(({ item }) => item.enabled !== false);
+  useEffect(() => {
+    const element = track.current;
+    if (!element) return;
+    const update = () => {
+      setPosition(element.scrollLeft);
+      setAtEnd(element.scrollLeft + element.clientWidth >= element.scrollWidth - 2);
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    update();
+    return () => observer.disconnect();
+  }, [items]);
   if (!visible.length) return null;
   const move = (direction: number) => {
     const element = track.current;

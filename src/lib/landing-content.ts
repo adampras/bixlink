@@ -18,7 +18,7 @@ export const defaultRoadmap: ContentItem[] = [
   ['Q4 2026', 'Ekosistem', 'Mengembangkan utilitas dan komunitas.'],
   ['Q1 2027', 'DAO', 'Merancang tata kelola komunitas.'],
   ['Q2 2027', '21 Juta Milestone', 'Meninjau perkembangan ekosistem dengan rencana suplai 21 juta BIX, bukan target harga.'],
-].map(([quarter, title, description]) => ({ quarter, title: title ?? '', description: description ?? '', enabled: true, size: 'md' }));
+].map(([quarter, title, description]) => ({ quarter: quarter ?? '', title: title ?? '', description: description ?? '', enabled: true, size: 'md' }));
 export const defaultNarrative: ContentItem[] = [
   { title: 'Internal BIX records', description: 'BIX balances and member transfers are recorded inside the application. On-chain token deployment remains a separate step.', enabled: true },
   { title: 'Community connections', description: 'Explore referral relationships and follow published project updates as the BIXLINK community develops.', enabled: true },

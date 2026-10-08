@@ -1276,3 +1276,4 @@ html[data-color-mode="light"] .internal-chart-line { stroke:var(--internal-blue)
 .content-medium-card p { font-size:14px; line-height:1.65; }
 .content-medium-card span { font-variant-numeric:tabular-nums lining-nums; letter-spacing:0; }
 .content-carousel-track:focus-visible { outline:2px solid var(--primary); outline-offset:4px; }
+.site-shell .content-carousel .content-medium-card { border-radius:8px; }
