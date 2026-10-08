@@ -11,6 +11,7 @@ const options: { id: PresentationTheme; name: string; detail: string }[] = [
   { id: 'emerald', name: 'Obsidian Emerald', detail: 'Emerald / Champagne · Spacious glass' },
   { id: 'graphite', name: 'Graphite Silver', detail: 'Silver / Teal · Spacious glass' },
   { id: 'royal', name: 'Royal Gold & Jade', detail: 'Pearl / Gold / Jade · Violet accents' },
+  { id: 'glass', name: 'Spectrum Clear Glass', detail: '8 category colors · Clear glass' },
 ];
 export function AdminAppearance({ initialTheme, onSaved, onMessage }: { initialTheme?: PresentationTheme | undefined; onSaved: () => Promise<void>; onMessage: (message: string) => void }) {
   const current = resolvePresentationTheme(initialTheme);
@@ -26,7 +27,7 @@ export function AdminAppearance({ initialTheme, onSaved, onMessage }: { initialT
         <span className="theme-miniature" data-presentation-theme={option.id}>
           <span className="theme-miniature-bar"><span>BIXLINK</span><span className="theme-swatches"><i/><i/><i/></span></span>
           <span className="theme-miniature-panels"><span><small>BIX / USDT</small><b>REFERENCE</b><span className="theme-miniature-chart"/></span><span><small>MARKET WATCH</small><i/><i/><i/></span></span>
-          <span className="theme-miniature-ribbon"><i/><i/><i/><i/></span>
+          <span className="theme-miniature-ribbon"><i/><i/><i/><i/>{option.id === 'glass' && <><i/><i/><i/><i/></>}</span>
         </span>
         <span className="flex w-full items-center justify-between gap-2"><span className="min-w-0 text-left"><b className="block text-sm">{option.name}</b><small className="mt-1 block text-xs text-muted-foreground">{option.detail}</small></span>{selected === option.id && <Check className="shrink-0 text-chart-2" size={18}/>}</span>
         <span className="text-left text-[10px] font-bold text-chart-2">{current === option.id ? 'ACTIVE' : '\u00a0'}</span>

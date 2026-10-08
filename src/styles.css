@@ -1044,3 +1044,120 @@ html[data-color-mode="light"] .site-header { background: color-mix(in oklab, var
 html[data-color-mode="light"] .duration-package { --package-surface:var(--card); --package-ink:var(--foreground); --package-muted:var(--muted-foreground); --package-control:var(--secondary); --package-border:var(--border); --tier-ink:oklch(0.99 0 0); }
 html[data-color-mode="light"] .duration-apy { color:var(--tier-color); }
 html[data-color-mode="light"] .tier-tone-7 { --tier-ink:var(--package-gold-ink); }
+
+/* Compact profit overview: preserve complete ledger precision. */
+.profit-summary .profit-metric { position: relative; padding: 12px; border-radius: 8px; }
+.profit-summary .profit-metric > svg { position: absolute; top: 12px; right: 12px; width: 15px; height: 15px; }
+.profit-summary .profit-metric > span { margin-top: 0; padding-right: 20px; font-size: 10px; }
+.profit-summary .profit-metric > strong { margin-top: 7px; font-size: 14px; line-height: 1.5; }
+.profit-summary .profit-metric > small { margin-top: 4px; font-size: 9px; }
+.profit-summary .profit-metric--total { grid-column: span 2; }
+.profit-summary .profit-metric--total > strong { font-size: 26px; }
+.profit-summary .profit-metric--daily { grid-column: span 2; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; }
+.profit-summary .profit-metric--daily > svg { position: static; flex-shrink: 0; }
+.profit-summary .profit-metric--daily > :is(span,strong,small) { margin: 0; padding: 0; }
+.profit-page .profit-position { padding: 12px; border-radius: 8px; min-width: 0; }
+.profit-page .profit-position .numeric { overflow-wrap: anywhere; }
+.profit-page .profit-position > div:last-child { gap: 8px; margin-top: 10px; padding-top: 10px; font-size: 10px; }
+.profit-page .section-title { font-size: 28px; letter-spacing: 0; }
+@media(min-width:1024px) {
+  .profit-summary .profit-metric--total, .profit-summary .profit-metric--daily { grid-column: auto; }
+  .profit-summary .profit-metric--daily { display: block; }
+  .profit-summary .profit-metric--daily > svg { position: absolute; }
+  .profit-summary .profit-metric--daily > span { padding-right: 20px; }
+  .profit-summary .profit-metric--daily > strong { margin-top: 7px; }
+  .profit-summary .profit-metric--daily > small { margin-top: 4px; }
+  .profit-page .section-title { font-size: 44px; }
+}
+
+/* Spectrum Clear Glass — owner-selected, isolated from existing themes. */
+[data-presentation-theme="glass"] {
+  --background: oklch(0.137 0.013 164); /* selected #050a08 */
+  --foreground: oklch(0.928 0.006 265); /* selected gray-200 */
+  --card: oklch(0.2 0.012 164);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.22 0.014 164);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.765 0.177 163);
+  --primary-foreground: oklch(0.15 0.013 164);
+  --secondary: oklch(0.26 0.016 164);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--secondary);
+  --muted-foreground: oklch(0.707 0.022 261);
+  --accent: var(--secondary);
+  --accent-foreground: var(--foreground);
+  --border: oklch(1 0 0 / 14%);
+  --input: oklch(1 0 0 / 20%);
+  --ring: var(--primary);
+  --chart-1: oklch(0.707 0.165 255);
+  --chart-2: var(--primary);
+  --chart-3: oklch(0.795 0.184 86);
+  --chart-4: oklch(0.702 0.183 294);
+  --chart-5: oklch(0.718 0.202 350);
+  --glass-clear: oklch(1 0 0 / 5%);
+  --glass-edge: oklch(1 0 0 / 20%);
+  --glass-sheen: oklch(1 0 0 / 13%);
+  --glass-shadow: 0 8px 24px oklch(0.05 0 0 / 24%);
+  --glass-inset: inset 0 1px 0 var(--glass-edge);
+  --glass-surface: linear-gradient(135deg, var(--glass-sheen), var(--glass-clear) 45%, var(--glass-clear));
+  --package-emerald: oklch(0.765 0.177 163);
+  --package-cyan: oklch(0.789 0.154 211);
+  --package-blue: oklch(0.707 0.165 255);
+  --package-indigo: oklch(0.702 0.183 294);
+  --package-violet: oklch(0.718 0.202 350);
+  --package-fuchsia: oklch(0.704 0.191 22);
+  --package-rose: oklch(0.828 0.189 84);
+  --package-gold: oklch(0.841 0.238 129);
+  --package-ink: var(--foreground);
+  --package-muted: var(--muted-foreground);
+  --package-surface: var(--glass-clear);
+  --package-control: var(--glass-clear);
+  --package-border: var(--glass-edge);
+  --package-shadow: var(--glass-shadow);
+}
+.site-shell[data-presentation-theme="glass"] { background-image: none; }
+[data-presentation-theme="glass"] .site-header {
+  background: color-mix(in oklab,var(--background) 85%,transparent);
+  backdrop-filter: blur(20px); border-color: var(--glass-edge); box-shadow: var(--glass-inset);
+}
+[data-presentation-theme="glass"] .site-header::after {
+  background: linear-gradient(90deg,var(--package-emerald),var(--package-cyan),var(--package-blue),var(--package-indigo),var(--package-violet),var(--package-fuchsia),var(--package-rose),var(--package-gold));
+}
+[data-presentation-theme="glass"] .header-brand img { border: 1px solid var(--glass-edge); box-shadow: 0 0 12px color-mix(in oklab,var(--chart-1) 28%,transparent); }
+[data-presentation-theme="glass"] .brand-mark { color: var(--foreground); font-size: 16px; letter-spacing: 0; padding: 6px 8px; border: 1px solid var(--glass-edge); border-radius: 6px; background: var(--glass-surface); text-shadow: none; box-shadow: var(--glass-inset); }
+[data-presentation-theme="glass"] :is(.header-icon,.header-reviewer,.language-trigger,.mode-toggle) { background: var(--glass-clear); border: 1px solid var(--border); border-radius: 8px; color: var(--foreground); }
+[data-presentation-theme="glass"] :is(.profit-metric,.profit-position,.network-stat,.terminal-kpi,.terminal-balance,.terminal-market,.profile-identity,.profile-referral,.boost-tier,.boost-fact,.stake-request) { background: var(--glass-surface); border-color: var(--glass-edge); box-shadow: var(--glass-shadow),var(--glass-inset); backdrop-filter: blur(12px); }
+[data-presentation-theme="glass"] :is(.income-category-card,.roadmap-card) { border-color: var(--glass-edge); }
+[data-presentation-theme="glass"] .duration-package { --tier-ink: var(--foreground); border-color: color-mix(in oklab,var(--tier-color) 35%,var(--glass-edge)); background: var(--glass-surface); backdrop-filter: blur(16px); box-shadow: var(--glass-shadow),var(--glass-inset); }
+[data-presentation-theme="glass"] .duration-package-head { background: linear-gradient(110deg,color-mix(in oklab,var(--tier-color) 40%,transparent),color-mix(in oklab,var(--tier-color) 10%,transparent)); border-bottom: 1px solid var(--glass-edge); box-shadow: var(--glass-inset); }
+[data-presentation-theme="glass"] .duration-package-head p { color: color-mix(in oklab,var(--tier-color) 60%,var(--foreground)); }
+[data-presentation-theme="glass"] .duration-price { background: var(--glass-surface); border-color: var(--glass-edge); color: var(--foreground); }
+[data-presentation-theme="glass"] .duration-package-body { background: color-mix(in oklab,var(--background) 40%,transparent); }
+[data-presentation-theme="glass"] .duration-package :is(.duration-stake,.duration-option[aria-pressed="true"]) { color: var(--primary-foreground); background: var(--tier-color); box-shadow: 0 4px 16px color-mix(in oklab,var(--tier-color) 20%,transparent); }
+[data-presentation-theme="glass"] .duration-apy { color: var(--tier-color); }
+[data-presentation-theme="glass"] .duration-package-action { margin-top: 18px; }
+[data-presentation-theme="glass"] .theme-miniature-bar { color: var(--foreground); }
+[data-presentation-theme="glass"] .theme-miniature-panels > span { background: var(--glass-surface); }
+[data-presentation-theme="glass"] .theme-miniature-ribbon { grid-template-columns: repeat(8,minmax(0,1fr)); }
+[data-presentation-theme="glass"] .theme-miniature-ribbon i:nth-child(1) { background: var(--package-emerald); }
+[data-presentation-theme="glass"] .theme-miniature-ribbon i:nth-child(2) { background: var(--package-cyan); }
+[data-presentation-theme="glass"] .theme-miniature-ribbon i:nth-child(3) { background: var(--package-blue); }
+[data-presentation-theme="glass"] .theme-miniature-ribbon i:nth-child(4) { background: var(--package-indigo); }
+[data-presentation-theme="glass"] .theme-miniature-ribbon i:nth-child(5) { background: var(--package-violet); }
+[data-presentation-theme="glass"] .theme-miniature-ribbon i:nth-child(6) { background: var(--package-fuchsia); }
+[data-presentation-theme="glass"] .theme-miniature-ribbon i:nth-child(7) { background: var(--package-rose); }
+[data-presentation-theme="glass"] .theme-miniature-ribbon i:nth-child(8) { background: var(--package-gold); }
+html[data-color-mode="light"] [data-presentation-theme="glass"] {
+  --primary: oklch(0.52 0.13 163); --chart-2: var(--primary); --chart-3: oklch(0.55 0.13 84);
+  --glass-clear: oklch(1 0 0 / 45%); --glass-edge: oklch(0.3 0.025 164 / 22%); --glass-sheen: oklch(1 0 0 / 80%);
+}
+html[data-color-mode="light"] [data-presentation-theme="glass"] .duration-apy { color: color-mix(in oklab,var(--tier-color) 60%,var(--foreground)); }
+html[data-color-mode="light"] [data-presentation-theme="glass"] .duration-package { --tier-ink: var(--foreground); }
+html[data-color-mode="light"] [data-presentation-theme="glass"] .duration-package :is(.duration-stake,.duration-option[aria-pressed="true"]) { color: var(--package-gold-ink); }
+@media(max-width:480px) {
+  [data-presentation-theme="glass"] .brand-mark { font-size: 11px; padding: 6px 4px; }
+  [data-presentation-theme="glass"] .header-brand { gap: 4px; }
+  [data-presentation-theme="glass"] .header-tools { gap: 3px; }
+  [data-presentation-theme="glass"] .mode-toggle { width: 28px; height: 30px; }
+  [data-presentation-theme="glass"] .duration-package :is(.duration-package-head,.duration-package-body) { padding: 18px; }
+}
