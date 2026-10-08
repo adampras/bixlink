@@ -155,8 +155,9 @@ export const setPackageEnabled = createServerFn({ method: 'POST' }).middleware([
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token'; value: Record<string, unknown> }) => {
-    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token']), value: z.record(z.unknown()) }).parse(data);
+  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token' | 'booster_withdraw'; value: Record<string, unknown> }) => {
+    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token','booster_withdraw']), value: z.record(z.unknown()) }).parse(data);
+    if (parsed.key === 'booster_withdraw') parsed.value = z.object({ bix: z.boolean(), usdt: z.boolean() }).strict().parse(parsed.value);
     if (parsed.key === 'booster') parsed.value = z.object({ enabled: z.boolean(), rate: z.number().min(0).max(45), maxApy: z.number().min(8).max(45).optional() }).strict().parse(parsed.value);
     if (parsed.key === 'readiness') parsed.value = z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean(), homeOverviewEnabled: z.boolean().optional(), footerEnabled: z.boolean().optional(), footerTitle: z.string().trim().max(80).optional(), footerBody: z.string().trim().max(320).optional(), footerContact: z.string().trim().max(120).optional(), presentationTheme: z.enum(PRESENTATION_THEMES).optional() }).strict().parse(parsed.value);
     if (parsed.key === 'unstake') z.object({ tiers: z.array(z.object({ days: z.number().int().min(1).max(3650), pct: z.number().min(0).max(100) })).min(1).max(10) }).parse(parsed.value);

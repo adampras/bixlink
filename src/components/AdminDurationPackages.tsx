@@ -28,7 +28,7 @@ function Editor({ pkg, index, onSave }: { pkg: Row; index: number; onSave: (m: s
     <header className="duration-package-head"><h3 className="text-xl font-bold">{pkg.id}</h3><label className="flex items-center gap-2 text-xs font-bold"><Switch aria-label={`${pkg.id} availability`} checked={enabled} onCheckedChange={setEnabled} disabled={busy}/>{enabled ? 'OPEN' : 'CLOSED'}</label></header>
     <div className="duration-package-body space-y-4">
       <label className="block text-xs font-bold">Package amount (USDT)<input aria-label={`${pkg.id} amount`} className="form-input mt-2" type="number" required min="0.01" max="10000000" step="0.01" value={price} onChange={e => setPrice(Number(e.target.value))}/></label>
-      <div className="grid grid-cols-2 gap-3">{PACKAGE_DURATIONS.map(d => <label key={d} className="text-xs font-bold">{d}D · APY %<input aria-label={`${pkg.id} ${d}D APY`} className="form-input mt-1" type="number" min="0" max="25" step="0.01" required value={apys[String(d)] ?? 0} onChange={e => setApys(current => ({ ...current, [String(d)]: Number(e.target.value) }))}/></label>)}</div>
+      <div className="grid grid-cols-2 gap-3">{PACKAGE_DURATIONS.map(d => <label key={d} className="text-xs font-bold">{d}D · % / month<input aria-label={`${pkg.id} ${d}D APY`} className="form-input mt-1" type="number" min="0" max="25" step="0.01" required value={apys[String(d)] ?? 0} onChange={e => setApys(current => ({ ...current, [String(d)]: Number(e.target.value) }))}/></label>)}</div>
       <Button className="duration-stake w-full" type="submit" disabled={busy}><Save size={16}/>{busy ? 'Saving…' : 'Save package'}</Button>
     </div>
   </form>;
@@ -36,7 +36,7 @@ function Editor({ pkg, index, onSave }: { pkg: Row; index: number; onSave: (m: s
 export function AdminDurationPackages({ onMessage }: { onMessage: (m: string) => void }) {
   const load = useServerFn(getEditablePackages);
   const query = useQuery({ queryKey: ['duration-package-editor'], queryFn: () => load() });
-  return <section className="mt-8"><h2 className="font-display text-2xl font-bold">Staking packages</h2><p className="mt-2 text-sm text-muted-foreground">APY per duration · 0–25%. Changes apply to new stakes only.</p>
+  return <section className="mt-8"><h2 className="font-display text-2xl font-bold">Staking packages</h2><p className="mt-2 text-sm text-muted-foreground">Monthly rate per duration · 0–25% per month. Changes apply to new stakes only.</p>
     {query.isPending ? <p className="mt-6">Loading packages…</p> : query.isError ? <div role="alert" className="mt-6 text-destructive">Could not load packages.<Button variant="outline" className="ml-3" onClick={() => query.refetch()}>Retry</Button></div> : <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">{query.data.map((pkg, i) => <Editor key={`${pkg.id}:${JSON.stringify(pkg.duration_apys)}:${pkg.enabled}:${pkg.price_usd}`} pkg={pkg} index={i} onSave={onMessage}/>)}</div>}
   </section>;
 }
