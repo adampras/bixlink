@@ -28,11 +28,11 @@ function BoostPage() {
         <div className="terminal-supply"><ShieldCheck size={13}/> 21 JUTA BIX TOKEN</div>
         <div className="eyebrow mt-5"><Zap size={15} className="text-chart-2"/> BIXCOIN YIELD ENGINE</div>
         <h1 className="section-title">BOOST YOUR <span>APY</span></h1>
-        <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">The BIXCOIN Booster converts each active BIX position into a live yield projection. Larger amounts and longer lock periods unlock annual APY tiers, from 8% up to {maximum}%. Existing contracts keep their recorded APY. All figures are projections, not guaranteed returns.</p>
+        <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">The BIXCOIN Booster converts each active BIX position into a live yield projection. Larger amounts and longer lock periods unlock monthly rate tiers, from 8% up to {maximum}% per month. Existing contracts keep their recorded APY. All figures are projections, not guaranteed returns.</p>
         <div className="boost-chips mt-6">
           <div className="booster-chip"><b className="text-chart-2">70%</b> profit in BIX</div>
           <div className="booster-chip"><b className="text-chart-3">30%</b> profit in USDT</div>
-          <div className="booster-chip"><b className="text-primary">{maximum}%</b> maximum annual APY</div>
+          <div className="booster-chip"><b className="text-primary">{maximum}%</b> maximum per month</div>
         </div>
         <div className="mt-7"><BixStakePanel bixPrice={bixPrice}/></div>
 
@@ -50,7 +50,7 @@ function BoostPage() {
           </div>
           <ReactorVideo maximum={maximum}/>
           <div className="boost-readouts">
-            <div className="boost-readout boost-readout--apy"><span>Maximum APY</span><strong>{maximum.toFixed(2)}%</strong></div>
+            <div className="boost-readout boost-readout--apy"><span>Maximum monthly</span><strong>{maximum.toFixed(2)}%</strong></div>
             <div className="boost-readout boost-readout--split"><span>Profit split BIX / USDT</span><strong>70 / 30</strong></div>
             <div className="boost-readout boost-readout--lock"><span>Longest lock</span><strong>{longestLock} DAYS</strong></div>
           </div>
@@ -64,7 +64,7 @@ function BoostPage() {
       <div className="booster-steps mt-8">
         <article><b>01</b><h3>Choose a BIXCOIN package</h3><p>Select the staking value, APY and lock duration that match your plan. The package value is paid from your virtual USDT testing balance.</p></article>
         <article><b>02</b><h3>Stake activates instantly</h3><p>When your balance is sufficient, the position becomes active automatically. No owner approval is needed for staking.</p></article>
-        <article><b>03</b><h3>Booster tracks every minute</h3><p>Profit is projected from the package value × APY × elapsed time. Seventy percent is displayed as BIX and thirty percent as USDT at the internal reference.</p></article>
+        <article><b>03</b><h3>Booster tracks every second</h3><p>Profit is projected from the package value × APY × elapsed time. Seventy percent is displayed as BIX and thirty percent as USDT at the internal reference.</p></article>
         <article><b>04</b><h3>Review in PROFIT</h3><p>Open the PROFIT menu to see every active position. Early unstaking ends the projection and applies the owner-configured penalty schedule.</p></article>
       </div>
       <div className="mt-7 flex flex-wrap gap-3"><Button asChild className="rounded-full"><Link to="/stake">Start BIXCOIN staking <ArrowUpRight/></Link></Button><Button asChild variant="outline" className="rounded-full"><Link to="/profit"><TrendingUp/> Open profit tracker</Link></Button></div>

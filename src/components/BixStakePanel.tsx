@@ -41,8 +41,8 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   const amt = Number(amount) || 0;
   const maximum = boosterMaximum(cfg?.booster.maxApy);
   const apy = nativeBixApy(amt, days, maximum);
-  const yearly = amt * apy / 100;
-  const periodProfit = yearly * days / 365;
+  const periodProfit = amt * apy / 100 * days / 30;
+  const perSecBix = amt * apy / 100 / 30 / 86400;
   const active = (q.data?.stakes ?? []).filter(s => s.status === 'active');
   const live = active.reduce((sum, s) => sum + Number(s.amount_bix) * Number(s.apy) / 100 * Math.min((now - new Date(s.created_at).getTime()) / 86400000, s.lock_days) / 365, 0);
 
@@ -51,7 +51,7 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
     setBusy(true); setMsg('');
     try {
       await stakeBix({ data: { amount: amt, days } });
-      setMsg(`CONGRATULATION — ${number(amt)} BIX staked at ${apy}% APY.`); txFeedback.success('BIX staked', `${number(amt)} BIX at ${apy}% APY`);
+      setMsg(`CONGRATULATION — ${number(amt)} BIX staked at ${apy}% per month.`); txFeedback.success('BIX staked', `${number(amt)} BIX at ${apy}% / month`);
       await qc.invalidateQueries();
     } catch (error) { setMsg(error instanceof Error ? error.message : 'Could not stake BIX.'); txFeedback.fail('BIX staking failed', error); }
     finally { setBusy(false); }
@@ -83,7 +83,7 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   return <section className="rounded-[20px] border border-chart-2/40 bg-card p-5 sm:p-6">
     <div className="eyebrow"><Coins size={14} className="text-chart-2"/> STAKE BIX DIRECTLY</div>
     <h2 className="mt-2 font-display text-2xl font-black">BIX Booster Staking</h2>
-    <p className="mt-2 text-sm text-muted-foreground">Stake your BIX balance here. Volume and lock period set your annual APY (8–{maximum}%). Profit split: 70% passive BIX · 30% active USDT — projection only.</p>
+    <p className="mt-2 text-sm text-muted-foreground">Stake your BIX balance here. Volume and lock period set your monthly rate (8–{maximum}% per month). Profit split: 70% passive BIX · 30% active USDT — projection only.</p>
     <div className="mt-4 flex items-center justify-between rounded-xl border border-border p-3 text-sm"><span>Available BIX</span><b className="numeric">{number(q.data?.bal ?? 0, { maximumFractionDigits: 2 })} BIX</b></div>
     <label className="mt-4 block text-xs font-bold uppercase text-muted-foreground">Amount (BIX, min 10)</label>
     <div className="mt-1 flex gap-2">
@@ -93,7 +93,7 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
     <label className="mt-4 block text-xs font-bold uppercase text-muted-foreground">Lock period</label>
     <div className="mt-1 grid grid-cols-5 gap-2">{LOCKS.map(d => <Button key={d} type="button" variant={d === days ? 'default' : 'outline'} className="rounded-xl px-1 text-xs" onClick={() => setDays(d)}>{d}d</Button>)}</div>
     <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-      <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">APY</span><b className="numeric block text-chart-2 text-xl">{apy}%</b></div>
+      <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Monthly rate</span><b className="numeric block text-chart-2 text-xl">{apy}% / month</b><span className="numeric text-[11px] text-chart-2">+{perSecBix.toFixed(8)} BIX/sec</span></div>
       <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Est. profit / period</span><b className="numeric block">{number(periodProfit, { maximumFractionDigits: 2 })} BIX</b></div>
       <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Passive 70% BIX</span><b className="numeric block text-primary">{number(periodProfit * 0.7, { maximumFractionDigits: 2 })} BIX</b></div>
       <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Active 30% USDT</span><b className="numeric block text-chart-3">${number(periodProfit * 0.3 * bixPrice, { maximumFractionDigits: 2 })}</b></div>
@@ -109,7 +109,7 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
         const end = new Date(s.created_at).getTime() + s.lock_days * 86400000;
         const pct = Math.min(100, (now - new Date(s.created_at).getTime()) / (s.lock_days * 86400000) * 100);
         return <div key={s.id} className="rounded-xl border border-border p-3 text-sm">
-          <div className="flex items-center justify-between gap-2"><b className="numeric">{number(Number(s.amount_bix))} BIX · {s.apy}%</b><Button size="sm" variant="outline" className="rounded-full" onClick={() => unstake(s.id)}>{now < end ? 'Unstake early' : 'Claim'}</Button></div>
+          <div className="flex items-center justify-between gap-2"><b className="numeric">{number(Number(s.amount_bix))} BIX · {number(Number(s.apy) / 12, { maximumFractionDigits: 2 })}%/mo</b><Button size="sm" variant="outline" className="rounded-full" onClick={() => unstake(s.id)}>{now < end ? 'Unstake early' : 'Claim'}</Button></div>
           <div className="mt-2 h-1.5 rounded-full bg-muted"><div className="h-full rounded-full bg-chart-2" style={{ width: `${pct}%` }}/></div>
           <span className="numeric mt-1 flex items-center gap-1 text-xs text-muted-foreground"><LockKeyhole size={11}/>{s.lock_days} days · {pct.toFixed(1)}%</span>
           {(() => { const avail = availableOf(s); const min = Number(s.amount_bix) * 0.1; const ok = avail >= min; return <div className="mt-3">
