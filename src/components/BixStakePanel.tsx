@@ -8,13 +8,13 @@ import { number } from '@/lib/bixlink';
 import { nativeBixApy, boosterMaximum } from '@/lib/booster-apy';
 import { usePublicConfig } from '@/lib/useMember';
 import { useServerFn } from '@tanstack/react-start';
-import { stakeNativeBix, unstakeNativeBix } from '@/lib/network.functions';
+import { stakeNativeBix, unstakeNativeBix, withdrawStakeProfit } from '@/lib/network.functions';
 
 const LOCKS = [30, 90, 180, 360, 540];
 
 export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   const qc = useQueryClient();
-  const stakeBix = useServerFn(stakeNativeBix); const unstakeBix = useServerFn(unstakeNativeBix);
+  const stakeBix = useServerFn(stakeNativeBix); const drawProfit = useServerFn(withdrawStakeProfit); const unstakeBix = useServerFn(unstakeNativeBix);
   const { data: cfg } = usePublicConfig();
   const [amount, setAmount] = useState('100');
   const [days, setDays] = useState(90);
@@ -27,12 +27,14 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
     queryKey: ['bix-native-stakes'],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return { bal: 0, stakes: [] as any[] };
-      const [b, s] = await Promise.all([
+      if (!u.user) return { bal: 0, stakes: [] as any[], taken: [] as { stake_id: string; amount_bix: number }[], wcfg: { bix: false, usdt: false } };
+      const [b, s, w, c] = await Promise.all([
         supabase.rpc('bix_asset_balances', { p_user: u.user.id }).single(),
         supabase.from('bix_stakes').select('*').eq('user_id', u.user.id).order('created_at', { ascending: false }),
+        supabase.from('bix_stake_profit_withdrawals').select('stake_id,amount_bix').eq('user_id', u.user.id),
+        supabase.rpc('bix_booster_withdraw_config'),
       ]);
-      return { bal: Number((b.data as any)?.bix_balance ?? 0), stakes: s.data ?? [] };
+      return { bal: Number((b.data as any)?.bix_balance ?? 0), stakes: s.data ?? [], taken: (w.data ?? []) as { stake_id: string; amount_bix: number }[], wcfg: (c.data ?? { bix: false, usdt: false }) as { bix: boolean; usdt: boolean } };
     },
   });
 
@@ -52,6 +54,19 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
       setMsg(`CONGRATULATION — ${number(amt)} BIX staked at ${apy}% APY.`); txFeedback.success('BIX staked', `${number(amt)} BIX at ${apy}% APY`);
       await qc.invalidateQueries();
     } catch (error) { setMsg(error instanceof Error ? error.message : 'Could not stake BIX.'); txFeedback.fail('BIX staking failed', error); }
+    finally { setBusy(false); }
+  }
+  const earned = (s: any) => Number(s.amount_bix) * Number(s.apy) / 100 * Math.min((now - new Date(s.created_at).getTime()) / 86400000, s.lock_days) / 365;
+  const availableOf = (s: any) => Math.max(0, earned(s) - (q.data?.taken ?? []).filter(t => t.stake_id === s.id).reduce((n, t) => n + Number(t.amount_bix), 0));
+  async function withdraw(s: any, asset: 'BIX' | 'USDT') {
+    if (!(await confirmPin())) return;
+    setBusy(true);
+    try {
+      const r = await drawProfit({ data: { id: s.id, asset } });
+      const text = asset === 'BIX' ? `${number(Number(r.amount_bix), { maximumFractionDigits: 6 })} BIX` : `$${number(Number(r.amount_usdt), { maximumFractionDigits: 4 })} USDT`;
+      setMsg(`Profit withdrawn — ${text} added to your balance.`); txFeedback.success('Profit withdrawn', text);
+      await qc.invalidateQueries();
+    } catch (error) { setMsg(error instanceof Error ? error.message : 'Withdraw failed.'); txFeedback.fail('Withdraw failed', error); }
     finally { setBusy(false); }
   }
   async function unstake(id: string) {
@@ -97,6 +112,14 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
           <div className="flex items-center justify-between gap-2"><b className="numeric">{number(Number(s.amount_bix))} BIX · {s.apy}%</b><Button size="sm" variant="outline" className="rounded-full" onClick={() => unstake(s.id)}>{now < end ? 'Unstake early' : 'Claim'}</Button></div>
           <div className="mt-2 h-1.5 rounded-full bg-muted"><div className="h-full rounded-full bg-chart-2" style={{ width: `${pct}%` }}/></div>
           <span className="numeric mt-1 flex items-center gap-1 text-xs text-muted-foreground"><LockKeyhole size={11}/>{s.lock_days} days · {pct.toFixed(1)}%</span>
+          {(() => { const avail = availableOf(s); const min = Number(s.amount_bix) * 0.1; const ok = avail >= min; return <div className="mt-3">
+            <div className="flex justify-between text-xs"><span className="text-muted-foreground">Withdrawable profit</span><b className="numeric text-chart-2">{number(avail, { maximumFractionDigits: 6 })} BIX</b></div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <Button size="sm" className="rounded-xl bg-chart-3 text-background" disabled={busy || !q.data?.wcfg.bix || !ok} onClick={() => withdraw(s, 'BIX')}>{q.data?.wcfg.bix ? 'Withdraw BIX' : 'BIX closed'}</Button>
+              <Button size="sm" className="rounded-xl bg-chart-2 text-background" disabled={busy || !q.data?.wcfg.usdt || !ok} onClick={() => withdraw(s, 'USDT')}>{q.data?.wcfg.usdt ? 'Withdraw USDT' : 'USDT closed'}</Button>
+            </div>
+            {!ok && <p className="mt-1 text-[11px] text-muted-foreground">Minimum withdraw: 10% of stake ({number(min, { maximumFractionDigits: 4 })} BIX). Principal returns after the contract ends.</p>}
+          </div>; })()}
         </div>;
       })}</div>
     </div>}

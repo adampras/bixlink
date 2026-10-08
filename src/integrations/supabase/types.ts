@@ -187,6 +187,47 @@ export type Database = {
           },
         ]
       }
+      bix_stake_profit_withdrawals: {
+        Row: {
+          amount_bix: number
+          amount_usdt: number
+          asset: string
+          created_at: string
+          id: string
+          price_usd: number
+          stake_id: string
+          user_id: string
+        }
+        Insert: {
+          amount_bix: number
+          amount_usdt?: number
+          asset: string
+          created_at?: string
+          id?: string
+          price_usd: number
+          stake_id: string
+          user_id: string
+        }
+        Update: {
+          amount_bix?: number
+          amount_usdt?: number
+          asset?: string
+          created_at?: string
+          id?: string
+          price_usd?: number
+          stake_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_stake_profit_withdrawals_stake_id_fkey"
+            columns: ["stake_id"]
+            isOneToOne: false
+            referencedRelation: "bix_stakes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bix_stakes: {
         Row: {
           amount_bix: number
@@ -831,6 +872,7 @@ export type Database = {
           usdt_balance: number
         }[]
       }
+      bix_booster_withdraw_config: { Args: never; Returns: Json }
       bix_can_manage_packages: { Args: never; Returns: boolean }
       bix_claim_vip: { Args: { p_level: number }; Returns: string }
       bix_content_published: { Args: { p_name: string }; Returns: boolean }
@@ -925,6 +967,10 @@ export type Database = {
         Returns: string
       }
       bix_wallet_balance: { Args: { p_user: string }; Returns: number }
+      bix_withdraw_stake_profit: {
+        Args: { p_asset: string; p_stake: string }
+        Returns: Json
+      }
       ensure_bix_profile: { Args: never; Returns: undefined }
       is_bix_admin: { Args: never; Returns: boolean }
       request_bix_deposit: {

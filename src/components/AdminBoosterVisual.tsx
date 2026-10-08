@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useServerFn } from '@tanstack/react-start';
 import { updateSetting } from '@/lib/bixlink.functions';
 import { Button } from '@/components/ui/button';
@@ -13,17 +14,27 @@ export function AdminBoosterVisual({ enabled, onMessage, onSaved }: { initialVis
   const { data: cfg } = usePublicConfig();
   const [maximum, setMaximum] = useState<number | null>(null);
   const [active, setActive] = useState(enabled);
+  const [wd, setWd] = useState({ bix: false, usdt: false });
+  useEffect(() => { supabase.rpc('bix_booster_withdraw_config').then(({ data }) => { if (data) setWd(data as { bix: boolean; usdt: boolean }); }); }, []);
+  const saveWd = async (next: { bix: boolean; usdt: boolean }) => { try { await saveSetting({ data: { key: 'booster_withdraw', value: next } }); setWd(next); onMessage(`Booster withdraw — BIX ${next.bix ? 'OPEN' : 'CLOSED'} · USDT ${next.usdt ? 'OPEN' : 'CLOSED'}.`); } catch { onMessage('Could not save withdraw setting.'); } };
   const cap = maximum ?? boosterMaximum(cfg?.booster.maxApy);
 
   return <div className="mt-8 max-w-4xl space-y-5">
     <div className="rounded-[20px] border border-chart-2 bg-card p-6">
       <h2 className="font-display text-xl font-black">BIXCOIN yield engine</h2>
-      <p className="my-5 text-sm leading-6 text-muted-foreground">When active, every eligible BIXCOIN staking position receives a live minute-by-minute profit projection. Package volume and lock duration set APY from 8% to the owner-selected maximum, allocated 70% BIX and 30% USDT. Existing stakes and USDT packages do not change.</p>
+      <p className="my-5 text-sm leading-6 text-muted-foreground">When active, every eligible BIXCOIN staking position receives a live second-by-second profit projection. Package volume and lock duration set APY from 8% to the owner-selected maximum, allocated 70% BIX and 30% USDT. Existing stakes and USDT packages do not change.</p>
       <label className="flex items-center gap-3"><input type="checkbox" checked={active} onChange={event => setActive(event.target.checked)}/> APY BOOSTER ACTIVE</label>
       <label className="mt-4 block text-sm">Maximum annual BIX APY (%)<input aria-label="Maximum annual BIX APY" type="number" min={8} max={45} step={0.01} value={cap} onChange={event => setMaximum(Number(event.target.value))} className="mt-2 block w-36 rounded-lg border border-border bg-background p-3"/></label>
       <Button className="mt-4" disabled={saving || !Number.isFinite(cap) || cap < 8 || cap > 45} onClick={async () => { setSaving(true); try { await saveSetting({ data: { key: 'booster', value: { enabled: active, rate: cfg?.booster.rate ?? 25, maxApy: cap } } }); await onSaved(); onMessage('BIX Booster maximum saved. Existing contracts and USDT packages are unchanged.'); } catch { onMessage('Could not save BIX Booster maximum.'); } finally { setSaving(false); } }}>Save Booster APY</Button>
 
     </div>
-
+    <div className="rounded-[20px] border border-chart-3 bg-card p-6">
+      <h2 className="font-display text-xl font-black">Booster profit withdraw</h2>
+      <p className="mt-2 text-sm text-muted-foreground">Members withdraw profit only (minimum 10% of stake value), paid from the owner BIX reserve. Principal returns after the contract ends.</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <Button variant={wd.bix ? 'default' : 'outline'} onClick={() => saveWd({ ...wd, bix: !wd.bix })}>Withdraw BIX: {wd.bix ? 'OPEN' : 'CLOSED'}</Button>
+        <Button variant={wd.usdt ? 'default' : 'outline'} onClick={() => saveWd({ ...wd, usdt: !wd.usdt })}>Withdraw USDT: {wd.usdt ? 'OPEN' : 'CLOSED'}</Button>
+      </div>
+    </div>
   </div>;
 }

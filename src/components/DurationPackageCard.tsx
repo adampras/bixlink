@@ -17,7 +17,7 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
       <div className="duration-options" role="group" aria-label={`${pkg.id} duration`}>
         {PACKAGE_DURATIONS.map(d => <Button key={d} variant="outline" aria-pressed={days === d} className="duration-option" onClick={() => setDays(d)}>{d}D</Button>)}
       </div>
-      <div className="duration-package-action"><div><p className="duration-label">Projected APY</p><strong className="duration-apy">{number(apy)}% <small>APY</small></strong></div><Button className="duration-stake" onClick={() => onStake({ ...pkg, lock_days: days, apy })}>Stake <ArrowUpRight size={18}/></Button></div>
+      <div className="duration-package-action"><div><p className="duration-label">Projected rate</p><strong className="duration-apy">{number(apy)}% <small>/ month</small></strong><p className="text-[10px] text-muted-foreground">≈ {number(apy * 12)}% / year</p></div><Button className="duration-stake" onClick={() => onStake({ ...pkg, lock_days: days, apy })}>Stake <ArrowUpRight size={18}/></Button></div>
     </div>
   </article>;
 }
