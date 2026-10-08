@@ -53,7 +53,7 @@
 .tokenomics-poster-band img { width:160px; height:auto; border:1px solid var(--token-edge); border-radius:4px; }
 .tokenomics-disclosure { display:flex; align-items:flex-start; gap:10px; padding-top:20px; border-top:1px solid var(--border); font-size:11px; line-height:1.8; color:var(--muted-foreground); }
 .tokenomics-disclosure svg { flex-shrink:0; margin-top:3px; }
-html:not(.dark) .landing-tokenomics { --token-cyan:oklch(.48 .1 210); --token-emerald:oklch(.48 .13 160); --token-violet:oklch(.5 .2 300); --token-magenta:oklch(.48 .19 335); --token-gold:oklch(.52 .11 85); --token-coral:oklch(.5 .16 30); }
+html[data-color-mode="light"] .landing-tokenomics { --token-cyan:oklch(.48 .1 210); --token-emerald:oklch(.48 .13 160); --token-violet:oklch(.5 .2 300); --token-magenta:oklch(.48 .19 335); --token-gold:oklch(.52 .11 85); --token-coral:oklch(.5 .16 30); }
 @media(max-width:767px) {
   .tokenomics-main { grid-template-columns:minmax(0,1fr); gap:16px; margin-top:20px; }
   .tokenomics-supply { padding:12px 0; }
