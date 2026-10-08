@@ -91,4 +91,4 @@
 - [x] Rename the USDT staking headline to STAKING CRYPTO; confirm its current APY is annual, calculated daily using /365.
 - [x] Apply selected compact staking summary and move BOOST engine above its form; verified signed-in at 384px and 1280px, no overflow, video loaded, financial logic unchanged.
 - [x] Implement selected Glassmorphism mobile hub: compact PROFIT, Spectrum Clear Glass (eight category colors), and glass header/wordmark. Owner save/reload verified; signed-in PROFIT/STAKING at 384px/1280px have no overflow, existing shared Emerald theme restored after testing, financial rules unchanged.
-- [ ] Preview owner-controlled up/down internal reference market in Spectrum Clear Glass; implement only after design selection, keeping simulation distinct from real market trading.
+- [x] Implement selected Vivid Cyan Glass internal market with owner-controlled bounds, interval, intensity, bias and pause; owner save/reload, live movement and freeze verified at 384px/1280px. Simulation left paused after testing; ledger reference, swaps, rewards and balances unchanged.
