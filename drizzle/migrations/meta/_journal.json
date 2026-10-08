@@ -281,6 +281,13 @@
       "when": 1791438857391,
       "tag": "0039_usdt_package_cap_30_monthly",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1791442671486,
+      "tag": "0040_stake_daily_compound_toggle",
+      "breakpoints": true
     }
   ]
 }
