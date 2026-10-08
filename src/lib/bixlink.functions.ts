@@ -36,11 +36,20 @@ export const assignReferral = createServerFn({ method: 'POST' }).middleware([req
   });
 
 export const requestStake = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { packageId: string; days: number }) => z.object({ packageId: z.string().min(1).max(40), days: z.number().int().refine(d => [30, 60, 90, 180, 360].includes(d)) }).parse(data))
+  .inputValidator((data: { packageId: string; days: number; compound?: boolean }) => z.object({ packageId: z.string().min(1).max(40), days: z.number().int().refine(d => [30, 60, 90, 180, 360].includes(d)), compound: z.boolean().optional() }).parse(data))
   .handler(async ({ data, context }) => {
     const { data: id, error } = await context.supabase.rpc('request_bix_duration_stake', { p_package: data.packageId, p_days: data.days });
     if (error) throw new Error(error.message);
+    if (data.compound && id) await context.supabase.rpc('bix_set_stake_compound', { p_stake: id as string, p_on: true });
     return { id };
+  });
+
+export const setStakeCompound = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { stakeId: string; on: boolean }) => z.object({ stakeId: z.string().uuid(), on: z.boolean() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc('bix_set_stake_compound', { p_stake: data.stakeId, p_on: data.on });
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const unstakeStake = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])

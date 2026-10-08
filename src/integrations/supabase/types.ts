@@ -646,6 +646,7 @@ export type Database = {
           activated_at: string | null
           amount_usd: number
           apy: number
+          compound: boolean
           created_at: string
           funded_vusdt: boolean
           id: string
@@ -661,6 +662,7 @@ export type Database = {
           activated_at?: string | null
           amount_usd: number
           apy: number
+          compound?: boolean
           created_at?: string
           funded_vusdt?: boolean
           id?: string
@@ -676,6 +678,7 @@ export type Database = {
           activated_at?: string | null
           amount_usd?: number
           apy?: number
+          compound?: boolean
           created_at?: string
           funded_vusdt?: boolean
           id?: string
@@ -932,6 +935,10 @@ export type Database = {
       }
       bix_review_vip: {
         Args: { p_approve: boolean; p_reward: string }
+        Returns: undefined
+      }
+      bix_set_stake_compound: {
+        Args: { p_on: boolean; p_stake: string }
         Returns: undefined
       }
       bix_settle_matching_daily: { Args: { p_day?: string }; Returns: number }
