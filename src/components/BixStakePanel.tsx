@@ -41,7 +41,6 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   const amt = Number(amount) || 0;
   const maximum = boosterMaximum(cfg?.booster.maxApy);
   const apy = nativeBixApy(amt, days, maximum);
-  const yearly = amt * apy / 100;
   const periodProfit = amt * apy / 100 * days / 30;
   const perSecBix = amt * apy / 100 / 30 / 86400;
   const active = (q.data?.stakes ?? []).filter(s => s.status === 'active');

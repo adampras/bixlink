@@ -21,7 +21,7 @@ export function ReactorVideo({ maximum }: { maximum: number }) {
   }, []);
   return <div className="reactor-glass-stage">
     <video ref={ref} className="reactor-glass-video" poster={poster.url} muted loop playsInline preload="metadata" aria-label="BIXCOIN gold reactor" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}><source src={webVideo.url} type="video/webm"/><source src={video.url} type="video/mp4"/></video>
-    <div className="reactor-glass-lens"><span>BIX BOOSTER</span><small>UP TO</small><strong>{maximum}%</strong><small>ANNUAL · PROJECTION</small></div>
+    <div className="reactor-glass-lens"><span>BIX BOOSTER</span><small>UP TO</small><strong>{maximum}%</strong><small>MONTHLY · PROJECTION</small></div>
     <Button variant="outline" size="icon" className="reactor-video-control" aria-label={playing ? 'Pause reactor video' : 'Play reactor video'} title={playing ? 'Pause video' : 'Play video'} onClick={() => { const element = ref.current; if (!element) return; if (element.paused) element.play().catch(() => {}); else element.pause(); }}>{playing ? <Pause size={14}/> : <Play size={14}/>}</Button>
   </div>;
 }
