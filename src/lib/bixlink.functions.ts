@@ -108,7 +108,7 @@ export const getAdminData = createServerFn({ method: 'GET' }).middleware([requir
   for (let page = 1; page <= 100; page++) {
     const { data: batch, error: membersError } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
     if (membersError) throw membersError;
-    members.push(...batch.users.map(user => ({ id: user.id, email: user.email ?? '', created_at: user.created_at, banned_until: user.banned_until ?? null, access: (user.banned_until && new Date(user.banned_until) > new Date() ? (user.app_metadata?.access_status === 'inactive' ? 'inactive' : 'banned') : 'active') as 'active' | 'inactive' | 'banned' })));
+    members.push(...batch.users.map(user => ({ id: user.id, email: user.email ?? '', created_at: user.created_at, banned_until: user.banned_until ?? null, access: (user.banned_until && new Date(user.banned_until) > new Date() ? (user.app_metadata?.['access_status'] === 'inactive' ? 'inactive' : 'banned') : 'active') as 'active' | 'inactive' | 'banned' })));
     if (batch.users.length < 1000) break;
   }
   return { stakes: stakes.data ?? [], packages: packages.data ?? [], settings: settings.data ?? [], sources: sources.data ?? [], referrals: referrals.data ?? [], members };
