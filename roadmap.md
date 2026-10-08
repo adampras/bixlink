@@ -94,3 +94,4 @@
 - [x] Implement selected Vivid Cyan Glass internal market with owner-controlled bounds, interval, intensity, bias and pause; owner save/reload, live movement and freeze verified at 384px/1280px. Simulation left paused after testing; ledger reference, swaps, rewards and balances unchanged.
 - [x] Preview and implement selected BIXCOIN glass donut landing tokenomics, six proposed allocations, vision/mission, and poster; allocation/schedule tests pass and poster opens with no mobile overflow. Existing member financial terms remain unchanged.
 - [x] Replace member HOME tokenomics with the shared latest version; verified signed-in HOME has one tokenomics, six allocations, no old heading or mobile overflow, and Space Grotesk amounts matching USDT packages.
+- [ ] Preview medium horizontal category and roadmap cards with BIXLINK-specific narratives; apply chosen direction consistently on member HOME and landing after user selection.
