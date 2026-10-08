@@ -104,7 +104,7 @@ export function usePublicConfig() {
       return {
         packages: (p.data ?? []) as Package[],
         booster: (settings['booster'] ?? { enabled: true, rate: 25 }) as { enabled: boolean; rate: number; maxApy?: number },
-        boosterVisual: (settings['booster_visual'] ?? { visual: 'fox' }) as { visual: 'fox' | 'reactor' | 'emblem' },
+        boosterVisual: (settings['booster_visual'] ?? { visual: 'video' }) as { visual: 'video' | 'reactor' | 'fox' | 'emblem' },
         wallet: (settings['wallet'] ?? { address: '', network: 'USDT BEP20' }) as { address: string; network: string },
         depositWallets: (((settings['deposit_wallets'] as { wallets?: { code: string; label: string; network: 'BEP20' | 'TRC20' | 'ERC20'; address: string; enabled: boolean }[] } | undefined)?.wallets) ?? []).filter(w => w.enabled && w.address),
         swap: (settings['swap'] ?? { enabled: false }) as { enabled: boolean },

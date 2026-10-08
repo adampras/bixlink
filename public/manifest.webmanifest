@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "BIXLINK",
+  "short_name": "BIXLINK",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#020203",
+  "background_color": "#020203",
+  "icons": [
+    {
+      "src": "/__l5e/assets-v1/53ca2354-a09f-425c-a6a0-62e4ba53054c/bixcoin-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/__l5e/assets-v1/a97e1883-6386-434d-819c-8e68179e4a62/bixcoin-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
