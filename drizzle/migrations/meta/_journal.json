@@ -253,6 +253,13 @@
       "when": 1791415272195,
       "tag": "0035_legacy_stake_uses_duration_options",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1791427215860,
+      "tag": "0036_bix_booster_owner_maximum_apy",
+      "breakpoints": true
     }
   ]
 }
