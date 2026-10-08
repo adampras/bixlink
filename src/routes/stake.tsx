@@ -42,22 +42,22 @@ function StakePage() {
   const activeStakes = (data?.stakes ?? []).filter(s => s.status === 'active');
   const liveTotal = activeStakes.reduce((n, s) => n + liveOf(s), 0);
   const perSecond = activeStakes.reduce((n, s) => n + Number(s.amount_usd) * Number(s.apy) / 100 / 365 / 86400, 0);
-  return <BixShell><main className="mx-auto max-w-7xl px-5 py-10 md:px-8">
+  return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="STAKE">
       <div className="stake-lux-head">
-        <div className="stake-lux-headrow">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
           <div className="eyebrow">CHOOSE PACKAGE</div>
           <span className="stake-lux-chip">Instant · {data?.isAdmin ? 'Virtual USDT' : 'USDT'}</span>
         </div>
-        <h1 className="section-title stake-lux-title">STAKING <span>CRYPTO</span></h1>
+        <h1 className="section-title stake-lux-title !text-3xl !tracking-normal sm:!text-5xl">STAKING <span>CRYPTO</span></h1>
         
       </div>
-      <div className="stake-pool">
-        <div><span className="stake-pool-label">BIX supply</span><p className="stake-pool-value">21 MILLION BIX TOKEN</p></div>
-        <span className="stake-pool-ico" aria-hidden><Zap size={15} /></span>
-      </div>
-      <div className="stake-pool mt-3"><div><span className="stake-pool-label">Available balance</span><p className="stake-pool-value numeric">{money(bal.data ?? 0)}</p></div></div>
-      {activeStakes.length > 0 && <div className="stake-pool mt-3"><div><span className="stake-pool-label">Live profit · updates every second</span><p className="stake-pool-value numeric text-chart-2">${liveTotal.toFixed(6)}</p><span className="numeric text-[11px] text-muted-foreground">+${perSecond.toFixed(8)} / second · projection</span></div></div>}
+      <dl aria-label="Staking summary" className="mt-5 grid grid-cols-[0.8fr_1.2fr_1fr] gap-2 sm:grid-cols-3 sm:gap-3">
+        <div className="min-w-0 rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">BIX supply</dt><dd className="mt-1 font-display text-xs font-bold text-chart-3 sm:text-lg">21M BIX</dd></div>
+        <div className="min-w-0 rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 sm:text-lg">{money(bal.data ?? 0)}</dd></div>
+        <div className="min-w-0 rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
+      </dl>
+      {activeStakes.length > 0 && <p className="numeric mt-2 text-[10px] leading-4 text-muted-foreground">+${perSecond.toFixed(8)} / second · projection</p>}
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {(cfg?.packages ?? []).map((p, i) => <DurationPackageCard key={p.id} pkg={p} index={i} onStake={setChosen}/>)}
       </div>

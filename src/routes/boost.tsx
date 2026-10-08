@@ -24,17 +24,22 @@ function BoostPage() {
   return <BixShell><main>
 
     <section className="booster-vault overflow-hidden border-b border-border">
-      <div className="mx-auto max-w-7xl px-5 py-10 md:px-8 md:py-14">
-        <div className="terminal-supply"><ShieldCheck size={13}/> 21 JUTA BIX TOKEN</div>
-        <div className="eyebrow mt-5"><Zap size={15} className="text-chart-2"/> BIXCOIN YIELD ENGINE</div>
-        <h1 className="section-title">BOOST YOUR <span>APY</span></h1>
-        <p className="mt-5 max-w-xl text-sm leading-7 text-muted-foreground">The BIXCOIN Booster converts each active BIX position into a live yield projection. Larger amounts and longer lock periods unlock monthly rate tiers, from 8% up to {maximum}% per month. Existing contracts keep their recorded APY. All figures are projections, not guaranteed returns.</p>
-        <div className="boost-chips mt-6">
-          <div className="booster-chip"><b className="text-chart-2">70%</b> profit in BIX</div>
-          <div className="booster-chip"><b className="text-chart-3">30%</b> profit in USDT</div>
-          <div className="booster-chip"><b className="text-primary">{maximum}%</b> maximum per month</div>
+      <div className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
+        <h1 className="section-title !mt-0 !text-3xl !tracking-normal sm:!text-5xl">BOOST YOUR <span>APY</span></h1>
+        <div className="mt-5 grid min-w-0 gap-6 lg:grid-cols-2 lg:items-start lg:gap-10">
+        <div className="min-w-0">
+          <div aria-label="BIX yield engine" className="[&_.reactor-glass-stage]:!my-5 [&_.reactor-glass-stage]:!rounded-lg">
+            <ReactorVideo maximum={maximum}/>
+          </div>
+          <dl className="grid grid-cols-3 gap-2 border-y border-border py-3 text-center">
+            <div className="min-w-0"><dd className="numeric font-display text-lg font-bold text-chart-2">70%</dd><dt className="text-[10px] text-muted-foreground">Profit in BIX</dt></div>
+            <div className="min-w-0"><dd className="numeric font-display text-lg font-bold text-chart-3">30%</dd><dt className="text-[10px] text-muted-foreground">Profit in USDT</dt></div>
+            <div className="min-w-0"><dd className="numeric font-display text-lg font-bold text-primary">{maximum}%</dd><dt className="text-[10px] text-muted-foreground">Max / month</dt></div>
+          </dl>
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">Larger BIX positions and longer locks unlock 8%–{maximum}% per month. Existing contracts keep their recorded APY. Projections only; returns are not guaranteed.</p>
         </div>
-        <div className="mt-7"><BixStakePanel bixPrice={bixPrice}/></div>
+        <div className="min-w-0"><BixStakePanel bixPrice={bixPrice}/></div>
+        </div>
 
         <section className="booster-member-status mt-6">
           <div><span>YOUR BOOSTER</span><strong className={boosterEnabled && activeStakes.length ? 'text-chart-2' : 'text-muted-foreground'}>{boosterEnabled ? (activeStakes.length ? 'ACTIVE' : 'READY') : 'PAUSED'}</strong></div>
@@ -43,18 +48,6 @@ function BoostPage() {
           <div><span>ANNUAL PROJECTION</span><strong className="numeric">${number(annualYield, { maximumFractionDigits: 2 })}</strong></div>
         </section>
 
-        <div className="boost-engine mt-8">
-          <div className="boost-engine-head">
-            <span className="boost-engine-live"><i/> YIELD ENGINE · LIVE READOUT</span>
-             <strong>{boosterEnabled ? 'ENGINE ACTIVE' : 'ENGINE PAUSED'}</strong>
-          </div>
-          <ReactorVideo maximum={maximum}/>
-          <div className="boost-readouts">
-            <div className="boost-readout boost-readout--apy"><span>Maximum monthly</span><strong>{maximum.toFixed(2)}%</strong></div>
-            <div className="boost-readout boost-readout--split"><span>Profit split BIX / USDT</span><strong>70 / 30</strong></div>
-            <div className="boost-readout boost-readout--lock"><span>Longest lock</span><strong>{longestLock} DAYS</strong></div>
-          </div>
-        </div>
       </div>
     </section>
 
