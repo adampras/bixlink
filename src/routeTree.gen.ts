@@ -31,6 +31,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TransferRouteImport } from './routes/transfer'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as WhitepaperRouteImport } from './routes/whitepaper'
+import { Route as ContentGroupIndexRouteImport } from './routes/content.$group.$index'
 import { Route as ApiPublicHooksScanDepositsRouteImport } from './routes/api/public/hooks/scan-deposits'
 
 const IndexRoute = IndexRouteImport.update({
@@ -143,6 +144,11 @@ const WhitepaperRoute = WhitepaperRouteImport.update({
   path: '/whitepaper',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContentGroupIndexRoute = ContentGroupIndexRouteImport.update({
+  id: '/content/$group/$index',
+  path: '/content/$group/$index',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksScanDepositsRoute =
   ApiPublicHooksScanDepositsRouteImport.update({
     id: '/api/public/hooks/scan-deposits',
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
+  '/content/$group/$index': typeof ContentGroupIndexRoute
   '/api/public/hooks/scan-deposits': typeof ApiPublicHooksScanDepositsRoute
 }
 export interface FileRoutesByTo {
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
+  '/content/$group/$index': typeof ContentGroupIndexRoute
   '/api/public/hooks/scan-deposits': typeof ApiPublicHooksScanDepositsRoute
 }
 export interface FileRoutesById {
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
+  '/content/$group/$index': typeof ContentGroupIndexRoute
   '/api/public/hooks/scan-deposits': typeof ApiPublicHooksScanDepositsRoute
 }
 export interface FileRouteTypes {
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/transfer'
     | '/wallet'
     | '/whitepaper'
+    | '/content/$group/$index'
     | '/api/public/hooks/scan-deposits'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/transfer'
     | '/wallet'
     | '/whitepaper'
+    | '/content/$group/$index'
     | '/api/public/hooks/scan-deposits'
   id:
     | '__root__'
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/transfer'
     | '/wallet'
     | '/whitepaper'
+    | '/content/$group/$index'
     | '/api/public/hooks/scan-deposits'
   fileRoutesById: FileRoutesById
 }
@@ -327,6 +339,7 @@ export interface RootRouteChildren {
   TransferRoute: typeof TransferRoute
   WalletRoute: typeof WalletRoute
   WhitepaperRoute: typeof WhitepaperRoute
+  ContentGroupIndexRoute: typeof ContentGroupIndexRoute
   ApiPublicHooksScanDepositsRoute: typeof ApiPublicHooksScanDepositsRoute
 }
 
@@ -486,6 +499,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WhitepaperRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/content/$group/$index': {
+      id: '/content/$group/$index'
+      path: '/content/$group/$index'
+      fullPath: '/content/$group/$index'
+      preLoaderRoute: typeof ContentGroupIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/scan-deposits': {
       id: '/api/public/hooks/scan-deposits'
       path: '/api/public/hooks/scan-deposits'
@@ -519,6 +539,7 @@ const rootRouteChildren: RootRouteChildren = {
   TransferRoute: TransferRoute,
   WalletRoute: WalletRoute,
   WhitepaperRoute: WhitepaperRoute,
+  ContentGroupIndexRoute: ContentGroupIndexRoute,
   ApiPublicHooksScanDepositsRoute: ApiPublicHooksScanDepositsRoute,
 }
 export const routeTree = rootRouteImport

@@ -650,7 +650,7 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .ecosystem-column header small { display: block; font-size: 8px; letter-spacing: .14em; color: var(--muted-foreground); }
 .ecosystem-column h3 { margin-top: 3px; font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
 .ecosystem-list { position: relative; z-index: 1; display: grid; gap: 18px; margin-top: 20px; }
-.ecosystem-list > div { display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 12px; }
+.ecosystem-list > * > div { display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 12px; }
 .ecosystem-list i { width: 6px; height: 6px; margin-top: 6px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 9px var(--primary); }
 .ecosystem-column--income .ecosystem-list i { background: var(--chart-3); box-shadow: 0 0 9px var(--chart-3); }
 .ecosystem-list h4 { font-size: 13px; font-weight: 700; }
