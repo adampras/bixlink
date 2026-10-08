@@ -95,3 +95,4 @@
 - [x] Preview and implement selected BIXCOIN glass donut landing tokenomics, six proposed allocations, vision/mission, and poster; allocation/schedule tests pass and poster opens with no mobile overflow. Existing member financial terms remain unchanged.
 - [x] Replace member HOME tokenomics with the shared latest version; verified signed-in HOME has one tokenomics, six allocations, no old heading or mobile overflow, and Space Grotesk amounts matching USDT packages.
 - [x] Preview and apply selected Kaca minimal medium horizontal category/roadmap cards; owner-saved narratives persist and match member HOME/public landing, arrows work at 384px/1280px with no overflow, existing images/visibility/detail links retained, related tests pass.
+- [ ] Organize Owner 2 into APY, DOMPET (one deposit wallet only), Market and Referral; preserve Owner 1 authority and verify restricted reads.
