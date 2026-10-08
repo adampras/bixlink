@@ -5,11 +5,22 @@ import type { Json } from '@/integrations/supabase/types';
 import { PRESENTATION_THEMES } from '@/lib/presentation-theme';
 import { canonicalJson } from '@/lib/json-content';
 import { movementInputSchema, resolveMovement, simulatedQuote, type MovementInput } from '@/lib/internal-market';
+import { canReviewerEditSetting } from '@/lib/reviewer-policy';
 
 const verifyAdmin = async (context: { supabase: any; userId: string; claims?: any }) => {
   const { data: admin, error } = await context.supabase.rpc('is_bix_admin');
   if (error || !admin) throw new Error('Owner access required');
 };
+
+async function settingAccess(context: { supabase: any; userId: string }, key: string) {
+  const { data: admin, error } = await context.supabase.rpc('is_bix_admin');
+  if (error) throw error;
+  if (admin) return 'owner' as const;
+  if (!canReviewerEditSetting(key)) throw new Error('Owner access required');
+  const role = await context.supabase.from('user_roles').select('role').eq('user_id', context.userId).eq('role', 'reviewer').maybeSingle();
+  if (role.error || !role.data) throw new Error('Owner access required');
+  return 'reviewer' as const;
+}
 
 export const getMyData = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const [stakes, referral, tree, admin, bixMetrics, bonuses, usdtBonuses] = await Promise.all([
@@ -182,13 +193,15 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
     return parsed;
   })
   .handler(async ({ context, data }) => {
-    await verifyAdmin(context);
+    const access = await settingAccess(context, data.key);
     if (data.key === 'bix_market') {
       const { data: current, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', 'bix_market').maybeSingle();
       if (readError) throw readError;
       data.value = { ...(current?.value && typeof current.value === 'object' && !Array.isArray(current.value) ? current.value : {}), priceUsd: data.value['priceUsd'] };
     }
-    const { error } = await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
+    const { error } = access === 'reviewer'
+      ? await context.supabase.rpc('bix_reviewer_update_setting', { p_key: data.key, p_value: data.value as Json })
+      : await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
     if (error) throw error;
     const { data: saved, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', data.key).single();
     if (readError || !saved || canonicalJson(saved.value) !== canonicalJson(data.value)) throw new Error('Could not confirm saved settings');
@@ -212,7 +225,7 @@ export const updatePresentationTheme = createServerFn({ method: 'POST' }).middle
 export const updateInternalMovement = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((input: MovementInput) => movementInputSchema.parse(input))
   .handler(async ({ context, data }) => {
-    await verifyAdmin(context);
+    const access = await settingAccess(context, 'bix_market');
     const { data: row, error } = await context.supabase.from('app_settings').select('value').eq('key', 'bix_market').single();
     if (error) throw error;
     const current = row.value as Record<string, Json | undefined>;
@@ -223,7 +236,9 @@ export const updateInternalMovement = createServerFn({ method: 'POST' }).middlew
     if (!Number.isFinite(base) || base <= 0) throw new Error('Set a valid ledger reference first.');
     const movement = same ? { ...old, ...data, startedAt: data.enabled && !old.enabled ? now - ((old.pausedAt ?? now) - old.startedAt) : old.startedAt, pausedAt: data.enabled ? null : old.enabled ? now : old.pausedAt } : { ...data, base: Math.min(data.upper, Math.max(data.lower, base)), startedAt: now, pausedAt: data.enabled ? null : now };
     const value = { ...current, movement };
-    const { error: writeError } = await context.supabase.from('app_settings').update({ value: value as Json }).eq('key', 'bix_market');
+    const { error: writeError } = access === 'reviewer'
+      ? await context.supabase.rpc('bix_reviewer_update_setting', { p_key: 'bix_market', p_value: value as Json })
+      : await context.supabase.from('app_settings').update({ value: value as Json }).eq('key', 'bix_market');
     if (writeError) throw writeError;
     const { data: saved, error: verifyError } = await context.supabase.from('app_settings').select('value').eq('key', 'bix_market').single();
     if (verifyError || canonicalJson(saved?.value) !== canonicalJson(value)) throw new Error('Could not confirm movement settings.');

@@ -8,10 +8,10 @@ import { AdminVip } from '@/components/AdminVip';
 import { getBixBonusReviews, reviewBixBonus } from '@/lib/network.functions';
 import { number } from '@/lib/bixlink';
 
-export function AdminReferrals({ initial, onSaved, onMessage }: { initial: Record<string, unknown> | undefined; onSaved: () => Promise<void>; onMessage: (message: string) => void }) {
+export function AdminReferrals({ initial, onSaved, onMessage, settingsOnly = false }: { initial: Record<string, unknown> | undefined; onSaved: () => Promise<void>; onMessage: (message: string) => void; settingsOnly?: boolean }) {
  const save = useServerFn(updateSetting); const fetch = useServerFn(getBixBonusReviews); const review = useServerFn(reviewBixBonus); const qc = useQueryClient();
  const [busy, setBusy] = useState(false);
- const { data: bonuses = [] } = useQuery({ queryKey: ['admin-bix-bonuses'], queryFn: () => fetch() });
+ const { data: bonuses = [] } = useQuery({ queryKey: ['admin-bix-bonuses'], queryFn: () => fetch(), enabled: !settingsOnly });
  const fields: [string,string,number][] = [['Direct %','direct',10], ...[12,6,3,2,1].map((n,i): [string,string,number] => [`Level ${i+1} %`,`level${i+1}`,n]), ['RewardPlus %','rewardPlus',5],['Minimum direct members','minimumDirect',3],['USDT split %','splitUsdt',70],['BIX split %','splitBix',30]];
  return <section className="mt-8 max-w-4xl">
  <form className="space-y-5" onSubmit={async e => {
@@ -32,11 +32,11 @@ export function AdminReferrals({ initial, onSaved, onMessage }: { initial: Recor
  </div>
  <Button disabled={busy} type="submit"><Save/>{busy ? 'Saving…' : 'Save referral settings'}</Button>
  </form>
- <div className="mt-10 border-t border-border pt-6"><h2 className="font-display text-xl font-bold">BIX bonus review</h2>
+ {!settingsOnly && <><div className="mt-10 border-t border-border pt-6"><h2 className="font-display text-xl font-bold">BIX bonus review</h2>
  <div className="mt-4 space-y-3">{bonuses.map(b => <div key={b.id} className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-4">
  <div className="min-w-0 text-sm"><strong className="text-chart-3">{number(Number(b.amount_bix))} BIX</strong><span className="ml-2 text-muted-foreground">{number(Number(b.rate_pct))}% · {b.status}</span><p className="mt-1 text-xs text-muted-foreground">Member {b.member_id.slice(0,8)} → Sponsor {b.referrer_id.slice(0,8)}</p></div>
   {b.status === 'pending' && <div className="flex gap-2">{[true,false].map(approve => <Button key={String(approve)} size="sm" variant={approve ? 'default' : 'outline'} disabled={busy} onClick={async () => {setBusy(true);try {await review({data:{id:b.id,approve}});qc.setQueryData(['admin-bix-bonuses'], bonuses.map(item => item.id === b.id ? {...item,status:approve ? 'approved' : 'rejected'} : item));await qc.invalidateQueries();onMessage(approve ? 'Bonus approved and credited in BIX.' : 'Bonus rejected.');} catch(err){onMessage(err instanceof Error ? err.message : 'Could not review bonus.');} finally{setBusy(false);}}}>{approve ? <Check/> : <X/>}{approve ? 'Approve' : 'Reject'}</Button>)}</div>}
  </div>)}{!bonuses.length && <p className="text-sm text-muted-foreground">No BIX referral bonuses yet.</p>}</div></div>
- <AdminVip/>
+ <AdminVip/></>}
  </section>;
 }

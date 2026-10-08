@@ -1,8 +1,10 @@
 import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { z } from 'zod';
+import { reviewerDepositWallet, reviewerWalletSchema } from '@/lib/reviewer-policy';
+import type { DepositWallet } from '@/lib/deposit.functions';
 
-// Owner 2 = 'reviewer' role: may only approve/reject pending deposits and withdrawals.
+// Reviewer permissions stay scoped; this role never grants general owner access.
 const isReviewer = async (context: { supabase: any; userId: string }) => {
   const { data, error } = await context.supabase.from('user_roles').select('role').eq('user_id', context.userId).eq('role', 'reviewer').maybeSingle();
   if (error) throw error;
@@ -12,6 +14,24 @@ const verifyOwner = async (context: { supabase: any }) => {
   const { data, error } = await context.supabase.rpc('is_bix_admin');
   if (error || !data) throw new Error('Owner access required');
 };
+
+export const getReviewerSettings = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
+  const { data, error } = await context.supabase.from('app_settings').select('key,value').in('key', ['deposit_wallets', 'bix_market', 'referrals']);
+  if (error) throw error;
+  const settings = Object.fromEntries((data ?? []).map(row => [row.key, row.value]));
+  const wallets = (settings['deposit_wallets'] as { wallets?: DepositWallet[] } | undefined)?.wallets ?? [];
+  return { wallet: reviewerDepositWallet(wallets), market: settings['bix_market'] as { priceUsd?: number; movement?: unknown } | undefined, referrals: settings['referrals'] as Record<string, unknown> | undefined };
+});
+
+export const saveReviewerDepositWallet = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((wallet: DepositWallet) => reviewerWalletSchema.parse(wallet))
+  .handler(async ({ context, data }) => {
+    if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
+    const { error } = await context.supabase.rpc('bix_reviewer_save_wallet', { p_wallet: data });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
 
 export const getReviewerQueue = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   if (!(await isReviewer(context))) return { reviewer: false as const, items: [] };

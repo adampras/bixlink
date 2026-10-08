@@ -2,12 +2,11 @@ import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 
-// Owner 1 (admin) or Owner 2 (reviewer) may view and activate/deactivate team accounts.
+// Team account controls remain exclusively with Owner 1.
 async function canManage(context: { supabase: any; userId: string }) {
   const { data: admin } = await context.supabase.rpc('is_bix_admin');
   if (admin) return true;
-  const { data } = await context.supabase.from('user_roles').select('role').eq('user_id', context.userId).eq('role', 'reviewer').maybeSingle();
-  return Boolean(data);
+  return false;
 }
 
 export const getTeamAccounts = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {

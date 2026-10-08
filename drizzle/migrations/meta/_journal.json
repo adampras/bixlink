@@ -288,6 +288,13 @@
       "when": 1791442671486,
       "tag": "0040_stake_daily_compound_toggle",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1791456738920,
+      "tag": "0041_reviewer_scoped_market_referral_wallet",
+      "breakpoints": true
     }
   ]
 }
