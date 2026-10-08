@@ -96,3 +96,4 @@
 - [x] Replace member HOME tokenomics with the shared latest version; verified signed-in HOME has one tokenomics, six allocations, no old heading or mobile overflow, and Space Grotesk amounts matching USDT packages.
 - [x] Preview and apply selected Kaca minimal medium horizontal category/roadmap cards; owner-saved narratives persist and match member HOME/public landing, arrows work at 384px/1280px with no overflow, existing images/visibility/detail links retained, related tests pass.
 - [x] Organize Owner 2 into APY, DOMPET (WLT-01 only), Market and Referral; signed-in save/reload verified for APY, WLT-01, reference, movement and referrals, other setting/wallet writes denied, four phone sections fit without overflow; Owner 1 keeps undelegated controls and team management.
+- [ ] Add uploaded BOOSTER replacement video choice, remove mascot image choices, use uploaded reactor artwork for a 500ms splash and install icon, and rename the reviewer heading ADMIIN PANEL.
