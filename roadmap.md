@@ -86,3 +86,6 @@
 - [x] Add five duration APYs and availability controls to both panels with narrowly scoped reviewer authorization; verify Owner 1 saving.
 - [x] Apply Presisi Ringkas v5; verify eight cards, five durations, 360D confirmation, mobile fit and APY tests.
 - [ ] Verify package saving signed in as Owner 2 and submit a fresh duration stake — needs an authorized Owner 2 session and consent for a balance-changing test.
+- [ ] Preview uploaded mascot video with clear-glass luxury styling for BOOST APY and public landing; implement after selection.
+- [ ] Add owner-controlled BIX Booster maximum up to 45% without changing USDT packages or existing stake contracts.
+- [x] Rename the USDT staking headline to STAKING CRYPTO; confirm its current APY is annual, calculated daily using /365.
