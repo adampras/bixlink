@@ -58,21 +58,21 @@ function ProfitPage() {
   const totals = rows.reduce((sum, row) => ({ accrued: sum.accrued + row.accrued, usdt: sum.usdt + row.usdt, bix: sum.bix + row.bix, daily: sum.daily + row.daily, minute: sum.minute + row.minute }), { accrued: 0, usdt: 0, bix: 0, daily: 0, minute: 0 });
   const nextRefresh = now === null ? 60 : 60 - Math.floor((now % MINUTE) / 1000);
 
-  return <BixShell><main className="mx-auto max-w-7xl px-5 py-10 md:px-8">
+  return <BixShell><main className="profit-page mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="PROFIT">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div><div className="eyebrow"><Activity size={14}/> ACTIVE YIELD LEDGER</div><h1 className="section-title">STAKING <span>PROFIT</span></h1><p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Your active BIXCOIN staking projection is recalculated every minute and allocated between USDT and BIX.</p></div>
         <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-bold ${boosterActive ? 'border-chart-2/40 bg-chart-2/10 text-chart-2' : 'border-border bg-muted text-muted-foreground'}`}><i className={`h-2 w-2 rounded-full ${boosterActive ? 'animate-pulse bg-chart-2' : 'bg-muted-foreground'}`}/> {boosterActive ? `BOOSTER LIVE · ${nextRefresh}s` : 'BOOSTER PAUSED'}</span>
       </div>
 
-      <section className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+       <section aria-label="Profit summary" className="profit-summary mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="profit-metric profit-metric--total"><TrendingUp/><span>Total active profit</span><strong className="numeric">{money(totals.accrued)}</strong><small>Projected accrued yield</small></div>
         <div className="profit-metric profit-metric--usdt"><WalletCards/><span>USDT profit · {Math.round(splitUsdt * 100)}%</span><strong className="numeric">{number(totals.usdt, { minimumFractionDigits: 8, maximumFractionDigits: 8 })}</strong><small>Virtual USDT allocation</small></div>
         <div className="profit-metric profit-metric--bix"><Coins/><span>BIX profit · {Math.round(splitBix * 100)}%</span><strong className="numeric">{number(totals.bix, { minimumFractionDigits: 8, maximumFractionDigits: 8 })}</strong><small>At ${bixPrice.toFixed(6)} reference</small></div>
         <div className="profit-metric profit-metric--daily"><Clock3/><span>Daily profit</span><strong className="numeric">{money(totals.daily)}</strong><small>+{money(totals.minute)} each minute</small></div>
       </section>
 
-      <div className="mt-10 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVE POSITIONS</div><h2 className="mt-2 font-display text-2xl font-black">Profit by stake</h2></div><span className="numeric text-xs text-muted-foreground">{rows.length} active</span></div>
+       <div className="mt-6 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVE POSITIONS</div><h2 className="mt-2 font-display text-2xl font-black">Profit by stake</h2></div><span className="numeric text-xs text-muted-foreground">{rows.length} active</span></div>
       <section className="mt-4 space-y-3">
         {rows.map(row => <article key={row.id} className="profit-position">
           <div className="flex flex-wrap items-start justify-between gap-3"><div><span className="text-[10px] font-extrabold uppercase text-chart-2">Yield active</span><h3 className="mt-1 font-display text-lg font-black">{row.package_id}</h3><p className="numeric text-xs text-muted-foreground">{money(Number(row.amount_usd))} · {row.apy}% APY</p></div><div className="text-right"><span className="text-[10px] uppercase text-muted-foreground">Accrued total</span><strong className="numeric block text-xl text-chart-3">{number(row.accrued, { minimumFractionDigits: 8, maximumFractionDigits: 8 })} USD</strong></div></div>
