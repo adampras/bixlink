@@ -14,7 +14,7 @@ export const getEditablePackages = createServerFn({ method: 'GET' }).middleware(
 export const saveDurationPackage = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { id: string; price: number; apys: Record<string, number>; enabled: boolean }) => z.object({
     id: z.string().min(1).max(40), price: z.number().positive().max(10_000_000), enabled: z.boolean(),
-    apys: z.object({ '30': z.number().min(0).max(25), '60': z.number().min(0).max(25), '90': z.number().min(0).max(25), '180': z.number().min(0).max(25), '360': z.number().min(0).max(25) }).strict(),
+    apys: z.object({ '30': z.number().min(0).max(360), '60': z.number().min(0).max(360), '90': z.number().min(0).max(360), '180': z.number().min(0).max(360), '360': z.number().min(0).max(360) }).strict(),
   }).parse(data))
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.rpc('bix_edit_duration_package', { p_id: data.id, p_price: data.price, p_apys: data.apys as Json, p_enabled: data.enabled });

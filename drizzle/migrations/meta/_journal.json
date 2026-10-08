@@ -274,6 +274,13 @@
       "when": 1791430535931,
       "tag": "0038_annual_package_input_and_monthly_booster",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1791438857391,
+      "tag": "0039_usdt_package_cap_30_monthly",
+      "breakpoints": true
     }
   ]
 }
