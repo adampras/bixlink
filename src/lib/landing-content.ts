@@ -1,5 +1,10 @@
-export type ContentItem = { title: string; description: string; image?: string; enabled?: boolean; quarter?: string };
-export type LandingContent = { ecosystem: ContentItem[]; income: ContentItem[]; spaces?: ContentItem[]; roadmap?: ContentItem[]; narrative?: ContentItem[]; narrativeTitle?: string; narrativeIntro?: string; narrativeEnabled?: boolean };
+export type ContentItem = { title: string; description: string; image?: string; enabled?: boolean; quarter?: string; detail?: string; detailImage?: string; size?: 'sm' | 'md' | 'lg'; pageWidth?: 'narrow' | 'normal' | 'wide'; pageOpen?: boolean; percent?: number };
+export type LandingContent = { ecosystem: ContentItem[]; income: ContentItem[]; spaces?: ContentItem[]; roadmap?: ContentItem[]; narrative?: ContentItem[]; tokenomics?: ContentItem[]; tokenomicsEnabled?: boolean; narrativeTitle?: string; narrativeIntro?: string; narrativeEnabled?: boolean };
+export const defaultTokenomics: ContentItem[] = [['Staking ecosystem', 40], ['RWA treasury', 25], ['Liquidity plan', 20], ['Community & operations', 15]].map(([title, percent]) => ({ title: String(title), percent: Number(percent), description: '', enabled: true }));
+export const contentGroups = ['ecosystem', 'income', 'spaces', 'roadmap', 'narrative', 'tokenomics'] as const;
+export type ContentGroup = typeof contentGroups[number];
+export const sizeSpan = (item: ContentItem) => item.size === 'lg' ? 'col-span-2' : '';
+export const hasPage = (item: ContentItem) => item.pageOpen !== false && Boolean(item.detail?.trim() || item.detailImage);
 export const defaultSpaces: ContentItem[] = ['FOREX', 'CRYPTO', 'RWA', 'ADVERTISING'].map(title => ({ title, description: 'Planned income category', enabled: true }));
 export const defaultRoadmap: ContentItem[] = ([['Q1 2026','Launch'],['Q2 2026','Staking App Beta'],['Q3 2026','RWA Listing'],['Q4 2026','Ecosystem'],['Q1 2027','DAO'],['Q2 2027','21 JUTA MILESTONE']] as [string, string][]).map(([quarter, title]) => ({ quarter, title, description: '', enabled: true }));
 export const defaultNarrative: ContentItem[] = [
