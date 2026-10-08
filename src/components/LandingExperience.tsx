@@ -8,8 +8,7 @@ import { usePublicConfig } from '@/lib/useMember';
 import { boosterMaximum } from '@/lib/booster-apy';
 
 import { ContentImage } from '@/components/ContentImage';
-import { IncomeCategoryCard } from '@/components/IncomeCategoryCard';
-import { RoadmapCard } from '@/components/RoadmapCard';
+import { ContentCarousel } from '@/components/ContentCarousel';
 import { ContentLink } from '@/components/ContentLink';
 import { LandingTokenomics } from '@/components/LandingTokenomics';
 import { defaultLandingContent, defaultRoadmap, defaultSpaces, type LandingContent } from '@/lib/landing-content';
@@ -34,8 +33,8 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
     </section>
     <LandingNarrative content={content}/>
     <section className="landing-ecosystem border-y border-border"><div className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="eyebrow">THE BIXLINK ADVANTAGE</div><h2 className="section-title">PREMIUM <span>ECOSYSTEM</span></h2><div className="mt-8 grid gap-5 lg:grid-cols-2"><article className="ecosystem-column"><header><span className="ecosystem-icon text-primary"><Globe2/></span><div><small>CONNECTED UTILITY</small><h3>Ecosystem core</h3></div></header><div className="ecosystem-list">{content.ecosystem.map((item, index) => item.enabled === false ? null : <ContentLink group="ecosystem" index={index} item={item} key={`${item.title}-${index}`}><div><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div></ContentLink>)}</div></article><article className="ecosystem-column ecosystem-column--income"><header><span className="ecosystem-icon text-chart-3"><CircleDollarSign/></span><div><small>DISCLOSED SOURCES</small><h3>Income narrative</h3></div></header><div className="ecosystem-list">{content.income.map((item, index) => item.enabled === false ? null : <ContentLink group="income" index={index} item={item} key={`${item.title}-${index}`}><div><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div></ContentLink>)}</div></article></div><div className="ecosystem-disclosure"><ShieldCheck/><span>Public narratives are owner-managed. Recorded income is not presented as audited revenue or guaranteed return.</span><Building2/></div></div></section>
-    <section className="mx-auto max-w-7xl px-5 py-8 md:px-8"><div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{(content.spaces ?? defaultSpaces).map((item, index) => item.enabled === false ? null : <ContentLink group="spaces" index={index} item={item} key={`${item.title}-${index}`}><IncomeCategoryCard item={item}/></ContentLink>)}</div></section>
+    <section className="mx-auto max-w-7xl px-5 py-8 md:px-8"><ContentCarousel group="spaces" title="Kategori Pengembangan" items={content.spaces ?? defaultSpaces}/></section>
     <LandingTokenomics content={content}/>
-    <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="eyebrow">WHAT'S AHEAD</div><h2 className="section-title">THE <span>ROADMAP</span></h2><div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3">{(content.roadmap ?? defaultRoadmap).map((item, i) => item.enabled !== false ? <ContentLink group="roadmap" index={i} item={item} key={`${item.title}-${i}`}><RoadmapCard item={item} index={i}/></ContentLink> : null)}</div></section>
+    <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><ContentCarousel group="roadmap" title="Roadmap BIXLINK" items={content.roadmap ?? defaultRoadmap}/></section>
   </div>;
 }

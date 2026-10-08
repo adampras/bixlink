@@ -5,8 +5,20 @@ export const contentGroups = ['ecosystem', 'income', 'spaces', 'roadmap', 'narra
 export type ContentGroup = typeof contentGroups[number];
 export const sizeSpan = (item: ContentItem) => item.size === 'lg' ? 'col-span-2' : '';
 export const hasPage = (item: ContentItem) => item.pageOpen !== false && Boolean(item.detail?.trim() || item.detailImage);
-export const defaultSpaces: ContentItem[] = ['FOREX', 'CRYPTO', 'RWA', 'ADVERTISING'].map(title => ({ title, description: 'Planned income category', enabled: true }));
-export const defaultRoadmap: ContentItem[] = ([['Q1 2026','Launch'],['Q2 2026','Staking App Beta'],['Q3 2026','RWA Listing'],['Q4 2026','Ecosystem'],['Q1 2027','DAO'],['Q2 2027','21 JUTA MILESTONE']] as [string, string][]).map(([quarter, title]) => ({ quarter, title, description: '', enabled: true }));
+export const defaultSpaces: ContentItem[] = [
+  ['FOREX', 'Rencana kajian valuta asing untuk diversifikasi BIXLINK. Hasil hanya ditampilkan setelah tercatat dan ditinjau.'],
+  ['CRYPTO', 'Pengembangan utilitas digital dan kajian kripto. Catatan internal BIX terpisah dari perdagangan dan token on-chain.'],
+  ['RWA', 'Rencana pelaporan aset nyata yang transparan. Verifikasi aset dan aspek hukum diperlukan sebelum integrasi.'],
+  ['ADVERTISING', 'Rencana ruang promosi di aplikasi, situs dan komunitas. Pendapatan ditampilkan setelah tercatat dan ditinjau.'],
+].map(([title, description]) => ({ title: title ?? '', description: description ?? '', enabled: true, size: 'md' }));
+export const defaultRoadmap: ContentItem[] = [
+  ['Q1 2026', 'Peluncuran', 'Menyiapkan identitas BIXLINK dan akses akun.'],
+  ['Q2 2026', 'Staking Beta', 'Menguji staking dan catatan internal.'],
+  ['Q3 2026', 'Daftar RWA', 'Menyusun kerangka verifikasi aset.'],
+  ['Q4 2026', 'Ekosistem', 'Mengembangkan utilitas dan komunitas.'],
+  ['Q1 2027', 'DAO', 'Merancang tata kelola komunitas.'],
+  ['Q2 2027', '21 Juta Milestone', 'Meninjau perkembangan ekosistem dengan rencana suplai 21 juta BIX, bukan target harga.'],
+].map(([quarter, title, description]) => ({ quarter: quarter ?? '', title: title ?? '', description: description ?? '', enabled: true, size: 'md' }));
 export const defaultNarrative: ContentItem[] = [
   { title: 'Internal BIX records', description: 'BIX balances and member transfers are recorded inside the application. On-chain token deployment remains a separate step.', enabled: true },
   { title: 'Community connections', description: 'Explore referral relationships and follow published project updates as the BIXLINK community develops.', enabled: true },

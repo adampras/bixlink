@@ -30,7 +30,7 @@
 - Share HOME/landing content and narratives (bundled fallbacks) through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
 - Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
 - Owner 2 discovery uses a shared role query; reviewer actions exclude clone transactions on reads and writes. Package editing uses a separate authenticated, narrowly scoped RPC; wallet-address and vault privileges remain owner-only.
-- Share category/roadmap cards and owner overrides across public/member views; reuse one CDN-backed reactor video on landing and Booster to keep playback consistent.
+- Share one horizontal category/roadmap carousel and owner-controlled content across public/member views to keep narratives, visibility and detail links consistent; reuse one CDN-backed reactor video on landing and Booster to keep playback consistent.
 - Store shared owner themes in readiness with scoped semantic overrides; this preserves public presentation without widening access.
 - Validate Appearance via the shared registry to preserve existing selections and owner authorization.
 - On-chain deployment uses only the owner injected TokenPocket wallet and fixed-supply bytecode; store the address, never keys or internal-balance conversions.

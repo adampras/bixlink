@@ -1265,3 +1265,15 @@ html[data-color-mode="light"] [data-presentation-theme="glass"] .duration-packag
 .internal-market .internal-market-action { margin-top:18px; width:100%; height:44px; border-radius:8px; background:var(--foreground); color:var(--background); font-weight:800; }
 html[data-color-mode="light"] .internal-chart-line { stroke:var(--internal-blue); }
 @media(max-width:480px) { .internal-market { padding:20px; } .internal-market-price > strong { font-size:30px; } }
+
+/* Shared Kaca minimal category and roadmap tracks. */
+.site-shell .content-carousel { min-width:0; font-family:'DM Sans',sans-serif; letter-spacing:0; }
+.site-shell .content-carousel :is(h2,h3) { font-family:'Space Grotesk',sans-serif; letter-spacing:0; }
+.content-carousel-track { display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding-bottom:4px; }
+.content-carousel-track::-webkit-scrollbar { display:none; }
+.content-carousel-slide { flex:0 0 280px; max-width:calc(100% - 32px); scroll-snap-align:start; }
+.content-medium-card { background:color-mix(in oklab,var(--foreground) 5%,var(--background)); border-color:color-mix(in oklab,var(--foreground) 10%,var(--border)); }
+.content-medium-card p { font-size:14px; line-height:1.65; }
+.content-medium-card span { font-variant-numeric:tabular-nums lining-nums; letter-spacing:0; }
+.content-carousel-track:focus-visible { outline:2px solid var(--primary); outline-offset:4px; }
+.site-shell .content-carousel .content-medium-card { border-radius:8px; }
