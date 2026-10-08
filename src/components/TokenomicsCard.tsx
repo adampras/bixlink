@@ -4,7 +4,7 @@ import { defaultTokenomics, hasPage, type LandingContent } from '@/lib/landing-c
 
 const colors = ['bg-primary', 'bg-chart-2', 'bg-chart-3', 'bg-muted-foreground', 'bg-chart-4', 'bg-chart-5'];
 
-export function TokenomicsCard({ content }: { content?: LandingContent }) {
+export function TokenomicsCard({ content }: { content?: LandingContent | undefined }) {
   if (content?.tokenomicsEnabled === false) return null;
   const items = (content?.tokenomics ?? defaultTokenomics).map((item, index) => ({ item, index })).filter(({ item }) => item.enabled !== false);
   return <div>
