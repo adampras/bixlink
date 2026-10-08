@@ -9,14 +9,18 @@ import { useQueryClient } from '@tanstack/react-query';
 import { movementInputSchema, resolveMovement, type MovementInput } from '@/lib/internal-market';
 
 const SUPPLY = 21_000_000;
+function movementForm(value: unknown, price: number): MovementInput {
+  const c = resolveMovement(value);
+  return c ? { enabled:c.enabled, lower:c.lower, upper:c.upper, intervalSeconds:c.intervalSeconds, intensity:c.intensity, bias:c.bias } : { enabled:false, lower:price*.9, upper:price*1.1, intervalSeconds:5, intensity:50, bias:'balanced' };
+}
 
 export function AdminBixMarket({ initialPrice, initialMovement, onMessage, onSaved }: { initialPrice: number; initialMovement?: unknown; onMessage: (message: string) => void; onSaved: () => Promise<void> }) {
   const saveSetting = useServerFn(updateSetting);
   const saveMovement = useServerFn(updateInternalMovement);
   const qc = useQueryClient();
   const current = resolveMovement(initialMovement);
-  const [movement, setMovement] = useState<MovementInput>(current ?? { enabled:false, lower:initialPrice*.9, upper:initialPrice*1.1, intervalSeconds:5, intensity:50, bias:'balanced' });
-  useEffect(() => { const saved = resolveMovement(initialMovement); if (saved) setMovement(saved); }, [initialMovement]);
+  const [movement, setMovement] = useState<MovementInput>(() => movementForm(initialMovement, initialPrice));
+  useEffect(() => { setMovement(movementForm(initialMovement, initialPrice)); }, [initialMovement, initialPrice]);
   async function refresh() { await onSaved(); await qc.invalidateQueries({queryKey:['bix-home-market']}); await qc.invalidateQueries({queryKey:['bix-public-config']}); }
   const [price, setPrice] = useState(String(initialPrice));
   const [saving, setSaving] = useState(false);
