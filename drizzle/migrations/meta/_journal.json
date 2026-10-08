@@ -260,6 +260,13 @@
       "when": 1791427215860,
       "tag": "0036_bix_booster_owner_maximum_apy",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1791429277130,
+      "tag": "0037_monthly_package_rates_and_booster_profit_withdraw",
+      "breakpoints": true
     }
   ]
 }
