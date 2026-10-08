@@ -937,6 +937,11 @@ export type Database = {
         Args: { p_approve: boolean; p_reward: string }
         Returns: undefined
       }
+      bix_reviewer_save_wallet: { Args: { p_wallet: Json }; Returns: undefined }
+      bix_reviewer_update_setting: {
+        Args: { p_key: string; p_value: Json }
+        Returns: undefined
+      }
       bix_set_stake_compound: {
         Args: { p_on: boolean; p_stake: string }
         Returns: undefined
