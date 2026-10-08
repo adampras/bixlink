@@ -28,7 +28,7 @@ export const saveReviewerDepositWallet = createServerFn({ method: 'POST' }).midd
   .inputValidator((wallet: DepositWallet) => reviewerWalletSchema.parse(wallet))
   .handler(async ({ context, data }) => {
     if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
-    const { error } = await context.supabase.rpc('bix_reviewer_save_wallet' as never, { p_wallet: data } as never);
+    const { error } = await context.supabase.rpc('bix_reviewer_save_wallet', { p_wallet: data });
     if (error) throw new Error(error.message);
     return { ok: true };
   });

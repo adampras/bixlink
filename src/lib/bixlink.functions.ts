@@ -200,7 +200,7 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
       data.value = { ...(current?.value && typeof current.value === 'object' && !Array.isArray(current.value) ? current.value : {}), priceUsd: data.value['priceUsd'] };
     }
     const { error } = access === 'reviewer'
-      ? await context.supabase.rpc('bix_reviewer_update_setting' as never, { p_key: data.key, p_value: data.value } as never)
+      ? await context.supabase.rpc('bix_reviewer_update_setting', { p_key: data.key, p_value: data.value as Json })
       : await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
     if (error) throw error;
     const { data: saved, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', data.key).single();
@@ -237,7 +237,7 @@ export const updateInternalMovement = createServerFn({ method: 'POST' }).middlew
     const movement = same ? { ...old, ...data, startedAt: data.enabled && !old.enabled ? now - ((old.pausedAt ?? now) - old.startedAt) : old.startedAt, pausedAt: data.enabled ? null : old.enabled ? now : old.pausedAt } : { ...data, base: Math.min(data.upper, Math.max(data.lower, base)), startedAt: now, pausedAt: data.enabled ? null : now };
     const value = { ...current, movement };
     const { error: writeError } = access === 'reviewer'
-      ? await context.supabase.rpc('bix_reviewer_update_setting' as never, { p_key: 'bix_market', p_value: value } as never)
+      ? await context.supabase.rpc('bix_reviewer_update_setting', { p_key: 'bix_market', p_value: value as Json })
       : await context.supabase.from('app_settings').update({ value: value as Json }).eq('key', 'bix_market');
     if (writeError) throw writeError;
     const { data: saved, error: verifyError } = await context.supabase.from('app_settings').select('value').eq('key', 'bix_market').single();
