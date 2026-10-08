@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { z } from 'zod';
 import { reviewerDepositWallet, reviewerWalletSchema } from '@/lib/reviewer-policy';
 import type { DepositWallet } from '@/lib/deposit.functions';
+import type { Json } from '@/integrations/supabase/types';
 
 // Reviewer permissions stay scoped; this role never grants general owner access.
 const isReviewer = async (context: { supabase: any; userId: string }) => {
@@ -21,7 +22,7 @@ export const getReviewerSettings = createServerFn({ method: 'GET' }).middleware(
   if (error) throw error;
   const settings = Object.fromEntries((data ?? []).map(row => [row.key, row.value]));
   const wallets = (settings['deposit_wallets'] as { wallets?: DepositWallet[] } | undefined)?.wallets ?? [];
-  return { wallet: reviewerDepositWallet(wallets), market: settings['bix_market'] as { priceUsd?: number; movement?: unknown } | undefined, referrals: settings['referrals'] as Record<string, unknown> | undefined };
+  return { wallet: reviewerDepositWallet(wallets), market: settings['bix_market'] as { priceUsd?: number; movement?: Json } | undefined, referrals: settings['referrals'] as Record<string, Json> | undefined };
 });
 
 export const saveReviewerDepositWallet = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])

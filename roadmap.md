@@ -85,7 +85,7 @@
 - [x] Replace old/clone offerings with eight duration-selectable packages; archive eleven clones and preserve 34 existing stakes.
 - [x] Add five duration APYs and availability controls to both panels with narrowly scoped reviewer authorization; verify Owner 1 saving.
 - [x] Apply Presisi Ringkas v5; verify eight cards, five durations, 360D confirmation, mobile fit and APY tests.
-- [ ] Verify package saving signed in as Owner 2 and submit a fresh duration stake — needs an authorized Owner 2 session and consent for a balance-changing test.
+- [x] Verify package saving signed in as Owner 2 without changing saved terms; no balance-changing stake test performed.
 - [x] Apply selected Frosted glass luxe uploaded video to BOOST APY and landing; verify real playback, pause/play and mobile fit.
 - [x] Add owner-controlled native BIX maximum 45%; verify owner save/reload and highest-tier estimate, preserving USDT packages and existing contracts. No balance-changing stake test performed.
 - [x] Rename the USDT staking headline to STAKING CRYPTO; confirm its current APY is annual, calculated daily using /365.
@@ -95,4 +95,4 @@
 - [x] Preview and implement selected BIXCOIN glass donut landing tokenomics, six proposed allocations, vision/mission, and poster; allocation/schedule tests pass and poster opens with no mobile overflow. Existing member financial terms remain unchanged.
 - [x] Replace member HOME tokenomics with the shared latest version; verified signed-in HOME has one tokenomics, six allocations, no old heading or mobile overflow, and Space Grotesk amounts matching USDT packages.
 - [x] Preview and apply selected Kaca minimal medium horizontal category/roadmap cards; owner-saved narratives persist and match member HOME/public landing, arrows work at 384px/1280px with no overflow, existing images/visibility/detail links retained, related tests pass.
-- [ ] Organize Owner 2 into APY, DOMPET (one deposit wallet only), Market and Referral; preserve Owner 1 authority and verify restricted reads.
+- [x] Organize Owner 2 into APY, DOMPET (WLT-01 only), Market and Referral; signed-in save/reload verified for APY, WLT-01, reference, movement and referrals, other setting/wallet writes denied, four phone sections fit without overflow; Owner 1 keeps undelegated controls and team management.
