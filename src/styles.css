@@ -4,6 +4,74 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.landing-tokenomics {
+  --token-cyan: oklch(0.78 0.14 210);
+  --token-emerald: oklch(0.76 0.18 160);
+  --token-violet: oklch(0.68 0.2 300);
+  --token-magenta: oklch(0.69 0.21 335);
+  --token-gold: oklch(0.83 0.17 85);
+  --token-coral: oklch(0.72 0.17 30);
+  --token-glass: color-mix(in oklch, var(--foreground) 4%, var(--background));
+  --token-edge: color-mix(in oklch, var(--token-cyan) 24%, var(--border));
+  background: var(--background); letter-spacing: 0;
+}
+.tokenomics-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; }
+.tokenomics-heading h2 span { color:var(--token-cyan); }
+.tokenomics-status { color:var(--muted-foreground); font-size:10px; border:1px solid var(--token-edge); padding:7px 10px; border-radius:4px; }
+.tokenomics-main { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.5fr); gap:40px; margin-top:36px; align-items:start; }
+.tokenomics-supply { margin:0; padding:24px 0; }
+.tokenomics-supply figcaption { text-align:center; }
+.tokenomics-supply figcaption small { display:block; font-size:10px; color:var(--muted-foreground); }
+.tokenomics-supply figcaption strong { display:block; font-size:30px; color:var(--token-gold); margin-top:8px; font-variant-numeric:tabular-nums; }
+.tokenomics-supply figcaption strong span { font-size:16px; }
+.tokenomics-donut { width:280px; max-width:100%; aspect-ratio:1; border-radius:50%; margin:28px auto 0; padding:38px; background:conic-gradient(var(--token-cyan) 0% 50%,var(--token-emerald) 50% 65%,var(--token-violet) 65% 75%,var(--token-magenta) 75% 85%,var(--token-gold) 85% 95%,var(--token-coral) 95% 100%); box-shadow:0 0 30px color-mix(in oklch,var(--token-cyan) 12%,transparent); }
+.tokenomics-donut > div { width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; background:var(--background); border:1px solid var(--token-edge); }
+.tokenomics-donut strong { font-size:44px; font-weight:800; color:var(--foreground); }
+.tokenomics-donut span { font-size:13px; color:var(--muted-foreground); }
+.tokenomics-donut small { font-size:7px; margin-top:10px; color:var(--muted-foreground); }
+.tokenomics-allocations { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.tokenomics-category-0 { --allocation:var(--token-cyan); }
+.tokenomics-category-1 { --allocation:var(--token-emerald); }
+.tokenomics-category-2 { --allocation:var(--token-violet); }
+.tokenomics-category-3 { --allocation:var(--token-magenta); }
+.tokenomics-category-4 { --allocation:var(--token-gold); }
+.tokenomics-category-5 { --allocation:var(--token-coral); }
+.tokenomics-allocation { min-width:0; border:1px solid var(--token-edge); border-top:2px solid var(--allocation); padding:16px; border-radius:8px; background:linear-gradient(125deg,color-mix(in oklch,var(--allocation) 7%,var(--token-glass)),var(--token-glass)); backdrop-filter:blur(12px); }
+.tokenomics-allocation-head { display:grid; grid-template-columns:20px minmax(0,1fr) auto; align-items:start; gap:8px; }
+.tokenomics-number { font-size:10px; padding-top:3px; color:var(--muted-foreground); }
+.tokenomics-allocation h3 { font-size:13px; line-height:1.5; font-weight:700; }
+.tokenomics-allocation-head strong { font-size:20px; line-height:1.2; color:var(--allocation); }
+.tokenomics-allocation-amount { margin:10px 0; font-size:14px; font-weight:700; font-variant-numeric:tabular-nums; }
+.tokenomics-allocation p { font-size:11px; line-height:1.7; color:var(--muted-foreground); }
+.tokenomics-schedule { display:block; margin-top:12px; border-top:1px solid var(--border); padding-top:10px; font-size:10px; line-height:1.6; color:var(--muted-foreground); }
+.tokenomics-purpose { display:grid; grid-template-columns:1fr 1fr; gap:40px; border-block:1px solid var(--token-edge); margin-top:36px; padding:28px 0; }
+.tokenomics-purpose h3 { display:flex; align-items:center; gap:10px; color:var(--token-cyan); font-weight:700; font-size:16px; }
+.tokenomics-purpose p,.tokenomics-purpose ol { margin-top:16px; font-size:13px; line-height:1.8; color:var(--muted-foreground); }
+.tokenomics-purpose li { display:flex; gap:12px; margin-top:8px; }
+.tokenomics-purpose li span { color:var(--token-magenta); font-size:10px; padding-top:3px; }
+.tokenomics-poster-band { display:grid; grid-template-columns:160px minmax(0,1fr); align-items:center; gap:28px; padding:28px 0; }
+.tokenomics-poster-band img { width:160px; height:auto; border:1px solid var(--token-edge); border-radius:4px; }
+.tokenomics-disclosure { display:flex; align-items:flex-start; gap:10px; padding-top:20px; border-top:1px solid var(--border); font-size:11px; line-height:1.8; color:var(--muted-foreground); }
+.tokenomics-disclosure svg { flex-shrink:0; margin-top:3px; }
+html:not(.dark) .landing-tokenomics { --token-cyan:oklch(.48 .1 210); --token-emerald:oklch(.48 .13 160); --token-violet:oklch(.5 .2 300); --token-magenta:oklch(.48 .19 335); --token-gold:oklch(.52 .11 85); --token-coral:oklch(.5 .16 30); }
+@media(max-width:767px) {
+  .tokenomics-main { grid-template-columns:minmax(0,1fr); gap:16px; margin-top:20px; }
+  .tokenomics-supply { padding:12px 0; }
+  .tokenomics-donut { width:240px; padding:32px; }
+  .tokenomics-purpose { grid-template-columns:minmax(0,1fr); gap:24px; }
+  .tokenomics-allocations { gap:10px; }
+  .tokenomics-allocation { padding:12px; }
+  .tokenomics-allocation-head { grid-template-columns:minmax(0,1fr) auto; gap:6px; }
+  .tokenomics-number { display:none; }
+  .tokenomics-allocation h3 { font-size:11px; }
+  .tokenomics-allocation-head strong { font-size:17px; }
+  .tokenomics-allocation-amount { font-size:12px; }
+  .tokenomics-poster-band { grid-template-columns:100px minmax(0,1fr); gap:16px; }
+  .tokenomics-poster-band img { width:100px; }
+}
+@media(prefers-reduced-motion:no-preference) { .tokenomics-donut { animation:tokenomics-reveal .65s ease-out both; } }
+@keyframes tokenomics-reveal { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
 :root {
   --reactor-stage: oklch(0.14 0.025 260);
   --reactor-glass: oklch(0.98 0 0 / 7%);
