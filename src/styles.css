@@ -17,6 +17,13 @@
 }
 .tokenomics-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; }
 .tokenomics-heading h2 span { color:var(--token-cyan); }
+.site-shell .member-tokenomics { font-family:'DM Sans',sans-serif; letter-spacing:0; }
+.site-shell .member-tokenomics :is(h2,h3,.font-display,.tokenomics-supply strong,.tokenomics-donut strong,.tokenomics-allocation-head strong,.tokenomics-allocation-amount,.tokenomics-number) { font-family:'Space Grotesk',sans-serif; letter-spacing:0; }
+.member-tokenomics :is(.tokenomics-supply strong,.tokenomics-donut strong,.tokenomics-allocation-head strong,.tokenomics-allocation-amount,.tokenomics-number) { font-variant-numeric:tabular-nums lining-nums; }
+.member-tokenomics .tokenomics-allocation-head { align-items:start; }
+.member-tokenomics .tokenomics-allocation h3 { min-height:39px; font-weight:700; }
+.member-tokenomics .tokenomics-allocation-amount { font-size:14px; line-height:1.5; white-space:nowrap; }
+.member-tokenomics .tokenomics-allocation p { font-size:12px; line-height:1.65; }
 .tokenomics-status { color:var(--muted-foreground); font-size:10px; border:1px solid var(--token-edge); padding:7px 10px; border-radius:4px; }
 .tokenomics-main { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.5fr); gap:40px; margin-top:36px; align-items:start; }
 .tokenomics-supply { margin:0; padding:24px 0; }
