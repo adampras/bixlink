@@ -4,6 +4,7 @@ import { z } from 'zod';
 import type { Json } from '@/integrations/supabase/types';
 import { PRESENTATION_THEMES } from '@/lib/presentation-theme';
 import { canonicalJson } from '@/lib/json-content';
+import { movementInputSchema, resolveMovement, simulatedQuote, type MovementInput } from '@/lib/internal-market';
 
 const verifyAdmin = async (context: { supabase: any; userId: string; claims?: any }) => {
   const { data: admin, error } = await context.supabase.rpc('is_bix_admin');
@@ -182,6 +183,11 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
   })
   .handler(async ({ context, data }) => {
     await verifyAdmin(context);
+    if (data.key === 'bix_market') {
+      const { data: current, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', 'bix_market').maybeSingle();
+      if (readError) throw readError;
+      data.value = { ...(current?.value && typeof current.value === 'object' && !Array.isArray(current.value) ? current.value : {}), priceUsd: data.value['priceUsd'] };
+    }
     const { error } = await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
     if (error) throw error;
     const { data: saved, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', data.key).single();
@@ -201,6 +207,27 @@ export const updatePresentationTheme = createServerFn({ method: 'POST' }).middle
     const { data: saved, error: verifyError } = await context.supabase.from('app_settings').select('value').eq('key', 'readiness').single();
     if (verifyError || (saved?.value as Record<string, unknown> | undefined)?.['presentationTheme'] !== data.theme) throw new Error('Could not confirm the saved theme.');
     return { theme: data.theme };
+  });
+
+export const updateInternalMovement = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((input: MovementInput) => movementInputSchema.parse(input))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { data: row, error } = await context.supabase.from('app_settings').select('value').eq('key', 'bix_market').single();
+    if (error) throw error;
+    const current = row.value as Record<string, Json | undefined>;
+    const old = resolveMovement(current['movement']);
+    const now = Date.now();
+    const same = old && old.lower === data.lower && old.upper === data.upper && old.intervalSeconds === data.intervalSeconds && old.intensity === data.intensity && old.bias === data.bias;
+    const base = old ? simulatedQuote(old, now) : Number(current['priceUsd']);
+    if (!Number.isFinite(base) || base <= 0) throw new Error('Set a valid ledger reference first.');
+    const movement = same ? { ...old, ...data, startedAt: data.enabled && !old.enabled ? now - ((old.pausedAt ?? now) - old.startedAt) : old.startedAt, pausedAt: data.enabled ? null : old.enabled ? now : old.pausedAt } : { ...data, base: Math.min(data.upper, Math.max(data.lower, base)), startedAt: now, pausedAt: data.enabled ? null : now };
+    const value = { ...current, movement };
+    const { error: writeError } = await context.supabase.from('app_settings').update({ value: value as Json }).eq('key', 'bix_market');
+    if (writeError) throw writeError;
+    const { data: saved, error: verifyError } = await context.supabase.from('app_settings').select('value').eq('key', 'bix_market').single();
+    if (verifyError || canonicalJson(saved?.value) !== canonicalJson(value)) throw new Error('Could not confirm movement settings.');
+    return { ok: true };
   });
 
 export const addIncomeSource = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])

@@ -43,7 +43,7 @@ export const getHomeMarketData = createServerFn({ method: 'GET' }).handler(async
   if (error) throw error;
   const configuredPrice = Number((marketSetting?.value as { priceUsd?: number } | null)?.priceUsd ?? 0.84291);
   const bixPriceUsd = Number.isFinite(configuredPrice) && configuredPrice > 0 ? configuredPrice : 0.84291;
-  return { stats, bixPriceUsd, markets, marketUpdatedAt: markets.length ? new Date().toISOString() : null };
+  return { stats, bixPriceUsd, movement: (marketSetting?.value as Record<string, unknown> | null)?.['movement'] ?? null, serverNow: Date.now(), markets, marketUpdatedAt: markets.length ? new Date().toISOString() : null };
 });
 
 export const getFiatRates = createServerFn({ method: 'GET' }).handler(async () => {
