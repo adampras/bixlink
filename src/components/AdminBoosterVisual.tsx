@@ -3,6 +3,8 @@ import { useServerFn } from '@tanstack/react-start';
 import { Bot, Cpu, Shield } from 'lucide-react';
 import { updateSetting } from '@/lib/bixlink.functions';
 import { Button } from '@/components/ui/button';
+import { usePublicConfig } from '@/lib/useMember';
+import { boosterMaximum } from '@/lib/booster-apy';
 import foxVisual from '@/assets/booster-concept-fox.png';
 import reactorVisual from '@/assets/booster-concept-reactor.png';
 import emblemVisual from '@/assets/booster-concept-emblem.png';
@@ -19,6 +21,10 @@ export function AdminBoosterVisual({ initialVisual, enabled, onMessage, onSaved 
   const saveSetting = useServerFn(updateSetting);
   const [selected, setSelected] = useState<BoosterVisual>(initialVisual);
   const [saving, setSaving] = useState(false);
+  const { data: cfg } = usePublicConfig();
+  const [maximum, setMaximum] = useState<number | null>(null);
+  const [active, setActive] = useState(enabled);
+  const cap = maximum ?? boosterMaximum(cfg?.booster.maxApy);
 
   async function saveVisual() {
     setSaving(true);
@@ -36,27 +42,14 @@ export function AdminBoosterVisual({ initialVisual, enabled, onMessage, onSaved 
   return <div className="mt-8 max-w-4xl space-y-5">
     <div className="rounded-[20px] border border-chart-2 bg-card p-6">
       <h2 className="font-display text-xl font-black">BIXCOIN yield engine</h2>
-      <p className="my-5 text-sm leading-6 text-muted-foreground">When active, every eligible BIXCOIN staking position receives a live minute-by-minute profit projection. Package volume and lock duration set APY from 8% to 25%, allocated 70% USDT and 30% BIX.</p>
-      <label className="flex items-center gap-3"><input type="checkbox" defaultChecked={enabled} onChange={async event => { try { await saveSetting({ data: { key: 'booster', value: { enabled: event.target.checked, rate: 25 } } }); onMessage('Booster updated.'); await onSaved(); } catch { onMessage('Could not update booster.'); } }}/> APY BOOSTER ACTIVE · up to 25%</label>
+      <p className="my-5 text-sm leading-6 text-muted-foreground">When active, every eligible BIXCOIN staking position receives a live minute-by-minute profit projection. Package volume and lock duration set APY from 8% to the owner-selected maximum, allocated 70% BIX and 30% USDT. Existing stakes and USDT packages do not change.</p>
+      <label className="flex items-center gap-3"><input type="checkbox" checked={active} onChange={event => setActive(event.target.checked)}/> APY BOOSTER ACTIVE</label>
+      <label className="mt-4 block text-sm">Maximum annual BIX APY (%)<input aria-label="Maximum annual BIX APY" type="number" min={8} max={45} step={0.01} value={cap} onChange={event => setMaximum(Number(event.target.value))} className="mt-2 block w-36 rounded-lg border border-border bg-background p-3"/></label>
+      <Button className="mt-4" disabled={saving || !Number.isFinite(cap) || cap < 8 || cap > 45} onClick={async () => { setSaving(true); try { await saveSetting({ data: { key: 'booster', value: { enabled: active, rate: cfg?.booster.rate ?? 25, maxApy: cap } } }); await onSaved(); onMessage('BIX Booster maximum saved. Existing contracts and USDT packages are unchanged.'); } catch { onMessage('Could not save BIX Booster maximum.'); } finally { setSaving(false); } }}>Save Booster APY</Button>
+
     </div>
 
-    <section className="rounded-[20px] border border-border bg-card p-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div><span className="eyebrow">VISUAL CONTROL</span><h3 className="mt-2 font-display text-lg font-black">BOOST APY centerpiece</h3></div>
-        <span className="text-xs text-muted-foreground">Tricolor theme remains locked</span>
-      </div>
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        {visualOptions.map(option => {
-          const Icon = option.icon;
-          const active = selected === option.id;
-          return <Button key={option.id} type="button" variant="outline" className={`admin-visual-option ${active ? 'admin-visual-option--active' : ''}`} aria-pressed={active} onClick={() => setSelected(option.id)}>
-            <img src={option.image} alt="" className="admin-visual-thumb"/>
-            <span className="admin-visual-copy"><b><Icon size={15}/>{option.label}</b><small>{option.description}</small></span>
-          </Button>;
-        })}
-      </div>
-      <Button className="mt-5 rounded-full" onClick={saveVisual} disabled={saving}><SaveIcon/>{saving ? 'Saving…' : 'Save visual'}</Button>
-    </section>
+    <p className="text-sm text-muted-foreground">BOOST APY and landing use the shared Frosted Glass Luxe reactor video.</p>
   </div>;
 }
 
