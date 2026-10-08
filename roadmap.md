@@ -89,3 +89,4 @@
 - [x] Apply selected Frosted glass luxe uploaded video to BOOST APY and landing; verify real playback, pause/play and mobile fit.
 - [x] Add owner-controlled native BIX maximum 45%; verify owner save/reload and highest-tier estimate, preserving USDT packages and existing contracts. No balance-changing stake test performed.
 - [x] Rename the USDT staking headline to STAKING CRYPTO; confirm its current APY is annual, calculated daily using /365.
+- [x] Apply selected compact staking summary and move BOOST engine above its form; verified signed-in at 384px and 1280px, no overflow, video loaded, financial logic unchanged.
