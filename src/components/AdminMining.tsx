@@ -82,7 +82,7 @@ export function AdminMining({ initial, onMessage, onSaved }: { initial: MiningSe
         <input className="form-input" type="number" min="0" max="100" step="1" value={stakeBoostPct} onChange={e => setStakeBoostPct(e.target.value)} placeholder="contoh: 10" />
       </label>
       <Button className="rounded-full" disabled={busy}>{busy ? 'Saving…' : 'Simpan pengaturan'}</Button>
-      <p className="text-xs text-muted-foreground">Catatan: pengaturan ini baru tersimpan sebagai konfigurasi. Penghitungan hadiah mining ke saldo member belum aktif dan akan menyusul setelah Anda setujui.</p>
+      <p className="text-xs text-muted-foreground">Catatan: pengaturan ini baru tersimpan sebagai konfigurasi. Mining menghasilkan vBIX (tak terbatas) plus bonus jaringan 5 level sesuai persentase Referral. Konversi ke BIX menyusul.</p>
     </form></div>
   );
 }
