@@ -1453,3 +1453,23 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
 .register-vault .register-numbered-input { background: hsl(var(--background) / .45); backdrop-filter: blur(8px); }
 .register-vault .register-numbered-input:focus { border-color: hsl(var(--ruby) / .6); box-shadow: 0 0 0 3px hsl(var(--ruby) / .15); }
 .register-vault .register-numbered-submit { background: linear-gradient(120deg, hsl(var(--chart-3)), hsl(var(--chart-3) / .85) 60%, hsl(var(--ruby) / .85)); box-shadow: 0 10px 30px -12px hsl(var(--ruby) / .6); }
+
+/* Vault flourish: stardust, aura logo, secure node, shimmer */
+.auth-vault-page,.register-numbered{position:relative;isolation:isolate}
+.vault-stardust{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:-1}
+.vault-stardust span{position:absolute;bottom:-10px;width:3px;height:3px;border-radius:50%;background:hsl(45 90% 65%/.7);box-shadow:0 0 8px hsl(45 90% 60%/.8);animation:vault-rise linear infinite}
+.vault-stardust span.ruby{background:hsl(var(--ruby)/.7);box-shadow:0 0 8px hsl(var(--ruby)/.8)}
+@keyframes vault-rise{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-100vh);opacity:0}}
+.vault-logo{position:relative;width:76px;height:76px;margin:0 auto 14px;display:grid;place-items:center}
+.vault-logo img{width:60px;height:60px;border-radius:50%;border:1px solid hsl(45 80% 60%/.5);box-shadow:0 0 22px hsl(45 90% 55%/.35);position:relative}
+.vault-logo i{position:absolute;inset:4px;border-radius:50%;border:1px solid hsl(45 85% 60%/.55);animation:vault-pulse 2.8s ease-out infinite}
+.vault-logo i+i{inset:0;border-color:hsl(var(--ruby)/.5);animation-delay:1.4s}
+@keyframes vault-pulse{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.25);opacity:0}}
+.vault-node{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:5px 12px;border-radius:999px;font-size:9px;font-weight:700;letter-spacing:.14em;color:hsl(var(--muted-foreground));border:1px solid hsl(45 80% 60%/.2);background:hsl(0 0% 100%/.03);backdrop-filter:blur(8px)}
+.vault-node span{width:6px;height:6px;border-radius:50%;background:hsl(142 70% 50%);box-shadow:0 0 8px hsl(142 70% 50%);animation:vault-blink 1.6s ease-in-out infinite}
+@keyframes vault-blink{50%{opacity:.3}}
+.vault-shimmer{position:relative;overflow:hidden}
+.vault-shimmer::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,hsl(0 0% 100%/.35) 50%,transparent 65%);transform:translateX(-120%);animation:vault-sweep 4s ease-in-out infinite;pointer-events:none}
+@keyframes vault-sweep{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.auth-vault{text-align:center}.auth-vault form,.auth-vault .flex{text-align:left}
+@media (prefers-reduced-motion:reduce){.vault-stardust span,.vault-logo i,.vault-node span,.vault-shimmer::after{animation:none}}

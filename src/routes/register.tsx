@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
+import { VaultStardust, VaultLogo, VaultNode } from '@/components/VaultFlourish';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { passwordValid, PASSWORD_HINT } from '@/lib/password-rule';
@@ -34,8 +35,8 @@ function RegisterPage() {
       setNotice('Check your email to confirm your account, then sign in.');
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
-  return <BixShell><main className="register-numbered"><div className="register-numbered-inner register-vault">
-    <header className="register-numbered-brand"><div className="auth-badge mb-4"><span/>SECURE ONBOARDING</div><h1>BIX<span>LINK</span></h1><i/></header>
+  return <BixShell><main className="register-numbered"><VaultStardust/><div className="register-numbered-inner register-vault">
+    <header className="register-numbered-brand"><VaultLogo/><div className="auth-badge mb-4"><span/>SECURE ONBOARDING</div><h1>BIX<span>LINK</span></h1><VaultNode/></header>
     <form onSubmit={submit} className="space-y-6" aria-label="Create BIXLINK account">
       <fieldset className="register-numbered-step"><legend className="sr-only">Personal profile</legend><span className="register-step-number" aria-hidden>01</span><div className="space-y-2.5"><h2>Personal profile</h2>
         <input aria-label="Full name" required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={event => setFullName(event.target.value)} className="register-numbered-input" placeholder="Full Name"/>
@@ -43,13 +44,13 @@ function RegisterPage() {
       </div></fieldset>
       <fieldset className="register-numbered-step"><legend className="sr-only">Account security</legend><span className="register-step-number" aria-hidden>02</span><div className="space-y-2.5"><h2>Security hub</h2>
         <input aria-label="Email address" required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} className="register-numbered-input" placeholder="Email Address"/>
-        <div className="relative"><input aria-label="Password" required minLength={6} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={event => setPassword(event.target.value)} className="register-numbered-input pr-12" placeholder="Secure Password"/><p className="mt-1 text-[11px] text-muted-foreground">{PASSWORD_HINT}</p><Button type="button" variant="ghost" size="icon" className="register-password-toggle" title={showPassword ? 'Hide password' : 'Show password'} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(current => !current)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div>
+        <div className="relative"><input aria-label="Password" required minLength={6} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={event => setPassword(event.target.value)} className="register-numbered-input pr-12" placeholder="Secure Password"/><Button type="button" variant="ghost" size="icon" className="register-password-toggle" title={showPassword ? 'Hide password' : 'Show password'} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(current => !current)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div>
       </div></fieldset>
       <fieldset className="register-numbered-step"><legend className="sr-only">Referral</legend><span className="register-step-number" aria-hidden>03</span><div className="space-y-2.5"><div className="flex items-center justify-between gap-2"><h2>Network code</h2><span className="text-[9px] font-bold uppercase text-muted-foreground">Optional</span></div>
         <input aria-label="Referral code" inputMode="text" maxLength={10} value={referral} onChange={event => setReferral(event.target.value.toUpperCase())} className="register-numbered-input register-network-code" placeholder="BIX-123456"/>
       </div></fieldset>
       {notice && <p role="status" className="text-sm leading-6 text-chart-2">{notice}</p>}
-      <div className="space-y-4 pt-4"><Button type="submit" disabled={busy} className="register-numbered-submit">{busy ? 'Please wait…' : 'Create account'}<ArrowRight/></Button><p className="text-center text-[11px] font-semibold uppercase text-muted-foreground">Member already? <Link to="/auth" className="register-access-link">Sign in</Link></p></div>
+      <div className="space-y-4 pt-4"><Button type="submit" disabled={busy} className="register-numbered-submit vault-shimmer">{busy ? 'Please wait…' : 'Create account'}<ArrowRight/></Button><p className="text-center text-[11px] font-semibold uppercase text-muted-foreground">Member already? <Link to="/auth" className="register-access-link">Sign in</Link></p></div>
     </form>
   </div></main></BixShell>;
 }
