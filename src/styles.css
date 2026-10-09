@@ -1350,7 +1350,6 @@ html[data-color-mode="light"] [data-presentation-theme="future"] { --background:
 /* Auric luxury glass: champagne gold edge + translucent brand watermark */
 .auric-card { position:relative; isolation:isolate; border-color:color-mix(in oklab, oklch(.84 .1 85) 55%, transparent) !important; box-shadow:inset 0 1px 0 color-mix(in oklab, oklch(.92 .08 88) 45%, transparent), 0 10px 32px -14px color-mix(in oklab, oklch(.8 .12 85) 40%, transparent); }
 .auric-card::after { content:""; position:absolute; right:-18px; bottom:-18px; width:150px; height:150px; background:var(--brand-watermark) center/contain no-repeat; opacity:.07; border-radius:9999px; pointer-events:none; z-index:-1; filter:saturate(.4); }
-.auric-card > * { position:relative; }
 html[data-color-mode="light"] .auric-card { border-color:color-mix(in oklab, oklch(.6 .11 80) 50%, transparent) !important; }
 html[data-color-mode="light"] .auric-card::after { opacity:.06; filter:grayscale(.6); }
 /* Light mode: keep mining engine clean — no speckled edges on bright backgrounds */
