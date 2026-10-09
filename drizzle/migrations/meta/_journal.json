@@ -309,6 +309,13 @@
       "when": 1791527749825,
       "tag": "0043_vbix_mining_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1791533972348,
+      "tag": "0044_mining_conversion_caps_and_splash_reads",
+      "breakpoints": true
     }
   ]
 }

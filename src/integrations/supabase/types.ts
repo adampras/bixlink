@@ -158,6 +158,44 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_mining_conversions: {
+        Row: {
+          allocation_id: string
+          amount_bix: number
+          amount_vbix: number
+          created_at: string
+          id: string
+          user_id: string
+          vbix_per_bix: number
+        }
+        Insert: {
+          allocation_id: string
+          amount_bix: number
+          amount_vbix: number
+          created_at?: string
+          id?: string
+          user_id: string
+          vbix_per_bix: number
+        }
+        Update: {
+          allocation_id?: string
+          amount_bix?: number
+          amount_vbix?: number
+          created_at?: string
+          id?: string
+          user_id?: string
+          vbix_per_bix?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_mining_conversions_allocation_id_fkey"
+            columns: ["allocation_id"]
+            isOneToOne: false
+            referencedRelation: "bix_allocations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bix_referral_bonuses: {
         Row: {
           amount_bix: number
@@ -938,6 +976,8 @@ export type Database = {
       }
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
+      bix_mining_conversion_status: { Args: never; Returns: Json }
+      bix_mining_convert: { Args: never; Returns: Json }
       bix_mining_rate: { Args: { p_user: string }; Returns: number }
       bix_mining_settle: { Args: never; Returns: Json }
       bix_mining_start: { Args: never; Returns: Json }
