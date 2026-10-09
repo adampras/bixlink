@@ -1346,3 +1346,14 @@ html[data-color-mode="light"] [data-presentation-theme="future"] { --background:
 .site-shell[data-presentation-theme="future"] :is(.landing-ecosystem,.landing-tokenomics,.hero-section) { background:transparent; }
 .site-shell[data-presentation-theme="future"] :is(.ecosystem-column::after,.profile-referral::after) { display:none; }
 .site-shell[data-presentation-theme="future"] :is(.duration-package,.terminal-market,.internal-market,.wallet-summary) { background:var(--future-surface); }
+
+/* Auric luxury glass: champagne gold edge + translucent brand watermark */
+.auric-card { position:relative; isolation:isolate; border-color:color-mix(in oklab, oklch(.84 .1 85) 55%, transparent) !important; box-shadow:inset 0 1px 0 color-mix(in oklab, oklch(.92 .08 88) 45%, transparent), 0 10px 32px -14px color-mix(in oklab, oklch(.8 .12 85) 40%, transparent); }
+.auric-card::after { content:""; position:absolute; right:-18px; bottom:-18px; width:150px; height:150px; background:var(--brand-watermark) center/contain no-repeat; opacity:.07; border-radius:9999px; pointer-events:none; z-index:-1; filter:saturate(.4); }
+.auric-card > * { position:relative; }
+html[data-color-mode="light"] .auric-card { border-color:color-mix(in oklab, oklch(.6 .11 80) 50%, transparent) !important; }
+html[data-color-mode="light"] .auric-card::after { opacity:.06; filter:grayscale(.6); }
+/* Light mode: keep mining engine clean — no speckled edges on bright backgrounds */
+html[data-color-mode="light"] .mining-engine { background:radial-gradient(ellipse at center, oklch(.2 .02 260) 0%, oklch(.2 .02 260 / .85) 45%, transparent 72%); border-radius:16px; }
+html[data-color-mode="light"] .mining-engine video { mask-image:radial-gradient(ellipse at center,var(--foreground) 50%,transparent 82%); }
+html[data-color-mode="light"] .reactor-glass-stage video { mask-image:radial-gradient(ellipse at center,var(--foreground) 55%,transparent 85%); }
