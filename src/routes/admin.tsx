@@ -25,6 +25,8 @@ import { AdminAppearance } from '@/components/AdminAppearance';
 import { AdminReferrals } from '@/components/AdminReferrals';
 import { AdminDurationPackages } from '@/components/AdminDurationPackages';
 import { AdminTeams } from '@/components/AdminTeams';
+import { AdminReports } from '@/components/AdminReports';
+import { AdminMining, type MiningSettings } from '@/components/AdminMining';
 import type { Readiness } from '@/lib/readiness';
 import type { LandingContent } from '@/components/LandingExperience';
 

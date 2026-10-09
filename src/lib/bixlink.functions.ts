@@ -211,8 +211,9 @@ export const setPackageEnabled = createServerFn({ method: 'POST' }).middleware([
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token' | 'booster_withdraw'; value: Record<string, unknown> }) => {
-    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token','booster_withdraw']), value: z.record(z.unknown()) }).parse(data);
+  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token' | 'booster_withdraw' | 'mining'; value: Record<string, unknown> }) => {
+    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token','booster_withdraw','mining']), value: z.record(z.unknown()) }).parse(data);
+    if (parsed.key === 'mining') parsed.value = z.object({ enabled: z.boolean(), ratePerDay: z.number().positive().max(100), mode: z.enum(['day','second']), stakeBoostPct: z.number().min(0).max(100) }).strict().parse(parsed.value);
     if (parsed.key === 'booster_withdraw') parsed.value = z.object({ bix: z.boolean(), usdt: z.boolean() }).strict().parse(parsed.value);
     if (parsed.key === 'booster_visual') parsed.value = z.object({ visual: z.enum(['reactor', 'video']) }).strict().parse(parsed.value);
     if (parsed.key === 'booster') parsed.value = z.object({ enabled: z.boolean(), rate: z.number().min(0).max(45), maxApy: z.number().min(8).max(45).optional() }).strict().parse(parsed.value);
