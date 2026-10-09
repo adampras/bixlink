@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { LandingNarrative } from '@/components/LandingNarrative';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
 import { ReactorVideo } from '@/components/ReactorVideo';
+import heroObsidian from '@/assets/hero-obsidian-gold.jpg';
 import { usePublicConfig } from '@/lib/useMember';
 import { boosterMaximum } from '@/lib/booster-apy';
 
@@ -21,7 +22,6 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
   return <div className="reactor-landing">
     <section className={`hero-section relative overflow-hidden border-b border-border ${hero3d ? 'hero-3d' : ''}`}>
       {hero3d && <><ContentImage path={content.heroImage} alt="" fallbackSrc={heroObsidian} className="hero-3d-bg"/><div className="hero-3d-veil" aria-hidden/></>}
-      {!hero3d && <></>}
       <div className={`relative mx-auto flex max-w-3xl flex-col items-center px-5 pb-14 pt-12 text-center ${hero3d ? 'min-h-[92dvh] justify-center' : ''} ${compact ? 'md:pb-16 md:pt-14' : 'md:pb-20 md:pt-16'}`}>
         <div className="inline-flex items-center gap-2 rounded-full border border-chart-3/30 bg-chart-3/10 px-4 py-1.5 backdrop-blur-sm"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-chart-3"/><span className="text-[10px] font-bold uppercase tracking-[0.15em] text-chart-3">21 MILLION BIX TOKEN</span></div>
         <h1 className="mt-6 bg-gradient-to-b from-foreground via-chart-3 to-chart-3/60 bg-clip-text font-display text-6xl font-bold leading-[0.9] tracking-tighter text-transparent drop-shadow-[0_0_24px_hsl(var(--chart-3)/0.25)] md:text-8xl">BIXLINK</h1>
@@ -40,6 +40,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
       </div>
       <div className="lux-ticker" aria-label="BIXLINK protocol highlights"><div className="lux-ticker-track">{[0,1].map(k => <span key={k} aria-hidden={k===1}>{['21.000.000 BIX FIXED SUPPLY','DEFLATIONARY HALVING','NON-CUSTODIAL MODEL','RWA NARRATIVE','SMART CONTRACT READY','COMMUNITY TO DAO'].map(t => <b key={t}>◆ {t}</b>)}</span>)}</div></div>
     </section>
+    {hero3d && <section className="mx-auto max-w-3xl px-5 py-10 text-center"><div className="eyebrow">CORE FOUNDATION</div><ReactorVideo maximum={maximum}/></section>}
     <LandingNarrative content={content}/>
     <section className="landing-ecosystem border-y border-border"><div className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="eyebrow">THE BIXLINK ADVANTAGE</div><h2 className="section-title">PREMIUM <span>ECOSYSTEM</span></h2><div className="mt-8 grid gap-5 lg:grid-cols-2"><article className="ecosystem-column"><header><span className="ecosystem-icon text-primary"><Globe2/></span><div><small>CONNECTED UTILITY</small><h3>Ecosystem core</h3></div></header><div className="ecosystem-list">{content.ecosystem.map((item, index) => item.enabled === false ? null : <ContentLink group="ecosystem" index={index} item={item} key={`${item.title}-${index}`}><div><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div></ContentLink>)}</div></article><article className="ecosystem-column ecosystem-column--income"><header><span className="ecosystem-icon text-chart-3"><CircleDollarSign/></span><div><small>DISCLOSED SOURCES</small><h3>Income narrative</h3></div></header><div className="ecosystem-list">{content.income.map((item, index) => item.enabled === false ? null : <ContentLink group="income" index={index} item={item} key={`${item.title}-${index}`}><div><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div></ContentLink>)}</div></article></div><div className="ecosystem-disclosure"><ShieldCheck/><span>Public narratives are owner-managed. Recorded income is not presented as audited revenue or guaranteed return.</span><Building2/></div></div></section>
     <section className="mx-auto max-w-7xl px-5 py-8 md:px-8"><ContentCarousel group="spaces" title="Kategori Pengembangan" items={content.spaces ?? defaultSpaces}/></section>
