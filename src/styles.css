@@ -1473,3 +1473,16 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
 @keyframes vault-sweep{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
 .auth-vault{text-align:center}.auth-vault form,.auth-vault .flex{text-align:left}
 @media (prefers-reduced-motion:reduce){.vault-stardust span,.vault-logo i,.vault-node span,.vault-shimmer::after{animation:none}}
+
+/* Member area: floating glass dock + sovereign card */
+.glass-dock{box-shadow:0 12px 40px -12px hsl(0 0% 0%/.6),inset 0 1px 0 hsl(var(--chart-3)/.18);border-color:hsl(var(--chart-3)/.28)!important;padding-bottom:env(safe-area-inset-bottom)}
+.glass-dock a{position:relative;transition:color .25s}
+.glass-dock .mobile-nav-on{color:hsl(var(--chart-3))!important;text-shadow:0 0 12px hsl(var(--chart-3)/.55)}
+.glass-dock .mobile-nav-on::before{content:"";position:absolute;top:4px;width:34px;height:34px;border-radius:999px;background:radial-gradient(circle,hsl(var(--chart-3)/.22),transparent 70%);pointer-events:none}
+.sovereign-card{position:relative;overflow:hidden;border:1px solid hsl(var(--chart-3)/.3)!important;background:linear-gradient(135deg,hsl(var(--card)/.85),hsl(var(--background)/.6))!important;backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 hsl(var(--chart-3)/.2),0 20px 50px -24px hsl(var(--chart-3)/.35)}
+.sovereign-card::before{content:"";position:absolute;inset:-40% -60%;background:linear-gradient(115deg,transparent 42%,hsl(var(--chart-3)/.1) 50%,transparent 58%);animation:sov-sweep 7s ease-in-out infinite;pointer-events:none}
+.sovereign-card::after{content:"";position:absolute;right:14px;top:44px;width:72px;height:72px;background:url('/favicon.png') center/contain no-repeat;opacity:.08;pointer-events:none}
+.sovereign-card>*{position:relative;z-index:1}
+.sovereign-card .terminal-action{border-radius:999px}
+@keyframes sov-sweep{0%,100%{transform:translateX(-30%)}50%{transform:translateX(30%)}}
+@media (prefers-reduced-motion:reduce){.sovereign-card::before{animation:none}}
