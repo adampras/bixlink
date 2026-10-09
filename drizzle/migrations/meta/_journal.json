@@ -302,6 +302,13 @@
       "when": 1791511794726,
       "tag": "0042_mining_visibility_and_owner_settings_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1791527749825,
+      "tag": "0043_vbix_mining_ledger",
+      "breakpoints": true
     }
   ]
 }

@@ -117,13 +117,14 @@ export const getAdminData = createServerFn({ method: 'GET' }).middleware([requir
 
 export const getAdminReport = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   await verifyAdmin(context);
-  const [stakes, bixStakes, refBonuses, usdtBonuses] = await Promise.all([
+  const [stakes, bixStakes, refBonuses, usdtBonuses, vbix] = await Promise.all([
     context.supabase.from('stakes').select('amount_usd,status,created_at'),
     context.supabase.from('bix_stakes').select('amount_bix,status,created_at'),
     context.supabase.from('bix_referral_bonuses').select('amount_bix,status,created_at'),
     context.supabase.from('bix_usdt_network_bonuses').select('total_usd,usdt_amount,bix_amount,created_at'),
+    context.supabase.from('bix_vbix_ledger').select('amount_vbix,created_at'),
   ]);
-  for (const result of [stakes, bixStakes, refBonuses, usdtBonuses]) if (result.error) throw result.error;
+  for (const result of [stakes, bixStakes, refBonuses, usdtBonuses, vbix]) if (result.error) throw result.error;
   const now = new Date();
   const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
@@ -145,8 +146,8 @@ export const getAdminReport = createServerFn({ method: 'GET' }).middleware([requ
     referralBix: bucket(refRows, row => Number(row.amount_bix)),
     networkUsdt: bucket(usdtRows, row => Number(row.total_usd)),
     networkBix: bucket(usdtRows, row => Number(row.bix_amount)),
-    miningBix: { day: 0, month: 0, total: 0 },
-    miningNote: 'Mesin mining belum aktif — hadiah mining belum tercatat.',
+    miningBix: bucket((vbix.data ?? []) as { amount_vbix: number; created_at: string }[], row => Number(row.amount_vbix)),
+    miningNote: 'Dalam vBIX (mining + bonus jaringan). Konversi ke BIX belum dibuka.',
   };
 });
 

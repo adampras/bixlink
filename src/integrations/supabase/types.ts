@@ -140,6 +140,24 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_mining_accounts: {
+        Row: {
+          settled_at: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          settled_at?: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          settled_at?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_referral_bonuses: {
         Row: {
           amount_bix: number
@@ -397,6 +415,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      bix_vbix_ledger: {
+        Row: {
+          amount_vbix: number
+          created_at: string
+          id: string
+          kind: string
+          level: number
+          source_user: string
+          user_id: string
+        }
+        Insert: {
+          amount_vbix: number
+          created_at?: string
+          id?: string
+          kind: string
+          level?: number
+          source_user: string
+          user_id: string
+        }
+        Update: {
+          amount_vbix?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          level?: number
+          source_user?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       bix_vip_rewards: {
         Row: {
@@ -890,6 +938,10 @@ export type Database = {
       }
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
+      bix_mining_rate: { Args: { p_user: string }; Returns: number }
+      bix_mining_settle: { Args: never; Returns: Json }
+      bix_mining_start: { Args: never; Returns: Json }
+      bix_mining_status: { Args: never; Returns: Json }
       bix_network_bix_metrics: { Args: never; Returns: Json }
       bix_network_bonus_split: {
         Args: { p_total: number }
