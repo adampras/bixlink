@@ -15,7 +15,7 @@ export const Route = createFileRoute('/transfer')({ head: () => ({ meta: [{ titl
 function TransferPage() {
   const { user, ready, data: mine } = useMember(); const { data: cfg } = usePublicConfig();
   const [code, setCode] = useState(''); const [amount, setAmount] = useState(''); const [note, setNote] = useState(''); const [msg, setMsg] = useState(''); const [busy, setBusy] = useState(false);
-  const q = useQuery({ queryKey: ['vusdt', user?.id], enabled: !!user, queryFn: async () => {
+  const q = useQuery({ queryKey: ['vusdt-transfers', user?.id], enabled: !!user, queryFn: async () => {
     const [b, t] = await Promise.all([supabase.rpc('bix_vusdt_balance', { p_user: user!.id }), supabase.from('vusdt_transfers').select('*').order('created_at', { ascending: false }).limit(50)]);
     return { balance: Number(b.data ?? 0), list: t.data ?? [] };
   } });
@@ -41,7 +41,7 @@ function TransferPage() {
     </form>}
     {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
     <h2 className="mt-10 font-display text-2xl font-black">History</h2>
-    <div className="mt-4 space-y-2">{(q.data?.list ?? []).map(t => { const out = t.sender_id === user?.id; return <div key={t.id} className="flex items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4 text-xs"><div className="flex items-center gap-3">{out ? <ArrowUpRight className="text-destructive"/> : <ArrowDownLeft className="text-chart-2"/>}<div><b className="text-sm">{out ? `To ${t.recipient_code}` : `From ${t.sender_code}`}</b><div className="text-muted-foreground">{dateTime(t.created_at)}{t.note ? ` · ${t.note}` : ''}</div></div></div><b className={`numeric text-sm ${out ? 'text-destructive' : 'text-chart-2'}`}>{out ? '-' : '+'}{money(Number(t.amount_usd))}</b></div>; })}{!q.data?.list.length && <p className="text-sm text-muted-foreground">No transfers yet.</p>}</div>
+    <div className="mt-4 space-y-2">{(q.data?.list ?? []).map(t => { const out = t.sender_id === user?.id; return <div key={t.id} className="flex items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4 text-xs"><div className="flex items-center gap-3">{out ? <ArrowUpRight className="text-destructive"/> : <ArrowDownLeft className="text-chart-2"/>}<div><b className="text-sm">{out ? `To ${t.recipient_code}` : `From ${t.sender_code}`}</b><div className="text-muted-foreground">{dateTime(t.created_at)}{t.note ? ` · ${t.note}` : ''}</div></div></div><b className={`numeric text-sm ${out ? 'text-destructive' : 'text-chart-2'}`}>{out ? '-' : '+'}{money(Number(t.amount_usd))}</b></div>; })}{!q.data?.list?.length && <p className="text-sm text-muted-foreground">No transfers yet.</p>}</div>
     <Link to="/wallet" className="mt-8 block text-center text-xs text-muted-foreground">← Back to WALLET</Link>
   </MemberGate></main></BixShell>;
 }
