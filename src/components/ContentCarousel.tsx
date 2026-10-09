@@ -73,6 +73,6 @@ export function ContentCarousel({ items: rawItems, group, title }: { items: Cont
       </button>)}
     </div>
     {group === 'roadmap' && <p className="mt-5 text-xs leading-5 text-muted-foreground">Rencana pengembangan, bukan jaminan hasil atau jadwal penyelesaian.</p>}
-    <ContentDetailModal item={open === null ? null : items[open]} eyebrow={open === null ? '' : group === 'roadmap' ? `PHASE ${open + 1}${items[open]?.quarter ? ` · ${items[open]?.quarter}` : ''}` : 'KATEGORI PENGEMBANGAN'} fallbackSrc={open === null ? undefined : group === 'spaces' ? categoryImage(items[open].title) : roadmapImage(items[open].title, open)} onClose={() => { setOpen(null); paused.current = false; }}/>
+    <ContentDetailModal item={open === null ? null : items[open] ?? null} eyebrow={open === null ? '' : group === 'roadmap' ? `PHASE ${open + 1}${items[open]?.quarter ? ` · ${items[open]?.quarter}` : ''}` : 'KATEGORI PENGEMBANGAN'} fallbackSrc={open === null ? undefined : group === 'spaces' ? categoryImage((items[open]?.title ?? "")) : roadmapImage((items[open]?.title ?? ""), open)} onClose={() => { setOpen(null); paused.current = false; }}/>
   </div>;
 }
