@@ -34,8 +34,8 @@ function PresalePage() {
   return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
     <div className="eyebrow"><Pickaxe size={14}/> EXCLUSIVE</div>
     <h1 className="section-title !mt-1">PRESALE <span>STAKING BIX</span></h1>
-    <div className="mx-auto mt-5 max-w-sm overflow-hidden rounded-2xl border border-border">
-      <video src={reactor.url} autoPlay muted loop playsInline className="aspect-[1/2] max-h-[70vh] w-full object-cover"/>
+    <div className="presale-reactor-stage">
+      <video src={reactor.url} autoPlay muted loop playsInline className="presale-reactor-video"/>
     </div>
     <dl className="mt-4 grid grid-cols-3 gap-2 border-y border-border py-3 text-center">
       <div><dd className="numeric font-display text-lg font-bold text-primary">{number(locked, { maximumFractionDigits: 2 })}</dd><dt className="text-[10px] text-muted-foreground">Locked BIX</dt></div>
