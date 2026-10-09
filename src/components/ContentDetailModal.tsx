@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ContentImage } from '@/components/ContentImage';
 import type { ContentItem } from '@/lib/landing-content';
 
-export function ContentDetailModal({ item, eyebrow, fallbackSrc, onClose }: { item: ContentItem | null; eyebrow: string; fallbackSrc?: string; onClose: () => void }) {
+export function ContentDetailModal({ item, eyebrow, fallbackSrc, onClose }: { item: ContentItem | null; eyebrow: string; fallbackSrc?: string | undefined; onClose: () => void }) {
   return <Dialog open={Boolean(item)} onOpenChange={open => { if (!open) onClose(); }}>
     <DialogContent className="content-detail-modal max-h-[88vh] overflow-y-auto border-chart-3/30 bg-card/90 p-0 backdrop-blur-xl sm:max-w-lg">
       {item && <>

@@ -85,6 +85,8 @@ Target fase:
 Ini adalah tonggak pengembangan, bukan target harga.`,
 };
 
+Object.assign(roadmapNarratives, { LAUNCH: roadmapNarratives.PELUNCURAN, 'STAKING APP BETA': roadmapNarratives['STAKING BETA'], 'RWA LISTING': roadmapNarratives['DAFTAR RWA'], ECOSYSTEM: roadmapNarratives.EKOSISTEM });
+
 const key = (title: string) => title.trim().toUpperCase();
 
 /** Fill missing long details from bundled narratives; append bundled defaults absent from saved content. */
