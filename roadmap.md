@@ -109,3 +109,6 @@
 - [x] Presale reactor video: compact blended look + poster/WebM + member mute toggle for thruster sound.
 - [x] Keep presale headings and balances readable outside the video vignette; verified mobile text and sound toggle.
 - [x] Add the presale rocket to shared owner-selectable BOOST APY/landing videos; owner save/reload and real playback verified, previous selection restored, financial rules unchanged.
+- [ ] Remove duplicate package/NFT previews and add popup close.
+- [ ] Add 100 distinct NFT designs with owner additions and visibility controls.
+- [ ] Add and verify NFT Marketplace and member navigation.
