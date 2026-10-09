@@ -5,6 +5,7 @@ import { Check, Palette, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { updatePresentationTheme } from '@/lib/bixlink.functions';
 import { resolvePresentationTheme, type PresentationTheme } from '@/lib/presentation-theme';
+import { AdminSplash } from '@/components/AdminSplash';
 
 const options: { id: PresentationTheme; name: string; detail: string }[] = [
   { id: 'original', name: 'BIXLINK Original', detail: 'Tricolor · Violet / Green / Gold' },
@@ -12,6 +13,7 @@ const options: { id: PresentationTheme; name: string; detail: string }[] = [
   { id: 'graphite', name: 'Graphite Silver', detail: 'Silver / Teal · Spacious glass' },
   { id: 'royal', name: 'Royal Gold & Jade', detail: 'Pearl / Gold / Jade · Violet accents' },
   { id: 'glass', name: 'Spectrum Clear Glass', detail: '8 category colors · Clear glass' },
+  { id: 'future', name: 'BIXLINK Future Glass', detail: 'Crystal / Cyan / Gold · Transparent' },
 ];
 export function AdminAppearance({ initialTheme, onSaved, onMessage }: { initialTheme?: PresentationTheme | undefined; onSaved: () => Promise<void>; onMessage: (message: string) => void }) {
   const current = resolvePresentationTheme(initialTheme);
@@ -34,5 +36,6 @@ export function AdminAppearance({ initialTheme, onSaved, onMessage }: { initialT
       </Button>)}
     </div>
     <div className="mt-6 flex justify-end"><Button disabled={saving || selected === current} onClick={async () => { setSaving(true); try { await save({ data: { theme: selected } }); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); await onSaved(); onMessage('Project theme saved for all members and visitors.'); } catch (error) { onMessage(error instanceof Error ? error.message : 'Could not save theme.'); } finally { setSaving(false); } }}><Save/>{saving ? 'Saving…' : 'Apply project theme'}</Button></div>
+    <AdminSplash onMessage={onMessage}/>
   </section>;
 }

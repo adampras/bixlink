@@ -7,10 +7,17 @@ import alternativeWeb from '@/assets/booster-alternative.webm.asset.json';
 import alternativePoster from '@/assets/booster-alternative-poster.jpg.asset.json';
 import { resolveBoosterVisual } from '@/lib/booster-visual';
 import { usePublicConfig } from '@/lib/useMember';
+import orbital from '@/assets/booster-orbital.mp4.asset.json';
+import orbitalWeb from '@/assets/booster-orbital.webm.asset.json';
+import orbitalPoster from '@/assets/booster-orbital-poster.jpg.asset.json';
+import crystal from '@/assets/booster-crystal.mp4.asset.json';
+import crystalWeb from '@/assets/booster-crystal.webm.asset.json';
+import crystalPoster from '@/assets/booster-crystal-poster.jpg.asset.json';
 
 export function ReactorVideo({ maximum, visual }: { maximum: number; visual?: string }) {
   const { data: cfg } = usePublicConfig();
   const selection = resolveBoosterVisual(visual ?? cfg?.boosterVisual.visual);
+  const media = { reactor: { mp4: video, webm: webVideo, poster }, video: { mp4: alternative, webm: alternativeWeb, poster: alternativePoster }, orbital: { mp4: orbital, webm: orbitalWeb, poster: orbitalPoster }, crystal: { mp4: crystal, webm: crystalWeb, poster: crystalPoster } }[selection];
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const element = ref.current;
@@ -24,7 +31,7 @@ export function ReactorVideo({ maximum, visual }: { maximum: number; visual?: st
     return () => { observer.disconnect(); element.pause(); };
   }, [selection]);
   return <div className="reactor-glass-stage">
-    <video key={selection} ref={ref} className="reactor-glass-video" poster={selection === 'video' ? alternativePoster.url : poster.url} muted loop playsInline preload="metadata" aria-label="BIXCOIN gold reactor">{selection === 'reactor' ? <><source src={webVideo.url} type="video/webm"/><source src={video.url} type="video/mp4"/></> : <><source src={alternativeWeb.url} type="video/webm"/><source src={alternative.url} type="video/mp4"/></>}</video>
+    <video key={selection} ref={ref} className="reactor-glass-video" poster={media.poster.url} muted loop playsInline preload="metadata" aria-label="BIXCOIN gold reactor"><source src={media.webm.url} type="video/webm"/><source src={media.mp4.url} type="video/mp4"/></video>
     <div className="reactor-glass-lens"><span>BIX BOOSTER</span><small>UP TO</small><strong>{maximum}%</strong><small>MONTHLY · PROJECTION</small></div>
   </div>;
 }
