@@ -100,3 +100,5 @@
 - [x] Install approved clear-gold mining design below member Major Crypto with cleaned uploaded engine video; signed-in playback and pause/play verified, phone layout has no overflow, start stays disabled and no rewards are awarded.
 - [ ] Activate mining ledger and owner rate/boost controls after the owner supplies the initial reward rate and staking boost formula.
 - [x] Add independent owner Buka/Tutup mining visibility; saved close/open verified after reload and HOME hides/shows accordingly. Video advances with working pause/play, clear background blends into HOME, 384px layout fits; rewards remain inactive pending rate/boost approval.
+- [x] vBIX mining ledger with 5-level network bonus; machine runs only after verified member presses Start
+- [ ] Open vBIX→BIX conversion (1,000,000 BIX pool, 100 BIX/account) — waits on owner conversion rate
