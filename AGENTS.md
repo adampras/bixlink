@@ -14,21 +14,17 @@
 - Read public package and settings data with RLS and run account-specific operations with authenticated server functions; this separates public browsing from private records.
 - BIX/USDT conversions are reviewed internal ledger requests at the owner reference, never exchange execution or custody.
 - Presentation settings use authenticated owner writes for central control.
-- Claim splash session before display; hydrate on public entry pages only, never in admin, so remounts cannot interrupt editing.
 - Share one session store across routes; use layout-shaped placeholders.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
 - Clone accounts (bix_clone_accounts) are funded only via bix_allocations and excluded from member stats — auditable and separate.
 - Leader virtual balances (bix_leaders) count in bix_wallet_balance but withdraw is blocked until bix_leader_status qualifies — one server gate.
 - Use cycle-safe NETWORK generation exploration and ancestry breadcrumbs with separate BIX/USDT metrics to keep unlimited depth readable.
-- Keep member Settings on its dedicated route but expose it through Profile rather than primary navigation, so the main trading navigation stays focused.
 - Calculate staking yield as a live display-only ledger projection from active stakes; never add projected USDT or BIX profit to spendable balances without a separate settlement rule.
 - Keep the 1,000,000 BIX reserve in an owner-only singleton vault initialized idempotently; never expose it in member balances or allow repeated generation.
 - Gate optional readiness surfaces through centralized app settings, and enforce identity availability and published announcement access with RLS; essential risk disclosures remain visible regardless of presentation toggles.
-- Market updates use a dedicated route with the public price feed and owner-authenticated announcement writes.
 - Dehydrate and hydrate the per-request QueryClient through the router so SSR and browser initially render the same market snapshot rather than fetching conflicting quotes.
 - Deposits use one on-chain matcher (polling and cron), chain amounts and one credit per TxID; transfer reports stay pending for review.
 - Share HOME/landing content and narratives (bundled fallbacks) through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
-- Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
 - Owner 2 uses scoped RPCs for packages, Market, Referral and WLT-01 only; wallet edits lock the row and preserve other wallets. Clone reviews stay excluded; vault, bonus funding, teams and other settings remain Owner 1.
 - Share category/roadmap carousels and one CDN-backed video registry across landing and Booster; contain video vignettes within their stage so headings and balances stay visible; public-entry splash uses owner timing; install icons use a manifest without caching.
 - Store shared themes in readiness with scoped semantic overrides; validate Appearance through the shared registry to preserve selections and owner authorization without widening access.
@@ -40,3 +36,4 @@
 - Keep landing tokenomics in a presentation-only module, honoring visibility without changing member terms.
 - Settle vBIX via authenticated RPCs; video never awards funds. Convert through an atomic capped marketing ledger, never the owner vault.
 - Fox Arena quest vBIX is paid only by the server-verified bix_quest_claim RPC, sharing mining's account cap and pool; season prizes are owner-reviewed, never auto-credited — game rewards stay in the promo budget.
+- NFT cards: one trigger-minted in-app card per stake; on completion it replaces the USDT refund; owner-reviewed vault-funded BIX buyback — auditable.

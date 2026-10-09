@@ -73,7 +73,7 @@ export const unstakeStake = createServerFn({ method: 'POST' }).middleware([requi
   .handler(async ({ data, context }) => {
     const { data: res, error } = await context.supabase.rpc('bix_unstake', { p_stake: data.stakeId });
     if (error) throw new Error(error.message);
-    return res as { penalty_pct: number; refund_usd: number };
+    return res as { penalty_pct: number; refund_usd: number; nft?: boolean };
   });
 
 export const createReferral = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {

@@ -1,0 +1,4 @@
+- Claim splash session before display; hydrate on public entry pages only, never in admin, so remounts cannot interrupt editing.
+- Keep member Settings on its dedicated route but expose it through Profile rather than primary navigation, so the main trading navigation stays focused.
+- Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
+- Market updates use a dedicated route with the public price feed and owner-authenticated announcement writes.
