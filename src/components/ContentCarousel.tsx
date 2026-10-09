@@ -1,12 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ContentLink } from '@/components/ContentLink';
+import { ContentDetailModal } from '@/components/ContentDetailModal';
+import { categoryImage } from '@/lib/category-images';
+import { roadmapImage } from '@/lib/roadmap-images';
+import { defaultRoadmap, defaultSpaces } from '@/lib/landing-content';
+import { roadmapNarratives, spaceNarratives, withNarratives } from '@/lib/content-narratives';
 import { IncomeCategoryCard } from '@/components/IncomeCategoryCard';
 import { RoadmapCard } from '@/components/RoadmapCard';
 import type { ContentItem } from '@/lib/landing-content';
 
-export function ContentCarousel({ items, group, title }: { items: ContentItem[]; group: 'spaces' | 'roadmap'; title: string }) {
+export function ContentCarousel({ items: rawItems, group, title }: { items: ContentItem[]; group: 'spaces' | 'roadmap'; title: string }) {
+  const items = group === 'spaces' ? withNarratives(rawItems, defaultSpaces, spaceNarratives) : withNarratives(rawItems, defaultRoadmap, roadmapNarratives);
+  const [open, setOpen] = useState<number | null>(null);
+  const openRef = useRef(false);
+  openRef.current = open !== null;
   const track = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(0);
   const [atEnd, setAtEnd] = useState(false);
@@ -22,20 +30,20 @@ export function ContentCarousel({ items, group, title }: { items: ContentItem[];
     observer.observe(element);
     update();
     return () => observer.disconnect();
-  }, [items]);
+  }, [rawItems]);
   const paused = useRef(false);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const timer = window.setInterval(() => {
       const element = track.current;
-      if (!element || paused.current || document.hidden) return;
+      if (!element || paused.current || openRef.current || document.hidden) return;
       const card = element.firstElementChild;
       const step = (card?.getBoundingClientRect().width ?? 280) + 16;
       const end = element.scrollLeft + element.clientWidth >= element.scrollWidth - 2;
       element.scrollTo({ left: end ? 0 : element.scrollLeft + step, behavior: 'smooth' });
     }, 3800);
     return () => window.clearInterval(timer);
-  }, [items]);
+  }, [rawItems]);
   if (!visible.length) return null;
   const move = (direction: number) => {
     const element = track.current;
@@ -59,10 +67,12 @@ export function ContentCarousel({ items, group, title }: { items: ContentItem[];
       setPosition(element.scrollLeft);
       setAtEnd(element.scrollLeft + element.clientWidth >= element.scrollWidth - 2);
     }}>
-      {visible.map(({ item, index }) => <ContentLink group={group} index={index} item={item} key={`${item.title}-${index}`} className="content-carousel-slide">
+      {visible.map(({ item, index }) => <button type="button" key={`${item.title}-${index}`} className="content-carousel-slide block min-w-0 rounded-lg text-left focus-visible:ring-2 focus-visible:ring-primary motion-safe:active:scale-[0.98]" aria-label={`Detail ${item.title}`} onClick={() => setOpen(index)}>
         {group === 'spaces' ? <IncomeCategoryCard item={item}/> : <RoadmapCard item={item} index={index}/>}
-      </ContentLink>)}
+        <span className="mt-2 block text-center text-[10px] font-bold uppercase tracking-[0.15em] text-chart-3">Ketuk untuk detail ▸</span>
+      </button>)}
     </div>
     {group === 'roadmap' && <p className="mt-5 text-xs leading-5 text-muted-foreground">Rencana pengembangan, bukan jaminan hasil atau jadwal penyelesaian.</p>}
+    <ContentDetailModal item={open === null ? null : items[open] ?? null} eyebrow={open === null ? '' : group === 'roadmap' ? `PHASE ${open + 1}${items[open]?.quarter ? ` · ${items[open]?.quarter}` : ''}` : 'KATEGORI PENGEMBANGAN'} fallbackSrc={open === null ? undefined : group === 'spaces' ? categoryImage((items[open]?.title ?? "")) : roadmapImage((items[open]?.title ?? ""), open)} onClose={() => { setOpen(null); paused.current = false; }}/>
   </div>;
 }
