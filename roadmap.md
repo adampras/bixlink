@@ -99,3 +99,4 @@
 - [x] Add uploaded BOOSTER replacement video choice without image mascots; owner save/reload and video pause/play verified, 500ms reactor splash and install icons load, reviewer heading ADMIIN PANEL applied; APY unchanged. Native APK packaging is not included.
 - [x] Install approved clear-gold mining design below member Major Crypto with cleaned uploaded engine video; signed-in playback and pause/play verified, phone layout has no overflow, start stays disabled and no rewards are awarded.
 - [ ] Activate mining ledger and owner rate/boost controls after the owner supplies the initial reward rate and staking boost formula.
+- [ ] Add independent owner Buka/Tutup mining visibility, blend the engine into HOME, and verify video playback and saved visibility.
