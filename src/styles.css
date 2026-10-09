@@ -85,11 +85,13 @@ html[data-color-mode="light"] .member-mining { --mining-gold:oklch(.5 .1 85); }
 .tokenomics-allocation-amount { margin:10px 0; font-size:14px; font-weight:700; font-variant-numeric:tabular-nums; }
 .tokenomics-allocation p { font-size:11px; line-height:1.7; color:var(--muted-foreground); }
 .tokenomics-schedule { display:block; margin-top:12px; border-top:1px solid var(--border); padding-top:10px; font-size:10px; line-height:1.6; color:var(--muted-foreground); }
-.tokenomics-purpose { display:grid; grid-template-columns:1fr 1fr; gap:40px; border-block:1px solid var(--token-edge); margin-top:36px; padding:28px 0; }
-.tokenomics-purpose h3 { display:flex; align-items:center; gap:10px; color:var(--token-cyan); font-weight:700; font-size:16px; }
-.tokenomics-purpose p,.tokenomics-purpose ol { margin-top:16px; font-size:13px; line-height:1.8; color:var(--muted-foreground); }
-.tokenomics-purpose li { display:flex; gap:12px; margin-top:8px; }
-.tokenomics-purpose li span { color:var(--token-magenta); font-size:10px; padding-top:3px; }
+.tokenomics-purpose { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:36px; }
+.tokenomics-purpose > div { position:relative; overflow:hidden; padding:24px; border-radius:18px; border:1px solid color-mix(in oklab, #E7C77A 22%, transparent); background:linear-gradient(145deg, color-mix(in oklab, #E7C77A 10%, transparent), color-mix(in oklab, var(--background) 72%, transparent) 55%); backdrop-filter:blur(16px); box-shadow:inset 0 1px 0 color-mix(in oklab, #fff 10%, transparent), 0 18px 40px -24px color-mix(in oklab, #E7C77A 35%, transparent); }
+.tokenomics-purpose > div::after { content:""; position:absolute; right:-24px; bottom:-24px; width:130px; height:130px; background:url('/favicon.png') center/contain no-repeat; opacity:.06; pointer-events:none; }
+.tokenomics-purpose h3 { display:flex; align-items:center; gap:10px; color:#E7C77A; font-weight:700; font-size:15px; letter-spacing:.18em; }
+.tokenomics-purpose p,.tokenomics-purpose ol { position:relative; margin-top:16px; font-size:13px; line-height:1.8; color:var(--muted-foreground); }
+.tokenomics-purpose li { display:flex; gap:12px; margin-top:10px; align-items:flex-start; }
+.tokenomics-purpose li span { flex-shrink:0; display:grid; place-items:center; width:30px; height:24px; border-radius:6px; border:1px solid color-mix(in oklab, #E7C77A 45%, transparent); background:color-mix(in oklab, #E7C77A 12%, transparent); color:#E7C77A; font-size:10px; font-weight:700; font-family:ui-monospace,monospace; box-shadow:0 0 12px -4px #E7C77A; }
 .tokenomics-poster-band { display:grid; grid-template-columns:160px minmax(0,1fr); align-items:center; gap:28px; padding:28px 0; }
 .tokenomics-poster-band img { width:160px; height:auto; border:1px solid var(--token-edge); border-radius:4px; }
 .tokenomics-disclosure { display:flex; align-items:flex-start; gap:10px; padding-top:20px; border-top:1px solid var(--border); font-size:11px; line-height:1.8; color:var(--muted-foreground); }
@@ -99,7 +101,7 @@ html[data-color-mode="light"] .landing-tokenomics { --token-cyan:oklch(.48 .1 21
   .tokenomics-main { grid-template-columns:minmax(0,1fr); gap:16px; margin-top:20px; }
   .tokenomics-supply { padding:12px 0; }
   .tokenomics-donut { width:240px; padding:32px; }
-  .tokenomics-purpose { grid-template-columns:minmax(0,1fr); gap:24px; }
+  .tokenomics-purpose { grid-template-columns:minmax(0,1fr); gap:14px; }
   .tokenomics-allocations { gap:10px; }
   .tokenomics-allocation { padding:12px; }
   .tokenomics-allocation-head { grid-template-columns:minmax(0,1fr) auto; gap:6px; }
