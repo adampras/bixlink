@@ -105,3 +105,4 @@
 - [x] Show HOME live vBIX and recorded BIX balances; owner conversion controls persist, opening without a rate is blocked; RPC enforces pool/account caps. Conversion remains closed until owner supplies rate; no balance-changing conversion tested.
 - [x] Add both uploaded transparent WebM videos to shared BOOST/landing choices; both play, saved video 1 matches public landing; video-1 splash duration saves and reloads.
 - [x] Add BIXLINK Future Glass Appearance; owner save/reload verified, HOME balances and BOOST fit 384px with no overflow or runtime errors. Theme and video 1 left selected; splash kept at 0.5 seconds.
+- [x] Add long narratives with tap-to-open detail popups for categories, roadmap and a new Marketplace category.
