@@ -31,8 +31,7 @@
 - Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
 - Owner 2 uses scoped RPCs for packages, Market, Referral and WLT-01 only; wallet edits lock the row and preserve other wallets. Clone reviews stay excluded; vault, bonus funding, teams and other settings remain Owner 1.
 - Share category/roadmap carousels and a CDN-backed video selector across landing and Booster; public-entry splash uses owner timing; install icons use a manifest without caching.
-- Store shared owner themes in readiness with scoped semantic overrides; this preserves public presentation without widening access.
-- Validate Appearance via the shared registry to preserve existing selections and owner authorization.
+- Store shared themes in readiness with scoped semantic overrides; validate Appearance through the shared registry to preserve selections and owner authorization without widening access.
 - On-chain deployment uses only the owner injected TokenPocket wallet and fixed-supply bytecode; store the address, never keys or internal-balance conversions.
 - VIP tiers live in SQL; team sales = active downline USDT stakes minus clones; one owner-reviewed, vault-funded row per user+level — server-enforced one-time rewards.
 - Network bonuses are source-stake-idempotent; native BIX ones stay owner-reviewed. USDT direct + daily matching live in bix_usdt_network_bonuses (unique per stake/receiver/level/day), split USDT/BIX by referral settings and summed into balance functions; a pg_cron job settles matching daily — one idempotent ledger for network rewards.
