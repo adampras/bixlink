@@ -10,7 +10,7 @@ export type MiningSettings = {
   stakeBoostPct?: number;
 };
 
-export function AdminMining({ initial, onMessage, onSaved }: { initial?: MiningSettings; onMessage: (msg: string) => void; onSaved: () => Promise<void> }) {
+export function AdminMining({ initial, onMessage, onSaved }: { initial: MiningSettings | undefined; onMessage: (msg: string) => void; onSaved: () => Promise<void> }) {
   const save = useServerFn(updateSetting);
   const [enabled, setEnabled] = useState(Boolean(initial?.enabled));
   const [ratePerDay, setRatePerDay] = useState(String(initial?.ratePerDay ?? ''));
