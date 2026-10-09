@@ -102,3 +102,6 @@
 - [x] Add independent owner Buka/Tutup mining visibility; saved close/open verified after reload and HOME hides/shows accordingly. Video advances with working pause/play, clear background blends into HOME, 384px layout fits; rewards remain inactive pending rate/boost approval.
 - [x] vBIX mining ledger with 5-level network bonus; machine runs only after verified member presses Start
 - [ ] Open vBIX→BIX conversion (1,000,000 BIX pool, 100 BIX/account) — waits on owner conversion rate
+- [ ] Show HOME vBIX/BIX balances and owner conversion controls with rate and server-enforced pool/account caps.
+- [ ] Add both uploaded videos to shared BOOST/landing choices and configurable video-1 splash.
+- [ ] Add futuristic transparent-glass Appearance and verify saved settings, media, and HOME balances.
