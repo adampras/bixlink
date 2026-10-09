@@ -36,7 +36,7 @@ function RegisterPage() {
       setNotice('Check your email to confirm your account, then sign in.');
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
-  return <BixShell><main className="register-numbered"><VaultStardust/><div className="register-numbered-inner register-vault">
+  return <BixShell><main className="register-numbered"><VaultStardust/><Link to="/" className="relative z-10 mb-3 inline-flex items-center gap-1.5 self-start rounded-full border border-chart-3/30 bg-card/50 px-3 py-1.5 text-xs font-bold text-chart-3 backdrop-blur-md">← Back to HOME</Link><div className="register-numbered-inner register-vault">
     <header className="register-numbered-brand"><VaultLogo/><div className="auth-badge mb-4"><span/>SECURE ONBOARDING</div><h1>BIX<span>LINK</span></h1><VaultNode/></header>
     <form onSubmit={submit} className="space-y-6" aria-label="Create BIXLINK account">
       <fieldset className="register-numbered-step"><legend className="sr-only">Personal profile</legend><span className="register-step-number" aria-hidden>01</span><div className="space-y-2.5"><h2>Personal profile</h2>
