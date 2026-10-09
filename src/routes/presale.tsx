@@ -8,8 +8,10 @@ import { useMember } from '@/lib/useMember';
 import { buyPresale, getPresaleStatus } from '@/lib/presale.functions';
 import { presaleReleased } from '@/lib/presale';
 import { number } from '@/lib/bixlink';
-import { Lock, Pickaxe, ShieldCheck, Users } from 'lucide-react';
+import { Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide-react';
 import reactor from '@/assets/presale-rocket.mp4.asset.json';
+import reactorWebm from '@/assets/presale-rocket.webm.asset.json';
+import reactorPoster from '@/assets/presale-rocket-poster.jpg.asset.json';
 
 export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Four presale packages: $500, $1,000, $5,000 and $10,000 with mining-based BIX release.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: PresalePage });
 
@@ -19,6 +21,8 @@ function PresalePage() {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ['presale', user?.id], queryFn: () => load(), enabled: !!user });
   const [now, setNow] = useState(() => Date.now()); const [msg, setMsg] = useState(''); const [busy, setBusy] = useState<number | null>(null);
+  const [sound, setSound] = useState(false); const vidRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => { if (vidRef.current) vidRef.current.muted = !sound; }, [sound]);
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   const s = q.data; const cfg = s?.config;
   const orders = (s?.orders ?? []).filter(o => o.status === 'locked');
