@@ -114,6 +114,41 @@ export const getAdminData = createServerFn({ method: 'GET' }).middleware([requir
   return { stakes: stakes.data ?? [], packages: packages.data ?? [], settings: settings.data ?? [], sources: sources.data ?? [], referrals: referrals.data ?? [], members };
 });
 
+export const getAdminReport = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await verifyAdmin(context);
+  const [stakes, bixStakes, refBonuses, usdtBonuses] = await Promise.all([
+    context.supabase.from('stakes').select('amount_usd,status,created_at'),
+    context.supabase.from('bix_stakes').select('amount_bix,status,created_at'),
+    context.supabase.from('bix_referral_bonuses').select('amount_bix,status,created_at'),
+    context.supabase.from('bix_usdt_network_bonuses').select('total_usd,usdt_amount,bix_amount,created_at'),
+  ]);
+  for (const result of [stakes, bixStakes, refBonuses, usdtBonuses]) if (result.error) throw result.error;
+  const now = new Date();
+  const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const sum = <T extends { created_at: string }>(rows: T[], pick: (row: T) => number, since?: Date) =>
+    rows.filter(row => !since || new Date(row.created_at) >= since).reduce((total, row) => total + pick(row), 0);
+  const stakeRows = stakes.data ?? [];
+  const bixRows = bixStakes.data ?? [];
+  const refRows = refBonuses.data ?? [];
+  const usdtRows = usdtBonuses.data ?? [];
+  const bucket = <T extends { created_at: string }>(rows: T[], pick: (row: T) => number) => ({
+    day: sum(rows, pick, dayStart),
+    month: sum(rows, pick, monthStart),
+    total: sum(rows, pick),
+  });
+  return {
+    stakingUsd: bucket(stakeRows, row => Number(row.amount_usd)),
+    stakingCount: bucket(stakeRows, () => 1),
+    stakingBix: bucket(bixRows, row => Number(row.amount_bix)),
+    referralBix: bucket(refRows, row => Number(row.amount_bix)),
+    networkUsdt: bucket(usdtRows, row => Number(row.total_usd)),
+    networkBix: bucket(usdtRows, row => Number(row.bix_amount)),
+    miningBix: { day: 0, month: 0, total: 0 },
+    miningNote: 'Mesin mining belum aktif — hadiah mining belum tercatat.',
+  };
+});
+
 export const getOwnerBixVault = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   await verifyAdmin(context);
   const { data, error } = await context.supabase.rpc('bix_owner_vault');
