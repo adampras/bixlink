@@ -39,6 +39,8 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   const { language, setLanguage, t, updates } = useI18n();
   const marketEnabled = publicConfig?.readiness.marketEnabled === true;
   const reviewerRole = useReviewerAccess(user?.id);
+  const presale = usePresaleStatus(user?.id);
+  const presaleOn = Boolean(user) && presaleOpen(presale.data);
   const official = useQuery({ queryKey: ['bix-market-updates'], queryFn: () => getMarketUpdates(), enabled: Boolean(user) && marketEnabled, staleTime: 60_000, refetchInterval: 60_000 });
   const visibleUpdates = marketEnabled && official.data?.announcements.length ? official.data.announcements.map(post => ({ id: `${post.id}:${post.published_at}`, title: post.title, body: post.body })) : updates;
   const [notificationsOpen, setNotificationsOpen] = useState(false);
