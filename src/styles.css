@@ -7,7 +7,7 @@
 .member-mining {
   --mining-gold: oklch(.84 .12 85);
   --mining-edge: color-mix(in oklch,var(--mining-gold) 65%,var(--border));
-  --mining-glass: color-mix(in oklch,var(--foreground) 5%,var(--background));
+  --mining-glass: color-mix(in oklch,var(--foreground) 5%,transparent);
   --mining-reflection: color-mix(in oklch,var(--foreground) 9%,transparent);
   --mining-shadow: 0 6px 24px color-mix(in oklch,var(--background) 30%,transparent);
   max-width:680px; margin-inline:auto; padding:20px;
@@ -19,7 +19,7 @@
 .mining-verified { color:var(--chart-2); }
 .mining-unverified { color:var(--muted-foreground); }
 .mining-engine { position:relative; width:100%; height:260px; margin:16px auto; }
-.mining-engine video { width:100%; height:100%; display:block; object-fit:contain; mask-image:radial-gradient(ellipse at center,var(--foreground) 48%,transparent 76%); }
+.mining-engine video { width:auto; max-width:100%; height:100%; margin-inline:auto; display:block; object-fit:contain; mask-image:radial-gradient(ellipse at center,var(--foreground) 58%,transparent 100%); }
 .mining-video-control { position:absolute; right:0; bottom:0; border-color:var(--mining-edge); color:var(--mining-gold); background:var(--mining-glass); }
 .mining-figures { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
 .mining-figures > div { min-width:0; padding:12px 10px; text-align:center; }
