@@ -6,6 +6,7 @@ import { BixShell } from '@/components/BixShell';
 import { passwordValid, PASSWORD_HINT } from '@/lib/password-rule';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable';
 
 export const Route = createFileRoute('/register')({
   validateSearch: (search: Record<string, unknown>): { ref?: string | undefined } => ({ ref: typeof search['ref'] === 'string' ? search['ref'] : undefined }),
@@ -50,7 +51,7 @@ function RegisterPage() {
         <input aria-label="Referral code" inputMode="text" maxLength={10} value={referral} onChange={event => setReferral(event.target.value.toUpperCase())} className="register-numbered-input register-network-code" placeholder="BIX-123456"/>
       </div></fieldset>
       {notice && <p role="status" className="text-sm leading-6 text-chart-2">{notice}</p>}
-      <div className="space-y-4 pt-4"><Button type="submit" disabled={busy} className="register-numbered-submit vault-shimmer">{busy ? 'Please wait…' : 'Create account'}<ArrowRight/></Button></div>
+      <div className="space-y-4 pt-4"><Button type="submit" disabled={busy} className="register-numbered-submit vault-shimmer">{busy ? 'Please wait…' : 'Create account'}<ArrowRight/></Button><div className="text-center text-[10px] font-bold tracking-widest text-muted-foreground">OR</div><Button type="button" variant="outline" className="h-12 w-full rounded-full border-border bg-card" onClick={async () => { const r = await lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/auth` }); if (r.error) setNotice(r.error.message); else if (!r.redirected) window.location.assign('/'); }}>Register with Google</Button></div>
     </form>
   </div></main></BixShell>;
 }
