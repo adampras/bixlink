@@ -10,6 +10,7 @@ export const defaultSpaces: ContentItem[] = [
   ['CRYPTO', 'Pengembangan utilitas digital dan kajian kripto. Catatan internal BIX terpisah dari perdagangan dan token on-chain.'],
   ['RWA', 'Rencana pelaporan aset nyata yang transparan. Verifikasi aset dan aspek hukum diperlukan sebelum integrasi.'],
   ['ADVERTISING', 'Rencana ruang promosi di aplikasi, situs dan komunitas. Pendapatan ditampilkan setelah tercatat dan ditinjau.'],
+  ['MARKETPLACE', 'Rencana pusat pertukaran produk, voucher dan layanan merchant dengan BIX PAY. Dirilis bertahap setelah pengujian.'],
 ].map(([title, description]) => ({ title: title ?? '', description: description ?? '', enabled: true, size: 'md' }));
 export const defaultRoadmap: ContentItem[] = [
   ['Q1 2026', 'Peluncuran', 'Menyiapkan identitas BIXLINK dan akses akun.'],
