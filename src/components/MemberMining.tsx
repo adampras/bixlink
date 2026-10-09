@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { BadgeCheck, LockKeyhole, Pause, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import engine from '@/assets/bix-mining-engine.mp4.asset.json';
+import webEngine from '@/assets/bix-mining-engine.webm.asset.json';
 import poster from '@/assets/bix-mining-engine-poster.jpg.asset.json';
 
 /** Presentation only; video playback never awards rewards. */
@@ -26,7 +27,7 @@ export function MemberMining({ emailVerified }: { emailVerified: boolean }) {
   return <section className="member-mining" aria-labelledby="member-mining-title">
     <div className="mining-heading"><h2 id="member-mining-title">BIX MINING</h2><span className={emailVerified ? 'mining-verified' : 'mining-unverified'}>{emailVerified ? <BadgeCheck size={15}/> : <LockKeyhole size={15}/>} {emailVerified ? 'Terverifikasi' : 'Verifikasi email'}</span></div>
     <div className="mining-engine">
-      <video ref={video} muted loop playsInline preload="metadata" poster={poster.url} aria-label="Mesin mining BIX" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}><source src={engine.url} type="video/mp4"/></video>
+      <video ref={video} muted loop playsInline preload="metadata" poster={poster.url} aria-label="Mesin mining BIX" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}><source src={webEngine.url} type="video/webm"/><source src={engine.url} type="video/mp4"/></video>
       <Button variant="outline" size="icon" className="mining-video-control" aria-label={playing ? 'Jeda video mining' : 'Putar video mining'} title={playing ? 'Jeda video mining' : 'Putar video mining'} onClick={() => { const element = video.current; if (!element) return; if (element.paused) element.play().catch(() => {}); else element.pause(); }}>{playing ? <Pause/> : <Play/>}</Button>
     </div>
     <dl className="mining-figures">
