@@ -1486,3 +1486,15 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
 .sovereign-card .terminal-action{border-radius:999px}
 @keyframes sov-sweep{0%,100%{transform:translateX(-30%)}50%{transform:translateX(30%)}}
 @media (prefers-reduced-motion:reduce){.sovereign-card::before{animation:none}}
+
+/* Member luxury pass 2 */
+.yield-ticker{display:inline-flex;align-items:center;gap:8px;border:1px solid hsl(var(--chart-2)/.35);background:hsl(var(--chart-2)/.08);color:hsl(var(--chart-2));border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;letter-spacing:.04em}
+.yield-ticker i{width:7px;height:7px;border-radius:50%;background:hsl(var(--chart-2));box-shadow:0 0 10px hsl(var(--chart-2));animation:vault-blink 1.6s ease-in-out infinite}
+.duration-package,.boost-tier,.booster-steps article,.booster-member-status{position:relative;overflow:hidden;border-color:hsl(var(--chart-3)/.28)!important;box-shadow:inset 0 1px 0 hsl(var(--chart-3)/.18),0 18px 44px -26px hsl(var(--chart-3)/.4)}
+.duration-package::after,.boost-tier::after{content:"";position:absolute;inset:-50% -80%;background:linear-gradient(115deg,transparent 44%,hsl(var(--chart-3)/.12) 50%,transparent 56%);transform:translateX(-60%);transition:transform 1.1s ease;pointer-events:none}
+.duration-package:hover::after,.boost-tier:hover::after{transform:translateX(60%)}
+.duration-option[aria-pressed=true]{border-color:hsl(var(--chart-3)/.7)!important;background:hsl(var(--chart-3)/.14)!important;color:hsl(var(--chart-3))!important;box-shadow:0 0 14px -4px hsl(var(--chart-3)/.6)}
+.vault-swap{position:relative;overflow:hidden}
+.wallet-vault::after,.vault-swap::after{content:"";position:absolute;right:12px;bottom:12px;width:84px;height:84px;background:url('/favicon.png') center/contain no-repeat;opacity:.07;pointer-events:none}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;background:currentColor;box-shadow:0 0 8px currentColor;animation:vault-blink 1.8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.yield-ticker i,.status-dot{animation:none}.duration-package::after,.boost-tier::after{display:none}}
