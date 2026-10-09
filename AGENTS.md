@@ -17,8 +17,8 @@
 - Claim splash session before display; hydrate on public entry pages only, never in admin, so remounts cannot interrupt editing.
 - Share one session store across routes; use layout-shaped placeholders.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
-- Owner clone accounts are tracked in bix_clone_accounts and funded only via bix_allocations, excluded from public member stats — keeps internal accounts auditable and separate from real members.
-- Leader virtual balances live in bix_leaders and are added inside bix_wallet_balance; withdraw RPC blocks the virtual portion until bix_leader_status reports qualified — one server-side gate for the turnover rule.
+- Clone accounts (bix_clone_accounts) are funded only via bix_allocations and excluded from member stats — auditable and separate.
+- Leader virtual balances (bix_leaders) count in bix_wallet_balance but withdraw is blocked until bix_leader_status qualifies — one server gate.
 - Use cycle-safe NETWORK generation exploration and ancestry breadcrumbs with separate BIX/USDT metrics to keep unlimited depth readable.
 - Keep member Settings on its dedicated route but expose it through Profile rather than primary navigation, so the main trading navigation stays focused.
 - Calculate staking yield as a live display-only ledger projection from active stakes; never add projected USDT or BIX profit to spendable balances without a separate settlement rule.
@@ -34,11 +34,9 @@
 - Store shared themes in readiness with scoped semantic overrides; validate Appearance through the shared registry to preserve selections and owner authorization without widening access.
 - On-chain deployment uses only the owner injected TokenPocket wallet and fixed-supply bytecode; store the address, never keys or internal-balance conversions.
 - VIP tiers live in SQL; team sales = active downline USDT stakes minus clones; one owner-reviewed, vault-funded row per user+level — server-enforced one-time rewards.
-- Network bonuses are source-stake-idempotent; native BIX ones stay owner-reviewed. USDT direct + daily matching live in bix_usdt_network_bonuses (unique per stake/receiver/level/day), split USDT/BIX by referral settings and summed into balance functions; a pg_cron job settles matching daily — one idempotent ledger for network rewards.
-
-- Package terms use duration_apys on eight original rows; retire clones without deleting historical stakes. RPCs snapshot stake terms; native BIX alone uses owner maxApy with matching SQL/UI formulas, preserving USDT terms and existing contracts.
-
+- Network bonuses are source-stake-idempotent (native BIX owner-reviewed); USDT direct/daily matching use unique rows in bix_usdt_network_bonuses settled by pg_cron — one idempotent reward ledger.
+- Package terms use duration_apys; RPCs snapshot stake terms and clones retire without deleting stakes — existing contracts never change.
 - Store time-based market movement in bix_market as display-only simulation with server-verified owner writes; preserve the ledger reference to avoid changing settlement or fabricating trading.
 - Keep landing tokenomics in a presentation-only module, honoring visibility without changing member terms.
 - Settle vBIX via authenticated RPCs; video never awards funds. Convert through an atomic capped marketing ledger, never the owner vault.
-- Fox Arena quests pay vBIX only via the bix_quest_claim RPC (server-verified, one claim per period, advisory-locked) into bix_vbix_ledger kind 'quest', sharing the 100 vBIX account cap and 1M pool; season prizes are owner-reviewed records, never auto-credited — keeps game rewards inside the existing promotional budget.
+- Fox Arena quest vBIX is paid only by the server-verified bix_quest_claim RPC, sharing mining's account cap and pool; season prizes are owner-reviewed, never auto-credited — game rewards stay in the promo budget.
