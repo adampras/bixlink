@@ -23,7 +23,7 @@ async function loadNews(): Promise<NewsItem[]> {
       if (!r.ok) return [];
       const xml = await r.text();
       return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 8).map(m => {
-        const pick = (tag: string) => decode(m[1].match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`))?.[1] ?? '');
+        const pick = (tag: string) => decode((m[1] ?? "").match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`))?.[1] ?? '');
         return { title: pick('title'), link: pick('link'), source: f.source, published: new Date(pick('pubDate') || Date.now()).toISOString() };
       }).filter(n => n.title && /^https?:\/\//.test(n.link));
     } catch { return []; }
