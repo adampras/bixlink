@@ -196,6 +196,42 @@ export type Database = {
           },
         ]
       }
+      bix_presale_orders: {
+        Row: {
+          bix_amount: number
+          created_at: string
+          id: string
+          package_usd: number
+          release_days: number
+          sponsor_bix: number
+          sponsor_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          bix_amount: number
+          created_at?: string
+          id?: string
+          package_usd: number
+          release_days: number
+          sponsor_bix?: number
+          sponsor_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          bix_amount?: number
+          created_at?: string
+          id?: string
+          package_usd?: number
+          release_days?: number
+          sponsor_bix?: number
+          sponsor_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_referral_bonuses: {
         Row: {
           amount_bix: number
@@ -993,6 +1029,11 @@ export type Database = {
         Args: { p_amount: number; p_code: string; p_note: string }
         Returns: string
       }
+      bix_presale_buy: { Args: { p_usd: number }; Returns: Json }
+      bix_presale_config: { Args: never; Returns: Json }
+      bix_presale_paid: { Args: { p_user: string }; Returns: number }
+      bix_presale_save: { Args: { p_config: Json }; Returns: Json }
+      bix_presale_status: { Args: never; Returns: Json }
       bix_public_home_stats: { Args: never; Returns: Json }
       bix_referral_tree: {
         Args: never
