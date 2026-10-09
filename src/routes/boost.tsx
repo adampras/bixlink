@@ -25,6 +25,7 @@ function BoostPage() {
 
     <section className="booster-vault overflow-hidden border-b border-border">
       <div className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
+        <Link to="/presale" className="mb-4 flex items-center justify-between rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-bold"><span>PRESALE STAKING BIX · $500 – $10,000</span><ArrowUpRight size={16}/></Link>
         <h1 className="section-title !mt-0 !text-3xl !tracking-normal sm:!text-5xl">BOOST YOUR <span>APY</span></h1>
         <div className="mt-5 grid min-w-0 gap-6 lg:grid-cols-2 lg:items-start lg:gap-10">
         <div className="min-w-0">
