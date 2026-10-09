@@ -19,7 +19,7 @@ export function MyNftCollection({ userId, bixPrice }: { userId?: string | undefi
     <div className="eyebrow">REACTOR NFT</div><h2 className="mt-2 font-display text-2xl font-black">My NFT collection</h2>
     <p className="mt-1 text-xs text-muted-foreground">In-app certificates, not on-chain tokens. When a contract completes, the card holds your package value; sell it to the owner for BIX at the current price (owner review).</p>
     <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">{q.data.map(c => <div key={c.id} className="space-y-2">
-      <NftCard tier={c.tier as NftTier} packageId={c.package_id} valueUsd={Number(c.value_usd)} days={c.lock_days} serial={c.serial}/>
+      <NftCard tier={c.tier as NftTier} packageId={c.package_id} valueUsd={Number(c.value_usd)} days={c.lock_days} serial={c.serial} artworkId={c.artwork_id} imagePath={c.artwork_image_path}/>
       <p className="text-center text-[11px] font-bold text-muted-foreground">{LABEL[c.status] ?? c.status}{c.sale_bix ? ` · ${number(Number(c.sale_bix), { maximumFractionDigits: 2 })} BIX` : ''}</p>
       {c.status === 'redeemable' && <Button size="sm" className="w-full rounded-full bg-chart-3 text-background" disabled={busy === c.id} onClick={async () => {
         if (!(await confirmPin())) return; setBusy(c.id);
