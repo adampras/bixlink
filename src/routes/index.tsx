@@ -7,6 +7,7 @@ import { getHomeMarketData } from '@/lib/market.functions';
 import { money, number } from '@/lib/bixlink';
 import { MemberGate } from '@/components/MemberGate';
 import { useMember, usePublicConfig } from '@/lib/useMember';
+import { usePresaleStatus, presaleOpen } from '@/components/PresaleEntry';
 import { LandingExperience } from '@/components/LandingExperience';
 import { ContentCarousel } from '@/components/ContentCarousel';
 import { defaultRoadmap, defaultSpaces } from '@/lib/landing-content';
