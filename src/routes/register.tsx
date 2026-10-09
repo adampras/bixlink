@@ -34,8 +34,8 @@ function RegisterPage() {
       setNotice('Check your email to confirm your account, then sign in.');
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
-  return <BixShell><main className="register-numbered"><div className="register-numbered-inner">
-    <header className="register-numbered-brand"><h1>BIX<span>LINK</span></h1><i/></header>
+  return <BixShell><main className="register-numbered"><div className="register-numbered-inner register-vault">
+    <header className="register-numbered-brand"><div className="auth-badge mb-4"><span/>SECURE ONBOARDING</div><h1>BIX<span>LINK</span></h1><i/></header>
     <form onSubmit={submit} className="space-y-6" aria-label="Create BIXLINK account">
       <fieldset className="register-numbered-step"><legend className="sr-only">Personal profile</legend><span className="register-step-number" aria-hidden>01</span><div className="space-y-2.5"><h2>Personal profile</h2>
         <input aria-label="Full name" required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={event => setFullName(event.target.value)} className="register-numbered-input" placeholder="Full Name"/>

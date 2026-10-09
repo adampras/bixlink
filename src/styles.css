@@ -1444,3 +1444,12 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
 .auth-badge { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 4px 12px; font-size: 10px; font-weight: 800; letter-spacing: .14em; color: hsl(var(--ruby)); border: 1px solid hsl(var(--ruby) / .4); background: hsl(var(--ruby) / .1); }
 .auth-badge span { width: 6px; height: 6px; border-radius: 99px; background: hsl(var(--ruby)); box-shadow: 0 0 8px hsl(var(--ruby)); }
 .auth-vault .form-input:focus { border-color: hsl(var(--ruby) / .6); box-shadow: 0 0 0 3px hsl(var(--ruby) / .15); }
+
+/* Register vault — obsidian glass + ruby accents */
+.register-vault { position: relative; border-radius: 24px; padding: 28px 20px; border: 1px solid hsl(var(--chart-3) / .25); background: linear-gradient(160deg, hsl(var(--card) / .7), hsl(var(--background) / .5)); backdrop-filter: blur(20px); box-shadow: inset 0 1px 0 hsl(var(--foreground) / .07), 0 24px 60px -30px hsl(var(--ruby) / .5); overflow: hidden; }
+.register-vault::before { content: ''; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, transparent, hsl(var(--ruby) / .85), hsl(var(--chart-3) / .85), transparent); }
+.register-vault .register-step-number { border-color: hsl(var(--ruby) / .4) !important; background: hsl(var(--ruby) / .1) !important; color: hsl(var(--ruby)) !important; }
+.register-vault .register-numbered-step:focus-within .register-step-number { box-shadow: 0 0 12px hsl(var(--ruby) / .55); }
+.register-vault .register-numbered-input { background: hsl(var(--background) / .45); backdrop-filter: blur(8px); }
+.register-vault .register-numbered-input:focus { border-color: hsl(var(--ruby) / .6); box-shadow: 0 0 0 3px hsl(var(--ruby) / .15); }
+.register-vault .register-numbered-submit { background: linear-gradient(120deg, hsl(var(--chart-3)), hsl(var(--chart-3) / .85) 60%, hsl(var(--ruby) / .85)); box-shadow: 0 10px 30px -12px hsl(var(--ruby) / .6); }
