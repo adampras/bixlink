@@ -75,7 +75,7 @@ function WalletPage() {
   };
   return <BixShell><main className="mx-auto max-w-5xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="WALLET">
-      <div className="wallet-summary relative overflow-hidden rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-3/10 p-6 shadow-[0_0_40px_color-mix(in_oklab,var(--chart-3)_18%,transparent)]">
+      <div className="wallet-summary auric-card relative overflow-hidden rounded-[20px] border border-chart-3 bg-gradient-to-br from-primary/25 via-card to-chart-3/10 p-6 shadow-[0_0_40px_color-mix(in_oklab,var(--chart-3)_18%,transparent)]">
         <div className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet size={16}/> Available balance</div>
         <strong className="numeric mt-2 block break-all text-[28px] leading-snug font-black text-foreground md:text-[32px]">{number(data?.balance ?? 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT</strong>
         {fiatShown.length > 0 && <><div className="wallet-fx-grid mt-4">{fiatShown.map(item => <div key={item.code}><span>{item.label}</span><b className="numeric">{item.code} {number((data?.balance ?? 0) * item.rate, { maximumFractionDigits: item.code === 'IDR' ? 0 : 2 })}</b></div>)}</div>

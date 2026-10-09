@@ -30,7 +30,7 @@ export function ReactorVideo({ maximum, visual }: { maximum: number; visual?: st
     observer.observe(element);
     return () => { observer.disconnect(); element.pause(); };
   }, [selection]);
-  return <div className="reactor-glass-stage">
+  return <div className="reactor-glass-stage auric-card">
     <video key={selection} ref={ref} className="reactor-glass-video" poster={media.poster.url} muted loop playsInline preload="metadata" aria-label="BIXCOIN gold reactor"><source src={media.webm.url} type="video/webm"/><source src={media.mp4.url} type="video/mp4"/></video>
     <div className="reactor-glass-lens"><span>BIX BOOSTER</span><small>UP TO</small><strong>{maximum}%</strong><small>MONTHLY · PROJECTION</small></div>
   </div>;
