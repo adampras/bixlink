@@ -1365,3 +1365,18 @@ html[data-color-mode="light"] .reactor-glass-stage {
 }
 html[data-color-mode="light"] .reactor-glass-stage video { mask-image:radial-gradient(ellipse at center,var(--foreground) 55%,transparent 85%); }
 @media(max-width:480px) { html[data-color-mode="light"] .mining-engine { height:260px; padding:16px 20px; } html[data-color-mode="light"] .reactor-glass-stage { padding:16px 18px; } }
+
+/* Obsidian Gold Vault — wallet luxury glass (presentation only) */
+:root { --vault-gold:oklch(.84 .11 85); --vault-gold-deep:oklch(.62 .12 78); --vault-obsidian:oklch(.14 .02 260); }
+.site-shell .wallet-vault { background:linear-gradient(135deg, color-mix(in oklab,var(--vault-gold) 14%,transparent) 0%, color-mix(in oklab,var(--vault-obsidian) 78%,transparent) 42%, color-mix(in oklab,var(--vault-obsidian) 88%,transparent) 70%, color-mix(in oklab,var(--vault-gold) 9%,transparent) 100%) !important; backdrop-filter:blur(18px); box-shadow:inset 0 1px 0 color-mix(in oklab,var(--vault-gold) 50%,transparent), 0 18px 44px -18px color-mix(in oklab,var(--vault-gold) 35%,transparent) !important; }
+.site-shell .wallet-vault strong { color:var(--foreground); }
+.vault-pill { display:inline-flex; align-items:center; border-radius:9999px; padding:3px 10px; font-size:10px; font-weight:700; letter-spacing:.12em; color:var(--vault-gold); border:1px solid color-mix(in oklab,var(--vault-gold) 55%,transparent); background:color-mix(in oklab,var(--vault-gold) 10%,transparent); box-shadow:inset 0 1px 0 color-mix(in oklab,var(--vault-gold) 30%,transparent); }
+.vault-pill.text-sm { font-size:13px; letter-spacing:0; padding:4px 12px; }
+.site-shell .vault-btn-primary { color:oklch(.18 .02 80); border:1px solid color-mix(in oklab,var(--vault-gold) 80%,transparent); background:linear-gradient(135deg, oklch(.9 .1 90), oklch(.78 .12 80) 55%, oklch(.88 .09 88)); box-shadow:inset 0 1px 0 oklch(1 0 0 / 55%), 0 8px 24px -10px color-mix(in oklab,var(--vault-gold) 70%,transparent); transition:box-shadow .2s, filter .2s; }
+.site-shell .vault-btn-primary:hover { filter:brightness(1.06); box-shadow:inset 0 1px 0 oklch(1 0 0 / 60%), 0 10px 30px -8px color-mix(in oklab,var(--vault-gold) 85%,transparent); }
+.site-shell .vault-btn-ghost { background:color-mix(in oklab,var(--foreground) 6%,transparent) !important; backdrop-filter:blur(12px); border-color:color-mix(in oklab,var(--vault-gold) 50%,transparent) !important; color:var(--foreground); }
+.site-shell .vault-slab { backdrop-filter:blur(14px); box-shadow:inset 0 1px 0 color-mix(in oklab,var(--vault-gold) 28%,transparent); border-color:color-mix(in oklab,var(--vault-gold) 35%,transparent) !important; }
+.site-shell .vault-slab > span > span:first-child { box-shadow:0 0 18px -4px color-mix(in oklab,var(--vault-gold) 55%,transparent); background:color-mix(in oklab,var(--vault-gold) 12%,transparent); color:var(--vault-gold); }
+.site-shell .vault-swap .form-input:focus { border-color:var(--vault-gold); box-shadow:0 0 0 3px color-mix(in oklab,var(--vault-gold) 18%,transparent); }
+html[data-color-mode="light"] { --vault-gold:oklch(.58 .12 78); --vault-obsidian:oklch(.99 .005 85); }
+html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px 0 oklch(1 0 0 / 80%), 0 16px 36px -18px color-mix(in oklab,var(--vault-gold) 45%,transparent) !important; }
