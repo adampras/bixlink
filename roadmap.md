@@ -98,10 +98,10 @@
 - [x] Organize Owner 2 into APY, DOMPET (WLT-01 only), Market and Referral; signed-in save/reload verified for APY, WLT-01, reference, movement and referrals, other setting/wallet writes denied, four phone sections fit without overflow; Owner 1 keeps undelegated controls and team management.
 - [x] Add uploaded BOOSTER replacement video choice without image mascots; owner save/reload and video pause/play verified, 500ms reactor splash and install icons load, reviewer heading ADMIIN PANEL applied; APY unchanged. Native APK packaging is not included.
 - [x] Install approved clear-gold mining design below member Major Crypto with cleaned uploaded engine video; signed-in playback and pause/play verified, phone layout has no overflow, start stays disabled and no rewards are awarded.
-- [ ] Activate mining ledger and owner rate/boost controls after the owner supplies the initial reward rate and staking boost formula.
+- [x] Activate vBIX mining ledger and owner rate/boost controls with the approved daily rate and fixed active-stake boost.
 - [x] Add independent owner Buka/Tutup mining visibility; saved close/open verified after reload and HOME hides/shows accordingly. Video advances with working pause/play, clear background blends into HOME, 384px layout fits; rewards remain inactive pending rate/boost approval.
 - [x] vBIX mining ledger with 5-level network bonus; machine runs only after verified member presses Start
 - [ ] Open vBIX→BIX conversion (1,000,000 BIX pool, 100 BIX/account) — waits on owner conversion rate
-- [ ] Show HOME vBIX/BIX balances and owner conversion controls with rate and server-enforced pool/account caps.
-- [ ] Add both uploaded videos to shared BOOST/landing choices and configurable video-1 splash.
-- [ ] Add futuristic transparent-glass Appearance and verify saved settings, media, and HOME balances.
+- [x] Show HOME live vBIX and recorded BIX balances; owner conversion controls persist, opening without a rate is blocked; RPC enforces pool/account caps. Conversion remains closed until owner supplies rate; no balance-changing conversion tested.
+- [x] Add both uploaded transparent WebM videos to shared BOOST/landing choices; both play, saved video 1 matches public landing; video-1 splash duration saves and reloads.
+- [x] Add BIXLINK Future Glass Appearance; owner save/reload verified, HOME balances and BOOST fit 384px with no overflow or runtime errors. Theme and video 1 left selected; splash kept at 0.5 seconds.
