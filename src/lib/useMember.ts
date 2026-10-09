@@ -104,7 +104,9 @@ export function usePublicConfig() {
       return {
         packages: (p.data ?? []) as Package[],
         booster: (settings['booster'] ?? { enabled: true, rate: 25 }) as { enabled: boolean; rate: number; maxApy?: number },
-        boosterVisual: (settings['booster_visual'] ?? { visual: 'video' }) as { visual: 'video' | 'reactor' | 'fox' | 'emblem' },
+        boosterVisual: (settings['booster_visual'] ?? { visual: 'video' }) as { visual: 'video' | 'reactor' | 'orbital' | 'crystal' },
+        splash: (settings['splash'] ?? { durationSeconds: 0.5 }) as { durationSeconds: number },
+        miningConversion: (settings['mining_conversion'] ?? { enabled: false, vbixPerBix: null }) as { enabled: boolean; vbixPerBix: number | null },
         wallet: (settings['wallet'] ?? { address: '', network: 'USDT BEP20' }) as { address: string; network: string },
         depositWallets: (((settings['deposit_wallets'] as { wallets?: { code: string; label: string; network: 'BEP20' | 'TRC20' | 'ERC20'; address: string; enabled: boolean }[] } | undefined)?.wallets) ?? []).filter(w => w.enabled && w.address),
         miningVisibility: (settings['mining_visibility'] ?? { visible: true }) as { visible: boolean },
@@ -118,6 +120,7 @@ export function usePublicConfig() {
         readiness: { ...defaultReadiness, ...settings['readiness'] } as Readiness,
       };
     },
+    refetchInterval: 15_000,
   });
 }
 

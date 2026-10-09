@@ -7,6 +7,9 @@ import { canonicalJson } from '@/lib/json-content';
 import { movementInputSchema, resolveMovement, simulatedQuote, type MovementInput } from '@/lib/internal-market';
 import { canReviewerEditSetting } from '@/lib/reviewer-policy';
 import { miningVisibilitySchema } from '@/lib/mining-visibility';
+import { miningConversionSchema } from '@/lib/mining-conversion';
+import { splashSettingsSchema } from '@/lib/splash-settings';
+import { BOOSTER_VIDEOS } from '@/lib/booster-visual';
 
 const verifyAdmin = async (context: { supabase: any; userId: string; claims?: any }) => {
   const { data: admin, error } = await context.supabase.rpc('is_bix_admin');
@@ -213,12 +216,14 @@ export const setPackageEnabled = createServerFn({ method: 'POST' }).middleware([
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token' | 'booster_withdraw' | 'mining' | 'mining_visibility'; value: Record<string, unknown> }) => {
-    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token','booster_withdraw','mining','mining_visibility']), value: z.record(z.unknown()) }).parse(data);
+  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token' | 'booster_withdraw' | 'mining' | 'mining_visibility' | 'mining_conversion' | 'splash'; value: Record<string, unknown> }) => {
+    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token','booster_withdraw','mining','mining_visibility','mining_conversion','splash']), value: z.record(z.unknown()) }).parse(data);
+    if (parsed.key === 'mining_conversion') parsed.value = miningConversionSchema.parse(parsed.value);
+    if (parsed.key === 'splash') parsed.value = splashSettingsSchema.parse(parsed.value);
     if (parsed.key === 'mining_visibility') parsed.value = miningVisibilitySchema.parse(parsed.value);
     if (parsed.key === 'mining') parsed.value = z.object({ enabled: z.boolean(), ratePerDay: z.number().positive().max(100), mode: z.enum(['day','second']), stakeBoostPct: z.number().min(0).max(100) }).strict().parse(parsed.value);
     if (parsed.key === 'booster_withdraw') parsed.value = z.object({ bix: z.boolean(), usdt: z.boolean() }).strict().parse(parsed.value);
-    if (parsed.key === 'booster_visual') parsed.value = z.object({ visual: z.enum(['reactor', 'video']) }).strict().parse(parsed.value);
+    if (parsed.key === 'booster_visual') parsed.value = z.object({ visual: z.enum(BOOSTER_VIDEOS) }).strict().parse(parsed.value);
     if (parsed.key === 'booster') parsed.value = z.object({ enabled: z.boolean(), rate: z.number().min(0).max(45), maxApy: z.number().min(8).max(45).optional() }).strict().parse(parsed.value);
     if (parsed.key === 'readiness') parsed.value = z.object({ legalEnabled: z.boolean(), kycEnabled: z.boolean(), readinessEnabled: z.boolean(), marketEnabled: z.boolean(), homeOverviewEnabled: z.boolean().optional(), footerEnabled: z.boolean().optional(), footerTitle: z.string().trim().max(80).optional(), footerBody: z.string().trim().max(320).optional(), footerContact: z.string().trim().max(120).optional(), presentationTheme: z.enum(PRESENTATION_THEMES).optional() }).strict().parse(parsed.value);
     if (parsed.key === 'unstake') z.object({ tiers: z.array(z.object({ days: z.number().int().min(1).max(3650), pct: z.number().min(0).max(100) })).min(1).max(10) }).parse(parsed.value);
