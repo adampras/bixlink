@@ -39,7 +39,11 @@ function PresalePage() {
     <div className="eyebrow"><Pickaxe size={14}/> EXCLUSIVE</div>
     <h1 className="section-title !mt-1">PRESALE <span>STAKING BIX</span></h1>
     <div className="presale-reactor-stage">
-      <video src={reactor.url} autoPlay muted loop playsInline className="presale-reactor-video"/>
+      <video ref={vidRef} autoPlay muted loop playsInline preload="metadata" poster={reactorPoster.url} className="presale-reactor-video" aria-label="BIXLINK presale rocket launch">
+        <source src={reactorWebm.url} type="video/webm"/>
+        <source src={reactor.url} type="video/mp4"/>
+      </video>
+      <button type="button" className="presale-sound-toggle" aria-label={sound ? 'Mute reactor sound' : 'Unmute reactor sound'} onClick={() => setSound(v => !v)}>{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</button>
     </div>
     <dl className="mt-4 grid grid-cols-3 gap-2 border-y border-border py-3 text-center">
       <div><dd className="numeric font-display text-lg font-bold text-primary">{number(locked, { maximumFractionDigits: 2 })}</dd><dt className="text-[10px] text-muted-foreground">Locked BIX</dt></div>

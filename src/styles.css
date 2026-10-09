@@ -1561,3 +1561,11 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
   background: radial-gradient(closest-side, transparent 52%, var(--background) 94%);
   pointer-events: none;
 }
+.presale-sound-toggle {
+  position: absolute; right: 10px; top: 10px; z-index: 2;
+  display: grid; place-items: center; width: 32px; height: 32px;
+  border-radius: 9999px; border: 1px solid var(--border);
+  background: var(--card); color: var(--muted-foreground);
+  backdrop-filter: blur(8px); cursor: pointer;
+}
+.presale-sound-toggle:hover { color: var(--primary); border-color: var(--primary); }
