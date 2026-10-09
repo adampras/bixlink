@@ -21,7 +21,8 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
     <section className="hero-section relative overflow-hidden border-b border-border">
       <div className={`relative mx-auto flex max-w-3xl flex-col items-center px-5 pb-14 pt-12 text-center ${compact ? 'md:pb-16 md:pt-14' : 'md:pb-20 md:pt-16'}`}>
         <div className="inline-flex items-center gap-2 rounded-full border border-chart-3/30 bg-chart-3/10 px-4 py-1.5 backdrop-blur-sm"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-chart-3"/><span className="text-[10px] font-bold uppercase tracking-[0.15em] text-chart-3">21 MILLION BIX TOKEN</span></div>
-        <h1 className="mt-6 bg-gradient-to-b from-foreground via-chart-3 to-chart-3/60 bg-clip-text font-display text-6xl font-bold leading-[0.9] tracking-tighter text-transparent md:text-8xl">BIXLINK</h1>
+        <h1 className="mt-6 bg-gradient-to-b from-foreground via-chart-3 to-chart-3/60 bg-clip-text font-display text-6xl font-bold leading-[0.9] tracking-tighter text-transparent drop-shadow-[0_0_24px_hsl(var(--chart-3)/0.25)] md:text-8xl">BIXLINK</h1>
+        <p className="mt-4 bg-gradient-to-r from-foreground via-chart-3 to-foreground bg-clip-text font-display text-sm font-semibold tracking-wider text-transparent md:text-base">Smart Staking. Real Utility. Infinite Horizon.</p>
         <div className="mt-3 flex flex-wrap justify-center gap-1.5 font-display text-[10px] font-medium uppercase tracking-[0.15em] md:text-xs"><span className="text-primary">STAKE BIXCOIN</span><span className="text-muted-foreground/50">•</span><span className="text-chart-2">EXCHANGE</span><span className="text-muted-foreground/50">•</span><span className="text-chart-3">DEFI</span><span className="text-muted-foreground/50">•</span><span className="text-foreground/80">RWA NARRATIVE</span></div>
         <ReactorVideo maximum={maximum}/>
         <div className="z-10 mt-6 grid w-full grid-cols-3 gap-2">
