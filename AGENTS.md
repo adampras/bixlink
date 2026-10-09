@@ -30,7 +30,7 @@
 - Share HOME/landing content and narratives (bundled fallbacks) through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
 - Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
 - Owner 2 uses scoped RPCs for packages, Market, Referral and WLT-01 only; wallet edits lock the row and preserve other wallets. Clone reviews stay excluded; vault, bonus funding, teams and other settings remain Owner 1.
-- Share category/roadmap carousels and a CDN-backed video selector across landing and Booster; install icons use a manifest without offline caching.
+- Share category/roadmap carousels and a CDN-backed video selector across landing and Booster; public-entry splash uses owner timing; install icons use a manifest without caching.
 - Store shared owner themes in readiness with scoped semantic overrides; this preserves public presentation without widening access.
 - Validate Appearance via the shared registry to preserve existing selections and owner authorization.
 - On-chain deployment uses only the owner injected TokenPocket wallet and fixed-supply bytecode; store the address, never keys or internal-balance conversions.
@@ -41,4 +41,4 @@
 
 - Store time-based market movement in bix_market as display-only simulation with server-verified owner writes; preserve the ledger reference to avoid changing settlement or fabricating trading.
 - Keep landing tokenomics in a presentation-only module, honoring visibility without changing member terms.
-- Mining stays presentation-only until approved; video never awards BIX. Keep owner visibility separate from rewards to prevent side effects.
+- Settle vBIX via authenticated RPCs; video never awards funds. Convert through an atomic capped marketing ledger, never the owner vault.
