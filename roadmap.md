@@ -107,5 +107,5 @@
 - [x] Add BIXLINK Future Glass Appearance; owner save/reload verified, HOME balances and BOOST fit 384px with no overflow or runtime errors. Theme and video 1 left selected; splash kept at 0.5 seconds.
 - [x] Add long narratives with tap-to-open detail popups for categories, roadmap and a new Marketplace category.
 - [x] Presale reactor video: compact blended look + poster/WebM + member mute toggle for thruster sound.
-- [ ] Keep presale headings and balances readable outside the video vignette.
-- [ ] Add the presale rocket to shared owner-selectable BOOST APY/landing videos and verify playback.
+- [x] Keep presale headings and balances readable outside the video vignette; verified mobile text and sound toggle.
+- [x] Add the presale rocket to shared owner-selectable BOOST APY/landing videos; owner save/reload and real playback verified, previous selection restored, financial rules unchanged.
