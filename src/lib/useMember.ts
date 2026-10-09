@@ -7,6 +7,7 @@ import { getMyData, assignReferral, ensureProfile } from '@/lib/bixlink.function
 import { fallbackPackages, type Package } from '@/lib/bixlink';
 import { defaultLandingContent, type LandingContent } from '@/lib/landing-content';
 import { defaultReadiness, type Readiness } from '@/lib/readiness';
+import { defaultSiteControl, effectiveSettings, type SiteControl } from '@/lib/site-control';
 
 // The member session is resolved once per app load and shared by every route, so
 // switching menus reuses the known session instead of re-asking the auth service
@@ -96,12 +97,18 @@ export function usePublicConfig() {
   return useQuery({
     queryKey: ['bix-public-config'],
     queryFn: async () => {
-      const [p, s] = await Promise.all([
+      const [p, s, a] = await Promise.all([
         supabase.from('packages').select('*').eq('enabled', true).eq('retired', false).order('price_usd'),
         supabase.from('app_settings').select('*'),
+        supabase.rpc('is_bix_admin').then(r => Boolean(r.data), () => false),
       ]);
-      const settings = Object.fromEntries((s.data ?? []).map(r => [r.key, r.value as Record<string, any>]));
+      const live = Object.fromEntries((s.data ?? []).map(r => [r.key, r.value as Record<string, any>]));
+      const siteControl = { ...defaultSiteControl, ...live['site_control'] } as SiteControl;
+      const isAdmin = a;
+      const settings = effectiveSettings(live, siteControl, live['site_snapshot'], isAdmin);
       return {
+        siteControl,
+        isAdmin,
         packages: (p.data ?? []) as Package[],
         booster: (settings['booster'] ?? { enabled: true, rate: 25 }) as { enabled: boolean; rate: number; maxApy?: number },
         boosterVisual: (settings['booster_visual'] ?? { visual: 'video' }) as { visual: 'video' | 'reactor' | 'orbital' | 'crystal' },
