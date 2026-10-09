@@ -50,7 +50,7 @@ function RegisterPage() {
         <input aria-label="Referral code" inputMode="text" maxLength={10} value={referral} onChange={event => setReferral(event.target.value.toUpperCase())} className="register-numbered-input register-network-code" placeholder="BIX-123456"/>
       </div></fieldset>
       {notice && <p role="status" className="text-sm leading-6 text-chart-2">{notice}</p>}
-      <div className="space-y-4 pt-4"><Button type="submit" disabled={busy} className="register-numbered-submit vault-shimmer">{busy ? 'Please wait…' : 'Create account'}<ArrowRight/></Button><p className="text-center text-[11px] font-semibold uppercase text-muted-foreground">Member already? <Link to="/auth" className="register-access-link">Sign in</Link></p></div>
+      <div className="space-y-4 pt-4"><Button type="submit" disabled={busy} className="register-numbered-submit vault-shimmer">{busy ? 'Please wait…' : 'Create account'}<ArrowRight/></Button></div>
     </form>
   </div></main></BixShell>;
 }
