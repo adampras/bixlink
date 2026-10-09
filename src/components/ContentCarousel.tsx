@@ -23,6 +23,19 @@ export function ContentCarousel({ items, group, title }: { items: ContentItem[];
     update();
     return () => observer.disconnect();
   }, [items]);
+  const paused = useRef(false);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = window.setInterval(() => {
+      const element = track.current;
+      if (!element || paused.current || document.hidden) return;
+      const card = element.firstElementChild;
+      const step = (card?.getBoundingClientRect().width ?? 280) + 16;
+      const end = element.scrollLeft + element.clientWidth >= element.scrollWidth - 2;
+      element.scrollTo({ left: end ? 0 : element.scrollLeft + step, behavior: 'smooth' });
+    }, 3800);
+    return () => window.clearInterval(timer);
+  }, [items]);
   if (!visible.length) return null;
   const move = (direction: number) => {
     const element = track.current;
@@ -31,7 +44,9 @@ export function ContentCarousel({ items, group, title }: { items: ContentItem[];
     const step = (card?.getBoundingClientRect().width ?? 280) + 16;
     element.scrollBy({ left: step * direction, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   };
-  return <div className="content-carousel" data-content-group={group}>
+  const hold = () => { paused.current = true; };
+  const release = () => { window.setTimeout(() => { paused.current = false; }, 2500); };
+  return <div className="content-carousel" data-content-group={group} onMouseEnter={hold} onMouseLeave={release} onTouchStart={hold} onTouchEnd={release} onFocus={hold} onBlur={release}>
     <header className="mb-5 flex items-center justify-between gap-3">
       <h2 className="min-w-0 break-words text-lg font-bold uppercase leading-6">{title}</h2>
       <div className="flex shrink-0 gap-2">
