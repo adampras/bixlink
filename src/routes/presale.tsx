@@ -37,13 +37,13 @@ function PresalePage() {
   };
   return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
     <div className="eyebrow"><Pickaxe size={14}/> EXCLUSIVE</div>
-    <h1 className="section-title !mt-1">PRESALE <span>STAKING BIX</span></h1>
+    <h1 className="mt-2 font-display text-3xl font-extrabold leading-tight text-foreground sm:text-5xl">PRESALE <span className="block text-chart-3">STAKING BIX</span></h1>
     <div className="presale-reactor-stage">
       <video ref={vidRef} autoPlay muted loop playsInline preload="metadata" poster={reactorPoster.url} className="presale-reactor-video" aria-label="BIXLINK presale rocket launch">
         <source src={reactorWebm.url} type="video/webm"/>
         <source src={reactor.url} type="video/mp4"/>
       </video>
-      <button type="button" className="presale-sound-toggle" aria-label={sound ? 'Mute reactor sound' : 'Unmute reactor sound'} onClick={() => setSound(v => !v)}>{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</button>
+      <Button type="button" variant="outline" size="icon" className="presale-sound-toggle" aria-label={sound ? 'Mute reactor sound' : 'Unmute reactor sound'} onClick={() => setSound(v => !v)}>{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</Button>
     </div>
     <dl className="mt-4 grid grid-cols-3 gap-2 border-y border-border py-3 text-center">
       <div><dd className="numeric font-display text-lg font-bold text-primary">{number(locked, { maximumFractionDigits: 2 })}</dd><dt className="text-[10px] text-muted-foreground">Locked BIX</dt></div>
@@ -62,7 +62,7 @@ function PresalePage() {
       </article>)}</div>
       {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
       {orders.length > 0 && <section className="mt-8"><h2 className="font-display text-lg font-black">My presale positions</h2><div className="mt-3 grid gap-2">{orders.map(o => { const r = presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now); return <div key={o.id} className="rounded-lg border border-border p-3 text-xs"><div className="flex justify-between"><b>${number(Number(o.package_usd))}</b><span className="numeric">{number(r, { maximumFractionDigits: 4 })} / {number(Number(o.bix_amount))} BIX</span></div><div className="apy-meter mt-2"><i style={{ width: `${Math.min(100, r / Number(o.bix_amount) * 100)}%` }}/></div></div>; })}</div></section>}
-      {(s?.sponsorRewards.length ?? 0) > 0 && <p className="mt-6 text-xs text-muted-foreground"><Users size={13} className="inline"/> Sponsor rewards: {s!.sponsorRewards.length} referral purchases, released on the same mining schedule.</p>}
+      {(s?.sponsorRewards?.length ?? 0) > 0 && <p className="mt-6 text-xs text-muted-foreground"><Users size={13} className="inline"/> Sponsor rewards: {s?.sponsorRewards?.length} referral purchases, released on the same mining schedule.</p>}
     </>}
     <p className="terminal-disclosure mt-8"><ShieldCheck size={14}/> No guarantee of profit. Presale BIX is an internal ledger allocation, not an on-chain token. Mined-out BIX is shown for tracking and is not spendable until the owner opens settlement. Sponsor bonus goes only to your direct referrer.</p>
   </main></BixShell>;
