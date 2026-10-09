@@ -10,7 +10,7 @@ import { number } from '@/lib/bixlink';
 
 const LABEL: Record<string, string> = { minted: 'Contract running', redeemable: 'Ready to sell', sale_pending: 'Sale pending owner review', sold: 'Sold for BIX', burned: 'Burned (early unstake)' };
 
-export function MyNftCollection({ userId, bixPrice }: { userId?: string; bixPrice: number }) {
+export function MyNftCollection({ userId, bixPrice }: { userId?: string | undefined; bixPrice: number }) {
   const load = useServerFn(getMyNfts); const sell = useServerFn(sellNft); const qc = useQueryClient();
   const [busy, setBusy] = useState('');
   const q = useQuery({ queryKey: ['my-nfts', userId], enabled: !!userId, queryFn: () => load() });
