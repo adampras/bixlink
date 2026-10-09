@@ -40,6 +40,8 @@ function Home() {
   const recordedStake = Number(stats.total_staked_usd ?? 0);
   const idrReference = recordedStake * 16250;
   const bixPrice = Number(data.bixPriceUsd ?? 0.84291);
+  const presale = usePresaleStatus(user?.id);
+  const presaleVisible = Boolean(user) && presaleOpen(presale.data);
 
   if (!user) return <BixShell><LandingExperience {...(cfg ? { packages: cfg.packages, booster: cfg.booster.enabled, bixPrice: cfg.bixMarket.priceUsd, content: cfg.landingContent } : {})}/></BixShell>;
   return <BixShell><MemberGate ready={ready} signedIn={!!user} title="HOME"><main>
