@@ -41,3 +41,4 @@
 - Store time-based market movement in bix_market as display-only simulation with server-verified owner writes; preserve the ledger reference to avoid changing settlement or fabricating trading.
 - Keep landing tokenomics in a presentation-only module, honoring visibility without changing member terms.
 - Settle vBIX via authenticated RPCs; video never awards funds. Convert through an atomic capped marketing ledger, never the owner vault.
+- Fox Arena quests pay vBIX only via the bix_quest_claim RPC (server-verified, one claim per period, advisory-locked) into bix_vbix_ledger kind 'quest', sharing the 100 vBIX account cap and 1M pool; season prizes are owner-reviewed records, never auto-credited — keeps game rewards inside the existing promotional budget.
