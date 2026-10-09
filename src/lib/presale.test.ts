@@ -12,3 +12,9 @@ describe('presale', () => {
     expect(presaleReleased(1000, 10, start, start + 99 * 86_400_000)).toBe(1000);
   });
 });
+
+import { bixForUsd } from './presale';
+describe('presale price', () => {
+  it('$500 at $0.50 per BIX gives 1000 BIX', () => { expect(bixForUsd(500, 0.5)).toBe(1000); });
+  it('$10000 at $0.10 per BIX gives 100000 BIX', () => { expect(bixForUsd(10000, 0.1)).toBe(100000); });
+});
