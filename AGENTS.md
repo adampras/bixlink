@@ -30,7 +30,7 @@
 - Share HOME/landing content and narratives (bundled fallbacks) through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
 - Keep the public landing at / for signed-out visitors and account forms at /auth and /register; LAUNCH APP opens /auth so marketing never embeds account forms.
 - Owner 2 uses scoped RPCs for packages, Market, Referral and WLT-01 only; wallet edits lock the row and preserve other wallets. Clone reviews stay excluded; vault, bonus funding, teams and other settings remain Owner 1.
-- Share category/roadmap carousels and a CDN-backed video selector across landing and Booster; public-entry splash uses owner timing; install icons use a manifest without caching.
+- Share category/roadmap carousels and one CDN-backed video registry across landing and Booster; contain video vignettes within their stage so headings and balances stay visible; public-entry splash uses owner timing; install icons use a manifest without caching.
 - Store shared themes in readiness with scoped semantic overrides; validate Appearance through the shared registry to preserve selections and owner authorization without widening access.
 - On-chain deployment uses only the owner injected TokenPocket wallet and fixed-supply bytecode; store the address, never keys or internal-balance conversions.
 - VIP tiers live in SQL; team sales = active downline USDT stakes minus clones; one owner-reviewed, vault-funded row per user+level — server-enforced one-time rewards.
