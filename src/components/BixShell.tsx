@@ -85,6 +85,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
       <Link to={"/"} className="header-brand"><img src={headerMark.url} width={42} height={42} alt="BIXLINK fox emblem" className="rounded-full object-cover"/><span className="brand-mark" aria-label="BIXLINK"><i>BIX</i><i>LI</i><i>NK</i></span></Link>
       {user && <nav className="hidden items-center gap-3 md:flex">
         {NAV.map(n => <Link key={n.to} to={n.to} className={`nav-link ${path === n.to ? 'active' : ''}`}><n.icon size={15}/>{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>)}
+        {presaleOn && <Link to="/presale" className={`nav-link ${path === '/presale' ? 'active' : ''}`}><Crown size={15}/>PRESALE</Link>}
       </nav>}
       <div className="header-tools">
         {user && reviewerRole.data && <Button asChild title="ADMIN PANEL BIX" variant="outline" size="sm" className="header-reviewer"><Link to="/review" aria-label="ADMIN PANEL BIX"><ClipboardCheck/><span>ADMIN PANEL BIX</span></Link></Button>}
