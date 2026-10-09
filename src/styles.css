@@ -1411,3 +1411,11 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
   background: url('./assets/bixlink-fox.png') center/contain no-repeat; opacity: .06; filter: sepia(1) saturate(2) hue-rotate(5deg); }
 .reactor-landing .eyebrow { color: var(--lux-gold); }
 .reactor-landing .landing-ecosystem { background: radial-gradient(ellipse 60% 50% at 50% 100%, color-mix(in oklch, var(--lux-gold) 8%, transparent), transparent 70%); }
+
+/* Glass control island + gold logo ring */
+.header-island { display: inline-flex; align-items: center; gap: 2px; border: 1px solid color-mix(in oklab, var(--chart-3) 22%, var(--border)); border-radius: 999px; padding: 2px; background: color-mix(in oklab, var(--card) 55%, transparent); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 8%, transparent), 0 4px 14px color-mix(in oklab, var(--background) 40%, transparent); }
+.header-island > * + * { border-left: 1px solid color-mix(in oklab, var(--chart-3) 18%, transparent); }
+.site-header .header-island :is(.mode-toggle,.language-trigger) { border: 0 !important; background: transparent !important; border-radius: 999px !important; height: 30px; }
+.site-header .header-island .mode-toggle { width: 32px; }
+.header-brand img { border: 1px solid color-mix(in oklab, var(--chart-3) 45%, transparent) !important; box-shadow: 0 0 14px color-mix(in oklab, var(--chart-3) 28%, transparent) !important; }
+.header-tools { gap: 6px !important; }
