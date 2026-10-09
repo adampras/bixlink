@@ -9,9 +9,9 @@ import { buyPresale, getPresaleStatus } from '@/lib/presale.functions';
 import { presaleReleased } from '@/lib/presale';
 import { number } from '@/lib/bixlink';
 import { Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide-react';
-import reactor from '@/assets/presale-rocket.mp4.asset.json';
-import reactorWebm from '@/assets/presale-rocket.webm.asset.json';
-import reactorPoster from '@/assets/presale-rocket-poster.jpg.asset.json';
+import reactor from '@/assets/presale-rocket-dark.mp4.asset.json';
+import reactorWebm from '@/assets/presale-rocket-dark.webm.asset.json';
+import reactorPoster from '@/assets/presale-rocket-dark-poster.jpg.asset.json';
 
 export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Four presale packages: $500, $1,000, $5,000 and $10,000 with mining-based BIX release.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: PresalePage });
 
