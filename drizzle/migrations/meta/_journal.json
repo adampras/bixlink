@@ -323,6 +323,20 @@
       "when": 1791553421216,
       "tag": "0045_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1791559889850,
+      "tag": "0046_fox_arena",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1791559915234,
+      "tag": "0047_arena_admin_config",
+      "breakpoints": true
     }
   ]
 }

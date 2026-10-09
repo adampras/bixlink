@@ -232,6 +232,33 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_quest_claims: {
+        Row: {
+          amount_vbix: number
+          created_at: string
+          id: string
+          period_key: string
+          quest_key: string
+          user_id: string
+        }
+        Insert: {
+          amount_vbix: number
+          created_at?: string
+          id?: string
+          period_key: string
+          quest_key: string
+          user_id: string
+        }
+        Update: {
+          amount_vbix?: number
+          created_at?: string
+          id?: string
+          period_key?: string
+          quest_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_referral_bonuses: {
         Row: {
           amount_bix: number
@@ -278,6 +305,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      bix_season_prizes: {
+        Row: {
+          amount_bix: number
+          created_at: string
+          id: string
+          points: number
+          rank: number
+          reviewed_at: string | null
+          reviewed_by: string | null
+          season: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_bix: number
+          created_at?: string
+          id?: string
+          points: number
+          rank: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          season: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_bix?: number
+          created_at?: string
+          id?: string
+          points?: number
+          rank?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          season?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       bix_stake_profit_withdrawals: {
         Row: {
@@ -990,6 +1056,10 @@ export type Database = {
       }
       apply_bix_leader: { Args: never; Returns: undefined }
       assign_bix_referrer: { Args: { p_code: string }; Returns: boolean }
+      bix_arena_admin_config: { Args: never; Returns: Json }
+      bix_arena_config: { Args: never; Returns: Json }
+      bix_arena_save: { Args: { p_config: Json }; Returns: undefined }
+      bix_arena_streak: { Args: { p_user: string }; Returns: number }
       bix_asset_balances: {
         Args: { p_user: string }
         Returns: {
@@ -1012,6 +1082,15 @@ export type Database = {
       }
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
+      bix_leaderboard: {
+        Args: { p_season?: string }
+        Returns: {
+          is_me: boolean
+          member: string
+          points: number
+          rank: number
+        }[]
+      }
       bix_mining_conversion_status: { Args: never; Returns: Json }
       bix_mining_convert: { Args: never; Returns: Json }
       bix_mining_rate: { Args: { p_user: string }; Returns: number }
@@ -1035,6 +1114,11 @@ export type Database = {
       bix_presale_save: { Args: { p_config: Json }; Returns: Json }
       bix_presale_status: { Args: never; Returns: Json }
       bix_public_home_stats: { Args: never; Returns: Json }
+      bix_quest_claim: {
+        Args: { p_answer?: number; p_key: string }
+        Returns: Json
+      }
+      bix_quest_status: { Args: never; Returns: Json }
       bix_referral_tree: {
         Args: never
         Returns: {
@@ -1066,6 +1150,10 @@ export type Database = {
         Args: { p_approve: boolean; p_bonus: string }
         Returns: undefined
       }
+      bix_review_season_prize: {
+        Args: { p_approve: boolean; p_id: string }
+        Returns: undefined
+      }
       bix_review_vip: {
         Args: { p_approve: boolean; p_reward: string }
         Returns: undefined
@@ -1075,6 +1163,7 @@ export type Database = {
         Args: { p_key: string; p_value: Json }
         Returns: undefined
       }
+      bix_season_close: { Args: { p_season: string }; Returns: number }
       bix_set_stake_compound: {
         Args: { p_on: boolean; p_stake: string }
         Returns: undefined

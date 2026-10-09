@@ -1530,3 +1530,16 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
 .sentiment-bar { position: relative; height: 6px; border-radius: 99px; background: linear-gradient(90deg, var(--destructive), var(--chart-3), var(--chart-2)); }
 .sentiment-bar i { position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 99px; background: var(--foreground); border: 2px solid var(--background); transform: translate(-50%, -50%); transition: left .6s; }
 @media (prefers-reduced-motion: reduce) { .market-ticker-track { animation: none; } }
+
+/* Fox Arena */
+.arena-den { display: flex; align-items: center; gap: 16px; border: 1px solid var(--border); border-radius: 18px; padding: 16px; background: color-mix(in oklab, var(--card) 85%, transparent); }
+.arena-fox { border-radius: 999px; flex-shrink: 0; }
+.arena-fox.tier-1 { box-shadow: 0 0 0 2px #b07a45, 0 0 18px #b07a4555; }
+.arena-fox.tier-2 { box-shadow: 0 0 0 2px #c9d1d9, 0 0 20px #c9d1d966; }
+.arena-fox.tier-3 { box-shadow: 0 0 0 2px var(--chart-3), 0 0 26px color-mix(in oklab, var(--chart-3) 50%, transparent); }
+.arena-fox.tier-4 { box-shadow: 0 0 0 2px var(--chart-2), 0 0 32px color-mix(in oklab, var(--chart-2) 55%, transparent); animation: arena-glow 2.4s ease-in-out infinite; }
+@keyframes arena-glow { 50% { filter: brightness(1.2); } }
+.arena-cap { height: 6px; border-radius: 99px; background: var(--muted); overflow: hidden; }
+.arena-cap i { display: block; height: 100%; background: linear-gradient(90deg, var(--chart-3), var(--chart-2)); }
+.arena-quest { border: 1px solid var(--border); border-radius: 14px; padding: 14px; background: color-mix(in oklab, var(--card) 80%, transparent); }
+@media (prefers-reduced-motion: reduce) { .arena-fox.tier-4 { animation: none; } }
