@@ -8,6 +8,7 @@ import poster from '@/assets/bix-mining-engine-poster.jpg.asset.json';
 /** Presentation only; video playback never awards rewards. */
 export function MemberMining({ emailVerified }: { emailVerified: boolean }) {
   const video = useRef<HTMLVideoElement>(null);
+  const manuallyPaused = useRef(false);
   const [playing, setPlaying] = useState(false);
   useEffect(() => {
     const element = video.current;
@@ -15,7 +16,7 @@ export function MemberMining({ emailVerified }: { emailVerified: boolean }) {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     let visible = false;
     const sync = () => {
-      if (visible && !document.hidden && !reduced.matches) element.play().catch(() => {});
+      if (visible && !document.hidden && !reduced.matches && !manuallyPaused.current) element.play().catch(() => {});
       else element.pause();
     };
     const observer = new IntersectionObserver(([entry]) => { visible = !!entry?.isIntersecting; sync(); });
@@ -27,8 +28,8 @@ export function MemberMining({ emailVerified }: { emailVerified: boolean }) {
   return <section className="member-mining" aria-labelledby="member-mining-title">
     <div className="mining-heading"><h2 id="member-mining-title">BIX MINING</h2><span className={emailVerified ? 'mining-verified' : 'mining-unverified'}>{emailVerified ? <BadgeCheck size={15}/> : <LockKeyhole size={15}/>} {emailVerified ? 'Terverifikasi' : 'Verifikasi email'}</span></div>
     <div className="mining-engine">
-      <video ref={video} muted loop playsInline preload="metadata" poster={poster.url} aria-label="Mesin mining BIX" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}><source src={webEngine.url} type="video/webm"/><source src={engine.url} type="video/mp4"/></video>
-      <Button variant="outline" size="icon" className="mining-video-control" aria-label={playing ? 'Jeda video mining' : 'Putar video mining'} title={playing ? 'Jeda video mining' : 'Putar video mining'} onClick={() => { const element = video.current; if (!element) return; if (element.paused) element.play().catch(() => {}); else element.pause(); }}>{playing ? <Pause/> : <Play/>}</Button>
+      <video ref={video} muted loop playsInline preload="auto" poster={poster.url} aria-label="Mesin mining BIX" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}><source src={webEngine.url} type="video/webm"/><source src={engine.url} type="video/mp4"/></video>
+      <Button variant="outline" size="icon" className="mining-video-control" aria-label={playing ? 'Jeda video mining' : 'Putar video mining'} title={playing ? 'Jeda video mining' : 'Putar video mining'} onClick={() => { const element = video.current; if (!element) return; if (element.paused) { manuallyPaused.current = false; if (element.error) element.load(); element.play().catch(() => {}); } else { manuallyPaused.current = true; element.pause(); } }}>{playing ? <Pause/> : <Play/>}</Button>
     </div>
     <dl className="mining-figures">
       <div><dt>Total mining</dt><dd>— <small>BIX</small></dd></div>

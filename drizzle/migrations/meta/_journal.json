@@ -295,6 +295,13 @@
       "when": 1791456738920,
       "tag": "0041_reviewer_scoped_market_referral_wallet",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1791511794726,
+      "tag": "0042_mining_visibility_and_owner_settings_reads",
+      "breakpoints": true
     }
   ]
 }

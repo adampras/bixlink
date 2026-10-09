@@ -13,7 +13,7 @@
 - Grant owner access only after server-validated identity and a matching verified owner email; client state is never an authority for admin actions.
 - Read public package and settings data with RLS and run account-specific operations with authenticated server functions; this separates public browsing from private records.
 - BIX/USDT conversions are reviewed internal ledger requests at the owner reference, never exchange execution or custody.
-- Public presentation settings are centrally controlled through authenticated owner writes.
+- Presentation settings use authenticated owner writes for central control.
 - Claim splash session before display; hydrate on public entry pages only, never in admin, so remounts cannot interrupt editing.
 - Share one session store across routes; use layout-shaped placeholders.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
@@ -41,4 +41,4 @@
 
 - Store time-based market movement in bix_market as display-only simulation with server-verified owner writes; preserve the ledger reference to avoid changing settlement or fabricating trading.
 - Keep landing tokenomics in a presentation-only module, honoring visibility without changing member terms.
-- Keep mining presentation-only until reward accounting is approved; video playback never awards BIX.
+- Mining stays presentation-only until approved; video never awards BIX. Keep owner visibility separate from rewards to prevent side effects.

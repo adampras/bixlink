@@ -1,0 +1,2 @@
+CREATE POLICY "Members read mining visibility" ON public.app_settings FOR SELECT TO authenticated USING (key = 'mining_visibility');
+CREATE POLICY "Owner reads all settings" ON public.app_settings FOR SELECT TO authenticated USING (public.is_bix_admin());

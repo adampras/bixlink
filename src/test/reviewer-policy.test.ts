@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { canReviewerEditSetting, reviewerDepositWallet, reviewerWalletSchema } from '@/lib/reviewer-policy';
 
 describe('Owner 2 scope', () => {
+  it('keeps mining controls with Owner 1', () => {
+    expect(canReviewerEditSetting('mining_visibility')).toBe(false);
+    expect(canReviewerEditSetting('mining')).toBe(false);
+  });
   it('allows Market and Referral only, not other owner settings', () => {
     expect(canReviewerEditSetting('bix_market')).toBe(true);
     expect(canReviewerEditSetting('referrals')).toBe(true);
