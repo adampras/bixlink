@@ -111,7 +111,7 @@ export function usePublicConfig() {
         isAdmin,
         packages: (p.data ?? []) as Package[],
         booster: (settings['booster'] ?? { enabled: true, rate: 25 }) as { enabled: boolean; rate: number; maxApy?: number },
-        boosterVisual: (settings['booster_visual'] ?? { visual: 'video' }) as { visual: 'video' | 'reactor' | 'orbital' | 'crystal' },
+        boosterVisual: (settings['booster_visual'] ?? { visual: 'video' }) as { visual: 'video' | 'reactor' | 'orbital' | 'crystal' | 'rocket' },
         splash: (settings['splash'] ?? { durationSeconds: 0.5 }) as { durationSeconds: number },
         miningConversion: (settings['mining_conversion'] ?? { enabled: false, vbixPerBix: null }) as { enabled: boolean; vbixPerBix: number | null },
         wallet: (settings['wallet'] ?? { address: '', network: 'USDT BEP20' }) as { address: string; network: string },
