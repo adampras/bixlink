@@ -40,3 +40,4 @@
 - Keep landing tokenomics in a presentation-only module, honoring visibility without changing member terms.
 - Settle vBIX via authenticated RPCs; video never awards funds. Convert through an atomic capped marketing ledger, never the owner vault.
 - Fox Arena quest vBIX is paid only by the server-verified bix_quest_claim RPC, sharing mining's account cap and pool; season prizes are owner-reviewed, never auto-credited — game rewards stay in the promo budget.
+- Reactor NFT cards (bix_nft_cards) are in-app certificates minted by trigger per active stake; at contract completion they replace the USDT principal refund and are sold to the owner via owner-reviewed, vault-funded buyback into bix_allocations — one idempotent card per stake.
