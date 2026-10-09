@@ -1056,6 +1056,7 @@ export type Database = {
       }
       apply_bix_leader: { Args: never; Returns: undefined }
       assign_bix_referrer: { Args: { p_code: string }; Returns: boolean }
+      bix_arena_admin_config: { Args: never; Returns: Json }
       bix_arena_config: { Args: never; Returns: Json }
       bix_arena_save: { Args: { p_config: Json }; Returns: undefined }
       bix_arena_streak: { Args: { p_user: string }; Returns: number }

@@ -330,6 +330,13 @@
       "when": 1791559889850,
       "tag": "0046_fox_arena",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1791559915234,
+      "tag": "0047_arena_admin_config",
+      "breakpoints": true
     }
   ]
 }
