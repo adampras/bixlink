@@ -107,6 +107,7 @@ export function usePublicConfig() {
         boosterVisual: (settings['booster_visual'] ?? { visual: 'video' }) as { visual: 'video' | 'reactor' | 'fox' | 'emblem' },
         wallet: (settings['wallet'] ?? { address: '', network: 'USDT BEP20' }) as { address: string; network: string },
         depositWallets: (((settings['deposit_wallets'] as { wallets?: { code: string; label: string; network: 'BEP20' | 'TRC20' | 'ERC20'; address: string; enabled: boolean }[] } | undefined)?.wallets) ?? []).filter(w => w.enabled && w.address),
+        miningVisibility: (settings['mining_visibility'] ?? { visible: true }) as { visible: boolean },
         swap: (settings['swap'] ?? { enabled: false }) as { enabled: boolean },
         bixPay: (settings['bix_pay'] ?? { enabled: false }) as { enabled: boolean },
         usdtTransfer: (settings['usdt_transfer'] ?? { enabled: false }) as { enabled: boolean },

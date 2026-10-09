@@ -6,6 +6,7 @@ import { PRESENTATION_THEMES } from '@/lib/presentation-theme';
 import { canonicalJson } from '@/lib/json-content';
 import { movementInputSchema, resolveMovement, simulatedQuote, type MovementInput } from '@/lib/internal-market';
 import { canReviewerEditSetting } from '@/lib/reviewer-policy';
+import { miningVisibilitySchema } from '@/lib/mining-visibility';
 
 const verifyAdmin = async (context: { supabase: any; userId: string; claims?: any }) => {
   const { data: admin, error } = await context.supabase.rpc('is_bix_admin');
@@ -211,8 +212,9 @@ export const setPackageEnabled = createServerFn({ method: 'POST' }).middleware([
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token' | 'booster_withdraw' | 'mining'; value: Record<string, unknown> }) => {
-    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token','booster_withdraw','mining']), value: z.record(z.unknown()) }).parse(data);
+  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token' | 'booster_withdraw' | 'mining' | 'mining_visibility'; value: Record<string, unknown> }) => {
+    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token','booster_withdraw','mining','mining_visibility']), value: z.record(z.unknown()) }).parse(data);
+    if (parsed.key === 'mining_visibility') parsed.value = miningVisibilitySchema.parse(parsed.value);
     if (parsed.key === 'mining') parsed.value = z.object({ enabled: z.boolean(), ratePerDay: z.number().positive().max(100), mode: z.enum(['day','second']), stakeBoostPct: z.number().min(0).max(100) }).strict().parse(parsed.value);
     if (parsed.key === 'booster_withdraw') parsed.value = z.object({ bix: z.boolean(), usdt: z.boolean() }).strict().parse(parsed.value);
     if (parsed.key === 'booster_visual') parsed.value = z.object({ visual: z.enum(['reactor', 'video']) }).strict().parse(parsed.value);
