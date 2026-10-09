@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { VaultStardust, VaultLogo, VaultNode } from '@/components/VaultFlourish';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
-import { passwordValid } from '@/lib/password-rule';
+import { passwordValid, PASSWORD_HINT } from '@/lib/password-rule';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 
