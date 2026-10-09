@@ -196,6 +196,68 @@ export type Database = {
           },
         ]
       }
+      bix_nft_cards: {
+        Row: {
+          created_at: string
+          id: string
+          lock_days: number
+          package_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sale_bix: number | null
+          sale_price_usd: number | null
+          sale_requested_at: string | null
+          serial: number
+          stake_id: string
+          status: string
+          tier: string
+          user_id: string
+          value_usd: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lock_days: number
+          package_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sale_bix?: number | null
+          sale_price_usd?: number | null
+          sale_requested_at?: string | null
+          serial?: number
+          stake_id: string
+          status?: string
+          tier: string
+          user_id: string
+          value_usd: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lock_days?: number
+          package_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sale_bix?: number | null
+          sale_price_usd?: number | null
+          sale_requested_at?: string | null
+          serial?: number
+          stake_id?: string
+          status?: string
+          tier?: string
+          user_id?: string
+          value_usd?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_nft_cards_stake_id_fkey"
+            columns: ["stake_id"]
+            isOneToOne: true
+            referencedRelation: "stakes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bix_presale_orders: {
         Row: {
           bix_amount: number
@@ -1102,6 +1164,12 @@ export type Database = {
         Args: { p_total: number }
         Returns: Record<string, unknown>
       }
+      bix_nft_review: {
+        Args: { p_approve: boolean; p_card: string }
+        Returns: undefined
+      }
+      bix_nft_sell: { Args: { p_card: string }; Returns: Json }
+      bix_nft_tier: { Args: { p_days: number; p_usd: number }; Returns: string }
       bix_owner_vault: { Args: never; Returns: Json }
       bix_pay_lookup: { Args: { p_code: string }; Returns: boolean }
       bix_pay_send: {
