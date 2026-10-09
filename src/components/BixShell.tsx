@@ -1,10 +1,13 @@
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useServerFn } from '@tanstack/react-start';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Home, Wallet, Layers, Zap, User, Network, LogIn, ShieldCheck, Lock, BadgeCheck, Bell, CheckCheck, ChevronDown, TrendingUp, ClipboardCheck } from 'lucide-react';
+import { Home, Wallet, Layers, Zap, User, Network, LogIn, ShieldCheck, Lock, BadgeCheck, Bell, CheckCheck, ChevronDown, TrendingUp, ClipboardCheck, Crown } from 'lucide-react';
 import { useMember, usePublicConfig, useReviewerAccess } from '@/lib/useMember';
+import { getPresaleStatus } from '@/lib/presale.functions';
+import { usePresaleStatus, presaleOpen } from '@/components/PresaleEntry';
 import headerLogo from '@/assets/bixlink-logo-gold.webp';
 const headerMark = { url: headerLogo };
 import { LANGUAGES, type Language, useI18n } from '@/lib/i18n';
