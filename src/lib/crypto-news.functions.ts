@@ -35,7 +35,7 @@ async function loadCoins(): Promise<TrendingCoin[]> {
   try {
     const r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=30&page=1&price_change_percentage=24h', { headers: { accept: 'application/json' } });
     if (!r.ok) return [];
-    const rows = (await r.json()) as Array<Record<string, unknown>>;
+    const rows = (await r.json()) as Array<{ id: string; symbol: string; name: string; image: string; current_price: number; price_change_percentage_24h: number }>;
     return rows
       .filter(c => !['usdt', 'usdc', 'dai', 'fdusd', 'usde', 'steth', 'wsteth', 'wbtc', 'weth'].includes(String(c.symbol)))
       .map(c => ({ id: String(c.id), symbol: String(c.symbol).toUpperCase(), name: String(c.name), image: String(c.image), price: Number(c.current_price) || 0, change24h: Number(c.price_change_percentage_24h) || 0 }))
