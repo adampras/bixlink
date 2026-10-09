@@ -1424,3 +1424,23 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
 .hero-3d { isolation: isolate; }
 .hero-3d .hero-3d-bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .hero-3d .hero-3d-veil { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at center, hsl(var(--background) / .35), hsl(var(--background) / .8) 75%), linear-gradient(to bottom, hsl(var(--background) / .5), transparent 30%, hsl(var(--background) / .9)); }
+
+/* Ruby accent + glass member cards & auth vault */
+:root { --ruby: 352 85% 55%; }
+.member-card { position: relative; border-radius: 18px; border: 1px solid hsl(var(--chart-3) / .22); background: linear-gradient(145deg, hsl(var(--card) / .75), hsl(var(--background) / .55)); backdrop-filter: blur(16px); box-shadow: inset 0 1px 0 hsl(var(--foreground) / .06), 0 10px 30px -18px hsl(var(--chart-3) / .4); }
+.member-card--inactive { border-color: hsl(var(--chart-3) / .4); }
+.member-card--banned { border-color: hsl(var(--ruby) / .55); background: linear-gradient(145deg, hsl(var(--ruby) / .12), hsl(var(--background) / .6)); box-shadow: 0 0 0 1px hsl(var(--ruby) / .15), 0 12px 30px -16px hsl(var(--ruby) / .6); }
+.member-avatar { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 12px; font-weight: 800; font-size: 12px; color: hsl(var(--chart-3)); border: 1px solid hsl(var(--chart-3) / .35); background: hsl(var(--chart-3) / .1); }
+.member-card--banned .member-avatar { color: hsl(var(--ruby)); border-color: hsl(var(--ruby) / .5); background: hsl(var(--ruby) / .12); }
+.member-actions { border: 1px solid hsl(var(--foreground) / .1); background: hsl(var(--background) / .4); }
+.member-ban { color: hsl(var(--ruby)); }
+.member-ban:hover, .member-ban.is-on { background: hsl(var(--ruby) / .85) !important; color: hsl(var(--foreground)) !important; box-shadow: 0 0 16px hsl(var(--ruby) / .55); }
+.member-chip { border-radius: 999px; padding: 4px 12px; border: 1px solid hsl(var(--foreground) / .12); background: hsl(var(--card) / .6); backdrop-filter: blur(10px); }
+.member-chip--active { border-color: hsl(var(--chart-2) / .45); }
+.member-chip--inactive { border-color: hsl(var(--chart-3) / .45); }
+.member-chip--banned { border-color: hsl(var(--ruby) / .55); color: hsl(var(--ruby)); }
+.auth-vault { position: relative; border-radius: 24px; padding: 28px 22px; border: 1px solid hsl(var(--chart-3) / .25); background: linear-gradient(160deg, hsl(var(--card) / .7), hsl(var(--background) / .5)); backdrop-filter: blur(20px); box-shadow: inset 0 1px 0 hsl(var(--foreground) / .07), 0 24px 60px -30px hsl(var(--ruby) / .45); overflow: hidden; }
+.auth-vault::before { content: ''; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, transparent, hsl(var(--ruby) / .8), hsl(var(--chart-3) / .8), transparent); }
+.auth-badge { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 4px 12px; font-size: 10px; font-weight: 800; letter-spacing: .14em; color: hsl(var(--ruby)); border: 1px solid hsl(var(--ruby) / .4); background: hsl(var(--ruby) / .1); }
+.auth-badge span { width: 6px; height: 6px; border-radius: 99px; background: hsl(var(--ruby)); box-shadow: 0 0 8px hsl(var(--ruby)); }
+.auth-vault .form-input:focus { border-color: hsl(var(--ruby) / .6); box-shadow: 0 0 0 3px hsl(var(--ruby) / .15); }
