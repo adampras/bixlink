@@ -1352,7 +1352,16 @@ html[data-color-mode="light"] [data-presentation-theme="future"] { --background:
 .auric-card::after { content:""; position:absolute; right:-18px; bottom:-18px; width:150px; height:150px; background:var(--brand-watermark) center/contain no-repeat; opacity:.07; border-radius:9999px; pointer-events:none; z-index:-1; filter:saturate(.4); }
 html[data-color-mode="light"] .auric-card { border-color:color-mix(in oklab, oklch(.6 .11 80) 50%, transparent) !important; }
 html[data-color-mode="light"] .auric-card::after { opacity:.06; filter:grayscale(.6); }
-/* Light mode: keep mining engine clean — no speckled edges on bright backgrounds */
-html[data-color-mode="light"] .mining-engine { background:radial-gradient(ellipse at center, oklch(.2 .02 260) 0%, oklch(.2 .02 260 / .85) 45%, transparent 72%); border-radius:16px; }
-html[data-color-mode="light"] .mining-engine video { mask-image:radial-gradient(ellipse at center,var(--foreground) 50%,transparent 82%); }
+/* Light mode: wrap videos in a soft feathered dark glass panel so their own
+   frame background never shows as a patchy rectangle on bright backgrounds */
+html[data-color-mode="light"] .mining-engine {
+  height: 300px; padding: 20px 28px; border-radius: 26px;
+  background: radial-gradient(ellipse at center, oklch(.16 .035 260) 0%, oklch(.16 .035 260 / .92) 60%, oklch(.16 .035 260 / .45) 82%, transparent 100%);
+}
+html[data-color-mode="light"] .mining-engine video { mask-image:radial-gradient(ellipse at center,var(--foreground) 50%,transparent 82%); mix-blend-mode:lighten; }
+html[data-color-mode="light"] .reactor-glass-stage {
+  padding: 22px 26px; border-radius: 26px;
+  background: radial-gradient(ellipse at center, oklch(.17 .02 260) 0%, oklch(.17 .02 260 / .9) 60%, oklch(.17 .02 260 / .45) 82%, transparent 100%);
+}
 html[data-color-mode="light"] .reactor-glass-stage video { mask-image:radial-gradient(ellipse at center,var(--foreground) 55%,transparent 85%); }
+@media(max-width:480px) { html[data-color-mode="light"] .mining-engine { height:260px; padding:16px 20px; } html[data-color-mode="light"] .reactor-glass-stage { padding:16px 18px; } }
