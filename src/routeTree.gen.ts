@@ -18,6 +18,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as NetworkRouteImport } from './routes/network'
 import { Route as PayRouteImport } from './routes/pay'
+import { Route as PresaleRouteImport } from './routes/presale'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProfitRouteImport } from './routes/profit'
@@ -77,6 +78,11 @@ const NetworkRoute = NetworkRouteImport.update({
 const PayRoute = PayRouteImport.update({
   id: '/pay',
   path: '/pay',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PresaleRoute = PresaleRouteImport.update({
+  id: '/presale',
+  path: '/presale',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/market': typeof MarketRoute
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
+  '/presale': typeof PresaleRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/profit': typeof ProfitRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/market': typeof MarketRoute
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
+  '/presale': typeof PresaleRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/profit': typeof ProfitRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/market': typeof MarketRoute
   '/network': typeof NetworkRoute
   '/pay': typeof PayRoute
+  '/presale': typeof PresaleRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/profit': typeof ProfitRoute
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/market'
     | '/network'
     | '/pay'
+    | '/presale'
     | '/privacy'
     | '/profile'
     | '/profit'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/market'
     | '/network'
     | '/pay'
+    | '/presale'
     | '/privacy'
     | '/profile'
     | '/profit'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/market'
     | '/network'
     | '/pay'
+    | '/presale'
     | '/privacy'
     | '/profile'
     | '/profit'
@@ -326,6 +338,7 @@ export interface RootRouteChildren {
   MarketRoute: typeof MarketRoute
   NetworkRoute: typeof NetworkRoute
   PayRoute: typeof PayRoute
+  PresaleRoute: typeof PresaleRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ProfitRoute: typeof ProfitRoute
@@ -406,6 +419,13 @@ declare module '@tanstack/react-router' {
       path: '/pay'
       fullPath: '/pay'
       preLoaderRoute: typeof PayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/presale': {
+      id: '/presale'
+      path: '/presale'
+      fullPath: '/presale'
+      preLoaderRoute: typeof PresaleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -526,6 +546,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketRoute: MarketRoute,
   NetworkRoute: NetworkRoute,
   PayRoute: PayRoute,
+  PresaleRoute: PresaleRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ProfitRoute: ProfitRoute,

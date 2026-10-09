@@ -316,6 +316,13 @@
       "when": 1791533972348,
       "tag": "0044_mining_conversion_caps_and_splash_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1791553421216,
+      "tag": "0045_migration",
+      "breakpoints": true
     }
   ]
 }
