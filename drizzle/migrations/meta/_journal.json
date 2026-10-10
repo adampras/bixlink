@@ -379,6 +379,13 @@
       "when": 1791623031549,
       "tag": "0053_presale_strategies",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1791624816126,
+      "tag": "0054_presale_sovereign",
+      "breakpoints": true
     }
   ]
 }
