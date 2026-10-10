@@ -12,7 +12,7 @@ const pillars = [
   { Icon: ShieldCheck, title: 'No-SC Disclosure', desc: 'The BIX smart contract is not yet deployed. We state this openly instead of showing a fake contract address.' },
 ];
 
-export function TrustCenter({ bixPrice, serverNow }: { bixPrice: number; serverNow?: string | undefined }) {
+export function TrustCenter({ bixPrice, serverNow }: { bixPrice: number; serverNow?: string | number | undefined }) {
   const { data: sentiment } = useQuery({ queryKey: ['trust-sentiment'], queryFn: () => getMarketSentiment(), staleTime: 3_600_000 });
   return (
     <section className="border-y border-border bg-card/30">
