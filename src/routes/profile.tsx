@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 import { useMember, useReviewerAccess } from '@/lib/useMember';
 import { createReferral, assignReferral } from '@/lib/bixlink.functions';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight, Check, Swords, ChevronRight, Copy, KeyRound, LogOut, Settings, Shield, ShoppingBag } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Check, Crown, Swords, ChevronRight, Copy, Gem, KeyRound, LogOut, Settings, Shield, ShoppingBag, TrendingUp } from 'lucide-react';
 import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 import { useI18n } from '@/lib/i18n';
+import { usePresaleStatus } from '@/components/PresaleEntry';
 
 export const Route = createFileRoute('/profile')({ head: () => ({ meta: [{ title: 'Profile — BIXLINK' }, { name: 'description', content: 'Your BIXLINK account, referral code and network.' }, { property: 'og:title', content: 'Profile — BIXLINK' }, { property: 'og:description', content: 'Manage your BIXLINK member profile.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: ProfilePage });
 
@@ -21,12 +22,20 @@ function ProfilePage() {
   const makeCode = useServerFn(createReferral); const link = useServerFn(assignReferral);
   const qc = useQueryClient(); const navigate = useNavigate();
   const { formatDate } = useI18n();
+  const presale = usePresaleStatus(user?.id);
+  const orders = presale.data?.orders ?? [];
+  const badges = [
+    user?.email_confirmed_at && { Icon: BadgeCheck, label: 'Verified email', cls: 'border-chart-2/40 bg-chart-2/10 text-chart-2' },
+    (data?.stakes ?? []).some(s => s.status === 'active') && { Icon: TrendingUp, label: 'Active staker', cls: 'border-primary/40 bg-primary/10 text-primary' },
+    orders.length > 0 && { Icon: Gem, label: 'Genesis Founder', cls: 'border-chart-3/40 bg-chart-3/10 text-chart-3' },
+    orders.some(o => Number(o.package_usd) >= 100000) && { Icon: Crown, label: 'Sovereign Founder', cls: 'border-chart-3/60 bg-chart-3/15 text-chart-3' },
+  ].filter(Boolean) as { Icon: typeof BadgeCheck; label: string; cls: string }[];
   const referralUrl = data?.referral?.code && typeof window !== 'undefined' ? `${window.location.origin}/register?ref=${data.referral.code}` : '';
   const signOut = async () => { await qc.cancelQueries(); qc.clear(); await supabase.auth.signOut(); navigate({ to: '/auth', replace: true }); };
   const copyReferral = async () => { if (!referralUrl) return; await navigator.clipboard.writeText(referralUrl); setNotice('Referral link copied.'); };
   return <BixShell><main className="profile-page mx-auto max-w-3xl px-5 py-8 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="PROFILE">
-      <header className="profile-identity"><div className="profile-avatar"><img src={headerMark.url} alt="BIXLINK member emblem"/></div><div className="min-w-0"><div className="eyebrow">VERIFIED MEMBER</div><h1>{user?.email}</h1><p>Active since {user && formatDate(user.created_at)}</p></div></header>
+      <header className="profile-identity"><div className="profile-avatar"><img src={headerMark.url} alt="BIXLINK member emblem"/></div><div className="min-w-0"><div className="eyebrow">VERIFIED MEMBER</div><h1>{user?.email}</h1><p>Active since {user && formatDate(user.created_at)}</p>{badges.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{badges.map(({ Icon, label, cls }) => <span key={label} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${cls}`}><Icon size={11}/>{label}</span>)}</div>}</div></header>
       <section className="profile-referral">
         <div className="profile-section-head"><h2>Referral code</h2>{data?.referral?.code && <span><Check size={11}/> Active</span>}</div>
         {data?.referral?.code ? <div className="profile-code-row"><div className="profile-code"><b>{data.referral.code}</b><Button size="icon" variant="ghost" title="Copy referral link" onClick={copyReferral}><Copy/></Button></div><Button onClick={copyReferral}>Copy link</Button></div> : <Button className="profile-generate" onClick={async () => { try { await makeCode(); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Could not create code.'); } }}>Generate referral code</Button>}
