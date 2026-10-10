@@ -1,0 +1,1 @@
+CREATE POLICY "Published merchandise catalog images" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'bix-content' AND EXISTS (SELECT 1 FROM public.app_settings s, jsonb_array_elements(s.value->'items') item WHERE s.key = 'merchandise_catalog' AND COALESCE((item->>'enabled')::boolean, false) AND item->>'imagePath' = name));

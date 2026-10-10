@@ -1,8 +1,8 @@
-import common from '@/assets/nft-common.jpg';
-import rare from '@/assets/nft-rare.jpg';
-import epic from '@/assets/nft-epic.jpg';
-import legendary from '@/assets/nft-legendary.jpg';
-import mythic from '@/assets/nft-mythic.jpg';
+import common from '@/assets/reactor-glass-common.jpg';
+import rare from '@/assets/reactor-glass-rare.jpg';
+import epic from '@/assets/reactor-glass-epic.jpg';
+import legendary from '@/assets/reactor-glass-legendary.jpg';
+import mythic from '@/assets/reactor-glass-mythic.jpg';
 
 export type NftTier = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC';
 export const NFT_TIERS: NftTier[] = ['COMMON', 'RARE', 'EPIC', 'LEGENDARY', 'MYTHIC'];

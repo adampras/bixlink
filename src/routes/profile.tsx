@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useMember, useReviewerAccess } from '@/lib/useMember';
 import { createReferral, assignReferral } from '@/lib/bixlink.functions';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight, Check, Swords, ChevronRight, Copy, KeyRound, LogOut, Settings, Shield } from 'lucide-react';
+import { ArrowRight, Check, Swords, ChevronRight, Copy, KeyRound, LogOut, Settings, Shield, ShoppingBag } from 'lucide-react';
 import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 import { useI18n } from '@/lib/i18n';
 
@@ -35,6 +35,7 @@ function ProfilePage() {
         <Link to="/network" className="profile-network-link">View my network <ArrowRight/></Link>
       </section>
       <section className="profile-actions">
+        <Button asChild variant="outline"><Link to="/nft-marketplace"><span className="profile-action-icon"><ShoppingBag/></span><span>BIXLINK Marketplace</span><ChevronRight className="profile-action-arrow"/></Link></Button>
         {reviewer.data && <Button asChild variant="outline"><Link to="/review"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>ADMIN PANEL BIX <small>Deposit &amp; withdrawal review only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
         <Button asChild variant="outline"><Link to="/arena"><span className="profile-action-icon"><Swords/></span><span>Fox Arena <small>Daily missions and leaderboard</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
         <Button asChild variant="outline"><Link to="/settings"><span className="profile-action-icon"><Settings/></span><span>Settings <small>Language, notifications and security</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>

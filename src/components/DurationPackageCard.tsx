@@ -23,7 +23,7 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
   useEffect(() => { const t = setInterval(() => setTicks(n => n + 1), 1000); return () => { clearInterval(t); if (timer.current) clearTimeout(timer.current); }; }, []);
   const tier = nftTier(price, days);
   const catalog = useNftCatalog();
-  const art = packageArtwork(catalog.data ?? [], index, days);
+  const art = packageArtwork(catalog.data ?? [], index, days, price);
   const choose = (d: number) => {
     setDays(d); setPicked(true);
     if (timer.current) clearTimeout(timer.current);
