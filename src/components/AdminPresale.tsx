@@ -19,15 +19,25 @@ export function AdminPresale({ onMessage }: { onMessage: (m: string) => void }) 
     <p className="text-xs text-muted-foreground">Separate from the 8 USDT packages and free mining. BIX is locked and released by mining over the duration you set. Pool comes from the Mining &amp; Staking Rewards allocation (max 10,500,000). Used: {used.toLocaleString()} BIX.</p>
     <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={cfg.enabled} onChange={e => setCfg({ ...cfg, enabled: e.target.checked })}/> Presale open (also shows the welcome pop-up to members)</label>
     <div className="grid gap-3 sm:grid-cols-3">
-      <label className="text-xs">Presale price (USD per BIX)<input type="number" step="0.0001" min="0.0001" className={num} value={price} onChange={e => applyPrice(Number(e.target.value))}/></label>
+      <label className="text-xs">Presale price (USD per BIX)<input type="number" step="0.0001" min="0.0001" className={num} value={price} onChange={e => applyPrice(Number(e.target.value))}/><button type="button" onClick={() => applyPrice(0.1)} className="mt-1 text-[11px] font-bold text-primary underline">Apply $0.10 to all packages</button></label>
       <label className="text-xs">Sponsor % (direct referrer, max 10)<input type="number" className={num} value={cfg.sponsorPct} onChange={e => setCfg({ ...cfg, sponsorPct: Number(e.target.value) })}/></label>
       <label className="text-xs">Pool cap (BIX)<input type="number" className={num} value={cfg.poolCap} onChange={e => setCfg({ ...cfg, poolCap: Number(e.target.value) })}/></label>
     </div>
     {cfg.packages.map((p, i) => <div key={i} className="grid grid-cols-3 gap-2 rounded-lg border border-border p-3">
       <label className="text-xs">Package USDT<input type="number" className={num} value={p.usd} onChange={e => setPkg(i, 'usd', Number(e.target.value))}/></label>
-      <div className="text-xs">BIX received (auto)<p className="numeric mt-1 rounded-md border border-border px-3 py-2 text-sm text-primary">{p.bix.toLocaleString()}</p></div>
+      <label className="text-xs">BIX received (editable)<input type="number" min="1" className={num} value={p.bix} onChange={e => setCfg({ ...cfg, packages: cfg.packages.map((q, j) => j === i ? { ...q, bix: Number(e.target.value) } : q) })}/></label>
       <label className="text-xs">Release days<input type="number" className={num} value={p.releaseDays} onChange={e => setPkg(i, 'releaseDays', Number(e.target.value))}/></label>
     </div>)}
+    {(() => { const sv = cfg.sovereign ?? { enabled: true, usd: 100000, bix: 175000, releaseDays: 365, slots: 21 }; const set = (k: keyof typeof sv, v: number | boolean) => setCfg({ ...cfg, sovereign: { ...sv, [k]: v } }); return <div className="grid gap-3 rounded-lg border border-chart-3/50 p-3">
+      <b className="text-sm">Sovereign $100,000 package</b>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={sv.enabled} onChange={e => set('enabled', e.target.checked)}/> Sovereign open</label>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <label className="text-xs">BIX received<input type="number" min="1" className={num} value={sv.bix} onChange={e => set('bix', Number(e.target.value))}/></label>
+        <label className="text-xs">Release days<input type="number" min="1" className={num} value={sv.releaseDays} onChange={e => set('releaseDays', Number(e.target.value))}/></label>
+        <label className="text-xs">Slots (max 21)<input type="number" min="1" max="21" className={num} value={sv.slots} onChange={e => set('slots', Number(e.target.value))}/></label>
+      </div>
+      <button type="button" onClick={() => set('bix', bixForUsd(100000, price))} className="w-fit text-[11px] font-bold text-primary underline">Use presale price ({bixForUsd(100000, price).toLocaleString()} BIX)</button>
+    </div>; })()}
     {(() => { const st = cfg.strategies ?? DEFAULT_STRATEGIES; const set = (k: keyof typeof st, v: number | boolean) => setCfg({ ...cfg, strategies: { ...st, [k]: v } }); return <div className="grid gap-3 rounded-lg border border-border p-3">
       <b className="text-sm">Investor strategies (automatic)</b>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={st.enabled} onChange={e => set('enabled', e.target.checked)}/> Strategies open (Hybrid, Dividend, Founder)</label>

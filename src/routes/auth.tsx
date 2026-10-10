@@ -17,7 +17,7 @@ function Auth() {
     e.preventDefault(); setBusy(true); setNotice('');
     try {
       if (mode === 'forgot') { const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` }); if (error) throw error; setNotice('Check your inbox for a password reset link.'); }
-      else { const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) throw error; navigate({ to: '/' }); }
+      else { const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) throw error; const t = window.localStorage.getItem('bixlink-target'); window.localStorage.removeItem('bixlink-target'); navigate({ to: t === 'presale' ? '/presale' : '/' }); }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong.';
       if (/not confirmed/i.test(msg)) {
