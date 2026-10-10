@@ -1634,3 +1634,7 @@ html[data-color-mode="light"], [data-presentation-theme="royal"] { --shop-gold:o
 .nft-power-5 .nft-card-stage::after { content:""; position:absolute; inset:0; pointer-events:none; box-shadow:inset 0 0 30px color-mix(in oklab,var(--nft) 45%,transparent); }
 .nft-mini { display:grid; grid-template-columns:72px 1fr; gap:10px; align-items:center; margin-top:12px; padding:8px; border:1px solid var(--border); border-radius:8px; background:var(--card); text-align:left; width:100%; }
 .nft-mini img { width:72px; height:72px; object-fit:cover; border-radius:6px; filter:hue-rotate(var(--nft-hue,0deg)) saturate(var(--nft-boost,1)); }
+
+.dock-wallet{position:relative;transform:translateY(-14px)}
+.dock-wallet svg{box-sizing:content-box;padding:12px;border-radius:999px;background:radial-gradient(circle at 30% 30%,var(--card),var(--background));border:2px solid var(--chart-3);color:var(--chart-3);box-shadow:0 0 18px color-mix(in oklab,var(--chart-3) 55%,transparent);animation:dock-pulse 2.4s ease-in-out infinite}
+@keyframes dock-pulse{50%{box-shadow:0 0 30px color-mix(in oklab,var(--chart-3) 80%,transparent)}}

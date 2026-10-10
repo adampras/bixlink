@@ -20,8 +20,8 @@ import { Sun, Moon } from 'lucide-react';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
-  { to: '/wallet', label: 'WALLET', icon: Wallet },
   { to: '/stake', label: 'STAKE', icon: Layers },
+  { to: '/wallet', label: 'WALLET', icon: Wallet },
   { to: '/profit', label: 'PROFIT', icon: TrendingUp },
   { to: '/boost', label: 'BOOST APY', icon: Zap },
   { to: '/network', label: 'NETWORK', icon: Network },
@@ -100,9 +100,8 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     {publicConfig && isBlockedByMaintenance(publicConfig.siteControl, publicConfig.isAdmin, path) ? <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-5 py-16 text-center"><img src={headerMark.url} width={72} height={72} alt="" className="rounded-full"/><div className="eyebrow mt-6">SYSTEM MAINTENANCE</div><h1 className="section-title mt-3">BIXLINK <span>MAINTENANCE</span></h1><p className="mt-4 text-sm leading-6 text-muted-foreground">{publicConfig.siteControl.message || 'Sistem BIXLINK sedang dalam pemeliharaan. Silakan kembali beberapa saat lagi.'}</p></main> : children}
     <TxFeedbackHost/>{user && <PresaleWelcome userId={user.id}/>}
     <footer className="border-t border-border py-4"><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
-    {user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 grid ${presaleOn ? 'grid-cols-7' : 'grid-cols-6'} rounded-2xl border border-border bg-card/80 backdrop-blur-xl md:hidden`}>
-      {NAV.map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} className={`flex min-w-0 flex-col items-center gap-1 py-2 text-[8px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19}/>{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>; })}
-      {presaleOn && <Link to="/presale" className={`flex min-w-0 flex-col items-center gap-1 py-2 text-[8px] font-bold ${path === '/presale' ? 'mobile-nav-on' : 'text-chart-3'}`}><Crown size={19}/>PRESALE</Link>}
+    {user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl md:hidden`}>
+      {NAV.filter(n => n.to !== '/profit').map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19}/>{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>; })}
     </nav>}
   </div>;
 }
