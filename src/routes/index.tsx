@@ -15,6 +15,7 @@ import { ContentCarousel } from '@/components/ContentCarousel';
 import { defaultRoadmap, defaultSpaces } from '@/lib/landing-content';
 import { LandingTokenomics } from '@/components/LandingTokenomics';
 import { PreTgeRoadmap } from '@/components/PreTgeRoadmap';
+import { TrustCenter } from '@/components/TrustCenter';
 import { InternalMarket } from '@/components/InternalMarket';
 import { CryptoIcon } from '@/components/CryptoIcon';
 

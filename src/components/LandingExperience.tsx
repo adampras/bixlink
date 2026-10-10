@@ -14,6 +14,7 @@ import { ContentLink } from '@/components/ContentLink';
 import { LandingTokenomics } from '@/components/LandingTokenomics';
 import { PoweredBy } from '@/components/PoweredBy';
 import { PreTgeRoadmap } from '@/components/PreTgeRoadmap';
+import { TrustCenter } from '@/components/TrustCenter';
 import { CryptoNewsFeed } from '@/components/CryptoNewsFeed';
 import { defaultLandingContent, defaultRoadmap, defaultSpaces, type LandingContent } from '@/lib/landing-content';
 export { defaultLandingContent, type LandingContent } from '@/lib/landing-content';
