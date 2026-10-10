@@ -1,16 +1,22 @@
 export type PresaleStrategy = 'hybrid' | 'dividend' | 'founder';
-export const DIVIDEND_DAILY_PCT = 0.2;
-export const FOUNDER_BONUS_APY = 20;
+export type StrategySettings = { enabled: boolean; hybridBixPct: number; hybridDailyPct: number; dividendDailyPct: number; founderBonusApy: number };
+export const DEFAULT_STRATEGIES: StrategySettings = { enabled: false, hybridBixPct: 50, hybridDailyPct: 0.3, dividendDailyPct: 0.2, founderBonusApy: 20 };
 
-export type StrategyQuote = { bix: number; stakingUsd: number; dividendUsd: number; bonusBix: number; devCashPct: number };
+export type StrategyQuote = { bix: number; dailyUsd: number; totalUsd: number; bonusBix: number };
+const r2 = (n: number) => Math.round(n * 100) / 100;
 
-/** Display-only preview of what a strategy offers. Never credits balances. */
-export function strategyQuote(s: PresaleStrategy, usd: number, price: number, days: number): StrategyQuote {
-  const full = price > 0 ? usd / price : 0;
-  const r = (n: number) => Math.round(n * 100) / 100;
-  if (s === 'hybrid') return { bix: r(full / 2), stakingUsd: r(usd / 2), dividendUsd: 0, bonusBix: 0, devCashPct: 50 };
-  if (s === 'dividend') { const d = r(usd * DIVIDEND_DAILY_PCT / 100 * days); return { bix: r(full), stakingUsd: 0, dividendUsd: d, bonusBix: 0, devCashPct: Math.max(0, Math.round((1 - d / usd) * 100)) }; }
-  return { bix: r(full), stakingUsd: 0, dividendUsd: 0, bonusBix: r(full * FOUNDER_BONUS_APY / 100 * days / 365), devCashPct: 100 };
+/** Mirrors SQL bix_presale_buy_strategy. `fullBix` is the package BIX at the presale price. */
+export function strategyQuote(s: PresaleStrategy, usd: number, fullBix: number, days: number, cfg: StrategySettings = DEFAULT_STRATEGIES): StrategyQuote {
+  if (s === 'hybrid') { const d = usd * (100 - cfg.hybridBixPct) / 100 * cfg.hybridDailyPct / 100; return { bix: r2(fullBix * cfg.hybridBixPct / 100), dailyUsd: d, totalUsd: r2(d * days), bonusBix: 0 }; }
+  if (s === 'dividend') { const d = usd * cfg.dividendDailyPct / 100; return { bix: fullBix, dailyUsd: d, totalUsd: r2(d * days), bonusBix: 0 }; }
+  const b = r2(fullBix * cfg.founderBonusApy / 100 * days / 365);
+  return { bix: r2(fullBix + b), dailyUsd: 0, totalUsd: 0, bonusBix: b };
+}
+
+/** USDT dividend settled so far: whole elapsed days, capped at release days (mirrors bix_presale_dividend). */
+export function dividendSettled(dailyUsd: number, releaseDays: number, startedAt: string | number, now: number) {
+  const days = Math.floor(Math.max(0, now - new Date(startedAt).getTime()) / 86_400_000);
+  return dailyUsd * Math.min(releaseDays, days);
 }
 
 export function genesisTier(usd: number) {

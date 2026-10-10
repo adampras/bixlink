@@ -267,35 +267,47 @@ export type Database = {
       bix_presale_orders: {
         Row: {
           bix_amount: number
+          bonus_bix: number
           created_at: string
+          dividend_daily_usd: number
+          genesis_serial: number
           id: string
           package_usd: number
           release_days: number
           sponsor_bix: number
           sponsor_id: string | null
           status: string
+          strategy: string
           user_id: string
         }
         Insert: {
           bix_amount: number
+          bonus_bix?: number
           created_at?: string
+          dividend_daily_usd?: number
+          genesis_serial?: number
           id?: string
           package_usd: number
           release_days: number
           sponsor_bix?: number
           sponsor_id?: string | null
           status?: string
+          strategy?: string
           user_id: string
         }
         Update: {
           bix_amount?: number
+          bonus_bix?: number
           created_at?: string
+          dividend_daily_usd?: number
+          genesis_serial?: number
           id?: string
           package_usd?: number
           release_days?: number
           sponsor_bix?: number
           sponsor_id?: string | null
           status?: string
+          strategy?: string
           user_id?: string
         }
         Relationships: []
@@ -1183,7 +1195,12 @@ export type Database = {
         Returns: string
       }
       bix_presale_buy: { Args: { p_usd: number }; Returns: Json }
+      bix_presale_buy_strategy: {
+        Args: { p_strategy: string; p_usd: number }
+        Returns: Json
+      }
       bix_presale_config: { Args: never; Returns: Json }
+      bix_presale_dividend: { Args: { p_user: string }; Returns: number }
       bix_presale_paid: { Args: { p_user: string }; Returns: number }
       bix_presale_save: { Args: { p_config: Json }; Returns: Json }
       bix_presale_status: { Args: never; Returns: Json }

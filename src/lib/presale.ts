@@ -1,5 +1,7 @@
+import type { StrategySettings } from './presale-strategy';
+
 export type PresalePackage = { usd: number; bix: number; releaseDays: number };
-export type PresaleConfig = { enabled: boolean; sponsorPct: number; poolCap: number; packages: PresalePackage[] };
+export type PresaleConfig = { enabled: boolean; sponsorPct: number; poolCap: number; packages: PresalePackage[]; strategies?: StrategySettings };
 
 /** Linear mining-style release of locked presale BIX. Display-only: not spendable balance. */
 export function presaleReleased(bix: number, releaseDays: number, startedAt: string | number, now: number) {
