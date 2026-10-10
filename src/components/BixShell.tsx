@@ -101,7 +101,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     <TxFeedbackHost/>{user && <PresaleWelcome userId={user.id}/>}
     <footer className="border-t border-border py-4"><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
     {user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl md:hidden`}>
-      {NAV.filter(n => n.to !== '/profit').map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19}/>{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>; })}
+      {NAV.filter(n => n.to !== '/profit').map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19}/>{t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>; })}
     </nav>}
   </div>;
 }
