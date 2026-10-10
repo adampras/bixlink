@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQueryClient } from '@tanstack/react-query';
-import { Eye, EyeOff, Plus, Save, Upload } from 'lucide-react';
+import { Eye, EyeOff, Plus, Save, Upload, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NftArtwork } from '@/components/NftArtwork';
 import { useNftCatalog } from '@/lib/useNftCatalog';
 import { saveNftCatalog } from '@/lib/nft-catalog.functions';
-import { NFT_THEMES, type CatalogItem } from '@/lib/nft-catalog';
+import { type CatalogItem } from '@/lib/nft-catalog';
 import { NFT_TIERS } from '@/lib/nft';
 import { supabase } from '@/integrations/supabase/client';
 export function AdminNftCatalog({ onMessage }: { onMessage: (m: string) => void }) {
