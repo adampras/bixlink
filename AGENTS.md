@@ -38,3 +38,4 @@
 - Fox Arena quest vBIX is paid only by the server-verified bix_quest_claim RPC, sharing mining's account cap and pool; season prizes are owner-reviewed, never auto-credited — game rewards stay in the promo budget.
 - NFT cards: one in-app certificate per stake with immutable artwork snapshot; new artwork selection matches the contract tier through the owner-controlled reactor catalog. Completion replaces USDT refund; buybacks remain owner-reviewed and vault-funded.
 - Marketplace merchandise lives in a separate owner-controlled presentation catalog with optional external HTTPS order links, not automatic payments or certificate settlement; HOME and PROFILE provide store access without a header shop.
+- Presale strategies (hybrid/dividend/founder) snapshot owner rates per order in bix_presale_buy_strategy; USDT dividends settle as whole elapsed days inside bix_wallet_balance via bix_presale_dividend — one server source, no cron.
