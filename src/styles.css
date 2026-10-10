@@ -1618,7 +1618,7 @@ html[data-color-mode="light"], [data-presentation-theme="royal"] { --shop-gold:o
 .lux-shop .shop-detail { display:flex; width:100%; justify-content:space-between; height:36px; padding:0; border-top:1px solid var(--shop-line); margin-top:12px; border-radius:0; color:var(--foreground); font-size:11px; }
 .shop-placeholder { position:absolute; width:48px; height:48px; top:calc(50% - 24px); left:calc(50% - 24px); color:var(--shop-photo-ink); }
 .shop-disclosure { padding:24px 0 0; border-top:1px solid var(--border); font-size:11px; line-height:1.8; color:var(--muted-foreground); }
-.shop-dialog { position:relative; max-width:440px; max-height:85vh; overflow-y:auto; border:1px solid var(--shop-line); border-radius:8px; }
+.shop-dialog { position:relative; max-width:440px; max-height:85vh; overflow-y:auto; border:1px solid var(--shop-line); border-radius:8px; background:var(--popover); backdrop-filter:blur(24px); }
 .shop-dialog-close { position:absolute; right:12px; top:12px; z-index:1; }.shop-dialog-image { width:100%; max-height:40vh; object-fit:contain; background:var(--shop-photo); border-radius:4px; }
 .nft-card-art { object-fit:contain; background:var(--shop-photo); }.nft-card-top { position:relative; background:var(--card); }.nft-card { box-shadow:var(--shop-shadow); }
 @media(max-width:1000px){.shop-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}

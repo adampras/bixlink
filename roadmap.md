@@ -112,6 +112,6 @@
 - [x] Remove duplicate package/NFT previews and add popup close; browser verified one confirmation after auto-dismiss.
 - [x] Add 100 distinct NFT designs with owner additions and visibility controls; owner save/reload and public filtering verified.
 - [x] Add and verify NFT Marketplace and member navigation; desktop/mobile fit and all 100 artworks verified.
-- [ ] Replace offered mascot/coin NFTs with clear-glass reactors matched to package and duration, preserving existing certificates.
-- [ ] Apply approved adaptive luxury marketplace, merchandise controls, and HOME/PROFILE access without header shop.
-- [ ] Verify owner product saving, public visibility, package previews, and mobile/light-mode layout.
+- [x] Replace offered mascot/coin NFTs with clear-glass reactors matched to package and duration, preserving existing certificates.
+- [x] Apply approved adaptive luxury marketplace, merchandise controls, and HOME/PROFILE access without header shop.
+- [x] Verify owner product/image saving and removal, public visibility, package preview close, and mobile/light-mode layout; no financial transactions performed.
