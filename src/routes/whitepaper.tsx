@@ -47,7 +47,13 @@ const chapters: { id: string; title: string; body: string[] }[] = [
     'Phase 1 Genesis staking & closed seed (active) → Phase 2 security audit & reserve lock → Phase 3 TGE & smart contract deployment → Phase 4 DEX liquidity & listing → Phase 5 card & merchant expansion.',
     'The BIX smart contract is not yet deployed. No contract address is published until deployment, so any address claimed before then is not official.',
   ] },
-  { id: 'risk', title: '7. Legal & risk disclosures', body: [
+  { id: 'contract', title: '7. BEP-20 contract blueprint & verification', body: [
+    'Planned parameters: name BIXLINK, symbol BIX, BNB Smart Chain (BEP-20), 18 decimals, fixed supply 21,000,000 minted once at deployment, no mint function, no hidden transfer fee, ownership renounced after distribution.',
+    'Deployment is performed only from the owner TokenPocket wallet. The official contract address will be published here and inside the app at the same time — verify the address, not the ticker, since other tokens may also use the BIX symbol.',
+    'Audit readiness checklist: fixed-supply source published, compiler version and bytecode match verified on BscScan, third-party audit (CertiK/Hacken format) report linked, liquidity lock proof, Genesis reserve wallet disclosed.',
+    'Status: not deployed. Every item above is pending until deployment.',
+  ] },
+  { id: 'risk', title: '8. Legal & risk disclosures', body: [
     'Roadmap items are plans, not guarantees. APY figures are annualized illustrations, not promised returns.',
     'Crypto assets involve substantial risk, including total loss. Check the laws of your jurisdiction before participating.',
   ] },

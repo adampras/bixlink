@@ -6,7 +6,9 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { useMember } from '@/lib/useMember';
 import { buyPresale, getPresaleStatus } from '@/lib/presale.functions';
-import { presaleReleased } from '@/lib/presale';
+import { presaleReleased, presalePrice } from '@/lib/presale';
+import { ProfitSimulator } from '@/components/ProfitSimulator';
+import { PresaleCommission } from '@/components/PresaleCommission';
 import { GenesisCertificate, PresaleStrategies } from '@/components/PresaleStrategies';
 import { SovereignAllocation } from '@/components/SovereignAllocation';
 import { dividendSettled, type PresaleStrategy } from '@/lib/presale-strategy';
@@ -19,7 +21,7 @@ import reactorPoster from '@/assets/presale-rocket-dark-poster.jpg.asset.json';
 export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Genesis presale with Hybrid, Dividend and Founder strategies plus the 21-slot $100,000 Sovereign allocation.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }, { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }] }), component: PresalePage });
 
 function PresalePage() {
-  const { user } = useMember();
+  const { user, data: me } = useMember();
   const load = useServerFn(getPresaleStatus); const buy = useServerFn(buyPresale);
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ['presale', user?.id], queryFn: () => load(), enabled: !!user });
@@ -57,6 +59,8 @@ function PresalePage() {
       {!cfg.enabled && <p className="mt-6 rounded-lg border border-chart-3 p-3 text-sm text-chart-3">Presale is currently closed by the owner.</p>}
       {cfg.sovereign && <SovereignAllocation cfg={cfg.sovereign} claimed={Number(s?.sovereignClaimed ?? 0)} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>}
       <PresaleStrategies packages={cfg.packages} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>
+      <ProfitSimulator price={presalePrice(cfg.packages)} days={cfg.packages[0]?.releaseDays ?? 180} settings={cfg.strategies}/>
+      <PresaleCommission rewards={s?.sponsorRewards ?? []} code={(me as any)?.referral?.code} now={now}/>
       {Number(s?.dividendEarned ?? 0) > 0 && <p className="mt-3 text-xs text-chart-2">USDT dividends credited so far: <b className="numeric">${number(Number(s?.dividendEarned), { maximumFractionDigits: 2 })}</b></p>}
       <p className="mt-4 text-xs text-muted-foreground">USDT balance: <b className="numeric">${number(Number(s?.balanceUsd ?? 0), { maximumFractionDigits: 2 })}</b> · Pool used {number(Number(s?.poolUsed ?? 0))} / {number(cfg.poolCap)} BIX</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{cfg.packages.map(p => <article key={p.usd} className="rounded-2xl border border-border bg-card/60 p-5">
