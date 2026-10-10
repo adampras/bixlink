@@ -115,3 +115,4 @@
 - [x] Replace offered mascot/coin NFTs with clear-glass reactors matched to package and duration, preserving existing certificates.
 - [x] Apply approved adaptive luxury marketplace, merchandise controls, and HOME/PROFILE access without header shop.
 - [x] Verify owner product/image saving and removal, public visibility, package preview close, and mobile/light-mode layout; no financial transactions performed.
+- [ ] Make Wallet color switches, staking profit controls and the selected splash easy to find; verify owner access and splash playback.

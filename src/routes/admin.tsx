@@ -8,7 +8,7 @@ import { money } from '@/lib/bixlink';
 import { BixShell } from '@/components/BixShell';
 import { useMember, useReviewerAccess } from '@/lib/useMember';
 import { Button } from '@/components/ui/button';
-import { Check, X, Search } from 'lucide-react';
+import { Check, X, Search, Palette, TrendingUp, Play } from 'lucide-react';
 import { AdminWallet } from '@/components/AdminWallet';
 import { AdminBixPay } from '@/components/AdminBixPay';
 import { AdminClones } from '@/components/AdminClones';
@@ -22,6 +22,7 @@ import { AdminBixToken } from '@/components/AdminBixToken';
 import { AdminReadiness } from '@/components/AdminReadiness';
 import { AdminReviewers } from '@/components/AdminReviewers';
 import { AdminAppearance } from '@/components/AdminAppearance';
+import { AdminSplash } from '@/components/AdminSplash';
 import { AdminReferrals } from '@/components/AdminReferrals';
 import { AdminDurationPackages } from '@/components/AdminDurationPackages';
 import { AdminTeams } from '@/components/AdminTeams';
@@ -47,8 +48,12 @@ function Admin() {
    const stakes = data?.stakes ?? []; const active = stakes.filter(s => s.status === 'active'); const total = active.reduce((n,s) => n + Number(s.amount_usd),0);
   if (reviewer.data) return <BixShell><main className="mx-auto min-h-[75vh] max-w-4xl px-5 py-12"><div className="eyebrow">ADMIN PANEL BIX</div><h1 className="section-title">REVIEW <span>CONSOLE</span></h1><Button asChild className="mt-8"><Link to="/review">Open Owner 2 panel</Link></Button></main></BixShell>;
   return <BixShell><main className="mx-auto min-h-[75vh] max-w-7xl px-5 py-12 md:px-8"><div className="eyebrow">PRIVATE ACCESS</div><h1 className="section-title">OWNER <span>CONSOLE</span></h1>{state === 'loading' ? <p className="mt-10 text-muted-foreground">Checking access…</p> : state === 'signin' ? <div className="mt-10"><p className="text-muted-foreground">Sign in with the verified owner account to continue.</p><Button asChild className="mt-5 rounded-full"><Link to="/auth">Sign in</Link></Button></div> : state === 'denied' ? <div className="mt-10">{reviewer.data ? <Button asChild><Link to="/review">Open Owner 2 panel</Link></Button> : <p className="text-destructive">Owner access is unavailable for this account. Sign in with the verified owner email.</p>}</div> : <>
-    <nav className="mt-8 flex gap-2 overflow-x-auto border-b border-border pb-3">{['Overview','Reports','Users','Stakes','Wallet','Market','Mining','Presale','Arena','NFT','Updates','Appearance','APY','Packages','Referrals','RWA','Landing','Booster','Clones','Teams','Token'].map(x => <Button key={x} size="sm" variant={tab === x ? 'default' : 'ghost'} className="shrink-0 rounded-full" onClick={() => setTab(x)}>{x}</Button>)}</nav>
-    <Link to="/yield-control" className="mt-4 inline-flex rounded-full border border-chart-3/40 px-4 py-2 text-xs font-bold text-chart-3">Yield &amp; Market Control →</Link>
+    <div className="mt-6 grid gap-2 sm:grid-cols-3" aria-label="Pengaturan cepat">
+      <Button variant={tab === 'Appearance' ? 'default' : 'outline'} onClick={() => setTab('Appearance')}><Palette size={16}/>5 warna Wallet &amp; animasi</Button>
+      <Button variant="outline" asChild><Link to="/yield-control"><TrendingUp size={16}/>Profit staking &amp; harga BIX</Link></Button>
+      <Button variant={tab === 'Splash' ? 'default' : 'outline'} onClick={() => setTab('Splash')}><Play size={16}/>Splash screen</Button>
+    </div>
+    <nav className="mt-5 flex gap-2 overflow-x-auto border-b border-border pb-3">{['Overview','Reports','Users','Stakes','Wallet','Market','Mining','Presale','Arena','NFT','Updates','Appearance','Splash','APY','Packages','Referrals','RWA','Landing','Booster','Clones','Teams','Token'].map(x => <Button key={x} size="sm" variant={tab === x ? 'default' : 'ghost'} className="shrink-0 rounded-full" onClick={() => setTab(x)}>{x}</Button>)}</nav>
     {message && <p role="status" className="mt-5 text-sm text-chart-2">{message}</p>}
     {tab === 'Overview' && <><AdminSiteControl initial={data?.settings.find(s => s.key === 'site_control')?.value as SiteControl | undefined} onMessage={setMessage} onSaved={refresh}/><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[['Total Users',String(data?.members.length ?? 0)],['Active staking value',money(total)],['Active positions',String(active.length)],['USDT max / month','30%']].map(([label,value],i) => <div className={`stat-card accent-${i%3}`} key={label}><span className="text-xs text-muted-foreground">{label}</span><strong className="mt-4 block text-2xl">{value}</strong></div>)}</div><AdminBixVault onMessage={setMessage}/></>}
      {tab === 'Users' && <div className="mt-8">
@@ -77,7 +82,8 @@ function Admin() {
     {tab === 'Teams' && <AdminTeams onMessage={setMessage}/>}
     {tab === 'Users' && <AdminReviewers members={data?.members ?? []} onMessage={setMessage}/>}
     {tab === 'Updates' && <AdminReadiness initial={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} onMessage={setMessage} onSaved={refresh}/>}
-     {tab === 'Appearance' && <AdminAppearance initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/>}
+     {tab === 'Appearance' && <AdminAppearance initialReadiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/>}
+    {tab === 'Splash' && <AdminSplash onMessage={setMessage}/>}
     {tab === 'Market' && <AdminBixMarket initialMovement={(data?.settings.find(s=>s.key==='bix_market')?.value as { movement?: unknown } | undefined)?.movement} initialPrice={Number((data?.settings.find(s=>s.key==='bix_market')?.value as {priceUsd?: number} | undefined)?.priceUsd ?? 0.84291)} onMessage={setMessage} onSaved={refresh}/>} 
     {(tab === 'Packages' || tab === 'APY') && <AdminDurationPackages onMessage={setMessage}/>}
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}

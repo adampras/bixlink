@@ -5,7 +5,8 @@ import { Check, Palette, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { updatePresentationTheme } from '@/lib/bixlink.functions';
 import { resolvePresentationTheme, type PresentationTheme } from '@/lib/presentation-theme';
-import { AdminSplash } from '@/components/AdminSplash';
+import { AdminWalletAppearance } from '@/components/AdminReadiness';
+import type { Readiness } from '@/lib/readiness';
 
 const options: { id: PresentationTheme; name: string; detail: string }[] = [
   { id: 'original', name: 'BIXLINK Original', detail: 'Tricolor · Violet / Green / Gold' },
@@ -15,7 +16,7 @@ const options: { id: PresentationTheme; name: string; detail: string }[] = [
   { id: 'glass', name: 'Spectrum Clear Glass', detail: '8 category colors · Clear glass' },
   { id: 'future', name: 'BIXLINK Future Glass', detail: 'Crystal / Cyan / Gold · Transparent' },
 ];
-export function AdminAppearance({ initialTheme, onSaved, onMessage }: { initialTheme?: PresentationTheme | undefined; onSaved: () => Promise<void>; onMessage: (message: string) => void }) {
+export function AdminAppearance({ initialTheme, initialReadiness, onSaved, onMessage }: { initialTheme?: PresentationTheme | undefined; initialReadiness?: Readiness | undefined; onSaved: () => Promise<void>; onMessage: (message: string) => void }) {
   const current = resolvePresentationTheme(initialTheme);
   const [selected, setSelected] = useState<PresentationTheme>(current);
   const [saving, setSaving] = useState(false);
@@ -23,7 +24,8 @@ export function AdminAppearance({ initialTheme, onSaved, onMessage }: { initialT
   const qc = useQueryClient();
   useEffect(() => { setSelected(current); }, [current]);
   return <section className="mt-8 max-w-5xl" data-no-translate>
-    <div className="flex items-center gap-2 text-primary"><Palette size={18}/><h2 className="font-display text-xl font-bold">Project appearance</h2></div>
+    <AdminWalletAppearance initial={initialReadiness} onMessage={onMessage} onSaved={onSaved}/>
+    <div className="mt-8 flex items-center gap-2 text-primary"><Palette size={18}/><h2 className="font-display text-xl font-bold">Project appearance</h2></div>
     <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4" role="group" aria-label="Project theme">
       {options.map(option => <Button key={option.id} type="button" variant="outline" className="theme-option" aria-label={`Select ${option.name}`} aria-pressed={selected === option.id} disabled={saving} onClick={() => setSelected(option.id)}>
         <span className="theme-miniature" data-presentation-theme={option.id}>
@@ -36,6 +38,5 @@ export function AdminAppearance({ initialTheme, onSaved, onMessage }: { initialT
       </Button>)}
     </div>
     <div className="mt-6 flex justify-end"><Button disabled={saving || selected === current} onClick={async () => { setSaving(true); try { await save({ data: { theme: selected } }); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); await onSaved(); onMessage('Project theme saved for all members and visitors.'); } catch (error) { onMessage(error instanceof Error ? error.message : 'Could not save theme.'); } finally { setSaving(false); } }}><Save/>{saving ? 'Saving…' : 'Apply project theme'}</Button></div>
-    <AdminSplash onMessage={onMessage}/>
   </section>;
 }
