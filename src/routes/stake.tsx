@@ -1,10 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { DurationPackageCard } from '@/components/DurationPackageCard';
-import { MyNftCollection } from '@/components/MyNftCollection';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
@@ -62,7 +61,7 @@ function StakePage() {
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {(cfg?.packages ?? []).map((p, i) => <DurationPackageCard key={p.id} pkg={p} index={i} onStake={setChosen}/>)}
       </div>
-      <MyNftCollection userId={user?.id} bixPrice={cfg?.bixMarket.priceUsd ?? 0.84291}/>
+      <div className="mt-6 flex justify-end"><Button asChild variant="outline"><Link to="/nft-marketplace">NFT Marketplace &amp; My collection <ArrowUpRight size={16}/></Link></Button></div>
       <div className="mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><div className="flex items-center gap-2"><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span><Button variant="outline" size="icon" aria-label={requestsVisible ? "Hide my requests" : "Show my requests"} aria-expanded={requestsVisible} aria-controls="stake-requests" onClick={() => setRequestsVisible(current => !current)}>{requestsVisible ? <ChevronUp/> : <ChevronDown/>}</Button></div></div>
       <div id="stake-requests" hidden={!requestsVisible} className="mt-4 space-y-3">{(data?.stakes ?? []).map(s => {
         const started = s.activated_at ? new Date(s.activated_at).getTime() : null;

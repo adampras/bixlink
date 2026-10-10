@@ -36,4 +36,4 @@
 - Keep landing tokenomics in a presentation-only module, honoring visibility without changing member terms.
 - Settle vBIX via authenticated RPCs; video never awards funds. Convert through an atomic capped marketing ledger, never the owner vault.
 - Fox Arena quest vBIX is paid only by the server-verified bix_quest_claim RPC, sharing mining's account cap and pool; season prizes are owner-reviewed, never auto-credited — game rewards stay in the promo budget.
-- NFT cards: one trigger-minted in-app card per stake; on completion it replaces the USDT refund; owner-reviewed vault-funded BIX buyback — auditable.
+- NFT cards: one in-app certificate per stake with immutable artwork snapshot; a separate owner-controlled artwork catalog powers previews and Marketplace, not trading. Completion replaces USDT refund; buybacks remain owner-reviewed and vault-funded.
