@@ -7,6 +7,7 @@ import { getNftCollection, reviewNft } from '@/lib/nft.functions';
 import { NFT_TIERS, type NftTier } from '@/lib/nft';
 import { money, number } from '@/lib/bixlink';
 import { AdminNftCatalog } from '@/components/AdminNftCatalog';
+import { AdminShopCatalog } from '@/components/AdminShopCatalog';
 
 export function AdminNft({ onMessage }: { onMessage: (m: string) => void }) {
   const load = useServerFn(getNftCollection); const review = useServerFn(reviewNft); const qc = useQueryClient();
@@ -18,6 +19,7 @@ export function AdminNft({ onMessage }: { onMessage: (m: string) => void }) {
   const shown = all.filter(c => filter === 'ALL' || c.tier === filter);
   const act = async (id: string, approve: boolean) => { setBusy(id); try { await review({ data: { id, approve } }); onMessage(approve ? 'NFT bought back — BIX credited from owner vault.' : 'Sale rejected — card returned to member.'); await qc.invalidateQueries({ queryKey: ['admin-nfts'] }); } catch (e) { onMessage(e instanceof Error ? e.message : 'Review failed'); } finally { setBusy(''); } };
   return <section className="mt-8">
+    <AdminShopCatalog onMessage={onMessage}/>
     <AdminNftCatalog onMessage={onMessage}/>
     <h2 className="font-display text-2xl font-bold">Reactor NFT collection</h2>
     <p className="mt-1 text-sm text-muted-foreground">{all.length} cards minted · {money(all.filter(c => c.status === 'minted' || c.status === 'redeemable').reduce((n, c) => n + Number(c.value_usd), 0))} outstanding value. Buybacks are paid in BIX from the owner vault.</p>

@@ -1,0 +1,20 @@
+import { useState } from 'react';
+import { useServerFn } from '@tanstack/react-start';
+import { useQueryClient } from '@tanstack/react-query';
+import { Plus, Save, Trash2, Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ContentImage } from '@/components/ContentImage';
+import { useShopCatalog } from '@/lib/useShopCatalog';
+import { saveShopCatalog } from '@/lib/shop.functions';
+import { SHOP_IMAGES, type ShopProduct } from '@/lib/shop';
+import { supabase } from '@/integrations/supabase/client';
+export function AdminShopCatalog({onMessage}:{onMessage:(m:string)=>void}){
+ const q=useShopCatalog(),save=useServerFn(saveShopCatalog),qc=useQueryClient();
+ const [draft,setDraft]=useState<ShopProduct[]|null>(null),[busy,setBusy]=useState(false);
+ const items=draft??q.data??[];
+ const edit=(id:string,patch:Partial<ShopProduct>)=>setDraft(items.map(i=>i.id===id?{...i,...patch}:i));
+ const upload=async(id:string,file?:File)=>{if(!file)return;const ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp'} as Record<string,string>)[file.type];if(!ext||file.size>5*1024*1024){onMessage('JPG, PNG or WebP, maximum 5 MB.');return;}setBusy(true);try{const path=`images/${crypto.randomUUID()}.${ext}`;const {error}=await supabase.storage.from('bix-content').upload(path,file,{contentType:file.type});if(error)throw error;edit(id,{imagePath:path});}catch{onMessage('Image upload failed.');}finally{setBusy(false);}};
+ return <section className="border-b border-border py-8"><div className="flex flex-wrap justify-between gap-3"><h2 className="font-display text-2xl font-bold">Marketplace products</h2><div className="flex gap-2"><Button variant="outline" disabled={busy||!q.data} onClick={()=>setDraft([...items,{id:crypto.randomUUID(),name:'New product',category:'Merchandise',description:'',enabled:false,priceUsd:null,inquiryUrl:''}])}><Plus/>Add product</Button><Button disabled={busy||!draft} onClick={async()=>{setBusy(true);try{await save({data:{items}});await qc.invalidateQueries({queryKey:['shop-catalog']});setDraft(null);onMessage('Marketplace products saved.');}catch(e){onMessage(e instanceof Error?e.message:'Save failed');}finally{setBusy(false);}}}><Save/>Save products</Button></div></div>
+ {q.isError&&<p role="alert" className="mt-4 text-destructive">Could not load products.</p>}
+ <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{items.map(i=><article key={i.id} className="min-w-0 space-y-3 rounded-lg border border-border p-4"><ContentImage path={i.imagePath} fallbackSrc={SHOP_IMAGES[i.id]} alt={i.name} className="shop-product-image"/><input className="form-input w-full" aria-label={`Product name ${i.id}`} value={i.name} onChange={e=>edit(i.id,{name:e.target.value})}/><input className="form-input w-full" aria-label={`Category ${i.id}`} value={i.category} onChange={e=>edit(i.id,{category:e.target.value})}/><textarea className="form-input w-full" aria-label={`Description ${i.id}`} value={i.description} onChange={e=>edit(i.id,{description:e.target.value})}/><input type="number" min="0" step="0.01" className="form-input w-full" aria-label={`Price USD ${i.id}`} placeholder="Price USD (optional)" value={i.priceUsd??''} onChange={e=>edit(i.id,{priceUsd:e.target.value===''?null:Number(e.target.value)})}/><input className="form-input w-full" aria-label={`Contact link ${i.id}`} placeholder="HTTPS ordering / contact link" value={i.inquiryUrl} onChange={e=>edit(i.id,{inquiryUrl:e.target.value})}/><label className="flex gap-2 text-sm"><input type="checkbox" checked={i.enabled} onChange={e=>edit(i.id,{enabled:e.target.checked})}/>Published</label><div className="flex gap-2"><Button asChild variant="outline" disabled={busy}><label><Upload/>Image<input className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" aria-label={`Product image ${i.id}`} onChange={e=>void upload(i.id,e.target.files?.[0])}/></label></Button><Button size="icon" variant="outline" aria-label={`Remove ${i.name}`} onClick={()=>setDraft(items.filter(p=>p.id!==i.id))}><Trash2/></Button></div></article>)}</div></section>;
+}
