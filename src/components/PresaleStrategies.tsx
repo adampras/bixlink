@@ -7,7 +7,7 @@ import type { PresalePackage } from '@/lib/presale';
 import poster from '@/assets/presale-rocket-dark-poster.jpg.asset.json';
 import video from '@/assets/presale-rocket-dark.mp4.asset.json';
 
-export function PresaleStrategies({ packages, settings, open, busy, onBuy }: { packages: PresalePackage[]; settings?: StrategySettings; open: boolean; busy: boolean; onBuy: (usd: number, s: PresaleStrategy) => void }) {
+export function PresaleStrategies({ packages, settings, open, busy, onBuy }: { packages: PresalePackage[]; settings?: StrategySettings | undefined; open: boolean; busy: boolean; onBuy: (usd: number, s: PresaleStrategy) => void }) {
   const cfg = settings ?? DEFAULT_STRATEGIES;
   const [s, setS] = useState<PresaleStrategy>('hybrid');
   const [i, setI] = useState(0);
@@ -52,7 +52,7 @@ export function PresaleStrategies({ packages, settings, open, busy, onBuy }: { p
   </section>;
 }
 
-export function GenesisCertificate({ usd, serial, strategy, bix }: { usd: number; serial?: number; strategy?: string; bix: number }) {
+export function GenesisCertificate({ usd, serial, strategy, bix }: { usd: number; serial?: number | undefined; strategy?: string | undefined; bix: number }) {
   return <figure className="relative overflow-hidden rounded-2xl border border-primary/40 bg-background">
     <video autoPlay muted loop playsInline preload="metadata" poster={poster.url} className="aspect-[4/3] w-full object-contain"><source src={video.url} type="video/mp4"/></video>
     <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background to-transparent p-3">
