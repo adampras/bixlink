@@ -365,6 +365,13 @@
       "when": 1791593009017,
       "tag": "0051_reactor_tier_and_merchandise_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1791593043857,
+      "tag": "0052_merchandise_published_image_access",
+      "breakpoints": true
     }
   ]
 }
