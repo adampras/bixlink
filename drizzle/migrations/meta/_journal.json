@@ -372,6 +372,13 @@
       "when": 1791593043857,
       "tag": "0052_merchandise_published_image_access",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1791623031549,
+      "tag": "0053_presale_strategies",
+      "breakpoints": true
     }
   ]
 }
