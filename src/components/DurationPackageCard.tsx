@@ -7,6 +7,7 @@ import { dailyRate, monthlyRate, nftTier } from '@/lib/nft';
 import { NftCard } from '@/components/NftCard';
 import { packageArtwork } from '@/lib/nft-catalog';
 import { useNftCatalog } from '@/lib/useNftCatalog';
+import { createPortal } from 'react-dom';
 
 export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; index: number; onStake: (p: Package & { compound?: boolean }) => void }) {
   const [days, setDays] = useState(initialDuration(pkg));
@@ -41,9 +42,9 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
       <label className="mt-3 flex items-center justify-between gap-2 text-xs text-muted-foreground"><span>Daily compound profit</span><input type="checkbox" checked={compound} onChange={e => setCompound(e.target.checked)}/></label>
       <div className="duration-package-action"><div><p className="duration-label">Monthly APY</p><strong className="duration-apy">{number(monthlyRate(apy), { maximumFractionDigits: 2 })}% <small>/ month</small></strong><p className="numeric text-[11px] font-bold text-chart-2">+${perSec.toFixed(8)}/sec · ${(perSec * ticks).toFixed(6)}</p><p className="text-[10px] text-muted-foreground">Projection, not guaranteed</p></div><Button className="duration-stake" onClick={() => { if (timer.current) clearTimeout(timer.current); setPopup(true); timer.current = setTimeout(() => { setPopup(false); onStake({ ...pkg, lock_days: days, apy, compound }); }, 2800); }}>Join <ArrowUpRight size={18}/></Button></div>
     </div>
-    {popup && <div className="nft-pop" role="dialog" aria-modal="true" aria-label="Package NFT preview" onClick={() => { setPopup(false); if (timer.current) clearTimeout(timer.current); }}>
+    {popup && createPortal(<div className="nft-pop" role="dialog" aria-modal="true" aria-label="Package NFT preview" onClick={() => { setPopup(false); if (timer.current) clearTimeout(timer.current); }}>
       <div className="relative" onClick={e => e.stopPropagation()}><Button variant="outline" size="icon" className="absolute -right-3 -top-3 z-10" aria-label="Close NFT preview" onClick={() => { setPopup(false); if (timer.current) clearTimeout(timer.current); }}><X/></Button><NftCard tier={tier} packageId={pkg.id} valueUsd={price} days={days} artworkId={art?.id} imagePath={art?.imagePath} compact/></div>
       <p className="nft-pop-note">{art?.name ?? 'Reactor NFT'} · {pkg.id} · {days}D. In-app certificate. Package confirmation follows.</p>
-    </div>}
+    </div>, document.body)}
   </article>;
 }
