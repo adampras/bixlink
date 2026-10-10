@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import type { PresaleConfig } from './presale';
 
 export type PresaleOrder = { id: string; package_usd: number; bix_amount: number; release_days: number; status: string; created_at: string; strategy?: string; dividend_daily_usd?: number; bonus_bix?: number; serial?: number };
-export type PresaleStatus = { config: PresaleConfig; poolUsed: number; serverNow: string; balanceUsd: number; dividendEarned?: number; orders: PresaleOrder[]; sponsorRewards: { id: string; bix: number; release_days: number; status: string; created_at: string }[] };
+export type PresaleStatus = { config: PresaleConfig; poolUsed: number; sovereignClaimed?: number; serverNow: string; balanceUsd: number; dividendEarned?: number; orders: PresaleOrder[]; sponsorRewards: { id: string; bix: number; release_days: number; status: string; created_at: string }[] };
 
 export const getPresaleStatus = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {

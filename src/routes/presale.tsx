@@ -8,6 +8,7 @@ import { useMember } from '@/lib/useMember';
 import { buyPresale, getPresaleStatus } from '@/lib/presale.functions';
 import { presaleReleased } from '@/lib/presale';
 import { GenesisCertificate, PresaleStrategies } from '@/components/PresaleStrategies';
+import { SovereignAllocation } from '@/components/SovereignAllocation';
 import { dividendSettled, type PresaleStrategy } from '@/lib/presale-strategy';
 import { number } from '@/lib/bixlink';
 import { Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide-react';
@@ -54,6 +55,7 @@ function PresalePage() {
     </dl>
     {!user ? <p className="mt-6 text-sm text-muted-foreground">Sign in to view presale packages.</p> : !cfg ? <p className="mt-6 text-sm text-muted-foreground">Loading…</p> : <>
       {!cfg.enabled && <p className="mt-6 rounded-lg border border-chart-3 p-3 text-sm text-chart-3">Presale is currently closed by the owner.</p>}
+      {cfg.sovereign && <SovereignAllocation cfg={cfg.sovereign} claimed={Number(s?.sovereignClaimed ?? 0)} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>}
       <PresaleStrategies packages={cfg.packages} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>
       {Number(s?.dividendEarned ?? 0) > 0 && <p className="mt-3 text-xs text-chart-2">USDT dividends credited so far: <b className="numeric">${number(Number(s?.dividendEarned), { maximumFractionDigits: 2 })}</b></p>}
       <p className="mt-4 text-xs text-muted-foreground">USDT balance: <b className="numeric">${number(Number(s?.balanceUsd ?? 0), { maximumFractionDigits: 2 })}</b> · Pool used {number(Number(s?.poolUsed ?? 0))} / {number(cfg.poolCap)} BIX</p>
