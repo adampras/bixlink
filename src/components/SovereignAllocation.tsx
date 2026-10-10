@@ -70,6 +70,7 @@ export function SovereignAllocation({ cfg, claimed, settings, open, busy, onBuy 
           <li>• Physical sapphire acrylic plaque (arranged with the team after purchase)</li>
           <li>• Private concierge contact with the development team</li>
         </ul>
+        <div className="mt-4"><SovereignPlaque serial={Math.min(claimed + 1, cfg.slots)} slots={cfg.slots} strategy={s} bix={q.bix}/></div>
         <Button className="mt-4 w-full rounded-full" disabled={!live || busy} onClick={() => onBuy(cfg.usd, s)}>{left === 0 ? 'All slots claimed' : busy ? 'Processing…' : live ? `Claim Sovereign slot · ${s}` : 'Not open yet'}</Button>
         <p className="mt-2 text-[10px] text-muted-foreground">BIX stays locked and is released over the period. Internal ledger record, not an on-chain token yet. No guarantee of profit.</p>
       </div>
