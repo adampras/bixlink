@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useMember } from '@/lib/useMember';
 import { buyPresale, getPresaleStatus } from '@/lib/presale.functions';
 import { presaleReleased } from '@/lib/presale';
+import { PresaleStrategies } from '@/components/PresaleStrategies';
 import { number } from '@/lib/bixlink';
 import { Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide-react';
 import reactor from '@/assets/presale-rocket-dark.mp4.asset.json';
@@ -52,6 +53,7 @@ function PresalePage() {
     </dl>
     {!user ? <p className="mt-6 text-sm text-muted-foreground">Sign in to view presale packages.</p> : !cfg ? <p className="mt-6 text-sm text-muted-foreground">Loading…</p> : <>
       {!cfg.enabled && <p className="mt-6 rounded-lg border border-chart-3 p-3 text-sm text-chart-3">Presale is currently closed by the owner.</p>}
+      <PresaleStrategies packages={cfg.packages}/>
       <p className="mt-4 text-xs text-muted-foreground">USDT balance: <b className="numeric">${number(Number(s?.balanceUsd ?? 0), { maximumFractionDigits: 2 })}</b> · Pool used {number(Number(s?.poolUsed ?? 0))} / {number(cfg.poolCap)} BIX</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{cfg.packages.map(p => <article key={p.usd} className="rounded-2xl border border-border bg-card/60 p-5">
         <span className="text-[10px] font-bold text-muted-foreground">PRESALE PACKAGE</span>
