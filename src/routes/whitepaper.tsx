@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
+import { tokenomicsPlan } from '@/lib/tokenomics-plan';
 
 const OG = 'https://bixlink.lovable.app/__l5e/assets-v1/c44e33af-5cb2-4bf8-9d9f-ce8af06b3e8b/bix-reactor-poster.jpg';
 
@@ -18,10 +19,6 @@ export const Route = createFileRoute('/whitepaper')({
   component: Whitepaper,
 });
 
-const allocation = [
-  ['Mining & Staking Rewards', 50], ['Ecosystem & Development', 15], ['Marketing & Community', 10],
-  ['Liquidity & Listing', 10], ['Team (vested)', 10], ['Genesis Reserve Vault', 5],
-] as const;
 
 const chapters: { id: string; title: string; body: string[] }[] = [
   { id: 'abstract', title: '1. Abstract', body: [
@@ -70,8 +67,8 @@ function Whitepaper() {
         {chapters.map(c => <section id={c.id} key={c.id} className="scroll-mt-24 rounded-2xl border border-border bg-card/50 p-5 md:p-7">
           <h2 className="font-display text-xl font-bold text-chart-3 md:text-2xl">{c.title}</h2>
           <div className="mt-3 space-y-3">{c.body.map((p, i) => <p key={i} className="text-sm leading-7 text-muted-foreground">{p}</p>)}</div>
-          {c.id === 'tokenomics' && <div className="mt-5 space-y-2">{allocation.map(([name, pct]) => <div key={name}>
-            <div className="flex justify-between text-xs"><span>{name}</span><b className="text-chart-3">{pct}% · {(21_000_000 * pct / 100).toLocaleString('en-US')} BIX</b></div>
+          {c.id === 'tokenomics' && <div className="mt-5 space-y-2">{tokenomicsPlan.map(({ title: name, percent: pct, amount }) => <div key={name}>
+            <div className="flex justify-between text-xs"><span>{name}</span><b className="text-chart-3">{pct}% · {amount.toLocaleString('en-US')} BIX</b></div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-chart-3" style={{ width: `${pct * 2}%` }} /></div>
           </div>)}<p className="pt-1 text-[10px] text-muted-foreground">Proposed allocation, presentation only.</p></div>}
         </section>)}
