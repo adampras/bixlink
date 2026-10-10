@@ -1,5 +1,82 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
-export const Route = createFileRoute('/whitepaper')({ head: () => ({ meta: [{ title: 'Whitepaper — BIXLINK' }, { name: 'description', content: 'BIXLINK staking, supply, rewards and roadmap overview.' }, { property: 'og:title', content: 'Whitepaper — BIXLINK' }, { property: 'og:description', content: 'Explore the BIXLINK staking concept and RWA roadmap.' }, { property: 'og:type', content: 'article' }, { name: 'twitter:card', content: 'summary' }] }), component: Whitepaper });
-function Whitepaper() { return <BixShell><main className="mx-auto max-w-3xl px-5 py-16 md:py-24"><div className="eyebrow">PROJECT OVERVIEW · PRELAUNCH</div><h1 className="section-title">BIXLINK <span>WHITEPAPER</span></h1><p className="mt-5 leading-8 text-muted-foreground">BIXLINK is a proposed BIXCOIN staking, exchange, DeFi and real-world asset ecosystem. The total supply badge is 21 JUTA BIX TOKEN. This page summarizes the concept and is not a verified token issuance or financial offer.</p><div className="mt-12 space-y-10"><section><h2 className="font-display text-2xl font-bold text-chart-3">Staking packages</h2><p className="mt-3 leading-7 text-muted-foreground">Eight packages run from SEED ($10, 30 days, 10% APY) to LEGEND ($10,000, 540 days, 25% APY). APY is an annualized illustration, not a guaranteed return. Staking uses the internal testing ledger; projected yield is display-only and is not credited as spendable balance.</p></section><section><h2 className="font-display text-2xl font-bold text-chart-3">Referral model</h2><p className="mt-3 leading-7 text-muted-foreground">The proposed plan includes 10% direct rewards, five matching-profit levels of 12%, 6%, 3%, 2%, and 1%, and a 5% weekly RewardPlus based on qualified turnover with at least three direct members. Automated calculations and payouts are not live.</p></section><section><h2 className="font-display text-2xl font-bold text-chart-3">Roadmap & risk</h2><p className="mt-3 leading-7 text-muted-foreground">The roadmap spans launch in Q1 2026, a staking beta, RWA listing, ecosystem expansion, DAO, and the 21 JUTA milestone in Q2 2027. These are planned milestones, not completed claims. Crypto assets and staking involve substantial risk, including total loss.</p></section></div><Button asChild className="mt-12 rounded-full bg-chart-3 text-background"><Link to="/">Back to BIXLINK</Link></Button></main></BixShell>; }
+
+const OG = 'https://bixlink.lovable.app/__l5e/assets-v1/c44e33af-5cb2-4bf8-9d9f-ce8af06b3e8b/bix-reactor-poster.jpg';
+
+export const Route = createFileRoute('/whitepaper')({
+  head: () => ({ meta: [
+    { title: 'Whitepaper — BIXLINK Protocol Documentation' },
+    { name: 'description', content: 'BIXLINK tokenomics, presale strategies, non-custodial ledger architecture and pre-TGE security roadmap.' },
+    { property: 'og:title', content: 'BIXLINK Whitepaper — Protocol Documentation' },
+    { property: 'og:description', content: '21M BIX fixed supply, three-strategy presale, Sovereign allocation and an honest pre-TGE roadmap.' },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:image', content: OG },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:image', content: OG },
+  ] }),
+  component: Whitepaper,
+});
+
+const allocation = [
+  ['Mining & Staking Rewards', 50], ['Ecosystem & Development', 15], ['Marketing & Community', 10],
+  ['Liquidity & Listing', 10], ['Team (vested)', 10], ['Genesis Reserve Vault', 5],
+] as const;
+
+const chapters: { id: string; title: string; body: string[] }[] = [
+  { id: 'abstract', title: '1. Abstract', body: [
+    'BIXLINK is a proposed BIXCOIN staking, DeFi and real-world-asset ecosystem currently operating in a prelaunch phase on an internal ledger.',
+    'This document describes the intended design. It is not a prospectus, a verified token issuance, or an offer of financial products.',
+  ] },
+  { id: 'tokenomics', title: '2. Tokenomics — 21M hard cap', body: [
+    'Planned standard: BEP-20 on BNB Smart Chain with a fixed supply of 21,000,000 BIX. Minting is intended to be renounced at deployment so supply can never increase.',
+    'A 1,000,000 BIX Genesis Reserve is held in an owner-only singleton vault. It is initialized once, is never shown in member balances and cannot be generated again.',
+  ] },
+  { id: 'presale', title: '3. Three-strategy presale engine', body: [
+    'Hybrid (Dual Engine): part of the package becomes locked BIX, the remainder earns a daily USDT rate during the release period.',
+    'Dividend (Accumulator): full BIX allocation plus a daily USDT dividend, settled by whole elapsed days only.',
+    'Founder (Pure Apex): full BIX allocation plus an annual BIX bonus and a Genesis certificate. Rates are snapshot per order, so later changes never affect existing positions.',
+  ] },
+  { id: 'sovereign', title: '4. Sovereign Singularity allocation', body: [
+    'An institutional $100,000 tier strictly limited to 21 slots worldwide, numbered #SOV-01/21 to #SOV-21/21. The server rejects any purchase after the 21st slot.',
+    'Holders receive a digital Omega Genesis plaque; physical plaque delivery and concierge access are arranged manually by the team.',
+  ] },
+  { id: 'architecture', title: '5. Non-custodial architecture & internal ledger', body: [
+    'Balances shown in the app are internal ledger records, not on-chain tokens. Staking projections are display-only and never added to spendable balance without a settlement rule.',
+    'Deposits are matched on-chain with one credit per transaction ID. Withdrawals and BIX/USDT conversions are owner-reviewed requests, never automatic exchange execution.',
+    'Account data is protected by row-level access rules; administrative actions require server-verified owner identity.',
+  ] },
+  { id: 'roadmap', title: '6. Pre-TGE security & audit roadmap', body: [
+    'Phase 1 Genesis staking & closed seed (active) → Phase 2 security audit & reserve lock → Phase 3 TGE & smart contract deployment → Phase 4 DEX liquidity & listing → Phase 5 card & merchant expansion.',
+    'The BIX smart contract is not yet deployed. No contract address is published until deployment, so any address claimed before then is not official.',
+  ] },
+  { id: 'risk', title: '7. Legal & risk disclosures', body: [
+    'Roadmap items are plans, not guarantees. APY figures are annualized illustrations, not promised returns.',
+    'Crypto assets involve substantial risk, including total loss. Check the laws of your jurisdiction before participating.',
+  ] },
+];
+
+function Whitepaper() {
+  return <BixShell><main className="mx-auto max-w-6xl px-5 py-14 md:py-20">
+    <div className="eyebrow">PROTOCOL DOCUMENTATION · v1.0 · PRELAUNCH</div>
+    <h1 className="section-title">BIXLINK <span>WHITEPAPER</span></h1>
+    <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">A transparent overview of supply, presale design, ledger architecture and the path to token generation.</p>
+    <div className="mt-10 grid gap-8 lg:grid-cols-[220px_1fr]">
+      <nav className="h-fit rounded-2xl border border-chart-3/25 bg-card/60 p-4 lg:sticky lg:top-24">
+        <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-chart-3">Contents</div>
+        <ol className="space-y-2 text-xs">{chapters.map(c => <li key={c.id}><a className="text-muted-foreground hover:text-chart-3" href={`#${c.id}`}>{c.title}</a></li>)}</ol>
+      </nav>
+      <div className="min-w-0 space-y-6">
+        {chapters.map(c => <section id={c.id} key={c.id} className="scroll-mt-24 rounded-2xl border border-border bg-card/50 p-5 md:p-7">
+          <h2 className="font-display text-xl font-bold text-chart-3 md:text-2xl">{c.title}</h2>
+          <div className="mt-3 space-y-3">{c.body.map((p, i) => <p key={i} className="text-sm leading-7 text-muted-foreground">{p}</p>)}</div>
+          {c.id === 'tokenomics' && <div className="mt-5 space-y-2">{allocation.map(([name, pct]) => <div key={name}>
+            <div className="flex justify-between text-xs"><span>{name}</span><b className="text-chart-3">{pct}% · {(21_000_000 * pct / 100).toLocaleString('en-US')} BIX</b></div>
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-chart-3" style={{ width: `${pct * 2}%` }} /></div>
+          </div>)}<p className="pt-1 text-[10px] text-muted-foreground">Proposed allocation, presentation only.</p></div>}
+        </section>)}
+        <Button asChild className="rounded-full bg-chart-3 text-background"><Link to="/">Back to BIXLINK</Link></Button>
+      </div>
+    </div>
+  </main></BixShell>;
+}
