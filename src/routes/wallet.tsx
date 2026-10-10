@@ -14,6 +14,7 @@ import { getFiatRates } from '@/lib/market.functions';
 import { createDepositIntent, checkDepositIntent, claimDepositIntent } from '@/lib/deposit.functions';
 import { dateTime, money, number } from '@/lib/bixlink';
 import { confirmPin, getFiatCodes, txFeedback } from '@/components/TxFeedback';
+import { pickWalletSkin } from '@/lib/wallet-skin';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, ScanLine, CheckCircle2, Clock } from 'lucide-react';
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
@@ -76,7 +77,7 @@ function WalletPage() {
   };
   return <BixShell><main className="mx-auto max-w-5xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="WALLET">
-      <div className="wallet-summary wallet-vault auric-card relative overflow-hidden rounded-[20px] border p-6">
+      <div data-wallet-skin={pickWalletSkin(cfg?.readiness.walletColors)} className="wallet-summary wallet-vault auric-card relative overflow-hidden rounded-[20px] border p-6">
         <div className="flex items-center justify-between gap-2"><div className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet size={16}/> Available balance</div><span className="vault-pill">ASSET VAULT</span></div>
         <strong className="numeric mt-2 block break-all text-[28px] leading-snug font-black text-foreground md:text-[32px]">{number(data?.balance ?? 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT</strong>
         {fiatShown.length > 0 && <><div className="wallet-fx-grid mt-4">{fiatShown.map(item => <div key={item.code}><span>{item.label}</span><b className="numeric">{item.code} {number((data?.balance ?? 0) * item.rate, { maximumFractionDigits: item.code === 'IDR' ? 0 : 2 })}</b></div>)}</div>

@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ArenaRouteImport } from './routes/arena'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BoostRouteImport } from './routes/boost'
+import { Route as BoostTiersRouteImport } from './routes/boost-tiers'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as NetworkRouteImport } from './routes/network'
@@ -66,6 +67,11 @@ const AuthRoute = AuthRouteImport.update({
 const BoostRoute = BoostRouteImport.update({
   id: '/boost',
   path: '/boost',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoostTiersRoute = BoostTiersRouteImport.update({
+  id: '/boost-tiers',
+  path: '/boost-tiers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
+  '/boost-tiers': typeof BoostTiersRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/network': typeof NetworkRoute
@@ -217,6 +224,7 @@ export interface FileRoutesByTo {
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
+  '/boost-tiers': typeof BoostTiersRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/network': typeof NetworkRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
+  '/boost-tiers': typeof BoostTiersRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/network': typeof NetworkRoute
@@ -280,6 +289,7 @@ export interface FileRouteTypes {
     | '/arena'
     | '/auth'
     | '/boost'
+    | '/boost-tiers'
     | '/dashboard'
     | '/market'
     | '/network'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/arena'
     | '/auth'
     | '/boost'
+    | '/boost-tiers'
     | '/dashboard'
     | '/market'
     | '/network'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/arena'
     | '/auth'
     | '/boost'
+    | '/boost-tiers'
     | '/dashboard'
     | '/market'
     | '/network'
@@ -371,6 +383,7 @@ export interface RootRouteChildren {
   ArenaRoute: typeof ArenaRoute
   AuthRoute: typeof AuthRoute
   BoostRoute: typeof BoostRoute
+  BoostTiersRoute: typeof BoostTiersRoute
   DashboardRoute: typeof DashboardRoute
   MarketRoute: typeof MarketRoute
   NetworkRoute: typeof NetworkRoute
@@ -437,6 +450,13 @@ declare module '@tanstack/react-router' {
       path: '/boost'
       fullPath: '/boost'
       preLoaderRoute: typeof BoostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/boost-tiers': {
+      id: '/boost-tiers'
+      path: '/boost-tiers'
+      fullPath: '/boost-tiers'
+      preLoaderRoute: typeof BoostTiersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -603,6 +623,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArenaRoute: ArenaRoute,
   AuthRoute: AuthRoute,
   BoostRoute: BoostRoute,
+  BoostTiersRoute: BoostTiersRoute,
   DashboardRoute: DashboardRoute,
   MarketRoute: MarketRoute,
   NetworkRoute: NetworkRoute,

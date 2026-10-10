@@ -34,6 +34,13 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.documentElement.dataset['presentationTheme'] = presentationTheme;
   }, [presentationTheme]);
+  const rd = publicConfig?.readiness as { animGlow?: boolean; animShimmer?: boolean; animFloat?: boolean } | undefined;
+  useEffect(() => {
+    const ds = document.documentElement.dataset;
+    ds['animGlow'] = rd?.animGlow ? 'on' : 'off';
+    ds['animShimmer'] = rd?.animShimmer ? 'on' : 'off';
+    ds['animFloat'] = rd?.animFloat ? 'on' : 'off';
+  }, [rd?.animGlow, rd?.animShimmer, rd?.animFloat]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const path = useRouterState({ select: s => s.location.pathname });

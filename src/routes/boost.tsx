@@ -68,26 +68,7 @@ function BoostPage() {
       <div className="eyebrow"><Gauge size={14}/> VOLUME + DURATION</div>
       <h2 className="section-title">BIX STAKING <span>TIERS</span></h2>
       <p className="mt-4 max-w-2xl text-sm text-muted-foreground">The package amount represents BIXCOIN staking value at the internal ${bixPrice.toFixed(6)} reference. Higher volume and longer lock periods unlock the next APY tier.</p>
-      <div className="boost-ladder mt-8">
-        {packages.map((pkg, index) => (
-          <Link key={pkg.id} to="/stake" className="boost-tier">
-            <span className="boost-tier-rank numeric">TIER {String(index + 1).padStart(2, '0')}</span>
-            <div className="min-w-0">
-              <h3 className="font-display text-lg font-black">{pkg.id}</h3>
-              <span className="numeric">{number(Number(pkg.price_usd) / bixPrice, { maximumFractionDigits: 2 })} BIX · {pkg.lock_days} days lock</span>
-            </div>
-            <div className="boost-tier-meter">
-              <div className="apy-meter"><i style={{ width: `${Math.min(100, (Number(pkg.apy) / 25) * 100)}%` }}/></div>
-              <span>APY tier ladder</span>
-            </div>
-            <div className="boost-tier-apy">
-              <b className="numeric">{pkg.apy}%</b>
-              <span>APY</span>
-            </div>
-            <ArrowUpRight size={16}/>
-          </Link>
-        ))}
-      </div>
+      <Button asChild className="mt-8 rounded-full"><Link to="/boost-tiers"><Gauge/> View all {packages.length} tiers <ArrowUpRight/></Link></Button>
     </section>
 
     <section className="border-y border-border bg-card/30">
