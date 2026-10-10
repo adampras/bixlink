@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { WALLET_SKINS } from '@/lib/wallet-skin';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Save, Plus, Pencil, Lock, ShieldCheck } from 'lucide-react';
@@ -39,6 +40,7 @@ export function AdminReadiness({ initial, onMessage, onSaved }: { initial?: Read
   return <div className="mt-8 max-w-3xl">
     <div className="eyebrow"><ShieldCheck size={14}/> OWNER CONTROLS</div><h2 className="mt-3 font-display text-2xl font-bold">Readiness & Updates</h2>
     <div className="mt-5">{controls.map(item => <div key={item.key} className="flex items-center justify-between gap-4 border-b border-border py-5"><div className="min-w-0"><b className="text-sm">{item.label}</b><p className="mt-1 text-xs leading-5 text-muted-foreground">{item.detail}</p></div><Button size="sm" variant="outline" className={`shrink-0 ${flags[item.key] ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'}`} aria-label={`${item.label} ${flags[item.key] ? 'open' : 'closed'}`} aria-pressed={flags[item.key]} disabled={busy} onClick={() => toggle(item.key)}>{flags[item.key] ? <ShieldCheck size={14}/> : <Lock size={14}/>} {flags[item.key] ? 'OPEN' : 'CLOSED'}</Button></div>)}</div>
+    <WalletLook flags={flags} busy={busy} onSave={async next => { setBusy(true); try { await change({ data: { key: 'readiness', value: next } }); setFlags(next); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Appearance saved.'); } catch (e) { onMessage(e instanceof Error ? e.message : 'Could not save.'); } finally { setBusy(false); } }}/>
     <p className="mt-4 text-xs leading-6 text-muted-foreground">Essential transaction risks, projection notices and BIXCOIN · No SC disclosures remain visible. Closing optional pages does not replace legal or regulatory obligations.</p>
     <form className="mt-8 space-y-3 border-y border-border py-6" onSubmit={async event => { event.preventDefault(); const next = { ...flags, footerTitle: footer.title.trim(), footerBody: footer.body.trim(), footerContact: footer.contact.trim() }; setBusy(true); try { await change({ data: { key: 'readiness', value: next } }); setFlags(next); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Footer content saved.'); } catch (error) { onMessage(error instanceof Error ? error.message : 'Could not save footer.'); } finally { setBusy(false); } }}>
       <h3 className="font-display text-lg font-bold">Footer content</h3>
@@ -57,5 +59,17 @@ export function AdminReadiness({ initial, onMessage, onSaved }: { initial?: Read
     </form>
     {posts.isError && <p className="mt-5 text-sm text-destructive">Could not load announcements.</p>}
     <div className="mt-6">{posts.data?.map(p => <article key={p.id} className="flex items-start justify-between gap-3 border-b border-border py-4"><div className="min-w-0"><span className={`text-[10px] font-bold ${p.published_at ? 'text-chart-2' : 'text-muted-foreground'}`}>{p.published_at ? 'PUBLISHED' : 'DRAFT'} · {p.category}</span><h3 className="mt-1 break-words text-sm font-bold">{p.title}</h3><small className="text-muted-foreground">{dateTime(p.published_at ?? p.created_at)}</small></div><Button size="icon" variant="ghost" aria-label={`Edit ${p.title}`} onClick={() => { setEditing(p.id); setForm({ title: p.title, body: p.body, category: p.category, published: Boolean(p.published_at) }); }}><Pencil size={16}/></Button></article>)}</div>
+  </div>;
+}
+
+function WalletLook({ flags, busy, onSave }: { flags: Readiness; busy: boolean; onSave: (next: Readiness) => Promise<void> }) {
+  const colors = flags.walletColors ?? [];
+  const anims = [['animGlow', 'Glow pulse'], ['animShimmer', 'Gold shimmer titles'], ['animFloat', 'Floating badges']] as const;
+  return <div className="mt-8 border-y border-border py-6">
+    <h3 className="font-display text-lg font-bold">Wallet balance colors</h3>
+    <p className="mt-1 text-xs text-muted-foreground">Only the Wallet balance box changes. 1 color on = fixed. 2–5 on = changes automatically every 24 hours.</p>
+    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">{WALLET_SKINS.map(skin => { const on = colors.includes(skin.id); return <Button key={skin.id} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, walletColors: on ? colors.filter(c => c !== skin.id) : [...colors, skin.id] })}>{skin.label} · {on ? 'ON' : 'OFF'}</Button>; })}</div>
+    <h3 className="mt-6 font-display text-lg font-bold">Website animations</h3>
+    <div className="mt-3 grid gap-2 sm:grid-cols-3">{anims.map(([key, label]) => { const on = flags[key] === true; return <Button key={key} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, [key]: !on })}>{label} · {on ? 'ON' : 'OFF'}</Button>; })}</div>
   </div>;
 }
