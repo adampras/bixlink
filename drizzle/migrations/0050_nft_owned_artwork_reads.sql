@@ -1,0 +1,1 @@
+CREATE POLICY "Owned NFT artwork reads" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'bix-content' AND EXISTS (SELECT 1 FROM public.bix_nft_cards c WHERE c.user_id = auth.uid() AND c.artwork_image_path = name));

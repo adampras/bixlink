@@ -351,6 +351,13 @@
       "when": 1791590300869,
       "tag": "0049_nft_artwork_catalog_snapshots",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1791590636861,
+      "tag": "0050_nft_owned_artwork_reads",
+      "breakpoints": true
     }
   ]
 }
