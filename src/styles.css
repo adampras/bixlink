@@ -1624,3 +1624,13 @@ html[data-color-mode="light"], [data-presentation-theme="royal"] { --shop-gold:o
 @media(max-width:1000px){.shop-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media(max-width:640px){.shop-heading{align-items:start;flex-direction:column;gap:16px;}.shop-heading h1{font-size:27px;}.shop-intro{align-items:start;flex-direction:column;gap:8px;}.shop-tabs{gap:0;}.shop-tabs button{font-size:11px;padding:10px 9px;}.shop-grid,.shop-grid-merch{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}.shop-item-meta{padding:10px;}.shop-item-meta h3{font-size:13px;}.shop-toolbar select{max-width:148px;}.shop-section-title h2{font-size:20px;}}
 @media(prefers-reduced-motion:reduce){.shop-item{transition:none;}.shop-item:hover{transform:none;}}
+
+/* Unique package × period signature on reactor NFT cards */
+.nft-card-stage { position:relative; overflow:hidden; }
+.nft-card .nft-card-art { filter:hue-rotate(var(--nft-hue,0deg)) saturate(var(--nft-boost,1)) brightness(var(--nft-boost,1)); }
+.nft-card-grade,.nft-card-days { position:absolute; bottom:8px; padding:3px 6px; border-radius:4px; font-size:9px; font-weight:800; color:var(--nft); border:1px solid color-mix(in oklab,var(--nft) 60%,transparent); background:color-mix(in oklab,var(--background) 75%,transparent); }
+.nft-card-grade { left:8px; } .nft-card-days { right:8px; }
+.nft-power { display:flex; gap:3px; margin:3px 0; } .nft-power i { flex:1; height:4px; border-radius:2px; background:var(--border); } .nft-power i[data-on="true"] { background:var(--nft); box-shadow:0 0 6px var(--nft); }
+.nft-power-5 .nft-card-stage::after { content:""; position:absolute; inset:0; pointer-events:none; box-shadow:inset 0 0 30px color-mix(in oklab,var(--nft) 45%,transparent); }
+.nft-mini { display:grid; grid-template-columns:72px 1fr; gap:10px; align-items:center; margin-top:12px; padding:8px; border:1px solid var(--border); border-radius:8px; background:var(--card); text-align:left; width:100%; }
+.nft-mini img { width:72px; height:72px; object-fit:cover; border-radius:6px; filter:hue-rotate(var(--nft-hue,0deg)) saturate(var(--nft-boost,1)); }

@@ -1,8 +1,8 @@
-import common from '@/assets/reactor-glass-common.jpg';
-import rare from '@/assets/reactor-glass-rare.jpg';
-import epic from '@/assets/reactor-glass-epic.jpg';
-import legendary from '@/assets/reactor-glass-legendary.jpg';
-import mythic from '@/assets/reactor-glass-mythic.jpg';
+import common from '@/assets/nft-common.jpg';
+import rare from '@/assets/nft-rare.jpg';
+import epic from '@/assets/nft-epic.jpg';
+import legendary from '@/assets/nft-legendary.jpg';
+import mythic from '@/assets/nft-mythic.jpg';
 
 export type NftTier = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC';
 export const NFT_TIERS: NftTier[] = ['COMMON', 'RARE', 'EPIC', 'LEGENDARY', 'MYTHIC'];
@@ -23,3 +23,12 @@ export function nftBuybackBix(valueUsd: number, priceUsd: number): number {
 /** Annual APY stored in packages → monthly and daily display rates. */
 export const monthlyRate = (annual: number) => annual / 12;
 export const dailyRate = (annual: number) => annual / 365;
+
+/** Unique visual signature per package value (grade 1–8) and lock period (power 1–5): 40 distinct combinations. */
+const GRADE_STEPS = [50, 100, 500, 1000, 3000, 5000, 10000];
+const POWER_DAYS = [30, 60, 90, 180, 360];
+export function nftSignature(usd: number, days: number) {
+  const grade = 1 + GRADE_STEPS.filter(v => usd >= v).length;
+  const power = Math.max(1, POWER_DAYS.filter(d => days >= d).length);
+  return { grade, power, hue: (grade - 1) * 42, code: `G${grade}-P${power}` };
+}
