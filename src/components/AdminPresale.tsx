@@ -3,6 +3,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { Button } from '@/components/ui/button';
 import { getPresaleStatus, savePresale } from '@/lib/presale.functions';
 import { bixForUsd, presalePrice, type PresaleConfig } from '@/lib/presale';
+import { DEFAULT_STRATEGIES } from '@/lib/presale-strategy';
 
 export function AdminPresale({ onMessage }: { onMessage: (m: string) => void }) {
   const load = useServerFn(getPresaleStatus); const save = useServerFn(savePresale);
@@ -27,6 +28,17 @@ export function AdminPresale({ onMessage }: { onMessage: (m: string) => void }) 
       <div className="text-xs">BIX received (auto)<p className="numeric mt-1 rounded-md border border-border px-3 py-2 text-sm text-primary">{p.bix.toLocaleString()}</p></div>
       <label className="text-xs">Release days<input type="number" className={num} value={p.releaseDays} onChange={e => setPkg(i, 'releaseDays', Number(e.target.value))}/></label>
     </div>)}
+    {(() => { const st = cfg.strategies ?? DEFAULT_STRATEGIES; const set = (k: keyof typeof st, v: number | boolean) => setCfg({ ...cfg, strategies: { ...st, [k]: v } }); return <div className="grid gap-3 rounded-lg border border-border p-3">
+      <b className="text-sm">Investor strategies (automatic)</b>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={st.enabled} onChange={e => set('enabled', e.target.checked)}/> Strategies open (Hybrid, Dividend, Founder)</label>
+      <div className="grid gap-3 sm:grid-cols-4">
+        <label className="text-xs">Hybrid BIX share %<input type="number" min="10" max="90" className={num} value={st.hybridBixPct} onChange={e => set('hybridBixPct', Number(e.target.value))}/></label>
+        <label className="text-xs">Hybrid USDT %/day<input type="number" step="0.01" min="0" max="1" className={num} value={st.hybridDailyPct} onChange={e => set('hybridDailyPct', Number(e.target.value))}/></label>
+        <label className="text-xs">Dividend %/day<input type="number" step="0.01" min="0" max="1" className={num} value={st.dividendDailyPct} onChange={e => set('dividendDailyPct', Number(e.target.value))}/></label>
+        <label className="text-xs">Founder bonus BIX %/year<input type="number" min="0" max="100" className={num} value={st.founderBonusApy} onChange={e => set('founderBonusApy', Number(e.target.value))}/></label>
+      </div>
+      <p className="text-[11px] text-muted-foreground">USDT dividends are credited to member wallets automatically each full day for the release period. Rates are snapshotted at purchase; changes apply to new purchases only.</p>
+    </div>; })()}
     <Button className="w-fit" onClick={async () => { try { setCfg(await save({ data: cfg })); onMessage('Presale settings saved.'); } catch (e) { onMessage(e instanceof Error ? e.message : 'Save failed'); } }}>Save presale</Button>
   </section>;
 }

@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { useMember } from '@/lib/useMember';
 import { buyPresale, getPresaleStatus } from '@/lib/presale.functions';
 import { presaleReleased } from '@/lib/presale';
-import { PresaleStrategies } from '@/components/PresaleStrategies';
+import { GenesisCertificate, PresaleStrategies } from '@/components/PresaleStrategies';
+import { dividendSettled, type PresaleStrategy } from '@/lib/presale-strategy';
 import { number } from '@/lib/bixlink';
 import { Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide-react';
 import reactor from '@/assets/presale-rocket-dark.mp4.asset.json';
@@ -30,10 +31,10 @@ function PresalePage() {
   const locked = orders.reduce((n, o) => n + Number(o.bix_amount), 0) + (s?.sponsorRewards ?? []).filter(r => r.status === 'locked').reduce((n, r) => n + Number(r.bix), 0);
   const released = orders.reduce((n, o) => n + presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now), 0)
     + (s?.sponsorRewards ?? []).filter(r => r.status === 'locked').reduce((n, r) => n + presaleReleased(Number(r.bix), r.release_days, r.created_at, now), 0);
-  const onBuy = async (usd: number) => {
-    if (!window.confirm(`Buy the $${number(usd)} presale package from your USDT balance?`)) return;
+  const onBuy = async (usd: number, strategy: 'standard' | PresaleStrategy = 'standard') => {
+    if (!window.confirm(`Buy the $${number(usd)} presale package (${strategy}) from your USDT balance?`)) return;
     setBusy(usd); setMsg('');
-    try { const r = await buy({ data: { usd } }); setMsg(`Locked ${number(r.bix)} BIX. Release starts now.`); await qc.invalidateQueries({ queryKey: ['presale'] }); }
+    try { const r = await buy({ data: { usd, strategy } }); setMsg(`Locked ${number(r.bix)} BIX · Genesis certificate #GEN-${String(r.serial ?? 0).padStart(4, '0')}${r.dailyUsd > 0 ? ` · $${number(r.dailyUsd, { maximumFractionDigits: 2 })}/day USDT` : ''}.`); await qc.invalidateQueries({ queryKey: ['presale'] }); }
     catch (e) { setMsg(e instanceof Error ? e.message : 'Purchase failed'); } finally { setBusy(null); }
   };
   return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
@@ -53,7 +54,8 @@ function PresalePage() {
     </dl>
     {!user ? <p className="mt-6 text-sm text-muted-foreground">Sign in to view presale packages.</p> : !cfg ? <p className="mt-6 text-sm text-muted-foreground">Loading…</p> : <>
       {!cfg.enabled && <p className="mt-6 rounded-lg border border-chart-3 p-3 text-sm text-chart-3">Presale is currently closed by the owner.</p>}
-      <PresaleStrategies packages={cfg.packages}/>
+      <PresaleStrategies packages={cfg.packages} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>
+      {Number(s?.dividendEarned ?? 0) > 0 && <p className="mt-3 text-xs text-chart-2">USDT dividends credited so far: <b className="numeric">${number(Number(s?.dividendEarned), { maximumFractionDigits: 2 })}</b></p>}
       <p className="mt-4 text-xs text-muted-foreground">USDT balance: <b className="numeric">${number(Number(s?.balanceUsd ?? 0), { maximumFractionDigits: 2 })}</b> · Pool used {number(Number(s?.poolUsed ?? 0))} / {number(cfg.poolCap)} BIX</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{cfg.packages.map(p => <article key={p.usd} className="rounded-2xl border border-border bg-card/60 p-5">
         <span className="text-[10px] font-bold text-muted-foreground">PRESALE PACKAGE</span>
@@ -63,7 +65,10 @@ function PresalePage() {
         <Button className="mt-4 w-full rounded-full" disabled={!cfg.enabled || busy !== null} onClick={() => onBuy(p.usd)}>{busy === p.usd ? 'Processing…' : 'Buy package'}</Button>
       </article>)}</div>
       {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
-      {orders.length > 0 && <section className="mt-8"><h2 className="font-display text-lg font-black">My presale positions</h2><div className="mt-3 grid gap-2">{orders.map(o => { const r = presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now); return <div key={o.id} className="rounded-lg border border-border p-3 text-xs"><div className="flex justify-between"><b>${number(Number(o.package_usd))}</b><span className="numeric">{number(r, { maximumFractionDigits: 4 })} / {number(Number(o.bix_amount))} BIX</span></div><div className="apy-meter mt-2"><i style={{ width: `${Math.min(100, r / Number(o.bix_amount) * 100)}%` }}/></div></div>; })}</div></section>}
+      {orders.length > 0 && <section className="mt-8"><h2 className="font-display text-lg font-black">My presale positions</h2><div className="mt-3 grid gap-2">{orders.map(o => { const r = presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now); return <div key={o.id} className="rounded-lg border border-border p-3 text-xs"><div className="flex justify-between"><b>${number(Number(o.package_usd))} · {o.strategy ?? 'standard'}</b><span className="numeric">{number(r, { maximumFractionDigits: 4 })} / {number(Number(o.bix_amount))} BIX</span></div><div className="apy-meter mt-2"><i style={{ width: `${Math.min(100, r / Number(o.bix_amount) * 100)}%` }}/></div>{Number(o.dividend_daily_usd ?? 0) > 0 && <p className="mt-1 text-muted-foreground">USDT dividend: ${number(dividendSettled(Number(o.dividend_daily_usd), o.release_days, o.created_at, now), { maximumFractionDigits: 2 })} credited</p>}</div>; })}</div>
+        <h2 className="mt-8 font-display text-lg font-black">My Genesis certificates</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{orders.map(o => <GenesisCertificate key={o.id} usd={Number(o.package_usd)} serial={o.serial} strategy={o.strategy} bix={Number(o.bix_amount)}/>)}</div>
+      </section>}
       {(s?.sponsorRewards?.length ?? 0) > 0 && <p className="mt-6 text-xs text-muted-foreground"><Users size={13} className="inline"/> Sponsor rewards: {s?.sponsorRewards?.length} referral purchases, released on the same mining schedule.</p>}
     </>}
     <p className="terminal-disclosure mt-8"><ShieldCheck size={14}/> No guarantee of profit. Presale BIX is an internal ledger allocation, not an on-chain token. Mined-out BIX is shown for tracking and is not spendable until the owner opens settlement. Sponsor bonus goes only to your direct referrer.</p>
