@@ -1,3 +1,4 @@
+import { PoweredBy } from '@/components/PoweredBy';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
@@ -138,5 +139,5 @@ function WalletPage() {
         <Button className="mt-6 w-full rounded-full bg-chart-2 text-background hover:bg-chart-2/90" onClick={() => setSuccess(null)}>Done</Button>
       </div></div>}
     </MemberGate>
-  </main></BixShell>;
+  <PoweredBy/><div className="h-24 md:h-0" aria-hidden/></main></BixShell>;
 }
