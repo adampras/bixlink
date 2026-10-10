@@ -198,6 +198,8 @@ export type Database = {
       }
       bix_nft_cards: {
         Row: {
+          artwork_id: string | null
+          artwork_image_path: string | null
           created_at: string
           id: string
           lock_days: number
@@ -215,6 +217,8 @@ export type Database = {
           value_usd: number
         }
         Insert: {
+          artwork_id?: string | null
+          artwork_image_path?: string | null
           created_at?: string
           id?: string
           lock_days: number
@@ -232,6 +236,8 @@ export type Database = {
           value_usd: number
         }
         Update: {
+          artwork_id?: string | null
+          artwork_image_path?: string | null
           created_at?: string
           id?: string
           lock_days?: number

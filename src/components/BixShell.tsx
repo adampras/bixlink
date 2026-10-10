@@ -16,7 +16,7 @@ import { isBlockedByMaintenance } from '@/lib/site-control';
 import { TxFeedbackHost } from '@/components/TxFeedback';
 import { MarketTicker } from '@/components/TradingFlair';
 import { PresaleWelcome } from '@/components/PresaleWelcome';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Store } from 'lucide-react';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
@@ -89,6 +89,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
         {presaleOn && <Link to="/presale" className={`nav-link ${path === '/presale' ? 'active' : ''}`}><Crown size={15}/>PRESALE</Link>}
       </nav>}
       <div className="header-tools">
+        {user && <Button asChild title="NFT Marketplace" variant="ghost" size="icon" className="header-icon"><Link to="/nft-marketplace" aria-label="NFT Marketplace"><Store/></Link></Button>}
         {user && reviewerRole.data && <Button asChild title="ADMIN PANEL BIX" variant="outline" size="sm" className="header-reviewer"><Link to="/review" aria-label="ADMIN PANEL BIX"><ClipboardCheck/><span>ADMIN PANEL BIX</span></Link></Button>}
         {user && marketEnabled && <Button asChild title="Market & Updates" variant="ghost" size="icon" className="header-icon"><Link to="/market" aria-label="Market & Updates"><TrendingUp/></Link></Button>}
         <div className="header-island"><Button type="button" variant="ghost" size="icon" className="mode-toggle" aria-label={colorMode === 'dark' ? 'Switch to day mode' : 'Switch to night mode'} onClick={toggleMode}>{colorMode === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</Button><div className="language-control" ref={languageRef}><Button type="button" variant="ghost" className="language-trigger" aria-label={t('language')} aria-haspopup="menu" aria-expanded={languagesOpen} onClick={() => setLanguagesOpen(value => !value)}><span className={`flag-symbol flag-${selectedLanguage.flag}`} aria-hidden/><ChevronDown/></Button>{languagesOpen && <div className="language-menu" role="menu" aria-label={t('language')}>{LANGUAGES.map(item => <Button key={item.code} type="button" variant="ghost" role="menuitemradio" aria-checked={language === item.code} title={item.label} className={language === item.code ? 'is-active' : ''} onClick={() => { setLanguage(item.code as Language); setLanguagesOpen(false); }}><span className={`flag-symbol flag-${item.flag}`} aria-hidden/><span className="sr-only">{item.label}</span></Button>)}</div>}</div></div>

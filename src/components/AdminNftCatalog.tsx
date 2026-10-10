@@ -1,0 +1,22 @@
+import { useState } from 'react';
+import { useServerFn } from '@tanstack/react-start';
+import { useQueryClient } from '@tanstack/react-query';
+import { Eye, EyeOff, Plus, Save, Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { NftArtwork } from '@/components/NftArtwork';
+import { useNftCatalog } from '@/lib/useNftCatalog';
+import { saveNftCatalog } from '@/lib/nft-catalog.functions';
+import { NFT_THEMES, type CatalogItem } from '@/lib/nft-catalog';
+import { NFT_TIERS } from '@/lib/nft';
+import { supabase } from '@/integrations/supabase/client';
+export function AdminNftCatalog({ onMessage }: { onMessage: (m: string) => void }) {
+ const q = useNftCatalog(); const save = useServerFn(saveNftCatalog); const qc = useQueryClient();
+ const [draft,setDraft] = useState<CatalogItem[] | null>(null); const [busy,setBusy] = useState(false); const [search,setSearch] = useState('');
+ const items = draft ?? q.data ?? [];
+ const edit = (id: string, patch: Partial<CatalogItem>) => setDraft(items.map(i => i.id === id ? {...i,...patch} : i));
+ const upload = async (id: string, file?: File) => { if (!file) return; const ext = ({'image/jpeg':'jpg','image/png':'png','image/webp':'webp'} as Record<string,string>)[file.type]; if (!ext || file.size > 5*1024*1024) { onMessage('JPG, PNG or WebP, maximum 5 MB.'); return; } setBusy(true); try { const path=`images/${crypto.randomUUID()}.${ext}`; const {error}=await supabase.storage.from('bix-content').upload(path,file,{upsert:false,contentType:file.type}); if(error) throw error; edit(id,{imagePath:path}); onMessage('Image ready. Save collection to publish.'); } catch(e) { onMessage(e instanceof Error ? e.message : 'Upload failed'); } finally {setBusy(false);} };
+ return <section className="mt-8 border-b border-border pb-8"><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-display text-2xl font-bold">Artwork catalog</h2><p className="text-sm text-muted-foreground">{items.length} designs · {items.filter(i=>i.enabled).length} visible</p></div><Button disabled={busy || !q.data} variant="outline" onClick={()=>setDraft([...items,{id:crypto.randomUUID(),name:'New NFT',theme:'REACTOR',tier:'COMMON',enabled:false}])}><Plus/>Add NFT</Button></div>
+ {q.isError && <p className="text-destructive">Could not load collection.</p>}
+ <div className="mt-4 flex flex-wrap gap-3"><input aria-label="Search admin NFTs" placeholder="Search NFT" className="form-input max-w-xs" value={search} onChange={e=>setSearch(e.target.value)}/><Button disabled={busy || !draft} onClick={async()=>{setBusy(true);try {await save({data:{items}}); await qc.invalidateQueries({queryKey:['nft-catalog']});setDraft(null);onMessage('NFT collection saved.');}catch(e){onMessage(e instanceof Error?e.message:'Save failed');}finally{setBusy(false);}}}><Save/>Save collection</Button><Button variant="outline" onClick={()=>setDraft(items.map(i=>({...i,enabled:true})))}>Show all</Button><Button variant="outline" onClick={()=>setDraft(items.map(i=>({...i,enabled:false})))}>Hide all</Button></div>
+ <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">{items.filter(i=>`${i.name} ${i.theme}`.toLowerCase().includes(search.toLowerCase())).map(i=><div key={i.id} className="min-w-0 space-y-2"><NftArtwork item={i}/><input className="form-input w-full" aria-label={`NFT name ${i.id}`} value={i.name} maxLength={60} onChange={e=>edit(i.id,{name:e.target.value})}/><select className="form-input w-full" aria-label={`NFT theme ${i.id}`} value={i.theme} onChange={e=>edit(i.id,{theme:e.target.value as CatalogItem['theme']})}>{NFT_THEMES.map(t=><option key={t}>{t}</option>)}</select><select className="form-input w-full" aria-label={`NFT tier ${i.id}`} value={i.tier} onChange={e=>edit(i.id,{tier:e.target.value as CatalogItem['tier']})}>{NFT_TIERS.map(t=><option key={t}>{t}</option>)}</select><div className="flex gap-1"><Button size="icon" variant="outline" title={i.enabled?'Hide NFT':'Show NFT'} aria-label={`${i.enabled?'Hide':'Show'} ${i.name}`} aria-pressed={i.enabled} onClick={()=>edit(i.id,{enabled:!i.enabled})}>{i.enabled?<Eye/>:<EyeOff/>}</Button><Button asChild size="icon" variant="outline" disabled={busy}><label title="Upload NFT image"><Upload/><input className="sr-only" aria-label={`Upload ${i.name}`} type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>void upload(i.id,e.target.files?.[0])}/></label></Button></div></div>)}</div></section>;
+}

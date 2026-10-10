@@ -1574,16 +1574,18 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
 .reactor-rocket-stage .reactor-glass-lens small { margin-top: 0; }
 
 /* Reactor NFT cards */
-.nft-card { --nft:var(--muted-foreground); position:relative; margin:0; overflow:hidden; border-radius:16px; border:1px solid color-mix(in oklab,var(--nft) 55%,transparent); background:var(--card); box-shadow:0 0 22px color-mix(in oklab,var(--nft) 30%,transparent); }
+.nft-card { --nft:var(--muted-foreground); position:relative; margin:0; overflow:hidden; border-radius:8px; border:1px solid color-mix(in oklab,var(--nft) 55%,transparent); background:var(--card); box-shadow:0 0 22px color-mix(in oklab,var(--nft) 30%,transparent); }
 .nft-rare { --nft:#3b82f6; } .nft-epic { --nft:#A855F7; } .nft-legendary { --nft:#FFD700; } .nft-mythic { --nft:#39FF14; }
 .nft-mythic,.nft-legendary { animation:nft-glow 2.6s ease-in-out infinite; }
 @keyframes nft-glow { 50% { box-shadow:0 0 36px color-mix(in oklab,var(--nft) 55%,transparent); } }
-.nft-card-top { position:absolute; inset:0 0 auto; z-index:1; display:flex; justify-content:space-between; padding:8px 10px; font-size:10px; font-weight:800; letter-spacing:.08em; color:var(--nft); background:linear-gradient(var(--background),transparent); }
+.nft-card-top { position:absolute; inset:0 0 auto; z-index:1; display:flex; justify-content:space-between; padding:8px 10px; font-size:10px; font-weight:800; letter-spacing:0; color:var(--nft); background:linear-gradient(var(--background),transparent); }
 .nft-card-art { display:block; width:100%; aspect-ratio:3/4; object-fit:cover; }
 .nft-card-foot { display:grid; gap:2px; padding:8px 10px 10px; font-size:11px; border-top:1px solid color-mix(in oklab,var(--nft) 40%,transparent); }
 .nft-card-foot b { color:var(--nft); font-size:12px; } .nft-card-foot span { color:var(--muted-foreground); } .nft-card-foot strong { font-size:15px; }
 .nft-compact .nft-card-foot strong { font-size:13px; }
-.nft-pop { position:fixed; inset:0; z-index:80; display:grid; place-content:center; gap:10px; padding:24px; background:color-mix(in oklab,var(--background) 70%,transparent); backdrop-filter:blur(6px); animation:nft-pop 2.8s ease forwards; }
+.nft-pop { position:fixed; inset:0; z-index:80; display:grid; place-content:center; gap:10px; padding:24px; background:color-mix(in oklab,var(--background) 70%,transparent); backdrop-filter:blur(6px); }
 .nft-pop .nft-card { width:min(220px,62vw); }
 .nft-pop-note { max-width:260px; text-align:center; font-size:12px; font-weight:700; }
 @keyframes nft-pop { 0% { opacity:0; transform:scale(.9); } 12%,82% { opacity:1; transform:none; } 100% { opacity:0; } }
+.nft-catalog-art { display:block; width:100%; aspect-ratio:6/7; object-fit:contain; background:var(--background); }
+@media (prefers-reduced-motion:reduce) { .nft-mythic,.nft-legendary { animation:none; } }

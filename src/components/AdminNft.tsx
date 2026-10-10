@@ -6,6 +6,7 @@ import { NftCard } from '@/components/NftCard';
 import { getNftCollection, reviewNft } from '@/lib/nft.functions';
 import { NFT_TIERS, type NftTier } from '@/lib/nft';
 import { money, number } from '@/lib/bixlink';
+import { AdminNftCatalog } from '@/components/AdminNftCatalog';
 
 export function AdminNft({ onMessage }: { onMessage: (m: string) => void }) {
   const load = useServerFn(getNftCollection); const review = useServerFn(reviewNft); const qc = useQueryClient();
@@ -17,6 +18,7 @@ export function AdminNft({ onMessage }: { onMessage: (m: string) => void }) {
   const shown = all.filter(c => filter === 'ALL' || c.tier === filter);
   const act = async (id: string, approve: boolean) => { setBusy(id); try { await review({ data: { id, approve } }); onMessage(approve ? 'NFT bought back — BIX credited from owner vault.' : 'Sale rejected — card returned to member.'); await qc.invalidateQueries({ queryKey: ['admin-nfts'] }); } catch (e) { onMessage(e instanceof Error ? e.message : 'Review failed'); } finally { setBusy(''); } };
   return <section className="mt-8">
+    <AdminNftCatalog onMessage={onMessage}/>
     <h2 className="font-display text-2xl font-bold">Reactor NFT collection</h2>
     <p className="mt-1 text-sm text-muted-foreground">{all.length} cards minted · {money(all.filter(c => c.status === 'minted' || c.status === 'redeemable').reduce((n, c) => n + Number(c.value_usd), 0))} outstanding value. Buybacks are paid in BIX from the owner vault.</p>
     {q.isPending ? <p className="mt-4">Loading…</p> : q.isError ? <p className="mt-4 text-destructive">Could not load NFTs.</p> : <>
@@ -26,7 +28,7 @@ export function AdminNft({ onMessage }: { onMessage: (m: string) => void }) {
         <span className="flex gap-2"><Button size="sm" disabled={busy === c.id} onClick={() => act(c.id, true)}>Buy back</Button><Button size="sm" variant="outline" disabled={busy === c.id} onClick={() => act(c.id, false)}>Reject</Button></span>
       </div>)}{!pending.length && <p className="text-xs text-muted-foreground">No pending sales.</p>}</div>
       <div className="mt-6 flex flex-wrap gap-2">{(['ALL', ...NFT_TIERS] as const).map(t => <Button key={t} size="sm" variant={filter === t ? 'default' : 'outline'} className="rounded-full" onClick={() => setFilter(t)}>{t}</Button>)}</div>
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-6">{shown.map(c => <div key={c.id}><NftCard tier={c.tier as NftTier} packageId={c.package_id} valueUsd={Number(c.value_usd)} days={c.lock_days} serial={c.serial} compact/><p className="mt-1 text-center text-[11px] text-muted-foreground">{c.username} · {c.status}</p></div>)}</div>
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-6">{shown.map(c => <div key={c.id}><NftCard tier={c.tier as NftTier} packageId={c.package_id} valueUsd={Number(c.value_usd)} days={c.lock_days} serial={c.serial} artworkId={c.artwork_id} imagePath={c.artwork_image_path} compact/><p className="mt-1 text-center text-[11px] text-muted-foreground">{c.username} · {c.status}</p></div>)}</div>
     </>}
   </section>;
 }
