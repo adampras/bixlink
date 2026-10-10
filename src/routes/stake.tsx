@@ -41,7 +41,7 @@ function StakePage() {
   const liveOf = (s: { amount_usd: number | string; apy: number | string; lock_days: number; activated_at: string | null; created_at: string; compound?: boolean }) => { const d = Math.max(0, Math.min(elapsedDays(s), s.lock_days)); const r = Number(s.apy) / 100 / 365; return s.compound ? Number(s.amount_usd) * (Math.pow(1 + r, d) - 1) : Number(s.amount_usd) * r * d; };
   const activeStakes = (data?.stakes ?? []).filter(s => s.status === 'active');
   const liveTotal = activeStakes.reduce((n, s) => n + liveOf(s), 0);
-  const perSecond = activeStakes.reduce((n, s) => n + Number(s.amount_usd) * Number(s.apy) / 100 / 365 / 86400, 0);
+  const perDay = activeStakes.reduce((n, s) => n + Number(s.amount_usd) * Number(s.apy) / 100 / 365, 0);
   return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="STAKE">
       <div className="stake-lux-head auric-card">
@@ -57,7 +57,7 @@ function StakePage() {
         <div className="min-w-0 rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 sm:text-lg">{money(bal.data ?? 0)}</dd></div>
         <div className="min-w-0 rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
       </dl>
-      {activeStakes.length > 0 && <p className="numeric mt-2 text-[10px] leading-4 text-muted-foreground">+${perSecond.toFixed(8)} / second · projection</p>}
+      {activeStakes.length > 0 && <p className="numeric mt-2 text-[10px] leading-4 text-muted-foreground">+${perDay.toFixed(2)} / day · projection</p>}
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {(cfg?.packages ?? []).map((p, i) => <DurationPackageCard key={p.id} pkg={p} index={i} onStake={setChosen}/>)}
       </div>
