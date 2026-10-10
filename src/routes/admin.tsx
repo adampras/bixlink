@@ -83,6 +83,7 @@ function Admin() {
     {tab === 'Users' && <AdminReviewers members={data?.members ?? []} onMessage={setMessage}/>}
     {tab === 'Updates' && <AdminReadiness initial={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} onMessage={setMessage} onSaved={refresh}/>}
      {tab === 'Appearance' && <AdminAppearance initialReadiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/>}
+    {tab === 'Splash' && <AdminSplash onMessage={setMessage}/>}
     {tab === 'Market' && <AdminBixMarket initialMovement={(data?.settings.find(s=>s.key==='bix_market')?.value as { movement?: unknown } | undefined)?.movement} initialPrice={Number((data?.settings.find(s=>s.key==='bix_market')?.value as {priceUsd?: number} | undefined)?.priceUsd ?? 0.84291)} onMessage={setMessage} onSaved={refresh}/>} 
     {(tab === 'Packages' || tab === 'APY') && <AdminDurationPackages onMessage={setMessage}/>}
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
