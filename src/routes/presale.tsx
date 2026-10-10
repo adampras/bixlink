@@ -16,7 +16,7 @@ import reactor from '@/assets/presale-rocket-dark.mp4.asset.json';
 import reactorWebm from '@/assets/presale-rocket-dark.webm.asset.json';
 import reactorPoster from '@/assets/presale-rocket-dark-poster.jpg.asset.json';
 
-export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Four presale packages: $500, $1,000, $5,000 and $10,000 with mining-based BIX release.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: PresalePage });
+export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Genesis presale with Hybrid, Dividend and Founder strategies plus the 21-slot $100,000 Sovereign allocation.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }, { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }] }), component: PresalePage });
 
 function PresalePage() {
   const { user } = useMember();

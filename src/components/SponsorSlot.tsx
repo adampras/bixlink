@@ -18,7 +18,7 @@ export function SponsorSlot({ sponsor }: { sponsor?: Sponsor | undefined }) {
           <div className="flex min-w-0 items-center gap-3">
             <span className="inline-grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-chart-3/40 bg-chart-3/10 text-chart-3"><Handshake size={20} /></span>
             <div className="min-w-0">
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-chart-3">Featured Partner</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-chart-3">{active ? 'Featured Partner · Sponsored' : 'Featured Partner'}</span>
               <h3 className="truncate font-display text-base font-bold text-foreground">{active ? sponsor!.title : 'Partnership & Sponsorship'}</h3>
               <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted-foreground">
                 {active
@@ -27,7 +27,7 @@ export function SponsorSlot({ sponsor }: { sponsor?: Sponsor | undefined }) {
               </p>
             </div>
           </div>
-          {active && sponsor!.url && (
+          {active && sponsor!.url?.startsWith('https://') && (
             <a href={sponsor!.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-chart-3/40 bg-chart-3/10 px-4 py-1.5 text-xs font-bold text-chart-3 transition hover:bg-chart-3/20">
               Visit partner <ExternalLink size={12} />
             </a>

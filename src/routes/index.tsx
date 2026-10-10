@@ -27,7 +27,7 @@ export const Route = createFileRoute('/')({
   loader: ({ context }) => context.queryClient.ensureQueryData(homeQuery),
   errorComponent: HomeError,
   notFoundComponent: () => <div className="p-10">Market overview unavailable.</div>,
-  head: () => ({ meta: [{ title: 'HOME Market & Staking Statistics — BIXLINK' }, { name: 'description', content: 'BIXLINK internal BIX/USDT reference market, staking statistics, tokenomics, RWA model and roadmap.' }, { property: 'og:title', content: 'BIXLINK Market & Staking Statistics' }, { property: 'og:description', content: 'Track the BIXLINK internal market reference, staking ecosystem and global crypto prices.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }),
+  head: () => ({ meta: [{ title: 'HOME Market & Staking Statistics — BIXLINK' }, { name: 'description', content: 'BIXLINK internal BIX/USDT reference market, staking statistics, tokenomics, RWA model and roadmap.' }, { property: 'og:title', content: 'BIXLINK Market & Staking Statistics' }, { property: 'og:description', content: 'Track the BIXLINK internal market reference, staking ecosystem and global crypto prices.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/c44e33af-5cb2-4bf8-9d9f-ce8af06b3e8b/bix-reactor-poster.jpg' }, { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/c44e33af-5cb2-4bf8-9d9f-ce8af06b3e8b/bix-reactor-poster.jpg' }] }),
   component: Home,
 });
 
