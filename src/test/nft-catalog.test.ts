@@ -1,8 +1,14 @@
 import { describe,it,expect } from 'vitest';
-import { DEFAULT_NFT_CATALOG, catalogImage, packageArtwork, visibleCatalog } from '@/lib/nft-catalog';
-describe('NFT catalog rules',()=>{
- it('contains 100 distinct artwork designs',()=>{expect(DEFAULT_NFT_CATALOG).toHaveLength(100);expect(new Set(DEFAULT_NFT_CATALOG.map(i=>catalogImage(i.id))).size).toBe(100);});
- it('includes reactor, BIXFOX and BIXCOIN themes',()=>{expect(new Set(DEFAULT_NFT_CATALOG.map(i=>i.theme))).toEqual(new Set(['REACTOR','BIXFOX','BIXCOIN']));});
- it('hidden artworks cannot appear or be offered in previews',()=>{const items=DEFAULT_NFT_CATALOG.map(i=>({...i,enabled:i.id==='nft-010'}));expect(visibleCatalog(items).map(i=>i.id)).toEqual(['nft-010']);expect(packageArtwork(items,0,30)?.id).toBe('nft-010');});
- it('eight packages with five periods have distinct artwork previews',()=>{const ids=Array.from({length:8},(_,i)=>[30,60,90,180,360].map(d=>packageArtwork(DEFAULT_NFT_CATALOG,i,d)?.id)).flat();expect(new Set(ids).size).toBe(40);});
+import { DEFAULT_NFT_CATALOG, packageArtwork, visibleCatalog } from '@/lib/nft-catalog';
+import { nftTier } from '@/lib/nft';
+import { DEFAULT_PRODUCTS, publishedProducts, shopSchema } from '@/lib/shop';
+describe('Approved reactor collection',()=>{
+ it('offers reactors only, never BIXFOX or BIXCOIN',()=>{expect(new Set(DEFAULT_NFT_CATALOG.map(i=>i.theme))).toEqual(new Set(['REACTOR']));expect(visibleCatalog([...DEFAULT_NFT_CATALOG,{...DEFAULT_NFT_CATALOG[0],id:'fox',name:'fox',theme:'BIXFOX',tier:'COMMON',enabled:true}])).toHaveLength(5);});
+ it('matches package value and duration to the contract tier',()=>{for(const usd of [50,100,500,3000,10000])for(const d of [30,60,90,180,360])expect(packageArtwork(DEFAULT_NFT_CATALOG,0,d,usd)?.tier).toBe(nftTier(usd,d));expect(packageArtwork(DEFAULT_NFT_CATALOG,0,360,10000)?.tier).toBe('MYTHIC');expect(packageArtwork(DEFAULT_NFT_CATALOG,0,30,50)?.tier).toBe('COMMON');});
+ it('never selects hidden artwork',()=>{expect(packageArtwork(DEFAULT_NFT_CATALOG.map(i=>({...i,enabled:false})),0,30,50)).toBeUndefined();});
+});
+describe('Owner marketplace catalog',()=>{
+ it('hides unpublished products',()=>{expect(publishedProducts(DEFAULT_PRODUCTS.map(i=>({...i,enabled:i.id==='shirt'}))).map(i=>i.id)).toEqual(['shirt']);});
+ it('supports removing all merchandise',()=>{expect(shopSchema.parse({items:[]})).toEqual({items:[]});});
+ it('allows only secure contact links',()=>{expect(shopSchema.safeParse({items:[{...DEFAULT_PRODUCTS[0],inquiryUrl:'javascript:alert(1)'}]}).success).toBe(false);});
 });
