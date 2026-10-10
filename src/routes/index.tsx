@@ -14,6 +14,7 @@ import { LandingExperience } from '@/components/LandingExperience';
 import { ContentCarousel } from '@/components/ContentCarousel';
 import { defaultRoadmap, defaultSpaces } from '@/lib/landing-content';
 import { LandingTokenomics } from '@/components/LandingTokenomics';
+import { PreTgeRoadmap } from '@/components/PreTgeRoadmap';
 import { InternalMarket } from '@/components/InternalMarket';
 import { CryptoIcon } from '@/components/CryptoIcon';
 
@@ -54,6 +55,7 @@ function Home() {
     </div></section>}
     <section className="mx-auto max-w-7xl px-5 pb-6 md:px-8"><div className={`grid gap-2 ${presaleVisible ? 'grid-cols-3' : 'grid-cols-2'}`}>{presaleVisible && <Link to="/presale" className="flex min-w-0 flex-col gap-1 rounded-xl border border-primary/40 bg-primary/10 p-3 text-xs font-bold"><Crown size={16}/><span className="truncate">PRESALE</span><small className="truncate font-normal text-muted-foreground">$500 – $10K</small></Link>}<Link to="/arena" className="flex min-w-0 flex-col gap-1 rounded-xl border border-chart-2/40 bg-chart-2/10 p-3 text-xs font-bold"><Swords size={16}/><span className="truncate">FOX ARENA</span><small className="truncate font-normal text-muted-foreground">Daily missions</small></Link><Link to="/nft-marketplace" className="flex min-w-0 flex-col gap-1 rounded-xl border border-border bg-card p-3 text-xs font-bold"><ShoppingBag size={16}/><span className="truncate">MARKETPLACE</span><small className="truncate font-normal text-muted-foreground">NFT & merch</small></Link></div></section>
     <section className="mx-auto max-w-7xl px-5 pb-6 md:px-8"><SentimentGauge/></section>
+    <PreTgeRoadmap/>
     <LandingTokenomics content={cfg?.landingContent} member/>
     <section className="border-b border-border bg-card/35"><div className="mx-auto max-w-7xl px-5 py-10 md:px-8"><ContentCarousel group="spaces" title="Kategori Pengembangan" items={cfg?.landingContent.spaces ?? defaultSpaces}/></div></section>
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]"><div><div className="eyebrow"><Database size={13}/> RECORDED SOURCES</div><h2 className="section-title">INCOME <span>OVERVIEW</span></h2><div className="mt-6 space-y-2">{income.length ? income.map(row => <div className="flex justify-between rounded-lg border border-border bg-card p-4" key={row.category}><span>{row.category}</span><b className="text-chart-3">{money(Number(row.amount_usd))}</b></div>) : <p className="text-sm text-muted-foreground">No verified income source has been recorded by the owner yet.</p>}</div><p className="mt-4 text-xs text-muted-foreground">Values shown are owner-entered internal records, not audited revenue.</p></div><div className="min-w-0"><ContentCarousel group="roadmap" title="Roadmap BIXLINK" items={cfg?.landingContent.roadmap ?? defaultRoadmap}/></div></div></section>
