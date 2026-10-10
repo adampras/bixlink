@@ -7,6 +7,8 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { getMarketUpdates } from '@/lib/updates.functions';
 import { dateTime, money, number } from '@/lib/bixlink';
+import { SponsorSlot } from '@/components/SponsorSlot';
+import { usePublicConfig } from '@/lib/useMember';
 
 const marketQuery = queryOptions({ queryKey: ['bix-market-updates'], queryFn: () => getMarketUpdates(), staleTime: 60_000, refetchInterval: 60_000 });
 export const Route = createFileRoute('/market')({
@@ -18,6 +20,7 @@ export const Route = createFileRoute('/market')({
 });
 function MarketPage() {
   const { data, refetch, isFetching } = useSuspenseQuery(marketQuery);
+  const { data: cfg } = usePublicConfig();
   return <BixShell><main className="mx-auto min-h-[70vh] max-w-6xl px-5 py-8 md:px-8 md:py-12">
     <div className="eyebrow"><Globe2 size={14}/> BIXLINK INTELLIGENCE</div>
     <div className="mt-3 flex items-center justify-between gap-3"><h1 className="font-display text-[26px] font-bold text-foreground md:text-3xl">Market & Updates</h1><Button size="icon" variant="ghost" aria-label="Refresh market" title="Refresh market" disabled={isFetching} onClick={() => refetch()}><RefreshCw size={18}/></Button></div>
@@ -31,5 +34,6 @@ function MarketPage() {
       </section>
       <section className="min-w-0"><div className="flex items-center justify-between gap-3"><h2 className="flex items-center gap-2 font-display text-lg font-bold"><Newspaper size={17}/> Latest updates</h2><span className="text-[10px] text-muted-foreground">OFFICIAL</span></div>{data.announcements.length ? data.announcements.map(post => <article key={post.id} className="border-b border-border py-6"><span className="text-[10px] font-bold text-primary">{post.category}</span><h3 className="mt-3 break-words font-display text-base font-bold leading-6">{post.title}</h3><p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-muted-foreground">{post.body}</p><time className="mt-4 block text-[10px] text-muted-foreground">{post.published_at ? dateTime(post.published_at) : ''}</time></article>) : <p className="mt-8 text-sm leading-6 text-muted-foreground">No official announcements published yet.</p>}</section>
     </div>}
+    <SponsorSlot sponsor={cfg?.landingContent.sponsor}/>
   </main></BixShell>;
 }
