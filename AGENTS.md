@@ -13,7 +13,7 @@
 - Grant owner access only after server-validated identity and a matching verified owner email; client state is never an authority for admin actions.
 - Read public package and settings data with RLS and run account-specific operations with authenticated server functions; this separates public browsing from private records.
 - BIX/USDT conversions are reviewed internal ledger requests at the owner reference, never exchange execution or custody.
-- Presentation settings use authenticated owner writes for central control.
+- Owner-only presentation writes; keep colors in Appearance and shortcuts to yield/Splash for discoverability.
 - Share one session store across routes; use layout-shaped placeholders.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
 - Clone accounts (bix_clone_accounts) are funded only via bix_allocations and excluded from member stats — auditable and separate.
