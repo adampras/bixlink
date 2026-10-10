@@ -11,7 +11,7 @@ import { ProfitSimulator } from '@/components/ProfitSimulator';
 import { PresaleCommission } from '@/components/PresaleCommission';
 import { GenesisCertificate, PresaleStrategies } from '@/components/PresaleStrategies';
 import { SovereignAllocation } from '@/components/SovereignAllocation';
-import { dividendSettled, type PresaleStrategy } from '@/lib/presale-strategy';
+import { DEFAULT_STRATEGIES, dividendSettled, type PresaleStrategy } from '@/lib/presale-strategy';
 import { number } from '@/lib/bixlink';
 import { Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide-react';
 import reactor from '@/assets/presale-rocket-dark.mp4.asset.json';
@@ -59,7 +59,7 @@ function PresalePage() {
       {!cfg.enabled && <p className="mt-6 rounded-lg border border-chart-3 p-3 text-sm text-chart-3">Presale is currently closed by the owner.</p>}
       {cfg.sovereign && <SovereignAllocation cfg={cfg.sovereign} claimed={Number(s?.sovereignClaimed ?? 0)} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>}
       <PresaleStrategies packages={cfg.packages} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>
-      <ProfitSimulator price={presalePrice(cfg.packages)} days={cfg.packages[0]?.releaseDays ?? 180} settings={cfg.strategies}/>
+      <ProfitSimulator price={presalePrice(cfg.packages)} days={cfg.packages[0]?.releaseDays ?? 180} settings={cfg.strategies ?? DEFAULT_STRATEGIES}/>
       <PresaleCommission rewards={s?.sponsorRewards ?? []} code={(me as any)?.referral?.code} now={now}/>
       {Number(s?.dividendEarned ?? 0) > 0 && <p className="mt-3 text-xs text-chart-2">USDT dividends credited so far: <b className="numeric">${number(Number(s?.dividendEarned), { maximumFractionDigits: 2 })}</b></p>}
       <p className="mt-4 text-xs text-muted-foreground">USDT balance: <b className="numeric">${number(Number(s?.balanceUsd ?? 0), { maximumFractionDigits: 2 })}</b> · Pool used {number(Number(s?.poolUsed ?? 0))} / {number(cfg.poolCap)} BIX</p>
