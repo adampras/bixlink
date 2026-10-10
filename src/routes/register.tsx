@@ -37,7 +37,7 @@ function RegisterPage() {
       setNotice('Check your email to confirm your account, then sign in.');
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
-  return <BixShell><main className="register-numbered"><VaultStardust/><Link to="/" className="relative z-10 mb-3 inline-flex items-center gap-1.5 self-start rounded-full border border-chart-3/30 bg-card/50 px-3 py-1.5 text-xs font-bold text-chart-3 backdrop-blur-md">← Back to HOME</Link><div className="register-numbered-inner register-vault">
+  return <BixShell><main className="register-numbered"><VaultStardust/><Link to="/" className="relative z-10 mb-3 inline-flex items-center gap-1.5 self-start rounded-full border border-chart-3/30 bg-card/50 px-3 py-1.5 text-xs font-bold text-chart-3 backdrop-blur-md">← Back to HOME</Link><div className="register-numbered-inner register-vault"><nav className="auth-tabs mb-6" aria-label="Account"><Link to="/auth">SIGN IN</Link><Link to="/register" data-active="true">REGISTER</Link></nav>
     <header className="register-numbered-brand"><VaultLogo/><div className="auth-badge mb-4"><span/>SECURE ONBOARDING</div><h1>BIX<span>LINK</span></h1><VaultNode/></header>
     <form onSubmit={submit} className="space-y-6" aria-label="Create BIXLINK account">
       <fieldset className="register-numbered-step"><legend className="sr-only">Personal profile</legend><span className="register-step-number" aria-hidden>01</span><div className="space-y-2.5"><h2>Personal profile</h2>
@@ -52,7 +52,7 @@ function RegisterPage() {
         <input aria-label="Referral code" inputMode="text" maxLength={10} value={referral} onChange={event => setReferral(event.target.value.toUpperCase())} className="register-numbered-input register-network-code" placeholder="BIX-123456"/>
       </div></fieldset>
       {notice && <p role="status" className="text-sm leading-6 text-chart-2">{notice}</p>}
-      <div className="space-y-4 pt-4"><Button type="submit" disabled={busy} className="register-numbered-submit vault-shimmer">{busy ? 'Please wait…' : 'Create account'}<ArrowRight/></Button><div className="text-center text-[10px] font-bold tracking-widest text-muted-foreground">OR</div><Button type="button" variant="outline" className="h-12 w-full rounded-full border-border bg-card" onClick={async () => { const r = await lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/auth` }); if (r.error) setNotice(r.error.message); else if (!r.redirected) window.location.assign('/'); }}>Register with Google</Button></div>
+      <div className="space-y-4 pt-4"><Button type="submit" disabled={busy} className="register-numbered-submit vault-shimmer">{busy ? 'Please wait…' : 'Create account'}<ArrowRight/></Button><div className="text-center text-[10px] font-bold tracking-widest text-muted-foreground">OR</div><Button type="button" variant="outline" className="h-12 w-full rounded-full border-border bg-card" onClick={async () => { const r = await lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/auth` }); if (r.error) setNotice(r.error.message); else if (!r.redirected) window.location.assign('/'); }}>Register with Google</Button><p className="text-center text-sm text-muted-foreground">Already have an account? <Link to="/auth" className="font-bold text-chart-2">Sign in</Link></p></div>
     </form>
   </div></main></BixShell>;
 }
