@@ -6,18 +6,21 @@ import { Save, Shuffle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getEditablePackages, saveDurationPackage } from '@/lib/packages.functions';
 import { updateSetting } from '@/lib/bixlink.functions';
-import { usePublicConfig } from '@/lib/useMember';
+import { useMember, usePublicConfig, useReviewerAccess } from '@/lib/useMember';
 import { PACKAGE_DURATIONS } from '@/lib/package-options';
 import { fluctuatedApys, standardApys } from '@/lib/yield-preset';
 import { number } from '@/lib/bixlink';
 
 export function YieldControlPanel({ market = true }: { market?: boolean }) {
   const { data: cfg } = usePublicConfig();
+  const { user } = useMember();
+  const reviewer = useReviewerAccess(user?.id);
+  const canEdit = Boolean(cfg?.isAdmin || reviewer.data);
   const load = useServerFn(getEditablePackages);
   const save = useServerFn(saveDurationPackage);
   const saveSetting = useServerFn(updateSetting);
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: ['duration-package-editor'], queryFn: () => load(), enabled: !!cfg?.isAdmin });
+  const q = useQuery({ queryKey: ['duration-package-editor'], queryFn: () => load(), enabled: canEdit });
   const [price, setPrice] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -44,9 +47,9 @@ export function YieldControlPanel({ market = true }: { market?: boolean }) {
   return <div className="py-6">
     <div className="eyebrow">OWNER CONTROL</div>
     <h2 className="font-display mt-2 text-2xl font-bold">Daily yield control</h2>
-    {!cfg ? <p className="mt-6">Loading…</p> : !cfg.isAdmin ? <p className="mt-6 text-muted-foreground">Owner access only. <Link to="/" className="text-chart-3">Back to HOME</Link></p> : <>
+    {!cfg ? <p className="mt-6">Loading…</p> : !canEdit ? <p className="mt-6 text-muted-foreground">Owner access only. <Link to="/" className="text-chart-3">Back to HOME</Link></p> : <>
       {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
-      {market && <section className="mt-6 border-y border-border py-5">
+      {market && cfg.isAdmin && <section className="mt-6 border-y border-border py-5">
         <h2 className="font-display text-xl font-bold">Internal BIX price</h2>
         <p className="mt-1 text-xs text-muted-foreground">Current reference: <b className="numeric text-chart-3">${number(current, { maximumFractionDigits: 6 })}</b> · presale price $0.10. Ledger reference only.</p>
         <div className="mt-4 flex flex-wrap gap-2">
