@@ -14,7 +14,8 @@ import { SovereignAllocation } from '@/components/SovereignAllocation';
 import { WhaleDesk } from '@/components/InstitutionalSuite';
 import { DEFAULT_STRATEGIES, dividendSettled, type PresaleStrategy } from '@/lib/presale-strategy';
 import { number } from '@/lib/bixlink';
-import { Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide-react';
+import { Eye, Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import reactor from '@/assets/presale-rocket-dark.mp4.asset.json';
 import reactorWebm from '@/assets/presale-rocket-dark.webm.asset.json';
 import reactorPoster from '@/assets/presale-rocket-dark-poster.jpg.asset.json';
@@ -38,6 +39,7 @@ function PresalePage() {
   const [sound, setSound] = useState(false); const vidRef = useRef<HTMLVideoElement>(null);
   const [selection, setSelection] = useState<PresaleSelection | null>(null);
   const [purchaseError, setPurchaseError] = useState('');
+  const [nftPreview, setNftPreview] = useState<NftTier | null>(null);
   useEffect(() => { if (vidRef.current) vidRef.current.muted = !sound; }, [sound]);
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   const s = q.data; const cfg = s?.config;
@@ -81,9 +83,9 @@ function PresalePage() {
       {tab === 'packages' && <>
         {GROUPS.map(g => { const list = cfg.packages.filter(p => p.usd >= g.min && p.usd < g.max); if (!list.length) return null; return <section key={g.name} className="mt-6">
           <div className="flex items-baseline justify-between"><h2 className="font-display text-base font-black tracking-wide">{g.name}</h2><span className="text-[11px] text-muted-foreground">{g.range}</span></div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{list.map(p => { const tier = presaleArtTier(p.usd); return <article key={p.usd} className="presale-lux-card presale-card-uniform" style={{ backgroundImage: `url(${NFT_ART[tier]})` }}>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{list.map(p => { const tier = presaleArtTier(p.usd); return <article key={p.usd} className="presale-lux-card presale-card-uniform">
             <div className="presale-lux-inner flex h-full flex-col">
-              <span className="truncate text-[10px] font-bold text-muted-foreground">{NFT_NAME[tier].toUpperCase()} · {tier}</span>
+              <div className="flex items-center justify-between gap-2"><span className="truncate text-[10px] font-bold text-muted-foreground">{NFT_NAME[tier].toUpperCase()} · {tier}</span><button type="button" className="nft-preview-chip" onClick={() => setNftPreview(tier)}><Eye size={12}/> NFT</button></div>
               <h3 className="presale-lux-price numeric font-display text-3xl font-black">${number(p.usd)}</h3>
               <dl className="mt-2 grid grid-cols-2 gap-2 text-xs"><div><dt className="text-muted-foreground">Total BIX</dt><dd className="numeric font-bold text-primary"><Lock size={11} className="inline"/> {number(p.bix)}</dd></div><div><dt className="text-muted-foreground">Release</dt><dd className="numeric font-bold">{p.releaseDays} days</dd></div></dl>
               <Button className="mt-auto w-full rounded-lg" disabled={!cfg.enabled || busy !== null} onClick={() => onBuy(p.usd)}>{busy === p.usd ? 'Processing…' : 'Buy package'}</Button>
@@ -110,5 +112,10 @@ function PresalePage() {
     </>}
     <p className="terminal-disclosure mt-8"><ShieldCheck size={14}/> No guarantee of profit. Presale BIX is an internal ledger allocation, not an on-chain token. Mined-out BIX is shown for tracking and is not spendable until the owner opens settlement. Sponsor bonus goes only to your direct referrer.</p>
     <PresalePurchaseDialog selection={selection} balance={Number(s?.balanceUsd ?? 0)} busy={busy !== null} error={purchaseError} onClose={() => setSelection(null)} onConfirm={confirmBuy}/>
+    <Dialog open={nftPreview !== null} onOpenChange={open => { if (!open) setNftPreview(null); }}>
+      <DialogContent className="nft-preview-dialog">
+        {nftPreview && <><img src={NFT_ART[nftPreview]} alt={`${NFT_NAME[nftPreview]} certificate artwork`}/><div className="p-4"><DialogTitle className="font-display text-base">{NFT_NAME[nftPreview]} · {nftPreview}</DialogTitle><DialogDescription className="mt-1 text-xs">In-app certificate artwork issued with this allocation. Not an on-chain NFT.</DialogDescription></div></>}
+      </DialogContent>
+    </Dialog>
   </main></BixShell>;
 }

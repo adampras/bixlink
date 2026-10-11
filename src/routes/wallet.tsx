@@ -149,5 +149,5 @@ function WalletPage() {
         <Button className="mt-6 w-full rounded-full bg-chart-2 text-background hover:bg-chart-2/90" onClick={() => setSuccess(null)}>Done</Button>
       </div></div>}
     </MemberGate>
-  <PoweredBy/><div className="h-24 md:h-0" aria-hidden/></main></BixShell>;
+  <PoweredBy slim/><div className="h-24 md:h-0" aria-hidden/></main></BixShell>;
 }

@@ -15,7 +15,7 @@ export function PresalePurchaseDialog({ selection, balance, busy, error, onClose
   return <Dialog open={selection !== null} onOpenChange={open => { if (!open && !busy) onClose(); }}>
     <DialogContent className="presale-purchase-dialog" onEscapeKeyDown={event => { if (busy) event.preventDefault(); }} onPointerDownOutside={event => { if (busy) event.preventDefault(); }}>
       {selection && <>
-        <div className="purchase-art"><img src={selection.artwork} alt="Clear-glass Genesis reactor"/><span><Crown size={14}/> GENESIS ALLOCATION</span></div>
+        <div className="purchase-art"><img src={selection.artwork} alt=""/><span><Crown size={14}/> GENESIS ALLOCATION</span></div>
         <div className="purchase-details">
           <DialogTitle className="font-display text-xl leading-snug">{genesisTier(selection.usd)}</DialogTitle>
           <DialogDescription className="mt-1 capitalize">{selection.strategy} · Confirm your presale allocation</DialogDescription>
