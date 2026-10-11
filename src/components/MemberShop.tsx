@@ -22,7 +22,7 @@ async function autoStudio(file: File): Promise<string> {
   x.filter = 'none';
   const d = x.getImageData(0, 0, W, H), s = new Uint8ClampedArray(d.data), o = d.data;
   for (let y = 1; y < H - 1; y++) for (let i = 1; i < W - 1; i++) for (let k = 0; k < 3; k++) {
-    const p = (y * W + i) * 4 + k; o[p] = s[p] * 1.6 - (s[p - 4] + s[p + 4] + s[p - W * 4] + s[p + W * 4]) * .15;
+    const p = (y * W + i) * 4 + k; o[p] = s[p]! * 1.6 - (s[p - 4]! + s[p + 4]! + s[p - W * 4]! + s[p + W * 4]!) * .15;
   }
   x.putImageData(d, 0, 0);
   return c.toDataURL('image/jpeg', .82);
@@ -30,14 +30,14 @@ async function autoStudio(file: File): Promise<string> {
 
 function ProductCard({ p, children }: { p: Product; children?: React.ReactNode }) {
   return <div className="overflow-hidden rounded-2xl border border-border bg-card">
-    <div className={`studio-stage ${STUDIOS[p.studio] ?? STUDIOS.obsidian} aspect-[3/4]`}>{p.image_url && <img src={p.image_url} alt={p.title} loading="lazy" className="h-full w-full object-cover"/>}</div>
+    <div className={`studio-stage ${STUDIOS[p.studio] ?? STUDIOS['obsidian']} aspect-[3/4]`}>{p.image_url && <img src={p.image_url} alt={p.title} loading="lazy" className="h-full w-full object-cover"/>}</div>
     <div className="p-3 text-xs"><b className="block truncate text-sm">{p.title}</b><span className="numeric text-primary">{money(Number(p.price_usd))}</span>
       {p.status !== 'approved' && <span className="ml-2 rounded-full border border-border px-2 text-[10px] uppercase">{p.status}</span>}
       {p.order_url && p.status === 'approved' && <a href={p.order_url} target="_blank" rel="noopener noreferrer" className="mt-2 block rounded-full border border-primary py-1 text-center font-bold text-primary">Order</a>}{children}</div>
   </div>;
 }
 
-export function MemberShop({ userId, onMessage }: { userId?: string; onMessage?: (m: string) => void }) {
+export function MemberShop({ userId, onMessage }: { userId?: string | undefined; onMessage?: (m: string) => void }) {
   const approved = useQuery({ queryKey: ['member-products', 'approved'], queryFn: async () => { const { data, error } = await supabase.from('bix_member_products').select('*').eq('status', 'approved').order('created_at', { ascending: false }).limit(60); if (error) throw error; return data as Product[]; } });
   const mine = useQuery({ queryKey: ['member-products', 'mine', userId], enabled: !!userId, queryFn: async () => {
     const [{ data, error }, slots] = await Promise.all([supabase.from('bix_member_products').select('*').eq('user_id', userId!).order('created_at', { ascending: false }), supabase.rpc('bix_member_shop_slots', { p_user: userId! })]);
@@ -83,7 +83,7 @@ export function MemberShop({ userId, onMessage }: { userId?: string; onMessage?:
   </section>;
 }
 
-export function AdminMemberShop({ initial, onMessage }: { initial?: MemberShopConfig; onMessage: (m: string) => void }) {
+export function AdminMemberShop({ initial, onMessage }: { initial?: MemberShopConfig | undefined; onMessage: (m: string) => void }) {
   const [cfg, setCfg] = useState<MemberShopConfig>({ ...defaultMemberShop, ...initial });
   const [ov, setOv] = useState({ user: '', slots: '' });
   const change = useServerFn(updateSetting);
