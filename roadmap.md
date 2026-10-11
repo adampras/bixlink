@@ -116,3 +116,6 @@
 - [x] Apply approved adaptive luxury marketplace, merchandise controls, and HOME/PROFILE access without header shop.
 - [x] Verify owner product/image saving and removal, public visibility, package preview close, and mobile/light-mode layout; no financial transactions performed.
 - [ ] Make Wallet color switches, staking profit controls and the selected splash easy to find; verify owner access and splash playback.
+- [x] Separate APY from package editing and expose one-click all-package daily fluctuation; verified owner update for 14 packages.
+- [x] Replace Join staking labels and add luxury presale purchase confirmation; verified acknowledgment and cancel without purchase.
+- [x] Fix visible landing animation and replace three effects with wallet-only financial icon motion; verified moving canvas and three enabled wallet effects.

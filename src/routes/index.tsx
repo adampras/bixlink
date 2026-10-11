@@ -21,7 +21,7 @@ import { ProtocolStatus } from '@/components/ProtocolStatus';
 import { SponsorSlot } from '@/components/SponsorSlot';
 import { InternalMarket } from '@/components/InternalMarket';
 import { CryptoIcon } from '@/components/CryptoIcon';
-import { HeroFlux, LiveActivityToast, PresaleStageBar } from '@/components/GrowthSuite';
+import { LiveActivityToast, PresaleStageBar } from '@/components/GrowthSuite';
 
 const homeQuery = queryOptions({ queryKey: ['bix-home-market'], queryFn: () => getHomeMarketData(), staleTime: 60_000, refetchInterval: 60_000 });
 
@@ -50,7 +50,7 @@ function Home() {
   const presaleVisible = Boolean(user) && presaleOpen(presale.data);
 
   const rd = cfg?.readiness;
-  if (!user) return <BixShell><div className="relative">{rd?.heroAnimEnabled !== false && <HeroFlux/>}<LandingExperience {...(cfg ? { packages: cfg.packages, booster: cfg.booster.enabled, bixPrice: cfg.bixMarket.priceUsd, content: cfg.landingContent } : {})}/>{rd?.presaleStageEnabled !== false && <PresaleStageBar/>}</div>{rd?.liveActivityEnabled !== false && <LiveActivityToast/>}</BixShell>;
+  if (!user) return <BixShell><div className="relative"><LandingExperience {...(cfg ? { packages: cfg.packages, booster: cfg.booster.enabled, bixPrice: cfg.bixMarket.priceUsd, content: cfg.landingContent } : {})}/>{rd?.presaleStageEnabled !== false && <PresaleStageBar/>}</div>{rd?.liveActivityEnabled !== false && <LiveActivityToast/>}</BixShell>;
   return <BixShell><MemberGate ready={ready} signedIn={!!user} title="HOME"><main>
     <section className="mx-auto grid max-w-7xl gap-6 px-5 pt-6 pb-6 md:px-8 lg:grid-cols-[1.05fr_1fr]"><InternalMarket reference={bixPrice} movement={data.movement} serverNow={data.serverNow}/>
       <div className="terminal-market min-w-0"><div className="terminal-market-head"><div><div className="eyebrow">GLOBAL MARKET WATCH</div><h2>Major assets</h2></div>{data.marketUpdatedAt && <span className="terminal-live"><i/> LIVE · 60S</span>}</div><div className="terminal-watchlist">{data.markets.length ? data.markets.map((asset,index) => <div key={asset.id} className="terminal-asset"><CryptoIcon symbol={asset.symbol} size={32}/><div className="min-w-0"><b>{asset.symbol}</b><span>{asset.name}</span></div><svg viewBox="0 0 100 28" role="img" aria-label={`${asset.symbol} 24 hour chart`}><polyline fill="none" stroke={asset.change24h >= 0 ? 'var(--chart-2)' : 'var(--destructive)'} strokeWidth="2" points={asset.sparkline.map((price,sparkIndex)=>{const low=Math.min(...asset.sparkline),high=Math.max(...asset.sparkline),range=high-low||1;return `${(sparkIndex/Math.max(asset.sparkline.length-1,1))*100},${26-((price-low)/range)*24}`;}).join(' ')}/></svg><div className="numeric text-right"><strong>{asset.price < 1 ? `$${asset.price.toFixed(4)}` : money(asset.price)}</strong><span className={asset.change24h >= 0 ? 'text-chart-2' : 'text-destructive'}>{asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%</span></div></div>) : <div className="py-14 text-center text-sm text-muted-foreground">Global feed is temporarily unavailable. Internal BIX data remains available.</div>}</div><div className="terminal-foot"><Globe2 size={13}/> Global USD feed · Local IDR context · Data may be delayed</div></div>

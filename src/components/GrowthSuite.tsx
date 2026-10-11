@@ -36,39 +36,57 @@ export function LiveActivityToast() {
   </div>;
 }
 
-/** Canvas "neural payment grid": gold/violet nodes linked like transaction routes. Decorative only. */
+/** Decorative global payment routes; never represents live transfers. */
 export function HeroFlux() {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    const c = ref.current; if (!c) return; const ctx = c.getContext('2d'); if (!ctx) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const css = getComputedStyle(document.documentElement);
-    const gold = css.getPropertyValue('--primary').trim() || '#FFD700';
-    const violet = css.getPropertyValue('--accent').trim() || '#A855F7';
-    let w = 0, h = 0, raf = 0; const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const resize = () => { w = c.clientWidth; h = c.clientHeight; c.width = w * dpr; c.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
-    resize(); window.addEventListener('resize', resize);
-    const n = w < 640 ? 34 : 70;
-    const pts = Array.from({ length: n }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35 }));
-    const pulses: { a: number; b: number; t: number }[] = [];
-    const draw = () => {
-      ctx.clearRect(0, 0, w, h);
-      for (const p of pts) { p.x += p.vx; p.y += p.vy; if (p.x < 0 || p.x > w) p.vx *= -1; if (p.y < 0 || p.y > h) p.vy *= -1; }
-      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
-        const A = pts[i]!, B = pts[j]!; const dx = A.x - B.x, dy = A.y - B.y, d = Math.hypot(dx, dy);
-        if (d < 130) { ctx.globalAlpha = (1 - d / 130) * .35; ctx.strokeStyle = (i + j) % 3 ? gold : violet; ctx.lineWidth = .7; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
-          if (Math.random() < .0008 && pulses.length < 14) pulses.push({ a: i, b: j, t: 0 }); }
-      }
-      ctx.globalAlpha = .8; for (const p of pts) { ctx.fillStyle = gold; ctx.beginPath(); ctx.arc(p.x, p.y, 1.4, 0, 6.3); ctx.fill(); }
-      for (let k = pulses.length - 1; k >= 0; k--) { const q = pulses[k]!; q.t += .02; if (q.t >= 1) { pulses.splice(k, 1); continue; }
-        const a = pts[q.a]!, b = pts[q.b]!; ctx.globalAlpha = 1; ctx.fillStyle = violet; ctx.shadowColor = violet; ctx.shadowBlur = 10;
-        ctx.beginPath(); ctx.arc(a.x + (b.x - a.x) * q.t, a.y + (b.y - a.y) * q.t, 2.4, 0, 6.3); ctx.fill(); ctx.shadowBlur = 0; }
-      raf = requestAnimationFrame(draw);
+    const canvas = ref.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    let w = 0, h = 0, frame = 0;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const resize = () => {
+      w = canvas.clientWidth; h = canvas.clientHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-    draw();
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
+    const observer = new ResizeObserver(resize); observer.observe(canvas); resize();
+    const draw = (time: number) => {
+      ctx.clearRect(0, 0, w, h);
+      const css = getComputedStyle(canvas.closest('.site-shell') ?? canvas);
+      const gold = css.getPropertyValue('--chart-3').trim();
+      const green = css.getPropertyValue('--chart-2').trim();
+      const violet = css.getPropertyValue('--primary').trim();
+      const nodes = [[.08,.19],[.82,.12],[.93,.42],[.75,.84],[.18,.82],[.04,.48],[.48,.06],[.52,.95]];
+      const center = {x:w*.5, y:h*.48};
+      for (const [i, node] of nodes.entries()) {
+        const [nx, ny] = node;
+        if (nx === undefined || ny === undefined) continue;
+        const end = {x:w*nx, y:h*ny};
+        const cp = {x:(center.x+end.x)/2 + (i%2 ? 65 : -65), y:(center.y+end.y)/2 - 60};
+        ctx.strokeStyle = i%3 === 0 ? green : gold;
+        ctx.globalAlpha = .32; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(center.x,center.y); ctx.quadraticCurveTo(cp.x,cp.y,end.x,end.y); ctx.stroke();
+        ctx.globalAlpha = .8;
+        ctx.beginPath(); ctx.arc(end.x,end.y,4,0,Math.PI*2); ctx.stroke();
+        for (let packet=0;packet<3;packet++) {
+          const t = reduced ? .5 : (time / 7000 + i*.12 + packet/3)%1;
+          const x = (1-t)**2*center.x + 2*(1-t)*t*cp.x + t*t*end.x;
+          const y = (1-t)**2*center.y + 2*(1-t)*t*cp.y + t*t*end.y;
+          ctx.fillStyle = packet%2 ? violet : gold; ctx.globalAlpha = .9;
+          ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2); ctx.fill();
+        }
+      }
+      ctx.globalAlpha = .35; ctx.strokeStyle = gold;
+      ctx.beginPath(); ctx.ellipse(center.x,center.y,w*.4,h*.36,0,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(center.x,center.y,w*.29,h*.44,-.4,0,Math.PI*2); ctx.stroke();
+      if (!reduced) frame = requestAnimationFrame(draw);
+    };
+    frame = requestAnimationFrame(draw);
+    return () => { cancelAnimationFrame(frame); observer.disconnect(); };
   }, []);
-  return <canvas ref={ref} aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[100vh] w-full opacity-60"/>;
+  return <canvas ref={ref} aria-hidden="true" className="hero-payment-canvas"/>;
 }
 
 const ROUND_END = Date.UTC(2026, 9, 31, 15, 59, 59); // 31 Oct 2026 23:59 WITA
