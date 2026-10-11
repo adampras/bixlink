@@ -1640,13 +1640,26 @@ html[data-color-mode="light"], [data-presentation-theme="royal"] { --shop-gold:o
 @keyframes dock-pulse{50%{box-shadow:0 0 30px color-mix(in oklab,var(--chart-3) 80%,transparent)}}
 
 /* Wallet balance color skins (owner-rotated daily) */
-.wallet-summary[data-wallet-skin] { transition: background .6s, border-color .6s, box-shadow .6s; }
-.wallet-summary[data-wallet-skin="auric"] { --skin: oklch(0.84 0.17 90); }
-.wallet-summary[data-wallet-skin="violet"] { --skin: oklch(0.67 0.23 305); }
-.wallet-summary[data-wallet-skin="emerald"] { --skin: oklch(0.86 0.27 142); }
-.wallet-summary[data-wallet-skin="sapphire"] { --skin: oklch(0.65 0.19 255); }
-.wallet-summary[data-wallet-skin="ruby"] { --skin: oklch(0.62 0.23 20); }
-.wallet-summary[data-wallet-skin] { background: radial-gradient(120% 90% at 0% 0%, color-mix(in oklch, var(--skin) 26%, transparent), transparent 60%), linear-gradient(160deg, color-mix(in oklch, var(--skin) 12%, var(--card)), var(--card)); border-color: color-mix(in oklch, var(--skin) 55%, transparent); box-shadow: 0 18px 50px -24px color-mix(in oklch, var(--skin) 70%, transparent); }
+.wallet-summary[data-wallet-skin="auric"], .wallet-swatch[data-skin="auric"] { --skin-a: oklch(0.86 0.17 85); --skin-b: oklch(0.68 0.16 60); }
+.wallet-summary[data-wallet-skin="violet"], .wallet-swatch[data-skin="violet"] { --skin-a: oklch(0.58 0.2 300); --skin-b: oklch(0.4 0.15 285); }
+.wallet-summary[data-wallet-skin="emerald"], .wallet-swatch[data-skin="emerald"] { --skin-a: oklch(0.7 0.19 150); --skin-b: oklch(0.52 0.16 150); }
+.wallet-summary[data-wallet-skin="sapphire"], .wallet-swatch[data-skin="sapphire"] { --skin-a: oklch(0.66 0.17 245); --skin-b: oklch(0.5 0.16 250); }
+.wallet-summary[data-wallet-skin="ruby"], .wallet-swatch[data-skin="ruby"] { --skin-a: oklch(0.7 0.2 40); --skin-b: oklch(0.6 0.22 30); }
+.wallet-swatch { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(135deg, var(--skin-a), var(--skin-b)); box-shadow: 0 0 0 1px oklch(1 0 0 / 40%); }
+.site-shell .wallet-summary[data-wallet-skin], [data-presentation-theme] .wallet-summary[data-wallet-skin], .wallet-summary[data-wallet-skin] {
+  --wallet-on: oklch(1 0 0);
+  transition: background .6s, box-shadow .6s;
+  background: radial-gradient(90% 120% at 100% 0%, oklch(1 0 0 / 28%), transparent 55%), radial-gradient(60% 80% at 0% 100%, oklch(1 0 0 / 12%), transparent 60%), linear-gradient(135deg, var(--skin-a), var(--skin-b)) !important;
+  border-color: oklch(1 0 0 / 30%) !important;
+  box-shadow: 0 20px 44px -18px var(--skin-b) !important;
+  color: var(--wallet-on) !important;
+}
+.wallet-summary[data-wallet-skin] :is(b, strong, span, p, div, svg, .text-foreground, .text-muted-foreground) { color: var(--wallet-on) !important; }
+.wallet-summary[data-wallet-skin] strong { text-shadow: 0 2px 10px oklch(0 0 0 / 22%); }
+.wallet-summary[data-wallet-skin] .wallet-fx-grid > div, .wallet-summary[data-wallet-skin] .vault-pill { background: oklch(1 0 0 / 18%) !important; border-color: oklch(1 0 0 / 30%) !important; }
+.wallet-summary[data-wallet-skin] .vault-btn-primary { background: var(--wallet-on) !important; color: var(--skin-b) !important; border-color: var(--wallet-on) !important; }
+.wallet-summary[data-wallet-skin] .vault-btn-primary svg { color: var(--skin-b) !important; }
+.wallet-summary[data-wallet-skin] .vault-btn-ghost { background: oklch(1 0 0 / 16%) !important; color: var(--wallet-on) !important; border-color: oklch(1 0 0 / 55%) !important; }
 
 /* Owner animation switches */
 @keyframes bix-glow { 0%,100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 0%, transparent); } 50% { box-shadow: 0 0 28px -4px color-mix(in oklch, var(--primary) 55%, transparent); } }

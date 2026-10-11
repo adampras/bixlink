@@ -1,9 +1,9 @@
 export const WALLET_SKINS = [
-  { id: 'auric', label: 'Auric Gold' },
-  { id: 'violet', label: 'Royal Violet' },
-  { id: 'emerald', label: 'Neon Emerald' },
-  { id: 'sapphire', label: 'Sapphire Blue' },
-  { id: 'ruby', label: 'Ruby Flame' },
+  { id: 'auric', label: 'Gold' },
+  { id: 'violet', label: 'Purple (OVO)' },
+  { id: 'emerald', label: 'Green (GoPay)' },
+  { id: 'sapphire', label: 'Blue (DANA)' },
+  { id: 'ruby', label: 'Orange (Shopee)' },
 ] as const;
 export type WalletSkin = typeof WALLET_SKINS[number]['id'];
 const IDS = WALLET_SKINS.map(s => s.id) as readonly string[];
