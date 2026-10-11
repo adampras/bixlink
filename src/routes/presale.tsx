@@ -19,6 +19,8 @@ import reactor from '@/assets/presale-rocket-dark.mp4.asset.json';
 import reactorWebm from '@/assets/presale-rocket-dark.webm.asset.json';
 import reactorPoster from '@/assets/presale-rocket-dark-poster.jpg.asset.json';
 import { NFT_ART, NFT_NAME, type NftTier } from '@/lib/nft';
+import { PresalePurchaseDialog, type PresaleSelection } from '@/components/PresalePurchaseDialog';
+import { strategyQuote } from '@/lib/presale-strategy';
 const presaleArtTier = (usd: number): NftTier => usd >= 30000 ? 'MYTHIC' : usd >= 10000 ? 'LEGENDARY' : usd >= 5000 ? 'EPIC' : usd >= 1000 ? 'RARE' : 'COMMON';
 
 export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Genesis presale with Hybrid, Dividend and Founder strategies plus the 21-slot $100,000 Sovereign allocation.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }, { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }] }), component: PresalePage });
@@ -34,6 +36,8 @@ function PresalePage() {
   const [now, setNow] = useState(() => Date.now()); const [msg, setMsg] = useState(''); const [busy, setBusy] = useState<number | null>(null);
   const [tab, setTab] = useState<'packages' | 'strategies' | 'calculator' | 'portfolio'>('packages');
   const [sound, setSound] = useState(false); const vidRef = useRef<HTMLVideoElement>(null);
+  const [selection, setSelection] = useState<PresaleSelection | null>(null);
+  const [purchaseError, setPurchaseError] = useState('');
   useEffect(() => { if (vidRef.current) vidRef.current.muted = !sound; }, [sound]);
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   const s = q.data; const cfg = s?.config;
@@ -41,11 +45,19 @@ function PresalePage() {
   const locked = orders.reduce((n, o) => n + Number(o.bix_amount), 0) + (s?.sponsorRewards ?? []).filter(r => r.status === 'locked').reduce((n, r) => n + Number(r.bix), 0);
   const released = orders.reduce((n, o) => n + presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now), 0)
     + (s?.sponsorRewards ?? []).filter(r => r.status === 'locked').reduce((n, r) => n + presaleReleased(Number(r.bix), r.release_days, r.created_at, now), 0);
-  const onBuy = async (usd: number, strategy: 'standard' | PresaleStrategy = 'standard') => {
-    if (!window.confirm(`Buy the $${number(usd)} presale package (${strategy}) from your USDT balance?`)) return;
+  const onBuy = (usd: number, strategy: 'standard' | PresaleStrategy = 'standard') => {
+    const pkg = cfg?.sovereign?.usd === usd ? cfg.sovereign : cfg?.packages.find(p => p.usd === usd);
+    if (!pkg) return;
+    const quote = strategy === 'standard' ? { bix: pkg.bix, dailyUsd: 0 } : strategyQuote(strategy, usd, pkg.bix, pkg.releaseDays, cfg?.strategies ?? DEFAULT_STRATEGIES);
+    setPurchaseError('');
+    setSelection({ usd, strategy, bix: quote.bix, dailyUsd: quote.dailyUsd, days: pkg.releaseDays, artwork: NFT_ART[presaleArtTier(usd)] });
+  };
+  const confirmBuy = async () => {
+    if (!selection || busy !== null) return;
+    const { usd, strategy } = selection;
     setBusy(usd); setMsg('');
-    try { const r = await buy({ data: { usd, strategy } }); setMsg(`Locked ${number(r.bix)} BIX · Genesis certificate #GEN-${String(r.serial ?? 0).padStart(4, '0')}${r.dailyUsd > 0 ? ` · $${number(r.dailyUsd, { maximumFractionDigits: 2 })}/day USDT` : ''}.`); await qc.invalidateQueries({ queryKey: ['presale'] }); }
-    catch (e) { setMsg(e instanceof Error ? e.message : 'Purchase failed'); } finally { setBusy(null); }
+    try { const r = await buy({ data: { usd, strategy: strategy as 'standard' | PresaleStrategy } }); setMsg(`Locked ${number(r.bix)} BIX · Genesis certificate #GEN-${String(r.serial ?? 0).padStart(4, '0')}${r.dailyUsd > 0 ? ` · $${number(r.dailyUsd, { maximumFractionDigits: 2 })}/day USDT` : ''}.`); setSelection(null); await Promise.all([qc.invalidateQueries({ queryKey: ['presale'] }), qc.invalidateQueries({ queryKey: ['my-wallet'] }), qc.invalidateQueries({ queryKey: ['bix-member'] })]); }
+    catch (e) { setPurchaseError(e instanceof Error ? e.message : 'Purchase failed'); } finally { setBusy(null); }
   };
   return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
     <div className="eyebrow"><Pickaxe size={14}/> EXCLUSIVE</div>
@@ -97,5 +109,6 @@ function PresalePage() {
       {(s?.sponsorRewards?.length ?? 0) > 0 && <p className="mt-6 text-xs text-muted-foreground"><Users size={13} className="inline"/> Sponsor rewards: {s?.sponsorRewards?.length} referral purchases, released on the same mining schedule.</p>}
     </>}
     <p className="terminal-disclosure mt-8"><ShieldCheck size={14}/> No guarantee of profit. Presale BIX is an internal ledger allocation, not an on-chain token. Mined-out BIX is shown for tracking and is not spendable until the owner opens settlement. Sponsor bonus goes only to your direct referrer.</p>
+    <PresalePurchaseDialog selection={selection} balance={Number(s?.balanceUsd ?? 0)} busy={busy !== null} error={purchaseError} onClose={() => setSelection(null)} onConfirm={confirmBuy}/>
   </main></BixShell>;
 }

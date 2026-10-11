@@ -84,12 +84,12 @@ export function AdminWalletAppearance({ initial, onMessage, onSaved }: { initial
 
 function WalletLook({ flags, busy, onSave }: { flags: Readiness; busy: boolean; onSave: (next: Readiness) => Promise<void> }) {
   const colors = flags.walletColors ?? [];
-  const anims = [['animGlow', 'Glow pulse'], ['animShimmer', 'Gold shimmer titles'], ['animFloat', 'Floating badges']] as const;
+  const anims = [['animGlow', 'Gold crypto coins'], ['animShimmer', 'Payment network'], ['animFloat', 'Market chart']] as const;
   return <div className="mt-8 border-y border-border py-6">
     <h3 className="font-display text-lg font-bold">5 warna kotak saldo Wallet</h3>
     <p className="mt-1 text-xs text-muted-foreground">Only the Wallet balance box changes. 1 color on = fixed. 2–5 on = changes automatically every 24 hours.</p>
     <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">{WALLET_SKINS.map(skin => { const on = colors.includes(skin.id); return <Button key={skin.id} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, walletColors: on ? colors.filter(c => c !== skin.id) : [...colors, skin.id] })}><span className="wallet-swatch" data-skin={skin.id} aria-hidden/>{skin.label} · {on ? 'ON' : 'OFF'}</Button>; })}</div>
-    <h3 className="mt-6 font-display text-lg font-bold">Animasi website · ON / OFF</h3>
+    <h3 className="mt-6 font-display text-lg font-bold">Animasi kotak Wallet · ON / OFF</h3>
     <div className="mt-3 grid gap-2 sm:grid-cols-3">{anims.map(([key, label]) => { const on = flags[key] === true; return <Button key={key} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, [key]: !on })}>{label} · {on ? 'ON' : 'OFF'}</Button>; })}</div>
   </div>;
 }

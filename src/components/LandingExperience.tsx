@@ -7,6 +7,7 @@ import { ReactorVideo } from '@/components/ReactorVideo';
 import heroObsidian from '@/assets/hero-obsidian-gold.jpg';
 import { usePublicConfig, useMember } from '@/lib/useMember';
 import { boosterMaximum } from '@/lib/booster-apy';
+import { HeroFlux } from '@/components/GrowthSuite';
 
 import { ContentImage } from '@/components/ContentImage';
 import { ContentCarousel } from '@/components/ContentCarousel';
@@ -27,6 +28,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
   return <div className="reactor-landing">
     <section className={`hero-section relative overflow-hidden border-b border-border ${hero3d ? 'hero-3d' : ''}`}>
       {hero3d && <><ContentImage path={content.heroImage} alt="" fallbackSrc={heroObsidian} className="hero-3d-bg"/><div className="hero-3d-veil" aria-hidden/></>}
+      {config?.readiness.heroAnimEnabled !== false && <HeroFlux/>}
       <div className={`relative mx-auto flex max-w-3xl flex-col items-center px-5 pb-14 pt-12 text-center ${hero3d ? 'min-h-[92dvh] justify-center' : ''} ${compact ? 'md:pb-16 md:pt-14' : 'md:pb-20 md:pt-16'}`}>
         <div className="inline-flex items-center gap-2 rounded-full border border-chart-3/30 bg-chart-3/10 px-4 py-1.5 backdrop-blur-sm"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-chart-3"/><span className="text-[10px] font-bold uppercase tracking-[0.15em] text-chart-3">21 MILLION BIX TOKEN</span></div>
         <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-chart-2/30 bg-card/50 px-3 py-1 backdrop-blur-sm"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-chart-2 opacity-60"/><span className="relative inline-flex h-2 w-2 rounded-full bg-chart-2"/></span><span className="text-[9px] font-bold uppercase tracking-[0.18em] text-chart-2">LEDGER ENGINE · ONLINE</span></div>

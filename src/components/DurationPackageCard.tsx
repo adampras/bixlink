@@ -47,7 +47,7 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
     </div>
     {popup && createPortal(<div className="nft-pop" role="dialog" aria-modal="true" aria-label="Package NFT preview" onClick={() => { setPopup(false); if (timer.current) clearTimeout(timer.current); }}>
       <div className="relative" onClick={e => e.stopPropagation()}><Button variant="outline" size="icon" className="absolute -right-3 -top-3 z-10" aria-label="Close NFT preview" onClick={() => { setPopup(false); if (timer.current) clearTimeout(timer.current); }}><X/></Button><NftCard tier={tier} packageId={pkg.id} valueUsd={price} days={days} artworkId={art?.id} imagePath={art?.imagePath} compact/></div>
-      <p classNameName="nft-pop-note">{art?.name ?? 'Reactor NFT'} · {pkg.id} · {days}D. In-app certificate.</p>
+      <p className="nft-pop-note">{art?.name ?? 'Reactor NFT'} · {pkg.id} · {days}D. In-app certificate.</p>
     </div>, document.body)}
   </article>;
 }
