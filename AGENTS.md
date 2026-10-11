@@ -10,11 +10,11 @@
 <!-- LOVABLE:END -->
 
 - Keep staking requests as non-custodial, pending records with no automatic payout or fabricated wallet balance; this app does not integrate a payment rail.
-- Grant owner access only after server-validated identity and a matching verified owner email; client state is never an authority for admin actions.
+- Owner access requires server-validated identity and verified owner email; never trust client roles.
 - Public reads use RLS; private operations use authenticated server functions.
 - BIX/USDT conversions are reviewed internal ledger requests at the owner reference, never exchange execution or custody.
 - Owner-only presentation writes; wallet finance motion and landing payment canvas stay scoped.
-- Share session store and layout-shaped placeholders.
+- Share session store and layout placeholders.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
 - Clone accounts (bix_clone_accounts) are funded only via bix_allocations and excluded from member stats — auditable and separate.
 - Leader virtual balances (bix_leaders) count in bix_wallet_balance but withdraw is blocked until bix_leader_status qualifies — one server gate.
