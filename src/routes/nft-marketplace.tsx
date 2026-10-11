@@ -8,6 +8,7 @@ import { MyNftCollection } from '@/components/MyNftCollection';
 import { useNftCatalog } from '@/lib/useNftCatalog';
 import { useShopCatalog } from '@/lib/useShopCatalog';
 import { useMember, usePublicConfig } from '@/lib/useMember';
+import { MemberShop } from '@/components/MemberShop';
 import { catalogImage, visibleCatalog, type CatalogItem } from '@/lib/nft-catalog';
 import { SHOP_IMAGES, publishedProducts, type ShopProduct } from '@/lib/shop';
 import { NFT_TIERS } from '@/lib/nft';

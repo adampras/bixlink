@@ -29,6 +29,8 @@ import { AdminTeams } from '@/components/AdminTeams';
 import { AdminReports } from '@/components/AdminReports';
 import { AdminPresale } from '@/components/AdminPresale';
 import { AdminShopCatalog } from '@/components/AdminShopCatalog';
+import { AdminMemberShop, type MemberShopConfig } from '@/components/MemberShop';
+import { AdminLeaders } from '@/components/AdminLeaders';
 import { AdminArena } from '@/components/AdminArena';
 import { AdminNft } from '@/components/AdminNft';
 import { AdminMining, type MiningSettings } from '@/components/AdminMining';
@@ -42,8 +44,8 @@ type AdminData = Awaited<ReturnType<typeof getAdminData>>;
 const ADMIN_GROUPS: { title: string; tabs: [string, string][] }[] = [
   { title: 'Keuangan & Staking', tabs: [['Overview','ringkasan vault brankas maintenance'],['Wallet','dompet deposit bix pay transfer swap'],['Stakes','staking unstake approve'],['Reports','laporan transfer']] },
   { title: 'Pasar & Presale', tabs: [['Presale','sovereign genesis 100000 strategi'],['Market','harga pasar bix'],['APY','profit yield'],['Packages','paket durasi'],['Token','bep20 kontrak smart contract']] },
-  { title: 'Pengguna & Jaringan', tabs: [['Users','member ban reviewer owner 2'],['Referrals','bonus komisi sponsor'],['Teams','tim leader vip'],['Clones','kloning']] },
-  { title: 'Tampilan & Ekosistem', tabs: [['Appearance','warna wallet animasi tema'],['Splash','splash screen video'],['Landing','konten banner sponsor partner'],['Updates','readiness pengumuman'],['Booster','visual boost'],['Arena','fox game quest'],['NFT','sertifikat kartu'],['Mining','vbix'],['RWA','income source sumber'],['Shop','marketplace produk merchandise toko']] },
+  { title: 'Pengguna & Jaringan', tabs: [['Users','member ban reviewer owner 2'],['Referrals','bonus komisi sponsor'],['Teams','tim leader vip'],['Clones','kloning'],['Leaders','akun leader gratis sponsor ambassador syarat']] },
+  { title: 'Tampilan & Ekosistem', tabs: [['Appearance','warna wallet animasi tema'],['Splash','splash screen video'],['Landing','konten banner sponsor partner'],['Updates','readiness pengumuman'],['Booster','visual boost'],['Arena','fox game quest'],['NFT','sertifikat kartu'],['Mining','vbix'],['RWA','income source sumber'],['Shop','marketplace produk merchandise toko'],['Member Shop','slot jualan member produk review']] },
 ];
 function Admin() {
   const { user } = useMember();
@@ -96,7 +98,7 @@ function Admin() {
     {(tab === 'Packages' || tab === 'APY') && <AdminDurationPackages onMessage={setMessage}/>}
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
      {tab === 'Reports' && <AdminReports onMessage={setMessage}/>}
-     {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>} {tab === 'Shop' && <AdminShopCatalog onMessage={setMessage}/>}
+     {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>} {tab === 'Shop' && <AdminShopCatalog onMessage={setMessage}/>} {tab === 'Member Shop' && <AdminMemberShop initial={data?.settings.find(s => s.key === 'member_shop')?.value as MemberShopConfig | undefined} onMessage={setMessage}/>} {tab === 'Leaders' && <AdminLeaders onMessage={setMessage}/>}
      {tab === 'Arena' && <AdminArena onMessage={setMessage}/>}
      {tab === 'NFT' && <AdminNft onMessage={setMessage}/>}
      {tab === 'Mining' && <AdminMining initial={data?.settings.find(s => s.key === 'mining')?.value as MiningSettings | undefined} onMessage={setMessage} onSaved={refresh}/>}
