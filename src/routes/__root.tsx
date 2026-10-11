@@ -114,7 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: "try{var d=document.documentElement,m=localStorage.getItem('bixlink-color-mode'),t=localStorage.getItem('bixlink-theme');d.dataset.colorMode=m==='light'?'light':'dark';if(t)d.dataset.presentationTheme=t}catch(e){}" }} />
         <HeadContent />
