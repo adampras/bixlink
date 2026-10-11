@@ -56,7 +56,7 @@ function PresalePage() {
     if (!selection || busy !== null) return;
     const { usd, strategy } = selection;
     setBusy(usd); setMsg('');
-    try { const r = await buy({ data: { usd, strategy: strategy as 'standard' | PresaleStrategy } }); setMsg(`Locked ${number(r.bix)} BIX · Genesis certificate #GEN-${String(r.serial ?? 0).padStart(4, '0')}${r.dailyUsd > 0 ? ` · $${number(r.dailyUsd, { maximumFractionDigits: 2 })}/day USDT` : ''}.`); setSelection(null); await Promise.all([qc.invalidateQueries({ queryKey: ['presale'] }), qc.invalidateQueries({ queryKey: ['my-wallet'] }), qc.invalidateQueries({ queryKey: ['bix-member'] })]); }
+    try { const r = await buy({ data: { usd, strategy: strategy as 'standard' | PresaleStrategy } }); setMsg(`Locked ${number(r.bix)} BIX · Genesis certificate #GEN-${String(r.serial ?? 0).padStart(4, '0')}${r.dailyUsd > 0 ? ` · $${number(r.dailyUsd, { maximumFractionDigits: 2 })}/day USDT` : ''}.`); setSelection(null); await Promise.all([qc.invalidateQueries({ queryKey: ['presale'] }), qc.invalidateQueries({ queryKey: ['my-wallet'] }), qc.invalidateQueries({ queryKey: ['my-bixlink'] })]); }
     catch (e) { setPurchaseError(e instanceof Error ? e.message : 'Purchase failed'); } finally { setBusy(null); }
   };
   return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
