@@ -19,8 +19,8 @@ export function LiveActivityToast() {
     if (closed) return;
     let t: ReturnType<typeof setTimeout>;
     const next = (delay: number) => { t = setTimeout(() => {
-      const [flag, city] = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
-      setItem({ flag, city, action: ACTIONS[Math.floor(Math.random() * ACTIONS.length)] });
+      const [flag, city] = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)]!;
+      setItem({ flag, city, action: ACTIONS[Math.floor(Math.random() * ACTIONS.length)]! });
       setTimeout(() => setItem(null), 6500);
       next(20000 + Math.random() * 20000);
     }, delay); };
@@ -55,13 +55,13 @@ export function HeroFlux() {
       ctx.clearRect(0, 0, w, h);
       for (const p of pts) { p.x += p.vx; p.y += p.vy; if (p.x < 0 || p.x > w) p.vx *= -1; if (p.y < 0 || p.y > h) p.vy *= -1; }
       for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
-        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.hypot(dx, dy);
-        if (d < 130) { ctx.globalAlpha = (1 - d / 130) * .35; ctx.strokeStyle = (i + j) % 3 ? gold : violet; ctx.lineWidth = .7; ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.stroke();
+        const A = pts[i]!, B = pts[j]!; const dx = A.x - B.x, dy = A.y - B.y, d = Math.hypot(dx, dy);
+        if (d < 130) { ctx.globalAlpha = (1 - d / 130) * .35; ctx.strokeStyle = (i + j) % 3 ? gold : violet; ctx.lineWidth = .7; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
           if (Math.random() < .0008 && pulses.length < 14) pulses.push({ a: i, b: j, t: 0 }); }
       }
       ctx.globalAlpha = .8; for (const p of pts) { ctx.fillStyle = gold; ctx.beginPath(); ctx.arc(p.x, p.y, 1.4, 0, 6.3); ctx.fill(); }
-      for (let k = pulses.length - 1; k >= 0; k--) { const q = pulses[k]; q.t += .02; if (q.t >= 1) { pulses.splice(k, 1); continue; }
-        const a = pts[q.a], b = pts[q.b]; ctx.globalAlpha = 1; ctx.fillStyle = violet; ctx.shadowColor = violet; ctx.shadowBlur = 10;
+      for (let k = pulses.length - 1; k >= 0; k--) { const q = pulses[k]!; q.t += .02; if (q.t >= 1) { pulses.splice(k, 1); continue; }
+        const a = pts[q.a]!, b = pts[q.b]!; ctx.globalAlpha = 1; ctx.fillStyle = violet; ctx.shadowColor = violet; ctx.shadowBlur = 10;
         ctx.beginPath(); ctx.arc(a.x + (b.x - a.x) * q.t, a.y + (b.y - a.y) * q.t, 2.4, 0, 6.3); ctx.fill(); ctx.shadowBlur = 0; }
       raf = requestAnimationFrame(draw);
     };
