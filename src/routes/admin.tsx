@@ -39,12 +39,14 @@ import type { Readiness } from '@/lib/readiness';
 import { AdminSiteControl } from '@/components/AdminSiteControl';
 import type { SiteControl } from '@/lib/site-control';
 import type { LandingContent } from '@/components/LandingExperience';
+import { AdminMarketing } from '@/components/AdminMarketing';
+import type { MarketingPlan } from '@/lib/marketing';
 
 export const Route = createFileRoute('/admin')({ head: () => ({ meta: [{ title: 'Owner Panel — BIXLINK' }, { name: 'description', content: 'Private BIXLINK owner operations.' }, { property: 'og:title', content: 'Owner Panel — BIXLINK' }, { property: 'og:description', content: 'BIXLINK owner operations.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }), component: Admin });
 type AdminData = Awaited<ReturnType<typeof getAdminData>>;
 const ADMIN_GROUPS: { title: string; tabs: [string, string][] }[] = [
   { title: 'Keuangan & Staking', tabs: [['Overview','ringkasan vault brankas maintenance'],['Wallet','dompet deposit bix pay transfer swap'],['Stakes','staking unstake approve'],['Reports','laporan transfer']] },
-  { title: 'Pasar & Presale', tabs: [['Presale','sovereign genesis 100000 strategi'],['Market','harga pasar bix'],['APY','profit yield'],['Packages','paket durasi'],['Token','bep20 kontrak smart contract']] },
+  { title: 'Pasar & Presale', tabs: [['Presale','sovereign genesis 100000 strategi'],['Marketing','pdf video bahasa materi'],['Market','harga pasar bix'],['APY','profit yield'],['Packages','paket durasi'],['Token','bep20 kontrak smart contract']] },
   { title: 'Pengguna & Jaringan', tabs: [['Users','member ban reviewer owner 2'],['Referrals','bonus komisi sponsor'],['Teams','tim leader vip'],['Clones','kloning'],['Leaders','akun leader gratis sponsor ambassador syarat']] },
   { title: 'Tampilan & Ekosistem', tabs: [['Appearance','warna wallet animasi tema'],['Splash','splash screen video'],['Landing','konten banner sponsor partner'],['Updates','readiness pengumuman'],['Booster','visual boost'],['Arena','fox game quest'],['NFT','sertifikat kartu'],['Mining','vbix'],['RWA','income source sumber'],['Shop','marketplace produk merchandise toko'],['Member Shop','slot jualan member produk review']] },
 ];
@@ -100,6 +102,7 @@ function Admin() {
     {tab === 'APY' && <YieldControlPanel market={false}/>} 
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
      {tab === 'Reports' && <AdminReports onMessage={setMessage}/>}
+     {tab === 'Marketing' && <AdminMarketing initial={data?.settings.find(s=>s.key==='marketing_plan')?.value as unknown as MarketingPlan | undefined} onMessage={setMessage}/>}
      {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>} {tab === 'Shop' && <AdminShopCatalog onMessage={setMessage}/>} {tab === 'Member Shop' && <AdminMemberShop initial={data?.settings.find(s => s.key === 'member_shop')?.value as MemberShopConfig | undefined} onMessage={setMessage}/>} {tab === 'Leaders' && <AdminLeaders onMessage={setMessage}/>}
      {tab === 'Arena' && <AdminArena onMessage={setMessage}/>}
      {tab === 'NFT' && <AdminNft onMessage={setMessage}/>}

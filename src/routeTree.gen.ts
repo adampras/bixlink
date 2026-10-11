@@ -18,6 +18,7 @@ import { Route as BoostRouteImport } from './routes/boost'
 import { Route as BoostTiersRouteImport } from './routes/boost-tiers'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MarketRouteImport } from './routes/market'
+import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as NetworkRouteImport } from './routes/network'
 import { Route as NftMarketplaceRouteImport } from './routes/nft-marketplace'
 import { Route as PayRouteImport } from './routes/pay'
@@ -82,6 +83,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const MarketRoute = MarketRouteImport.update({
   id: '/market',
   path: '/market',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketingRoute = MarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NetworkRoute = NetworkRouteImport.update({
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/boost-tiers': typeof BoostTiersRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
+  '/marketing': typeof MarketingRoute
   '/network': typeof NetworkRoute
   '/nft-marketplace': typeof NftMarketplaceRoute
   '/pay': typeof PayRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/boost-tiers': typeof BoostTiersRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
+  '/marketing': typeof MarketingRoute
   '/network': typeof NetworkRoute
   '/nft-marketplace': typeof NftMarketplaceRoute
   '/pay': typeof PayRoute
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   '/boost-tiers': typeof BoostTiersRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
+  '/marketing': typeof MarketingRoute
   '/network': typeof NetworkRoute
   '/nft-marketplace': typeof NftMarketplaceRoute
   '/pay': typeof PayRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/boost-tiers'
     | '/dashboard'
     | '/market'
+    | '/marketing'
     | '/network'
     | '/nft-marketplace'
     | '/pay'
@@ -323,6 +333,7 @@ export interface FileRouteTypes {
     | '/boost-tiers'
     | '/dashboard'
     | '/market'
+    | '/marketing'
     | '/network'
     | '/nft-marketplace'
     | '/pay'
@@ -354,6 +365,7 @@ export interface FileRouteTypes {
     | '/boost-tiers'
     | '/dashboard'
     | '/market'
+    | '/marketing'
     | '/network'
     | '/nft-marketplace'
     | '/pay'
@@ -386,6 +398,7 @@ export interface RootRouteChildren {
   BoostTiersRoute: typeof BoostTiersRoute
   DashboardRoute: typeof DashboardRoute
   MarketRoute: typeof MarketRoute
+  MarketingRoute: typeof MarketingRoute
   NetworkRoute: typeof NetworkRoute
   NftMarketplaceRoute: typeof NftMarketplaceRoute
   PayRoute: typeof PayRoute
@@ -471,6 +484,13 @@ declare module '@tanstack/react-router' {
       path: '/market'
       fullPath: '/market'
       preLoaderRoute: typeof MarketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketing': {
+      id: '/marketing'
+      path: '/marketing'
+      fullPath: '/marketing'
+      preLoaderRoute: typeof MarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/network': {
@@ -626,6 +646,7 @@ const rootRouteChildren: RootRouteChildren = {
   BoostTiersRoute: BoostTiersRoute,
   DashboardRoute: DashboardRoute,
   MarketRoute: MarketRoute,
+  MarketingRoute: MarketingRoute,
   NetworkRoute: NetworkRoute,
   NftMarketplaceRoute: NftMarketplaceRoute,
   PayRoute: PayRoute,

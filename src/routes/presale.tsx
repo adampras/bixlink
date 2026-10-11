@@ -22,6 +22,7 @@ import reactorPoster from '@/assets/presale-rocket-dark-poster.jpg.asset.json';
 import { NFT_ART, NFT_NAME, type NftTier } from '@/lib/nft';
 import { PresalePurchaseDialog, type PresaleSelection } from '@/components/PresalePurchaseDialog';
 import { strategyQuote } from '@/lib/presale-strategy';
+import { poolAvailability } from '@/lib/marketing';
 const presaleArtTier = (usd: number): NftTier => usd >= 30000 ? 'MYTHIC' : usd >= 10000 ? 'LEGENDARY' : usd >= 5000 ? 'EPIC' : usd >= 1000 ? 'RARE' : 'COMMON';
 
 export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Genesis presale with Hybrid, Dividend and Founder strategies plus the 21-slot $100,000 Sovereign allocation.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }, { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }] }), component: PresalePage });
@@ -43,6 +44,7 @@ function PresalePage() {
   useEffect(() => { if (vidRef.current) vidRef.current.muted = !sound; }, [sound]);
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   const s = q.data; const cfg = s?.config;
+  const pool = poolAvailability(cfg?.poolCap ?? 0, s?.poolUsed ?? 0);
   const orders = (s?.orders ?? []).filter(o => o.status === 'locked');
   const locked = orders.reduce((n, o) => n + Number(o.bix_amount), 0) + (s?.sponsorRewards ?? []).filter(r => r.status === 'locked').reduce((n, r) => n + Number(r.bix), 0);
   const released = orders.reduce((n, o) => n + presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now), 0)
@@ -79,6 +81,7 @@ function PresalePage() {
     </dl>
     {!user ? <p className="mt-6 text-sm text-muted-foreground">Sign in to view presale packages.</p> : !cfg ? <p className="mt-6 text-sm text-muted-foreground">Loading…</p> : <>
       {!cfg.enabled && <p className="mt-6 rounded-lg border border-chart-3 p-3 text-sm text-chart-3">Presale is currently closed by the owner.</p>}
+      <section aria-label="Presale pool availability" className="mt-5 border-y border-border py-4"><div className="flex flex-wrap justify-between gap-2 text-xs"><b>Shared presale allocation</b><span className="numeric">{number(pool.remaining)} BIX remaining</span></div><progress className="allocation-progress mt-3" max={100} value={pool.percent}/><p className="mt-2 text-[10px] text-muted-foreground">Recorded pool usage · shared across all packages · not a guaranteed reservation.</p></section>
       <nav className="presale-tabs mt-6" role="tablist">{(['packages','strategies','calculator','portfolio'] as const).map(t => <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={tab === t ? 'is-active' : ''}>{TAB_LABEL[t]}</button>)}</nav>
       {tab === 'packages' && <>
         {GROUPS.map(g => { const list = cfg.packages.filter(p => p.usd >= g.min && p.usd < g.max); if (!list.length) return null; return <section key={g.name} className="mt-6">
