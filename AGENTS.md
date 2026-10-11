@@ -14,7 +14,7 @@
 - Read public package and settings data with RLS and run account-specific operations with authenticated server functions; this separates public browsing from private records.
 - BIX/USDT conversions are reviewed internal ledger requests at the owner reference, never exchange execution or custody.
 - Owner-only presentation writes; Appearance controls wallet-only finance motion, while the payment canvas lives inside the landing hero — keeps effects visible and scoped.
-- Share one session store across routes; use layout-shaped placeholders.
+- Share one route session store; use layout-shaped placeholders.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
 - Clone accounts (bix_clone_accounts) are funded only via bix_allocations and excluded from member stats — auditable and separate.
 - Leader virtual balances (bix_leaders) count in bix_wallet_balance but withdraw is blocked until bix_leader_status qualifies — one server gate.
