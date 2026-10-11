@@ -23,12 +23,16 @@ const presaleArtTier = (usd: number): NftTier => usd >= 30000 ? 'MYTHIC' : usd >
 
 export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Genesis presale with Hybrid, Dividend and Founder strategies plus the 21-slot $100,000 Sovereign allocation.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }, { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }] }), component: PresalePage });
 
+const TAB_LABEL = { packages: 'Packages', strategies: 'Strategies', calculator: 'Calculator', portfolio: 'My Portfolio' } as const;
+const GROUPS = [{ name: 'ENTRY', range: '$500 – $5,000', min: 0, max: 7000 }, { name: 'PREMIUM', range: '$7,000 – $30,000', min: 7000, max: 50000 }, { name: 'PRIVATE ALLOCATION', range: '$50,000 – $70,000', min: 50000, max: 100000 }];
+
 function PresalePage() {
   const { user, data: me } = useMember();
   const load = useServerFn(getPresaleStatus); const buy = useServerFn(buyPresale);
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ['presale', user?.id], queryFn: () => load(), enabled: !!user });
   const [now, setNow] = useState(() => Date.now()); const [msg, setMsg] = useState(''); const [busy, setBusy] = useState<number | null>(null);
+  const [tab, setTab] = useState<'packages' | 'strategies' | 'calculator' | 'portfolio'>('packages');
   const [sound, setSound] = useState(false); const vidRef = useRef<HTMLVideoElement>(null);
   useEffect(() => { if (vidRef.current) vidRef.current.muted = !sound; }, [sound]);
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
@@ -45,7 +49,8 @@ function PresalePage() {
   };
   return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
     <div className="eyebrow"><Pickaxe size={14}/> EXCLUSIVE</div>
-    <h1 className="mt-2 font-display text-3xl font-extrabold leading-tight text-foreground sm:text-5xl">PRESALE <span className="block text-chart-3">STAKING BIX</span></h1>
+    <h1 className="mt-2 font-display text-3xl font-extrabold leading-tight text-foreground sm:text-5xl">BIX <span className="text-chart-3">PRESALE</span></h1>
+    <p className="mt-1 text-sm text-muted-foreground">Genesis allocation with locked BIX released over time.</p>
     <div className="presale-reactor-stage">
       <video ref={vidRef} autoPlay muted loop playsInline preload="metadata" poster={reactorPoster.url} className="presale-reactor-video" aria-label="BIXLINK presale rocket launch">
         <source src={reactorWebm.url} type="video/webm"/>
@@ -60,24 +65,32 @@ function PresalePage() {
     </dl>
     {!user ? <p className="mt-6 text-sm text-muted-foreground">Sign in to view presale packages.</p> : !cfg ? <p className="mt-6 text-sm text-muted-foreground">Loading…</p> : <>
       {!cfg.enabled && <p className="mt-6 rounded-lg border border-chart-3 p-3 text-sm text-chart-3">Presale is currently closed by the owner.</p>}
-      {cfg.sovereign && <SovereignAllocation cfg={cfg.sovereign} claimed={Number(s?.sovereignClaimed ?? 0)} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>}
-      <WhaleDesk/>
-      <PresaleStrategies packages={cfg.packages} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>
-      <ProfitSimulator price={presalePrice(cfg.packages)} days={cfg.packages[0]?.releaseDays ?? 180} settings={cfg.strategies ?? DEFAULT_STRATEGIES}/>
-      <PresaleCommission rewards={s?.sponsorRewards ?? []} code={(me as any)?.referral?.code} now={now}/>
-      {Number(s?.dividendEarned ?? 0) > 0 && <p className="mt-3 text-xs text-chart-2">USDT dividends credited so far: <b className="numeric">${number(Number(s?.dividendEarned), { maximumFractionDigits: 2 })}</b></p>}
+      <nav className="presale-tabs mt-6" role="tablist">{(['packages','strategies','calculator','portfolio'] as const).map(t => <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={tab === t ? 'is-active' : ''}>{TAB_LABEL[t]}</button>)}</nav>
+      {tab === 'packages' && <>
+        {GROUPS.map(g => { const list = cfg.packages.filter(p => p.usd >= g.min && p.usd < g.max); if (!list.length) return null; return <section key={g.name} className="mt-6">
+          <div className="flex items-baseline justify-between"><h2 className="font-display text-base font-black tracking-wide">{g.name}</h2><span className="text-[11px] text-muted-foreground">{g.range}</span></div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{list.map(p => { const tier = presaleArtTier(p.usd); return <article key={p.usd} className="presale-lux-card presale-card-uniform" style={{ backgroundImage: `url(${NFT_ART[tier]})` }}>
+            <div className="presale-lux-inner flex h-full flex-col">
+              <span className="truncate text-[10px] font-bold text-muted-foreground">{NFT_NAME[tier].toUpperCase()} · {tier}</span>
+              <h3 className="presale-lux-price numeric font-display text-3xl font-black">${number(p.usd)}</h3>
+              <dl className="mt-2 grid grid-cols-2 gap-2 text-xs"><div><dt className="text-muted-foreground">Total BIX</dt><dd className="numeric font-bold text-primary"><Lock size={11} className="inline"/> {number(p.bix)}</dd></div><div><dt className="text-muted-foreground">Release</dt><dd className="numeric font-bold">{p.releaseDays} days</dd></div></dl>
+              <Button className="mt-auto w-full rounded-lg" disabled={!cfg.enabled || busy !== null} onClick={() => onBuy(p.usd)}>{busy === p.usd ? 'Processing…' : 'Buy package'}</Button>
+            </div>
+          </article>; })}</div>
+        </section>; })}
+        {cfg.sovereign && <SovereignAllocation cfg={cfg.sovereign} claimed={Number(s?.sovereignClaimed ?? 0)} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>}
+        <WhaleDesk/>
+      </>}
+      {tab === 'strategies' && <PresaleStrategies packages={cfg.packages} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>}
+      {tab === 'calculator' && <ProfitSimulator price={presalePrice(cfg.packages)} days={cfg.packages[0]?.releaseDays ?? 180} settings={cfg.strategies ?? DEFAULT_STRATEGIES}/>}
+      {tab === 'portfolio' && <>
+        <PresaleCommission rewards={s?.sponsorRewards ?? []} code={(me as any)?.referral?.code} now={now}/>
+        {Number(s?.dividendEarned ?? 0) > 0 && <p className="mt-3 text-xs text-chart-2">USDT dividends credited so far: <b className="numeric">${number(Number(s?.dividendEarned), { maximumFractionDigits: 2 })}</b></p>}
+        {orders.length === 0 && <p className="mt-6 text-sm text-muted-foreground">No presale positions yet.</p>}
+      </>}
       <p className="mt-4 text-xs text-muted-foreground">USDT balance: <b className="numeric">${number(Number(s?.balanceUsd ?? 0), { maximumFractionDigits: 2 })}</b> · Pool used {number(Number(s?.poolUsed ?? 0))} / {number(cfg.poolCap)} BIX</p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{cfg.packages.map(p => { const tier = presaleArtTier(p.usd); const lux = p.usd >= 500 && p.usd < 100000; return <article key={p.usd} className={lux ? 'presale-lux-card' : 'rounded-2xl border border-border bg-card/60 p-5'} style={lux ? { backgroundImage: `url(${NFT_ART[tier]})` } : undefined}>
-        <div className={lux ? 'presale-lux-inner' : ''}>
-        <span className="text-[10px] font-bold text-muted-foreground">{lux ? `${NFT_NAME[tier].toUpperCase()} · ${tier}` : 'PRESALE PACKAGE'}</span>
-        <h3 className="presale-lux-price numeric font-display text-3xl font-black">${number(p.usd)}</h3>
-        <p className="mt-2 text-sm"><Lock size={13} className="inline"/> <b className="numeric text-primary">{number(p.bix)} BIX</b> instantly locked</p>
-        <p className="text-xs text-muted-foreground">Released by mining over {p.releaseDays} days</p>
-        <Button className="mt-4 w-full rounded-full" disabled={!cfg.enabled || busy !== null} onClick={() => onBuy(p.usd)}>{busy === p.usd ? 'Processing…' : 'Buy package'}</Button>
-        </div>
-      </article>; })}</div>
       {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
-      {orders.length > 0 && <section className="mt-8"><h2 className="font-display text-lg font-black">My presale positions</h2><div className="mt-3 grid gap-2">{orders.map(o => { const r = presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now); return <div key={o.id} className="rounded-lg border border-border p-3 text-xs"><div className="flex justify-between"><b>${number(Number(o.package_usd))} · {o.strategy ?? 'standard'}</b><span className="numeric">{number(r, { maximumFractionDigits: 4 })} / {number(Number(o.bix_amount))} BIX</span></div><div className="apy-meter mt-2"><i style={{ width: `${Math.min(100, r / Number(o.bix_amount) * 100)}%` }}/></div>{Number(o.dividend_daily_usd ?? 0) > 0 && <p className="mt-1 text-muted-foreground">USDT dividend: ${number(dividendSettled(Number(o.dividend_daily_usd), o.release_days, o.created_at, now), { maximumFractionDigits: 2 })} credited</p>}</div>; })}</div>
+      {tab === 'portfolio' && orders.length > 0 && <section className="mt-8"><h2 className="font-display text-lg font-black">My presale positions</h2><div className="mt-3 grid gap-2">{orders.map(o => { const r = presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now); return <div key={o.id} className="rounded-lg border border-border p-3 text-xs"><div className="flex justify-between"><b>${number(Number(o.package_usd))} · {o.strategy ?? 'standard'}</b><span className="numeric">{number(r, { maximumFractionDigits: 4 })} / {number(Number(o.bix_amount))} BIX</span></div><div className="apy-meter mt-2"><i style={{ width: `${Math.min(100, r / Number(o.bix_amount) * 100)}%` }}/></div>{Number(o.dividend_daily_usd ?? 0) > 0 && <p className="mt-1 text-muted-foreground">USDT dividend: ${number(dividendSettled(Number(o.dividend_daily_usd), o.release_days, o.created_at, now), { maximumFractionDigits: 2 })} credited</p>}</div>; })}</div>
         <h2 className="mt-8 font-display text-lg font-black">My Genesis certificates</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{orders.map(o => <GenesisCertificate key={o.id} usd={Number(o.package_usd)} serial={o.serial} strategy={o.strategy} bix={Number(o.bix_amount)}/>)}</div>
       </section>}
