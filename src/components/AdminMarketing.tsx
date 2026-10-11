@@ -7,7 +7,7 @@ import { Button } from './ui/button';
 import { LANGUAGES, type Language } from '@/lib/i18n';
 import { defaultMarketing, type MarketingPlan } from '@/lib/marketing';
 import { saveMarketing } from '@/lib/marketing.functions';
-export function AdminMarketing({ initial, onMessage }: { initial?: MarketingPlan; onMessage: (message: string) => void }) {
+export function AdminMarketing({ initial, onMessage }: { initial?: MarketingPlan | undefined; onMessage: (message: string) => void }) {
   const [plan, setPlan] = useState(initial ?? defaultMarketing()); const [lang, setLang] = useState<Language>('en'); const [busy, setBusy] = useState(false);
   const save = useServerFn(saveMarketing); const qc = useQueryClient(); const current = plan.locales[lang];
   return <section className="mt-8 max-w-3xl space-y-5"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-xl font-bold">Marketing materials</h2><Button variant="outline" aria-pressed={plan.enabled} onClick={() => setPlan({ ...plan, enabled: !plan.enabled })}>{plan.enabled ? <Eye/> : <EyeOff/>}{plan.enabled ? 'OPEN' : 'CLOSED'}</Button></div>
