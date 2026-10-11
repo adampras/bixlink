@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Globe2, Timer, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const COUNTRIES = [
   ['🇨🇳', 'Shanghai'], ['🇲🇾', 'Kuala Lumpur'], ['🇮🇩', 'Jakarta'], ['🇻🇳', 'Ho Chi Minh'], ['🇦🇪', 'Dubai'], ['🇰🇷', 'Seoul'],
@@ -18,21 +19,25 @@ export function LiveActivityToast() {
   useEffect(() => {
     if (closed) return;
     let t: ReturnType<typeof setTimeout>;
+    let dismiss: ReturnType<typeof setTimeout> | undefined;
     const next = (delay: number) => { t = setTimeout(() => {
-      const [flag, city] = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)]!;
-      setItem({ flag, city, action: ACTIONS[Math.floor(Math.random() * ACTIONS.length)]! });
-      setTimeout(() => setItem(null), 6500);
+      const country = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
+      const action = ACTIONS[Math.floor(Math.random() * ACTIONS.length)];
+      if (!country || !action) return;
+      const [flag, city] = country;
+      setItem({ flag, city, action });
+      dismiss = setTimeout(() => setItem(null), 6500);
       next(20000 + Math.random() * 20000);
     }, delay); };
     next(8000);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); if (dismiss) clearTimeout(dismiss); };
   }, [closed]);
   if (!item || closed) return null;
   return <div role="status" className="live-toast fixed bottom-20 left-3 z-40 flex max-w-[300px] items-start gap-3 rounded-2xl border border-primary/40 bg-card/90 p-3 text-xs shadow-lg backdrop-blur-xl md:bottom-6">
     <span className="text-2xl leading-none">{item.flag}</span>
     <div className="min-w-0"><b className="block text-foreground">Visitor from {item.city}</b><span className="text-muted-foreground">{item.action}</span>
       <span className="mt-1 block text-[9px] uppercase tracking-widest text-muted-foreground/80">Community simulation · not a transaction</span></div>
-    <button aria-label="Close activity notices" onClick={() => setClosed(true)} className="text-muted-foreground"><X size={14}/></button>
+    <Button variant="ghost" size="icon" aria-label="Close activity notices" onClick={() => setClosed(true)} className="size-6 shrink-0 text-muted-foreground"><X size={14}/></Button>
   </div>;
 }
 
