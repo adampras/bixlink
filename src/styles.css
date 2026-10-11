@@ -1704,3 +1704,9 @@ html[data-color-mode="light"][data-anim-glow="on"] :is(.auric-card,.wallet-summa
 .glass-dock a svg { width: 18px; height: 18px; }
 .dock-wallet { transform: translateY(-12px) !important; color: var(--chart-3) !important; }
 .dock-wallet svg { width: 20px !important; height: 20px !important; padding: 11px !important; border: none !important; background: linear-gradient(145deg, oklch(0.93 0.15 95), var(--chart-3) 50%, oklch(0.62 0.13 75)) !important; color: var(--background) !important; box-shadow: 0 0 0 3px var(--background), 0 6px 18px color-mix(in oklab, var(--chart-3) 55%, transparent) !important; }
+
+.presale-tabs { display: flex; gap: .25rem; overflow-x: auto; padding: .25rem; border: 1px solid var(--border); border-radius: .9rem; background: color-mix(in oklab, var(--card) 60%, transparent); }
+.presale-tabs button { flex: 1 0 auto; padding: .5rem .8rem; border-radius: .65rem; font-size: .75rem; font-weight: 700; color: var(--muted-foreground); white-space: nowrap; }
+.presale-tabs button.is-active { background: var(--primary); color: var(--primary-foreground); }
+.presale-card-uniform { min-height: 220px; display: flex; }
+.presale-card-uniform > .presale-lux-inner { width: 100%; }
