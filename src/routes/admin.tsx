@@ -24,6 +24,7 @@ import { AdminReviewers } from '@/components/AdminReviewers';
 import { AdminAppearance } from '@/components/AdminAppearance';
 import { AdminSplash } from '@/components/AdminSplash';
 import { AdminReferrals } from '@/components/AdminReferrals';
+import { YieldControlPanel } from '@/components/YieldControlPanel';
 import { AdminDurationPackages } from '@/components/AdminDurationPackages';
 import { AdminTeams } from '@/components/AdminTeams';
 import { AdminReports } from '@/components/AdminReports';
@@ -95,7 +96,8 @@ function Admin() {
      {tab === 'Appearance' && <AdminAppearance initialReadiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/>}
     {tab === 'Splash' && <AdminSplash onMessage={setMessage}/>}
     {tab === 'Market' && <AdminBixMarket initialMovement={(data?.settings.find(s=>s.key==='bix_market')?.value as { movement?: unknown } | undefined)?.movement} initialPrice={Number((data?.settings.find(s=>s.key==='bix_market')?.value as {priceUsd?: number} | undefined)?.priceUsd ?? 0.84291)} onMessage={setMessage} onSaved={refresh}/>} 
-    {(tab === 'Packages' || tab === 'APY') && <AdminDurationPackages onMessage={setMessage}/>}
+    {tab === 'Packages' && <AdminDurationPackages onMessage={setMessage}/>}
+    {tab === 'APY' && <YieldControlPanel market={false}/>} 
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
      {tab === 'Reports' && <AdminReports onMessage={setMessage}/>}
      {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>} {tab === 'Shop' && <AdminShopCatalog onMessage={setMessage}/>} {tab === 'Member Shop' && <AdminMemberShop initial={data?.settings.find(s => s.key === 'member_shop')?.value as MemberShopConfig | undefined} onMessage={setMessage}/>} {tab === 'Leaders' && <AdminLeaders onMessage={setMessage}/>}
