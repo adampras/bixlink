@@ -16,6 +16,7 @@ import { defaultRoadmap, defaultSpaces } from '@/lib/landing-content';
 import { LandingTokenomics } from '@/components/LandingTokenomics';
 import { PreTgeRoadmap } from '@/components/PreTgeRoadmap';
 import { TrustCenter } from '@/components/TrustCenter';
+import { ReserveTelemetry } from '@/components/InstitutionalSuite';
 import { ProtocolStatus } from '@/components/ProtocolStatus';
 import { SponsorSlot } from '@/components/SponsorSlot';
 import { InternalMarket } from '@/components/InternalMarket';
@@ -60,6 +61,7 @@ function Home() {
     <section className="mx-auto max-w-7xl px-5 pb-6 md:px-8"><SentimentGauge/></section>
     <PreTgeRoadmap/>
     <TrustCenter bixPrice={bixPrice} serverNow={data.serverNow}/>
+    <ReserveTelemetry/>
     <ProtocolStatus serverNow={data.serverNow} marketCount={data.markets.length}/>
     <SponsorSlot sponsor={cfg?.landingContent.sponsor}/>
     <LandingTokenomics content={cfg?.landingContent} member/>
