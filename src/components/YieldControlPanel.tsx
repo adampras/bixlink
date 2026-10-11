@@ -35,7 +35,7 @@ export function YieldControlPanel({ market = true }: { market?: boolean }) {
   async function applyDaily() {
     if (!q.data) return; setBusy(true); setMsg('');
     const day = new Date().toISOString().slice(0, 10);
-    try { for (const [i, p] of q.data.entries()) await save({ data: { id: p.id, price: Number(p.price_usd), apys: fluctuatedApys(i, day, q.data.length), enabled: p.enabled } }); await refresh(); setMsg(`Profit harian ${day} diperbarui untuk ${q.data.length} paket (0.5%–1%, hanya stake baru).`); }
+    try { for (const [i, p] of q.data.entries()) await save({ data: { id: p.id, price: Number(p.price_usd), apys: fluctuatedApys(i, day, q.data.length), enabled: p.enabled } }); await refresh(); setMsg(`Profit harian ${day} diperbarui untuk ${q.data.length} paket (0.50%–0.98%, hanya stake baru).`); }
     catch (e) { setMsg(e instanceof Error ? e.message : 'Could not apply.'); } finally { setBusy(false); }
   }
   async function savePrice(v: number) {
