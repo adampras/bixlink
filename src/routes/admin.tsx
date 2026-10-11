@@ -39,12 +39,14 @@ import type { Readiness } from '@/lib/readiness';
 import { AdminSiteControl } from '@/components/AdminSiteControl';
 import type { SiteControl } from '@/lib/site-control';
 import type { LandingContent } from '@/components/LandingExperience';
+import { AdminMarketing } from '@/components/AdminMarketing';
+import type { MarketingPlan } from '@/lib/marketing';
 
 export const Route = createFileRoute('/admin')({ head: () => ({ meta: [{ title: 'Owner Panel — BIXLINK' }, { name: 'description', content: 'Private BIXLINK owner operations.' }, { property: 'og:title', content: 'Owner Panel — BIXLINK' }, { property: 'og:description', content: 'BIXLINK owner operations.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }), component: Admin });
 type AdminData = Awaited<ReturnType<typeof getAdminData>>;
 const ADMIN_GROUPS: { title: string; tabs: [string, string][] }[] = [
   { title: 'Keuangan & Staking', tabs: [['Overview','ringkasan vault brankas maintenance'],['Wallet','dompet deposit bix pay transfer swap'],['Stakes','staking unstake approve'],['Reports','laporan transfer']] },
-  { title: 'Pasar & Presale', tabs: [['Presale','sovereign genesis 100000 strategi'],['Market','harga pasar bix'],['APY','profit yield'],['Packages','paket durasi'],['Token','bep20 kontrak smart contract']] },
+  { title: 'Pasar & Presale', tabs: [['Presale','sovereign genesis 100000 strategi'],['Marketing','pdf video bahasa materi'],['Market','harga pasar bix'],['APY','profit yield'],['Packages','paket durasi'],['Token','bep20 kontrak smart contract']] },
   { title: 'Pengguna & Jaringan', tabs: [['Users','member ban reviewer owner 2'],['Referrals','bonus komisi sponsor'],['Teams','tim leader vip'],['Clones','kloning'],['Leaders','akun leader gratis sponsor ambassador syarat']] },
   { title: 'Tampilan & Ekosistem', tabs: [['Appearance','warna wallet animasi tema'],['Splash','splash screen video'],['Landing','konten banner sponsor partner'],['Updates','readiness pengumuman'],['Booster','visual boost'],['Arena','fox game quest'],['NFT','sertifikat kartu'],['Mining','vbix'],['RWA','income source sumber'],['Shop','marketplace produk merchandise toko'],['Member Shop','slot jualan member produk review']] },
 ];

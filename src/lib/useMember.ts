@@ -8,6 +8,7 @@ import { fallbackPackages, type Package } from '@/lib/bixlink';
 import { defaultLandingContent, type LandingContent } from '@/lib/landing-content';
 import { defaultReadiness, type Readiness } from '@/lib/readiness';
 import { defaultSiteControl, effectiveSettings, type SiteControl } from '@/lib/site-control';
+import { defaultMarketing, marketingSchema } from '@/lib/marketing';
 
 // The member session is resolved once per app load and shared by every route, so
 // switching menus reuses the known session instead of re-asking the auth service
@@ -124,6 +125,7 @@ export function usePublicConfig() {
         bixMarket: (settings['bix_market'] ?? { priceUsd: 0.84291 }) as { priceUsd: number; movement?: unknown },
         referrals: (settings['referrals'] ?? { direct: 10, levels: [12, 6, 3, 2, 1], rewardPlus: 5, minimumDirect: 3, splitUsdt: 70, splitBix: 30 }) as { direct: number; levels: number[]; rewardPlus: number; minimumDirect: number; splitUsdt: number; splitBix: number; bixDirectEnabled?: boolean; bixDirectPct?: number },
         landingContent: (settings['landing_content'] ?? defaultLandingContent) as LandingContent,
+        marketingPlan: marketingSchema.safeParse(settings['marketing_plan']).success ? marketingSchema.parse(settings['marketing_plan']) : defaultMarketing(),
         readiness: { ...defaultReadiness, ...settings['readiness'] } as Readiness,
       };
     },
