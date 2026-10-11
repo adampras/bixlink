@@ -1673,3 +1673,12 @@ html[data-anim-float="on"] :is(.vault-pill, .lux-btn, .boost-tier-apy) { animati
 .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid var(--border); background: color-mix(in oklch, var(--card) 70%, transparent); }
 .auth-tabs a { text-align: center; padding: 10px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .12em; color: var(--muted-foreground); }
 .auth-tabs a[data-active="true"] { background: var(--primary); color: var(--primary-foreground); }
+
+/* Larger header brand + clean light mode */
+.header-brand img { width: 48px !important; height: 48px !important; }
+.site-header .brand-mark { font-size: 1.4rem !important; font-weight: 900; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; }
+@media (max-width: 480px) { .header-brand img { width: 38px !important; height: 38px !important; } .site-header .brand-mark { font-size: 1.08rem !important; } }
+html[data-color-mode="light"] :is(.brand-mark,.brand-hero,h1,h2,h3) { text-shadow: none !important; }
+html[data-color-mode="light"] :is(.auric-card,.boost-tier,.terminal-market,.terminal-balance) { box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 6%, transparent), 0 8px 24px -12px color-mix(in oklab, var(--foreground) 14%, transparent) !important; border-color: color-mix(in oklab, var(--foreground) 12%, transparent) !important; }
+html[data-color-mode="light"] .header-brand img { box-shadow: none !important; }
+html[data-color-mode="light"][data-anim-glow="on"] :is(.auric-card,.wallet-summary,.boost-tier) { animation: none; }
