@@ -13,8 +13,8 @@
 - Grant owner access only after server-validated identity and a matching verified owner email; client state is never an authority for admin actions.
 - Public reads use RLS; private operations use authenticated server functions.
 - BIX/USDT conversions are reviewed internal ledger requests at the owner reference, never exchange execution or custody.
-- Owner-only presentation writes; Appearance controls wallet-only finance motion, while the payment canvas lives inside the landing hero — keeps effects visible and scoped.
-- Share one session store with layout-shaped placeholders.
+- Owner-only presentation writes; wallet finance motion and landing payment canvas stay scoped.
+- Share session store and layout-shaped placeholders.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
 - Clone accounts (bix_clone_accounts) are funded only via bix_allocations and excluded from member stats — auditable and separate.
 - Leader virtual balances (bix_leaders) count in bix_wallet_balance but withdraw is blocked until bix_leader_status qualifies — one server gate.
@@ -33,7 +33,7 @@
 - Network bonuses are source-stake-idempotent (native BIX owner-reviewed); USDT direct/daily matching use unique rows in bix_usdt_network_bonuses settled by pg_cron — one idempotent reward ledger.
 - Share daily yield control between APY and its standalone route using authorized package saves; duration_apys and RPC snapshots preserve running stakes; retire clones without deleting stakes.
 - Store time-based market movement in bix_market as display-only simulation with server-verified owner writes; preserve the ledger reference to avoid changing settlement or fabricating trading.
-- Keep tokenomics presentation-only; honor visibility and member terms.
+- Tokenomics is presentation-only; honor visibility and terms.
 - Settle vBIX via authenticated RPCs; video never awards funds. Convert through an atomic capped marketing ledger, never the owner vault.
 - Fox Arena quest vBIX is paid only by the server-verified bix_quest_claim RPC, sharing mining's account cap and pool; season prizes are owner-reviewed, never auto-credited — game rewards stay in the promo budget.
 - NFT cards: one in-app certificate per stake with immutable artwork snapshot; new artwork selection matches the contract tier through the owner-controlled reactor catalog. Completion replaces USDT refund; buybacks remain owner-reviewed and vault-funded.
