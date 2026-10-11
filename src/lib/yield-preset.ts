@@ -11,3 +11,14 @@ export function standardDailyPct(tierIndex: number, durationIndex: number): numb
 export function standardApys(tierIndex: number): Record<string, number> {
   return Object.fromEntries(PACKAGE_DURATIONS.map((d, j) => [String(d), Math.min(360, Math.round(standardDailyPct(tierIndex, j) * 365 * 10000) / 10000)]));
 }
+
+/** Daily fluctuation: standard rate ± up to 0.08%, deterministic per UTC day, clamped to 0.50%–0.98%. */
+export function fluctuatedDailyPct(tierIndex: number, durationIndex: number, dayKey: string): number {
+  let h = 2166136261;
+  for (const c of `${dayKey}:${tierIndex}:${durationIndex}`) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  const jitter = ((h >>> 0) % 17 - 8) / 100;
+  return Math.round(Math.max(0.5, Math.min(0.98, standardDailyPct(tierIndex, durationIndex) + jitter)) * 100) / 100;
+}
+export function fluctuatedApys(tierIndex: number, dayKey: string): Record<string, number> {
+  return Object.fromEntries(PACKAGE_DURATIONS.map((d, j) => [String(d), Math.min(360, Math.round(fluctuatedDailyPct(tierIndex, j, dayKey) * 365 * 10000) / 10000)]));
+}
