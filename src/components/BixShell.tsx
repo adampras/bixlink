@@ -33,7 +33,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   const { data: publicConfig } = usePublicConfig();
   const presentationTheme = resolvePresentationTheme(publicConfig?.readiness.presentationTheme);
   useEffect(() => {
-    document.documentElement.dataset['presentationTheme'] = presentationTheme;
+    document.documentElement.dataset['presentationTheme'] = presentationTheme; if (publicConfig) localStorage.setItem('bixlink-theme', presentationTheme);
   }, [presentationTheme]);
   const rd = publicConfig?.readiness as { animGlow?: boolean; animShimmer?: boolean; animFloat?: boolean } | undefined;
   useEffect(() => {
