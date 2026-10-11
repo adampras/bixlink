@@ -222,6 +222,7 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
     if (parsed.key === 'splash') parsed.value = splashSettingsSchema.parse(parsed.value);
     if (parsed.key === 'mining_visibility') parsed.value = miningVisibilitySchema.parse(parsed.value);
     if (parsed.key === 'mining') parsed.value = z.object({ enabled: z.boolean(), ratePerDay: z.number().positive().max(100), mode: z.enum(['day','second']), stakeBoostPct: z.number().min(0).max(100) }).strict().parse(parsed.value);
+    if (parsed.key === 'member_shop') parsed.value = z.object({ enabled: z.boolean(), tiers: z.array(z.object({ min: z.number().min(0).max(10_000_000), slots: z.number().int().min(0).max(1000) })).max(10), overrides: z.record(z.string().uuid(), z.number().int().min(0).max(1000)).optional() }).strict().parse(parsed.value);
     if (parsed.key === 'booster_withdraw') parsed.value = z.object({ bix: z.boolean(), usdt: z.boolean() }).strict().parse(parsed.value);
     if (parsed.key === 'booster_visual') parsed.value = z.object({ visual: z.enum(BOOSTER_VIDEOS) }).strict().parse(parsed.value);
     if (parsed.key === 'booster') parsed.value = z.object({ enabled: z.boolean(), rate: z.number().min(0).max(45), maxApy: z.number().min(8).max(45).optional() }).strict().parse(parsed.value);
