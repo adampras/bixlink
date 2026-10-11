@@ -1743,3 +1743,24 @@ html[data-color-mode="light"] { --finance-gold:oklch(.5 .1 80); }
 .purchase-details { padding:20px; }
 .presale-purchase-dialog > button { background:var(--card); color:var(--foreground); padding:5px; }
 @media(prefers-reduced-motion:reduce) { .finance-coins span,.finance-network svg,.finance-chart span { animation:none; } }
+
+/* Batch polish: clean light wallet, compact dialog, clean presale cards, slim powered-by */
+html[data-color-mode="light"] .wallet-summary[data-wallet-skin] { box-shadow: 0 1px 3px color-mix(in oklab, var(--foreground) 8%, transparent) !important; border-color: color-mix(in oklab, var(--foreground) 10%, transparent) !important; background: linear-gradient(135deg, var(--skin-a), var(--skin-b)) !important; animation: none !important; }
+html[data-color-mode="light"] .wallet-summary[data-wallet-skin] strong { text-shadow: none; }
+html[data-color-mode="light"] .wallet-finance-motion { display: none; }
+.presale-purchase-dialog { max-width: 360px !important; max-height: 86dvh; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; }
+.presale-purchase-dialog .purchase-art { height: 64px; }
+.presale-purchase-dialog .purchase-details { padding: 14px 16px 16px; }
+.presale-purchase-dialog .purchase-details strong.text-3xl { font-size: 1.6rem; margin-top: .6rem; }
+.presale-purchase-dialog dl { margin-top: .6rem; }
+.presale-purchase-dialog dl > div { padding-top: .35rem; padding-bottom: .35rem; }
+.presale-lux-card { background: linear-gradient(160deg, color-mix(in oklab, var(--card) 92%, var(--chart-3)), var(--card)) !important; }
+.presale-lux-card::before { display: none; }
+.presale-lux-inner { padding: 18px !important; }
+.nft-preview-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 800; color: var(--chart-3); border: 1px solid color-mix(in oklab, var(--chart-3) 45%, transparent); background: color-mix(in oklab, var(--chart-3) 8%, transparent); }
+.nft-preview-dialog { width: calc(100% - 40px); max-width: 300px; padding: 0; gap: 0; overflow: hidden; border-radius: 12px; background: var(--card); }
+.nft-preview-dialog img { display: block; width: 100%; aspect-ratio: 3/4; object-fit: cover; }
+.powered-by--slim { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+.powered-by--slim .powered-row { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 6px; margin-top: 10px; }
+.powered-by--slim .powered-row::-webkit-scrollbar { display: none; }
+.powered-by--slim .powered-badge { flex: 0 0 auto; padding: 5px 10px; font-size: 10px; white-space: nowrap; }
