@@ -140,6 +140,48 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_member_products: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          order_url: string | null
+          price_usd: number
+          reviewed_at: string | null
+          status: string
+          studio: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          order_url?: string | null
+          price_usd: number
+          reviewed_at?: string | null
+          status?: string
+          studio?: string
+          title: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          order_url?: string | null
+          price_usd?: number
+          reviewed_at?: string | null
+          status?: string
+          studio?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_mining_accounts: {
         Row: {
           settled_at: string
@@ -1171,6 +1213,7 @@ export type Database = {
           rank: number
         }[]
       }
+      bix_member_shop_slots: { Args: { p_user: string }; Returns: number }
       bix_mining_conversion_status: { Args: never; Returns: Json }
       bix_mining_convert: { Args: never; Returns: Json }
       bix_mining_rate: { Args: { p_user: string }; Returns: number }

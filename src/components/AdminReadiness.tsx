@@ -9,13 +9,16 @@ import { getOwnerAnnouncements, saveAnnouncement } from '@/lib/updates.functions
 import { defaultReadiness, type Readiness } from '@/lib/readiness';
 import { dateTime } from '@/lib/bixlink';
 
-type AvailabilityKey = 'legalEnabled' | 'kycEnabled' | 'readinessEnabled' | 'homeOverviewEnabled' | 'marketEnabled' | 'footerEnabled';
+type AvailabilityKey = 'legalEnabled' | 'kycEnabled' | 'readinessEnabled' | 'homeOverviewEnabled' | 'marketEnabled' | 'footerEnabled' | 'liveActivityEnabled' | 'heroAnimEnabled' | 'presaleStageEnabled';
 const controls: { key: AvailabilityKey; label: string; detail: string }[] = [
   { key: 'legalEnabled', label: 'Legal & About pages', detail: 'Terms, Privacy, Risk Disclosure, About & Support.' },
   { key: 'kycEnabled', label: 'Optional identity check', detail: 'Identity submissions in Settings and Withdraw.' },
   { key: 'readinessEnabled', label: 'Readiness information', detail: 'Additional footer information about the project.' },
   { key: 'homeOverviewEnabled', label: 'HOME top overview', detail: 'Recorded staking value, Deposit/Withdraw/Swap buttons and the 3 stat cards at the top of HOME.' },
   { key: 'marketEnabled', label: 'Market & Updates', detail: 'Major coin prices and published owner announcements.' },
+  { key: 'liveActivityEnabled', label: 'Live Global Activity', detail: 'Floating notices of community interest from 11 priority countries (labelled simulation; real ledger events marked).' },
+  { key: 'heroAnimEnabled', label: 'Animated hero background', detail: 'Neural payment grid animation behind the landing page.' },
+  { key: 'presaleStageEnabled', label: 'Presale stage & countdown', detail: 'Stage progress bar and round countdown on the landing page.' },
   { key: 'footerEnabled', label: 'Editable footer content', detail: 'Owner-written footer title, description and contact line.' },
 ];
 const empty = { title: '', body: '', category: 'ANNOUNCEMENT', published: false };

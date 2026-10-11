@@ -1682,3 +1682,12 @@ html[data-color-mode="light"] :is(.brand-mark,.brand-hero,h1,h2,h3) { text-shado
 html[data-color-mode="light"] :is(.auric-card,.boost-tier,.terminal-market,.terminal-balance) { box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 6%, transparent), 0 8px 24px -12px color-mix(in oklab, var(--foreground) 14%, transparent) !important; border-color: color-mix(in oklab, var(--foreground) 12%, transparent) !important; }
 html[data-color-mode="light"] .header-brand img { box-shadow: none !important; }
 html[data-color-mode="light"][data-anim-glow="on"] :is(.auric-card,.wallet-summary,.boost-tier) { animation: none; }
+.studio-stage { position: relative; }
+.studio-obsidian { background: radial-gradient(circle at 50% 30%, color-mix(in oklab, var(--primary) 18%, var(--card)), var(--background)); }
+.studio-white { background: radial-gradient(circle at 50% 30%, oklch(1 0 0), oklch(0.9 0 0)); }
+.studio-gold { background: radial-gradient(circle at 50% 30%, color-mix(in oklab, var(--primary) 55%, oklch(1 0 0)), color-mix(in oklab, var(--primary) 30%, var(--background))); }
+.studio-stage::after { content: ""; position: absolute; inset: auto 0 0 0; height: 18%; background: linear-gradient(to top, color-mix(in oklab, var(--foreground) 10%, transparent), transparent); pointer-events: none; }
+.skeleton-shimmer { background: linear-gradient(100deg, var(--card) 30%, color-mix(in oklab, var(--primary) 14%, var(--card)) 50%, var(--card) 70%); background-size: 200% 100%; animation: skeleton-move 1.4s linear infinite; }
+@keyframes skeleton-move { to { background-position: -200% 0; } }
+.live-toast { animation: live-in .45s ease-out; }
+@keyframes live-in { from { opacity: 0; transform: translateY(12px); } }
