@@ -46,7 +46,7 @@ function ProfilePage() {
         <Link to="/network" className="profile-network-link">View my network <ArrowRight/></Link>
       </section>
       {orders.length > 0 && <section className="mt-6"><div className="eyebrow">MY GENESIS PROOF</div><div className="mt-3 grid gap-3 sm:grid-cols-2">{orders.map((o, i) => Number(o.package_usd) >= 100000 ? <SovereignPlaque key={o.id} serial={o.serial ?? i + 1} strategy={o.strategy ?? 'standard'} bix={Number(o.bix_amount)} holder={user?.email ?? 'Member'}/> : <GenesisCertificate key={o.id} usd={Number(o.package_usd)} serial={o.serial} strategy={o.strategy} bix={Number(o.bix_amount)}/>)}</div></section>}
-      <section className="profile-actions">
+      <section className="profile-actions"><Button asChild variant="outline"><Link to="/marketing"><span className="profile-action-icon"><TrendingUp/></span><span>Marketing materials <small>PDF · Video</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
         <Button asChild variant="outline"><Link to="/nft-marketplace"><span className="profile-action-icon"><ShoppingBag/></span><span>BIXLINK Marketplace</span><ChevronRight className="profile-action-arrow"/></Link></Button>
         {reviewer.data && <Button asChild variant="outline"><Link to="/review"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>ADMIN PANEL BIX <small>Deposit &amp; withdrawal review only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
         <Button asChild variant="outline"><Link to="/arena"><span className="profile-action-icon"><Swords/></span><span>Fox Arena <small>Daily missions and leaderboard</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>

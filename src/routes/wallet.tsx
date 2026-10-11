@@ -148,6 +148,7 @@ function WalletPage() {
         <p className="mt-4 break-all font-mono text-[11px] text-muted-foreground">TxID {success.txHash}</p>
         <Button className="mt-6 w-full rounded-full bg-chart-2 text-background hover:bg-chart-2/90" onClick={() => setSuccess(null)}>Done</Button>
       </div></div>}
+      <nav aria-label="Wallet quick actions" className="wallet-quick-actions"><Button variant="ghost" size="sm" onClick={() => setModal('deposit')}><ArrowDownToLine size={16}/> Deposit</Button><span className="h-5 w-px bg-border"/><Button variant="ghost" size="sm" onClick={() => setModal('withdraw')}><ArrowUpFromLine size={16}/> Withdraw</Button></nav>
     </MemberGate>
   <PoweredBy slim/><div className="h-24 md:h-0" aria-hidden/></main></BixShell>;
 }

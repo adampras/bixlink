@@ -102,6 +102,7 @@ function Admin() {
     {tab === 'APY' && <YieldControlPanel market={false}/>} 
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
      {tab === 'Reports' && <AdminReports onMessage={setMessage}/>}
+     {tab === 'Marketing' && <AdminMarketing initial={data?.settings.find(s=>s.key==='marketing_plan')?.value as unknown as MarketingPlan | undefined} onMessage={setMessage}/>}
      {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>} {tab === 'Shop' && <AdminShopCatalog onMessage={setMessage}/>} {tab === 'Member Shop' && <AdminMemberShop initial={data?.settings.find(s => s.key === 'member_shop')?.value as MemberShopConfig | undefined} onMessage={setMessage}/>} {tab === 'Leaders' && <AdminLeaders onMessage={setMessage}/>}
      {tab === 'Arena' && <AdminArena onMessage={setMessage}/>}
      {tab === 'NFT' && <AdminNft onMessage={setMessage}/>}
