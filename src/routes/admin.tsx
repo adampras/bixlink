@@ -38,10 +38,16 @@ import type { LandingContent } from '@/components/LandingExperience';
 
 export const Route = createFileRoute('/admin')({ head: () => ({ meta: [{ title: 'Owner Panel — BIXLINK' }, { name: 'description', content: 'Private BIXLINK owner operations.' }, { property: 'og:title', content: 'Owner Panel — BIXLINK' }, { property: 'og:description', content: 'BIXLINK owner operations.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }), component: Admin });
 type AdminData = Awaited<ReturnType<typeof getAdminData>>;
+const ADMIN_GROUPS: { title: string; tabs: [string, string][] }[] = [
+  { title: 'Keuangan & Staking', tabs: [['Overview','ringkasan vault brankas maintenance'],['Wallet','dompet deposit bix pay transfer swap'],['Stakes','staking unstake approve'],['Reports','laporan transfer']] },
+  { title: 'Pasar & Presale', tabs: [['Presale','sovereign genesis 100000 strategi'],['Market','harga pasar bix'],['APY','profit yield'],['Packages','paket durasi'],['Token','bep20 kontrak smart contract']] },
+  { title: 'Pengguna & Jaringan', tabs: [['Users','member ban reviewer owner 2'],['Referrals','bonus komisi sponsor'],['Teams','tim leader vip'],['Clones','kloning']] },
+  { title: 'Tampilan & Ekosistem', tabs: [['Appearance','warna wallet animasi tema'],['Splash','splash screen video'],['Landing','konten banner sponsor partner'],['Updates','readiness pengumuman'],['Booster','visual boost'],['Arena','fox game quest'],['NFT','sertifikat kartu'],['Mining','vbix'],['RWA','income source sumber']] },
+];
 function Admin() {
   const { user } = useMember();
   const reviewer = useReviewerAccess(user?.id);
-  const [state,setState] = useState<'loading'|'signin'|'denied'|'ready'>('loading'); const [data,setData] = useState<AdminData | null>(null); const [message,setMessage] = useState(''); const [search,setSearch] = useState(''); const [tab,setTab] = useState('Overview');
+  const [state,setState] = useState<'loading'|'signin'|'denied'|'ready'>('loading'); const [data,setData] = useState<AdminData | null>(null); const [message,setMessage] = useState(''); const [search,setSearch] = useState(''); const [menuQuery,setMenuQuery] = useState(''); const [tab,setTab] = useState('Overview');
    const boot = useServerFn(bootstrapOwner); const fetchData = useServerFn(getAdminData); const changeStake = useServerFn(updateStake); const saveSetting = useServerFn(updateSetting); const createSource = useServerFn(addIncomeSource); const changeMember = useServerFn(manageMember);
   async function refresh() { const result = await fetchData(); setData(result); }
   useEffect(() => { supabase.auth.getUser().then(async ({data:auth}) => { if (!auth.user) {setState('signin');return;} try { const result = await boot(); if (!result.owner) {setState('denied');return;} await refresh();setState('ready'); } catch {setState('denied');} }); }, []);
@@ -53,7 +59,8 @@ function Admin() {
       <Button variant="outline" asChild><Link to="/yield-control"><TrendingUp size={16}/>Profit staking &amp; harga BIX</Link></Button>
       <Button variant={tab === 'Splash' ? 'default' : 'outline'} onClick={() => setTab('Splash')}><Play size={16}/>Splash screen</Button>
     </div>
-    <nav className="mt-5 flex gap-2 overflow-x-auto border-b border-border pb-3">{['Overview','Reports','Users','Stakes','Wallet','Market','Mining','Presale','Arena','NFT','Updates','Appearance','Splash','APY','Packages','Referrals','RWA','Landing','Booster','Clones','Teams','Token'].map(x => <Button key={x} size="sm" variant={tab === x ? 'default' : 'ghost'} className="shrink-0 rounded-full" onClick={() => setTab(x)}>{x}</Button>)}</nav>
+    <div className="mt-5 flex max-w-md items-center gap-2 rounded-full border border-border bg-card px-4"><Search size={16} className="text-primary"/><input className="w-full bg-transparent py-2.5 text-sm outline-none" placeholder="Cari menu admin (mis. warna, presale, bonus)…" value={menuQuery} onChange={e => setMenuQuery(e.target.value)}/></div>
+    <nav className="mt-4 grid gap-3 border-b border-border pb-4 sm:grid-cols-2">{ADMIN_GROUPS.map(g => { const tabs = g.tabs.filter(([x, k]) => `${x} ${k}`.toLowerCase().includes(menuQuery.toLowerCase().trim())); if (!tabs.length) return null; return <div key={g.title} className="rounded-2xl border border-border bg-card/60 p-3"><div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-primary">{g.title}</div><div className="flex flex-wrap gap-1.5">{tabs.map(([x]) => <Button key={x} size="sm" variant={tab === x ? 'default' : 'ghost'} className="rounded-full" onClick={() => setTab(x)}>{x}</Button>)}</div></div>; })}</nav>
     {message && <p role="status" className="mt-5 text-sm text-chart-2">{message}</p>}
     {tab === 'Overview' && <><AdminSiteControl initial={data?.settings.find(s => s.key === 'site_control')?.value as SiteControl | undefined} onMessage={setMessage} onSaved={refresh}/><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[['Total Users',String(data?.members.length ?? 0)],['Active staking value',money(total)],['Active positions',String(active.length)],['USDT max / month','30%']].map(([label,value],i) => <div className={`stat-card accent-${i%3}`} key={label}><span className="text-xs text-muted-foreground">{label}</span><strong className="mt-4 block text-2xl">{value}</strong></div>)}</div><AdminBixVault onMessage={setMessage}/></>}
      {tab === 'Users' && <div className="mt-8">
