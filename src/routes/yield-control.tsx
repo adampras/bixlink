@@ -2,14 +2,14 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Save, Sparkles } from 'lucide-react';
+import { Save, Shuffle, Sparkles } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { getEditablePackages, saveDurationPackage } from '@/lib/packages.functions';
 import { updateSetting } from '@/lib/bixlink.functions';
 import { usePublicConfig } from '@/lib/useMember';
 import { PACKAGE_DURATIONS } from '@/lib/package-options';
-import { standardApys } from '@/lib/yield-preset';
+import { fluctuatedApys, standardApys } from '@/lib/yield-preset';
 import { number } from '@/lib/bixlink';
 
 export const Route = createFileRoute('/yield-control')({
@@ -35,6 +35,12 @@ function YieldControl() {
     try { for (const [i, p] of q.data.entries()) await save({ data: { id: p.id, price: Number(p.price_usd), apys: standardApys(i), enabled: p.enabled } }); await refresh(); setMsg('Standard 0.5%–1% daily profit applied to all 8 packages (new stakes only).'); }
     catch (e) { setMsg(e instanceof Error ? e.message : 'Could not apply.'); } finally { setBusy(false); }
   }
+  async function applyDaily() {
+    if (!q.data) return; setBusy(true); setMsg('');
+    const day = new Date().toISOString().slice(0, 10);
+    try { for (const [i, p] of q.data.entries()) await save({ data: { id: p.id, price: Number(p.price_usd), apys: fluctuatedApys(i, day), enabled: p.enabled } }); await refresh(); setMsg(`Profit harian ${day} diperbarui untuk ${q.data.length} paket (0.5%–1%, hanya stake baru).`); }
+    catch (e) { setMsg(e instanceof Error ? e.message : 'Could not apply.'); } finally { setBusy(false); }
+  }
   async function savePrice(v: number) {
     setBusy(true); setMsg('');
     try { await saveSetting({ data: { key: 'bix_market', value: { priceUsd: v } } }); await refresh(); setMsg(`BIX internal price set to $${v}.`); }
@@ -58,7 +64,10 @@ function YieldControl() {
       <section className="auric-card mt-6 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div><h2 className="font-display text-xl font-bold">8 staking packages · daily profit</h2><p className="mt-1 text-xs text-muted-foreground">Projection rates; running stakes keep their original terms.</p></div>
-          <Button disabled={busy || !q.data} onClick={applyStandard}><Sparkles size={16}/>{busy ? 'Applying…' : 'Apply standard 0.5%–1%'}</Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" disabled={busy || !q.data} onClick={applyStandard}><Sparkles size={16}/>Standard</Button>
+            <Button disabled={busy || !q.data} onClick={applyDaily}><Shuffle size={16}/>{busy ? 'Applying…' : 'Update profit hari ini'}</Button>
+          </div>
         </div>
         {q.isPending ? <p className="mt-4">Loading packages…</p> : <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[620px] text-sm"><thead className="text-xs text-muted-foreground"><tr><th className="p-2 text-left">Package</th>{PACKAGE_DURATIONS.map(d => <th key={d} className="p-2">{d}D now → standard</th>)}</tr></thead>
           <tbody>{(q.data ?? []).map((p, i) => { const std = standardApys(i); return <tr key={p.id} className="border-t border-border"><td className="p-2 font-bold">{p.id} <span className="text-xs text-muted-foreground">${number(Number(p.price_usd))}</span></td>{PACKAGE_DURATIONS.map(d => <td key={d} className="numeric p-2 text-center text-xs">{number((p.duration_apys[String(d)] ?? 0) / 365, { maximumFractionDigits: 2 })}% → <b className="text-chart-2">{number((std[String(d)] ?? 0) / 365, { maximumFractionDigits: 2 })}%</b></td>)}</tr>; })}</tbody></table></div>}
