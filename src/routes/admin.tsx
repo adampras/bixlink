@@ -28,6 +28,7 @@ import { AdminDurationPackages } from '@/components/AdminDurationPackages';
 import { AdminTeams } from '@/components/AdminTeams';
 import { AdminReports } from '@/components/AdminReports';
 import { AdminPresale } from '@/components/AdminPresale';
+import { AdminShopCatalog } from '@/components/AdminShopCatalog';
 import { AdminArena } from '@/components/AdminArena';
 import { AdminNft } from '@/components/AdminNft';
 import { AdminMining, type MiningSettings } from '@/components/AdminMining';
@@ -42,7 +43,7 @@ const ADMIN_GROUPS: { title: string; tabs: [string, string][] }[] = [
   { title: 'Keuangan & Staking', tabs: [['Overview','ringkasan vault brankas maintenance'],['Wallet','dompet deposit bix pay transfer swap'],['Stakes','staking unstake approve'],['Reports','laporan transfer']] },
   { title: 'Pasar & Presale', tabs: [['Presale','sovereign genesis 100000 strategi'],['Market','harga pasar bix'],['APY','profit yield'],['Packages','paket durasi'],['Token','bep20 kontrak smart contract']] },
   { title: 'Pengguna & Jaringan', tabs: [['Users','member ban reviewer owner 2'],['Referrals','bonus komisi sponsor'],['Teams','tim leader vip'],['Clones','kloning']] },
-  { title: 'Tampilan & Ekosistem', tabs: [['Appearance','warna wallet animasi tema'],['Splash','splash screen video'],['Landing','konten banner sponsor partner'],['Updates','readiness pengumuman'],['Booster','visual boost'],['Arena','fox game quest'],['NFT','sertifikat kartu'],['Mining','vbix'],['RWA','income source sumber']] },
+  { title: 'Tampilan & Ekosistem', tabs: [['Appearance','warna wallet animasi tema'],['Splash','splash screen video'],['Landing','konten banner sponsor partner'],['Updates','readiness pengumuman'],['Booster','visual boost'],['Arena','fox game quest'],['NFT','sertifikat kartu'],['Mining','vbix'],['RWA','income source sumber'],['Shop','marketplace produk merchandise toko']] },
 ];
 function Admin() {
   const { user } = useMember();
