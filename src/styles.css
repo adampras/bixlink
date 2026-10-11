@@ -1691,3 +1691,16 @@ html[data-color-mode="light"][data-anim-glow="on"] :is(.auric-card,.wallet-summa
 @keyframes skeleton-move { to { background-position: -200% 0; } }
 .live-toast { animation: live-in .45s ease-out; }
 @keyframes live-in { from { opacity: 0; transform: translateY(12px); } }
+
+/* Presale NFT embossed cards */
+.presale-lux-card { position: relative; overflow: hidden; border-radius: 22px; padding: 2px; background-size: cover; background-position: center; border: 1px solid color-mix(in oklab, var(--chart-3) 55%, transparent); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 35%, transparent), inset 0 -3px 6px color-mix(in oklab, var(--background) 70%, transparent), 0 14px 34px -14px color-mix(in oklab, var(--chart-3) 45%, transparent); }
+.presale-lux-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in oklab, var(--background) 25%, transparent), color-mix(in oklab, var(--background) 88%, transparent) 70%); }
+.presale-lux-inner { position: relative; border-radius: 20px; padding: 20px; padding-top: 96px; box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent); }
+.presale-lux-price { background: linear-gradient(180deg, var(--foreground), var(--chart-3)); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 0 color-mix(in oklab, var(--foreground) 40%, transparent)) drop-shadow(0 -1px 0 color-mix(in oklab, var(--background) 80%, transparent)); }
+
+/* Slim mobile dock + distinct wallet */
+.glass-dock { bottom: 10px !important; border-radius: 22px !important; padding-top: 0; }
+.glass-dock a { padding-top: 6px !important; padding-bottom: 6px !important; gap: 2px !important; font-size: 9px !important; }
+.glass-dock a svg { width: 18px; height: 18px; }
+.dock-wallet { transform: translateY(-12px) !important; color: var(--chart-3) !important; }
+.dock-wallet svg { width: 20px !important; height: 20px !important; padding: 11px !important; border: none !important; background: linear-gradient(145deg, oklch(0.93 0.15 95), var(--chart-3) 50%, oklch(0.62 0.13 75)) !important; color: var(--background) !important; box-shadow: 0 0 0 3px var(--background), 0 6px 18px color-mix(in oklab, var(--chart-3) 55%, transparent) !important; }
