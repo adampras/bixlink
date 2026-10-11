@@ -21,7 +21,13 @@ export function dividendSettled(dailyUsd: number, releaseDays: number, startedAt
 
 export function genesisTier(usd: number) {
   if (usd >= 100_000) return 'Sovereign Singularity';
+  if (usd >= 70_000) return 'Quantum Sovereign';
+  if (usd >= 50_000) return 'Cosmic Nexus';
+  if (usd >= 30_000) return 'Aether Vanguard';
+  if (usd >= 25_000) return 'Crown Imperial';
+  if (usd >= 20_000) return 'Diamond Velocity';
   if (usd >= 10_000) return 'Obsidian Apex';
+  if (usd >= 7_000) return 'Platinum Reactor';
   if (usd >= 5_000) return 'Gold Fusion';
   if (usd >= 1_000) return 'Silver Turbine';
   return 'Bronze Core';

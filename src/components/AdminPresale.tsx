@@ -27,7 +27,9 @@ export function AdminPresale({ onMessage }: { onMessage: (m: string) => void }) 
       <label className="text-xs">Package USDT<input type="number" className={num} value={p.usd} onChange={e => setPkg(i, 'usd', Number(e.target.value))}/></label>
       <label className="text-xs">BIX received (editable)<input type="number" min="1" className={num} value={p.bix} onChange={e => setCfg({ ...cfg, packages: cfg.packages.map((q, j) => j === i ? { ...q, bix: Number(e.target.value) } : q) })}/></label>
       <label className="text-xs">Release days<input type="number" className={num} value={p.releaseDays} onChange={e => setPkg(i, 'releaseDays', Number(e.target.value))}/></label>
+      <button type="button" className="col-span-3 w-fit text-[11px] font-bold text-destructive underline" onClick={() => setCfg({ ...cfg, packages: cfg.packages.filter((_, j) => j !== i) })}>Remove package</button>
     </div>)}
+    {cfg.packages.length < 14 && <Button type="button" variant="outline" className="w-fit" onClick={() => setCfg({ ...cfg, packages: [...cfg.packages, { usd: 1000, bix: bixForUsd(1000, price), releaseDays: 365 }].sort((a, b) => a.usd - b.usd) })}>+ Add package</Button>}
     {(() => { const sv = cfg.sovereign ?? { enabled: true, usd: 100000, bix: 175000, releaseDays: 365, slots: 21 }; const set = (k: keyof typeof sv, v: number | boolean) => setCfg({ ...cfg, sovereign: { ...sv, [k]: v } }); return <div className="grid gap-3 rounded-lg border border-chart-3/50 p-3">
       <b className="text-sm">Sovereign $100,000 package</b>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={sv.enabled} onChange={e => set('enabled', e.target.checked)}/> Sovereign open</label>
