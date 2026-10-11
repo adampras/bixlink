@@ -96,7 +96,7 @@ function Admin() {
     {(tab === 'Packages' || tab === 'APY') && <AdminDurationPackages onMessage={setMessage}/>}
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
      {tab === 'Reports' && <AdminReports onMessage={setMessage}/>}
-     {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>}
+     {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>} {tab === 'Shop' && <AdminShopCatalog onMessage={setMessage}/>}
      {tab === 'Arena' && <AdminArena onMessage={setMessage}/>}
      {tab === 'NFT' && <AdminNft onMessage={setMessage}/>}
      {tab === 'Mining' && <AdminMining initial={data?.settings.find(s => s.key === 'mining')?.value as MiningSettings | undefined} onMessage={setMessage} onSaved={refresh}/>}
