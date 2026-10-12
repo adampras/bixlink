@@ -6,7 +6,7 @@ export type MarketingExport = { language: Language; plan: MarketingPlan; tables:
 export async function exportMarketingPdf(input: MarketingExport) {
   const { PDFDocument } = await import('pdf-lib');
   const face = new FontFace('MarketingExport', `url(${font.url})`); await face.load(); document.fonts.add(face);
-  const c = marketingCopy(input.language); const locale = input.plan.locales[input.language];
+  const c = marketingCopy(input.language); const locale = (input.plan.locales[input.language as keyof typeof input.plan.locales] ?? input.plan.locales.en);
   const css = getComputedStyle(document.querySelector('.site-shell') ?? document.documentElement);
   const bg = css.getPropertyValue('--background').trim(); const fg = css.getPropertyValue('--foreground').trim(); const accent = css.getPropertyValue('--chart-3').trim(); const muted = css.getPropertyValue('--muted-foreground').trim();
   const pdf = await PDFDocument.create(); pdf.setTitle(`BIXLINK — ${c[0]}`); pdf.setAuthor('BIXLINK');
