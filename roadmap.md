@@ -123,3 +123,6 @@
 - [x] Add owner-editable eight-language marketing materials with member PDF and dated bilingual silent video downloads; verify exports and owner save/readback.
 - [ ] Consolidate duplicated owner menu controls without changing delegated permissions.
 - [ ] Polish shared phone layouts and verify all public/member areas and owner navigation.
+- [x] Marketplace: fox emblem header, 2x2 glow boxes, Sell/Buy Now buttons with order checkout via seller link.
+- [x] Member header tools swipe left/right on phones.
+- [ ] Real connected card payments for marketplace — waits on owner choosing a payment provider.

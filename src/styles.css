@@ -1955,3 +1955,16 @@ html[data-view="zen"] .pro-only { display:none !important; }
 .atelier-box b { display:block; margin-top:4px; font-size:13px; color:var(--foreground); }
 .atelier-box--violet { --tone:#A855F7; } .atelier-box--gold { --tone:#FFD700; } .atelier-box--emerald { --tone:#39FF14; } .atelier-box--cyan { --tone:#00F0FF; }
 .atelier-tabs [aria-selected="true"] { border-color:#FFD700 !important; color:#FFD700 !important; box-shadow:0 0 14px color-mix(in oklab,#FFD700 35%,transparent); }
+
+/* Marketplace atelier v2 (reference layout) */
+.atelier-head { justify-items:center; text-align:center; }
+.atelier-emblem { width:min(220px,58vw); aspect-ratio:800/870; object-fit:cover; border-radius:24px; mask-image:radial-gradient(circle,#000 62%,transparent 75%); }
+.atelier-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+.atelier-pill { border-radius:999px !important; border-color:#FFD700 !important; color:#FFD700 !important; }
+.atelier-sell, .shop-buy { border-radius:999px !important; background:linear-gradient(135deg,#FFD700,#ffb347) !important; color:#0a0a23 !important; font-weight:800; }
+.shop-buy { margin-top:6px; width:100%; }
+.atelier-info { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:14px; }
+@media (min-width:900px){ .atelier-info { grid-template-columns:repeat(4,minmax(0,1fr)) !important; } }
+.atelier-box { display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; padding:22px 12px; border-radius:20px; backdrop-filter:blur(12px); background:linear-gradient(160deg,color-mix(in oklab,var(--tone) 14%,transparent),color-mix(in oklab,var(--card) 80%,transparent)); box-shadow:0 0 18px color-mix(in oklab,var(--tone) 30%,transparent), inset 0 0 12px color-mix(in oklab,var(--tone) 12%,transparent); color:var(--tone); }
+.atelier-box span { font-size:12px; }
+.site-header .header-tools { justify-self:end; max-width:100%; }

@@ -36,7 +36,7 @@ function ProductCard({ p, children, editorial }: { p: Product; children?: React.
       {editorial && p.description && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{p.description}</p>}
       <span className="numeric mt-1 block text-primary">{money(Number(p.price_usd))}</span>
       {p.status !== 'approved' && <span className="mt-1 inline-block rounded-full border border-border px-2 text-[10px] uppercase">{p.status}</span>}
-      {p.order_url && p.status === 'approved' && <a href={p.order_url} target="_blank" rel="noopener noreferrer" className="boutique-cta">Inquire with seller</a>}{children}</div>
+      {p.order_url && p.status === 'approved' && <a href={p.order_url} target="_blank" rel="noopener noreferrer" className="boutique-cta">Buy now</a>}{children}</div>
   </div>;
 }
 
@@ -58,13 +58,13 @@ export function MemberShop({ userId, onMessage }: { userId?: string | undefined;
     } catch (err) { say(err instanceof Error ? err.message : 'Could not submit product.'); } finally { setBusy(false); }
   }
   async function remove(id: string) { await supabase.from('bix_member_products').delete().eq('id', id); await mine.refetch(); }
-  return <section className="mx-auto max-w-7xl px-5 py-10 md:px-8">
+  return <section id="member-store" className="mx-auto max-w-7xl px-5 py-10 md:px-8">
     <div className="eyebrow"><Store size={13}/> MEMBER MERCHANT HUB</div><h2 className="section-title">MEMBER <span>STORE</span></h2>
-    <p className="mt-2 text-xs text-muted-foreground">Products listed by members. Orders happen through each seller's own link; BIXLINK does not process payments.</p>
+    <p className="mt-2 text-xs text-muted-foreground">Products listed by members. Tap Buy now to order through the seller's own payment link. BIXLINK does not hold or process payments.</p>
     <div className="boutique-toggle" role="group" aria-label="Store view"><button type="button" aria-pressed={!editorial} onClick={() => setEditorial(false)}>Grid</button><button type="button" aria-pressed={editorial} onClick={() => setEditorial(true)}>Editorial</button></div>
     <div className={`mt-4 grid gap-3 ${editorial ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'}`}>{(approved.data ?? []).map(p => <ProductCard key={p.id} p={p} editorial={editorial}/>)}{approved.isLoading && Array.from({ length: 5 }, (_, i) => <div key={i} className="skeleton-shimmer aspect-[3/4] rounded-2xl"/>)}</div>
     {!approved.isLoading && !approved.data?.length && <p className="mt-3 text-sm text-muted-foreground">No member products yet.</p>}
-    {userId && <div className="mt-10 rounded-3xl border border-primary/40 bg-card/70 p-5">
+    {userId && <div id="sell-product" className="mt-10 rounded-3xl border border-primary/40 bg-card/70 p-5">
       <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-display text-lg font-black">Sell your product</h3><span className="numeric rounded-full border border-primary px-3 py-1 text-xs font-bold text-primary">Slots {used} / {slots}</span></div>
       {slots === 0 ? <p className="mt-3 text-sm text-muted-foreground">Activate a staking package of at least $100 to unlock product slots. Larger stakes unlock more slots.</p> :
       <form onSubmit={submit} className="mt-4 grid gap-4 md:grid-cols-[220px_1fr]">
