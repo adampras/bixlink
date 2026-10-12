@@ -1918,3 +1918,40 @@ html[data-color-mode="light"] .site-shell .wallet-summary { border-color: color-
 /* Zen / Pro view switch */
 html[data-view="zen"] .pro-only { display:none !important; }
 .view-switch { height:32px; padding:0 8px; border-radius:999px; font:800 9px/1 "JetBrains Mono", monospace; letter-spacing:.1em; color:var(--chart-3); border:1px solid color-mix(in oklab, var(--chart-3) 40%, var(--border)); }
+
+/* Hero presale ribbon */
+.hero-ribbon { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; padding:8px 8px 8px 14px; border-radius:999px; border:1px solid color-mix(in oklab,var(--chart-3) 45%,transparent); background:color-mix(in oklab,var(--card) 70%,transparent); backdrop-filter:blur(14px); text-align:left; }
+.hero-ribbon-live { display:flex; align-items:center; gap:7px; font-size:9px; font-weight:800; letter-spacing:.14em; color:var(--chart-2); white-space:nowrap; }
+.hero-ribbon-live i { width:7px; height:7px; border-radius:50%; background:var(--chart-2); animation:pulse 1.6s infinite; }
+.hero-ribbon-live b { color:var(--foreground); font-size:12px; letter-spacing:.04em; }
+.hero-ribbon-path { display:flex; justify-content:center; gap:6px; font-size:11px; color:var(--muted-foreground); }
+.hero-ribbon-path .is-on { color:var(--chart-3); font-weight:800; }
+.hero-ribbon-path em { font-style:normal; margin-right:6px; opacity:.5; }
+.hero-ribbon-cta { border-radius:999px; padding:7px 14px; font-size:11px; font-weight:800; white-space:nowrap; background:linear-gradient(135deg,var(--chart-3),color-mix(in oklab,var(--chart-3) 60%,var(--primary))); color:var(--primary-foreground); }
+.hero-ribbon-note { grid-column:1/-1; font-size:9px; color:var(--muted-foreground); text-align:center; }
+@media (max-width:640px){ .hero-ribbon { grid-template-columns:1fr auto; border-radius:18px; } .hero-ribbon-path { grid-column:1/-1; grid-row:2; } }
+
+/* Member header: swipeable tools rail */
+.header-brand { flex-shrink:0; padding-right:10px; margin-right:4px; border-right:1px solid color-mix(in oklab,var(--border) 70%,transparent); }
+@media (max-width:767px){
+  .site-header .header-tools { min-width:0; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x proximity; scrollbar-width:none; -webkit-overflow-scrolling:touch; padding:2px 2px; mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%); }
+  .site-header .header-tools::-webkit-scrollbar { display:none; }
+  .site-header .header-tools > * { flex-shrink:0; scroll-snap-align:start; }
+  .site-header .language-menu, .site-header .notification-menu { position:fixed !important; top:58px; right:10px; z-index:60; }
+}
+
+/* Marketplace atelier */
+.atelier-head { position:relative; display:grid; gap:10px; padding-bottom:22px; text-align:left; }
+.atelier-kicker { font-size:10px; letter-spacing:.32em; color:var(--muted-foreground); }
+.atelier-head h1 { font-family:var(--font-display); font-weight:900; font-size:clamp(2rem,6vw,3.8rem); line-height:.95; background:linear-gradient(180deg,var(--foreground),color-mix(in oklab,var(--foreground) 45%,var(--background))); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.atelier-head h1 span { background:linear-gradient(100deg,#FFD700,#ffb347 45%,#A855F7); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.atelier-line { height:1px; background:linear-gradient(90deg,#FFD700,#A855F7 50%,transparent); }
+.atelier-head .shop-outline { justify-self:start; }
+.atelier-info { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:6px 0 18px; }
+@media (max-width:640px){ .atelier-info { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.atelier-box { --tone:#FFD700; text-align:left; padding:14px; border-radius:16px; border:1px solid color-mix(in oklab,var(--tone) 55%,transparent); background:linear-gradient(150deg,color-mix(in oklab,var(--tone) 18%,var(--card)),var(--card)); transition:transform .2s; }
+.atelier-box:hover { transform:translateY(-2px); }
+.atelier-box span { display:block; font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--tone); }
+.atelier-box b { display:block; margin-top:4px; font-size:13px; color:var(--foreground); }
+.atelier-box--violet { --tone:#A855F7; } .atelier-box--gold { --tone:#FFD700; } .atelier-box--emerald { --tone:#39FF14; } .atelier-box--cyan { --tone:#00F0FF; }
+.atelier-tabs [aria-selected="true"] { border-color:#FFD700 !important; color:#FFD700 !important; box-shadow:0 0 14px color-mix(in oklab,#FFD700 35%,transparent); }
