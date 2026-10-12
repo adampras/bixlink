@@ -15,7 +15,7 @@ import { resolvePresentationTheme } from '@/lib/presentation-theme';
 import { isBlockedByMaintenance } from '@/lib/site-control';
 import { TxFeedbackHost } from '@/components/TxFeedback';
 import { MarketTicker } from '@/components/TradingFlair';
-import { PresaleWelcome } from '@/components/PresaleWelcome';
+import { createPortal } from 'react-dom';
 import { Sun, Moon } from 'lucide-react';
 import { SiteSearch } from '@/components/SiteSearch';
 import { SitePopup } from '@/components/SitePopup';
@@ -58,6 +58,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const notificationRef = useRef<HTMLDivElement>(null);
   const languageRef = useRef<HTMLDivElement>(null);
+  const languageMenuRef = useRef<HTMLDivElement>(null);
   const [languagesOpen, setLanguagesOpen] = useState(false);
   const [colorMode, setColorMode] = useState<'dark' | 'light'>('dark');
   useEffect(() => { setColorMode(localStorage.getItem('bixlink-color-mode') === 'light' ? 'light' : 'dark'); }, []);
@@ -77,7 +78,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const close = (event: PointerEvent) => {
       if (!notificationRef.current?.contains(event.target as Node)) setNotificationsOpen(false);
-      if (!languageRef.current?.contains(event.target as Node)) setLanguagesOpen(false);
+      if (!languageRef.current?.contains(event.target as Node) && !languageMenuRef.current?.contains(event.target as Node)) setLanguagesOpen(false);
     };
     document.addEventListener('pointerdown', close);
     return () => document.removeEventListener('pointerdown', close);
@@ -102,14 +103,14 @@ export function BixShell({ children }: { children: React.ReactNode }) {
         {user && marketEnabled && <Button asChild title="Market & Updates" variant="ghost" size="icon" className="header-icon"><Link to="/market" aria-label="Market & Updates"><TrendingUp/></Link></Button>}
         <SiteSearch member={Boolean(user)}/>
         {user && <ViewSwitch/>}
-        <div className="header-island"><Button type="button" variant="ghost" size="icon" className="mode-toggle" aria-label={colorMode === 'dark' ? 'Switch to day mode' : 'Switch to night mode'} onClick={toggleMode}>{colorMode === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</Button><div className="language-control" ref={languageRef}><Button type="button" variant="ghost" className="language-trigger" aria-label={t('language')} aria-haspopup="menu" aria-expanded={languagesOpen} onClick={() => setLanguagesOpen(value => !value)}><span className={`flag-symbol flag-${selectedLanguage.flag}`} aria-hidden/><ChevronDown/></Button>{languagesOpen && <div className="language-menu" role="menu" aria-label={t('language')}>{LANGUAGES.map(item => <Button key={item.code} type="button" variant="ghost" role="menuitemradio" aria-checked={language === item.code} title={item.label} className={language === item.code ? 'is-active' : ''} onClick={() => { setLanguage(item.code as Language); setLanguagesOpen(false); }}><span className={`flag-symbol flag-${item.flag}`} aria-hidden/><span className="sr-only">{item.label}</span></Button>)}</div>}</div></div>
+        <div className="header-island"><Button type="button" variant="ghost" size="icon" className="mode-toggle" aria-label={colorMode === 'dark' ? 'Switch to day mode' : 'Switch to night mode'} onClick={toggleMode}>{colorMode === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</Button><div className="language-control" ref={languageRef}><Button type="button" variant="ghost" className="language-trigger" aria-label={t('language')} aria-haspopup="menu" aria-expanded={languagesOpen} onClick={() => setLanguagesOpen(value => !value)}><span className={`flag-symbol flag-${selectedLanguage.flag}`} aria-hidden/><ChevronDown/></Button>{languagesOpen && typeof document !== 'undefined' && createPortal(<div ref={languageMenuRef} data-no-translate className="language-menu language-menu--portal" role="menu" aria-label={t('language')}>{LANGUAGES.map(item => <Button key={item.code} type="button" variant="ghost" role="menuitemradio" aria-checked={language === item.code} title={item.label} className={language === item.code ? 'is-active' : ''} onClick={() => { setLanguage(item.code as Language); setLanguagesOpen(false); }}><span className={`flag-symbol flag-${item.flag}`} aria-hidden/><span className="sr-only">{item.label}</span></Button>)}</div>, document.body)}</div></div>
         {user ? <><div className="notification-control" ref={notificationRef}><Button title={t('notifications')} variant="ghost" size="icon" className="header-icon" aria-label={t('notifications')} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen(value => !value)}><Bell/>{unread > 0 && <span className="notification-count">{unread}</span>}</Button>{notificationsOpen && <div className="notification-menu"><div className="notification-menu-head"><div><span>{t('latestUpdates')}</span><b>{t('notifications')}</b></div>{unread > 0 && <Button size="icon" variant="ghost" title={t('markRead')} onClick={markAllRead}><CheckCheck/></Button>}</div>{notificationsEnabled ? <div className="notification-list">{visibleUpdates.map(item => <article key={item.id} className={readIds.includes(item.id) ? 'is-read' : ''}><i/><div><b>{item.title}</b><p>{item.body}</p></div></article>)}{marketEnabled && <Link to="/market" className="block px-4 py-3 text-xs font-bold text-chart-3" onClick={() => setNotificationsOpen(false)}>Market &amp; Updates →</Link>}</div> : <p className="notification-empty">{t('noUpdates')}</p>}</div>}</div><Button asChild title={t('profile')} variant={path === '/profile' || path === '/settings' ? 'default' : 'ghost'} size="icon" className="header-icon"><Link to="/profile" aria-label={t('profile')}><User/></Link></Button></> : <Button asChild size="sm" className="header-signin max-[480px]:w-auto! max-[480px]:px-3!"><Link to="/auth" aria-label="LAUNCH APP"><LogIn/> <span className="max-[480px]:inline!">LAUNCH APP</span></Link></Button>}
       </div>
     </div></header>
     <MarketTicker/>
     {publicConfig?.isAdmin && (publicConfig.siteControl.maintenance || publicConfig.siteControl.staging) && <div role="status" className="border-b border-chart-3 bg-card px-5 py-2 text-center text-[11px] font-bold text-chart-3">{publicConfig.siteControl.maintenance ? 'MAINTENANCE ON · ' : ''}{publicConfig.siteControl.staging ? 'PRATINJAU ADMIN ON — perubahan hanya terlihat oleh admin' : 'Hanya admin yang dapat membuka aplikasi'}</div>}
     {publicConfig && isBlockedByMaintenance(publicConfig.siteControl, publicConfig.isAdmin, path) ? <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-5 py-16 text-center"><img src={headerMark.url} width={72} height={72} alt="" className="rounded-full"/><div className="eyebrow mt-6">SYSTEM MAINTENANCE</div><h1 className="section-title mt-3">BIXLINK <span>MAINTENANCE</span></h1><p className="mt-4 text-sm leading-6 text-muted-foreground">{publicConfig.siteControl.message || 'Sistem BIXLINK sedang dalam pemeliharaan. Silakan kembali beberapa saat lagi.'}</p></main> : children}
-    <TxFeedbackHost/>{user && <PresaleWelcome userId={user.id}/>}
+    <TxFeedbackHost/>
     <SitePopup path={path} popups={publicConfig?.landingContent.popups} signedIn={!!user}/>
     <footer className="border-t border-border py-4"><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
     {user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden`}>
