@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { X, Search, ArrowUpRight, Layers, ShoppingBag, SlidersHorizontal, Boxes, Store, Lock, Shield, Gem } from 'lucide-react';
+import { X, Search, ArrowUpRight, Layers, ShoppingBag, SlidersHorizontal, Store, Lock, Shield, Gem } from 'lucide-react';
 import foxEmblem from '@/assets/marketplace-fox-emblem.jpg.asset.json';
 import vaultHero from '@/assets/marketplace-vault-hero.jpg.asset.json';
 import { BixShell } from '@/components/BixShell';
