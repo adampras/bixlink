@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { X, Search, ArrowUpRight, Layers, ShoppingBag, SlidersHorizontal, Store, Lock, Shield, Gem } from 'lucide-react';
 import foxEmblem from '@/assets/marketplace-fox-emblem.jpg.asset.json';
 import vaultHero from '@/assets/marketplace-vault-hero.jpg.asset.json';
+import heroReal from '@/assets/marketplace-vault-hero-real.png.asset.json';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { ContentImage } from '@/components/ContentImage';
@@ -26,11 +27,13 @@ function Marketplace(){
  const artworks=visibleCatalog(q.data??[]),products=publishedProducts(shop.data??[]);
   const matching=(s:string)=>s.toLowerCase().includes(search.toLowerCase());
   const explore=()=>{setView('ALL');requestAnimationFrame(()=>document.getElementById('market-grid')?.scrollIntoView({behavior:'smooth'}));};
+  const hotCls='absolute cursor-pointer rounded-2xl border border-transparent transition duration-200 hover:border-[#39FF14]/70 hover:shadow-[0_0_26px_rgba(57,255,20,0.45)]';
  const nfts=artworks.filter(i=>matching(i.name)&&(tier==='ALL'||i.tier===tier));
  const merch=products.filter(i=>matching(i.name)&&(category==='ALL'||i.category===category)).sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='price'?(a.priceUsd??Infinity)-(b.priceUsd??Infinity):0);
  const nftShown=view==='ALL'||view==='REACTOR',merchShown=view==='ALL'||view==='MERCHANDISE';
  return <BixShell><main className="lux-shop mx-auto max-w-7xl px-5 py-8 md:px-8 md:py-12">
 <section aria-label="BIXLINK Marketplace vault" className="market-hero relative mb-8 overflow-hidden rounded-3xl border border-[#39FF14]/20 shadow-[0_30px_90px_-40px_rgba(57,255,20,0.45)] md:mb-12">
+  <div className="relative md:hidden">
   <div aria-hidden className="absolute inset-0" style={{ backgroundImage: `linear-gradient(100deg, rgba(2,12,7,0.94) 0%, rgba(2,12,7,0.8) 45%, rgba(3,24,14,0.45) 100%), url(${vaultHero.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
   <div aria-hidden className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#040b07] to-transparent" />
   <div className="relative z-10 flex flex-col gap-8 px-5 py-8 md:px-10 md:py-12">
@@ -66,6 +69,17 @@ function Marketplace(){
         <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.07] p-4 backdrop-blur-md transition hover:border-[#39FF14]/40 hover:bg-white/[0.1]"><span className="rounded-xl border border-amber-300/40 bg-amber-400/10 p-3 text-amber-300"><Layers size={26} strokeWidth={1.6}/></span><div><b className="text-sm text-emerald-50">Rare Collections</b><p className="text-xs text-emerald-100/60">Curated by experts · Limited editions</p></div></div>
       </div>
     </div>
+  </div>
+  </div>
+  <div className="relative hidden md:block">
+    <img src={heroReal.url} alt="BIXLINK Marketplace — The Atelier & Vault" width={1376} height={768} className="block h-auto w-full" />
+    <button type="button" aria-label="Marketplace collection" onClick={explore} className={hotCls} style={{ left: '46%', width: '9.6%', top: '7%', height: '7.6%' }} />
+    <button type="button" aria-label="My vault" onClick={()=>setView('OWNED')} className={hotCls} style={{ left: '57.6%', width: '5.2%', top: '7%', height: '7.6%' }} />
+    <button type="button" aria-label="Reactor NFTs" onClick={()=>setView('REACTOR')} className={hotCls} style={{ left: '64.9%', width: '5%', top: '7%', height: '7.6%' }} />
+    <Link to="/about" aria-label="About BIXLINK" className={hotCls} style={{ left: '71.6%', width: '5.4%', top: '7%', height: '7.6%' }} />
+    <button type="button" aria-label="My certificates" onClick={()=>setView('OWNED')} className={hotCls} style={{ left: '7.1%', width: '22.2%', top: '71.6%', height: '11.4%' }} />
+    <button type="button" aria-label="Explore Collection" onClick={explore} className={hotCls} style={{ left: '31.6%', width: '23.3%', top: '71.6%', height: '11.4%' }} />
+    <button type="button" aria-label="Sell product" onClick={()=>document.getElementById('sell-product')?.scrollIntoView({behavior:'smooth'})} className="absolute right-4 bottom-4 cursor-pointer rounded-full border border-[#39FF14]/40 bg-black/50 px-3 py-1.5 text-[10px] font-bold tracking-[0.2em] text-emerald-200/80 backdrop-blur-md transition hover:border-[#39FF14] hover:text-[#39FF14]">SELL PRODUCT</button>
   </div>
 </section>
    <div className="shop-tabs atelier-tabs" id="market-grid" role="tablist" aria-label="Marketplace categories">{[['ALL','All collections'],['REACTOR','Reactor NFTs'],['MERCHANDISE','Merchandise'],['OWNED','My certificates']].map(([id,label])=><Button key={id} role="tab" aria-selected={view===id} variant="ghost" onClick={()=>setView(id??'ALL')}>{label}</Button>)}</div>
