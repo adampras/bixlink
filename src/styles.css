@@ -1806,3 +1806,55 @@ html[data-color-mode="light"] .site-shell .wallet-summary { border-color: color-
 .allocation-progress::-webkit-progress-value { background:var(--chart-3); }
 .allocation-progress::-moz-progress-bar { background:var(--chart-3); }
 @media(min-width:768px) { .wallet-quick-actions { bottom:20px; } }
+
+/* Shared phone polish: measured spacing, stable controls and contained dialogs. */
+.site-shell main { min-width:0; }
+.site-shell main :is(h1,h2,h3,p,dd) { overflow-wrap:anywhere; }
+.section-title { letter-spacing:0; }
+.wallet-tile-sub { display:block; min-height:32px; }
+.modal-panel { max-height:calc(100dvh - 32px); overflow-y:auto; overscroll-behavior:contain; }
+.glass-dock { bottom:calc(12px + env(safe-area-inset-bottom)); padding-bottom:0; }
+.glass-dock .mobile-nav-on { color:var(--chart-3) !important; text-shadow:none; }
+.wallet-quick-actions { max-width:calc(100% - 32px); }
+@media (min-width:768px) and (max-width:1279px) { .wallet-quick-actions { bottom:calc(84px + env(safe-area-inset-bottom)); } }
+@media (max-width:767px) {
+  .site-shell main { padding-left:16px; padding-right:16px; padding-top:24px; padding-bottom:120px; }
+  .site-shell .section-title { font-size:28px; line-height:1.2; }
+  .site-shell main .form-input, .register-numbered-input { min-width:0; font-size:16px; }
+  .site-header > div { padding:10px 12px; }
+  .site-header .header-tools { gap:2px !important; flex-shrink:0; }
+  .site-header .header-brand { min-width:0; gap:6px; }
+  .site-header .header-brand img { width:34px; height:34px; flex-shrink:0; box-shadow:none !important; }
+  .site-header .brand-mark { font-size:14px; letter-spacing:0; }
+  .site-header .header-icon { width:28px; height:32px; }
+  .site-header .header-island { padding:1px; box-shadow:none; }
+  .site-header .header-island .mode-toggle { width:28px; }
+  .site-header .header-island .language-trigger { width:30px; }
+  .site-header .header-reviewer { width:28px; padding:0; }
+  .site-header .header-reviewer span { display:none; }
+  .site-header .header-signin { font-size:10px; }
+  .notification-menu { max-width:calc(100vw - 24px); }
+  .site-shell .wallet-summary, .site-shell .vault-swap { padding:18px; border-radius:8px; }
+  .wallet-summary .vault-pill { font-size:8px; padding:4px 7px; }
+  .vault-swap > div:first-child { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; }
+  .vault-swap > div:first-child .vault-pill { font-size:10px; }
+  .wallet-tile { border-radius:8px; gap:10px; padding:12px; }
+  .wallet-tile-title { font-size:14px; letter-spacing:0; }
+  .nx-levels { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+  .nx-level { padding:20px 8px 12px; }
+  .register-numbered-brand { margin-bottom:24px; }
+  .register-numbered-brand h1 { font-size:28px; }
+  .register-numbered { padding:28px 16px; }
+  .settings-console a { overflow-wrap:anywhere; }
+  .settings-console .settings-row { min-width:0; }
+  .admin-navigation + [role="status"] { overflow-wrap:anywhere; }
+  .presale-purchase-dialog { width:calc(100% - 32px) !important; max-height:calc(100dvh - 32px); overflow-y:auto; }
+}
+@media (max-width:359px) {
+  .site-header .header-tools { gap:0 !important; }
+  .site-header .header-brand img { width:28px; height:28px; }
+  .site-header .brand-mark { font-size:12px; }
+  .site-header > div { padding-inline:8px; gap:4px; }
+  .site-header .header-icon { width:25px; }
+  .glass-dock a { font-size:9px; }
+}

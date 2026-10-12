@@ -41,3 +41,5 @@
 - All presale entry points use one accessible confirmation before the authenticated purchase; strategies snapshot rates and whole-day dividends settle via bix_wallet_balance — one server source.
 
 - Owner-only marketing settings feed browser PDF exports; dated CDN video stays separate to avoid implying re-rendering.
+- Owner navigation uses one searchable category selector; shared staking controls separate daily presets from individual edits to avoid duplicate forms across consoles.
+- Shared shell and dialogs own phone spacing, safe-area navigation and scroll bounds so every page remains usable without changing transaction logic.

@@ -89,10 +89,10 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   };
   const selectedLanguage = LANGUAGES.find(item => item.code === language) ?? LANGUAGES[0];
 
-  return <div data-presentation-theme={presentationTheme} style={{ ["--brand-watermark" as string]: `url(${headerMark.url})` }} className="site-shell min-h-screen bg-background pb-24 text-foreground md:pb-0">
-    <header className="site-header" data-no-translate><div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-3 md:px-8">
+  return <div data-presentation-theme={presentationTheme} style={{ ["--brand-watermark" as string]: `url(${headerMark.url})` }} className="site-shell min-h-screen bg-background pb-24 text-foreground xl:pb-0">
+    <header className="site-header" data-no-translate><div className="mx-auto grid grid-cols-[minmax(0,1fr)_auto] max-w-7xl items-center gap-2 px-5 py-3 xl:flex xl:justify-between md:px-8">
       <Link to={"/"} className="header-brand"><img src={headerMark.url} width={42} height={42} alt="BIXLINK fox emblem" className="rounded-full object-cover"/><span className="brand-mark" aria-label="BIXLINK"><i>BIX</i><i>LI</i><i>NK</i></span></Link>
-      {user && <nav className="hidden items-center gap-3 md:flex">
+      {user && <nav className="hidden items-center gap-2 xl:flex">
         {NAV.map(n => <Link key={n.to} to={n.to} className={`nav-link ${path === n.to ? 'active' : ''}`}><n.icon size={15}/>{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>)}
         {presaleOn && <Link to="/presale" className={`nav-link ${path === '/presale' ? 'active' : ''}`}><Crown size={15}/>PRESALE</Link>}
       </nav>}
@@ -109,8 +109,8 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     {publicConfig && isBlockedByMaintenance(publicConfig.siteControl, publicConfig.isAdmin, path) ? <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-5 py-16 text-center"><img src={headerMark.url} width={72} height={72} alt="" className="rounded-full"/><div className="eyebrow mt-6">SYSTEM MAINTENANCE</div><h1 className="section-title mt-3">BIXLINK <span>MAINTENANCE</span></h1><p className="mt-4 text-sm leading-6 text-muted-foreground">{publicConfig.siteControl.message || 'Sistem BIXLINK sedang dalam pemeliharaan. Silakan kembali beberapa saat lagi.'}</p></main> : children}
     <TxFeedbackHost/>{user && <PresaleWelcome userId={user.id}/>}
     <footer className="border-t border-border py-4"><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
-    {user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl md:hidden`}>
-      {NAV.filter(n => n.to !== '/profit').map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19}/>{t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>; })}
+    {user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden`}>
+      {NAV.filter(n => n.to !== '/profit').map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} title={t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19} className="shrink-0"/><span className="max-w-full truncate">{t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</span></Link>; })}
     </nav>}
   </div>;
 }

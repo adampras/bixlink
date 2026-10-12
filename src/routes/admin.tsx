@@ -8,7 +8,7 @@ import { money } from '@/lib/bixlink';
 import { BixShell } from '@/components/BixShell';
 import { useMember, useReviewerAccess } from '@/lib/useMember';
 import { Button } from '@/components/ui/button';
-import { Check, X, Search, Palette, TrendingUp, Play } from 'lucide-react';
+import { Check, X, Search } from 'lucide-react';
 import { AdminWallet } from '@/components/AdminWallet';
 import { AdminBixPay } from '@/components/AdminBixPay';
 import { AdminClones } from '@/components/AdminClones';
@@ -24,8 +24,8 @@ import { AdminReviewers } from '@/components/AdminReviewers';
 import { AdminAppearance } from '@/components/AdminAppearance';
 import { AdminSplash } from '@/components/AdminSplash';
 import { AdminReferrals } from '@/components/AdminReferrals';
-import { YieldControlPanel } from '@/components/YieldControlPanel';
-import { AdminDurationPackages } from '@/components/AdminDurationPackages';
+import { AdminStakingControls } from '@/components/AdminStakingControls';
+import { AdminNavigation } from '@/components/AdminNavigation';
 import { AdminTeams } from '@/components/AdminTeams';
 import { AdminReports } from '@/components/AdminReports';
 import { AdminPresale } from '@/components/AdminPresale';
@@ -45,28 +45,22 @@ import type { MarketingPlan } from '@/lib/marketing';
 export const Route = createFileRoute('/admin')({ head: () => ({ meta: [{ title: 'Owner Panel — BIXLINK' }, { name: 'description', content: 'Private BIXLINK owner operations.' }, { property: 'og:title', content: 'Owner Panel — BIXLINK' }, { property: 'og:description', content: 'BIXLINK owner operations.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }), component: Admin });
 type AdminData = Awaited<ReturnType<typeof getAdminData>>;
 const ADMIN_GROUPS: { title: string; tabs: [string, string][] }[] = [
-  { title: 'Keuangan & Staking', tabs: [['Overview','ringkasan vault brankas maintenance'],['Wallet','dompet deposit bix pay transfer swap'],['Stakes','staking unstake approve'],['Reports','laporan transfer']] },
-  { title: 'Pasar & Presale', tabs: [['Presale','sovereign genesis 100000 strategi'],['Marketing','pdf video bahasa materi'],['Market','harga pasar bix'],['APY','profit yield'],['Packages','paket durasi'],['Token','bep20 kontrak smart contract']] },
+  { title: 'Keuangan & Staking', tabs: [['Overview','ringkasan vault brankas maintenance'],['Wallet','dompet deposit bix pay transfer swap'],['Staking','apy profit yield packages paket durasi'],['Stakes','staking unstake approve permintaan'],['Reports','laporan transfer']] },
+  { title: 'Pasar & Presale', tabs: [['Presale','sovereign genesis 100000 strategi'],['Marketing','pdf video bahasa materi'],['Market','harga pasar bix'],['Token','bep20 kontrak smart contract']] },
   { title: 'Pengguna & Jaringan', tabs: [['Users','member ban reviewer owner 2'],['Referrals','bonus komisi sponsor'],['Teams','tim leader vip'],['Clones','kloning'],['Leaders','akun leader gratis sponsor ambassador syarat']] },
   { title: 'Tampilan & Ekosistem', tabs: [['Appearance','warna wallet animasi tema'],['Splash','splash screen video'],['Landing','konten banner sponsor partner'],['Updates','readiness pengumuman'],['Booster','visual boost'],['Arena','fox game quest'],['NFT','sertifikat kartu'],['Mining','vbix'],['RWA','income source sumber'],['Shop','marketplace produk merchandise toko'],['Member Shop','slot jualan member produk review']] },
 ];
 function Admin() {
   const { user } = useMember();
   const reviewer = useReviewerAccess(user?.id);
-  const [state,setState] = useState<'loading'|'signin'|'denied'|'ready'>('loading'); const [data,setData] = useState<AdminData | null>(null); const [message,setMessage] = useState(''); const [search,setSearch] = useState(''); const [menuQuery,setMenuQuery] = useState(''); const [tab,setTab] = useState('Overview');
+  const [state,setState] = useState<'loading'|'signin'|'denied'|'ready'>('loading'); const [data,setData] = useState<AdminData | null>(null); const [message,setMessage] = useState(''); const [search,setSearch] = useState(''); const [tab,setTab] = useState('Overview');
    const boot = useServerFn(bootstrapOwner); const fetchData = useServerFn(getAdminData); const changeStake = useServerFn(updateStake); const saveSetting = useServerFn(updateSetting); const createSource = useServerFn(addIncomeSource); const changeMember = useServerFn(manageMember);
   async function refresh() { const result = await fetchData(); setData(result); }
   useEffect(() => { supabase.auth.getUser().then(async ({data:auth}) => { if (!auth.user) {setState('signin');return;} try { const result = await boot(); if (!result.owner) {setState('denied');return;} await refresh();setState('ready'); } catch {setState('denied');} }); }, []);
    const stakes = data?.stakes ?? []; const active = stakes.filter(s => s.status === 'active'); const total = active.reduce((n,s) => n + Number(s.amount_usd),0);
   if (reviewer.data) return <BixShell><main className="mx-auto min-h-[75vh] max-w-4xl px-5 py-12"><div className="eyebrow">ADMIN PANEL BIX</div><h1 className="section-title">REVIEW <span>CONSOLE</span></h1><Button asChild className="mt-8"><Link to="/review">Open Owner 2 panel</Link></Button></main></BixShell>;
   return <BixShell><main className="mx-auto min-h-[75vh] max-w-7xl px-5 py-12 md:px-8"><div className="eyebrow">PRIVATE ACCESS</div><h1 className="section-title">OWNER <span>CONSOLE</span></h1>{state === 'loading' ? <p className="mt-10 text-muted-foreground">Checking access…</p> : state === 'signin' ? <div className="mt-10"><p className="text-muted-foreground">Sign in with the verified owner account to continue.</p><Button asChild className="mt-5 rounded-full"><Link to="/auth">Sign in</Link></Button></div> : state === 'denied' ? <div className="mt-10">{reviewer.data ? <Button asChild><Link to="/review">Open Owner 2 panel</Link></Button> : <p className="text-destructive">Owner access is unavailable for this account. Sign in with the verified owner email.</p>}</div> : <>
-    <div className="mt-6 grid gap-2 sm:grid-cols-3" aria-label="Pengaturan cepat">
-      <Button variant={tab === 'Appearance' ? 'default' : 'outline'} onClick={() => setTab('Appearance')}><Palette size={16}/>5 warna Wallet &amp; animasi</Button>
-      <Button variant="outline" asChild><Link to="/yield-control"><TrendingUp size={16}/>Profit staking &amp; harga BIX</Link></Button>
-      <Button variant={tab === 'Splash' ? 'default' : 'outline'} onClick={() => setTab('Splash')}><Play size={16}/>Splash screen</Button>
-    </div>
-    <div className="mt-5 flex max-w-md items-center gap-2 rounded-full border border-border bg-card px-4"><Search size={16} className="text-primary"/><input className="w-full bg-transparent py-2.5 text-sm outline-none" placeholder="Cari menu admin (mis. warna, presale, bonus)…" value={menuQuery} onChange={e => setMenuQuery(e.target.value)}/></div>
-    <nav className="mt-4 grid gap-3 border-b border-border pb-4 sm:grid-cols-2">{ADMIN_GROUPS.map(g => { const tabs = g.tabs.filter(([x, k]) => `${x} ${k}`.toLowerCase().includes(menuQuery.toLowerCase().trim())); if (!tabs.length) return null; return <div key={g.title} className="rounded-2xl border border-border bg-card/60 p-3"><div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-primary">{g.title}</div><div className="flex flex-wrap gap-1.5">{tabs.map(([x]) => <Button key={x} size="sm" variant={tab === x ? 'default' : 'ghost'} className="rounded-full" onClick={() => setTab(x)}>{x}</Button>)}</div></div>; })}</nav>
+    <AdminNavigation groups={ADMIN_GROUPS} tab={tab} onSelect={next => { setTab(next); setMessage(''); }}/>
     {message && <p role="status" className="mt-5 text-sm text-chart-2">{message}</p>}
     {tab === 'Overview' && <><AdminSiteControl initial={data?.settings.find(s => s.key === 'site_control')?.value as SiteControl | undefined} onMessage={setMessage} onSaved={refresh}/><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[['Total Users',String(data?.members.length ?? 0)],['Active staking value',money(total)],['Active positions',String(active.length)],['USDT max / month','30%']].map(([label,value],i) => <div className={`stat-card accent-${i%3}`} key={label}><span className="text-xs text-muted-foreground">{label}</span><strong className="mt-4 block text-2xl">{value}</strong></div>)}</div><AdminBixVault onMessage={setMessage}/></>}
      {tab === 'Users' && <div className="mt-8">
@@ -98,8 +92,7 @@ function Admin() {
      {tab === 'Appearance' && <AdminAppearance initialReadiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/>}
     {tab === 'Splash' && <AdminSplash onMessage={setMessage}/>}
     {tab === 'Market' && <AdminBixMarket initialMovement={(data?.settings.find(s=>s.key==='bix_market')?.value as { movement?: unknown } | undefined)?.movement} initialPrice={Number((data?.settings.find(s=>s.key==='bix_market')?.value as {priceUsd?: number} | undefined)?.priceUsd ?? 0.84291)} onMessage={setMessage} onSaved={refresh}/>} 
-    {tab === 'Packages' && <AdminDurationPackages onMessage={setMessage}/>}
-    {tab === 'APY' && <YieldControlPanel market={false}/>} 
+    {tab === 'Staking' && <AdminStakingControls onMessage={setMessage}/>}
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
      {tab === 'Reports' && <AdminReports onMessage={setMessage}/>}
      {tab === 'Marketing' && <AdminMarketing initial={data?.settings.find(s=>s.key==='marketing_plan')?.value as unknown as MarketingPlan | undefined} onMessage={setMessage}/>}
