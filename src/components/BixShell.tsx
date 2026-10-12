@@ -75,12 +75,12 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const close = (event: MouseEvent) => {
+    const close = (event: PointerEvent) => {
       if (!notificationRef.current?.contains(event.target as Node)) setNotificationsOpen(false);
       if (!languageRef.current?.contains(event.target as Node)) setLanguagesOpen(false);
     };
-    document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
   }, []);
   const unread = useMemo(() => notificationsEnabled ? visibleUpdates.filter(item => !readIds.includes(item.id)).length : 0, [notificationsEnabled, readIds, visibleUpdates]);
   const markAllRead = () => {

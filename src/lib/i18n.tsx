@@ -10,6 +10,9 @@ export const LANGUAGES = [
   { code: 'zh', flag: 'cn', label: '中文' },
   { code: 'ja', flag: 'jp', label: '日本語' },
   { code: 'ko', flag: 'kr', label: '한국어' },
+  { code: 'hi', flag: 'in', label: 'हिन्दी' },
+  { code: 'es', flag: 'es', label: 'Español' },
+  { code: 'pt', flag: 'br', label: 'Português (BR)' },
 ] as const;
 
 export type Language = (typeof LANGUAGES)[number]['code'];
@@ -23,6 +26,9 @@ const ui = {
   zh: { home: '首页', wallet: '钱包', stake: '质押', boost: '收益加速', network: '网络', profile: '个人资料', settings: '设置', notifications: '通知', markRead: '全部标为已读', noUpdates: '暂无新动态', signIn: '登录', language: '语言', updatePrefs: '更新通知', updatePrefsHelp: '在顶部显示产品和服务公告。', enabled: '已开启', disabled: '已关闭', preferences: '偏好设置', accountSettings: '账户设置', savedHere: '偏好设置保存在此设备上。', latestUpdates: '最新动态' },
   ja: { home: 'ホーム', wallet: 'ウォレット', stake: 'ステーク', boost: 'APYブースト', network: 'ネットワーク', profile: 'プロフィール', settings: '設定', notifications: '通知', markRead: 'すべて既読にする', noUpdates: '新しい更新はありません', signIn: 'ログイン', language: '言語', updatePrefs: '更新通知', updatePrefsHelp: '製品とサービスのお知らせを上部に表示します。', enabled: 'オン', disabled: 'オフ', preferences: '環境設定', accountSettings: 'アカウント設定', savedHere: '設定はこの端末に保存されます。', latestUpdates: '最新情報' },
   ko: { home: '홈', wallet: '지갑', stake: '스테이킹', boost: 'APY 부스트', network: '네트워크', profile: '프로필', settings: '설정', notifications: '알림', markRead: '모두 읽음', noUpdates: '새 업데이트 없음', signIn: '로그인', language: '언어', updatePrefs: '업데이트 알림', updatePrefsHelp: '제품 및 서비스 공지를 상단에 표시합니다.', enabled: '켜짐', disabled: '꺼짐', preferences: '환경설정', accountSettings: '계정 설정', savedHere: '설정은 이 기기에 저장됩니다.', latestUpdates: '최신 업데이트' },
+  hi: { home: 'होम', wallet: 'वॉलेट', stake: 'स्टेक', boost: 'APY बूस्ट', network: 'नेटवर्क', profile: 'प्रोफ़ाइल', settings: 'सेटिंग्स', notifications: 'सूचनाएँ', markRead: 'सभी पढ़े गए', noUpdates: 'कोई नया अपडेट नहीं', signIn: 'साइन इन', language: 'भाषा', updatePrefs: 'अपडेट सूचनाएँ', updatePrefsHelp: 'ऊपर उत्पाद और सेवा घोषणाएँ दिखाएँ।', enabled: 'चालू', disabled: 'बंद', preferences: 'प्राथमिकताएँ', accountSettings: 'खाता सेटिंग्स', savedHere: 'प्राथमिकताएँ इस डिवाइस पर सहेजी गई हैं।', latestUpdates: 'नवीनतम अपडेट' },
+  es: { home: 'INICIO', wallet: 'BILLETERA', stake: 'STAKING', boost: 'BOOST APY', network: 'RED', profile: 'Perfil', settings: 'Ajustes', notifications: 'Notificaciones', markRead: 'Marcar todo como leído', noUpdates: 'Sin novedades', signIn: 'Iniciar sesión', language: 'Idioma', updatePrefs: 'Avisos de novedades', updatePrefsHelp: 'Mostrar anuncios de productos y servicios arriba.', enabled: 'Activado', disabled: 'Desactivado', preferences: 'PREFERENCIAS', accountSettings: 'AJUSTES DE CUENTA', savedHere: 'Las preferencias se guardan en este dispositivo.', latestUpdates: 'ÚLTIMAS NOVEDADES' },
+  pt: { home: 'INÍCIO', wallet: 'CARTEIRA', stake: 'STAKING', boost: 'BOOST APY', network: 'REDE', profile: 'Perfil', settings: 'Configurações', notifications: 'Notificações', markRead: 'Marcar tudo como lido', noUpdates: 'Sem novidades', signIn: 'Entrar', language: 'Idioma', updatePrefs: 'Avisos de novidades', updatePrefsHelp: 'Mostrar anúncios de produtos e serviços no topo.', enabled: 'Ativado', disabled: 'Desativado', preferences: 'PREFERÊNCIAS', accountSettings: 'CONFIGURAÇÕES DA CONTA', savedHere: 'As preferências ficam salvas neste dispositivo.', latestUpdates: 'ÚLTIMAS NOVIDADES' },
 } as const;
 
 type UiKey = keyof typeof ui.en;
@@ -68,6 +74,21 @@ const updates = {
     { id: 'transfer', title: '가상 USDT 송금', body: '테스트 사용은 소유자가 관리합니다.' },
     { id: 'stake-confirm', title: '명확한 스테이킹 확인', body: '모든 요청에 동의 및 확인 단계가 포함됩니다.' },
   ],
+  hi: [
+    { id: 'languages', title: 'अब 11 भाषाएँ उपलब्ध', body: 'झंडे के प्रतीक से अपनी भाषा चुनें।' },
+    { id: 'transfer', title: 'वर्चुअल USDT ट्रांसफ़र', body: 'परीक्षण पहुँच मालिक द्वारा नियंत्रित है।' },
+    { id: 'stake-confirm', title: 'स्पष्ट स्टेकिंग पुष्टि', body: 'हर अनुरोध में सहमति और पुष्टि शामिल है।' },
+  ],
+  es: [
+    { id: 'languages', title: 'Ya hay 11 idiomas', body: 'Elige tu idioma con el símbolo de la bandera.' },
+    { id: 'transfer', title: 'Transferencia USDT virtual', body: 'El acceso de prueba lo controla el propietario.' },
+    { id: 'stake-confirm', title: 'Confirmación de staking más clara', body: 'Cada solicitud incluye aceptación y confirmación.' },
+  ],
+  pt: [
+    { id: 'languages', title: 'Agora com 11 idiomas', body: 'Escolha seu idioma pelo símbolo da bandeira.' },
+    { id: 'transfer', title: 'Transferência USDT virtual', body: 'O acesso de teste é controlado pelo proprietário.' },
+    { id: 'stake-confirm', title: 'Confirmação de staking mais clara', body: 'Cada pedido inclui aceite e confirmação.' },
+  ],
 } as const;
 
 const manualPhrases: Record<Exclude<Language, 'en'>, Record<string, string>> = {
@@ -92,13 +113,22 @@ const manualPhrases: Record<Exclude<Language, 'en'>, Record<string, string>> = {
   ko: {
     'Recorded staking value':'기록된 스테이킹 가치','Active stakes':'활성 스테이킹','Network members':'네트워크 회원','Average APY':'평균 APY','Deposit':'입금','Withdraw':'출금','Swap':'스왑','Available balance':'사용 가능 잔액','Transaction history':'거래 내역','Swap history':'스왑 내역','Coming soon':'출시 예정','Done':'완료','CHOOSE PACKAGE':'패키지 선택','Annual yield':'연간 수익률','Lock period':'잠금 기간','Stake Now':'지금 스테이킹','My requests':'내 요청','No stake requests yet':'스테이킹 요청이 없습니다','Disagree':'동의 안 함','Agree & stake':'동의하고 스테이킹','MY NETWORK':'내 네트워크','Direct referrals':'직접 추천','Total network':'전체 네트워크','Deepest generation':'최대 세대','Network tree':'네트워크 트리','Unlimited depth':'무제한 깊이','Your network starts here':'여기서 네트워크가 시작됩니다','Plan benefits':'플랜 혜택','Referral code':'추천 코드','Personal link':'개인 링크','Copy link':'링크 복사','View my network':'내 네트워크 보기','Change password':'비밀번호 변경','Sign out':'로그아웃','MEMBER ACCESS':'회원 접속','WELCOME BACK':'다시 오신 것을 환영합니다','RESET PASSWORD':'비밀번호 재설정','Create an account':'계정 만들기','Forgot password?':'비밀번호를 잊으셨나요?','CREATE YOUR ACCOUNT':'계정 만들기','FULL NAME':'이름','USERNAME':'사용자 이름','PASSWORD':'비밀번호','REFERRAL CODE':'추천 코드','Create account':'계정 만들기','Already a member? Sign in':'이미 회원인가요? 로그인','BIX balance':'BIX 잔액','Pay':'결제','Receive':'받기','Scan QR code':'QR 코드 스캔','Review payment':'결제 검토','Confirm payment':'결제 확인','Cancel':'취소','Pay now':'지금 결제','History':'내역','Send transfer':'송금','No transfers yet.':'송금 내역이 없습니다.','Virtual USDT balance':'가상 USDT 잔액','RECIPIENT CODE':'수신자 코드','AMOUNT (USDT)':'금액 (USDT)','NOTE (OPTIONAL)':'메모 (선택)','Staking packages':'스테이킹 패키지','Referral model':'추천 모델','Roadmap & risk':'로드맵 및 위험','Back to BIXLINK':'BIXLINK로 돌아가기'
   },
+  hi: {
+    'Deposit':'जमा','Withdraw':'निकासी','Swap':'स्वैप','Available balance':'उपलब्ध शेष','Transaction history':'लेन-देन इतिहास','Coming soon':'जल्द आ रहा है','Done':'पूर्ण','CHOOSE PACKAGE':'पैकेज चुनें','Annual yield':'वार्षिक यील्ड','Lock period':'लॉक अवधि','Stake Now':'अभी स्टेक करें','Stake now':'अभी स्टेक करें','My requests':'मेरे अनुरोध','MY NETWORK':'मेरा नेटवर्क','Direct referrals':'प्रत्यक्ष रेफ़रल','Total network':'कुल नेटवर्क','Referral code':'रेफ़रल कोड','Copy link':'लिंक कॉपी करें','Change password':'पासवर्ड बदलें','Sign out':'साइन आउट','WELCOME BACK':'फिर से स्वागत है','Create an account':'खाता बनाएँ','Create account':'खाता बनाएँ','FULL NAME':'पूरा नाम','USERNAME':'उपयोगकर्ता नाम','PASSWORD':'पासवर्ड','REFERRAL CODE':'रेफ़रल कोड','Forgot password?':'पासवर्ड भूल गए?','Pay':'भुगतान','Receive':'प्राप्त करें','History':'इतिहास','Cancel':'रद्द करें','BIX balance':'BIX शेष'
+  },
+  es: {
+    'Deposit':'Depositar','Withdraw':'Retirar','Swap':'Intercambiar','Available balance':'Saldo disponible','Transaction history':'Historial de transacciones','Swap history':'Historial de intercambios','Coming soon':'Próximamente','Done':'Listo','CHOOSE PACKAGE':'ELIGE UN PAQUETE','Annual yield':'Rendimiento anual','Lock period':'Periodo de bloqueo','Stake Now':'Hacer staking','Stake now':'Hacer staking','My requests':'Mis solicitudes','MY NETWORK':'MI RED','Direct referrals':'Referidos directos','Total network':'Red total','Network tree':'Árbol de red','Referral code':'Código de referido','Personal link':'Enlace personal','Copy link':'Copiar enlace','Change password':'Cambiar contraseña','Sign out':'Cerrar sesión','MEMBER ACCESS':'ACCESO DE MIEMBROS','WELCOME BACK':'BIENVENIDO DE NUEVO','Create an account':'Crear una cuenta','Create account':'Crear cuenta','FULL NAME':'NOMBRE COMPLETO','USERNAME':'USUARIO','PASSWORD':'CONTRASEÑA','REFERRAL CODE':'CÓDIGO DE REFERIDO','Forgot password?':'¿Olvidaste tu contraseña?','Pay':'Pagar','Receive':'Recibir','History':'Historial','Cancel':'Cancelar','Send transfer':'Enviar transferencia','BIX balance':'Saldo BIX','Back to BIXLINK':'Volver a BIXLINK'
+  },
+  pt: {
+    'Deposit':'Depositar','Withdraw':'Sacar','Swap':'Trocar','Available balance':'Saldo disponível','Transaction history':'Histórico de transações','Swap history':'Histórico de trocas','Coming soon':'Em breve','Done':'Concluído','CHOOSE PACKAGE':'ESCOLHA O PACOTE','Annual yield':'Rendimento anual','Lock period':'Período de bloqueio','Stake Now':'Fazer staking','Stake now':'Fazer staking','My requests':'Meus pedidos','MY NETWORK':'MINHA REDE','Direct referrals':'Indicações diretas','Total network':'Rede total','Network tree':'Árvore da rede','Referral code':'Código de indicação','Personal link':'Link pessoal','Copy link':'Copiar link','Change password':'Alterar senha','Sign out':'Sair','MEMBER ACCESS':'ACESSO DE MEMBROS','WELCOME BACK':'BEM-VINDO DE VOLTA','Create an account':'Criar uma conta','Create account':'Criar conta','FULL NAME':'NOME COMPLETO','USERNAME':'USUÁRIO','PASSWORD':'SENHA','REFERRAL CODE':'CÓDIGO DE INDICAÇÃO','Forgot password?':'Esqueceu a senha?','Pay':'Pagar','Receive':'Receber','History':'Histórico','Cancel':'Cancelar','Send transfer':'Enviar transferência','BIX balance':'Saldo BIX','Back to BIXLINK':'Voltar ao BIXLINK'
+  },
 };
 
-const generated = generatedPhrases as Record<Exclude<Language, 'en'>, Record<string, string>>;
+const generated = generatedPhrases as Partial<Record<Exclude<Language, 'en'>, Record<string, string>>>;
 const phrases = Object.fromEntries((Object.keys(manualPhrases) as Exclude<Language, 'en'>[]).map(l => [l, { ...generated[l], ...manualPhrases[l] }])) as Record<Exclude<Language, 'en'>, Record<string, string>>;
 
 type ProductUpdate = { id: string; title: string; body: string };
-const locales: Record<Language, string> = { en: 'en-US', id: 'id-ID', ms: 'ms-MY', vi: 'vi-VN', th: 'th-TH', zh: 'zh-CN', ja: 'ja-JP', ko: 'ko-KR' };
+const locales: Record<Language, string> = { en: 'en-US', id: 'id-ID', ms: 'ms-MY', vi: 'vi-VN', th: 'th-TH', zh: 'zh-CN', ja: 'ja-JP', ko: 'ko-KR', hi: 'hi-IN', es: 'es-ES', pt: 'pt-BR' };
 type I18nValue = { language: Language; setLanguage: (language: Language) => void; t: (key: UiKey) => string; updates: ProductUpdate[]; formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string; formatDate: (value: string | number | Date, options?: Intl.DateTimeFormatOptions) => string; };
 const fallbackI18n: I18nValue = {
   language: 'en',

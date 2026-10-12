@@ -1996,3 +1996,12 @@ html[data-view="zen"] .pro-only { display:none !important; }
 }
 @keyframes lux-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 @keyframes lux-reveal { from { opacity: 0; transform: translateY(24px) scale(.98); } to { opacity: 1; transform: none; } }
+
+/* Language menu: fixed so header scroll rail never clips it; 11 flags */
+.site-header .language-menu { position: fixed; top: 62px; right: 12px; z-index: 80; width: 160px; grid-template-columns: repeat(3, 1fr); }
+.flag-in { background: linear-gradient(oklch(0.72 0.17 55) 0 33%, var(--foreground) 33% 67%, oklch(0.55 0.15 150) 67%); }
+.flag-in::after { content: ""; position: absolute; top: 5px; left: 9px; width: 4px; height: 4px; border-radius: 50%; border: 1px solid oklch(0.34 0.16 264); }
+.flag-es { background: linear-gradient(var(--destructive) 0 25%, var(--chart-3) 25% 75%, var(--destructive) 75%); }
+.flag-br { background: oklch(0.55 0.15 150); }
+.flag-br::before { content: ""; position: absolute; inset: 2px 3px; background: var(--chart-3); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.flag-br::after { content: ""; position: absolute; top: 4px; left: 8px; width: 7px; height: 7px; border-radius: 50%; background: oklch(0.34 0.16 264); }

@@ -9,7 +9,7 @@ import { defaultMarketing, type MarketingPlan } from '@/lib/marketing';
 import { saveMarketing } from '@/lib/marketing.functions';
 export function AdminMarketing({ initial, onMessage }: { initial?: MarketingPlan | undefined; onMessage: (message: string) => void }) {
   const [plan, setPlan] = useState(initial ?? defaultMarketing()); const [lang, setLang] = useState<Language>('en'); const [busy, setBusy] = useState(false);
-  const save = useServerFn(saveMarketing); const qc = useQueryClient(); const current = plan.locales[lang];
+  const save = useServerFn(saveMarketing); const qc = useQueryClient(); const current = (plan.locales[lang as keyof typeof plan.locales] ?? plan.locales.en);
   return <section className="mt-8 max-w-3xl space-y-5"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-xl font-bold">Marketing materials</h2><Button variant="outline" aria-pressed={plan.enabled} onClick={() => setPlan({ ...plan, enabled: !plan.enabled })}>{plan.enabled ? <Eye/> : <EyeOff/>}{plan.enabled ? 'OPEN' : 'CLOSED'}</Button></div>
     <p className="text-sm text-muted-foreground">PDF uses saved package, presale and referral settings at download time. Video is a dated overview; editing this copy updates the PDF, not the rendered video. Copyright notice is not patent registration.</p>
     <select className="form-input" aria-label="Marketing language" value={lang} onChange={e => setLang(e.target.value as Language)}>{LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}</select>
