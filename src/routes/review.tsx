@@ -7,8 +7,7 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { Check, X, Percent, Wallet, TrendingUp, Users } from 'lucide-react';
 import { dateTime, money } from '@/lib/bixlink';
-import { AdminDurationPackages } from '@/components/AdminDurationPackages';
-import { YieldControlPanel } from '@/components/YieldControlPanel';
+import { AdminStakingControls } from '@/components/AdminStakingControls';
 import { AdminBixMarket } from '@/components/AdminBixMarket';
 import { AdminReferrals } from '@/components/AdminReferrals';
 import { ReviewerDepositWallet } from '@/components/ReviewerDepositWallet';
@@ -44,7 +43,7 @@ function Review() {
           <div className="flex items-center gap-3"><div className="text-right"><div className="text-chart-3">{money(Number(t.amount_usd))}</div>{Number(t.fee_usd) > 0 && <div className="text-muted-foreground">send {money(Number(t.net_usd))}</div>}<div className="capitalize">{t.status}</div></div>
             {t.status === 'pending' && (['approved', 'rejected'] as const).map(s => <Button key={s} size="icon" variant={s === 'approved' ? 'default' : 'destructive'} className="rounded-full" title={s} onClick={async () => { try { await decide({ data: { id: t.id, status: s } }); await refresh(); setMsg(`Marked ${s}.`); } catch { setMsg('Could not update.'); } }}>{s === 'approved' ? <Check /> : <X />}</Button>)}</div>
         </div>)}{!list.length && <p className="text-sm text-muted-foreground">No transactions.</p>}</div></>}
-        {tab === 'APY' && <><YieldControlPanel market={false}/><AdminDurationPackages onMessage={setMsg}/></>}
+        {tab === 'APY' && <AdminStakingControls onMessage={setMsg}/>}
         {tab === 'Market' && <AdminBixMarket initialPrice={Number(settings?.market?.priceUsd ?? 0.84291)} initialMovement={settings?.market?.movement} onMessage={setMsg} onSaved={refreshSettings}/>}
         {tab === 'Referral' && <AdminReferrals key={JSON.stringify(settings?.referrals)} initial={settings?.referrals} onMessage={setMsg} onSaved={refreshSettings} settingsOnly/>}
       </>}
