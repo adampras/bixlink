@@ -111,7 +111,7 @@ function PayPage() {
         {data?.code ? <><div className="pay-qr-card">
             <div className="pay-qr-card__head"><span className="inline-flex items-center gap-1"><QrCode size={13}/> BIX PAY</span><span>{Number(reqAmount) > 0 ? `${number(Number(reqAmount), { maximumFractionDigits: 8 })} BIX` : 'ANY AMOUNT'}</span></div>
             <div className="pay-qr-plate"><QRCodeSVG value={qrUrl} size={220} level="M" marginSize={0}/></div>
-            <button type="button" className="pay-qr-code numeric w-full" onClick={() => { navigator.clipboard.writeText(data.code); setMsg('Member code copied.'); }} aria-label="Copy member code">{data.code}<Copy size={13}/></button>
+            <button type="button" className="pay-qr-code numeric w-full" onClick={() => { navigator.clipboard.writeText(data.code ?? ''); setMsg('Member code copied.'); }} aria-label="Copy member code">{data.code}<Copy size={13}/></button>
             {reqNote && <p className="mt-2 truncate text-[11px] text-muted-foreground">{reqNote}</p>}
           </div>
           <p className="tx-hint">Show this QR to another member. They scan it to send BIX to your code.</p>
