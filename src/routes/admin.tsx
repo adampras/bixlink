@@ -26,6 +26,7 @@ import { AdminSplash } from '@/components/AdminSplash';
 import { AdminReferrals } from '@/components/AdminReferrals';
 import { AdminStakingControls } from '@/components/AdminStakingControls';
 import { AdminNavigation } from '@/components/AdminNavigation';
+import { AdminWorkspace } from '@/components/AdminWorkspace';
 import { AdminTeams } from '@/components/AdminTeams';
 import { AdminReports } from '@/components/AdminReports';
 import { AdminPresale } from '@/components/AdminPresale';
@@ -47,8 +48,8 @@ type AdminData = Awaited<ReturnType<typeof getAdminData>>;
 const ADMIN_GROUPS: { title: string; tabs: [string, string][] }[] = [
   { title: 'Keuangan & Staking', tabs: [['Overview','ringkasan vault brankas maintenance'],['Wallet','dompet deposit bix pay transfer swap'],['Staking','apy profit yield packages paket durasi'],['Stakes','staking unstake approve permintaan'],['Reports','laporan transfer']] },
   { title: 'Pasar & Presale', tabs: [['Presale','sovereign genesis 100000 strategi'],['Marketing','pdf video bahasa materi'],['Market','harga pasar bix'],['Token','bep20 kontrak smart contract']] },
-  { title: 'Pengguna & Jaringan', tabs: [['Users','member ban reviewer owner 2'],['Referrals','bonus komisi sponsor'],['Teams','tim leader vip'],['Clones','kloning'],['Leaders','akun leader gratis sponsor ambassador syarat']] },
-  { title: 'Tampilan & Ekosistem', tabs: [['Appearance','warna wallet animasi tema'],['Splash','splash screen video'],['Landing','konten banner sponsor partner'],['Updates','readiness pengumuman'],['Booster','visual boost'],['Arena','fox game quest'],['NFT','sertifikat kartu'],['Mining','vbix'],['RWA','income source sumber'],['Shop','marketplace produk merchandise toko'],['Member Shop','slot jualan member produk review']] },
+  { title: 'Pengguna & Jaringan', tabs: [['Users','member ban reviewer owner 2'],['Referrals','bonus komisi sponsor'],['Kepemimpinan & Tim','teams tim leader vip clones kloning akun gratis sponsor ambassador syarat']] },
+  { title: 'Tampilan & Ekosistem', tabs: [['Desain & Tampilan','appearance warna wallet animasi tema updates readiness pengumuman splash screen video'],['Landing','konten banner sponsor partner'],['Booster','visual boost'],['Arena','fox game quest'],['NFT','sertifikat kartu'],['Mining','vbix'],['RWA','income source sumber'],['Marketplace','shop katalog merchandise toko member shop slot jualan produk review']] },
 ];
 function Admin() {
   const { user } = useMember();
@@ -85,18 +86,27 @@ function Admin() {
     {tab === 'Wallet' && <AdminWallet members={data?.members ?? []} depositWallets={(data?.settings.find(s=>s.key==='deposit_wallets')?.value as {wallets?: DepositWallet[]} | undefined)?.wallets} swapEnabled={Boolean((data?.settings.find(s=>s.key==='swap')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>} 
     {tab === 'Wallet' && <AdminBixPay enabled={Boolean((data?.settings.find(s=>s.key==='bix_pay')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>}
     {tab === 'Wallet' && <AdminTransferToggle enabled={Boolean((data?.settings.find(s=>s.key==='usdt_transfer')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>}
-    {tab === 'Clones' && <AdminClones onMessage={setMessage}/>}
-    {tab === 'Teams' && <AdminTeams onMessage={setMessage}/>}
+    {tab === 'Kepemimpinan & Tim' && <AdminWorkspace label="Kepemimpinan & Tim" panels={[
+      { title: 'Tim & VIP', content: <AdminTeams onMessage={setMessage}/> },
+      { title: 'Leader bersponsor', content: <AdminLeaders onMessage={setMessage}/> },
+      { title: 'Clones', content: <AdminClones onMessage={setMessage}/> },
+    ]}/>}
     {tab === 'Users' && <AdminReviewers members={data?.members ?? []} onMessage={setMessage}/>}
-    {tab === 'Updates' && <AdminReadiness initial={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} onMessage={setMessage} onSaved={refresh}/>}
-     {tab === 'Appearance' && <AdminAppearance initialReadiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/>}
-    {tab === 'Splash' && <AdminSplash onMessage={setMessage}/>}
+    {tab === 'Desain & Tampilan' && <AdminWorkspace label="Desain & Tampilan" panels={[
+      { title: 'Tema & Wallet', content: <AdminAppearance initialReadiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/> },
+      { title: 'Visibilitas & Updates', content: <AdminReadiness initial={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} onMessage={setMessage} onSaved={refresh}/> },
+      { title: 'Splash', content: <AdminSplash onMessage={setMessage}/> },
+    ]}/>}
     {tab === 'Market' && <AdminBixMarket initialMovement={(data?.settings.find(s=>s.key==='bix_market')?.value as { movement?: unknown } | undefined)?.movement} initialPrice={Number((data?.settings.find(s=>s.key==='bix_market')?.value as {priceUsd?: number} | undefined)?.priceUsd ?? 0.84291)} onMessage={setMessage} onSaved={refresh}/>} 
     {tab === 'Staking' && <AdminStakingControls onMessage={setMessage}/>}
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
      {tab === 'Reports' && <AdminReports onMessage={setMessage}/>}
      {tab === 'Marketing' && <AdminMarketing initial={data?.settings.find(s=>s.key==='marketing_plan')?.value as unknown as MarketingPlan | undefined} onMessage={setMessage}/>}
-     {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>} {tab === 'Shop' && <AdminShopCatalog onMessage={setMessage}/>} {tab === 'Member Shop' && <AdminMemberShop initial={data?.settings.find(s => s.key === 'member_shop')?.value as MemberShopConfig | undefined} onMessage={setMessage}/>} {tab === 'Leaders' && <AdminLeaders onMessage={setMessage}/>}
+     {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>}
+     {tab === 'Marketplace' && <AdminWorkspace label="Marketplace" panels={[
+       { title: 'Katalog owner', content: <AdminShopCatalog onMessage={setMessage}/> },
+       { title: 'Slot & Moderasi member', content: <AdminMemberShop initial={data?.settings.find(s => s.key === 'member_shop')?.value as MemberShopConfig | undefined} onMessage={setMessage}/> },
+     ]}/>}
      {tab === 'Arena' && <AdminArena onMessage={setMessage}/>}
      {tab === 'NFT' && <AdminNft onMessage={setMessage}/>}
      {tab === 'Mining' && <AdminMining initial={data?.settings.find(s => s.key === 'mining')?.value as MiningSettings | undefined} onMessage={setMessage} onSaved={refresh}/>}
