@@ -138,6 +138,7 @@ function WalletPage() {
           {notice && <p className="mt-2 text-xs text-destructive">{notice}</p>}
         </>}
         <Button disabled={busy || (modal === 'deposit' ? !addr || (!intent && !(amt >= 1)) : !field || !amt || amt < 10 || amt > 10000)} className="mt-5 w-full rounded-full bg-chart-3 text-background" onClick={submit}>{busy ? 'Checking blockchain…' : modal === 'deposit' ? (intent ? 'Waiting for transfer… Check now' : 'Get exact deposit amount') : 'Submit withdraw'}</Button>
+        <p className="tx-hint">{modal === 'deposit' ? 'Send the exact amount on-chain; one credit per transaction ID after the matcher confirms it.' : 'Creates a withdrawal request for review; USDT is not sent until it is approved.'}</p>
       </div></div>}
       {success && <div className="modal-backdrop" onClick={() => setSuccess(null)}><div role="dialog" aria-modal="true" className="deposit-success" onClick={e => e.stopPropagation()}>
         <div className="deposit-success-ring"><CheckCircle2 size={56}/></div>
