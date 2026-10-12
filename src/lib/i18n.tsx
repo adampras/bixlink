@@ -10,6 +10,9 @@ export const LANGUAGES = [
   { code: 'zh', flag: 'cn', label: '中文' },
   { code: 'ja', flag: 'jp', label: '日本語' },
   { code: 'ko', flag: 'kr', label: '한국어' },
+  { code: 'hi', flag: 'in', label: 'हिन्दी' },
+  { code: 'es', flag: 'es', label: 'Español' },
+  { code: 'pt', flag: 'br', label: 'Português (BR)' },
 ] as const;
 
 export type Language = (typeof LANGUAGES)[number]['code'];
@@ -23,6 +26,9 @@ const ui = {
   zh: { home: '首页', wallet: '钱包', stake: '质押', boost: '收益加速', network: '网络', profile: '个人资料', settings: '设置', notifications: '通知', markRead: '全部标为已读', noUpdates: '暂无新动态', signIn: '登录', language: '语言', updatePrefs: '更新通知', updatePrefsHelp: '在顶部显示产品和服务公告。', enabled: '已开启', disabled: '已关闭', preferences: '偏好设置', accountSettings: '账户设置', savedHere: '偏好设置保存在此设备上。', latestUpdates: '最新动态' },
   ja: { home: 'ホーム', wallet: 'ウォレット', stake: 'ステーク', boost: 'APYブースト', network: 'ネットワーク', profile: 'プロフィール', settings: '設定', notifications: '通知', markRead: 'すべて既読にする', noUpdates: '新しい更新はありません', signIn: 'ログイン', language: '言語', updatePrefs: '更新通知', updatePrefsHelp: '製品とサービスのお知らせを上部に表示します。', enabled: 'オン', disabled: 'オフ', preferences: '環境設定', accountSettings: 'アカウント設定', savedHere: '設定はこの端末に保存されます。', latestUpdates: '最新情報' },
   ko: { home: '홈', wallet: '지갑', stake: '스테이킹', boost: 'APY 부스트', network: '네트워크', profile: '프로필', settings: '설정', notifications: '알림', markRead: '모두 읽음', noUpdates: '새 업데이트 없음', signIn: '로그인', language: '언어', updatePrefs: '업데이트 알림', updatePrefsHelp: '제품 및 서비스 공지를 상단에 표시합니다.', enabled: '켜짐', disabled: '꺼짐', preferences: '환경설정', accountSettings: '계정 설정', savedHere: '설정은 이 기기에 저장됩니다.', latestUpdates: '최신 업데이트' },
+  hi: { home: 'होम', wallet: 'वॉलेट', stake: 'स्टेक', boost: 'APY बूस्ट', network: 'नेटवर्क', profile: 'प्रोफ़ाइल', settings: 'सेटिंग्स', notifications: 'सूचनाएँ', markRead: 'सभी पढ़े गए', noUpdates: 'कोई नया अपडेट नहीं', signIn: 'साइन इन', language: 'भाषा', updatePrefs: 'अपडेट सूचनाएँ', updatePrefsHelp: 'ऊपर उत्पाद और सेवा घोषणाएँ दिखाएँ।', enabled: 'चालू', disabled: 'बंद', preferences: 'प्राथमिकताएँ', accountSettings: 'खाता सेटिंग्स', savedHere: 'प्राथमिकताएँ इस डिवाइस पर सहेजी गई हैं।', latestUpdates: 'नवीनतम अपडेट' },
+  es: { home: 'INICIO', wallet: 'BILLETERA', stake: 'STAKING', boost: 'BOOST APY', network: 'RED', profile: 'Perfil', settings: 'Ajustes', notifications: 'Notificaciones', markRead: 'Marcar todo como leído', noUpdates: 'Sin novedades', signIn: 'Iniciar sesión', language: 'Idioma', updatePrefs: 'Avisos de novedades', updatePrefsHelp: 'Mostrar anuncios de productos y servicios arriba.', enabled: 'Activado', disabled: 'Desactivado', preferences: 'PREFERENCIAS', accountSettings: 'AJUSTES DE CUENTA', savedHere: 'Las preferencias se guardan en este dispositivo.', latestUpdates: 'ÚLTIMAS NOVEDADES' },
+  pt: { home: 'INÍCIO', wallet: 'CARTEIRA', stake: 'STAKING', boost: 'BOOST APY', network: 'REDE', profile: 'Perfil', settings: 'Configurações', notifications: 'Notificações', markRead: 'Marcar tudo como lido', noUpdates: 'Sem novidades', signIn: 'Entrar', language: 'Idioma', updatePrefs: 'Avisos de novidades', updatePrefsHelp: 'Mostrar anúncios de produtos e serviços no topo.', enabled: 'Ativado', disabled: 'Desativado', preferences: 'PREFERÊNCIAS', accountSettings: 'CONFIGURAÇÕES DA CONTA', savedHere: 'As preferências ficam salvas neste dispositivo.', latestUpdates: 'ÚLTIMAS NOVIDADES' },
 } as const;
 
 type UiKey = keyof typeof ui.en;
@@ -67,6 +73,21 @@ const updates = {
     { id: 'languages', title: '5개 언어 지원', body: '영어, 인도네시아어, 중국어, 일본어, 한국어를 선택하세요.' },
     { id: 'transfer', title: '가상 USDT 송금', body: '테스트 사용은 소유자가 관리합니다.' },
     { id: 'stake-confirm', title: '명확한 스테이킹 확인', body: '모든 요청에 동의 및 확인 단계가 포함됩니다.' },
+  ],
+  hi: [
+    { id: 'languages', title: 'अब 11 भाषाएँ उपलब्ध', body: 'झंडे के प्रतीक से अपनी भाषा चुनें।' },
+    { id: 'transfer', title: 'वर्चुअल USDT ट्रांसफ़र', body: 'परीक्षण पहुँच मालिक द्वारा नियंत्रित है।' },
+    { id: 'stake-confirm', title: 'स्पष्ट स्टेकिंग पुष्टि', body: 'हर अनुरोध में सहमति और पुष्टि शामिल है।' },
+  ],
+  es: [
+    { id: 'languages', title: 'Ya hay 11 idiomas', body: 'Elige tu idioma con el símbolo de la bandera.' },
+    { id: 'transfer', title: 'Transferencia USDT virtual', body: 'El acceso de prueba lo controla el propietario.' },
+    { id: 'stake-confirm', title: 'Confirmación de staking más clara', body: 'Cada solicitud incluye aceptación y confirmación.' },
+  ],
+  pt: [
+    { id: 'languages', title: 'Agora com 11 idiomas', body: 'Escolha seu idioma pelo símbolo da bandeira.' },
+    { id: 'transfer', title: 'Transferência USDT virtual', body: 'O acesso de teste é controlado pelo proprietário.' },
+    { id: 'stake-confirm', title: 'Confirmação de staking mais clara', body: 'Cada pedido inclui aceite e confirmação.' },
   ],
 } as const;
 
