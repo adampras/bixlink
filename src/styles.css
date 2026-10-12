@@ -886,14 +886,15 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
   --register-border: color-mix(in srgb, var(--register-foreground) 8%, transparent);
   --register-submit-shadow: 0 12px 40px -10px color-mix(in srgb, var(--register-gold) 50%, transparent);
   background: var(--register-background); color: var(--register-foreground);
-  display: flex; justify-content: center; padding: 48px 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 32px 24px;
   font-family: Inter, sans-serif; letter-spacing: 0;
 }
 .register-numbered-inner { width: 100%; max-width: 360px; }
+.register-numbered > a { width: 100%; max-width: 360px; align-self: center; }
 .register-numbered-brand { display: flex; flex-direction: column; align-items: center; margin-bottom: 36px; }
 .register-numbered-brand h1 { font: 800 36px/1.2 'Space Grotesk', sans-serif; letter-spacing: 0; }
 .register-numbered-brand h1 span { background: linear-gradient(to right, var(--register-gold-light), var(--register-gold-deep)); background-clip: text; color: transparent; }
-.register-numbered-brand i { width: 32px; height: 4px; margin-top: 4px; border-radius: 4px; background: color-mix(in srgb, var(--register-gold) 40%, transparent); }
+.register-numbered-brand > i { width: 32px; height: 4px; margin-top: 4px; border-radius: 4px; background: color-mix(in srgb, var(--register-gold) 40%, transparent); }
 .register-numbered-step { position: relative; padding-left: 40px; min-width: 0; }
 .register-numbered-step h2 { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--register-muted); line-height: 16px; letter-spacing: 0; }
 .register-step-number { position: absolute; top: 2px; left: 0; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--register-border); background: color-mix(in srgb, var(--register-foreground) 5%, transparent); color: var(--register-muted); font: 700 11px 'Space Grotesk', sans-serif; transition: color .2s, border-color .2s, background .2s; }
@@ -1446,13 +1447,19 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
 .auth-vault .form-input:focus { border-color: hsl(var(--ruby) / .6); box-shadow: 0 0 0 3px hsl(var(--ruby) / .15); }
 
 /* Register vault — obsidian glass + ruby accents */
-.register-vault { position: relative; border-radius: 24px; padding: 28px 20px; border: 1px solid hsl(var(--chart-3) / .25); background: linear-gradient(160deg, hsl(var(--card) / .7), hsl(var(--background) / .5)); backdrop-filter: blur(20px); box-shadow: inset 0 1px 0 hsl(var(--foreground) / .07), 0 24px 60px -30px hsl(var(--ruby) / .5); overflow: hidden; }
+.register-vault { position: relative; min-width: 0; border-radius: 8px; padding: 24px 16px; border: 1px solid var(--register-border); background: var(--register-background); box-shadow: none; overflow: hidden; }
 .register-vault::before { content: ''; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, transparent, hsl(var(--ruby) / .85), hsl(var(--chart-3) / .85), transparent); }
 .register-vault .register-step-number { border-color: hsl(var(--ruby) / .4) !important; background: hsl(var(--ruby) / .1) !important; color: hsl(var(--ruby)) !important; }
 .register-vault .register-numbered-step:focus-within .register-step-number { box-shadow: 0 0 12px hsl(var(--ruby) / .55); }
 .register-vault .register-numbered-input { background: hsl(var(--background) / .45); backdrop-filter: blur(8px); }
 .register-vault .register-numbered-input:focus { border-color: hsl(var(--ruby) / .6); box-shadow: 0 0 0 3px hsl(var(--ruby) / .15); }
 .register-vault .register-numbered-submit { background: linear-gradient(120deg, hsl(var(--chart-3)), hsl(var(--chart-3) / .85) 60%, hsl(var(--ruby) / .85)); box-shadow: 0 10px 30px -12px hsl(var(--ruby) / .6); }
+.register-numbered .vault-stardust { display: none; }
+.register-numbered .vault-node { max-width: 100%; justify-content: center; font-size: 9px; letter-spacing: 0; text-align: center; }
+.register-numbered .vault-logo img { box-shadow: none; }
+.register-numbered .register-numbered-input { padding-left: 12px; padding-right: 12px; border-radius: 8px; }
+.register-numbered .register-numbered-input.pr-12 { padding-right: 44px; }
+.register-numbered .register-numbered-submit { background: var(--register-gold); color: var(--register-background); box-shadow: none; border-radius: 8px; }
 
 /* Vault flourish: stardust, aura logo, secure node, shimmer */
 .auth-vault-page,.register-numbered{position:relative;isolation:isolate}
@@ -1934,7 +1941,7 @@ html[data-view="zen"] .pro-only { display:none !important; }
 /* Member header: swipeable tools rail */
 .header-brand { flex-shrink:0; padding-right:10px; margin-right:4px; border-right:1px solid color-mix(in oklab,var(--border) 70%,transparent); }
 @media (max-width:767px){
-  .site-header .header-tools { min-width:0; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x proximity; scrollbar-width:none; -webkit-overflow-scrolling:touch; padding:2px 2px; mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%); }
+  .site-header .header-tools { min-width:0; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x proximity; scrollbar-width:none; -webkit-overflow-scrolling:touch; padding:2px 2px; mask-image:none; }
   .site-header .header-tools::-webkit-scrollbar { display:none; }
   .site-header .header-tools > * { flex-shrink:0; scroll-snap-align:start; }
   .site-header .language-menu, .site-header .notification-menu { position:fixed !important; top:58px; right:10px; z-index:60; }
