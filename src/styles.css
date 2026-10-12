@@ -1847,6 +1847,9 @@ html[data-color-mode="light"] .site-shell .wallet-summary { border-color: color-
   .register-numbered { padding:28px 16px; }
   .settings-console a { overflow-wrap:anywhere; }
   .settings-console .settings-row { min-width:0; }
+  .settings-rail nav { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .settings-rail nav a { min-width:0; padding:10px 6px; gap:6px; font-size:10px; }
+  .settings-rail nav svg { flex-shrink:0; }
   .admin-navigation + [role="status"] { overflow-wrap:anywhere; }
   .presale-purchase-dialog { width:calc(100% - 32px) !important; max-height:calc(100dvh - 32px); overflow-y:auto; }
 }
