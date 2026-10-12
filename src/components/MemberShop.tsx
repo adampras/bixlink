@@ -4,6 +4,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { Check, ImagePlus, Store, Trash2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { updateSetting } from '@/lib/bixlink.functions';
 import { money } from '@/lib/bixlink';
 
@@ -28,6 +29,22 @@ async function autoStudio(file: File): Promise<string> {
   return c.toDataURL('image/jpeg', .82);
 }
 
+function CheckoutButton({ p }: { p: Product }) {
+  const [open, setOpen] = useState(false); const [ok, setOk] = useState(false);
+  const inv = `INV-BIX-${p.id.replace(/-/g, '').slice(0, 6).toUpperCase()}`;
+  return <>
+    <button type="button" className="boutique-cta" onClick={() => { setOk(false); setOpen(true); }}>Buy now</button>
+    <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-w-sm">
+      <DialogHeader><DialogTitle>Checkout</DialogTitle><DialogDescription className="numeric">{inv}</DialogDescription></DialogHeader>
+      <div className="flex gap-3">{p.image_url && <img src={p.image_url} alt={p.title} className="h-20 w-16 rounded-lg object-cover"/>}<div className="min-w-0"><b className="block truncate">{p.title}</b><span className="boutique-badge mt-1"><Check size={10}/> Curated seller</span></div></div>
+      <div className="space-y-1 rounded-xl border border-border p-3 text-sm"><div className="flex justify-between"><span className="text-muted-foreground">Item price</span><b className="numeric">{money(Number(p.price_usd))}</b></div><div className="flex justify-between"><span className="text-muted-foreground">BIXLINK fee</span><b className="numeric">{money(0)}</b></div><div className="flex justify-between border-t border-border pt-1"><span>Total</span><b className="numeric text-primary">{money(Number(p.price_usd))}</b></div></div>
+      <p className="text-xs text-muted-foreground">Payment is completed on the seller's own checkout page. BIXLINK does not hold, process or refund payments — confirm details with the seller before paying.</p>
+      <label className="flex items-start gap-2 text-xs"><input type="checkbox" checked={ok} onChange={e => setOk(e.target.checked)} className="mt-0.5"/> I understand this purchase is made directly with the seller.</label>
+      <div className="flex gap-2"><Button variant="outline" className="flex-1 rounded-full" onClick={() => setOpen(false)}>Cancel</Button><Button disabled={!ok} className="flex-1 rounded-full" asChild={ok}>{ok ? <a href={p.order_url!} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>Continue to seller</a> : <span>Continue to seller</span>}</Button></div>
+    </DialogContent></Dialog>
+  </>;
+}
+
 function ProductCard({ p, children, editorial }: { p: Product; children?: React.ReactNode; editorial?: boolean }) {
   const lot = `LOT ${p.id.replace(/-/g, '').slice(0, 6).toUpperCase()}`;
   return <div className={`boutique-card ${editorial ? 'boutique-card--editorial' : ''}`}>
@@ -36,7 +53,7 @@ function ProductCard({ p, children, editorial }: { p: Product; children?: React.
       {editorial && p.description && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{p.description}</p>}
       <span className="numeric mt-1 block text-primary">{money(Number(p.price_usd))}</span>
       {p.status !== 'approved' && <span className="mt-1 inline-block rounded-full border border-border px-2 text-[10px] uppercase">{p.status}</span>}
-      {p.order_url && p.status === 'approved' && <a href={p.order_url} target="_blank" rel="noopener noreferrer" className="boutique-cta">Buy now</a>}{children}</div>
+      {p.order_url && p.status === 'approved' && <CheckoutButton p={p}/>}{children}</div>
   </div>;
 }
 

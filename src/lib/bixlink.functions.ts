@@ -521,3 +521,12 @@ export const reviewLeader = createServerFn({ method: 'POST' }).middleware([requi
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const createSponsoredLeader = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { code: string; seedUsd: number; requireTurnover: boolean; scope: 'local' | 'global' }) => z.object({ code: z.string().trim().min(2).max(40), seedUsd: z.union([z.literal(100), z.literal(500), z.literal(1000), z.literal(5000), z.literal(10000)]), requireTurnover: z.boolean(), scope: z.enum(['local', 'global']) }).parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyAdmin(context);
+    const { error } = await context.supabase.rpc('admin_create_bix_leader', { p_code: data.code, p_virtual: data.seedUsd, p_require: data.requireTurnover, p_scope: data.scope });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

@@ -115,6 +115,7 @@ export type Database = {
           created_at: string
           require_turnover: boolean
           reviewed_at: string | null
+          scope: string
           status: string
           turnover_multiple: number
           user_id: string
@@ -124,6 +125,7 @@ export type Database = {
           created_at?: string
           require_turnover?: boolean
           reviewed_at?: string | null
+          scope?: string
           status?: string
           turnover_multiple?: number
           user_id: string
@@ -133,6 +135,7 @@ export type Database = {
           created_at?: string
           require_turnover?: boolean
           reviewed_at?: string | null
+          scope?: string
           status?: string
           turnover_multiple?: number
           user_id?: string
@@ -1167,6 +1170,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_create_bix_leader: {
+        Args: {
+          p_code: string
+          p_require: boolean
+          p_scope: string
+          p_virtual: number
+        }
+        Returns: string
+      }
       admin_review_bix_leader: {
         Args: {
           p_require: boolean

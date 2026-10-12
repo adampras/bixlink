@@ -393,6 +393,13 @@
       "when": 1791729235418,
       "tag": "0055_member_shop_products",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1791791977382,
+      "tag": "0056_admin_create_bix_leader",
+      "breakpoints": true
     }
   ]
 }
