@@ -120,7 +120,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
 
 function ViewSwitch() {
   const [view, setView] = useState<'pro' | 'zen'>('pro');
-  useEffect(() => { const v = localStorage.getItem('bixlink-view') === 'zen' ? 'zen' : 'pro'; setView(v); document.documentElement.dataset.view = v; }, []);
-  const toggle = () => { const next = view === 'pro' ? 'zen' : 'pro'; setView(next); localStorage.setItem('bixlink-view', next); document.documentElement.dataset.view = next; };
+  useEffect(() => { const v = localStorage.getItem('bixlink-view') === 'zen' ? 'zen' : 'pro'; setView(v); document.documentElement.dataset['view'] = v; }, []);
+  const toggle = () => { const next = view === 'pro' ? 'zen' : 'pro'; setView(next); localStorage.setItem('bixlink-view', next); document.documentElement.dataset['view'] = next; };
   return <button type="button" className="view-switch" onClick={toggle} aria-label={view === 'pro' ? 'Switch to Zen mode' : 'Switch to Pro terminal'} title={view === 'pro' ? 'Pro terminal · tap for Zen' : 'Zen mode · tap for Pro'}>{view === 'pro' ? 'PRO' : 'ZEN'}</button>;
 }
