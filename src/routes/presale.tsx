@@ -74,7 +74,7 @@ function PresalePage() {
       </video>
       <Button type="button" variant="outline" size="icon" className="presale-sound-toggle" aria-label={sound ? 'Mute reactor sound' : 'Unmute reactor sound'} onClick={() => setSound(v => !v)}>{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</Button>
     </div>
-    <dl className="mt-4 grid grid-cols-3 gap-2 border-y border-border py-3 text-center">
+    <dl className="pro-only mt-4 grid grid-cols-3 gap-2 border-y border-border py-3 text-center">
       <div><dd className="numeric font-display text-lg font-bold text-primary">{number(locked, { maximumFractionDigits: 2 })}</dd><dt className="text-[10px] text-muted-foreground">Locked BIX</dt></div>
       <div><dd className="numeric font-display text-lg font-bold text-chart-2">{number(released, { maximumFractionDigits: 4 })}</dd><dt className="text-[10px] text-muted-foreground">Mined out</dt></div>
       <div><dd className="numeric font-display text-lg font-bold text-chart-3">{cfg?.sponsorPct ?? 10}%</dd><dt className="text-[10px] text-muted-foreground">Sponsor</dt></div>

@@ -1,3 +1,4 @@
+import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { PoweredBy } from '@/components/PoweredBy';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -86,7 +87,7 @@ function WalletPage() {
       <div data-wallet-skin={pickWalletSkin(cfg?.readiness.walletColors)} className="wallet-summary wallet-vault auric-card relative overflow-hidden rounded-[20px] border p-6">
         <WalletFinanceMotion settings={cfg?.readiness}/>
         <div className="flex items-center justify-between gap-2"><div className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet size={16}/> Available balance</div><div className="flex items-center gap-2"><Button type="button" size="icon" variant="ghost" className="vault-pill! size-8 rounded-full" aria-label={hidden ? 'Show balance' : 'Hide balance'} aria-pressed={hidden} title={hidden ? 'Show balance' : 'Hide balance'} onClick={toggleHidden}>{hidden ? <Eye size={16}/> : <EyeOff size={16}/>}</Button><span className="vault-pill">ASSET VAULT</span></div></div>
-        <strong className="numeric mt-2 block break-all text-[28px] leading-snug font-black text-foreground md:text-[32px]">{hidden ? '••••••••' : `${number(data?.balance ?? 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT`}</strong>
+        <strong className="numeric mt-2 block break-all text-[28px] leading-snug font-black text-foreground md:text-[32px]">{hidden ? '••••••••' : <><AnimatedNumber value={data?.balance ?? 0}/> USDT</>}</strong>
         {fiatShown.length > 0 && <><div className="wallet-fx-grid mt-4">{fiatShown.map(item => <div key={item.code}><span>{item.label}</span><b className="numeric">{hidden ? '••••••' : `${item.code} ${number((data?.balance ?? 0) * item.rate, { maximumFractionDigits: item.code === 'IDR' ? 0 : 2 })}`}</b></div>)}</div>
         <p className="mt-3 text-[10px] text-foreground/70">Display-only USD reference conversions. Rates may be delayed.</p></>}
         <div className="mt-5 grid grid-cols-2 gap-3"><Button className="vault-btn-primary rounded-full" onClick={() => setModal('deposit')}><ArrowDownToLine/> Deposit</Button><Button variant="outline" className="vault-btn-ghost rounded-full" onClick={() => setModal('withdraw')}><ArrowUpFromLine/> Withdraw</Button></div>
