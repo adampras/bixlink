@@ -21,7 +21,7 @@ import { ProtocolStatus } from '@/components/ProtocolStatus';
 import { SponsorSlot } from '@/components/SponsorSlot';
 import { InternalMarket } from '@/components/InternalMarket';
 import { CryptoIcon } from '@/components/CryptoIcon';
-import { LiveActivityToast, PresaleStageBar } from '@/components/GrowthSuite';
+import { LiveActivityToast } from '@/components/GrowthSuite';
 
 const homeQuery = queryOptions({ queryKey: ['bix-home-market'], queryFn: () => getHomeMarketData(), staleTime: 60_000, refetchInterval: 60_000 });
 
