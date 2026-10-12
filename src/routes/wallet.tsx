@@ -1,3 +1,4 @@
+import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { PoweredBy } from '@/components/PoweredBy';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
