@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { ArrowRight, ArrowUpRight, Building2, CircleDollarSign, Globe2, ShieldCheck } from 'lucide-react';
+import { Building2, CircleDollarSign, Globe2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LandingNarrative } from '@/components/LandingNarrative';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
@@ -7,7 +7,7 @@ import { ReactorVideo } from '@/components/ReactorVideo';
 import heroObsidian from '@/assets/hero-obsidian-gold.jpg';
 import { usePublicConfig, useMember } from '@/lib/useMember';
 import { boosterMaximum } from '@/lib/booster-apy';
-import { HeroFlux } from '@/components/GrowthSuite';
+import { HeroFlux, HeroPresaleRibbon } from '@/components/GrowthSuite';
 
 import { ContentImage } from '@/components/ContentImage';
 import { ContentCarousel } from '@/components/ContentCarousel';
@@ -41,10 +41,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
           <div className="relative flex flex-col items-center overflow-hidden rounded-xl border border-primary/30 bg-card/60 p-3 shadow-lg backdrop-blur-md"><div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent"/><span className="relative z-10 mb-1 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">BIX Booster APY</span><span className="relative z-10 font-display text-[13px] font-bold text-primary">8% – {maximum}%</span></div>
           <div className="flex flex-col items-center rounded-xl border border-border/60 bg-card/60 p-3 shadow-lg backdrop-blur-md"><span className="mb-1 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Reference</span><span className="numeric font-display text-[13px] font-bold text-chart-2">${bixPrice.toFixed(6)}</span></div>
         </div>
-        <div className="lux-cta z-10 mt-6 grid w-full grid-cols-2 gap-3">
-          <Link to="/auth" className="lux-btn lux-btn--gold">LAUNCH APP <ArrowRight size={16}/></Link>
-          <Link to="/register" className="lux-btn lux-btn--glass">DAFTAR AKUN <ArrowUpRight size={16}/></Link>
-        </div>
+        {config?.readiness.presaleStageEnabled !== false && <HeroPresaleRibbon/>}
       </div>
       <div className="lux-ticker" aria-label="BIXLINK protocol highlights"><div className="lux-ticker-track">{[0,1].map(k => <span key={k} aria-hidden={k===1}>{['21.000.000 BIX FIXED SUPPLY','DEFLATIONARY HALVING','NON-CUSTODIAL MODEL','RWA NARRATIVE','SMART CONTRACT READY','COMMUNITY TO DAO'].map(t => <b key={t}>◆ {t}</b>)}</span>)}</div></div>
     </section>
@@ -59,7 +56,6 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><ContentCarousel group="roadmap" title="Roadmap BIXLINK" items={content.roadmap ?? defaultRoadmap}/></section>
     <CryptoNewsFeed />
     <section className="mx-auto max-w-3xl px-5 pb-16 md:px-8"><div className="eyebrow">FAQ</div><h2 className="section-title">PERTANYAAN <span>UMUM</span></h2><div className="mt-6 space-y-3">{FAQ.map(f => <details key={f.q} className="group rounded-2xl border border-chart-3/20 bg-card/50 p-4 backdrop-blur-md"><summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-bold">{f.q}<span className="text-chart-3 transition group-open:rotate-45">+</span></summary><p className="mt-3 text-xs leading-6 text-muted-foreground">{f.a}</p></details>)}</div></section>
-    {!user && <Link to="/auth" className="lux-btn lux-btn--gold fixed bottom-4 right-4 z-40 h-11 px-5 text-xs shadow-2xl md:hidden">LAUNCH APP <ArrowRight size={14}/></Link>}
   </div>;
 }
 const FAQ = [

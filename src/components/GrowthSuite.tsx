@@ -97,6 +97,20 @@ export function HeroFlux() {
 const ROUND_END = Date.UTC(2026, 9, 31, 15, 59, 59); // 31 Oct 2026 23:59 WITA
 const STAGES = [['Round 1', '$0.10', 'Current'], ['Round 2', '$0.13', 'Planned'], ['Round 3', '$0.16', 'Planned'], ['Listing target', '$0.20+', 'Not guaranteed']] as const;
 
+export function HeroPresaleRibbon() {
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => { setNow(Date.now()); const i = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(i); }, []);
+  const left = now === null ? 0 : Math.max(0, ROUND_END - now);
+  const parts = [Math.floor(left / 864e5), Math.floor(left / 36e5) % 24, Math.floor(left / 6e4) % 60, Math.floor(left / 1e3) % 60];
+  const fmt = (v: number) => now === null ? '--' : String(v).padStart(2, '0');
+  return <div className="hero-ribbon z-10 mt-6 w-full">
+    <div className="hero-ribbon-live"><i/><span>ROUND 1 LIVE</span><b className="numeric">{parts.map((v, i) => `${fmt(v)}${['D', 'H', 'M', 'S'][i]}`).join(' : ')}</b></div>
+    <div className="hero-ribbon-path numeric">{STAGES.slice(0, 3).map(([n, p], i) => <span key={n} className={i === 0 ? 'is-on' : ''}>{i > 0 && <em>→</em>}{p}</span>)}</div>
+    <Link to="/register" className="hero-ribbon-cta">Amankan alokasi</Link>
+    <small className="hero-ribbon-note">Harga ronde adalah referensi ledger internal, bukan jaminan listing.</small>
+  </div>;
+}
+
 export function PresaleStageBar() {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => { setNow(Date.now()); const i = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(i); }, []);
