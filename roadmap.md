@@ -121,3 +121,5 @@
 - [x] Fix visible landing animation and replace three effects with wallet-only financial icon motion; verified moving canvas and three enabled wallet effects.
 - [x] Add wallet quick actions, honest staking projection chart, pool-based presale availability, and scoped community simulation.
 - [x] Add owner-editable eight-language marketing materials with member PDF and dated bilingual silent video downloads; verify exports and owner save/readback.
+- [ ] Consolidate duplicated owner menu controls without changing delegated permissions.
+- [ ] Polish shared phone layouts and verify all public/member areas and owner navigation.
