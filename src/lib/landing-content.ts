@@ -1,5 +1,10 @@
 export type ContentItem = { title: string; description: string; image?: string; enabled?: boolean; quarter?: string; detail?: string; detailImage?: string; size?: 'sm' | 'md' | 'lg'; pageWidth?: 'narrow' | 'normal' | 'wide'; pageOpen?: boolean; percent?: number; url?: string };
-export type LandingContent = { ecosystem: ContentItem[]; income: ContentItem[]; spaces?: ContentItem[]; roadmap?: ContentItem[]; narrative?: ContentItem[]; tokenomics?: ContentItem[]; tokenomicsEnabled?: boolean; narrativeTitle?: string; narrativeIntro?: string; narrativeEnabled?: boolean; hero3dEnabled?: boolean; heroImage?: string | undefined; sponsor?: ContentItem };
+export const POPUP_PLACEMENTS = ['home', 'presale', 'wallet', 'dashboard'] as const;
+export type PopupPlacement = typeof POPUP_PLACEMENTS[number];
+export type PopupItem = { title: string; description: string; image?: string | undefined; enabled?: boolean; placement: PopupPlacement; ctaLabel?: string | undefined; url?: string | undefined };
+export const popupPlacementForPath = (path: string, signedIn: boolean): PopupPlacement | null =>
+  path === '/' ? (signedIn ? 'dashboard' : 'home') : path === '/presale' ? 'presale' : path === '/wallet' ? 'wallet' : null;
+export type LandingContent = { ecosystem: ContentItem[]; income: ContentItem[]; spaces?: ContentItem[]; roadmap?: ContentItem[]; narrative?: ContentItem[]; tokenomics?: ContentItem[]; tokenomicsEnabled?: boolean; narrativeTitle?: string; narrativeIntro?: string; narrativeEnabled?: boolean; hero3dEnabled?: boolean; heroImage?: string | undefined; sponsor?: ContentItem; popups?: PopupItem[] };
 export const defaultTokenomics: ContentItem[] = [['Staking ecosystem', 40], ['RWA treasury', 25], ['Liquidity plan', 20], ['Community & operations', 15]].map(([title, percent]) => ({ title: String(title), percent: Number(percent), description: '', enabled: true }));
 export const contentGroups = ['ecosystem', 'income', 'spaces', 'roadmap', 'narrative', 'tokenomics'] as const;
 export type ContentGroup = typeof contentGroups[number];

@@ -1861,3 +1861,25 @@ html[data-color-mode="light"] .site-shell .wallet-summary { border-color: color-
   .site-header .header-icon { width:25px; }
   .glass-dock a { font-size:9px; }
 }
+
+/* Centered compact dialogs (presale + announcement pop-ups): flex-free centering that survives zoom animation on mobile */
+.presale-purchase-dialog, .site-popup { position:fixed !important; inset:0 !important; margin:auto !important; transform:none !important; translate:none !important; width:min(360px, calc(100vw - 32px)) !important; max-width:none !important; height:fit-content !important; max-height:calc(100dvh - 40px) !important; overflow-y:auto; }
+.presale-purchase-dialog[data-state=open], .site-popup[data-state=open] { animation:popup-in .2s ease-out; }
+@keyframes popup-in { from { opacity:0; scale:.96; } to { opacity:1; scale:1; } }
+.site-popup { padding:0; gap:0; border-radius:14px; border-color:color-mix(in oklab, var(--chart-3) 45%, var(--border)); background:linear-gradient(165deg, color-mix(in oklab, var(--card) 94%, var(--chart-3)), var(--card)); box-shadow:var(--sh-3); }
+.site-popup > button { background:color-mix(in oklab, var(--card) 80%, transparent); border-radius:999px; padding:5px; z-index:2; }
+.site-popup__art { aspect-ratio:16/10; overflow:hidden; background:var(--background); }
+.site-popup__img { display:block; width:100%; height:100%; object-fit:cover; }
+.site-popup__body { padding:16px 18px 18px; }
+.site-popup__eyebrow { display:block; margin-bottom:6px; font-size:9px; font-weight:800; letter-spacing:.12em; color:var(--chart-3); }
+
+/* BIX PAY receive card */
+.pay-qr-card { position:relative; margin-inline:auto; width:min(100%, 300px); border-radius:22px; padding:18px; border:1px solid color-mix(in oklab, var(--chart-3) 50%, var(--border)); background:linear-gradient(160deg, color-mix(in oklab, var(--card) 88%, var(--chart-3)), var(--card)); box-shadow:var(--sh-2); }
+.pay-qr-card__head { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:10px; font-weight:800; letter-spacing:.1em; color:var(--chart-3); }
+.pay-qr-plate { position:relative; margin-top:14px; border-radius:16px; padding:14px; background:oklch(0.99 0 0); }
+.pay-qr-plate svg { display:block; width:100%; height:auto; }
+.pay-qr-plate::before, .pay-qr-plate::after { content:""; position:absolute; width:22px; height:22px; border:2px solid var(--chart-3); }
+.pay-qr-plate::before { top:-6px; left:-6px; border-right:0; border-bottom:0; border-top-left-radius:10px; }
+.pay-qr-plate::after { bottom:-6px; right:-6px; border-left:0; border-top:0; border-bottom-right-radius:10px; }
+.pay-qr-code { margin-top:14px; display:flex; align-items:center; justify-content:center; gap:8px; border-radius:999px; border:1px dashed color-mix(in oklab, var(--chart-3) 50%, transparent); padding:8px 12px; font-weight:800; }
+.tx-hint { margin-top:6px; font-size:10.5px; line-height:1.5; color:var(--muted-foreground); text-align:center; }

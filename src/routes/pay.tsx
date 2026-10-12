@@ -99,17 +99,25 @@ function PayPage() {
 
       {tab === 'pay' ? <section className="mt-5 rounded-[20px] border border-primary bg-card p-5">
         <Button className="w-full rounded-full bg-chart-2 text-background" onClick={() => gate() && setScan(true)}>{enabled ? <><ScanLine/> Scan QR code</> : <><Lock/> Scan QR · Coming soon</>}</Button>
+        <p className="tx-hint">Opens the camera or a gallery image to read a member's BIX PAY QR.</p>
         <div className="my-4 text-center text-xs text-muted-foreground">or enter manually</div>
         <label className="text-xs text-muted-foreground">RECIPIENT CODE<input className="form-input mt-2 uppercase" placeholder="BIX-123456" value={code} onChange={e => setCode(e.target.value)}/></label>
         <label className="mt-3 block text-xs text-muted-foreground">AMOUNT (BIX)<input className="form-input mt-2" type="number" min="0.0001" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00"/></label>
         <label className="mt-3 block text-xs text-muted-foreground">NOTE (OPTIONAL)<input className="form-input mt-2" maxLength={120} value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. Order #12"/></label>
         <Button disabled={busy || (enabled && (!code || !(Number(amount) > 0)))} className="mt-5 w-full rounded-full bg-primary" onClick={review}>{enabled ? 'Review payment' : <><Lock size={16}/> Pay · Coming soon</>}</Button>
+        <p className="tx-hint">Checks the recipient first; nothing is sent until you confirm with your PIN.</p>
         <p className="mt-3 text-xs text-muted-foreground">Payments move BIX instantly inside the BIXLINK internal ledger. Max 100,000 BIX per payment, 500,000 BIX per 24 hours. The owner can reverse suspicious payments.</p>
       </section> : <section className="mt-5 rounded-[20px] border border-chart-2 bg-card p-5 text-center">
-        {data?.code ? <><div className="mx-auto w-fit rounded-2xl bg-foreground p-4"><QRCodeSVG value={qrUrl} size={200}/></div>
-          <p className="numeric mt-3 font-bold">{data.code}</p>
+        {data?.code ? <><div className="pay-qr-card">
+            <div className="pay-qr-card__head"><span className="inline-flex items-center gap-1"><QrCode size={13}/> BIX PAY</span><span>{Number(reqAmount) > 0 ? `${number(Number(reqAmount), { maximumFractionDigits: 8 })} BIX` : 'ANY AMOUNT'}</span></div>
+            <div className="pay-qr-plate"><QRCodeSVG value={qrUrl} size={220} level="M" marginSize={0}/></div>
+            <button type="button" className="pay-qr-code numeric w-full" onClick={() => { navigator.clipboard.writeText(data.code ?? ''); setMsg('Member code copied.'); }} aria-label="Copy member code">{data.code}<Copy size={13}/></button>
+            {reqNote && <p className="mt-2 truncate text-[11px] text-muted-foreground">{reqNote}</p>}
+          </div>
+          <p className="tx-hint">Show this QR to another member. They scan it to send BIX to your code.</p>
           <div className="mt-4 grid gap-3 text-left sm:grid-cols-2"><label className="text-xs text-muted-foreground">REQUEST AMOUNT (OPTIONAL)<input className="form-input mt-2" type="number" min="0" step="any" value={reqAmount} onChange={e => setReqAmount(e.target.value)} placeholder="Any amount"/></label><label className="text-xs text-muted-foreground">NOTE (OPTIONAL)<input className="form-input mt-2" maxLength={120} value={reqNote} onChange={e => setReqNote(e.target.value)}/></label></div>
-          <Button variant="outline" className="mt-4 rounded-full" onClick={() => { navigator.clipboard.writeText(qrUrl); setMsg('Payment link copied.'); }}><Copy/> Copy payment link</Button></>
+          <Button variant="outline" className="mt-4 rounded-full" onClick={() => { navigator.clipboard.writeText(qrUrl); setMsg('Payment link copied.'); }}><Copy/> Copy payment link</Button>
+          <p className="tx-hint">Share the link in chat — it opens BIX PAY with your code and amount filled in.</p></>
           : <p className="text-sm text-muted-foreground">Your member code is being prepared.</p>}
         {!enabled && <p className="mt-4 text-xs text-chart-3">Receiving opens when the owner launches BIX PAY.</p>}
       </section>}
