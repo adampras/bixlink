@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { X, Search, ArrowUpRight, Layers, ShoppingBag, SlidersHorizontal, Boxes, Store, Lock } from 'lucide-react';
+import { X, Search, ArrowUpRight, Layers, ShoppingBag, SlidersHorizontal, Boxes, Store, Lock, Shield, Gem } from 'lucide-react';
 import foxEmblem from '@/assets/marketplace-fox-emblem.jpg.asset.json';
+import vaultHero from '@/assets/marketplace-vault-hero.jpg.asset.json';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { ContentImage } from '@/components/ContentImage';
@@ -28,8 +29,44 @@ function Marketplace(){
  const merch=products.filter(i=>matching(i.name)&&(category==='ALL'||i.category===category)).sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='price'?(a.priceUsd??Infinity)-(b.priceUsd??Infinity):0);
  const nftShown=view==='ALL'||view==='REACTOR',merchShown=view==='ALL'||view==='MERCHANDISE';
  return <BixShell><main className="lux-shop mx-auto max-w-7xl px-5 py-8 md:px-8 md:py-12">
-  <header className="atelier-head"><img src={foxEmblem.url} alt="BIXLINK Marketplace" className="atelier-emblem"/><p className="atelier-kicker">THE ATELIER &amp; VAULT</p><div className="atelier-actions"><Button variant="outline" className="atelier-pill" onClick={()=>setView('OWNED')}><Layers size={16}/>My certificates</Button><Button className="atelier-sell" onClick={()=>document.getElementById('sell-product')?.scrollIntoView({behavior:'smooth'})}><Store size={16}/>Sell product</Button></div></header>
-   <section className="atelier-info">{([['violet','Reactor NFTs',`${artworks.length} certificates`,'REACTOR',Boxes],['gold','Merchandise',`${products.length} signature objects`,'MERCHANDISE',ShoppingBag],['emerald','Member Store','Curated sellers','STORE',Store],['cyan','My Vault','Owned certificates','OWNED',Lock]] as const).map(([tone,title,sub,id,Icon])=><button type="button" key={title} className={`atelier-box atelier-box--${tone}`} onClick={()=>id==='STORE'?document.getElementById('member-store')?.scrollIntoView({behavior:'smooth'}):setView(id)}><Icon size={34} strokeWidth={1.6}/><span>{title}</span><b>{sub}</b></button>)}</section>
+<section aria-label="BIXLINK Marketplace vault" className="market-hero relative mb-8 overflow-hidden rounded-3xl border border-[#39FF14]/20 shadow-[0_30px_90px_-40px_rgba(57,255,20,0.45)] md:mb-12">
+  <div aria-hidden className="absolute inset-0" style={{ backgroundImage: `linear-gradient(100deg, rgba(2,12,7,0.94) 0%, rgba(2,12,7,0.8) 45%, rgba(3,24,14,0.45) 100%), url(${vaultHero.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+  <div aria-hidden className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#040b07] to-transparent" />
+  <div className="relative z-10 flex flex-col gap-8 px-5 py-8 md:px-10 md:py-12">
+    <div className="flex flex-col gap-4 md:grid md:grid-cols-[auto_1fr_auto] md:items-center">
+      <div className="flex items-center gap-3">
+        <img src={foxEmblem.url} alt="BIXLINK emblem" className="h-12 w-12 rounded-xl border border-amber-300/40 object-cover shadow-[0_0_22px_-4px_rgba(255,215,0,0.55)] md:h-14 md:w-14" />
+        <span className="text-[10px] font-bold tracking-[0.35em] text-amber-200/80">BIXLINK</span>
+      </div>
+      <nav aria-label="Marketplace sections" className="order-last flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white/10 bg-black/45 p-1.5 backdrop-blur-md md:order-none md:justify-self-center">
+        <Button variant="ghost" onClick={explore} className="shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[10px] font-bold tracking-[0.2em] text-emerald-100/75 transition hover:bg-[#39FF14]/10 hover:text-[#39FF14]">MARKETPLACE</Button>
+        <Button variant="ghost" onClick={()=>setView('OWNED')} className="shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[10px] font-bold tracking-[0.2em] text-emerald-100/75 transition hover:bg-[#39FF14]/10 hover:text-[#39FF14]">VAULT</Button>
+        <Button variant="ghost" onClick={()=>setView('REACTOR')} className="shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[10px] font-bold tracking-[0.2em] text-emerald-100/75 transition hover:bg-[#39FF14]/10 hover:text-[#39FF14]">NFTS</Button>
+        <Button asChild variant="ghost" className="shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[10px] font-bold tracking-[0.2em] text-emerald-100/75 transition hover:bg-[#39FF14]/10 hover:text-[#39FF14]"><Link to="/about">ABOUT</Link></Button>
+      </nav>
+      <span aria-hidden className="hidden w-12 md:block" />
+    </div>
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-center">
+      <div>
+        <h1 className="font-display text-4xl font-black leading-[0.95] tracking-tight md:text-6xl xl:text-7xl">
+          <span className="block bg-gradient-to-r from-emerald-300 via-[#39FF14] to-emerald-600 bg-clip-text text-transparent drop-shadow-[0_0_28px_rgba(57,255,20,0.35)]">BIXLINK</span>
+          <span className="block bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-600 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(255,215,0,0.28)]">MARKETPLACE</span>
+        </h1>
+        <p className="mt-4 text-[10px] font-bold tracking-[0.3em] text-emerald-200/80 md:text-xs">THE ATELIER &amp; VAULT — CURATED DIGITAL ARTIFACTS</p>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <Button onClick={()=>setView('OWNED')} className="rounded-xl border border-[#39FF14]/50 bg-[#39FF14]/10 px-5 py-3 text-sm font-bold text-emerald-50 shadow-[0_0_30px_-8px_rgba(57,255,20,0.6)] backdrop-blur-md transition hover:bg-[#39FF14]/20"><Lock size={16}/>My certificates</Button>
+          <Button variant="outline" onClick={explore} className="rounded-xl border border-emerald-300/30 bg-white/5 px-5 py-3 text-sm font-bold text-emerald-100 backdrop-blur-md transition hover:bg-white/10"><Search size={16}/>Explore Collection</Button>
+          <Button variant="ghost" onClick={()=>document.getElementById('sell-product')?.scrollIntoView({behavior:'smooth'})} className="rounded-xl px-3 py-3 text-xs font-semibold text-emerald-200/60 transition hover:text-[#39FF14]"><Store size={14}/>Sell product</Button>
+        </div>
+      </div>
+      <div className="grid gap-3">
+        <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.07] p-4 backdrop-blur-md transition hover:border-[#39FF14]/40 hover:bg-white/[0.1]"><span className="rounded-xl border border-amber-300/40 bg-amber-400/10 p-3 text-amber-300"><Shield size={26} strokeWidth={1.6}/></span><div><b className="text-sm text-emerald-50">Verified Assets</b><p className="text-xs text-emerald-100/60">Authenticated &amp; immutable</p></div></div>
+        <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.07] p-4 backdrop-blur-md transition hover:border-[#39FF14]/40 hover:bg-white/[0.1]"><span className="rounded-xl border border-[#39FF14]/40 bg-[#39FF14]/10 p-3 text-[#39FF14]"><Gem size={26} strokeWidth={1.6}/></span><div><b className="text-sm text-emerald-50">Decentralized Vault</b><p className="text-xs text-emerald-100/60">Secure storage for digital artifacts</p></div></div>
+        <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.07] p-4 backdrop-blur-md transition hover:border-[#39FF14]/40 hover:bg-white/[0.1]"><span className="rounded-xl border border-amber-300/40 bg-amber-400/10 p-3 text-amber-300"><Layers size={26} strokeWidth={1.6}/></span><div><b className="text-sm text-emerald-50">Rare Collections</b><p className="text-xs text-emerald-100/60">Curated by experts · Limited editions</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
    <div className="shop-tabs atelier-tabs" role="tablist" aria-label="Marketplace categories">{[['ALL','All collections'],['REACTOR','Reactor NFTs'],['MERCHANDISE','Merchandise'],['OWNED','My certificates']].map(([id,label])=><Button key={id} role="tab" aria-selected={view===id} variant="ghost" onClick={()=>setView(id??'ALL')}>{label}</Button>)}</div>
  {view==='OWNED'?user?<MyNftCollection userId={user.id} bixPrice={cfg?.bixMarket.priceUsd??.84291}/>:<Button asChild className="mt-8"><Link to="/auth">Sign in to view certificates</Link></Button>:<>
  <div className="shop-toolbar"><label className="shop-search"><Search size={17}/><input aria-label="Search marketplace" placeholder="Search the collection" value={search} onChange={e=>setSearch(e.target.value)}/></label><div className="flex flex-wrap items-center gap-2"><SlidersHorizontal size={15}/>{nftShown&&<select className="form-input" aria-label="Reactor rarity" value={tier} onChange={e=>setTier(e.target.value)}>{['ALL',...NFT_TIERS].map(t=><option key={t} value={t}>{t==='ALL'?'All rarities':t}</option>)}</select>}{merchShown&&<><select className="form-input" aria-label="Product category" value={category} onChange={e=>setCategory(e.target.value)}>{['ALL',...new Set(products.map(p=>p.category))].map(c=><option key={c} value={c}>{c==='ALL'?'All categories':c}</option>)}</select><select className="form-input" aria-label="Sort products" value={sort} onChange={e=>setSort(e.target.value)}><option value="featured">Featured</option><option value="name">Name A–Z</option><option value="price">Price: low to high</option></select></>}</div></div>
