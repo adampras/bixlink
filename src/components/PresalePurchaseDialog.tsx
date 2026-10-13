@@ -25,6 +25,7 @@ export function PresalePurchaseDialog({ selection, balance, busy, error, onClose
               <DialogPrimitive.Description className="mt-1 text-sm capitalize text-muted-foreground">{selection.strategy} · Confirm your presale allocation</DialogPrimitive.Description>
               <strong className="numeric mt-3 block text-2xl font-bold text-chart-3"><AnimatedNumber value={selection.usd} digits={0}/> <small className="text-sm">USDT</small></strong>
               <dl className="mt-3 text-xs">
+                <div className="flex justify-between gap-3 border-t border-border py-2"><dt className="text-muted-foreground">Presale rate</dt><dd className="numeric font-bold">1 BIX = $0.50 USDT</dd></div>
                 <div className="flex justify-between gap-3 border-t border-border py-2"><dt className="text-muted-foreground">Locked allocation</dt><dd className="numeric font-bold">{number(selection.bix)} BIX</dd></div>
                 <div className="flex justify-between gap-3 border-t border-border py-2"><dt className="text-muted-foreground">Release period</dt><dd>{selection.days} days</dd></div>
                 {selection.dailyUsd > 0 && <div className="flex justify-between gap-3 border-t border-border py-2"><dt className="text-muted-foreground">USDT daily terms</dt><dd className="numeric">{number(selection.dailyUsd, {maximumFractionDigits: 2})} USDT</dd></div>}

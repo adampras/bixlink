@@ -12,6 +12,6 @@ export function AdminStakingControls({ onMessage }: { onMessage: (message: strin
       <Button variant={view === 'daily' ? 'default' : 'outline'} aria-pressed={view === 'daily'} className="h-auto min-h-11 whitespace-normal" onClick={() => setView('daily')}><Shuffle size={16}/>Profit harian</Button>
       <Button variant={view === 'packages' ? 'default' : 'outline'} aria-pressed={view === 'packages'} className="h-auto min-h-11 whitespace-normal" onClick={() => setView('packages')}><SlidersHorizontal size={16}/>Edit paket</Button>
     </div>
-    {view === 'daily' ? <YieldControlPanel market={false}/> : <AdminDurationPackages onMessage={onMessage}/>}
+    {view === 'daily' ? <YieldControlPanel/> : <AdminDurationPackages onMessage={onMessage}/>}
   </section>;
 }

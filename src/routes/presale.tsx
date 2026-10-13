@@ -80,6 +80,7 @@ function PresalePage() {
       <div><dd className="numeric font-display text-lg font-bold text-chart-2">{number(released, { maximumFractionDigits: 4 })}</dd><dt className="text-[10px] text-muted-foreground">Mined out</dt></div>
       <div><dd className="numeric font-display text-lg font-bold text-chart-3">{cfg?.sponsorPct ?? 10}%</dd><dt className="text-[10px] text-muted-foreground">Sponsor</dt></div>
     </dl>
+    <p className="mt-4 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-center text-xs font-bold text-primary">Round 1 Presale · 1 BIX = $0.50 USDT · Pool cap 3,150,000 BIX</p>
     {!user ? <p className="mt-6 text-sm text-muted-foreground">Sign in to view presale packages.</p> : !cfg ? <p className="mt-6 text-sm text-muted-foreground">Loading…</p> : <>
       {!cfg.enabled && <p className="mt-6 rounded-lg border border-chart-3 p-3 text-sm text-chart-3">Presale is currently closed by the owner.</p>}
       <section aria-label="Presale pool availability" className="mt-5 border-y border-border py-4"><div className="flex flex-wrap justify-between gap-2 text-xs"><b>Shared presale allocation</b><span className="numeric">{number(pool.remaining)} BIX remaining</span></div><progress className="allocation-progress mt-3" max={100} value={pool.percent}/><p className="mt-2 text-[10px] text-muted-foreground">Recorded pool usage · shared across all packages · not a guaranteed reservation.</p></section>
