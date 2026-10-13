@@ -23,6 +23,7 @@ import { NFT_ART, NFT_NAME, type NftTier } from '@/lib/nft';
 import { PresalePurchaseDialog, type PresaleSelection } from '@/components/PresalePurchaseDialog';
 import { strategyQuote } from '@/lib/presale-strategy';
 import { poolAvailability } from '@/lib/marketing';
+import { maxCapLabel } from '@/lib/max-cap';
 const presaleArtTier = (usd: number): NftTier => usd >= 30000 ? 'MYTHIC' : usd >= 10000 ? 'LEGENDARY' : usd >= 5000 ? 'EPIC' : usd >= 1000 ? 'RARE' : 'COMMON';
 
 export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Genesis presale with Hybrid, Dividend and Founder strategies plus the 21-slot $100,000 Sovereign allocation.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }, { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }] }), component: PresalePage });
@@ -90,7 +91,7 @@ function PresalePage() {
             <div className="presale-lux-inner flex h-full flex-col">
               <div className="flex items-center justify-between gap-2"><span className="truncate text-[10px] font-bold text-muted-foreground">{NFT_NAME[tier].toUpperCase()} · {tier}</span><button type="button" className="nft-preview-chip" onClick={() => setNftPreview(tier)}><Eye size={12}/> NFT</button></div>
               <h3 className="presale-lux-price numeric font-display text-3xl font-black">${number(p.usd)}</h3>
-              <dl className="mt-2 grid grid-cols-2 gap-2 text-xs"><div><dt className="text-muted-foreground">Total BIX</dt><dd className="numeric font-bold text-primary"><Lock size={11} className="inline"/> {number(p.bix)}</dd></div><div><dt className="text-muted-foreground">Release</dt><dd className="numeric font-bold">{p.releaseDays} days</dd></div></dl>
+              <dl className="mt-2 grid grid-cols-2 gap-2 text-xs"><div><dt className="text-muted-foreground">Total BIX</dt><dd className="numeric font-bold text-primary"><Lock size={11} className="inline"/> {number(p.bix)}</dd></div><div><dt className="text-muted-foreground">Release</dt><dd className="numeric font-bold">{p.releaseDays} days</dd></div><div className="col-span-2"><dt className="text-muted-foreground">Earnings limit</dt><dd className="numeric font-bold text-chart-3">{maxCapLabel(p.usd)}</dd></div></dl>
               <Button className="mt-auto w-full rounded-lg" disabled={!cfg.enabled || busy !== null} onClick={() => onBuy(p.usd)}>{busy === p.usd ? 'Processing…' : 'Buy package'}</Button>
             </div>
           </article>; })}</div>
