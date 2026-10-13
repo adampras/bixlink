@@ -51,11 +51,11 @@ export function YieldControlPanel({ market = true }: { market?: boolean }) {
       {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
       {market && cfg.isAdmin && <section className="mt-6 border-y border-border py-5">
         <h2 className="font-display text-xl font-bold">Internal BIX price</h2>
-        <p className="mt-1 text-xs text-muted-foreground">Current reference: <b className="numeric text-chart-3">${number(current, { maximumFractionDigits: 6 })}</b> · presale price $0.10. Ledger reference only.</p>
+        <p className="mt-1 text-xs text-muted-foreground">Current reference: <b className="numeric text-chart-3">${number(current, { maximumFractionDigits: 6 })}</b> · presale price $0.50. Ledger reference only.</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <input aria-label="BIX price" className="form-input numeric max-w-[180px]" type="number" min="0.000001" step="0.000001" placeholder={String(current)} value={price} onChange={e => setPrice(e.target.value)}/>
-          <Button disabled={busy || !(Number(price) > 0)} onClick={() => savePrice(Number(price))}><Save size={16}/>Save</Button>
-          <Button variant="outline" disabled={busy} onClick={() => savePrice(0.1)}>Match presale $0.10</Button>
+          <input aria-label="BIX price" className="form-input numeric max-w-[180px]" type="number" min="0.000001" step="0.000001" placeholder={String(current)} value={price === '' && current ? String(current) : price} onChange={e => setPrice(e.target.value)}/>
+          <Button disabled={busy || !(Number(price || current) > 0)} onClick={() => savePrice(Number(price || current))}><Save size={16}/>Save</Button>
+          <Button variant="outline" disabled={busy} onClick={() => savePrice(0.5)}>Match presale $0.50</Button>
         </div>
       </section>}
       <section className="mt-6 border-y border-border py-5">

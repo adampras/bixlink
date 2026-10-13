@@ -195,7 +195,7 @@ export function HeroFlux() {
 }
 
 const ROUND_END = Date.UTC(2026, 9, 31, 15, 59, 59); // 31 Oct 2026 23:59 WITA
-const STAGES = [['Round 1', '$0.10', 'Current'], ['Round 2', '$0.13', 'Planned'], ['Round 3', '$0.16', 'Planned'], ['Listing target', '$0.20+', 'Not guaranteed']] as const;
+const STAGES = [['Round 1', '$0.50', 'Current'], ['Round 2', '$0.65', 'Planned'], ['Round 3', '$0.80', 'Planned'], ['Listing target', '$1.00+', 'Not guaranteed']] as const;
 
 export function HeroPresaleRibbon() {
   const [now, setNow] = useState<number | null>(null);
