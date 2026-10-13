@@ -2037,3 +2037,4 @@ html[data-view="zen"] .pro-only { display:none !important; }
 .boutique-badge { background: color-mix(in oklab, var(--primary) 14%, transparent) !important; color: var(--primary) !important; border-color: color-mix(in oklab, var(--primary) 45%, transparent) !important; box-shadow: none !important; }
 .boutique-lot { letter-spacing: .14em; font-variant-numeric: tabular-nums; }
 .boutique-cta { background: linear-gradient(135deg, var(--primary), color-mix(in oklab, var(--primary) 70%, var(--background))) !important; color: var(--primary-foreground) !important; box-shadow: none !important; }
+.wallet-summary[data-wallet-skin] { position: relative; }
