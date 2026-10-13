@@ -528,13 +528,13 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .settings-language svg { position: absolute; top: 5px; right: 5px; width: 12px; }
 .settings-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .settings-toggle { min-width: 86px; border-radius: 999px; }
-.network-stat { display: flex; min-height: 104px; align-items: center; gap: 14px; border: 1px solid var(--line); border-radius: var(--r-card); padding: 18px; background: linear-gradient(145deg, oklch(0.25 0.08 290 / 90%), var(--card)); box-shadow: var(--sh-1); }
-.network-stat-icon { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: var(--r-control); background: var(--secondary); color: var(--primary); }
+.network-stat { display: flex; min-height: 104px; align-items: center; gap: 14px; border: 1px solid var(--line); border-radius: var(--r-card); padding: 18px; background: linear-gradient(145deg, color-mix(in oklab, var(--chart-3) 7%, var(--card)), var(--card)); box-shadow: var(--sh-1); }
+.network-stat-icon { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: var(--r-control); background: var(--secondary); color: var(--chart-3); }
 .network-stat-icon svg { width: 18px; }
 .network-stat span:not(.network-stat-icon) { display: block; font-size: 11px; color: var(--muted-foreground); }
 .network-stat strong { display: block; margin-top: 3px; font-family: "JetBrains Mono", monospace; font-size: clamp(1.05rem, 3vw, 1.75rem); line-height: 1; color: var(--foreground); }
 .network-stat strong small { font-size: .8rem; color: var(--muted-foreground); }
-.network-tree-panel, .network-plan { border: 1px solid var(--line); border-radius: var(--r-card); background: linear-gradient(150deg, oklch(0.24 0.08 290 / 86%), var(--card)); box-shadow: var(--sh-2); }
+.network-tree-panel, .network-plan { border: 1px solid var(--line); border-radius: var(--r-card); background: linear-gradient(150deg, color-mix(in oklab, var(--chart-3) 6%, var(--card)), var(--card)); box-shadow: var(--sh-2); }
 .network-tree-panel { position: relative; overflow: hidden; padding: 14px; }
 .network-tree-panel::before { content: ""; position: absolute; inset: 20% 20%; border-radius: 50%; background: oklch(0.84 0.105 92 / 12%); filter: blur(45px); }
 .network-tree { position: relative; z-index: 1; max-width: 520px; }
