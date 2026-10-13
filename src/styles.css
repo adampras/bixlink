@@ -277,37 +277,37 @@ html[data-color-mode="light"] .landing-tokenomics { --token-cyan:oklch(.48 .1 21
   }
 }
 
-/* BIXLINK visual system */
+/* BIXLINK visual system — Imperial Obsidian & Champagne Gold */
 :root {
   --radius: 1.25rem;
-  --background: oklch(0.13 0.05 285);
-  --foreground: oklch(0.97 0.01 280);
-  --card: oklch(0.21 0.07 282);
-  --card-foreground: oklch(0.97 0.01 280);
-  --popover: oklch(0.21 0.07 282);
-  --popover-foreground: oklch(0.97 0.01 280);
-  --primary: oklch(0.67 0.23 305);
-  --primary-foreground: oklch(0.1 0.04 285);
-  --secondary: oklch(0.25 0.06 282);
-  --secondary-foreground: oklch(0.97 0.01 280);
-  --muted: oklch(0.25 0.06 282);
-  --muted-foreground: oklch(0.74 0.025 280);
-  --accent: oklch(0.3 0.09 300);
-  --accent-foreground: oklch(0.97 0.01 280);
-  --border: oklch(0.39 0.08 285 / 55%);
-  --input: oklch(0.39 0.08 285 / 55%);
-  --ring: oklch(0.67 0.23 305);
-  --chart-1: oklch(0.67 0.23 305);
-  --chart-2: oklch(0.89 0.31 142);
-  --chart-3: oklch(0.88 0.19 95);
+  --background: oklch(0.145 0.018 275);
+  --foreground: oklch(0.96 0.012 95);
+  --card: oklch(0.205 0.022 278);
+  --card-foreground: oklch(0.96 0.012 95);
+  --popover: oklch(0.205 0.022 278);
+  --popover-foreground: oklch(0.96 0.012 95);
+  --primary: oklch(0.84 0.105 92);
+  --primary-foreground: oklch(0.16 0.03 280);
+  --secondary: oklch(0.24 0.02 278);
+  --secondary-foreground: oklch(0.96 0.012 95);
+  --muted: oklch(0.24 0.02 278);
+  --muted-foreground: oklch(0.72 0.02 90);
+  --accent: oklch(0.28 0.035 90);
+  --accent-foreground: oklch(0.94 0.06 95);
+  --border: oklch(0.45 0.045 90 / 42%);
+  --input: oklch(0.45 0.045 90 / 42%);
+  --ring: oklch(0.84 0.105 92);
+  --chart-1: oklch(0.84 0.105 92);
+  --chart-2: oklch(0.78 0.12 160);
+  --chart-3: oklch(0.87 0.13 95);
   --destructive: oklch(0.65 0.23 25);
   --destructive-foreground: oklch(0.97 0.01 280);
 }
 @theme inline { --font-display: 'Sora', sans-serif; --font-sans: 'Manrope', sans-serif; }
 html { scroll-behavior: smooth; }
 body { font-family: var(--font-sans); }
-.site-shell { background-image: radial-gradient(ellipse at 52% 8%, oklch(0.3 0.14 297 / 26%), transparent 37%); }
-.site-header { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid var(--border); background: oklch(0.13 0.05 285 / 90%); backdrop-filter: blur(18px); }
+.site-shell { background-image: radial-gradient(ellipse at 52% 8%, oklch(0.4 0.08 92 / 18%), transparent 37%); }
+.site-header { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid var(--border); background: oklch(0.145 0.018 275 / 90%); backdrop-filter: blur(18px); }
 .brand-mark, .brand-hero { color: var(--chart-3); text-shadow: 0 0 32px oklch(0.88 0.19 95 / 35%); }
 .header-brand { display: flex; min-width: 122px; align-items: center; gap: 8px; }
 .header-brand img { width: 40px; height: 40px; }
