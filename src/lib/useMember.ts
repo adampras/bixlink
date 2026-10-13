@@ -116,7 +116,7 @@ export function usePublicConfig() {
         splash: (settings['splash'] ?? { durationSeconds: 0.5 }) as { durationSeconds: number },
         miningConversion: (settings['mining_conversion'] ?? { enabled: false, vbixPerBix: null }) as { enabled: boolean; vbixPerBix: number | null },
         wallet: (settings['wallet'] ?? { address: '', network: 'USDT BEP20' }) as { address: string; network: string },
-        depositWallets: (((settings['deposit_wallets'] as { wallets?: { code: string; label: string; network: 'BEP20' | 'TRC20' | 'ERC20'; address: string; enabled: boolean }[] } | undefined)?.wallets) ?? []).filter(w => w.enabled && w.address),
+        depositWallets: (((settings['deposit_wallets'] as { wallets?: { code: string; label: string; network: 'BEP20' | 'TRC20' | 'ERC20'; asset?: 'USDT' | 'USDC'; address: string; enabled: boolean }[] } | undefined)?.wallets) ?? []).filter(w => w.enabled && w.address),
         miningVisibility: (settings['mining_visibility'] ?? { visible: true }) as { visible: boolean },
         swap: (settings['swap'] ?? { enabled: false }) as { enabled: boolean },
         bixPay: (settings['bix_pay'] ?? { enabled: false }) as { enabled: boolean },
