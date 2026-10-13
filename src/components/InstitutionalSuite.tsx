@@ -3,7 +3,8 @@ import { Lock, ShieldCheck, Vault, Crown, Send, Mail } from 'lucide-react';
 const RESERVES = [
   { label: 'Fixed total supply', value: '21,000,000 BIX', note: 'Hard cap · no mint planned' },
   { label: 'Genesis reserve vault', value: '1,000,000 BIX', note: 'Owner-only · locked' },
-  { label: 'Mining & staking rewards pool', value: '10,500,000 BIX', note: 'Presale + rewards cap' },
+  { label: 'Staking rewards pool', value: '7,350,000 BIX', note: '35% · halving every 2 years' },
+  { label: 'Presale allocation', value: '3,150,000 BIX', note: '15% · pool cap' },
 ];
 
 /** Proof-of-reserve style disclosure. Planned allocations only — not on-chain attestation. */

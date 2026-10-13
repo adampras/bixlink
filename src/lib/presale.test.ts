@@ -16,5 +16,12 @@ describe('presale', () => {
 import { bixForUsd } from './presale';
 describe('presale price', () => {
   it('$500 at $0.50 per BIX gives 1000 BIX', () => { expect(bixForUsd(500, 0.5)).toBe(1000); });
-  it('$10000 at $0.10 per BIX gives 100000 BIX', () => { expect(bixForUsd(10000, 0.1)).toBe(100000); });
+  it('$10000 at $0.50 per BIX gives 20000 BIX', () => { expect(bixForUsd(10000, 0.5)).toBe(20000); });
+});
+
+import { maxCapPct } from './max-cap';
+describe('tiered max cap', () => {
+  it('packages below $1000 cap at 300%', () => { expect(maxCapPct(500)).toBe(300); });
+  it('packages $1000–$20000 cap at 350%', () => { expect(maxCapPct(1000)).toBe(350); expect(maxCapPct(20000)).toBe(350); });
+  it('packages above $20000 cap at 400%', () => { expect(maxCapPct(20001)).toBe(400); expect(maxCapPct(100000)).toBe(400); });
 });
