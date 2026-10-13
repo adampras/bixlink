@@ -244,14 +244,23 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
     if (data.key === 'bix_market') {
       const { data: current, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', 'bix_market').maybeSingle();
       if (readError) throw readError;
-      data.value = { ...(current?.value && typeof current.value === 'object' && !Array.isArray(current.value) ? current.value : {}), priceUsd: data.value['priceUsd'] };
+      const prev = (current?.value && typeof current.value === 'object' && !Array.isArray(current.value) ? current.value : {}) as Record<string, unknown>;
+      const price = Number(data.value['priceUsd']);
+      const mv = resolveMovement(prev['movement']);
+      const now = Date.now();
+      // Re-anchor the display simulation around the new reference so the market card follows the saved price.
+      const movement = mv ? { ...mv, lower: Number((price * .9).toFixed(6)), upper: Number((price * 1.1).toFixed(6)), base: price, startedAt: now, pausedAt: mv.enabled ? null : now } : undefined;
+      data.value = { ...prev, priceUsd: price, ...(movement ? { movement } : {}) };
     }
     const { error } = access === 'reviewer'
       ? await context.supabase.rpc('bix_reviewer_update_setting', { p_key: data.key, p_value: data.value as Json })
       : await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
     if (error) throw error;
     const { data: saved, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', data.key).single();
-    if (readError || !saved || canonicalJson(saved.value) !== canonicalJson(data.value)) throw new Error('Could not confirm saved settings');
+    const savedOk = data.key === 'bix_market'
+      ? Math.abs(Number((saved?.value as Record<string, unknown> | null)?.['priceUsd']) - Number(data.value['priceUsd'])) < 1e-9
+      : saved && canonicalJson(saved.value) === canonicalJson(data.value);
+    if (readError || !saved || !savedOk) throw new Error('Could not confirm saved settings');
     return { ok: true };
   });
 
@@ -288,7 +297,7 @@ export const updateInternalMovement = createServerFn({ method: 'POST' }).middlew
       : await context.supabase.from('app_settings').update({ value: value as Json }).eq('key', 'bix_market');
     if (writeError) throw writeError;
     const { data: saved, error: verifyError } = await context.supabase.from('app_settings').select('value').eq('key', 'bix_market').single();
-    if (verifyError || canonicalJson(saved?.value) !== canonicalJson(value)) throw new Error('Could not confirm movement settings.');
+    if (verifyError || canonicalJson((saved?.value as Record<string, unknown> | null)?.['movement']) !== canonicalJson(movement)) throw new Error('Could not confirm movement settings.');
     return { ok: true };
   });
 
