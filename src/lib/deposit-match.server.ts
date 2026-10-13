@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
-import { listIncomingUsdt, type DepositNetwork } from './deposit.server';
+import { listIncomingUsdt, type DepositNetwork, type DepositAsset } from './deposit.server';
 
 type Admin = SupabaseClient<Database>;
 type Intent = Database['public']['Tables']['deposit_intents']['Row'];
@@ -9,9 +9,12 @@ export type MatchResult = { status: 'credited'; amount: number; txHash: string; 
 /** Try to match one pending intent against recent on-chain transfers and credit it once. */
 export async function matchIntent(admin: Admin, intent: Intent, cache?: Map<string, Awaited<ReturnType<typeof listIncomingUsdt>>>): Promise<MatchResult> {
   if (new Date(intent.expires_at) < new Date()) { await admin.from('deposit_intents').update({ status: 'expired' }).eq('id', intent.id).eq('status', 'pending'); return { status: 'expired' }; }
-  const key = `${intent.network}:${intent.address}`;
+  const { data: cfg } = await admin.from('app_settings').select('value').eq('key', 'deposit_wallets').maybeSingle();
+  const wallets = ((cfg?.value as { wallets?: { code: string; asset?: DepositAsset }[] } | null)?.wallets ?? []);
+  const asset: DepositAsset = wallets.find(w => w.code === intent.wallet_code)?.asset === 'USDC' ? 'USDC' : 'USDT';
+  const key = `${asset}:${intent.network}:${intent.address}`;
   let list = cache?.get(key);
-  if (!list) { list = await listIncomingUsdt(intent.network as DepositNetwork, intent.address); cache?.set(key, list); }
+  if (!list) { list = await listIncomingUsdt(intent.network as DepositNetwork, intent.address, asset); cache?.set(key, list); }
   if (!Array.isArray(list)) return { status: 'waiting', reason: list.error };
   const since = new Date(intent.created_at).getTime() - 60_000;
   const target = Number(intent.amount_exact);
@@ -24,7 +27,7 @@ export async function matchIntent(admin: Admin, intent: Intent, cache?: Map<stri
     const { data: locked } = await admin.from('deposit_intents').update({ status: 'credited', tx_hash: t.hash, credited_at: now }).eq('id', intent.id).eq('status', 'pending').select('id');
     if (!locked?.length) return { status: 'expired' };
     const amount = Math.floor(t.amount * 100) / 100;
-    const row = { amount_usd: amount, fee_usd: 0, net_usd: amount, status: 'approved', tx_hash: t.hash, wallet_code: intent.wallet_code, network: intent.network, address: intent.address, note: `Auto-detected · ${intent.wallet_code}`, verified_at: now, reviewed_at: now };
+    const row = { amount_usd: amount, fee_usd: 0, net_usd: amount, status: 'approved', tx_hash: t.hash, wallet_code: intent.wallet_code, network: intent.network, address: intent.address, note: `Auto-detected · ${asset} · ${intent.wallet_code}`, verified_at: now, reviewed_at: now };
     if (intent.claim_tx_id) await admin.from('wallet_transactions').update(row).eq('id', intent.claim_tx_id).eq('status', 'pending');
     else await admin.from('wallet_transactions').insert({ ...row, user_id: intent.user_id, type: 'deposit' });
     return { status: 'credited', amount, txHash: t.hash, walletCode: intent.wallet_code, network: intent.network };
