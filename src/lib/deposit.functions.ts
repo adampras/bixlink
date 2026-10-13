@@ -2,14 +2,15 @@ import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { z } from 'zod';
 import type { Json } from '@/integrations/supabase/types';
-import { verifyUsdtDeposit, type DepositNetwork } from './deposit.server';
+import { verifyUsdtDeposit, type DepositNetwork, type DepositAsset } from './deposit.server';
 
-export type DepositWallet = { code: string; label: string; network: DepositNetwork; address: string; enabled: boolean };
+export type DepositWallet = { code: string; label: string; network: DepositNetwork; asset?: DepositAsset; address: string; enabled: boolean };
 
 const walletSchema = z.object({
   code: z.string().trim().regex(/^[A-Za-z0-9_-]{2,20}$/),
   label: z.string().trim().max(40),
   network: z.enum(['BEP20', 'TRC20', 'ERC20']),
+  asset: z.enum(['USDT', 'USDC']).optional(),
   address: z.string().trim().max(120),
   enabled: z.boolean(),
 });
@@ -46,9 +47,9 @@ export const verifyDeposit = createServerFn({ method: 'POST' }).middleware([requ
     const { data: used } = await supabaseAdmin.from('wallet_transactions').select('id').eq('type', 'deposit').not('verified_at', 'is', null).ilike('tx_hash', hash).limit(1);
     if (used?.length) return { ok: false as const, reason: 'This transaction has already been credited.' };
 
-    const result = await verifyUsdtDeposit(wallet.network, hash, wallet.address);
+    const result = await verifyUsdtDeposit(wallet.network, hash, wallet.address, wallet.asset ?? 'USDT');
     if (!result.ok) return { ok: false as const, reason: result.reason };
-    if (result.amount < 1) return { ok: false as const, reason: 'Minimum deposit is 1 USDT.' };
+    if (result.amount < 1) return { ok: false as const, reason: 'Minimum deposit is 1 USD stablecoin.' };
 
     const amount = Math.floor(result.amount * 100) / 100;
     const now = new Date().toISOString();
@@ -79,7 +80,7 @@ export const createDepositIntent = createServerFn({ method: 'POST' }).middleware
       const cents = 1 + Math.floor(Math.random() * 9998); // 0.0001–0.9999
       const exact = Number((data.amount + cents / 10000).toFixed(4));
       const { data: intent, error } = await supabaseAdmin.from('deposit_intents').insert({ user_id: context.userId, wallet_code: wallet.code, network: wallet.network, address: wallet.address, amount_exact: exact }).select('id, amount_exact, expires_at').single();
-      if (!error && intent) return { id: intent.id, amount: Number(intent.amount_exact), expiresAt: intent.expires_at, walletCode: wallet.code, network: wallet.network, address: wallet.address };
+      if (!error && intent) return { id: intent.id, amount: Number(intent.amount_exact), expiresAt: intent.expires_at, walletCode: wallet.code, network: wallet.network, asset: wallet.asset ?? 'USDT', address: wallet.address };
     }
     throw new Error('Please try again.');
   });
@@ -106,7 +107,7 @@ export const claimDepositIntent = createServerFn({ method: 'POST' }).middleware(
     if (!intent) throw new Error('This deposit request is no longer active.');
     if (intent.claim_tx_id) return { ok: true };
     const amount = Math.floor(Number(intent.amount_exact) * 100) / 100;
-    const { data: tx, error } = await supabaseAdmin.from('wallet_transactions').insert({ user_id: context.userId, type: 'deposit', amount_usd: amount, fee_usd: 0, net_usd: amount, status: 'pending', wallet_code: intent.wallet_code, network: intent.network, address: intent.address, note: `Member reported transfer · exact ${Number(intent.amount_exact).toFixed(4)} USDT · ${intent.wallet_code}` }).select('id').single();
+    const { data: tx, error } = await supabaseAdmin.from('wallet_transactions').insert({ user_id: context.userId, type: 'deposit', amount_usd: amount, fee_usd: 0, net_usd: amount, status: 'pending', wallet_code: intent.wallet_code, network: intent.network, address: intent.address, note: `Member reported transfer · exact ${Number(intent.amount_exact).toFixed(4)} stablecoin · ${intent.wallet_code}` }).select('id').single();
     if (error || !tx) throw new Error('Could not record your transfer.');
     const expires = new Date(Date.now() + 24 * 3600_000).toISOString();
     await supabaseAdmin.from('deposit_intents').update({ claim_tx_id: tx.id, claimed_at: new Date().toISOString(), expires_at: expires }).eq('id', intent.id);

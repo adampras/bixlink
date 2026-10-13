@@ -1,11 +1,17 @@
 // Server-only on-chain verification of USDT deposits to owner wallets.
 export type DepositNetwork = 'BEP20' | 'TRC20' | 'ERC20';
+export type DepositAsset = 'USDT' | 'USDC';
+// Official stablecoin contracts per network (USDC added alongside USDT).
+const TOKENS = {
+  USDT: { BEP20: { contract: '0x55d398326f99059ff775485246999027b3197955', decimals: 18 }, ERC20: { contract: '0xdac17f958d2ee523a2206206994597c13d831ec7', decimals: 6 }, TRC20: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t' },
+  USDC: { BEP20: { contract: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', decimals: 18 }, ERC20: { contract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', decimals: 6 }, TRC20: 'TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8' },
+} as const;
+const evmCfg = (net: 'BEP20' | 'ERC20', asset: DepositAsset) => ({ ...EVM[net], ...TOKENS[asset][net] });
 
 const EVM = {
   BEP20: { chainId: 56, contract: '0x55d398326f99059ff775485246999027b3197955', decimals: 18, minConf: 5 },
   ERC20: { chainId: 1, contract: '0xdac17f958d2ee523a2206206994597c13d831ec7', decimals: 6, minConf: 3 },
 } as const;
-const TRON_USDT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 
 export type VerifyResult = { ok: true; amount: number } | { ok: false; reason: string };
@@ -15,11 +21,11 @@ function units(raw: bigint, decimals: number) {
   return Number(raw / base) + Number(raw % base) / Number(base);
 }
 
-async function verifyEvm(net: 'BEP20' | 'ERC20', hash: string, to: string): Promise<VerifyResult> {
+async function verifyEvm(net: 'BEP20' | 'ERC20', hash: string, to: string, asset: DepositAsset): Promise<VerifyResult> {
   const key = process.env['ETHERSCAN_API_KEY'];
   if (!key) return { ok: false, reason: 'Automatic verification for this network is not configured yet.' };
   if (!/^0x[0-9a-fA-F]{64}$/.test(hash)) return { ok: false, reason: 'Invalid transaction hash format.' };
-  const cfg = EVM[net];
+  const cfg = evmCfg(net, asset);
   const call = async (action: string, extra = '') => {
     const r = await fetch(`https://api.etherscan.io/v2/api?chainid=${cfg.chainId}&module=proxy&action=${action}${extra}&apikey=${key}`);
     if (!r.ok) throw new Error('explorer');
@@ -39,11 +45,11 @@ async function verifyEvm(net: 'BEP20' | 'ERC20', hash: string, to: string): Prom
     if (String(log.topics?.[2]).toLowerCase().replace(/^0x/, '') !== target) continue;
     total += BigInt(log.data);
   }
-  if (total === 0n) return { ok: false, reason: 'No USDT transfer to this wallet was found in that transaction.' };
+  if (total === 0n) return { ok: false, reason: `No ${asset} transfer to this wallet was found in that transaction.` };
   return { ok: true, amount: units(total, cfg.decimals) };
 }
 
-async function verifyTron(hash: string, to: string): Promise<VerifyResult> {
+async function verifyTron(hash: string, to: string, asset: DepositAsset): Promise<VerifyResult> {
   if (!/^[0-9a-fA-F]{64}$/.test(hash)) return { ok: false, reason: 'Invalid TRON transaction hash format.' };
   const r = await fetch(`https://apilist.tronscanapi.com/api/transaction-info?hash=${hash}`);
   if (!r.ok) throw new Error('explorer');
@@ -53,16 +59,16 @@ async function verifyTron(hash: string, to: string): Promise<VerifyResult> {
   if (!tx.confirmed) return { ok: false, reason: 'Waiting for confirmations. Try again shortly.' };
   let total = 0n;
   for (const t of tx.trc20TransferInfo ?? []) {
-    if (t.contract_address !== TRON_USDT || t.to_address !== to) continue;
+    if (t.contract_address !== TOKENS[asset].TRC20 || t.to_address !== to) continue;
     total += BigInt(t.amount_str ?? '0');
   }
-  if (total === 0n) return { ok: false, reason: 'No USDT transfer to this wallet was found in that transaction.' };
+  if (total === 0n) return { ok: false, reason: `No ${asset} transfer to this wallet was found in that transaction.` };
   return { ok: true, amount: units(total, 6) };
 }
 
-export async function verifyUsdtDeposit(net: DepositNetwork, hash: string, to: string): Promise<VerifyResult> {
+export async function verifyUsdtDeposit(net: DepositNetwork, hash: string, to: string, asset: DepositAsset = 'USDT'): Promise<VerifyResult> {
   try {
-    return net === 'TRC20' ? await verifyTron(hash, to) : await verifyEvm(net, hash, to);
+    return net === 'TRC20' ? await verifyTron(hash, to, asset) : await verifyEvm(net, hash, to, asset);
   } catch (e) {
     console.error('deposit verify failed', e);
     return { ok: false, reason: 'Blockchain explorer is busy. Please try again in a moment.' };
@@ -72,19 +78,19 @@ export async function verifyUsdtDeposit(net: DepositNetwork, hash: string, to: s
 export type IncomingTransfer = { hash: string; amount: number; timestamp: number };
 
 /** Recent confirmed USDT transfers into `to`, newest first. */
-export async function listIncomingUsdt(net: DepositNetwork, to: string): Promise<IncomingTransfer[] | { error: string }> {
+export async function listIncomingUsdt(net: DepositNetwork, to: string, asset: DepositAsset = 'USDT'): Promise<IncomingTransfer[] | { error: string }> {
   try {
     if (net === 'TRC20') {
-      const r = await fetch(`https://apilist.tronscanapi.com/api/token_trc20/transfers?limit=50&start=0&toAddress=${to}&contract_address=${TRON_USDT}&confirm=true`);
+      const r = await fetch(`https://apilist.tronscanapi.com/api/token_trc20/transfers?limit=50&start=0&toAddress=${to}&contract_address=${TOKENS[asset].TRC20}&confirm=true`);
       if (!r.ok) throw new Error('explorer');
       const j = (await r.json()) as any;
       return (j.token_transfers ?? []).filter((t: any) => t.to_address === to && t.confirmed !== false && (t.finalResult ?? 'SUCCESS') === 'SUCCESS')
         .map((t: any) => ({ hash: String(t.transaction_id), amount: units(BigInt(t.quant ?? '0'), 6), timestamp: Number(t.block_ts) }));
     }
     const key = process.env['ETHERSCAN_API_KEY'];
-    if (net === 'BEP20' && !key) return await listBscViaRpc(to);
+    if (net === 'BEP20' && !key) return await listBscViaRpc(to, asset);
     if (!key) return { error: 'Automatic detection for this network is not configured yet.' };
-    const cfg = EVM[net];
+    const cfg = evmCfg(net, asset);
     const r = await fetch(`https://api.etherscan.io/v2/api?chainid=${cfg.chainId}&module=account&action=tokentx&contractaddress=${cfg.contract}&address=${to}&page=1&offset=50&sort=desc&apikey=${key}`);
     if (!r.ok) throw new Error('explorer');
     const j = (await r.json()) as any;
@@ -106,8 +112,8 @@ async function rpc(url: string, method: string, params: unknown[]) {
   return j.result;
 }
 /** Keyless BNB Chain scan of recent USDT Transfer logs into `to` (about the last 30 minutes). */
-async function listBscViaRpc(to: string): Promise<IncomingTransfer[] | { error: string }> {
-  const cfg = EVM.BEP20;
+async function listBscViaRpc(to: string, asset: DepositAsset): Promise<IncomingTransfer[] | { error: string }> {
+  const cfg = evmCfg('BEP20', asset);
   const topic = '0x' + to.toLowerCase().replace(/^0x/, '').padStart(64, '0');
   for (const url of BSC_RPC) {
     try {

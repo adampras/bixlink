@@ -14,11 +14,12 @@ export function AdminDepositWallets({ initial, onMessage }: { initial?: DepositW
   const [busy, setBusy] = useState(false);
   const set = (i: number, patch: Partial<DepositWallet>) => setRows(r => r.map((w, j) => (j === i ? { ...w, ...patch } : w)));
   return <section className="rounded-[20px] border border-chart-2/60 bg-card p-5">
-    <h3 className="flex items-center gap-2 font-display text-lg font-black"><Wallet size={18}/> Owner deposit wallets (5)</h3>
+    <h3 className="flex items-center gap-2 font-display text-lg font-black"><Wallet size={18}/> Owner deposit wallets (5) · USDT / USDC</h3>
     <p className="mt-1 text-xs text-muted-foreground">Each wallet has its own code. Member deposits are verified on the blockchain and credited automatically to the wallet code they paid into.</p>
-    <div className="mt-4 space-y-3">{rows.map((w, i) => <div key={i} className="grid gap-2 rounded-xl border border-border p-3 sm:grid-cols-[110px_1fr_110px_2fr_auto] sm:items-center">
+    <div className="mt-4 space-y-3">{rows.map((w, i) => <div key={i} className="grid gap-2 rounded-xl border border-border p-3 sm:grid-cols-[110px_1fr_90px_100px_2fr_auto] sm:items-center">
       <input className="form-input font-mono uppercase" value={w.code} onChange={e => set(i, { code: e.target.value.toUpperCase() })} placeholder="Code" aria-label={`Wallet ${i + 1} code`}/>
       <input className="form-input" value={w.label} onChange={e => set(i, { label: e.target.value })} placeholder="Label (optional)"/>
+      <select aria-label={`Wallet ${i + 1} coin`} className="form-input" value={w.asset ?? 'USDT'} onChange={e => set(i, { asset: e.target.value as 'USDT' | 'USDC' })}><option value="USDT">USDT</option><option value="USDC">USDC</option></select>
       <select className="form-input" value={w.network} onChange={e => set(i, { network: e.target.value as DepositWallet['network'] })}><option value="BEP20">BEP20</option><option value="TRC20">TRC20</option><option value="ERC20">ERC20</option></select>
       <input className="form-input font-mono text-xs" value={w.address} onChange={e => set(i, { address: e.target.value.trim() })} placeholder={w.network === 'TRC20' ? 'T…' : '0x…'}/>
       <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={w.enabled} onChange={e => set(i, { enabled: e.target.checked })}/>{w.enabled ? 'ON' : 'OFF'}</label>
