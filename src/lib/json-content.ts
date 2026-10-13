@@ -5,6 +5,7 @@ export function canonicalJson(value: unknown): string {
     if (item !== null && typeof item === 'object') {
       return Object.fromEntries(Object.entries(item).filter(([, child]) => child !== undefined).sort(([a], [b]) => a.localeCompare(b)).map(([key, child]) => [key, normalize(child)]));
     }
+    if (typeof item === 'number' && Number.isFinite(item)) return Number(item.toPrecision(12));
     return item;
   };
   return JSON.stringify(normalize(value));

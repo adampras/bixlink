@@ -5,9 +5,9 @@ import { number } from '@/lib/bixlink';
 
 const SCENARIOS = [0.5, 0.84, 1.5, 3];
 
-export function ProfitSimulator({ price = 0.1, days = 180, settings = DEFAULT_STRATEGIES }: { price?: number; days?: number; settings?: StrategySettings }) {
+export function ProfitSimulator({ price = 0.5, days = 180, settings = DEFAULT_STRATEGIES }: { price?: number; days?: number; settings?: StrategySettings }) {
   const [usd, setUsd] = useState(1000); const [s, setS] = useState<PresaleStrategy>('hybrid');
-  const q = strategyQuote(s, usd, usd / (price || 0.1), days, settings);
+  const q = strategyQuote(s, usd, usd / (price || 0.5), days, settings);
   return <section className="mt-8 rounded-2xl border border-chart-3/30 bg-card/60 p-5">
     <div className="eyebrow"><Calculator size={14}/> INVESTOR SIMULATOR</div>
     <h2 className="mt-1 font-display text-xl font-black">Portfolio simulation</h2>
