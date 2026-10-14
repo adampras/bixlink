@@ -43,3 +43,5 @@
 - Owner-only marketing settings feed browser PDF exports; dated CDN video stays separate to avoid implying re-rendering.
 - Owner navigation uses one searchable category selector; shared staking controls separate daily presets from individual edits to avoid duplicate forms across consoles.
 - Shared shell and dialogs own phone spacing, safe-area navigation and scroll bounds so every page remains usable without changing transaction logic.
+
+- Scope public hero sizing to landing-hero-compact and compact-market-hero; keep uploaded marketplace artwork proportionate and catalog/transaction layouts untouched.

@@ -126,3 +126,5 @@
 - [x] Marketplace: fox emblem header, 2x2 glow boxes, Sell/Buy Now buttons with order checkout via seller link.
 - [x] Member header tools swipe left/right on phones.
 - [ ] Real connected card payments for marketplace — waits on owner choosing a payment provider.
+
+- [ ] Compact landing and marketplace heroes; verify phone/desktop layout and collection actions.
