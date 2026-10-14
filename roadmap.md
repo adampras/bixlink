@@ -127,4 +127,4 @@
 - [x] Member header tools swipe left/right on phones.
 - [ ] Real connected card payments for marketplace — waits on owner choosing a payment provider.
 
-- [ ] Compact landing and marketplace heroes; verify phone/desktop layout and collection actions.
+- [x] Compact landing and marketplace heroes; verify phone/desktop layout and collection actions.
