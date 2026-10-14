@@ -41,6 +41,6 @@ export function ReactorVideo({ maximum, visual }: { maximum: number; visual?: st
   return <div className={`reactor-glass-stage auric-card${selection === 'rocket' ? ' reactor-rocket-stage' : ''}`}>
     <video key={selection} ref={ref} className="reactor-glass-video" poster={media.poster.url} muted loop playsInline preload="metadata" aria-label={selection === 'rocket' ? 'BIXLINK rocket reactor' : 'BIXCOIN gold reactor'}><source src={media.webm.url} type="video/webm"/><source src={media.mp4.url} type="video/mp4"/></video>
     {selection === 'rocket' && <Button variant="outline" size="icon" className="presale-sound-toggle" aria-label={sound ? 'Mute reactor sound' : 'Unmute reactor sound'} onClick={() => setSound(value => !value)}>{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</Button>}
-    <div className="reactor-glass-lens"><span>BIX BOOSTER</span><small>UP TO</small><strong>{maximum}%</strong><small>MONTHLY · PROJECTION</small></div>
+    <div className="reactor-apy-pill"><span>BIX BOOSTER</span><strong>UP TO {maximum}%</strong><small>MONTHLY · PROJECTION</small></div>
   </div>;
 }
