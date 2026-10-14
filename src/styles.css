@@ -2043,6 +2043,8 @@ html[data-view="zen"] .pro-only { display:none !important; }
 .reactor-landing .landing-hero-compact > .landing-hero-content { min-height:410px; max-width:800px; padding:28px 20px 24px; }
 .reactor-landing .landing-hero-compact > .hero-3d-bg,
 .reactor-landing .landing-hero-compact > .hero-3d-veil { max-width:none; padding:0; }
+.reactor-landing .landing-hero-compact > .lux-ticker { max-width:none; padding:0; }
+.landing-hero-compact .lux-ticker-track b { padding-block:10px; }
 .reactor-landing .landing-hero-compact h1 { margin-top:20px; font-size:60px; line-height:1; letter-spacing:0; }
 .landing-hero-compact p { letter-spacing:0; }
 .landing-hero-compact .landing-hero-metrics { margin-top:20px; }
@@ -2067,6 +2069,7 @@ html[data-view="zen"] .pro-only { display:none !important; }
 .market-art-action:focus-visible { outline:2px solid var(--chart-3); outline-offset:2px; }
 .market-sell-action { position:absolute; right:10px; bottom:8px; height:26px; padding:0 10px; font-size:9px; border-radius:8px; color:var(--chart-3); background:color-mix(in oklch,var(--background) 80%,transparent); border:1px solid var(--border); }
 @media(min-width:768px) {
+  .compact-market-mobile { display:none; }
   .reactor-landing .landing-hero-compact > .landing-hero-content { min-height:440px; padding-block:40px 32px; }
   .reactor-landing .landing-hero-compact h1 { font-size:80px; }
 }
