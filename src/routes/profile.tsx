@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getArenaStatus } from '@/lib/arena.functions';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,9 @@ function ProfilePage() {
   const { formatDate } = useI18n();
   const presale = usePresaleStatus(user?.id);
   const orders = presale.data?.orders ?? [];
+  const loadArena = useServerFn(getArenaStatus);
+  const arena = useQuery({ queryKey: ['arena', user?.id], queryFn: () => loadArena(), enabled: Boolean(user) });
+  const bixp = arena.data?.status;
   const badges = [
     user?.email_confirmed_at && { Icon: BadgeCheck, label: 'Verified email', cls: 'border-chart-2/40 bg-chart-2/10 text-chart-2' },
     (data?.stakes ?? []).some(s => s.status === 'active') && { Icon: TrendingUp, label: 'Active staker', cls: 'border-primary/40 bg-primary/10 text-primary' },
@@ -46,11 +50,13 @@ function ProfilePage() {
         {data && !data.referral?.referred_by && <form className="profile-apply" onSubmit={async e => { e.preventDefault(); try { const r = await link({ data: { code: code.trim().toUpperCase() } }); setNotice(r.linked ? 'Referrer linked.' : 'Code unavailable.'); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Invalid code.'); } }}><input className="form-input" placeholder="Apply referrer code" aria-label="Apply referrer code" value={code} onChange={e => setCode(e.target.value)}/><Button type="submit" variant="outline">Apply</Button></form>}
         <Link to="/network" className="profile-network-link">View my network <ArrowRight/></Link>
       </section>
+      <section className="mt-6 rounded-2xl border border-chart-3/40 bg-card p-5"><div className="flex items-center justify-between gap-3"><div><div className="eyebrow">BIXP · ECOSYSTEM POINTS</div><b className="numeric mt-1 block font-display text-2xl text-chart-3">{bixp ? Number(bixp.totalVbix).toFixed(2) : '—'} <small className="text-sm text-muted-foreground">/ {bixp?.cap ?? 100} BIXP</small></b></div><Button asChild size="sm"><Link to="/arena">Earn BIXP</Link></Button></div><div className="arena-cap mt-3"><i style={{ width: `${bixp ? Math.min(100, Number(bixp.totalVbix) / bixp.cap * 100) : 0}%` }}/></div><p className="mt-2 text-[11px] text-muted-foreground">Free promotional points. Not on-chain BIX; conversion only if the owner opens it.</p></section>
       {orders.length > 0 && <section className="mt-6"><div className="eyebrow">MY GENESIS PROOF</div><div className="mt-3 grid gap-3 sm:grid-cols-2">{(showAllProof ? orders : orders.slice(0, 2)).map((o, i) => Number(o.package_usd) >= 100000 ? <SovereignPlaque key={o.id} serial={o.serial ?? i + 1} strategy={o.strategy ?? 'standard'} bix={Number(o.bix_amount)} holder={user?.email ?? 'Member'}/> : <GenesisCertificate key={o.id} usd={Number(o.package_usd)} serial={o.serial} strategy={o.strategy} bix={Number(o.bix_amount)}/>)}</div>{orders.length > 2 && <button type="button" className="mt-3 text-xs font-bold text-chart-3" onClick={() => setShowAllProof(v => !v)}>{showAllProof ? 'Show less' : `Show all ${orders.length} certificates`}</button>}</section>}
-      <section className="profile-actions"><Button asChild variant="outline"><Link to="/marketing"><span className="profile-action-icon"><TrendingUp/></span><span>Marketing materials <small>PDF · Video</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
+      <div className="eyebrow mt-8">ECOSYSTEM</div><section className="profile-actions"><Button asChild variant="outline"><Link to="/marketing"><span className="profile-action-icon"><TrendingUp/></span><span>Marketing materials <small>PDF · Video</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
         <Button asChild variant="outline"><Link to="/nft-marketplace"><span className="profile-action-icon"><ShoppingBag/></span><span>BIXLINK Marketplace</span><ChevronRight className="profile-action-arrow"/></Link></Button>
         {reviewer.data && <Button asChild variant="outline"><Link to="/review"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>ADMIN PANEL BIX <small>Deposit &amp; withdrawal review only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
         <Button asChild variant="outline"><Link to="/arena"><span className="profile-action-icon"><Swords/></span><span>Fox Arena <small>Daily missions and leaderboard</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
+      </section><div className="eyebrow mt-6">SECURITY &amp; ACCOUNT</div><section className="profile-actions">
         <Button asChild variant="outline"><Link to="/settings"><span className="profile-action-icon"><Settings/></span><span>Settings <small>Language, notifications and security</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
         <Button variant="outline" onClick={async () => { if (!user?.email) return; const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` }); setNotice(error ? error.message : 'Password reset email sent.'); }}><span className="profile-action-icon"><KeyRound/></span><span>Change password</span><ChevronRight className="profile-action-arrow"/></Button>
         {data?.isAdmin && <Button asChild variant="outline"><Link to="/admin"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Admin panel <small>Owner only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
