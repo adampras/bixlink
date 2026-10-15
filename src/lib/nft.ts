@@ -3,11 +3,13 @@ import rare from '@/assets/nft-rare.jpg';
 import epic from '@/assets/nft-epic.jpg';
 import legendary from '@/assets/nft-legendary.jpg';
 import mythic from '@/assets/nft-mythic.jpg';
+import goldIngot from '@/assets/nft-gold-ingot.jpg';
 
 export type NftTier = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC';
 export const NFT_TIERS: NftTier[] = ['COMMON', 'RARE', 'EPIC', 'LEGENDARY', 'MYTHIC'];
-export const NFT_ART: Record<NftTier, string> = { COMMON: common, RARE: rare, EPIC: epic, LEGENDARY: legendary, MYTHIC: mythic };
-export const NFT_NAME: Record<NftTier, string> = { COMMON: 'Core Cell', RARE: 'Plasma Ring', EPIC: 'Fusion Vortex', LEGENDARY: 'Golden Mega Reactor', MYTHIC: 'Singularity Forge' };
+export const NFT_ART: Record<NftTier, string> = { COMMON: goldIngot, RARE: goldIngot, EPIC: goldIngot, LEGENDARY: goldIngot, MYTHIC: goldIngot };
+export const LEGACY_REACTOR_ART = { common, rare, epic, legendary, mythic };
+export const NFT_NAME: Record<NftTier, string> = { COMMON: 'Aurum Mint Ingot 10g', RARE: 'Electrum Bullion 50g', EPIC: 'Damascus Gold Bar 100g', LEGENDARY: 'Digital Gold Bullion 250g', MYTHIC: 'Imperial Vault Master Ingot 1Kg' };
 
 /** Mirrors SQL public.bix_nft_tier — bigger package + longer lock = better card. */
 export function nftTier(usd: number, days: number): NftTier {
