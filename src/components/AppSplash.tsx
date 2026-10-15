@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-import splashVideo from '@/assets/booster-orbital.webm.asset.json';
-import fallbackVideo from '@/assets/booster-orbital.mp4.asset.json';
-import splashPoster from '@/assets/booster-orbital-poster.jpg.asset.json';
+import logo from '@/assets/bixlink-logo-gold.webp';
 import { usePublicConfig } from '@/lib/useMember';
 import { splashDuration } from '@/lib/splash-settings';
 
@@ -45,7 +43,7 @@ export function AppSplash() {
       aria-modal="true"
       aria-label="BIXCOIN is loading"
     >
-      <video className="h-auto max-h-[85dvh] w-full max-w-4xl object-contain" poster={splashPoster.url} muted autoPlay loop playsInline onClick={dismiss} aria-label="BIXCOIN splash video"><source src={splashVideo.url} type="video/webm"/><source src={fallbackVideo.url} type="video/mp4"/></video>
+      <button type="button" onClick={dismiss} className="splash-emblem" aria-label="Skip intro"><img src={logo} width={120} height={120} alt="BIXLINK fox emblem"/><span>BIXLINK</span></button>
     </div>
   );
 }
