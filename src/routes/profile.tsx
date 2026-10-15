@@ -20,6 +20,7 @@ export const Route = createFileRoute('/profile')({ head: () => ({ meta: [{ title
 function ProfilePage() {
   const { user, ready, data } = useMember();
   const reviewer = useReviewerAccess(user?.id);
+  const [showAllProof, setShowAllProof] = useState(false);
   const [notice, setNotice] = useState(''); const [code, setCode] = useState('');
   const makeCode = useServerFn(createReferral); const link = useServerFn(assignReferral);
   const qc = useQueryClient(); const navigate = useNavigate();
@@ -45,7 +46,7 @@ function ProfilePage() {
         {data && !data.referral?.referred_by && <form className="profile-apply" onSubmit={async e => { e.preventDefault(); try { const r = await link({ data: { code: code.trim().toUpperCase() } }); setNotice(r.linked ? 'Referrer linked.' : 'Code unavailable.'); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Invalid code.'); } }}><input className="form-input" placeholder="Apply referrer code" aria-label="Apply referrer code" value={code} onChange={e => setCode(e.target.value)}/><Button type="submit" variant="outline">Apply</Button></form>}
         <Link to="/network" className="profile-network-link">View my network <ArrowRight/></Link>
       </section>
-      {orders.length > 0 && <section className="mt-6"><div className="eyebrow">MY GENESIS PROOF</div><div className="mt-3 grid gap-3 sm:grid-cols-2">{orders.map((o, i) => Number(o.package_usd) >= 100000 ? <SovereignPlaque key={o.id} serial={o.serial ?? i + 1} strategy={o.strategy ?? 'standard'} bix={Number(o.bix_amount)} holder={user?.email ?? 'Member'}/> : <GenesisCertificate key={o.id} usd={Number(o.package_usd)} serial={o.serial} strategy={o.strategy} bix={Number(o.bix_amount)}/>)}</div></section>}
+      {orders.length > 0 && <section className="mt-6"><div className="eyebrow">MY GENESIS PROOF</div><div className="mt-3 grid gap-3 sm:grid-cols-2">{(showAllProof ? orders : orders.slice(0, 2)).map((o, i) => Number(o.package_usd) >= 100000 ? <SovereignPlaque key={o.id} serial={o.serial ?? i + 1} strategy={o.strategy ?? 'standard'} bix={Number(o.bix_amount)} holder={user?.email ?? 'Member'}/> : <GenesisCertificate key={o.id} usd={Number(o.package_usd)} serial={o.serial} strategy={o.strategy} bix={Number(o.bix_amount)}/>)}</div>{orders.length > 2 && <button type="button" className="mt-3 text-xs font-bold text-chart-3" onClick={() => setShowAllProof(v => !v)}>{showAllProof ? 'Show less' : `Show all ${orders.length} certificates`}</button>}</section>}
       <section className="profile-actions"><Button asChild variant="outline"><Link to="/marketing"><span className="profile-action-icon"><TrendingUp/></span><span>Marketing materials <small>PDF · Video</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
         <Button asChild variant="outline"><Link to="/nft-marketplace"><span className="profile-action-icon"><ShoppingBag/></span><span>BIXLINK Marketplace</span><ChevronRight className="profile-action-arrow"/></Link></Button>
         {reviewer.data && <Button asChild variant="outline"><Link to="/review"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>ADMIN PANEL BIX <small>Deposit &amp; withdrawal review only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}

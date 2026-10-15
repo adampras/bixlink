@@ -2125,3 +2125,11 @@ html .site-shell .wallet-summary[data-wallet-skin], html .wallet-summary[data-wa
 .vault-swap > .mt-4.grid > button { margin-bottom: 0 !important; margin-top: 14px; }
 .vault-swap > p { margin-top: 10px !important; font-size: 10px !important; }
 .vault-swap > button { margin-top: 10px !important; height: 40px; }
+
+.splash-emblem { display: grid; justify-items: center; gap: 14px; background: none; border: 0; color: var(--splash-gold); font-family: var(--font-display); font-weight: 800; letter-spacing: .3em; font-size: 12px; }
+.splash-emblem img { border-radius: 50%; animation: splash-pulse 900ms var(--ease) infinite alternate; }
+@keyframes splash-pulse { from { transform: scale(.94); opacity: .75; } to { transform: scale(1.02); opacity: 1; } }
+.route-progress { position: fixed; top: 0; left: 0; height: 2px; width: 100%; z-index: 120; background: linear-gradient(90deg, transparent, #EAB308, #FEF08A); transform-origin: left; animation: route-progress 1.2s ease-out forwards; pointer-events: none; }
+@keyframes route-progress { from { transform: scaleX(0); } to { transform: scaleX(.9); } }
+@media (max-width: 480px) { .view-switch { display: none; } }
+@media (prefers-reduced-motion: reduce) { .splash-emblem img, .route-progress { animation: none; } }
