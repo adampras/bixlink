@@ -20,6 +20,7 @@ export const Route = createFileRoute('/profile')({ head: () => ({ meta: [{ title
 function ProfilePage() {
   const { user, ready, data } = useMember();
   const reviewer = useReviewerAccess(user?.id);
+  const [showAllProof, setShowAllProof] = useState(false);
   const [notice, setNotice] = useState(''); const [code, setCode] = useState('');
   const makeCode = useServerFn(createReferral); const link = useServerFn(assignReferral);
   const qc = useQueryClient(); const navigate = useNavigate();
