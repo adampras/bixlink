@@ -12,11 +12,11 @@ import { QUEST_KEYS, QUEST_LABELS, denTier, type QuestKey } from '@/lib/arena';
 import headerLogo from '@/assets/bixlink-logo-gold.webp';
 
 export const Route = createFileRoute('/arena')({
-  head: () => ({ meta: [{ title: 'Fox Arena — BIXLINK' }, { name: 'description', content: 'Daily BIXLINK missions, Fox Den tiers and monthly leaderboard seasons with free promotional vBIX.' }, { property: 'og:title', content: 'Fox Arena — BIXLINK' }, { property: 'og:description', content: 'Complete daily missions and climb the monthly Fox Arena leaderboard.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
+  head: () => ({ meta: [{ title: 'Fox Arena — BIXLINK' }, { name: 'description', content: 'Daily BIXLINK missions, Fox Den tiers and monthly leaderboard seasons with free promotional BIXP.' }, { property: 'og:title', content: 'Fox Arena — BIXLINK' }, { property: 'og:description', content: 'Complete daily missions and climb the monthly Fox Arena leaderboard.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
   component: ArenaPage,
 });
 
-const DISCLOSURE = 'vBIX are free promotional points within the 100 vBIX cap. Not on-chain BIX, not withdrawable until owner conversion opens. Rankings and rewards are not guaranteed.';
+const DISCLOSURE = 'BIXP are free promotional points within the 100 BIXP cap. Not on-chain BIX, not withdrawable until owner conversion opens. Rankings and rewards are not guaranteed.';
 
 function ArenaPage() {
   const { user, ready } = useMember();
@@ -27,7 +27,7 @@ function ArenaPage() {
   const s = q.data?.status;
   const run = async (key: QuestKey) => {
     setBusy(key); setMsg('');
-    try { const r = await claim({ data: { key, ...(key === 'quiz' && answer !== null ? { answer } : {}) } }); setMsg(r.amount > 0 ? `+${r.amount} vBIX added${r.capped ? ' (limited by the 100 vBIX cap)' : ''}.` : 'Mission recorded. Your 100 vBIX cap is reached, so no vBIX was added.'); await qc.invalidateQueries({ queryKey: ['arena', user?.id] }); }
+    try { const r = await claim({ data: { key, ...(key === 'quiz' && answer !== null ? { answer } : {}) } }); setMsg(r.amount > 0 ? `+${r.amount} BIXP added${r.capped ? ' (limited by the 100 BIXP cap)' : ''}.` : 'Mission recorded. Your 100 BIXP cap is reached, so no BIXP was added.'); await qc.invalidateQueries({ queryKey: ['arena', user?.id] }); }
     catch (e) { setMsg(e instanceof Error ? e.message : 'Could not claim.'); }
     setBusy(null);
   };
@@ -39,13 +39,13 @@ function ArenaPage() {
       <section className="arena-den mt-6">
         <img src={headerLogo} alt="" width={84} height={84} className={`arena-fox tier-${tier!.level}`}/>
         <div className="min-w-0"><span className="text-[10px] font-bold tracking-widest text-muted-foreground">FOX DEN · STATUS ONLY</span><h2 className="font-display text-xl font-bold text-chart-3">{tier!.name} Fox</h2>
-          <div className="mt-2 flex flex-wrap gap-3 text-xs"><span className="flex items-center gap-1"><Flame size={14} className="text-chart-3"/>{s.streak}-day streak</span><span>Quest vBIX: <b className="numeric">{Number(s.questVbix).toFixed(2)}</b></span><span>Total vBIX: <b className="numeric">{Number(s.totalVbix).toFixed(2)} / {s.cap}</b></span></div>
+          <div className="mt-2 flex flex-wrap gap-3 text-xs"><span className="flex items-center gap-1"><Flame size={14} className="text-chart-3"/>{s.streak}-day streak</span><span>Quest BIXP: <b className="numeric">{Number(s.questVbix).toFixed(2)}</b></span><span>Total BIXP: <b className="numeric">{Number(s.totalVbix).toFixed(2)} / {s.cap}</b></span></div>
           <div className="arena-cap mt-2"><i style={{ width: `${Math.min(100, Number(s.totalVbix) / s.cap * 100)}%` }}/></div>
         </div>
       </section>
       <h2 className="mt-8 font-display text-lg font-bold">Fox Quest</h2>
       <div className="mt-3 grid gap-3 md:grid-cols-2">{QUEST_KEYS.filter(k => s.missions[k]).map(k => { const done = s.claimed.includes(k); const L = QUEST_LABELS[k]; return <article key={k} className="arena-quest">
-        <div className="flex items-start justify-between gap-3"><div><b className="text-sm">{L.title}</b><p className="mt-1 text-xs text-muted-foreground">{L.hint}</p></div><span className="shrink-0 text-xs font-bold text-chart-3">+{s.rewards[k]} vBIX</span></div>
+        <div className="flex items-start justify-between gap-3"><div><b className="text-sm">{L.title}</b><p className="mt-1 text-xs text-muted-foreground">{L.hint}</p></div><span className="shrink-0 text-xs font-bold text-chart-3">+{s.rewards[k]} BIXP</span></div>
         {k === 'quiz' && !done && s.quiz && <div className="mt-3"><p className="text-sm">{s.quiz.q}</p><div className="mt-2 grid gap-2">{s.quiz.options.map((o, i) => <button type="button" key={i} onClick={() => setAnswer(i)} className={`rounded-lg border px-3 py-2 text-left text-xs ${answer === i ? 'border-primary bg-primary/10' : 'border-border'}`}>{o}</button>)}</div></div>}
         <div className="mt-3 flex items-center justify-between"><span className="text-[10px] uppercase text-muted-foreground">{L.period}</span>{done ? <span className="flex items-center gap-1 text-xs font-bold text-chart-2"><Check size={14}/> Done</span> : <Button size="sm" disabled={busy !== null || (k === 'quiz' && answer === null)} onClick={() => run(k)}>{busy === k ? 'Checking…' : 'Claim'}</Button>}</div>
       </article>; })}</div>
