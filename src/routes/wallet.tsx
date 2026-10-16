@@ -18,6 +18,7 @@ import { confirmPin, getFiatCodes, txFeedback } from '@/components/TxFeedback';
 import { pickWalletSkin } from '@/lib/wallet-skin';
 import { WalletFinanceMotion } from '@/components/WalletFinanceMotion';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, ScanLine, CheckCircle2, Clock, Eye, EyeOff } from 'lucide-react';
+import { DepositFlightScanner } from '@/components/DepositFlightScanner';
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
   return <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border bg-card/60 p-8 text-center"><span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary"><Inbox size={22}/></span><p className="text-sm text-muted-foreground">{text}</p>{action && onAction && <Button size="sm" variant="outline" className="rounded-full" onClick={onAction}>{action}</Button>}</div>;
@@ -40,7 +41,7 @@ function WalletPage() {
   const [depMode, setDepMode] = useState<'copy' | 'qr'>('copy');
   const [amount, setAmount] = useState(''); const [field, setField] = useState('');
   const [notice, setNotice] = useState(''); const [walletCode, setWalletCode] = useState(''); const [success, setSuccess] = useState<{ amount: number; walletCode: string; network: string; txHash: string } | null>(null); const [busy, setBusy] = useState(false);
-  const [intent, setIntent] = useState<{ id: string; amount: number; network: string; address: string; walletCode: string } | null>(null);
+  const [intent, setIntent] = useState<{ id: string; amount: number; network: string; address: string; walletCode: string } | null>(null); const [matched, setMatched] = useState(false);
   const [swapDirection, setSwapDirection] = useState<'USDT_TO_BIX'|'BIX_TO_USDT'>('USDT_TO_BIX'); const [swapAmount, setSwapAmount] = useState('');
   const [fiatCodes, setFiat] = useState<string[]>([]);
   useEffect(() => { const load = () => setFiat(getFiatCodes()); load(); window.addEventListener('bixlink-preferences', load); return () => window.removeEventListener('bixlink-preferences', load); }, []);
@@ -56,7 +57,7 @@ function WalletPage() {
   const close = () => { setModal(null); setAmount(''); setField(''); setNotice(''); setIntent(null); setClaimed(false); };
   const poll = async (id: string) => {
     const r = await checkIntent({ data: { id } });
-    if (r.status === 'credited') { setSuccess({ amount: r.amount, walletCode: r.walletCode, network: r.network, txHash: r.txHash }); close(); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); }
+    if (r.status === 'credited') { setMatched(true); await new Promise(res => setTimeout(res, 1200)); setMatched(false); setSuccess({ amount: r.amount, walletCode: r.walletCode, network: r.network, txHash: r.txHash }); close(); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); }
     else if (r.status === 'expired' || r.status === 'missing') { setIntent(null); setNotice('This deposit request expired. Create a new one.'); }
     else setNotice('Still waiting for the blockchain to confirm your transfer. This updates automatically.');
   };
@@ -93,7 +94,6 @@ function WalletPage() {
         <div className="mt-5 grid grid-cols-2 gap-3"><Button className="vault-btn-primary rounded-full" onClick={() => setModal('deposit')}><ArrowDownToLine/> Deposit</Button><Button variant="outline" className="vault-btn-ghost rounded-full" onClick={() => setModal('withdraw')}><ArrowUpFromLine/> Withdraw</Button></div>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <Link to="/p2p" className="wallet-tile"><span className="wallet-tile-top"><span className="wallet-tile-icon"><ScanLine size={18}/></span><span className="wallet-tile-status is-open"><i/>OPEN</span></span><span><b className="wallet-tile-title">P2P MARKET</b><span className="wallet-tile-sub">Trade BIX with members</span></span></Link>
         <Link to="/pay" className="wallet-tile wallet-tile--pay"><span className="wallet-tile-top"><span className="wallet-tile-icon"><ScanLine size={18}/></span><span className={`wallet-tile-status${cfg?.bixPay.enabled ? ' is-open' : ''}`}><i/>{cfg?.bixPay.enabled ? 'OPEN' : 'SOON'}</span></span><span><b className="wallet-tile-title">BIX PAY</b><span className="wallet-tile-sub">Scan QR · pay in BIX</span></span></Link>
         <Link to="/transfer" className="wallet-tile wallet-tile--transfer"><span className="wallet-tile-top"><span className="wallet-tile-icon"><ArrowLeftRight size={18}/></span><span className={`wallet-tile-status${cfg?.usdtTransfer.enabled ? ' is-open' : ''}`}><i/>{cfg?.usdtTransfer.enabled ? 'OPEN' : 'SOON'}</span></span><span><b className="wallet-tile-title">TRANSFER</b><span className="wallet-tile-sub">{isAdmin ? 'Virtual USDT (testing)' : 'Send USDT to members'}</span></span></Link>
       </div>
