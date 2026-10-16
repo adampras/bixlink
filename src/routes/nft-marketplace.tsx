@@ -17,6 +17,11 @@ import { SHOP_IMAGES, publishedProducts, type ShopProduct } from '@/lib/shop';
 import { NFT_TIERS } from '@/lib/nft';
 import { money, number } from '@/lib/bixlink';
 import { AuricCardShowcase } from '@/components/AuricCardShowcase';
+import { ShopCart } from '@/components/ShopCart';
+import { ShopOrders, shopOrdersKey } from '@/components/ShopOrders';
+import { cartUnits, type CartLine } from '@/lib/shipping';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 const localPrice=(usd:number)=>`≈ IDR ${number(usd*16250,{maximumFractionDigits:0})} · MYR ${number(usd*4.45,{maximumFractionDigits:2})}`;
 export const Route = createFileRoute('/nft-marketplace')({head:()=>({meta:[{title:'BIXLINK Marketplace — Reactor Collection & Merchandise'},{name:'description',content:'Explore clear-glass BIXLINK reactor certificates and curated merchandise.'},{property:'og:title',content:'BIXLINK Marketplace'},{property:'og:description',content:'Clear-glass reactor collections and BIXLINK merchandise in the luxury marketplace.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:Marketplace});
 type Selection={kind:'nft';item:CatalogItem}|{kind:'product';item:ShopProduct};
@@ -24,6 +29,8 @@ function Marketplace(){
  const q=useNftCatalog(),shop=useShopCatalog(),{user}=useMember(),{data:cfg}=usePublicConfig();
  const [view,setView]=useState('ALL'),[tier,setTier]=useState('ALL'),[category,setCategory]=useState('ALL'),[search,setSearch]=useState(''),[sort,setSort]=useState('featured'),[selected,setSelected]=useState<Selection|null>(null);
  useEffect(()=>{if(!selected)return;const close=(e:KeyboardEvent)=>{if(e.key==='Escape')setSelected(null);};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close);},[selected]);
+ const [cart,setCart]=useState<CartLine[]>([]),[cartOpen,setCartOpen]=useState(false),qc=useQueryClient();
+ const addToCart=(p:ShopProduct)=>{if(p.priceUsd===null)return;setCart(c=>c.some(l=>l.id===p.id)?c.map(l=>l.id===p.id?{...l,qty:Math.min(99,l.qty+1)}:l):[...c,{id:p.id,name:p.name,priceUsd:p.priceUsd!,qty:1}]);toast.success(`${p.name} added to cart`);};
  const artworks=visibleCatalog(q.data??[]),products=publishedProducts(shop.data??[]);
   const matching=(s:string)=>s.toLowerCase().includes(search.toLowerCase());
   const explore=()=>{setView('ALL');requestAnimationFrame(()=>document.getElementById('market-grid')?.scrollIntoView({behavior:'smooth'}));};
@@ -70,6 +77,9 @@ function Marketplace(){
  </>}
  <aside className="shop-disclosure">Reactor NFTs are in-app staking certificates, not on-chain tokens. Package value and duration determine the tier. Completion and BIX buybacks follow contract terms and owner review, not public trading. Merchandise orders use owner-provided contact links; no payment is processed here.</aside>
  {selected&&<div className="modal-backdrop" onClick={()=>setSelected(null)}><div role="dialog" aria-modal="true" aria-label={selected.item.name} className="modal-panel shop-dialog" onClick={e=>e.stopPropagation()}><Button size="icon" variant="outline" className="shop-dialog-close" aria-label="Close product details" onClick={()=>setSelected(null)} autoFocus><X/></Button><ContentImage path={selected.item.imagePath} fallbackSrc={selected.kind==='nft'?catalogImage(selected.item.id):SHOP_IMAGES[selected.item.id]} alt={selected.item.name} className="shop-dialog-image"/><p className="shop-eyebrow mt-5">{selected.kind==='nft'?selected.item.tier:selected.item.category}</p><h2 className="mt-2 font-display text-2xl font-bold">{selected.item.name}</h2>{selected.kind==='nft'?<><p className="mt-3 text-sm text-muted-foreground">Your joined package and staking duration determine the certificate tier and principal value.</p><Button asChild className="shop-outline mt-5 w-full" variant="outline"><Link to="/stake">View staking packages<ArrowUpRight/></Link></Button></>:<><p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{selected.item.description}</p>{selected.item.priceUsd!==null&&<><p className="numeric mt-3 text-xl font-bold">{money(selected.item.priceUsd)}</p><p className="numeric text-xs text-muted-foreground">{localPrice(selected.item.priceUsd)} · reference rate</p></>}{selected.item.inquiryUrl?<Button asChild className="shop-outline mt-5 w-full" variant="outline"><a href={selected.item.inquiryUrl} target="_blank" rel="noopener noreferrer">Buy now · contact seller<ArrowUpRight/></a></Button>:<p className="mt-4 text-sm text-muted-foreground">Not available to order yet.</p>}</>}</div></div>}
+ {user&&<section className="shop-section"><div className="shop-section-title"><div><p className="shop-eyebrow">03 / ORDERS</p><h2>My orders</h2></div></div><ShopOrders userId={user.id}/></section>}
  <MemberShop userId={user?.id}/>
+ {cart.length>0&&<Button className="fixed bottom-24 right-4 z-40 shadow-lg xl:bottom-6" onClick={()=>setCartOpen(true)} aria-label="Open cart"><ShoppingBag size={16}/>Cart · {cartUnits(cart)}</Button>}
+ <ShopCart open={cartOpen} onClose={()=>setCartOpen(false)} lines={cart} setLines={setCart} userId={user?.id} onOrdered={()=>{setCart([]);setCartOpen(false);qc.invalidateQueries({queryKey:shopOrdersKey(user?.id)});}}/>
  </main></BixShell>;
 }
