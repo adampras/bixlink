@@ -19,11 +19,13 @@ export function AdminReferrals({ initial, onSaved, onMessage, settingsOnly = fal
  const value = { ...initial, direct: Number(f.get('direct')), levels: [1,2,3,4,5].map(i => Number(f.get(`level${i}`))), rewardPlus: Number(f.get('rewardPlus')), minimumDirect: Number(f.get('minimumDirect')), splitUsdt: Number(f.get('splitUsdt')), splitBix: Number(f.get('splitBix')), bixDirectPct: Number(f.get('bixDirectPct')), bixDirectEnabled: f.get('bixDirectEnabled') === 'on' };
  try { await save({ data: { key: 'referrals', value } }); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Referral settings saved and confirmed.'); } catch(err) { onMessage(err instanceof Error ? err.message : 'Could not save settings.'); } finally {setBusy(false);}
  }}>
- <h2 className="font-display text-xl font-bold">USDT package referrals</h2>
- <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">{fields.map(([label,name,fallback]) => {
+ <h2 className="font-display text-xl font-bold">Network bonus settings</h2>
+ {([['Direct sponsor · USDT','Credited once per direct member USDT stake, paid with the split below.',['direct','splitUsdt','splitBix']],['Matching profit · daily L1–L5','Percent of each downline level\'s daily staking yield. Level N unlocks with N active direct members.',['level1','level2','level3','level4','level5']],['Weekly RewardPlus · USDT','Percent of weekly direct USDT turnover once the minimum direct members is reached. Resets Monday.',['rewardPlus','minimumDirect']]] as const).map(([title,hint,names]) => <div key={title} className="rounded-xl border border-border bg-card p-4">
+ <h3 className="font-display text-base font-bold text-chart-3">{title}</h3><p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+ <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">{fields.filter(f => (names as readonly string[]).includes(f[1])).map(([label,name,fallback]) => {
  const level = name.startsWith('level') ? (initial?.['levels'] as number[] | undefined)?.[Number(name.slice(5))-1] : initial?.[name];
  return <label key={name} className="text-xs text-muted-foreground">{label}<input className="form-input mt-2" name={name} type="number" step="0.01" min={name === 'minimumDirect' ? 1 : 0} max={name === 'minimumDirect' ? undefined : 100} defaultValue={Number(level ?? fallback)} required/></label>;
- })}</div>
+ })}</div></div>)}
  <div className="border-y border-border py-5 space-y-4">
  <h2 className="flex items-center gap-2 font-display text-xl font-bold text-chart-3"><Coins/> BIX Booster direct bonus</h2>
  <label className="flex items-center gap-3 text-sm"><input name="bixDirectEnabled" type="checkbox" defaultChecked={Boolean(initial?.['bixDirectEnabled'] ?? true)}/> Enable direct BIX staking bonuses</label>
