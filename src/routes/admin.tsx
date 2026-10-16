@@ -32,6 +32,7 @@ import { AdminTeams } from '@/components/AdminTeams';
 import { AdminReports } from '@/components/AdminReports';
 import { AdminPresale } from '@/components/AdminPresale';
 import { AdminShopCatalog } from '@/components/AdminShopCatalog';
+import { AdminShopOrders } from '@/components/AdminShopOrders';
 import { AdminMemberShop, type MemberShopConfig } from '@/components/MemberShop';
 import { AdminLeaders } from '@/components/AdminLeaders';
 import { AdminArena } from '@/components/AdminArena';
@@ -107,6 +108,7 @@ function Admin() {
      {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>}
      {tab === 'Marketplace' && <AdminWorkspace label="Marketplace" panels={[
        { title: 'Katalog owner', content: <AdminShopCatalog onMessage={setMessage}/> },
+       { title: 'Pesanan & resi', content: <AdminShopOrders onMessage={setMessage}/> },
        { title: 'Slot & Moderasi member', content: <AdminMemberShop initial={data?.settings.find(s => s.key === 'member_shop')?.value as MemberShopConfig | undefined} onMessage={setMessage}/> },
      ]}/>}
      {tab === 'Arena' && <AdminArena onMessage={setMessage}/>}

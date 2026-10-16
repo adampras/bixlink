@@ -414,6 +414,13 @@
       "when": 1792173576767,
       "tag": "0058_editable_vip_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1792176790359,
+      "tag": "0059_arena_admin_bixp_cap",
+      "breakpoints": true
     }
   ]
 }

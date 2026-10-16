@@ -16,7 +16,7 @@ export const Route = createFileRoute('/arena')({
   component: ArenaPage,
 });
 
-const DISCLOSURE = 'BIXP are free promotional points within the 100 BIXP cap. Not on-chain BIX, not withdrawable until owner conversion opens. Rankings and rewards are not guaranteed.';
+const DISCLOSURE = 'BIXP are free promotional points earned by completing missions. Not on-chain BIX, not withdrawable until owner conversion opens. Rankings and rewards are not guaranteed.';
 
 function ArenaPage() {
   const { user, ready } = useMember();
@@ -27,7 +27,7 @@ function ArenaPage() {
   const s = q.data?.status;
   const run = async (key: QuestKey) => {
     setBusy(key); setMsg('');
-    try { const r = await claim({ data: { key, ...(key === 'quiz' && answer !== null ? { answer } : {}) } }); setMsg(r.amount > 0 ? `+${r.amount} BIXP added${r.capped ? ' (limited by the 100 BIXP cap)' : ''}.` : 'Mission recorded. Your 100 BIXP cap is reached, so no BIXP was added.'); await qc.invalidateQueries({ queryKey: ['arena', user?.id] }); }
+    try { const r = await claim({ data: { key, ...(key === 'quiz' && answer !== null ? { answer } : {}) } }); setMsg(r.amount > 0 ? `+${r.amount} BIXP added${r.capped ? ' (limited by the account BIXP limit)' : ''}.` : 'Mission recorded. Your BIXP mission limit is reached, so no BIXP was added.'); await qc.invalidateQueries({ queryKey: ['arena', user?.id] }); }
     catch (e) { setMsg(e instanceof Error ? e.message : 'Could not claim.'); }
     setBusy(null);
   };
@@ -39,11 +39,11 @@ function ArenaPage() {
       <section className="arena-den mt-6">
         <img src={headerLogo} alt="" width={84} height={84} className={`arena-fox tier-${tier!.level}`}/>
         <div className="min-w-0"><span className="text-[10px] font-bold tracking-widest text-muted-foreground">FOX DEN · STATUS ONLY</span><h2 className="font-display text-xl font-bold text-chart-3">{tier!.name} Fox</h2>
-          <div className="mt-2 flex flex-wrap gap-3 text-xs"><span className="flex items-center gap-1"><Flame size={14} className="text-chart-3"/>{s.streak}-day streak</span><span>Quest BIXP: <b className="numeric">{Number(s.questVbix).toFixed(2)}</b></span><span>Total BIXP: <b className="numeric">{Number(s.totalVbix).toFixed(2)} / {s.cap}</b></span></div>
-          <div className="arena-cap mt-2"><i style={{ width: `${Math.min(100, Number(s.totalVbix) / s.cap * 100)}%` }}/></div>
+          <div className="mt-2 flex flex-wrap gap-3 text-xs"><span className="flex items-center gap-1"><Flame size={14} className="text-chart-3"/>{s.streak}-day streak</span><span>Quest BIXP: <b className="numeric">{Number(s.questVbix).toFixed(2)}</b></span><span>Total BIXP: <b className="numeric">{Number(s.totalVbix).toFixed(2)}{s.cap > 0 ? ` · mission limit ${Number(s.questVbix).toFixed(0)}/${s.cap}` : ' · no limit'}</b></span></div>
+          <div className="arena-cap mt-2"><i style={{ width: `${s.cap > 0 ? Math.min(100, Number(s.questVbix) / s.cap * 100) : 100}%` }}/></div>
         </div>
       </section>
-      {(() => { const active = QUEST_KEYS.filter(k => s.missions[k]); const done = active.filter(k => s.claimed.includes(k)).length; const left = active.filter(k => !s.claimed.includes(k)).reduce((t, k) => t + Number(s.rewards[k] ?? 0), 0); return <div className="mt-8 flex items-end justify-between gap-3"><div><h2 className="font-display text-lg font-bold">Fox Quest</h2><p className="text-xs text-muted-foreground">{done}/{active.length} missions done · {left.toFixed(1)} BIXP still available</p></div>{Number(s.totalVbix) >= s.cap && <span className="rounded-full border border-chart-3 px-2 py-0.5 text-[10px] font-bold text-chart-3">CAP REACHED</span>}</div>; })()}
+      {(() => { const active = QUEST_KEYS.filter(k => s.missions[k]); const done = active.filter(k => s.claimed.includes(k)).length; const left = active.filter(k => !s.claimed.includes(k)).reduce((t, k) => t + Number(s.rewards[k] ?? 0), 0); return <div className="mt-8 flex items-end justify-between gap-3"><div><h2 className="font-display text-lg font-bold">Fox Quest</h2><p className="text-xs text-muted-foreground">{done}/{active.length} missions done · {left.toFixed(1)} BIXP still available</p></div>{s.cap > 0 && Number(s.questVbix) >= s.cap && <span className="rounded-full border border-chart-3 px-2 py-0.5 text-[10px] font-bold text-chart-3">CAP REACHED</span>}</div>; })()}
       <div className="mt-3 grid gap-3 md:grid-cols-2">{QUEST_KEYS.filter(k => s.missions[k]).map(k => { const done = s.claimed.includes(k); const L = QUEST_LABELS[k]; return <article key={k} className="arena-quest">
         <div className="flex items-start justify-between gap-3"><div><b className="text-sm">{L.title}</b><p className="mt-1 text-xs text-muted-foreground">{L.hint}</p></div><span className="shrink-0 text-xs font-bold text-chart-3">+{s.rewards[k]} BIXP</span></div>
         {k === 'quiz' && !done && s.quiz && <div className="mt-3"><p className="text-sm">{s.quiz.q}</p><div className="mt-2 grid gap-2">{s.quiz.options.map((o, i) => <button type="button" key={i} onClick={() => setAnswer(i)} className={`rounded-lg border px-3 py-2 text-left text-xs ${answer === i ? 'border-primary bg-primary/10' : 'border-border'}`}>{o}</button>)}</div></div>}
