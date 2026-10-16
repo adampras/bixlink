@@ -25,7 +25,15 @@ function BoostPage() {
 
     <section className="booster-vault overflow-hidden border-b border-border">
       <div className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
-        <Link to="/presale" className="mb-4 flex items-center justify-between rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-bold"><span>PRESALE STAKING BIX · $500 – $10,000</span><ArrowUpRight size={16}/></Link>
+        <Link to="/presale" aria-label="Open Genesis presale staking" className="group mb-5 flex items-center gap-3 rounded-2xl border border-chart-3/40 bg-gradient-to-r from-card via-background to-card px-4 py-3 transition-colors hover:border-chart-3/80">
+          <span className="relative flex size-2 shrink-0"><span className="absolute inline-flex size-full animate-ping rounded-full bg-chart-3 opacity-60"/><span className="relative inline-flex size-2 rounded-full bg-chart-3"/></span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[9px] font-bold tracking-[0.28em] text-chart-3">LIMITED ALLOCATION</span>
+            <span className="block truncate font-display text-sm font-black tracking-wide sm:text-base">GENESIS PRESALE STAKING</span>
+            <span className="block truncate text-[10px] text-muted-foreground sm:text-xs">$500 – $70,000 · Hybrid, Dividend &amp; Founder</span>
+          </span>
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-chart-3/60 text-chart-3 transition-transform group-hover:translate-x-0.5"><ArrowUpRight size={16}/></span>
+        </Link>
         <h1 className="section-title !mt-0 !text-3xl !tracking-normal sm:!text-5xl">BOOST YOUR <span>APY</span></h1>
         <div className="mt-5 grid min-w-0 gap-6 lg:grid-cols-2 lg:items-start lg:gap-10">
         <div className="min-w-0">
