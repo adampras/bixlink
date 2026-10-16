@@ -16,6 +16,8 @@ import { DEFAULT_STRATEGIES, dividendSettled, type PresaleStrategy } from '@/lib
 import { number } from '@/lib/bixlink';
 import { Eye, Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { BadgeCheck } from 'lucide-react';
 import reactor from '@/assets/presale-rocket-dark.mp4.asset.json';
 import reactorWebm from '@/assets/presale-rocket-dark.webm.asset.json';
 import reactorPoster from '@/assets/presale-rocket-dark-poster.jpg.asset.json';
@@ -41,6 +43,7 @@ function PresalePage() {
   const [sound, setSound] = useState(false); const vidRef = useRef<HTMLVideoElement>(null);
   const [selection, setSelection] = useState<PresaleSelection | null>(null);
   const [purchaseError, setPurchaseError] = useState('');
+  const [receipt, setReceipt] = useState<{ usd: number; bix: number; serial: number; dailyUsd: number } | null>(null);
   const [nftPreview, setNftPreview] = useState<NftTier | null>(null);
   useEffect(() => { if (vidRef.current) vidRef.current.muted = !sound; }, [sound]);
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
@@ -117,6 +120,22 @@ function PresalePage() {
     </>}
     <p className="terminal-disclosure mt-8"><ShieldCheck size={14}/> No guarantee of profit. Presale BIX is an internal ledger allocation, not an on-chain token. Mined-out BIX is shown for tracking and is not spendable until the owner opens settlement. Sponsor bonus goes only to your direct referrer.</p>
     <PresalePurchaseDialog selection={selection} balance={Number(s?.balanceUsd ?? 0)} busy={busy !== null} error={purchaseError} onClose={() => setSelection(null)} onConfirm={confirmBuy}/>
+    <Dialog open={receipt !== null} onOpenChange={open => { if (!open) setReceipt(null); }}>
+      <DialogContent className="max-w-sm border-chart-3 text-center">
+        {receipt && <>
+          <BadgeCheck size={44} className="mx-auto text-chart-3"/>
+          <DialogTitle className="font-display text-xl font-black text-chart-3">Purchase successful</DialogTitle>
+          <DialogDescription className="text-xs">Your Genesis allocation is confirmed and recorded.</DialogDescription>
+          <dl className="mt-2 text-left text-sm">
+            <div className="flex justify-between border-t border-border py-2"><dt className="text-muted-foreground">Certificate</dt><dd className="numeric font-bold">#GEN-{String(receipt.serial).padStart(4, '0')}</dd></div>
+            <div className="flex justify-between border-t border-border py-2"><dt className="text-muted-foreground">Paid</dt><dd className="numeric font-bold">{number(receipt.usd)} USDT</dd></div>
+            <div className="flex justify-between border-t border-border py-2"><dt className="text-muted-foreground">Locked BIX</dt><dd className="numeric font-bold text-primary">{number(receipt.bix)} BIX</dd></div>
+            {receipt.dailyUsd > 0 && <div className="flex justify-between border-y border-border py-2"><dt className="text-muted-foreground">USDT daily terms</dt><dd className="numeric">{number(receipt.dailyUsd, { maximumFractionDigits: 2 })} USDT</dd></div>}
+          </dl>
+          <Button className="mt-3 w-full" onClick={() => { setReceipt(null); setTab('portfolio'); }}>View my portfolio</Button>
+        </>}
+      </DialogContent>
+    </Dialog>
     <Dialog open={nftPreview !== null} onOpenChange={open => { if (!open) setNftPreview(null); }}>
       <DialogContent className="nft-preview-dialog">
         {nftPreview && <><img src={NFT_ART[nftPreview]} alt={`${NFT_NAME[nftPreview]} certificate artwork`}/><div className="p-4"><DialogTitle className="font-display text-base">{NFT_NAME[nftPreview]} · {nftPreview}</DialogTitle><DialogDescription className="mt-1 text-xs">In-app certificate artwork issued with this allocation. Not an on-chain NFT.</DialogDescription></div></>}
