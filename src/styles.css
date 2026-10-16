@@ -2141,3 +2141,18 @@ html .site-shell .wallet-summary[data-wallet-skin], html .wallet-summary[data-wa
 .nft-lux-frame .nft-card-top, .nft-lux-frame .nft-card-foot { letter-spacing: .14em; }
 .nft-lux-frame .nft-card-foot span { color: oklch(0.82 0.11 85); font-size: 9px; font-weight: 800; }
 .nft-lux-corner { position: absolute; inset: 10px; pointer-events: none; z-index: 2; border-radius: 12px; background: linear-gradient(oklch(0.88 0.1 86),oklch(0.88 0.1 86)) top left/14px 1.5px, linear-gradient(oklch(0.88 0.1 86),oklch(0.88 0.1 86)) top left/1.5px 14px, linear-gradient(oklch(0.88 0.1 86),oklch(0.88 0.1 86)) bottom right/14px 1.5px, linear-gradient(oklch(0.88 0.1 86),oklch(0.88 0.1 86)) bottom right/1.5px 14px; background-repeat: no-repeat; }
+
+/* Deposit flight scanner */
+.dep-flight { margin-top: .75rem; border: 1px solid var(--border); border-radius: 1rem; padding: .75rem; background: color-mix(in oklab, var(--card) 85%, transparent); }
+.dep-flight-sky { position: relative; height: 84px; overflow: hidden; border-radius: .75rem; background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--chart-3) 18%, transparent), transparent 70%); }
+.dep-flight-radar { position: absolute; left: 50%; top: 50%; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 9999px; border: 1px solid color-mix(in oklab, var(--chart-3) 60%, transparent); animation: dep-radar 1.8s ease-out infinite; }
+.dep-flight-plane { position: absolute; top: 50%; left: -40px; color: var(--chart-3); transform: translateY(-50%) rotate(45deg); animation: dep-fly 2.6s ease-in-out infinite; filter: drop-shadow(0 0 6px color-mix(in oklab, var(--chart-3) 60%, transparent)); }
+.dep-flight-trail { position: absolute; top: 50%; left: 0; height: 2px; width: 0; background: linear-gradient(90deg, transparent, var(--chart-3)); animation: dep-trail 2.6s ease-in-out infinite; }
+.dep-flight-text { margin-top: .5rem; text-align: center; font-size: .75rem; font-weight: 700; color: var(--chart-3); }
+.dep-flight.is-done .dep-flight-plane { animation: dep-warp .8s ease-in forwards; }
+.dep-flight.is-done .dep-flight-text { color: var(--chart-2); }
+@keyframes dep-fly { 0% { left: -40px; } 100% { left: calc(100% + 40px); } }
+@keyframes dep-trail { 0% { width: 0; } 100% { width: 100%; opacity: 0; } }
+@keyframes dep-radar { 0% { transform: scale(.4); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+@keyframes dep-warp { 0% { left: 40%; } 100% { left: 130%; transform: translateY(-50%) rotate(45deg) scale(1.6); } }
+@media (prefers-reduced-motion: reduce) { .dep-flight-plane, .dep-flight-trail, .dep-flight-radar { animation: none; left: 45%; } }
