@@ -26,9 +26,9 @@ export function AdminMining({ initial, onMessage, onSaved }: { initial: MiningSe
   const rateText = conversionRate ?? (conversion?.vbixPerBix == null ? '' : String(conversion.vbixPerBix));
   const saveConversion = async (enabled: boolean) => {
     const parsed = miningConversionSchema.safeParse({ enabled, vbixPerBix: rateText.trim() ? Number(rateText) : null });
-    if (!parsed.success) { onMessage('Isi nilai vBIX untuk 1 BIX sebelum membuka konversi.'); return; }
+    if (!parsed.success) { onMessage('Isi nilai BIXP untuk 1 BIX sebelum membuka konversi.'); return; }
     setConversionBusy(true);
-    try { await save({ data: { key: 'mining_conversion', value: parsed.data } }); await Promise.all([queryClient.invalidateQueries({ queryKey: ['bix-public-config'] }), queryClient.invalidateQueries({ queryKey: ['bix-mining-conversion'] })]); await onSaved(); onMessage(enabled ? 'Konversi vBIX dibuka.' : 'Konversi vBIX ditutup.'); }
+    try { await save({ data: { key: 'mining_conversion', value: parsed.data } }); await Promise.all([queryClient.invalidateQueries({ queryKey: ['bix-public-config'] }), queryClient.invalidateQueries({ queryKey: ['bix-mining-conversion'] })]); await onSaved(); onMessage(enabled ? 'Konversi BIXP dibuka.' : 'Konversi BIXP ditutup.'); }
     catch (e) { onMessage(e instanceof Error ? e.message : 'Konversi gagal disimpan.'); }
     finally { setConversionBusy(false); }
   };
@@ -74,7 +74,7 @@ export function AdminMining({ initial, onMessage, onSaved }: { initial: MiningSe
         </div>
         <p className="mt-3 text-xs text-muted-foreground">{visible ? 'Terlihat di HOME member.' : 'Tersembunyi dari HOME member.'}</p>
       </section>
-    <section className="mt-6 border-b border-border pb-6"><h2 className="font-display text-lg font-bold">Konversi vBIX ke BIX</h2><label className="mt-3 grid gap-2 text-sm">Jumlah vBIX untuk 1 BIX<input className="form-input" type="number" min="0.000001" step="any" value={rateText} onChange={e => setConversionRate(e.target.value)} placeholder="Tentukan nilai konversi"/></label><div role="group" aria-label="Buka atau tutup konversi" className="mt-3 flex flex-wrap gap-2"><Button aria-pressed={!!conversion?.enabled} variant={conversion?.enabled ? 'default' : 'outline'} disabled={conversionBusy || !config} onClick={() => saveConversion(true)}><Eye size={16}/>Buka konversi</Button><Button aria-pressed={!conversion?.enabled} variant={!conversion?.enabled ? 'default' : 'outline'} disabled={conversionBusy || !config} onClick={() => saveConversion(false)}><EyeOff size={16}/>Tutup konversi</Button><Button variant="outline" disabled={conversionBusy || !config} onClick={() => saveConversion(!!conversion?.enabled)}>Simpan nilai</Button></div><p className="mt-3 text-xs text-muted-foreground">Pool Marketing & Community 1.000.000 BIX · batas kumulatif 100 BIX per akun. Tidak menggunakan vault owner.</p></section>
+    <section className="mt-6 border-b border-border pb-6"><h2 className="font-display text-lg font-bold">Konversi BIXP ke BIX</h2><label className="mt-3 grid gap-2 text-sm">Jumlah BIXP untuk 1 BIX<input className="form-input" type="number" min="0.000001" step="any" value={rateText} onChange={e => setConversionRate(e.target.value)} placeholder="Tentukan nilai konversi"/></label><div role="group" aria-label="Buka atau tutup konversi" className="mt-3 flex flex-wrap gap-2"><Button aria-pressed={!!conversion?.enabled} variant={conversion?.enabled ? 'default' : 'outline'} disabled={conversionBusy || !config} onClick={() => saveConversion(true)}><Eye size={16}/>Buka konversi</Button><Button aria-pressed={!conversion?.enabled} variant={!conversion?.enabled ? 'default' : 'outline'} disabled={conversionBusy || !config} onClick={() => saveConversion(false)}><EyeOff size={16}/>Tutup konversi</Button><Button variant="outline" disabled={conversionBusy || !config} onClick={() => saveConversion(!!conversion?.enabled)}>Simpan nilai</Button></div><p className="mt-3 text-xs text-muted-foreground">Pool Marketing & Community 1.000.000 BIX · batas kumulatif 100 BIX per akun. Tidak menggunakan vault owner.</p></section>
     <form onSubmit={submit} className="mt-6 grid gap-4">
       <div className="flex items-center justify-between">
         <div>
@@ -96,7 +96,7 @@ export function AdminMining({ initial, onMessage, onSaved }: { initial: MiningSe
         <input className="form-input" type="number" min="0" max="100" step="1" value={stakeBoostPct} onChange={e => setStakeBoostPct(e.target.value)} placeholder="contoh: 10" />
       </label>
       <Button className="rounded-full" disabled={busy}>{busy ? 'Saving…' : 'Simpan pengaturan'}</Button>
-      <p className="text-xs text-muted-foreground">Mining menghasilkan vBIX plus bonus jaringan 5 level sesuai persentase Referral. Konversi ke saldo BIX internal mengikuti nilai dan tombol buka/tutup di atas.</p>
+      <p className="text-xs text-muted-foreground">Mining menghasilkan BIXP plus bonus jaringan 5 level sesuai persentase Referral. Konversi ke saldo BIX internal mengikuti nilai dan tombol buka/tutup di atas.</p>
     </form></div>
   );
 }

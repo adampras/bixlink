@@ -64,7 +64,7 @@ Target fase:
 • Standar kurasi dan penilaian aset
 • Kajian aspek hukum dan kepatuhan
 • Format pelaporan terbuka untuk status setiap aset`,
-  EKOSISTEM: `Fase ekspansi memperkuat utilitas BIX dan komunitas: BIX PAY, market internal, mining vBIX, serta persiapan Marketplace.
+  EKOSISTEM: `Fase ekspansi memperkuat utilitas BIX dan komunitas: BIX PAY, market internal, mining BIXP, serta persiapan Marketplace.
 
 Target fase:
 • Transfer BIX antar-anggota secara instan
