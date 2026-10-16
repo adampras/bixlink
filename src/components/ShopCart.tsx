@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { money } from '@/lib/bixlink';
 import { COURIERS, cartSubtotal, cartUnits, shippingCost, type CartLine, type Region } from '@/lib/shipping';
 
-export function ShopCart({ open, onClose, lines, setLines, userId, onOrdered }: { open: boolean; onClose: () => void; lines: CartLine[]; setLines: (l: CartLine[]) => void; userId?: string; onOrdered: () => void }) {
+export function ShopCart({ open, onClose, lines, setLines, userId, onOrdered }: { open: boolean; onClose: () => void; lines: CartLine[]; setLines: (l: CartLine[]) => void; userId?: string | undefined; onOrdered: () => void }) {
   const [step, setStep] = useState<'cart' | 'ship'>('cart');
   const [region, setRegion] = useState<Region>('local');
   const [courier, setCourier] = useState('jne-reg');

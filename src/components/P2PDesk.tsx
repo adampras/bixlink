@@ -9,7 +9,7 @@ import { money, number } from '@/lib/bixlink';
 import { P2P_CEILING, P2P_FLOOR, p2pPriceAllowed } from '@/lib/shipping';
 
 type Offer = { id: string; user_id: string; side: string; price_usd: number; remaining_bix: number; amount_bix: number; status: string; created_at: string };
-export function P2PDesk({ userId }: { userId?: string }) {
+export function P2PDesk({ userId }: { userId?: string | undefined }) {
   const qc = useQueryClient();
   const book = useQuery({ queryKey: ['p2p-book'], enabled: !!userId, refetchInterval: 10000, queryFn: async () => {
     const [o, f] = await Promise.all([
