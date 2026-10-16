@@ -2214,3 +2214,5 @@ html[data-color-mode="light"] .landing-hero-compact .hero-payment-canvas { opaci
 }
 @keyframes hero-rise { from { opacity: 0; transform: translateY(10px); } }
 @media (prefers-reduced-motion: reduce) { .landing-hero-compact .hero-title, .landing-hero-compact .landing-hero-metrics > div { animation: none; } }
+html[data-color-mode="light"] .reactor-landing :is(.eyebrow, .section-title span) { color: oklch(0.5 0.12 70); }
+html[data-color-mode="light"] .reactor-landing .section-title { color: var(--foreground); }
