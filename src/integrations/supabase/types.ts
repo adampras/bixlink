@@ -309,6 +309,83 @@ export type Database = {
           },
         ]
       }
+      bix_p2p_fills: {
+        Row: {
+          amount_bix: number
+          buyer_id: string
+          created_at: string
+          id: string
+          offer_id: string
+          price_usd: number
+          seller_id: string
+          total_usd: number
+        }
+        Insert: {
+          amount_bix: number
+          buyer_id: string
+          created_at?: string
+          id?: string
+          offer_id: string
+          price_usd: number
+          seller_id: string
+          total_usd: number
+        }
+        Update: {
+          amount_bix?: number
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          offer_id?: string
+          price_usd?: number
+          seller_id?: string
+          total_usd?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_p2p_fills_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "bix_p2p_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bix_p2p_offers: {
+        Row: {
+          amount_bix: number
+          created_at: string
+          id: string
+          price_usd: number
+          remaining_bix: number
+          side: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_bix: number
+          created_at?: string
+          id?: string
+          price_usd: number
+          remaining_bix: number
+          side: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_bix?: number
+          created_at?: string
+          id?: string
+          price_usd?: number
+          remaining_bix?: number
+          side?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_presale_orders: {
         Row: {
           bix_amount: number
@@ -466,6 +543,66 @@ export type Database = {
           reviewed_by?: string | null
           season?: string
           status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bix_shop_orders: {
+        Row: {
+          address: string
+          city: string
+          country: string
+          courier: string
+          created_at: string
+          id: string
+          items: Json
+          phone: string
+          postal_code: string
+          recipient: string
+          region: string
+          shipping_usd: number
+          status: string
+          subtotal_usd: number
+          tracking_number: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          city: string
+          country: string
+          courier: string
+          created_at?: string
+          id?: string
+          items: Json
+          phone: string
+          postal_code: string
+          recipient: string
+          region: string
+          shipping_usd: number
+          status?: string
+          subtotal_usd: number
+          tracking_number?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          country?: string
+          courier?: string
+          created_at?: string
+          id?: string
+          items?: Json
+          phone?: string
+          postal_code?: string
+          recipient?: string
+          region?: string
+          shipping_usd?: number
+          status?: string
+          subtotal_usd?: number
+          tracking_number?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1244,6 +1381,17 @@ export type Database = {
       bix_nft_sell: { Args: { p_card: string }; Returns: Json }
       bix_nft_tier: { Args: { p_days: number; p_usd: number }; Returns: string }
       bix_owner_vault: { Args: never; Returns: Json }
+      bix_p2p_bix_delta: { Args: { p_user: string }; Returns: number }
+      bix_p2p_cancel: { Args: { p_offer: string }; Returns: undefined }
+      bix_p2p_post: {
+        Args: { p_amount: number; p_price: number; p_side: string }
+        Returns: string
+      }
+      bix_p2p_take: {
+        Args: { p_amount: number; p_offer: string }
+        Returns: string
+      }
+      bix_p2p_usdt_delta: { Args: { p_user: string }; Returns: number }
       bix_pay_lookup: { Args: { p_code: string }; Returns: boolean }
       bix_pay_send: {
         Args: { p_amount: number; p_code: string; p_note: string }
