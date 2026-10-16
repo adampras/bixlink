@@ -15,10 +15,10 @@ export function AdminArena({ onMessage }: { onMessage: (m: string) => void }) {
   const setQuiz = (i: number, patch: Partial<ArenaConfig['quiz'][number]>) => setCfg({ ...cfg, quiz: cfg.quiz.map((x, j) => j === i ? { ...x, ...patch } : x) });
   return <section className="mt-8 grid max-w-3xl gap-4">
     <h2 className="font-display text-xl font-black">FOX ARENA</h2>
-    <p className="text-xs text-muted-foreground">Quest vBIX share the 100 vBIX per-account cap and the 1,000,000 Marketing &amp; Community pool with mining.</p>
+    <p className="text-xs text-muted-foreground">Quest BIXP share the 100 BIXP per-account cap and the 1,000,000 Marketing &amp; Community pool with mining.</p>
     <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={cfg.enabled} onChange={e => setCfg({ ...cfg, enabled: e.target.checked })}/> Arena open</label>
     <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={cfg.leaderboard} onChange={e => setCfg({ ...cfg, leaderboard: e.target.checked })}/> Show leaderboard</label>
-    {QUEST_KEYS.map(k => <div key={k} className="grid grid-cols-[1fr_7rem] items-center gap-3 rounded-lg border border-border p-3"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={cfg.missions[k]} onChange={e => setCfg({ ...cfg, missions: { ...cfg.missions, [k]: e.target.checked } })}/>{QUEST_LABELS[k].title}</label><label className="text-xs">vBIX<input type="number" step="0.1" min="0" max="10" className={num} value={cfg.rewards[k]} onChange={e => setCfg({ ...cfg, rewards: { ...cfg.rewards, [k]: Number(e.target.value) } })}/></label></div>)}
+    {QUEST_KEYS.map(k => <div key={k} className="grid grid-cols-[1fr_7rem] items-center gap-3 rounded-lg border border-border p-3"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={cfg.missions[k]} onChange={e => setCfg({ ...cfg, missions: { ...cfg.missions, [k]: e.target.checked } })}/>{QUEST_LABELS[k].title}</label><label className="text-xs">BIXP<input type="number" step="0.1" min="0" max="10" className={num} value={cfg.rewards[k]} onChange={e => setCfg({ ...cfg, rewards: { ...cfg.rewards, [k]: Number(e.target.value) } })}/></label></div>)}
     <h3 className="mt-2 font-bold">Quiz questions (one per day, rotating)</h3>
     {cfg.quiz.map((x, i) => <div key={i} className="grid gap-2 rounded-lg border border-border p-3">
       <input className={num} value={x.q} onChange={e => setQuiz(i, { q: e.target.value })} placeholder="Question"/>

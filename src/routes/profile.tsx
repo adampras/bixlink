@@ -15,13 +15,14 @@ import { useI18n } from '@/lib/i18n';
 import { usePresaleStatus } from '@/components/PresaleEntry';
 import { GenesisCertificate } from '@/components/PresaleStrategies';
 import { SovereignPlaque } from '@/components/SovereignAllocation';
+import { number } from '@/lib/bixlink';
 
 export const Route = createFileRoute('/profile')({ head: () => ({ meta: [{ title: 'Profile — BIXLINK' }, { name: 'description', content: 'Your BIXLINK account, referral code and network.' }, { property: 'og:title', content: 'Profile — BIXLINK' }, { property: 'og:description', content: 'Manage your BIXLINK member profile.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: ProfilePage });
 
 function ProfilePage() {
   const { user, ready, data } = useMember();
   const reviewer = useReviewerAccess(user?.id);
-  const [showAllProof, setShowAllProof] = useState(false);
+  const [openProof, setOpenProof] = useState<string | null>(null);
   const [notice, setNotice] = useState(''); const [code, setCode] = useState('');
   const makeCode = useServerFn(createReferral); const link = useServerFn(assignReferral);
   const qc = useQueryClient(); const navigate = useNavigate();
@@ -51,7 +52,11 @@ function ProfilePage() {
         <Link to="/network" className="profile-network-link">View my network <ArrowRight/></Link>
       </section>
       <section className="mt-6 rounded-2xl border border-chart-3/40 bg-card p-5"><div className="flex items-center justify-between gap-3"><div><div className="eyebrow">BIXP · ECOSYSTEM POINTS</div><b className="numeric mt-1 block font-display text-2xl text-chart-3">{bixp ? Number(bixp.totalVbix).toFixed(2) : '—'} <small className="text-sm text-muted-foreground">/ {bixp?.cap ?? 100} BIXP</small></b></div><Button asChild size="sm"><Link to="/arena">Earn BIXP</Link></Button></div><div className="arena-cap mt-3"><i style={{ width: `${bixp ? Math.min(100, Number(bixp.totalVbix) / bixp.cap * 100) : 0}%` }}/></div><p className="mt-2 text-[11px] text-muted-foreground">Free promotional points. Not on-chain BIX; conversion only if the owner opens it.</p></section>
-      {orders.length > 0 && <section className="mt-6"><div className="eyebrow">MY GENESIS PROOF</div><div className="mt-3 grid gap-3 sm:grid-cols-2">{(showAllProof ? orders : orders.slice(0, 2)).map((o, i) => Number(o.package_usd) >= 100000 ? <SovereignPlaque key={o.id} serial={o.serial ?? i + 1} strategy={o.strategy ?? 'standard'} bix={Number(o.bix_amount)} holder={user?.email ?? 'Member'}/> : <GenesisCertificate key={o.id} usd={Number(o.package_usd)} serial={o.serial} strategy={o.strategy} bix={Number(o.bix_amount)}/>)}</div>{orders.length > 2 && <button type="button" className="mt-3 text-xs font-bold text-chart-3" onClick={() => setShowAllProof(v => !v)}>{showAllProof ? 'Show less' : `Show all ${orders.length} certificates`}</button>}</section>}
+      {orders.length > 0 && (() => { const pick = orders.find(o => o.id === openProof) ?? orders[0]!; const total = orders.reduce((s, o) => s + Number(o.package_usd), 0); return <section className="mt-6 rounded-2xl border border-chart-3/40 bg-card p-4">
+        <div className="flex items-center justify-between gap-3"><div className="min-w-0"><div className="eyebrow">GENESIS VAULT</div><p className="mt-1 text-xs text-muted-foreground">{orders.length} certificates · <span className="numeric">${number(total)}</span></p></div><Gem size={18} className="shrink-0 text-chart-3"/></div>
+        <div className="mx-auto mt-3 max-w-[260px]">{Number(pick.package_usd) >= 100000 ? <SovereignPlaque serial={pick.serial ?? 1} strategy={pick.strategy ?? 'standard'} bix={Number(pick.bix_amount)} holder={user?.email ?? 'Member'}/> : <GenesisCertificate usd={Number(pick.package_usd)} serial={pick.serial} strategy={pick.strategy} bix={Number(pick.bix_amount)}/>}</div>
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">{orders.map(o => <button key={o.id} type="button" onClick={() => setOpenProof(o.id)} className={`numeric shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold ${o.id === pick.id ? 'border-chart-3 bg-chart-3/10 text-chart-3' : 'border-border text-muted-foreground'}`}>#GEN-{String(o.serial ?? 0).padStart(4, '0')} · ${number(Number(o.package_usd))}</button>)}</div>
+      </section>; })()}
       <div className="eyebrow mt-8">ECOSYSTEM</div><section className="profile-actions"><Button asChild variant="outline"><Link to="/p2p"><span className="profile-action-icon"><TrendingUp/></span><span>P2P Market <small>Buy · sell BIX between members</small></span><ChevronRight className="profile-action-arrow"/></Link></Button><Button asChild variant="outline"><Link to="/marketing"><span className="profile-action-icon"><TrendingUp/></span><span>Marketing materials <small>PDF · Video</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
         <Button asChild variant="outline"><Link to="/nft-marketplace"><span className="profile-action-icon"><ShoppingBag/></span><span>BIXLINK Marketplace</span><ChevronRight className="profile-action-arrow"/></Link></Button>
         {reviewer.data && <Button asChild variant="outline"><Link to="/review"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>ADMIN PANEL BIX <small>Deposit &amp; withdrawal review only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
