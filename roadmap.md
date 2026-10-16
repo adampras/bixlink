@@ -128,3 +128,7 @@
 - [ ] Real connected card payments for marketplace — waits on owner choosing a payment provider.
 
 - [x] Compact landing and marketplace heroes; verify phone/desktop layout and collection actions.
+- [x] Editable VIP Reward tiers (target + BIX) in Admin.
+- [x] Group referral admin editor (Direct, Matching, RewardPlus, BIX).
+- [x] NETWORK Leader Bonus Hub with matching matrix.
+- [x] Presale purchase success receipt pop-up.

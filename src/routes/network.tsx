@@ -55,6 +55,19 @@ function NetworkPage() {
  <div className="nx-milestone-heading"><h3>Matching access</h3><span>{unlocked}/{levels.length} unlocked</span></div>
  <div className="nx-levels">{levels.map((pct,i) => <div key={i} className={i<unlocked ? 'nx-level nx-level-active' : 'nx-level'}><span>LEVEL {i+1}</span><strong>{pct}%</strong><small>{i+1} direct</small>{i<unlocked ? <BadgeCheck size={16}/> : <Lock size={14}/>}</div>)}</div>
  </section>
+ <section aria-label="Leader bonus hub" className="mt-6 rounded-2xl border border-chart-3/50 bg-card p-4 md:p-5">
+  <div className="eyebrow">LEADER BONUS HUB</div><h2 className="mt-1 font-display text-lg font-bold">My network bonuses</h2>
+  <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">{[
+   ['Direct sponsor', money(usdtDirectBonus), 'text-chart-2'],
+   ['Matching profit', money(matchingTotal), 'text-chart-3'],
+   ['Matching · last 24h', money(netBonuses.filter(b => b.kind==='matching' && Date.now()-new Date(b.created_at).getTime() < 864e5).reduce((s,b) => s+Number(b.total_usd),0)), 'text-chart-3'],
+   ['RewardPlus this week', money(weeklyReward), 'text-chart-2'],
+  ].map(([l,v,c]) => <div key={l} className="rounded-xl border border-border p-3"><span className="text-[11px] text-muted-foreground">{l}</span><b className={`numeric mt-1 block text-xl ${c}`}>{v}</b></div>)}</div>
+  <h3 className="mt-5 text-sm font-bold">Matching matrix L1–L{levels.length}</h3>
+  <div className="mt-2 grid grid-cols-5 gap-2">{levels.map((pct,i) => { const earned = netBonuses.filter(b => b.kind==='matching' && b.level===i+1).reduce((s,b) => s+Number(b.total_usd),0); const members = tree.filter(n => n.depth===i+1).length; return <div key={i} className={`rounded-xl border p-2 text-center ${i<unlocked ? 'border-chart-3' : 'border-border opacity-70'}`}><b className="text-xs text-chart-3">L{i+1} · {pct}%</b><p className="text-[10px] text-muted-foreground">{members} members</p><p className="numeric text-xs font-bold">{money(earned)}</p>{i<unlocked ? <BadgeCheck size={13} className="mx-auto mt-1 text-chart-2"/> : <Lock size={12} className="mx-auto mt-1"/>}</div>; })}</div>
+  <div className="mt-5"><div className="flex justify-between text-xs"><span>RewardPlus qualification</span><b>{Math.min(weeklyDirect,minimum)}/{minimum} direct this week</b></div><progress className="allocation-progress mt-2" max={minimum} value={Math.min(weeklyDirect,minimum)}/></div>
+  <p className="mt-3 text-[10px] text-muted-foreground">Totals come from recorded bonus entries. RewardPlus this week is a projection until settled.</p>
+ </section>
  <section className="nx-matrix"><div className="nx-matrix-heading"><h2>{term ? 'Search results' : generation ? `Generation L${generation}` : focus ? `${identity(focus)} · Direct members` : 'Your direct members · L1'}</h2><span>{visible.length} members</span></div>
  <nav className="nx-breadcrumb" aria-label="Network ancestry"><Button size="sm" variant="ghost" onClick={() => {setSelected(null);setGeneration(null);setSearch('');}}>YOU</Button>{ancestors.map(n => <span key={n.user_id}><ChevronRight size={12}/><Button size="sm" variant="ghost" onClick={() => {setSelected(n.user_id);setGeneration(null);setSearch('');}}>{identity(n)}</Button></span>)}</nav>
  {focus && !term && !generation && <div className="nx-focus"><UserRound size={20}/><div><b>{identity(focus)}</b><p>{focus.member_code} · L{focus.depth}</p></div><div className="ml-auto text-right text-xs"><p>{money(Number(focus.stake_value_usd ?? 0))} USDT stake</p><p className="text-chart-3">{bix(Number(metrics.get(focus.user_id)?.stake_bix ?? 0))} stake</p></div></div>}
