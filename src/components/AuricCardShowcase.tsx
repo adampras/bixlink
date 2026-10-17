@@ -3,7 +3,7 @@ import { CreditCard, ShieldCheck, Sparkles } from 'lucide-react';
 /** Presentation-only roadmap showcase. No card issuing, payment or whitelist record exists yet. */
 export function AuricCardShowcase() {
   return <section className="shop-section">
-    <div className="shop-section-title"><div><p className="shop-eyebrow">03 / ROADMAP · PHASE 5</p><h2>BIXLINK Auric Metal Card</h2></div><CreditCard size={20}/></div>
+    <div className="shop-section-title"><div><p className="shop-eyebrow">05 / VIP ROADMAP · PHASE 5</p><h2>BIXLINK Auric Metal Card</h2></div><CreditCard size={20}/></div>
     <div className="grid items-center gap-6 md:grid-cols-2">
       <div className="relative mx-auto aspect-[1.586] w-full max-w-sm overflow-hidden rounded-2xl border border-chart-3/60 bg-gradient-to-br from-background via-card to-background p-5 shadow-2xl">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-chart-3/15 to-transparent"/>
