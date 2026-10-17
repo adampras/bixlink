@@ -145,41 +145,53 @@ export type Database = {
       }
       bix_member_products: {
         Row: {
+          category: string
           created_at: string
           description: string
           id: string
           image_url: string | null
           order_url: string | null
           price_usd: number
+          review_note: string | null
           reviewed_at: string | null
+          seller_tier: string
           status: string
           studio: string
+          terms_accepted_at: string | null
           title: string
           user_id: string
         }
         Insert: {
+          category?: string
           created_at?: string
           description?: string
           id?: string
           image_url?: string | null
           order_url?: string | null
           price_usd: number
+          review_note?: string | null
           reviewed_at?: string | null
+          seller_tier?: string
           status?: string
           studio?: string
+          terms_accepted_at?: string | null
           title: string
           user_id?: string
         }
         Update: {
+          category?: string
           created_at?: string
           description?: string
           id?: string
           image_url?: string | null
           order_url?: string | null
           price_usd?: number
+          review_note?: string | null
           reviewed_at?: string | null
+          seller_tier?: string
           status?: string
           studio?: string
+          terms_accepted_at?: string | null
           title?: string
           user_id?: string
         }
@@ -1363,6 +1375,7 @@ export type Database = {
         }[]
       }
       bix_member_shop_slots: { Args: { p_user: string }; Returns: number }
+      bix_merchant_tier: { Args: { p_user: string }; Returns: string }
       bix_mining_conversion_status: { Args: never; Returns: Json }
       bix_mining_convert: { Args: never; Returns: Json }
       bix_mining_rate: { Args: { p_user: string }; Returns: number }
