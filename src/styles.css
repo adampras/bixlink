@@ -2216,3 +2216,53 @@ html[data-color-mode="light"] .landing-hero-compact .hero-payment-canvas { opaci
 @media (prefers-reduced-motion: reduce) { .landing-hero-compact .hero-title, .landing-hero-compact .landing-hero-metrics > div { animation: none; } }
 html[data-color-mode="light"] .reactor-landing :is(.eyebrow, .section-title span) { color: oklch(0.5 0.12 70); }
 html[data-color-mode="light"] .reactor-landing .section-title { color: var(--foreground); }
+
+/* Cart drawer: solid obsidian panel */
+.cart-drawer { position: relative; display: flex; flex-direction: column; width: min(460px, 100%); max-height: min(88dvh, 820px); padding: 16px; border-radius: 22px; background: var(--card); color: var(--card-foreground); border: 1px solid color-mix(in oklab, var(--chart-3) 35%, var(--border)); box-shadow: 0 24px 60px -20px oklch(0 0 0 / 70%); overflow: hidden; }
+.modal-backdrop:has(.cart-drawer) { background: oklch(0.06 0.01 270 / 88%); backdrop-filter: blur(10px); }
+.cart-back { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-bottom: 10px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--chart-3); border: 1px solid color-mix(in oklab, var(--chart-3) 40%, transparent); background: color-mix(in oklab, var(--chart-3) 8%, var(--card)); }
+.cart-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--muted); }
+.courier-option { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--muted); cursor: pointer; transition: border-color .2s, transform .2s; }
+.courier-option.is-active { border-color: var(--chart-3); box-shadow: inset 0 0 0 1px var(--chart-3); }
+.courier-option:active { transform: scale(.98); }
+.courier-eta { display: inline-block; margin-top: 2px; padding: 1px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; background: color-mix(in oklab, var(--chart-2) 18%, transparent); color: var(--chart-2); }
+.courier-logo { display: grid; place-items: center; flex-shrink: 0; width: 58px; height: 34px; border-radius: 9px; font-size: 12px; font-weight: 900; font-style: italic; letter-spacing: -.02em; }
+.courier-jne { background: #0b3a8c; color: #fff; box-shadow: inset 0 -4px 0 #e31e24; }
+.courier-jnt { background: #e60012; color: #fff; }
+.courier-sicepat { background: #fff; color: #e2231a; border: 1px solid #e2231a; font-size: 11px; }
+.courier-dhl { background: #ffcc00; color: #d40511; }
+.courier-fedex { background: #fff; color: #4d148c; border: 1px solid #ddd; }
+
+/* Fox Arena game HUD */
+.arena-title { letter-spacing: .08em; background: linear-gradient(90deg, var(--chart-3), var(--primary), var(--chart-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.arena-hud { position: relative; display: flex; align-items: center; gap: 16px; padding: 18px; border-radius: 22px; overflow: hidden; border: 1px solid color-mix(in oklab, var(--chart-3) 45%, var(--border)); background: radial-gradient(circle at 15% 50%, color-mix(in oklab, var(--primary) 30%, transparent), transparent 60%), linear-gradient(135deg, var(--card), color-mix(in oklab, var(--chart-3) 10%, var(--card))); }
+.arena-hud::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in oklab, var(--foreground) 3%, transparent) 3px 4px); pointer-events: none; }
+.arena-hud-avatar { position: relative; flex-shrink: 0; }
+.arena-lvl { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); padding: 1px 8px; border-radius: 999px; font-size: 10px; font-weight: 900; background: var(--chart-3); color: var(--background); white-space: nowrap; }
+.arena-hud .arena-cap { height: 10px; border: 1px solid var(--border); }
+.arena-hud .arena-cap i { box-shadow: 0 0 12px var(--chart-3); }
+.arena-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.arena-stats > div { display: grid; justify-items: center; gap: 2px; padding: 10px 6px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); color: var(--chart-3); }
+.arena-stats b { font-size: 18px; color: var(--foreground); }
+.arena-stats small { font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted-foreground); }
+.arena-quest { position: relative; border: 1px solid color-mix(in oklab, var(--primary) 35%, var(--border)); border-radius: 18px; padding: 14px; background: linear-gradient(160deg, color-mix(in oklab, var(--primary) 12%, var(--card)), var(--card)); transition: transform .2s; }
+.arena-quest:hover { transform: translateY(-2px); }
+.arena-quest.is-done { opacity: .7; border-color: color-mix(in oklab, var(--chart-2) 40%, var(--border)); }
+.arena-quest-icon { display: grid; place-items: center; flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; color: var(--chart-3); background: color-mix(in oklab, var(--chart-3) 15%, transparent); border: 1px solid color-mix(in oklab, var(--chart-3) 40%, transparent); }
+.arena-reward { display: grid; justify-items: center; flex-shrink: 0; font-weight: 900; font-size: 16px; color: var(--chart-3); line-height: 1; }
+.arena-reward small { font-size: 8px; letter-spacing: .15em; margin-top: 2px; }
+.arena-option { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--border); text-align: left; font-size: 12px; background: var(--muted); }
+.arena-option span { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; font-weight: 900; font-size: 11px; background: var(--card); }
+.arena-option.is-picked { border-color: var(--chart-3); background: color-mix(in oklab, var(--chart-3) 14%, var(--muted)); }
+.arena-option.is-picked span { background: var(--chart-3); color: var(--background); }
+.arena-claim { font-weight: 900; letter-spacing: .1em; animation: arena-pulse 2s ease-in-out infinite; }
+@keyframes arena-pulse { 50% { box-shadow: 0 0 0 6px color-mix(in oklab, var(--primary) 0%, transparent), 0 0 18px color-mix(in oklab, var(--primary) 55%, transparent); } }
+.arena-podium { display: grid; grid-template-columns: repeat(3, 1fr); align-items: end; gap: 8px; }
+.arena-step { position: relative; display: grid; justify-items: center; gap: 4px; padding: 12px 6px 28px; border-radius: 16px 16px 6px 6px; border: 1px solid var(--border); background: var(--card); min-width: 0; }
+.arena-step i { position: absolute; bottom: 6px; font-style: normal; font-weight: 900; font-size: 13px; }
+.arena-step.rank-1 { min-height: 150px; color: #e8b923; border-color: #e8b92388; background: linear-gradient(180deg, #e8b92322, var(--card)); }
+.arena-step.rank-2 { min-height: 120px; color: #b8c0cc; background: linear-gradient(180deg, #b8c0cc1f, var(--card)); }
+.arena-step.rank-3 { min-height: 100px; color: #c27d45; background: linear-gradient(180deg, #c27d451f, var(--card)); }
+.arena-step b, .arena-step span { color: var(--foreground); max-width: 100%; }
+.arena-step.is-me { box-shadow: 0 0 0 2px var(--primary); }
+@media (prefers-reduced-motion: reduce) { .arena-claim { animation: none; } }
