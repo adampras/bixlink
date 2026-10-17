@@ -52,9 +52,9 @@ export const assignReferral = createServerFn({ method: 'POST' }).middleware([req
   });
 
 export const requestStake = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { packageId: string; days: number }) => z.object({ packageId: z.string().min(1).max(40), days: z.number().int().refine(d => [30, 60, 90, 180, 360].includes(d)) }).parse(data))
+  .inputValidator((data: { packageId: string; days: number; mode?: 'usdt' | 'hybrid' }) => z.object({ packageId: z.string().min(1).max(40), days: z.number().int().refine(d => [30, 60, 90, 180, 360].includes(d)), mode: z.enum(['usdt', 'hybrid']).default('usdt') }).parse(data))
   .handler(async ({ data, context }) => {
-    const { data: id, error } = await context.supabase.rpc('request_bix_duration_stake', { p_package: data.packageId, p_days: data.days });
+    const { data: id, error } = await context.supabase.rpc('request_bix_duration_stake_mode', { p_package: data.packageId, p_days: data.days, p_mode: data.mode });
     if (error) throw new Error(error.message);
     return { id };
   });

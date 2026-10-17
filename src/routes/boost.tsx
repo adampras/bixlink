@@ -8,7 +8,7 @@ import { boosterMaximum } from '@/lib/booster-apy';
 import { number } from '@/lib/bixlink';
 import { BixStakePanel } from '@/components/BixStakePanel';
 
-export const Route = createFileRoute('/boost')({ head: () => ({ meta: [{ title: 'BIXCOIN Boost APY — BIXLINK' }, { name: 'description', content: 'Increase BIXCOIN staking APY through higher volume and longer lock periods, up to 45%.' }, { property: 'og:title', content: 'BIXCOIN Boost APY — BIXLINK' }, { property: 'og:description', content: 'BIXCOIN staking tiers, passive and active profit, with a 70% BIX and 30% USDT profit split.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: BoostPage });
+export const Route = createFileRoute('/boost')({ head: () => ({ meta: [{ title: 'BIXCOIN Boost APY — BIXLINK' }, { name: 'description', content: 'Increase BIXCOIN staking APY through higher volume and longer lock periods, up to 45%.' }, { property: 'og:title', content: 'BIXCOIN Boost APY — BIXLINK' }, { property: 'og:description', content: 'BIXCOIN staking tiers, passive and active profit, with dividends paid 100% in BIX.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: BoostPage });
 
 function BoostPage() {
   const { data: cfg } = usePublicConfig();
@@ -41,8 +41,7 @@ function BoostPage() {
             <ReactorVideo maximum={maximum}/>
           </div>
           <dl className="grid grid-cols-3 gap-2 border-y border-border py-3 text-center">
-            <div className="min-w-0"><dd className="numeric font-display text-lg font-bold text-chart-2">70%</dd><dt className="text-[10px] text-muted-foreground">Profit in BIX</dt></div>
-            <div className="min-w-0"><dd className="numeric font-display text-lg font-bold text-chart-3">30%</dd><dt className="text-[10px] text-muted-foreground">Profit in USDT</dt></div>
+            <div className="col-span-2 min-w-0"><dd className="numeric font-display text-lg font-bold text-chart-3">100% BIX</dd><dt className="text-[10px] text-muted-foreground">Dividend · no USDT profit</dt></div>
             <div className="min-w-0"><dd className="numeric font-display text-lg font-bold text-primary">{maximum}%</dd><dt className="text-[10px] text-muted-foreground">Max / month</dt></div>
           </dl>
           <p className="mt-3 text-xs leading-5 text-muted-foreground">Larger BIX positions and longer locks unlock 8%–{maximum}% per month. Existing contracts keep their recorded APY. Projections only; returns are not guaranteed.</p>
@@ -66,7 +65,7 @@ function BoostPage() {
       <div className="booster-steps mt-8">
         <article><b>01</b><h3>Choose a BIXCOIN package</h3><p>Select the staking value, APY and lock duration that match your plan. The package value is paid from your virtual USDT testing balance.</p></article>
         <article><b>02</b><h3>Stake activates instantly</h3><p>When your balance is sufficient, the position becomes active automatically. No owner approval is needed for staking.</p></article>
-        <article><b>03</b><h3>Booster tracks every second</h3><p>Profit is projected from the package value × APY × elapsed time. Seventy percent is displayed as BIX and thirty percent as USDT at the internal reference.</p></article>
+        <article><b>03</b><h3>Booster tracks every second</h3><p>Profit is projected from the package value × APY × elapsed time. The full dividend is recorded in BIX.</p></article>
         <article><b>04</b><h3>Review in PROFIT</h3><p>Open the PROFIT menu to see every active position. Early unstaking ends the projection and applies the owner-configured penalty schedule.</p></article>
       </div>
       <div className="mt-7 flex flex-wrap gap-3"><Button asChild className="rounded-full"><Link to="/stake">Start BIXCOIN staking <ArrowUpRight/></Link></Button><Button asChild variant="outline" className="rounded-full"><Link to="/profit"><TrendingUp/> Open profit tracker</Link></Button></div>
@@ -88,21 +87,20 @@ function BoostPage() {
               <h2 className="mt-1">YIELD ALLOCATION</h2>
             </div>
             <div className="text-right">
-              <strong>70 / 30</strong>
-              <span>BIX / USDT split</span>
+              <strong>100%</strong>
+              <span>BIX dividend</span>
             </div>
           </div>
-          <div className="boost-split-bar mt-5"><i/><i/></div>
+          <div className="boost-split-bar mt-5 [&>i:last-child]:hidden [&>i:first-child]:!w-full"><i/><i/></div>
           <div className="boost-legend mt-4">
-            <div className="boost-legend-item"><span><i className="bg-primary"/> BIX portion</span><b className="numeric text-primary">70%</b></div>
-            <div className="boost-legend-item"><span><i className="bg-chart-3"/> USDT portion</span><b className="numeric text-chart-3">30%</b></div>
-            <div className="boost-legend-item"><span><i className="bg-chart-2"/> At current internal reference</span><b className="numeric">70% BIX</b></div>
+            <div className="boost-legend-item"><span><i className="bg-primary"/> BIX portion</span><b className="numeric text-primary">100%</b></div>
+            <div className="boost-legend-item"><span><i className="bg-chart-2"/> At current internal reference</span><b className="numeric">100% BIX</b></div>
           </div>
-          <p className="terminal-disclosure"><ShieldCheck size={14}/> Active staking profit is projected automatically every minute. No automatic payout is performed and the split is a reference allocation, not an exchange.</p>
+          <p className="terminal-disclosure"><ShieldCheck size={14}/> Active staking profit is projected automatically every minute. No automatic payout is performed and the dividend is a BIX reference allocation, not an exchange.</p>
         </div>
         <div className="grid content-start gap-3">
           <div className="boost-fact"><Coins className="text-chart-2"/><div><b>Passive staking profit</b><p>Calculated from the approved package APY and lock duration.</p></div></div>
-          <div className="boost-fact"><Zap className="text-primary"/><div><b>Active BIX profit</b><p>Seventy percent of recorded profit is allocated in BIX at the internal reference value.</p></div></div>
+          <div className="boost-fact"><Zap className="text-primary"/><div><b>Active BIX profit</b><p>All recorded booster dividends are allocated in BIX; there is no USDT profit.</p></div></div>
           <div className="boost-fact"><ShieldCheck className="text-chart-3"/><div><b>Automatic activation</b><p>Eligible stakes activate instantly from the available virtual USDT testing balance.</p></div></div>
         </div>
       </div>
