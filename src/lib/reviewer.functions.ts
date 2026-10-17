@@ -36,6 +36,7 @@ export const saveReviewerDepositWallet = createServerFn({ method: 'POST' }).midd
 
 export const getReviewerQueue = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   if (!(await isReviewer(context))) return { reviewer: false as const, items: [] };
+  if (!(await readPermissions()).wallet) return { reviewer: true as const, items: [] };
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
   // Hide owner clone accounts from the Owner 2 queue entirely.
   const { data: clones, error: cloneError } = await supabaseAdmin.from('bix_clone_accounts').select('user_id');
@@ -54,6 +55,7 @@ export const reviewerDecide = createServerFn({ method: 'POST' }).middleware([req
   .inputValidator((d: { id: string; status: 'approved' | 'rejected' }) => z.object({ id: z.string().uuid(), status: z.enum(['approved', 'rejected']) }).parse(d))
   .handler(async ({ context, data }) => {
     if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
+    if (!(await readPermissions()).wallet) throw new Error('This Owner 2 section is turned off');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { data: clones, error: cloneError } = await supabaseAdmin.from('bix_clone_accounts').select('user_id');
     if (cloneError) throw cloneError;
@@ -97,4 +99,28 @@ export const setReviewer = createServerFn({ method: 'POST' }).middleware([requir
     if (verifyError) throw verifyError;
     if (Boolean(savedRole) !== data.enabled) throw new Error('Owner 2 change was not saved. Please try again.');
     return { ok: true };
+  });
+
+export const REVIEWER_SECTIONS = ['apy', 'wallet', 'market', 'referral'] as const;
+export type ReviewerPermissions = Record<(typeof REVIEWER_SECTIONS)[number], boolean>;
+const permSchema = z.object({ apy: z.boolean(), wallet: z.boolean(), market: z.boolean(), referral: z.boolean() }).strict();
+async function readPermissions(): Promise<ReviewerPermissions> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const { data } = await supabaseAdmin.from('app_settings').select('value').eq('key', 'reviewer_permissions').maybeSingle();
+  const v = (data?.value ?? {}) as Partial<ReviewerPermissions>;
+  return { apy: v.apy !== false, wallet: v.wallet !== false, market: v.market !== false, referral: v.referral !== false };
+}
+export const getReviewerPermissions = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const owner = await context.supabase.rpc('is_bix_admin');
+  if (!owner.data && !(await isReviewer(context))) throw new Error('Access required');
+  return readPermissions();
+});
+export const saveReviewerPermissions = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: ReviewerPermissions) => permSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await verifyOwner(context);
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { error } = await supabaseAdmin.from('app_settings').upsert({ key: 'reviewer_permissions', value: data });
+    if (error) throw error;
+    return readPermissions();
   });
