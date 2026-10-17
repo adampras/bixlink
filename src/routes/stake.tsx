@@ -31,6 +31,9 @@ function StakePage() {
   const [unstaking, setUnstaking] = useState<NonNullable<typeof data>['stakes'][number] | null>(null);
   const [unAgree, setUnAgree] = useState(false);
   const bal = useQuery({ queryKey: ['vusdt', user?.id], enabled: !!user, queryFn: async () => { if (!user) return 0; return Number((await supabase.rpc('bix_vusdt_balance', { p_user: user.id })).data ?? 0); } });
+  const bixBal = useQuery({ queryKey: ['stake-bix-bal', user?.id], enabled: !!user, queryFn: async () => { if (!user) return 0; const r = await supabase.rpc('bix_asset_balances', { p_user: user.id }).single(); return Number((r.data as { bix_balance?: number } | null)?.bix_balance ?? 0); } });
+  const [mode, setMode] = useState<'usdt' | 'hybrid'>('usdt');
+  const bixRef = Number(cfg?.bixMarket.priceUsd ?? 0.5) || 0.5;
   const tiers = [...(cfg?.unstake.tiers ?? [])].sort((a, b) => a.days - b.days);
   const elapsedDays = (s: { activated_at: string | null; created_at: string }) => now ? (now - new Date(s.activated_at ?? s.created_at).getTime()) / 86400000 : 0;
   const penaltyFor = (s: { activated_at: string | null; created_at: string; lock_days: number }) => { const d = elapsedDays(s); if (d >= s.lock_days) return 0; return tiers.find(t => d < t.days)?.pct ?? 0; };
@@ -90,7 +93,6 @@ function StakePage() {
           <Button variant="outline" className="rounded-full" onClick={() => { setChosen(null); setNotice('Stake cancelled — you did not agree.'); }}>Disagree</Button>
           <Button disabled={busy || !agree || Number(bal.data ?? 0) < usdtNeed || Number(bixBal.data ?? 0) < bixNeed} className="rounded-full bg-chart-3 text-background" onClick={async () => { if (!(await confirmPin())) return; setBusy(true); try { await submit({ data: { packageId: chosen.id, days: chosen.lock_days, mode } }); setCongrats(chosen); await refreshAll(); await bixBal.refetch(); } catch (e) { const message = e instanceof Error ? e.message : 'Request failed.'; setNotice(message); txFeedback.fail('Staking failed', message); } setBusy(false); setChosen(null); }}>Agree & stake</Button>
         </div></>; })()}
-        </div>
       </div></div>}
       {congrats && <div className="modal-backdrop" onClick={() => setCongrats(null)}><div role="dialog" aria-modal="true" className="modal-panel deposit-success text-center" onClick={e => e.stopPropagation()}>
         <CheckCircle2 size={56} className="mx-auto text-chart-2"/>
