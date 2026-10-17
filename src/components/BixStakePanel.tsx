@@ -83,7 +83,7 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   return <section className="rounded-[20px] border border-chart-2/40 bg-card p-5 sm:p-6">
     <div className="eyebrow"><Coins size={14} className="text-chart-2"/> STAKE BIX DIRECTLY</div>
     <h2 className="mt-2 font-display text-2xl font-black">BIX Booster Staking</h2>
-    <p className="mt-2 text-sm text-muted-foreground">Stake your BIX balance here. Volume and lock period set your monthly rate (8–{maximum}% per month). Profit split: 70% passive BIX · 30% active USDT — projection only.</p>
+    <p className="mt-2 text-sm text-muted-foreground">Stake your BIX balance here. Volume and lock period set your monthly rate (8–{maximum}% per month). Dividend paid 100% in BIX — projection only.</p>
     <div className="mt-4 flex items-center justify-between rounded-xl border border-border p-3 text-sm"><span>Available BIX</span><b className="numeric">{number(q.data?.bal ?? 0, { maximumFractionDigits: 2 })} BIX</b></div>
     <label className="mt-4 block text-xs font-bold uppercase text-muted-foreground">Amount (BIX, min 10)</label>
     <div className="mt-1 flex gap-2">
@@ -95,8 +95,7 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
     <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
       <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Monthly rate</span><b className="numeric block text-chart-2 text-xl">{apy}% / month</b><span className="numeric text-[11px] text-chart-2">+{perSecBix.toFixed(8)} BIX/sec</span></div>
       <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Est. profit / period</span><b className="numeric block">{number(periodProfit, { maximumFractionDigits: 2 })} BIX</b></div>
-      <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Passive 70% BIX</span><b className="numeric block text-primary">{number(periodProfit * 0.7, { maximumFractionDigits: 2 })} BIX</b></div>
-      <div className="rounded-xl border border-border p-3"><span className="text-xs text-muted-foreground">Active 30% USDT</span><b className="numeric block text-chart-3">${number(periodProfit * 0.3 * bixPrice, { maximumFractionDigits: 2 })}</b></div>
+      <div className="col-span-2 flex items-center justify-between rounded-xl border border-chart-3/40 bg-chart-3/5 p-3"><span className="text-xs text-muted-foreground">Dividend · 100% BIX</span><b className="numeric text-chart-3">{number(periodProfit, { maximumFractionDigits: 2 })} BIX <small className="text-[10px] text-muted-foreground">≈ ${number(periodProfit * bixPrice, { maximumFractionDigits: 2 })}</small></b></div>
     </div>
     <Button className="mt-4 w-full rounded-xl" disabled={busy || amt < 10 || amt > (q.data?.bal ?? 0)} onClick={stake}><Zap/> {busy ? 'Staking…' : amt > (q.data?.bal ?? 0) ? 'Insufficient BIX balance' : 'Stake BIX now'}</Button>
     <p className="mt-3 text-xs text-chart-3">Direct referral bonus: {cfg?.referrals.bixDirectEnabled === false ? 'Closed' : `${cfg?.referrals.bixDirectPct ?? cfg?.referrals.direct ?? 10}% · 100% BIX · pending owner approval`}</p>
@@ -114,9 +113,8 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
           <span className="numeric mt-1 flex items-center gap-1 text-xs text-muted-foreground"><LockKeyhole size={11}/>{s.lock_days} days · {pct.toFixed(1)}%</span>
           {(() => { const avail = availableOf(s); const min = Number(s.amount_bix) * 0.1; const ok = avail >= min; return <div className="mt-3">
             <div className="flex justify-between text-xs"><span className="text-muted-foreground">Withdrawable profit</span><b className="numeric text-chart-2">{number(avail, { maximumFractionDigits: 6 })} BIX</b></div>
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="mt-2 grid">
               <Button size="sm" className="rounded-xl bg-chart-3 text-background" disabled={busy || !q.data?.wcfg.bix || !ok} onClick={() => withdraw(s, 'BIX')}>{q.data?.wcfg.bix ? 'Withdraw BIX' : 'BIX closed'}</Button>
-              <Button size="sm" className="rounded-xl bg-chart-2 text-background" disabled={busy || !q.data?.wcfg.usdt || !ok} onClick={() => withdraw(s, 'USDT')}>{q.data?.wcfg.usdt ? 'Withdraw USDT' : 'USDT closed'}</Button>
             </div>
             {!ok && <p className="mt-1 text-[11px] text-muted-foreground">Minimum withdraw: 10% of stake ({number(min, { maximumFractionDigits: 4 })} BIX). Principal returns after the contract ends.</p>}
           </div>; })()}
