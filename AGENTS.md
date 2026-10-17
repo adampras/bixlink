@@ -45,3 +45,4 @@
 - Shared shell and dialogs own phone spacing, safe-area navigation and scroll bounds.
 
 - Size heroes only via landing-hero-compact and compact-market-hero; preserve art proportions and catalog/transaction layouts to isolate visual changes.
+- Owner 2 section access is controlled by app_settings.reviewer_permissions, enforced in DB (bix_reviewer_can + app_settings trigger) and server functions — UI hiding alone is never trusted.
