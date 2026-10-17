@@ -52,7 +52,7 @@ function StakePage() {
         <h1 className="section-title stake-lux-title !text-3xl !tracking-normal sm:!text-5xl">STAKING <span>CRYPTO</span></h1>
         
       </div>
-      <dl aria-label="Staking summary" className="mt-5 grid grid-cols-[0.8fr_1.2fr_1fr] gap-2 sm:grid-cols-3 sm:gap-3">
+      <dl aria-label="Staking summary" className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
         <div className="min-w-0 stake-metric rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">BIX supply</dt><dd className="mt-1 font-display text-xs font-bold text-chart-3 sm:text-lg">21M BIX</dd></div>
         <div className="min-w-0 stake-metric rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 sm:text-lg">{money(bal.data ?? 0)}</dd></div>
         <div className="min-w-0 stake-metric rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
