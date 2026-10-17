@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { DurationPackageCard } from '@/components/DurationPackageCard';
+import { StakePackageLayouts } from '@/components/StakePackageLayouts';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
@@ -62,9 +62,7 @@ function StakePage() {
       </dl>
       {activeStakes.length > 0 && <p className="numeric mt-2 text-[10px] leading-4 text-muted-foreground">+${perDay.toFixed(2)} / day · projection</p>}
       {activeStakes.length > 0 && <section className="mt-4 border-y border-border py-4" aria-label="Seven-day staking projection"><div className="flex justify-between gap-3 text-xs"><b>Next 7 days · projection</b><span className="numeric text-chart-2">${(perDay*7).toFixed(2)} USDT</span></div><div className="mt-3 grid h-20 grid-cols-7 items-end gap-2">{[1,2,3,4,5,6,7].map(day=><div key={day} className="flex flex-col justify-end border-b border-chart-2"><b className="numeric text-[9px] text-muted-foreground">${(perDay*day).toFixed(2)}</b><progress aria-label={`Day ${day} projected accumulation`} className="allocation-progress mt-1" max={7} value={day}/><span className="mt-1 text-[9px] text-muted-foreground">D{day}</span></div>)}</div><p className="mt-2 text-[10px] text-muted-foreground">Indicative simple-rate projection from active contract snapshots; not historical earnings, settlement or spendable balance.</p></section>}
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {(cfg?.packages ?? []).map((p, i) => <DurationPackageCard key={p.id} pkg={p} index={i} onStake={setChosen}/>)}
-      </div>
+      <StakePackageLayouts packages={cfg?.packages ?? []} layout={cfg?.boosterVisual.stakeLayout} onStake={setChosen}/>
       <div className="mt-6 flex justify-end"><Button asChild variant="outline"><Link to="/nft-marketplace">NFT Marketplace &amp; My collection <ArrowUpRight size={16}/></Link></Button></div>
       <div className="mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><div className="flex items-center gap-2"><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span><Button variant="outline" size="icon" aria-label={requestsVisible ? "Hide my requests" : "Show my requests"} aria-expanded={requestsVisible} aria-controls="stake-requests" onClick={() => setRequestsVisible(current => !current)}>{requestsVisible ? <ChevronUp/> : <ChevronDown/>}</Button></div></div>
       <div id="stake-requests" hidden={!requestsVisible} className="mt-4 space-y-3">{(data?.stakes ?? []).map(s => {
