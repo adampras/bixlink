@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { usePublicConfig } from '@/lib/useMember';
 import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Minus, Plus, ShoppingBag, Trash2, Truck, X } from 'lucide-react';
 const LOGO: Record<string, string> = { jne: 'JNE', jnt: 'J&T', sicepat: 'SiCepat', dhl: 'DHL', fedex: 'FedEx' };
@@ -14,6 +15,8 @@ export function ShopCart({ open, onClose, lines, setLines, userId, onOrdered }: 
   const [courier, setCourier] = useState('jne-reg');
   const [form, setForm] = useState({ recipient: '', phone: '', address: '', city: '', country: 'Indonesia', postal_code: '' });
   const [busy, setBusy] = useState(false);
+  const [pay, setPay] = useState<'USDT' | 'BIX'>('USDT');
+  const { data: cfg } = usePublicConfig(); const bixPrice = cfg?.bixMarket.priceUsd || 0.5;
   if (!open) return null;
   const units = cartUnits(lines), subtotal = cartSubtotal(lines), ship = shippingCost(courier, units);
   const qty = (id: string, d: number) => setLines(lines.map(l => l.id === id ? { ...l, qty: Math.max(1, Math.min(99, l.qty + d)) } : l));
@@ -22,7 +25,7 @@ export function ShopCart({ open, onClose, lines, setLines, userId, onOrdered }: 
     if (!userId) return;
     if (Object.values(form).some(v => !v.trim())) { toast.error('Complete all shipping fields'); return; }
     setBusy(true);
-    const { error } = await supabase.from('bix_shop_orders').insert({ user_id: userId, items: lines, subtotal_usd: subtotal, region, courier: COURIERS.find(c => c.id === courier)!.name, shipping_usd: ship, ...Object.fromEntries(Object.entries(form).map(([k, v]) => [k, v.trim().slice(0, 300)])) as typeof form });
+    const { error } = await supabase.from('bix_shop_orders').insert({ user_id: userId, items: lines, subtotal_usd: subtotal, region, courier: `${COURIERS.find(c => c.id === courier)!.name} · Pay ${pay === 'BIX' ? `BIX (${((subtotal + ship) / bixPrice).toFixed(2)} BIX @ $${bixPrice})` : 'USDT'}`, shipping_usd: ship, ...Object.fromEntries(Object.entries(form).map(([k, v]) => [k, v.trim().slice(0, 300)])) as typeof form });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success('Order placed — awaiting store confirmation');
@@ -42,7 +45,7 @@ export function ShopCart({ open, onClose, lines, setLines, userId, onOrdered }: 
           <div className="grid gap-2">{COURIERS.filter(c => c.region === region).map(c => <label key={c.id} className={`courier-option ${courier === c.id ? 'is-active' : ''}`}><input type="radio" name="courier" className="sr-only" checked={courier === c.id} onChange={() => setCourier(c.id)} /><span className={`courier-logo courier-${c.id.split('-')[0]}`} aria-hidden="true">{LOGO[c.id.split('-')[0] ?? ''] ?? c.name.slice(0, 3)}</span><span className="min-w-0 flex-1"><b className="block truncate text-sm">{c.name}</b><small className="courier-eta">{c.eta}</small></span><span className="numeric text-sm font-bold">{money(shippingCost(c.id, units))}</span></label>)}</div>
           <div className="grid gap-2">{field('recipient', 'Recipient name')}{field('phone', 'Phone / WhatsApp')}{field('address', 'Street address')}<div className="grid grid-cols-2 gap-2">{field('city', 'City')}{field('postal_code', 'Postal code')}</div>{field('country', 'Country')}</div>
         </div>
-        <footer className="space-y-2 border-t border-border pt-3 text-sm"><div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="numeric">{money(subtotal)}</span></div><div className="flex justify-between"><span className="text-muted-foreground">Shipping (estimate)</span><span className="numeric">{money(ship)}</span></div><div className="flex justify-between text-base"><b>Total</b><b className="numeric">{money(subtotal + ship)}</b></div><p className="text-[11px] text-muted-foreground">The store confirms your order and sends payment instructions. No payment is charged here.</p><div className="grid grid-cols-2 gap-2"><Button variant="outline" onClick={() => setStep('cart')}>Back</Button><Button disabled={busy} onClick={submit}>{busy ? 'Placing…' : 'Place order'}</Button></div></footer>
+        <footer className="space-y-2 border-t border-border pt-3 text-sm"><div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="numeric">{money(subtotal)}</span></div><div className="flex justify-between"><span className="text-muted-foreground">Shipping (estimate)</span><span className="numeric">{money(ship)}</span></div><div className="flex justify-between text-base"><b>Total</b><b className="numeric">{money(subtotal + ship)}</b></div><div className="grid grid-cols-2 gap-2" role="group" aria-label="Payment method">{(['USDT', 'BIX'] as const).map(m => <Button key={m} size="sm" variant={pay === m ? 'default' : 'outline'} aria-pressed={pay === m} onClick={() => setPay(m)}>Pay with {m}</Button>)}</div>{pay === 'BIX' && <div className="flex justify-between text-primary"><span>Total in BIX</span><b className="numeric">{((subtotal + ship) / bixPrice).toFixed(2)} BIX</b></div>}<p className="text-[11px] text-muted-foreground">The store confirms your order and sends payment instructions. No payment is charged here.</p><div className="grid grid-cols-2 gap-2"><Button variant="outline" onClick={() => setStep('cart')}>Back</Button><Button disabled={busy} onClick={submit}>{busy ? 'Placing…' : 'Place order'}</Button></div></footer>
       </>}
     </aside>
   </div>;
