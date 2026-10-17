@@ -2266,3 +2266,11 @@ html[data-color-mode="light"] .reactor-landing .section-title { color: var(--for
 .arena-step b, .arena-step span { color: var(--foreground); max-width: 100%; }
 .arena-step.is-me { box-shadow: 0 0 0 2px var(--primary); }
 @media (prefers-reduced-motion: reduce) { .arena-claim { animation: none; } }
+
+/* Home/Wallet/Stake polish */
+.stake-metric{border-color:color-mix(in oklab,var(--chart-3) 28%,var(--border));background:linear-gradient(160deg,color-mix(in oklab,var(--card) 92%,transparent),color-mix(in oklab,var(--chart-3) 6%,var(--card)));transition:transform .2s ease}
+.duration-package-card,.wallet-action-tile,.terminal-action{transition:transform .15s ease,box-shadow .2s ease}
+.duration-package-card:active,.wallet-action-tile:active,.terminal-action:active{transform:scale(.98)}
+.terminal-live i{animation:bix-beacon 1.8s ease-in-out infinite}
+@keyframes bix-beacon{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.terminal-live i{animation:none}}
