@@ -8,6 +8,7 @@ import { boosterMaximum } from '@/lib/booster-apy';
 import { BOOSTER_VIDEOS, resolveBoosterVisual, type BoosterVisual } from '@/lib/booster-visual';
 import { ReactorVideo } from '@/components/ReactorVideo';
 import { useQueryClient } from '@tanstack/react-query';
+import { STAKE_LAYOUTS, STAKE_LAYOUT_LABEL, type StakeLayout } from '@/components/StakePackageLayouts';
 
 export type { BoosterVisual } from '@/lib/booster-visual';
 
@@ -24,7 +25,12 @@ export function AdminBoosterVisual({ initialVisual, enabled, onMessage, onSaved 
   const saveWd = async (next: { bix: boolean; usdt: boolean }) => { try { await saveSetting({ data: { key: 'booster_withdraw', value: next } }); setWd(next); onMessage(`Booster withdraw — BIX ${next.bix ? 'OPEN' : 'CLOSED'} · USDT ${next.usdt ? 'OPEN' : 'CLOSED'}.`); } catch { onMessage('Could not save withdraw setting.'); } };
   const cap = maximum ?? boosterMaximum(cfg?.booster.maxApy);
 
+  const [layout, setLayout] = useState<StakeLayout | null>(null);
+  const curLayout: StakeLayout = layout ?? cfg?.boosterVisual.stakeLayout ?? 'carousel';
+  const saveLayout = async (next: StakeLayout) => { setLayout(next); try { await saveSetting({ data: { key: 'booster_visual', value: { visual, stakeLayout: next } } }); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage(`Tampilan paket Staking: ${STAKE_LAYOUT_LABEL[next]}.`); } catch { onMessage('Tampilan staking gagal disimpan.'); } };
+
   return <div className="mt-8 max-w-4xl space-y-5">
+    <section className="border-b border-border pb-6"><h2 className="font-display text-xl font-bold">Tampilan paket STAKING</h2><p className="mt-1 text-xs text-muted-foreground">Pilih model tampilan halaman Stake. Langsung berlaku untuk semua member.</p><div className="mt-4 flex flex-wrap gap-2">{STAKE_LAYOUTS.map(l => <Button key={l} variant={curLayout === l ? 'default' : 'outline'} aria-pressed={curLayout === l} onClick={() => saveLayout(l)}>{STAKE_LAYOUT_LABEL[l]}</Button>)}</div></section>
     <section className="border-b border-border pb-6"><h2 className="font-display text-xl font-bold">Video BOOSTER APY</h2><div className="mt-4 flex flex-wrap gap-2">{BOOSTER_VIDEOS.map(v => <Button key={v} variant={visual === v ? 'default' : 'outline'} aria-pressed={visual === v} onClick={() => setVisual(v)}>{{ video: 'Video pengganti lama', reactor: 'Video reactor', orbital: 'Video pengganti 1', crystal: 'Video pengganti 2', rocket: 'Video roket presale' }[v]}</Button>)}</div><div className="max-w-lg"><ReactorVideo maximum={cap} visual={visual}/></div><Button disabled={saving} onClick={async () => { setSaving(true); try { await saveSetting({ data: { key: 'booster_visual', value: { visual } } }); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Video BOOSTER dan landing tersimpan.'); } catch { onMessage('Video gagal disimpan.'); } finally { setSaving(false); } }}>Simpan video BOOSTER</Button></section>
     <div className="rounded-[20px] border border-chart-2 bg-card p-6">
       <h2 className="font-display text-xl font-black">BIXCOIN yield engine</h2>
