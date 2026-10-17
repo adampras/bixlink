@@ -43,7 +43,7 @@ export function AppSplash() {
       aria-modal="true"
       aria-label="BIXCOIN is loading"
     >
-      <button type="button" onClick={dismiss} className="splash-emblem" aria-label="Skip intro"><img src={logo} width={120} height={120} alt="BIXLINK fox emblem"/><span>BIXLINK</span></button>
+      <button type="button" onClick={dismiss} className="splash-emblem" aria-label="Skip intro"><img src={logo} width={84} height={84} alt="BIXLINK fox emblem"/><span className="splash-word">BIXLINK</span><small className="splash-sub">GLOBAL CRYPTO ECOSYSTEM</small></button>
     </div>
   );
 }
