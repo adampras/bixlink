@@ -32,7 +32,7 @@ function ArenaPage() {
     setBusy(null);
   };
   const tier = s ? denTier(s) : null;
-  const ICON: Record<string, typeof Swords> = { checkin: Flame, quiz: Brain, share: Zap };
+  const ICON: Record<string, typeof Swords> = { checkin: Flame, quiz: Brain, streak: Zap, referral: Star, stake7: Trophy };
   return <BixShell><MemberGate ready={ready} signedIn={!!user} title="FOX ARENA"><main className="arena-page mx-auto max-w-5xl px-5 py-8 md:px-8">
     <div className="eyebrow"><Swords size={14}/> BIXLINK GAME ECOSYSTEM</div>
     <h1 className="arena-title mt-3 font-display text-[28px] font-black md:text-4xl">FOX ARENA</h1>
