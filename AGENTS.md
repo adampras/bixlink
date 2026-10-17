@@ -25,7 +25,7 @@
 - Hydrate per-request QueryClient through the router for matching SSR/browser market snapshots.
 - Deposits use one on-chain matcher (polling and cron), chain amounts and one credit per TxID; transfer reports stay pending for review.
 - Share HOME/landing content and narratives (bundled fallbacks) through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
-- Owner 2 uses scoped RPCs for packages, Market, Referral and WLT-01 only; wallet edits lock the row and preserve other wallets. Clone reviews stay excluded; vault, bonus funding, teams and other settings remain Owner 1.
+- Owner 2 uses scoped RPCs (packages, Market, Referral, WLT-01), each gated by reviewer_permissions in DB and server; clones excluded; everything else stays Owner 1.
 - Share category/roadmap carousels and CDN videos; contain media; owner times splash; manifest icons uncached.
 - Themes use readiness and semantic overrides; Appearance validates against the shared registry without widening authorization.
 - Deploy fixed-supply bytecode with owner TokenPocket only; store addresses, never keys or ledger conversions.
@@ -45,4 +45,3 @@
 - Shared shell and dialogs own phone spacing, safe-area navigation and scroll bounds.
 
 - Size heroes only via landing-hero-compact and compact-market-hero; preserve art proportions and catalog/transaction layouts to isolate visual changes.
-- Owner 2 section access is controlled by app_settings.reviewer_permissions, enforced in DB (bix_reviewer_can + app_settings trigger) and server functions — UI hiding alone is never trusted.
