@@ -8,7 +8,7 @@ export const STAKE_LAYOUTS = ['carousel', 'spotlight', 'accordion'] as const;
 export type StakeLayout = (typeof STAKE_LAYOUTS)[number];
 export const STAKE_LAYOUT_LABEL: Record<StakeLayout, string> = { carousel: 'C · Carousel halaman', spotlight: 'A · Spotlight', accordion: 'B · Baris accordion' };
 
-type Props = { packages: Package[]; layout?: string; onStake: (p: Package) => void };
+type Props = { packages: Package[]; layout?: string | undefined; onStake: (p: Package) => void };
 
 export function StakePackageLayouts({ packages, layout, onStake }: Props) {
   const mode: StakeLayout = (STAKE_LAYOUTS as readonly string[]).includes(layout ?? '') ? (layout as StakeLayout) : 'carousel';
@@ -24,7 +24,7 @@ export function StakePackageLayouts({ packages, layout, onStake }: Props) {
         {packages.map((p, n) => <button key={p.id} type="button" role="tab" aria-selected={n === i} onClick={() => setActive(n)} className="stake-pill"><span>T{String(n + 1).padStart(2, '0')}</span><b className="numeric">${number(Number(p.price_usd), { maximumFractionDigits: 0 })}</b></button>)}
       </div>
       <div className="mx-auto mt-4 max-w-md">
-        <DurationPackageCard key={packages[i].id} pkg={packages[i]} index={i} onStake={onStake} />
+        <DurationPackageCard key={packages[i]!.id} pkg={packages[i]!} index={i} onStake={onStake} />
       </div>
       <Pager page={i} total={packages.length} onPage={setActive} />
     </section>;
