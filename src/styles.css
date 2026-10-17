@@ -2284,3 +2284,15 @@ html[data-color-mode="light"] .reactor-landing .section-title { color: var(--for
 .stake-row { border: 1px solid var(--border); border-radius: 1rem; background: color-mix(in oklab, var(--card) 80%, transparent); overflow: hidden; }
 .stake-row-head { display: flex; width: 100%; align-items: center; gap: .75rem; min-height: 3.4rem; padding: 0 1rem; }
 .stake-row:has([aria-expanded="true"]) { border-color: color-mix(in oklab, var(--chart-3) 60%, var(--border)); }
+
+/* Tier-1 minimal splash + dock */
+.splash-emblem { gap: 18px; animation: splash-rise 520ms var(--ease) both; }
+.splash-emblem img { box-shadow: 0 0 0 1px color-mix(in srgb, var(--splash-gold) 35%, transparent), 0 0 40px color-mix(in srgb, var(--splash-gold) 18%, transparent); }
+.splash-word { font-size: 26px; font-weight: 800; letter-spacing: .42em; padding-left: .42em; background: linear-gradient(180deg, var(--splash-highlight), var(--splash-gold)); background-clip: text; color: transparent; }
+.splash-sub { font-size: 9px; font-weight: 600; letter-spacing: .36em; padding-left: .36em; color: color-mix(in srgb, var(--splash-foreground) 55%, transparent); }
+.app-splash--leaving .splash-emblem { transform: scale(1.04); transition: transform 180ms var(--ease); }
+@keyframes splash-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.glass-dock { background: color-mix(in srgb, var(--card) 88%, transparent) !important; }
+.glass-dock .mobile-nav-on { text-shadow: none !important; }
+.glass-dock .mobile-nav-on::before { left: 32%; right: 32%; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .splash-emblem { animation: none; } }
