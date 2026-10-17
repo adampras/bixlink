@@ -45,3 +45,4 @@
 - Shared shell and dialogs own phone spacing, safe-area navigation and scroll bounds so every page remains usable without changing transaction logic.
 
 - Size heroes only via landing-hero-compact and compact-market-hero; preserve art proportions and catalog/transaction layouts to isolate visual changes.
+- Member store listings are auto-approved only by the database guard trigger (terms, photo, description, price cap, banned words, owner toggle); never approve from the client.
