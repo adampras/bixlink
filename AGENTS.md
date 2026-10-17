@@ -37,11 +37,11 @@
 - Settle vBIX via authenticated RPCs; video never awards funds. Convert through an atomic capped marketing ledger, never the owner vault.
 - Fox Arena quest vBIX is paid only by the server-verified bix_quest_claim RPC, sharing mining's account cap and pool; season prizes are owner-reviewed, never auto-credited — game rewards stay in the promo budget.
 - NFT cards: one in-app certificate per stake with immutable artwork snapshot; new artwork selection matches the contract tier through the owner-controlled reactor catalog. Completion replaces USDT refund; buybacks remain owner-reviewed and vault-funded.
-- Marketplace merchandise lives in a separate owner-controlled presentation catalog with optional external HTTPS order links, not automatic payments or certificate settlement; HOME and PROFILE provide store access without a header shop.
-- All presale entry points use one accessible confirmation before the authenticated purchase; strategies snapshot rates and whole-day dividends settle via bix_wallet_balance — one server source.
+- Marketplace merchandise lives in a separate owner-controlled presentation catalog with optional external HTTPS order links, not automatic payments or certificate settlement; HOME and PROFILE provide store access without a header shop; member listings are auto-approved only by the DB guard trigger.
+- All presale entry points use one accessible confirmation before the authenticated purchase; strategies snapshot rates; dividends settle via bix_wallet_balance.
 
 - Owner-only marketing settings feed browser PDF exports; dated CDN video stays separate to avoid implying re-rendering.
 - Owner navigation uses one searchable category selector; shared staking controls separate daily presets from individual edits to avoid duplicate forms across consoles.
-- Shared shell and dialogs own phone spacing, safe-area navigation and scroll bounds so every page remains usable without changing transaction logic.
+- Shared shell and dialogs own phone spacing, safe-area navigation and scroll bounds.
 
 - Size heroes only via landing-hero-compact and compact-market-hero; preserve art proportions and catalog/transaction layouts to isolate visual changes.

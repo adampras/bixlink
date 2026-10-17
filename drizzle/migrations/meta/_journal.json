@@ -421,6 +421,13 @@
       "when": 1792176790359,
       "tag": "0059_arena_admin_bixp_cap",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1792206905091,
+      "tag": "0060_member_shop_auto_approve",
+      "breakpoints": true
     }
   ]
 }

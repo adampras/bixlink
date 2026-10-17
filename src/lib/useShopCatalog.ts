@@ -7,3 +7,4 @@ export function useShopCatalog(){return useQuery({queryKey:['shop-catalog'],quer
  if(!data)return DEFAULT_PRODUCTS;
  return shopSchema.parse(data.value).items;
 },refetchInterval:15000});}
+export function useShopPromo(){return useQuery({queryKey:['shop-promo'],queryFn:async()=>{const {data}=await supabase.from('app_settings').select('value').eq('key','merchandise_catalog').maybeSingle();const r=data?shopSchema.safeParse(data.value):null;return r?.success?r.data.promo??null:null;}});}
