@@ -1108,12 +1108,15 @@ export type Database = {
           activated_at: string | null
           amount_usd: number
           apy: number
+          bix_paid: number
+          bix_price_usd: number | null
           compound: boolean
           created_at: string
           funded_vusdt: boolean
           id: string
           lock_days: number
           package_id: string
+          payment_mode: string
           penalty_pct: number
           refund_usd: number
           status: string
@@ -1124,12 +1127,15 @@ export type Database = {
           activated_at?: string | null
           amount_usd: number
           apy: number
+          bix_paid?: number
+          bix_price_usd?: number | null
           compound?: boolean
           created_at?: string
           funded_vusdt?: boolean
           id?: string
           lock_days: number
           package_id: string
+          payment_mode?: string
           penalty_pct?: number
           refund_usd?: number
           status?: string
@@ -1140,12 +1146,15 @@ export type Database = {
           activated_at?: string | null
           amount_usd?: number
           apy?: number
+          bix_paid?: number
+          bix_price_usd?: number | null
           compound?: boolean
           created_at?: string
           funded_vusdt?: boolean
           id?: string
           lock_days?: number
           package_id?: string
+          payment_mode?: string
           penalty_pct?: number
           refund_usd?: number
           status?: string
@@ -1521,6 +1530,10 @@ export type Database = {
       }
       request_bix_duration_stake: {
         Args: { p_days: number; p_package: string }
+        Returns: string
+      }
+      request_bix_duration_stake_mode: {
+        Args: { p_days: number; p_mode: string; p_package: string }
         Returns: string
       }
       request_bix_stake: { Args: { p_package: string }; Returns: string }
