@@ -63,6 +63,7 @@ export const reviewVip = createServerFn({ method: 'POST' }).middleware([requireS
 export const withdrawStakeProfit = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string; asset: 'BIX' | 'USDT' }) => z.object({ id: z.string().uuid(), asset: z.enum(['BIX', 'USDT']) }).parse(input))
   .handler(async ({ context, data }) => {
+    if (data.asset !== 'BIX') throw new Error('Booster dividends are paid 100% in BIX.');
     const { data: r, error } = await context.supabase.rpc('bix_withdraw_stake_profit', { p_stake: data.id, p_asset: data.asset });
     if (error) throw new Error(error.message);
     return r as { amount_bix: number; amount_usdt: number; asset: string };
