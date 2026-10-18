@@ -2438,3 +2438,18 @@ html[data-color-mode="light"] .reactor-landing .section-title { color: var(--for
 .zoom-dialog { --zoom-hi: oklch(0.96 0.06 92); --zoom-mid: oklch(0.82 0.14 82); --zoom-lo: oklch(0.58 0.11 68); }
 .zoom-crest { margin: 8px auto 0; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 16px; box-shadow: 0 0 0 1.5px var(--chart-3), 0 0 24px -6px var(--chart-3); }
 .zoom-reward { display: inline-block; border-radius: 999px; padding: 3px 12px; font-size: 10px; font-weight: 900; letter-spacing: .1em; color: var(--background); background: var(--chart-3); }
+
+/* Popup true-center (no translate drift on mobile) */
+.site-popup { inset: 0 !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; margin: auto !important; transform: none !important; height: fit-content !important; }
+
+/* Auth/Register: ruby -> gold */
+.auth-vault-page, .register-numbered { --ruby: 45 90% 55%; }
+.auth-badge { color: hsl(45 90% 55%); }
+
+/* Light mode clarity */
+html[data-color-mode="light"] .landing-hero-compact .hero-3d-bg { opacity: .18; filter: saturate(.6) brightness(1.4); }
+html[data-color-mode="light"] .landing-hero-compact .hero-3d-veil { background: linear-gradient(180deg, color-mix(in oklch, var(--background) 82%, transparent), var(--background)); }
+html[data-color-mode="light"] .landing-hero-compact .hero-title { filter: none; }
+html[data-color-mode="light"] .landing-hero-compact .hero-tagline { color: oklch(0.42 0.09 70); }
+html[data-color-mode="light"] .coin-stage--vault { background-image: radial-gradient(ellipse at 50% 45%, oklch(0.97 0.03 90), oklch(0.92 0.03 85)) !important; }
+html[data-color-mode="light"] .coin-stage--vault .coin-caption span { color: var(--foreground); }
