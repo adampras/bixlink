@@ -48,6 +48,7 @@ function ZoomDialog({ z, open, onClose, signedIn }: { z: ZoomPublic; open: boole
         {z.rewardBix > 0 && (signedIn ? (z.claimed ? <p className="mt-3 text-xs font-bold text-chart-3">Claim status: {z.claimed}</p> : <div className="mt-3 grid grid-cols-[1fr_auto] gap-2"><input className="form-input" maxLength={40} placeholder="Attendance code from host" value={code} onChange={e => setCode(e.target.value)}/><Button disabled={busy || !code.trim()} onClick={() => void claim()}>Claim</Button></div>) : <Button asChild variant="outline" size="sm" className="mt-3"><Link to="/auth">Sign in to claim reward</Link></Button>)}
         {msg && <p className="mt-2 text-xs">{msg}</p>}
         {z.terms && <details className="mt-3 text-left text-[11px] text-muted-foreground"><summary className="cursor-pointer font-bold">Terms & conditions</summary><p className="mt-2 whitespace-pre-line">{z.terms}</p></details>}
+        <Link to="/studio" className="mt-3 block text-[11px] font-bold text-primary underline">BIX Studio · Banner & presentation maker</Link>
         <p className="mt-3 text-[10px] text-muted-foreground">Rewards are reviewed by the owner before credit. Terms apply.</p>
       </div>
     </DialogContent>
