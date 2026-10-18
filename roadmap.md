@@ -136,3 +136,4 @@
 - [x] Popup auto-fit any image size
 - [x] Compact STAKE details, remove duration-triggered popups and verify complete phone action labels.
 - [x] Blend the landing coin backdrop and refine dimensional rotation using existing artwork; verify phone and desktop.
+- [ ] Upgrade $7,000 PLATINUM NFT from the $5,000 pass; improve gold title contrast and emerald numbers; verify phone display.
