@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ArbitrageRouteImport } from './routes/arbitrage'
 import { Route as ArenaRouteImport } from './routes/arena'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BoostRouteImport } from './routes/boost'
@@ -55,6 +56,11 @@ const AboutRoute = AboutRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArbitrageRoute = ArbitrageRouteImport.update({
+  id: '/arbitrage',
+  path: '/arbitrage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArenaRoute = ArenaRouteImport.update({
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/arbitrage': typeof ArbitrageRoute
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/arbitrage': typeof ArbitrageRoute
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/arbitrage': typeof ArbitrageRoute
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
@@ -313,6 +322,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/arbitrage'
     | '/arena'
     | '/auth'
     | '/boost'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/arbitrage'
     | '/arena'
     | '/auth'
     | '/boost'
@@ -381,6 +392,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/arbitrage'
     | '/arena'
     | '/auth'
     | '/boost'
@@ -416,6 +428,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
+  ArbitrageRoute: typeof ArbitrageRoute
   ArenaRoute: typeof ArenaRoute
   AuthRoute: typeof AuthRoute
   BoostRoute: typeof BoostRoute
@@ -468,6 +481,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/arbitrage': {
+      id: '/arbitrage'
+      path: '/arbitrage'
+      fullPath: '/arbitrage'
+      preLoaderRoute: typeof ArbitrageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/arena': {
@@ -680,6 +700,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
+  ArbitrageRoute: ArbitrageRoute,
   ArenaRoute: ArenaRoute,
   AuthRoute: AuthRoute,
   BoostRoute: BoostRoute,
