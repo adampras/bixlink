@@ -2331,3 +2331,10 @@ html[data-color-mode="light"] .reactor-landing .section-title { color: var(--for
 .pass-mini img { width:112px; aspect-ratio:1050/600; object-fit:contain; border-radius:6px; }
 .pass-pop { display:block; width:min(420px,88vw); aspect-ratio:1050/600; object-fit:contain; border-radius:14px; }
 .pass-card .pass-card-art { display:block; width:100%; aspect-ratio:1050/600; object-fit:contain; background:var(--background); }
+
+/* Landing compact luxury powered strip */
+.powered-strip { margin: 8px auto 4px; padding: 10px 16px; border-block: 1px solid color-mix(in oklab, var(--chart-3) 18%, transparent); background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--card) 55%, transparent), transparent); }
+.powered-strip-row { justify-content: safe center; }
+.powered-strip-chip { border-color: color-mix(in oklab, var(--chart-3) 28%, transparent); background: color-mix(in oklab, var(--card) 50%, transparent); letter-spacing: .04em; }
+.powered-strip-note { text-align: center; opacity: .7; }
+@media (max-width: 640px) { .ecosystem-column { border-radius: 18px; } .ecosystem-list { gap: 8px; } }
