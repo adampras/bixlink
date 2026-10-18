@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { P2PDesk } from '@/components/P2PDesk';
 import { useMember } from '@/lib/useMember';
@@ -19,6 +19,7 @@ function P2PPage() {
     <p className="shop-eyebrow">INTERNAL TRADING DESK</p>
     <h1 className="mt-1 font-display text-3xl font-bold">P2P <span className="text-chart-3">BIX Market</span></h1>
     <p className="mt-1 mb-6 text-sm text-muted-foreground">Post offers or take existing ones — settled instantly between members.</p>
+    <Link to="/arbitrage" className="mb-4 inline-block text-xs font-bold text-chart-3 underline">Arbitrage & spread calculator →</Link>
     <P2PDesk userId={user?.id} />
   </main></BixShell>;
 }
