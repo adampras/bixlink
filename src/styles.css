@@ -2389,3 +2389,19 @@ html[data-color-mode="light"] .reactor-landing .section-title { color: var(--for
 .hub-text em{font-style:normal;font-size:10px;color:var(--muted-foreground);line-height:1.2}
 .hub-gold{--hub:#FFD700}.hub-emerald{--hub:#10b981}.hub-cyan{--hub:#22d3ee}.hub-violet{--hub:#A855F7}.hub-crimson{--hub:#f43f5e}
 @media (min-width:768px){.hub-card{flex-basis:16rem;height:6.4rem}}
+
+/* Hero clarity + spectrum title (matches Highlights Hub) */
+.landing-hero-compact .hero-3d-veil { background: radial-gradient(ellipse at 50% 45%, color-mix(in oklch, var(--background) 20%, transparent), color-mix(in oklch, var(--background) 70%, transparent) 80%); }
+.landing-hero-compact .hero-title { font-family: var(--font-display); letter-spacing: .04em; font-weight: 800; background-image: linear-gradient(100deg, oklch(0.9 0.15 85), oklch(0.82 0.16 200) 30%, oklch(0.72 0.22 320) 55%, oklch(0.88 0.17 85) 80%); background-size: 220% 100%; animation: hero-spectrum 8s linear infinite; filter: drop-shadow(0 4px 18px oklch(0 0 0 / 45%)); }
+.landing-hero-compact .hero-tagline { letter-spacing: .18em; text-transform: uppercase; font-size: 11px; font-weight: 600; }
+@keyframes hero-spectrum { to { background-position: 220% 0; } }
+/* Coin: infinite spin + BIX TO THE MOON backdrop */
+.coin-stage--moon { background-size: cover; background-position: center; border-color: color-mix(in oklab, var(--chart-3) 45%, transparent); box-shadow: 0 0 40px -10px oklch(0.7 0.2 320 / 45%), inset 0 0 60px oklch(0 0 0 / 55%); }
+.coin-stage--moon::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, oklch(0.08 0.01 280 / 85%)); }
+.coin-stage--moon .coin-float { animation: coin-levitate 6s ease-in-out infinite; }
+.coin-stage--moon .coin-3d { animation: coin-rotate 7s linear infinite; filter: drop-shadow(0 0 22px oklch(0.85 0.16 85 / 55%)) drop-shadow(0 0 40px oklch(0.7 0.2 320 / 35%)); }
+.coin-stage--moon .coin-halo { background: conic-gradient(from 0deg, oklch(0.85 0.16 85 / 45%), oklch(0.78 0.15 200 / 45%), oklch(0.7 0.22 320 / 45%), oklch(0.85 0.16 85 / 45%)); filter: blur(28px); animation: coin-rotate 10s linear infinite; }
+.moon-tag { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: .4rem; margin-bottom: .5rem; padding: .25rem .7rem; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .2em; color: oklch(0.9 0.15 85); border: 1px solid oklch(0.85 0.16 85 / 50%); background: oklch(0.1 0.02 280 / 60%); backdrop-filter: blur(8px); }
+.moon-tag i { width: 6px; height: 6px; border-radius: 50%; background: oklch(0.78 0.2 320); box-shadow: 0 0 8px oklch(0.78 0.2 320); animation: coin-halo-pulse 1.6s infinite; }
+.coin-stage--moon > *:not(.coin-halo):not(.coin-dust) { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) { .landing-hero-compact .hero-title, .coin-stage--moon .coin-3d, .coin-stage--moon .coin-halo { animation: none; } }
