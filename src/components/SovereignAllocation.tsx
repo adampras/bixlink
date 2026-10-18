@@ -4,17 +4,11 @@ import { Button } from '@/components/ui/button';
 import { number } from '@/lib/bixlink';
 import { DEFAULT_STRATEGIES, strategyQuote, type PresaleStrategy, type StrategySettings } from '@/lib/presale-strategy';
 import type { SovereignConfig } from '@/lib/presale';
-import core from '@/assets/sovereign-core.jpg';
-import coreVideo from '@/assets/sovereign-core.mp4.asset.json';
+import { valueCard } from '@/lib/value-cards';
 
-function SovereignVideo() {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [sound, setSound] = useState(false);
-  useEffect(() => { if (ref.current) { ref.current.muted = !sound; ref.current.volume = 0.35; } }, [sound]);
-  return <>
-    <video ref={ref} autoPlay muted loop playsInline preload="metadata" poster={core} aria-label="Sovereign Singularity Core reactor" className="aspect-square w-full object-cover"><source src={coreVideo.url} type="video/mp4"/></video>
-    <Button variant="outline" size="icon" className="absolute right-3 top-3 rounded-full bg-background/60" aria-label={sound ? 'Mute' : 'Play soft sound'} onClick={() => setSound(v => !v)}>{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</Button>
-  </>;
+function SovereignVideo({ usd }: { usd: number }) {
+  const card = valueCard(usd);
+  return card ? <img src={card.url} alt={`${card.name} NFT`} loading="lazy" className="block w-full object-contain"/> : null;
 }
 
 /** Digital sapphire plaque certificate for a Sovereign holder. */
