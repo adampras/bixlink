@@ -2455,8 +2455,9 @@ html[data-color-mode="light"] .coin-stage--vault { background-image: radial-grad
 html[data-color-mode="light"] .coin-stage--vault .coin-caption span { color: var(--foreground); }
 
 /* Popup precise centering — final override (no transform animations) */
-.site-popup, .site-popup.zoom-dialog { position:fixed !important; inset:0 !important; margin:auto !important; transform:none !important; translate:none !important; scale:none !important; width:min(500px, calc(100vw - 24px)) !important; max-width:none !important; height:fit-content !important; max-height:calc(100dvh - 32px) !important; overflow-y:auto; }
-.site-popup[data-state], .site-popup.zoom-dialog[data-state] { animation:popup-fade .2s ease-out !important; }
+.site-popup, .site-popup.zoom-dialog { position:fixed !important; top:50% !important; bottom:auto !important; left:0 !important; right:0 !important; margin:0 auto !important; transform:translateY(-50%) !important; translate:none !important; scale:none !important; rotate:none !important; width:calc(100vw - 24px) !important; max-width:500px !important; height:auto !important; max-height:calc(100dvh - 32px) !important; overflow-y:auto; box-sizing:border-box; }
+.site-popup[data-state], .site-popup.zoom-dialog[data-state] { animation:popup-fade .2s ease-out !important; --tw-enter-translate-x:0; --tw-enter-translate-y:0; --tw-enter-scale:1; }
+.value-nft { display:block; width:100%; aspect-ratio:2000/1294; object-fit:cover; border-radius:12px; border:1px solid color-mix(in oklab, var(--chart-3) 40%, var(--border)); box-shadow:0 10px 30px -14px var(--chart-3); }
 @keyframes popup-fade { from { opacity:0 } to { opacity:1 } }
 .studio-canvas { width:100%; height:auto; border-radius:12px; border:1px solid color-mix(in oklab, var(--chart-3) 45%, var(--border)); }
 .studio-stage { aspect-ratio:16/9; display:grid; place-items:center; text-align:center; padding:6%; border-radius:14px; background:radial-gradient(circle at 50% 30%, color-mix(in oklab, var(--chart-3) 22%, var(--background)), var(--background) 70%); border:1px solid color-mix(in oklab, var(--chart-3) 45%, var(--border)); overflow:hidden; }
