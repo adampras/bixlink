@@ -3,7 +3,7 @@ import { Building2, CircleDollarSign, Globe2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LandingNarrative } from '@/components/LandingNarrative';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
-import { ReactorVideo } from '@/components/ReactorVideo';
+import coinIcon from '@/assets/bixcoin-icon-512.png.asset.json';
 import heroObsidian from '@/assets/hero-obsidian-gold.jpg';
 import { usePublicConfig, useMember } from '@/lib/useMember';
 import { boosterMaximum } from '@/lib/booster-apy';
@@ -44,7 +44,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
       <div className="lux-ticker" aria-label="BIXLINK protocol highlights"><div className="lux-ticker-track">{[0,1].map(k => <span key={k} aria-hidden={k===1}>{['21.000.000 BIX FIXED SUPPLY','DEFLATIONARY HALVING','NON-CUSTODIAL MODEL','RWA NARRATIVE','SMART CONTRACT READY','COMMUNITY TO DAO'].map(t => <b key={t}>◆ {t}</b>)}</span>)}</div></div>
     </section>
     <PoweredBy/>
-    <section className="mx-auto max-w-3xl px-5 py-10 text-center"><div className="eyebrow">CORE FOUNDATION</div><ReactorVideo maximum={maximum}/></section>
+    <section className="mx-auto max-w-3xl px-5 py-10 text-center"><div className="eyebrow">OFFICIAL BIXCOIN</div><div className="coin-stage" aria-label="BIXCOIN official coin"><div className="coin-halo" aria-hidden/><img src={coinIcon.url} alt="BIXCOIN" className="coin-spin" width={220} height={220}/><div className="coin-pedestal" aria-hidden/><div className="coin-caption"><span>21,000,000 BIX · FIXED SUPPLY</span><strong>BIX BOOSTER UP TO {maximum}% · PROJECTION</strong></div></div></section>
     <LandingNarrative content={content}/>
     <section className="landing-ecosystem border-y border-border"><div className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="eyebrow">THE BIXLINK ADVANTAGE</div><h2 className="section-title">PREMIUM <span>ECOSYSTEM</span></h2><div className="mt-8 grid gap-5 lg:grid-cols-2"><article className="ecosystem-column"><header><span className="ecosystem-icon text-primary"><Globe2/></span><div><small>CONNECTED UTILITY</small><h3>Ecosystem core</h3></div></header><div className="ecosystem-list">{content.ecosystem.map((item, index) => item.enabled === false ? null : <ContentLink group="ecosystem" index={index} item={item} key={`${item.title}-${index}`}><div><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div></ContentLink>)}</div></article><article className="ecosystem-column ecosystem-column--income"><header><span className="ecosystem-icon text-chart-3"><CircleDollarSign/></span><div><small>DISCLOSED SOURCES</small><h3>Income narrative</h3></div></header><div className="ecosystem-list">{content.income.map((item, index) => item.enabled === false ? null : <ContentLink group="income" index={index} item={item} key={`${item.title}-${index}`}><div><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div></ContentLink>)}</div></article></div><div className="ecosystem-disclosure"><ShieldCheck/><span>Public narratives are owner-managed. Recorded income is not presented as audited revenue or guaranteed return.</span><Building2/></div></div></section>
     <section className="mx-auto max-w-7xl px-5 py-8 md:px-8"><ContentCarousel group="spaces" title="Kategori Pengembangan" items={content.spaces ?? defaultSpaces}/></section>
