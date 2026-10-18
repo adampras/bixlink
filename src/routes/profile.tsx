@@ -13,6 +13,7 @@ import { ArrowRight, BadgeCheck, Check, Crown, Swords, ChevronRight, Copy, Gem, 
 import headerMark from '@/assets/bixlink-header-mark.png.asset.json';
 import { useI18n } from '@/lib/i18n';
 import { usePresaleStatus } from '@/components/PresaleEntry';
+import { AvatarFrameMaker } from '@/components/AvatarFrameMaker';
 import { GenesisCertificate } from '@/components/PresaleStrategies';
 import { SovereignPlaque } from '@/components/SovereignAllocation';
 import { number } from '@/lib/bixlink';
@@ -44,6 +45,7 @@ function ProfilePage() {
   return <BixShell><main className="profile-page mx-auto max-w-3xl px-5 py-8 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="PROFILE">
       <header className="profile-identity"><div className="profile-avatar"><img src={headerMark.url} alt="BIXLINK member emblem"/></div><div className="min-w-0"><div className="eyebrow">VERIFIED MEMBER</div><h1>{user?.email}</h1><p>Active since {user && formatDate(user.created_at)}</p>{badges.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{badges.map(({ Icon, label, cls }) => <span key={label} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${cls}`}><Icon size={11}/>{label}</span>)}</div>}</div></header>
+      <AvatarFrameMaker logo={headerMark.url}/>
       <section className="profile-referral">
         <div className="profile-section-head"><h2>Referral code</h2>{data?.referral?.code && <span><Check size={11}/> Active</span>}</div>
         {data?.referral?.code ? <><div className="profile-code-row"><div className="profile-code"><b>{data.referral.code}</b><Button size="icon" variant="ghost" title="Copy referral link" onClick={copyReferral}><Copy/></Button></div><Button onClick={copyReferral}>Copy link</Button></div>{referralUrl && <div className="mt-2 grid grid-cols-2 gap-2"><Button asChild size="sm" variant="outline" className="rounded-full"><a href={`https://wa.me/?text=${encodeURIComponent(`Join me on BIXLINK: ${referralUrl}`)}`} target="_blank" rel="noopener noreferrer">Share WhatsApp</a></Button><Button asChild size="sm" variant="outline" className="rounded-full"><a href={`https://t.me/share/url?url=${encodeURIComponent(referralUrl)}&text=${encodeURIComponent('Join me on BIXLINK')}`} target="_blank" rel="noopener noreferrer">Share Telegram</a></Button></div>}</> : <Button className="profile-generate" onClick={async () => { try { await makeCode(); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Could not create code.'); } }}>Generate referral code</Button>}
