@@ -899,6 +899,78 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_zoom_claims: {
+        Row: {
+          amount_bix: number
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          session_key: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_bix: number
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          session_key: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_bix?: number
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          session_key?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bix_zoom_config: {
+        Row: {
+          enabled: boolean
+          id: number
+          passcode: string | null
+          reward_bix: number
+          schedule: string | null
+          session_key: string
+          terms: string
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          id?: number
+          passcode?: string | null
+          reward_bix?: number
+          schedule?: string | null
+          session_key?: string
+          terms?: string
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          id?: number
+          passcode?: string | null
+          reward_bix?: number
+          schedule?: string | null
+          session_key?: string
+          terms?: string
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       deposit_intents: {
         Row: {
           address: string
@@ -1522,6 +1594,14 @@ export type Database = {
         Args: { p_asset: string; p_stake: string }
         Returns: Json
       }
+      bix_zoom_admin: { Args: never; Returns: Json }
+      bix_zoom_claim: { Args: { p_code: string }; Returns: string }
+      bix_zoom_public: { Args: never; Returns: Json }
+      bix_zoom_review: {
+        Args: { p_approve: boolean; p_claim: string }
+        Returns: undefined
+      }
+      bix_zoom_save: { Args: { p: Json }; Returns: undefined }
       ensure_bix_profile: { Args: never; Returns: undefined }
       is_bix_admin: { Args: never; Returns: boolean }
       request_bix_deposit: {

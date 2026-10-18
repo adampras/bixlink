@@ -1,3 +1,4 @@
+import { BixZoomButton } from '@/components/BixZoom';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -113,7 +114,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     {publicConfig && isBlockedByMaintenance(publicConfig.siteControl, publicConfig.isAdmin, path) ? <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-5 py-16 text-center"><img src={headerMark.url} width={72} height={72} alt="" className="rounded-full"/><div className="eyebrow mt-6">SYSTEM MAINTENANCE</div><h1 className="section-title mt-3">BIXLINK <span>MAINTENANCE</span></h1><p className="mt-4 text-sm leading-6 text-muted-foreground">{publicConfig.siteControl.message || 'Sistem BIXLINK sedang dalam pemeliharaan. Silakan kembali beberapa saat lagi.'}</p></main> : children}
     <TxFeedbackHost/>
     <SitePopup path={path} popups={publicConfig?.landingContent.popups} signedIn={!!user}/>
-    <footer className="border-t border-border py-4"><SocialLinks links={publicConfig?.readiness.socials}/><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
+    <footer className="border-t border-border py-4"><SocialLinks links={publicConfig?.readiness.socials} signedIn={!!user}/><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
     {user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden`}>
       {NAV.filter(n => n.to !== '/boost').map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} title={n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19} className="shrink-0"/><span className="max-w-full truncate">{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')}</span></Link>; })}
     </nav>}
@@ -128,8 +129,8 @@ const SOCIAL_ICONS: Record<string, string> = {
   instagram: 'M12 2.2c3.2 0 3.6 0 4.8.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8C2.4 3.9 3.9 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2Zm0 4.9a4.9 4.9 0 1 0 0 9.8 4.9 4.9 0 0 0 0-9.8Zm0 8.1a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4Zm5.1-9.4a1.2 1.2 0 1 0 0 2.3 1.2 1.2 0 0 0 0-2.3Z',
 };
 const SOCIAL_LABELS: Record<string, string> = { telegram: 'Telegram', x: 'X', youtube: 'YouTube', discord: 'Discord', instagram: 'Instagram' };
-function SocialLinks({ links }: { links?: Partial<Record<string, string>> | undefined }) {
-  return <nav aria-label="Official social media" className="social-row">{Object.keys(SOCIAL_ICONS).map(k => { const url = links?.[k]; const icon = <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden><path d={SOCIAL_ICONS[k]}/></svg>; return url?.startsWith('https://') ? <a key={k} href={url} target="_blank" rel="noopener noreferrer" aria-label={`BIXLINK on ${SOCIAL_LABELS[k]}`} title={SOCIAL_LABELS[k]} className="social-orb">{icon}</a> : <span key={k} aria-label={`${SOCIAL_LABELS[k]} coming soon`} title={`${SOCIAL_LABELS[k]} · coming soon`} className="social-orb opacity-60">{icon}</span>; })}</nav>;
+function SocialLinks({ links, signedIn }: { links?: Partial<Record<string, string>> | undefined; signedIn: boolean }) {
+  return <nav aria-label="Official social media" className="social-row">{Object.keys(SOCIAL_ICONS).flatMap((k, idx) => { const url = links?.[k]; const icon = <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden><path d={SOCIAL_ICONS[k]}/></svg>; return url?.startsWith('https://') ? <a key={k} href={url} target="_blank" rel="noopener noreferrer" aria-label={`BIXLINK on ${SOCIAL_LABELS[k]}`} title={SOCIAL_LABELS[k]} className="social-orb">{icon}</a> : <span key={k} aria-label={`${SOCIAL_LABELS[k]} coming soon`} title={`${SOCIAL_LABELS[k]} · coming soon`} className="social-orb opacity-60">{icon}</span>; }).flatMap((el, idx) => idx === 2 ? [<BixZoomButton key="zoom" signedIn={signedIn}/>, el] : [el])}</nav>;
 }
 
 function ViewSwitch() {
