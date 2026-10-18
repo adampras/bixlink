@@ -2325,3 +2325,9 @@ html[data-color-mode="light"] .reactor-landing .section-title { color: var(--for
 @keyframes coin-ring { from { transform: scale(.7); opacity: .9; } to { transform: scale(1.25); opacity: 0; } }
 @keyframes coin-dust-rise { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .8; } 100% { transform: translateY(-220px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .coin-float, .coin-sheen::after, .coin-dust i, .coin-pedestal span, .coin-stage--lux .coin-halo, .coin-stage--lux .coin-pedestal { animation: none; } }
+
+/* Member pass cards ($10–$10,000 packages): bank-card ratio, never cropped. */
+.pass-mini { display:grid; grid-template-columns:112px minmax(0,1fr); align-items:center; gap:12px; width:100%; margin-top:12px; padding:8px; border:1px solid var(--border); border-radius:10px; background:color-mix(in oklab,var(--card) 80%,transparent); text-align:left; }
+.pass-mini img { width:112px; aspect-ratio:1050/600; object-fit:contain; border-radius:6px; }
+.pass-pop { display:block; width:min(420px,88vw); aspect-ratio:1050/600; object-fit:contain; border-radius:14px; }
+.pass-card .pass-card-art { display:block; width:100%; aspect-ratio:1050/600; object-fit:contain; background:var(--background); }
