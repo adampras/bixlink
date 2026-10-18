@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { DurationPackageCard } from '@/components/DurationPackageCard';
 import { number, type Package } from '@/lib/bixlink';
 
-export const STAKE_LAYOUTS = ['carousel', 'spotlight', 'accordion'] as const;
+export const STAKE_LAYOUTS = ['capsule', 'carousel', 'spotlight', 'accordion'] as const;
 export type StakeLayout = (typeof STAKE_LAYOUTS)[number];
-export const STAKE_LAYOUT_LABEL: Record<StakeLayout, string> = { carousel: 'C · Carousel halaman', spotlight: 'A · Spotlight', accordion: 'B · Baris accordion' };
+export const STAKE_LAYOUT_LABEL: Record<StakeLayout, string> = { capsule: 'D · Kotak kapsul mewah', carousel: 'C · Carousel halaman', spotlight: 'A · Spotlight', accordion: 'B · Baris accordion' };
 
 type Props = { packages: Package[]; layout?: string | undefined; onStake: (p: Package) => void };
+
+const short = (v: number) => v >= 1000 ? `$${number(v / 1000, { maximumFractionDigits: 1 })}K` : `$${number(v, { maximumFractionDigits: 0 })}`;
 
 export function StakePackageLayouts({ packages, layout, onStake }: Props) {
   const mode: StakeLayout = (STAKE_LAYOUTS as readonly string[]).includes(layout ?? '') ? (layout as StakeLayout) : 'carousel';
@@ -16,6 +18,18 @@ export function StakePackageLayouts({ packages, layout, onStake }: Props) {
   const [page, setPage] = useState(0);
   const [open, setOpen] = useState<number | null>(null);
   if (!packages.length) return null;
+
+  if (mode === 'capsule') {
+    const i = Math.min(active, packages.length - 1);
+    return <section aria-label="Staking packages" className="mt-6">
+      <div role="tablist" aria-label="Package tier" className="stake-capsules">
+        {packages.map((p, n) => <button key={p.id} type="button" role="tab" aria-selected={n === i} onClick={() => setActive(n)} className="stake-capsule"><span>T{String(n + 1).padStart(2, '0')}</span><b className="numeric">{short(Number(p.price_usd))}</b></button>)}
+      </div>
+      <div className="mx-auto mt-4 max-w-md">
+        <DurationPackageCard key={packages[i]!.id} pkg={packages[i]!} index={i} onStake={onStake} />
+      </div>
+    </section>;
+  }
 
   if (mode === 'spotlight') {
     const i = Math.min(active, packages.length - 1);
