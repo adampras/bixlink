@@ -23,6 +23,14 @@ export function StakePackageLayouts({ packages, layout, onStake }: Props) {
     const i = Math.min(active, packages.length - 1);
     const go = (n: number) => { setActive(n); document.getElementById(`auric-pkg-${n}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); };
     return <section aria-label="Staking packages" className="auric-stake mt-6">
+      <div className="auric-terminal">
+        <p className="auric-terminal-title">BIXLINK SOVEREIGN VAULT · STAKING TERMINAL</p>
+        <div className="auric-ingots">
+          <div><span>Total pool cap</span><b className="numeric">21,000,000 BIX</b></div>
+          <div><span>Bullion tiers</span><b className="numeric">{packages.length} · {short(Number(packages[0]!.price_usd))}–{short(Number(packages[packages.length - 1]!.price_usd))}</b></div>
+          <div className="is-live"><span>Selected tier</span><b className="numeric">T{String(i + 1).padStart(2, '0')} · {short(Number(packages[i]!.price_usd))}</b></div>
+        </div>
+      </div>
       <div className="auric-head"><span>AURIC SOVEREIGN</span><b>999.9 · Select your bullion tier</b></div>
       <div role="tablist" aria-label="Package tier" className="auric-grid">
         {packages.map((p, n) => <button key={p.id} type="button" role="tab" aria-selected={n === i} onClick={() => go(n)} className="auric-bar"><i aria-hidden /><span>T{String(n + 1).padStart(2, '0')}</span><b className="numeric">{short(Number(p.price_usd))}</b><small>FINE GOLD</small></button>)}
