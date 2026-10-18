@@ -134,5 +134,5 @@
 - [x] Presale purchase success receipt pop-up.
 - [x] BIXZOOM room: gold center button, admin link/schedule/terms, BIX reward via passcode claim (owner-reviewed)
 - [x] Popup auto-fit any image size
-- [ ] Compact STAKE details, remove duration-triggered popups and verify complete phone action labels.
-- [ ] Blend the landing coin backdrop and refine dimensional rotation using existing artwork; verify phone and desktop.
+- [x] Compact STAKE details, remove duration-triggered popups and verify complete phone action labels.
+- [x] Blend the landing coin backdrop and refine dimensional rotation using existing artwork; verify phone and desktop.
