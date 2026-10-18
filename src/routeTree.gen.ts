@@ -33,6 +33,7 @@ import { Route as ReviewRouteImport } from './routes/review'
 import { Route as RiskRouteImport } from './routes/risk'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StakeRouteImport } from './routes/stake'
+import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TransferRouteImport } from './routes/transfer'
 import { Route as WalletRouteImport } from './routes/wallet'
@@ -161,6 +162,11 @@ const StakeRoute = StakeRouteImport.update({
   path: '/stake',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -223,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
@@ -256,6 +263,7 @@ export interface FileRoutesByTo {
   '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
@@ -290,6 +298,7 @@ export interface FileRoutesById {
   '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
   '/stake': typeof StakeRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
   '/transfer': typeof TransferRoute
   '/wallet': typeof WalletRoute
@@ -325,6 +334,7 @@ export interface FileRouteTypes {
     | '/risk'
     | '/settings'
     | '/stake'
+    | '/studio'
     | '/terms'
     | '/transfer'
     | '/wallet'
@@ -358,6 +368,7 @@ export interface FileRouteTypes {
     | '/risk'
     | '/settings'
     | '/stake'
+    | '/studio'
     | '/terms'
     | '/transfer'
     | '/wallet'
@@ -391,6 +402,7 @@ export interface FileRouteTypes {
     | '/risk'
     | '/settings'
     | '/stake'
+    | '/studio'
     | '/terms'
     | '/transfer'
     | '/wallet'
@@ -425,6 +437,7 @@ export interface RootRouteChildren {
   RiskRoute: typeof RiskRoute
   SettingsRoute: typeof SettingsRoute
   StakeRoute: typeof StakeRoute
+  StudioRoute: typeof StudioRoute
   TermsRoute: typeof TermsRoute
   TransferRoute: typeof TransferRoute
   WalletRoute: typeof WalletRoute
@@ -604,6 +617,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StakeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -681,6 +701,7 @@ const rootRouteChildren: RootRouteChildren = {
   RiskRoute: RiskRoute,
   SettingsRoute: SettingsRoute,
   StakeRoute: StakeRoute,
+  StudioRoute: StudioRoute,
   TermsRoute: TermsRoute,
   TransferRoute: TransferRoute,
   WalletRoute: WalletRoute,
