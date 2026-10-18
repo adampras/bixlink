@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { RefreshCw, Globe2, Newspaper, Lock } from 'lucide-react';
 import { CryptoIcon } from '@/components/CryptoIcon';
@@ -22,6 +22,7 @@ function MarketPage() {
   const { data, refetch, isFetching } = useSuspenseQuery(marketQuery);
   const { data: cfg } = usePublicConfig();
   return <BixShell><main className="mx-auto min-h-[70vh] max-w-6xl px-5 py-8 md:px-8 md:py-12">
+    <Link to="/p2p" className="mb-5 flex items-center justify-between rounded-xl border border-primary/40 bg-card px-4 py-3 text-sm font-bold text-primary">P2P Market · buy &amp; sell BIX between members <span aria-hidden>→</span></Link>
     <div className="eyebrow"><Globe2 size={14}/> BIXLINK INTELLIGENCE</div>
     <div className="mt-3 flex items-center justify-between gap-3"><h1 className="font-display text-[26px] font-bold text-foreground md:text-3xl">Market & Updates</h1><Button size="icon" variant="ghost" aria-label="Refresh market" title="Refresh market" disabled={isFetching} onClick={() => refetch()}><RefreshCw size={18}/></Button></div>
     {!data.enabled ? <div className="mt-12 flex items-center gap-3 text-muted-foreground"><Lock size={20}/><p>Market & Updates is not open yet.</p></div> : <div className="mt-8 grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
