@@ -132,3 +132,5 @@
 - [x] Group referral admin editor (Direct, Matching, RewardPlus, BIX).
 - [x] NETWORK Leader Bonus Hub with matching matrix.
 - [x] Presale purchase success receipt pop-up.
+- [ ] BIXZOOM room: gold center button, admin link/schedule/terms, BIX reward via passcode claim (owner-reviewed)
+- [ ] Popup auto-fit any image size
