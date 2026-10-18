@@ -92,6 +92,7 @@ function WalletPage() {
         {fiatShown.length > 0 && <><div className="wallet-fx-grid mt-4">{fiatShown.map(item => <div key={item.code}><span>{item.label}</span><b className="numeric">{hidden ? '••••••' : `${item.code} ${number((data?.balance ?? 0) * item.rate, { maximumFractionDigits: item.code === 'IDR' ? 0 : 2 })}`}</b></div>)}</div>
         <p className="mt-3 text-[10px] text-foreground/70">Display-only USD reference conversions. Rates may be delayed.</p></>}
         <div className="mt-5 grid grid-cols-2 gap-3"><Button className="vault-btn-primary rounded-full" onClick={() => setModal('deposit')}><ArrowDownToLine/> Deposit</Button><Button variant="outline" className="vault-btn-ghost rounded-full" onClick={() => setModal('withdraw')}><ArrowUpFromLine/> Withdraw</Button></div>
+        {cfg?.readiness.walletCard && <div className="sov-foot"><span className="numeric">{(user?.id.replace(/\D/g, '').padEnd(4, '0').slice(0, 4) ?? '0000')} •••• •••• 2026</span><span>MEMBER LEDGER PASS</span></div>}
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3">
         <Link to="/pay" className="wallet-tile wallet-tile--pay"><span className="wallet-tile-top"><span className="wallet-tile-icon"><ScanLine size={18}/></span><span className={`wallet-tile-status${cfg?.bixPay.enabled ? ' is-open' : ''}`}><i/>{cfg?.bixPay.enabled ? 'OPEN' : 'SOON'}</span></span><span><b className="wallet-tile-title">BIX PAY</b><span className="wallet-tile-sub">Scan QR · pay in BIX</span></span></Link>
