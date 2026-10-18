@@ -2421,3 +2421,5 @@ html[data-color-mode="light"] .reactor-landing .section-title { color: var(--for
 .coin-stage--vault .coin-pedestal span { border-color: color-mix(in oklab, var(--chart-3) 35%, transparent); animation: coin-ring 3.5s ease-out infinite; }
 .coin-stage--vault .coin-caption strong { color: var(--chart-3); }
 @media (prefers-reduced-motion: reduce) { .coin-stage--vault .coin-3d, .coin-stage--vault .coin-float, .coin-stage--vault .coin-halo { animation: none; } }
+.coin-stage--vault { background-size: cover; background-position: center; border: 1px solid color-mix(in oklab, var(--chart-3) 18%, transparent); }
+.hub-strip { scroll-snap-type: x proximity; }
