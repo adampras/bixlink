@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Crown, ShieldCheck, Volume2, VolumeX } from 'lucide-react';
+import { useState } from 'react';
+import { Crown, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { number } from '@/lib/bixlink';
 import { DEFAULT_STRATEGIES, strategyQuote, type PresaleStrategy, type StrategySettings } from '@/lib/presale-strategy';
