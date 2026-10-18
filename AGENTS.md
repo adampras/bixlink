@@ -42,6 +42,6 @@
 
 - Owner-only marketing settings feed browser PDF exports; dated CDN video stays separate to avoid implying re-rendering.
 - Owner navigation uses one searchable category selector; shared staking controls separate daily presets from individual edits to avoid duplicate forms across consoles.
-- Shared shell and dialogs own phone spacing, safe-area navigation and scroll bounds.
+- Shell/dialogs own phone spacing and scroll bounds; shared package cards use inline duration and full-width actions for phone readability.
 
-- Size heroes only via landing-hero-compact and compact-market-hero; preserve art proportions and catalog/transaction layouts to isolate visual changes.
+- Size heroes via landing-hero-compact/compact-market-hero; preserve catalogs. Mask vault art behind the transparent coin to blend themes without new assets.
