@@ -26,7 +26,7 @@ export function AdminBoosterVisual({ initialVisual, enabled, onMessage, onSaved 
   const cap = maximum ?? boosterMaximum(cfg?.booster.maxApy);
 
   const [layout, setLayout] = useState<StakeLayout | null>(null);
-  const curLayout: StakeLayout = layout ?? cfg?.boosterVisual.stakeLayout ?? 'carousel';
+  const curLayout: StakeLayout = layout ?? cfg?.boosterVisual.stakeLayout ?? 'auric';
   const saveLayout = async (next: StakeLayout) => { setLayout(next); try { await saveSetting({ data: { key: 'booster_visual', value: { visual, stakeLayout: next } } }); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage(`Tampilan paket Staking: ${STAKE_LAYOUT_LABEL[next]}.`); } catch { onMessage('Tampilan staking gagal disimpan.'); } };
 
   return <div className="mt-8 max-w-4xl space-y-5">
