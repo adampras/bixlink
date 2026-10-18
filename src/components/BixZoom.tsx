@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Check, Save, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { Dialog, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -37,7 +38,7 @@ function ZoomDialog({ z, open, onClose, signedIn }: { z: ZoomPublic; open: boole
   const qc = useQueryClient();
   const claim = async () => { setBusy(true); setMsg(undefined); const { error } = await rpc('bix_zoom_claim', { p_code: code }); setBusy(false); if (error) { setMsg(error.message); return; } setMsg('Claim sent. Waiting for owner review.'); setCode(''); await qc.invalidateQueries({ queryKey: ['bix-zoom'] }); };
   return <Dialog open={open} onOpenChange={o => { if (!o) onClose(); }}>
-    <DialogContent className="site-popup zoom-dialog">
+    <DialogPrimitive.Portal><DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"/><div className="zoom-center"><DialogPrimitive.Content className="zoom-panel zoom-dialog"><DialogPrimitive.Close className="zoom-close" aria-label="Close"><X size={16}/></DialogPrimitive.Close>
       <div className="site-popup__body text-center">
         <div className="zoom-crest"><BixZoomLogo size={40}/></div>
         <span className="site-popup__eyebrow mt-3">BIXZOOM ROOM</span>
@@ -51,7 +52,7 @@ function ZoomDialog({ z, open, onClose, signedIn }: { z: ZoomPublic; open: boole
         <Link to="/studio" className="mt-3 block text-[11px] font-bold text-primary underline">BIX Studio · Banner & presentation maker</Link>
         <p className="mt-3 text-[10px] text-muted-foreground">Rewards are reviewed by the owner before credit. Terms apply.</p>
       </div>
-    </DialogContent>
+    </DialogPrimitive.Content></div></DialogPrimitive.Portal>
   </Dialog>;
 }
 
