@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ArrowUpRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { number, type Package } from '@/lib/bixlink';
 import { initialDuration, packageApy, PACKAGE_DURATIONS } from '@/lib/package-options';
-import { dailyRate, monthlyRate, nftTier, nftSignature, NFT_ART, NFT_NAME } from '@/lib/nft';
+import { dailyRate, nftTier, nftSignature, NFT_ART, NFT_NAME } from '@/lib/nft';
 import type { CSSProperties } from 'react';
 import { NftCard } from '@/components/NftCard';
 import { packageArtwork } from '@/lib/nft-catalog';
@@ -14,22 +14,14 @@ import { valueCard } from '@/lib/value-cards';
 
 export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; index: number; onStake: (p: Package) => void }) {
   const [days, setDays] = useState(initialDuration(pkg));
-  const [picked, setPicked] = useState(false);
   const [popup, setPopup] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const apy = packageApy(pkg, days);
   const price = Number(pkg.price_usd);
-  const perSec = price * apy / 100 / 365 / 86400;
   const perDay = price * dailyRate(apy) / 100;
-  const [ticks, setTicks] = useState(0);
-  useEffect(() => { const t = setInterval(() => setTicks(n => n + 1), 1000); return () => { clearInterval(t); if (timer.current) clearTimeout(timer.current); }; }, []);
   const tier = nftTier(price, days);
   const catalog = useNftCatalog();
   const art = packageArtwork(catalog.data ?? [], index, days, price);
-  const choose = (d: number) => {
-    setDays(d); setPicked(true); setPopup(true);
-    if (timer.current) clearTimeout(timer.current);
-  };
+  const card = valueCard(price) ?? packageCard(pkg.id);
   return <article className={`duration-package tier-tone-${index % 8}`} aria-label={`${pkg.id} package`}>
     <header className="duration-package-head">
       <div><p className="text-xs font-bold">Tier {String(index + 1).padStart(2, '0')}</p><h3 className="mt-1 text-2xl font-bold">{pkg.id}</h3></div>
@@ -38,15 +30,14 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
     <div className="duration-package-body">
       <p className="duration-label">Choose duration</p>
       <div className="duration-options" role="group" aria-label={`${pkg.id} duration`}>
-        {PACKAGE_DURATIONS.map(d => <Button key={d} variant="outline" aria-pressed={days === d} className="duration-option" onClick={() => choose(d)}>{d}D</Button>)}
+        {PACKAGE_DURATIONS.map(d => <Button key={d} variant="outline" aria-pressed={days === d} className="duration-option" onClick={() => setDays(d)}>{d}D</Button>)}
       </div>
-      <div className="mt-3 rounded-xl border border-chart-2/40 bg-chart-2/10 px-3 py-2"><p className="text-[10px] font-bold uppercase text-chart-2">Daily profit</p><p className="numeric mt-1 text-lg font-bold">+{number(dailyRate(apy), { maximumFractionDigits: 3 })}% <small className="text-xs text-muted-foreground">/ day</small> · <span className="text-chart-2">${number(perDay, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</span> <small className="text-xs text-muted-foreground">/ day</small></p></div>
-      <div className="mt-2 grid grid-cols-2 gap-2 text-xs"><div className="rounded-xl border border-border px-3 py-2"><p className="text-[10px] text-muted-foreground">Monthly profit</p><b className="numeric block">{number(monthlyRate(apy), { maximumFractionDigits: 2 })}% · ${number(perDay * 30, { maximumFractionDigits: 2 })}</b></div><div className="rounded-xl border border-border px-3 py-2"><p className="text-[10px] text-muted-foreground">Total ({days} days)</p><b className="numeric block text-chart-3">${number(perDay * days, { maximumFractionDigits: 2 })}</b></div></div>
-      {(() => { const vc = valueCard(price); const card = vc ? { name: vc.name, url: vc.url } : packageCard(pkg.id); if (card) return <button type="button" className="pass-mini" onClick={() => setPopup(true)} aria-label={`Preview ${card.name} NFT`}><img src={card.url} alt={`${card.name} member pass`} loading="lazy"/><span className="text-xs"><b className="block text-chart-3">{card.name} · ${number(price, { maximumFractionDigits: 0 })}</b><span className="numeric text-muted-foreground">Member Pass NFT · {days}D lock</span><span className="block text-[10px] text-muted-foreground">Tap to view</span></span></button>; const sig = nftSignature(price, days); return <button type="button" className="nft-mini" style={{ '--nft-hue': `${sig.hue}deg`, '--nft-boost': String(0.9 + sig.power * 0.06) } as CSSProperties} onClick={() => setPopup(true)} aria-label="Preview NFT certificate"><img src={NFT_ART[tier]} alt="" loading="lazy"/><span className="text-xs"><b className="block text-chart-3">{NFT_NAME[tier]}</b><span className="numeric text-muted-foreground">{tier} · {days}D</span></span></button>; })()}
-      <div className="duration-package-action"><div><p className="text-[10px] text-muted-foreground">Locks USDT for the selected days at today's APY snapshot · projection, not guaranteed</p></div><Button className="duration-stake" onClick={() => { setPopup(false); onStake({ ...pkg, lock_days: days, apy }); }}>Stake now <ArrowUpRight size={18}/></Button></div>
+      <dl className="duration-yield"><div><dt>Daily projection</dt><dd className="numeric">{number(dailyRate(apy), { maximumFractionDigits: 3 })}% · ${number(perDay, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</dd></div><div><dt>Total · {days} days</dt><dd className="numeric">${number(perDay * days, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</dd></div></dl>
+      {(() => { if (card) return <Button variant="ghost" className="pass-mini" onClick={() => setPopup(true)} aria-label={`Preview ${card.name} NFT`}><img src={card.url} alt={`${card.name} member pass`} loading="lazy"/><span className="text-xs"><b className="block text-chart-3">{card.name}</b><span className="text-muted-foreground">Member Pass NFT</span></span></Button>; const sig = nftSignature(price, days); return <Button variant="ghost" className="nft-mini" style={{ '--nft-hue': `${sig.hue}deg`, '--nft-boost': String(0.9 + sig.power * 0.06) } as CSSProperties} onClick={() => setPopup(true)} aria-label="Preview NFT certificate"><img src={NFT_ART[tier]} alt="" loading="lazy"/><span className="text-xs"><b className="block text-chart-3">{NFT_NAME[tier]}</b><span className="text-muted-foreground">In-app certificate</span></span></Button>; })()}
+      <div className="duration-package-action"><Button className="duration-stake" onClick={() => { setPopup(false); onStake({ ...pkg, lock_days: days, apy }); }}>Stake now <ArrowUpRight size={18}/></Button><p className="duration-risk">{days}D lock · APY snapshot · Projection, not guaranteed.</p></div>
     </div>
-    {popup && createPortal(<div className="nft-pop" role="dialog" aria-modal="true" aria-label="Package NFT preview" onClick={() => { setPopup(false); if (timer.current) clearTimeout(timer.current); }}>
-      <div className="relative" onClick={e => e.stopPropagation()}><Button variant="outline" size="icon" className="absolute -right-3 -top-3 z-10" aria-label="Close NFT preview" onClick={() => { setPopup(false); if (timer.current) clearTimeout(timer.current); }}><X/></Button>{(valueCard(price) ?? packageCard(pkg.id)) ? <img src={(valueCard(price) ?? packageCard(pkg.id))!.url} alt="Member pass NFT" className="pass-pop"/> : <NftCard tier={tier} packageId={pkg.id} valueUsd={price} days={days} artworkId={art?.id} imagePath={art?.imagePath} compact/>}</div>
+    {popup && createPortal(<div className="nft-pop" role="dialog" aria-modal="true" aria-label="Package NFT preview" onClick={() => setPopup(false)}>
+      <div className="relative" onClick={e => e.stopPropagation()}><Button variant="outline" size="icon" className="absolute -right-3 -top-3 z-10" aria-label="Close NFT preview" onClick={() => setPopup(false)}><X/></Button>{card ? <img src={card.url} alt="Member pass NFT" className="pass-pop"/> : <NftCard tier={tier} packageId={pkg.id} valueUsd={price} days={days} artworkId={art?.id} imagePath={art?.imagePath} compact/>}</div>
       <p className="nft-pop-note">{valueCard(price)?.name ?? packageCard(pkg.id)?.name ?? art?.name ?? 'Member Pass'} · ${number(price, { maximumFractionDigits: 0 })} · {days}D lock. In-app staking certificate, not a payment card.</p>
     </div>, document.body)}
   </article>;

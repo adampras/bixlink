@@ -1147,10 +1147,18 @@ html[data-color-mode="light"] .site-header { background: color-mix(in oklab, var
 .duration-package .duration-option { width:100%; min-width:0; height:38px; padding:0; border-radius:6px; background:var(--package-control); border-color:var(--package-border); color:var(--package-muted); font-size:11px; font-weight:700; }
 .duration-package .duration-option[aria-pressed="true"] { background:var(--tier-color); border-color:var(--tier-color); color:var(--tier-ink); }
 .duration-package .duration-option:hover { border-color:var(--tier-color); }
-.duration-package-action { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:24px; }
+.duration-package-action { display:grid; grid-template-columns:minmax(0,1fr); gap:8px; margin-top:16px; }
+.duration-yield { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:12px; margin-top:14px; padding-block:12px; border-block:1px solid var(--package-border); }
+.duration-yield > div { min-width:0; }
+.duration-yield dt { color:var(--package-muted); font-size:10px; }
+.duration-yield dd { margin-top:5px; font-size:13px; font-weight:700; overflow-wrap:anywhere; }
+.duration-yield > div:last-child dd { color:color-mix(in oklab,var(--chart-3) 65%,var(--package-ink)); }
+.duration-risk { text-align:center; color:var(--package-muted); font-size:10px; line-height:1.6; }
+.duration-package :is(.pass-mini,.nft-mini) { height:auto; white-space:normal; border-radius:8px; box-shadow:none; }
+.duration-package .pass-mini { padding:8px 0; border:0; background:transparent; }
 .duration-apy { display:block; margin-top:3px; font-size:26px; font-weight:700; color:color-mix(in oklab,var(--tier-color) 64%,var(--package-ink)); }
 .duration-apy small { font-size:10px; }
-.duration-package .duration-stake { height:42px; border-radius:8px; background:var(--tier-color); color:var(--tier-ink); padding-inline:18px; font-size:13px; }
+.duration-package .duration-stake { width:100%; min-width:0; flex-shrink:0; height:46px; border-radius:8px; background:var(--tier-color); color:var(--tier-ink); padding-inline:18px; font-size:13px; }
 .duration-package .duration-stake:hover { filter:brightness(1.08); }
 .duration-package .form-input { background:var(--package-control); color:var(--package-ink); border-color:var(--package-border); border-radius:6px; font-family:'DM Sans',sans-serif; }
 html[data-color-mode="light"] .duration-package { --package-surface:var(--card); --package-ink:var(--foreground); --package-muted:var(--muted-foreground); --package-control:var(--secondary); --package-border:var(--border); --tier-ink:oklch(0.99 0 0); }
@@ -2421,7 +2429,18 @@ html[data-color-mode="light"] .reactor-landing .section-title { color: var(--for
 .coin-stage--vault .coin-pedestal span { border-color: color-mix(in oklab, var(--chart-3) 35%, transparent); animation: coin-ring 3.5s ease-out infinite; }
 .coin-stage--vault .coin-caption strong { color: var(--chart-3); }
 @media (prefers-reduced-motion: reduce) { .coin-stage--vault .coin-3d, .coin-stage--vault .coin-float, .coin-stage--vault .coin-halo { animation: none; } }
-.coin-stage--vault { background-size: cover; background-position: center; border: 1px solid color-mix(in oklab, var(--chart-3) 18%, transparent); }
+.coin-stage--vault { --coin-gold:var(--chart-3); --coin-jade:var(--chart-2); --coin-sapphire:var(--chart-1); --coin-shadow:color-mix(in oklab,var(--foreground) 24%,transparent); isolation:isolate; border:0; border-radius:0; background:transparent; padding:1.5rem 0 1rem; overflow:hidden; }
+.coin-vault-art { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-1; opacity:.68; filter:saturate(.8); mask-image:linear-gradient(transparent, var(--foreground) 22%, var(--foreground) 72%, transparent),linear-gradient(90deg,transparent,var(--foreground) 18%,var(--foreground) 82%,transparent); mask-composite:intersect; }
+.coin-stage--vault::before { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(135deg,color-mix(in oklab,var(--coin-sapphire) 8%,transparent),transparent 45%,color-mix(in oklab,var(--coin-jade) 8%,transparent)); pointer-events:none; }
+.coin-stage--vault .coin-float { width:min(280px,72vw); perspective:1100px; animation:coin-vault-float 8s ease-in-out infinite; }
+.coin-stage--vault .coin-3d { animation:coin-vault-turn 18s linear infinite; transform-origin:center; filter:drop-shadow(0 20px 15px var(--coin-shadow)) drop-shadow(2px 0 1px var(--coin-gold)); }
+.coin-stage--vault .coin-pedestal { width:min(240px,60vw); height:12px; margin-top:0; background:linear-gradient(90deg,transparent,color-mix(in oklab,var(--coin-gold) 24%,transparent),color-mix(in oklab,var(--coin-jade) 16%,transparent),transparent); animation:coin-shadow 8s ease-in-out infinite; }
+.coin-stage--vault .coin-pedestal span { inset:3px 10%; height:1px; border:0; background:linear-gradient(90deg,transparent,var(--coin-gold),transparent); animation:none; }
+.coin-stage--vault .coin-caption { position:relative; letter-spacing:0; line-height:1.8; }
+@keyframes coin-vault-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+@keyframes coin-vault-turn { 0% { transform:rotateY(0deg) rotateZ(-3deg); } 25% { transform:rotateY(90deg) rotateZ(0deg); } 50% { transform:rotateY(180deg) rotateZ(3deg); } 75% { transform:rotateY(270deg) rotateZ(0deg); } 100% { transform:rotateY(360deg) rotateZ(-3deg); } }
+html[data-color-mode="light"] .coin-stage--vault .coin-vault-art { opacity:.2; filter:saturate(.65) brightness(1.7); }
+@media(prefers-reduced-motion:reduce) { .coin-stage--vault :is(.coin-3d,.coin-float,.coin-pedestal) { animation:none; } }
 .hub-strip { scroll-snap-type: x proximity; }
 
 /* Popup auto-fit: any admin image shown whole */
@@ -2451,7 +2470,7 @@ html[data-color-mode="light"] .landing-hero-compact .hero-3d-bg { opacity: .18; 
 html[data-color-mode="light"] .landing-hero-compact .hero-3d-veil { background: linear-gradient(180deg, color-mix(in oklch, var(--background) 82%, transparent), var(--background)); }
 html[data-color-mode="light"] .landing-hero-compact .hero-title { filter: none; }
 html[data-color-mode="light"] .landing-hero-compact .hero-tagline { color: oklch(0.42 0.09 70); }
-html[data-color-mode="light"] .coin-stage--vault { background-image: radial-gradient(ellipse at 50% 45%, oklch(0.97 0.03 90), oklch(0.92 0.03 85)) !important; }
+html[data-color-mode="light"] .coin-stage--vault { background:transparent; }
 html[data-color-mode="light"] .coin-stage--vault .coin-caption span { color: var(--foreground); }
 
 /* Popup precise centering — final override (no transform animations) */
@@ -2478,7 +2497,7 @@ html[data-color-mode="light"] .coin-stage--vault .coin-caption span { color: var
 .auric-head b { font-size:.62rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--muted-foreground); }
 .auric-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.5rem; }
 @media (min-width:768px){ .auric-grid { grid-template-columns:repeat(8,minmax(0,1fr)); } }
-.auric-bar { position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; aspect-ratio:1; min-width:0; border-radius:10px; border:1px solid color-mix(in oklab, var(--au) 35%, var(--border)); background:linear-gradient(150deg, color-mix(in oklab, var(--card) 94%, var(--au)), color-mix(in oklab, var(--background) 92%, transparent)); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--au) 25%, transparent), inset 0 -2px 6px oklch(0 0 0 / 25%); color:var(--muted-foreground); transition: transform .18s, border-color .2s, background .25s; }
+.auric-bar { position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; aspect-ratio:1; height:auto; min-width:0; padding:6px; border-radius:8px; border:1px solid color-mix(in oklab, var(--au) 35%, var(--border)); background:linear-gradient(150deg, color-mix(in oklab, var(--card) 94%, var(--au)), color-mix(in oklab, var(--background) 92%, transparent)); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--au) 25%, transparent), inset 0 -2px 6px oklch(0 0 0 / 25%); color:var(--muted-foreground); transition: transform .18s, border-color .2s, background .25s; }
 .auric-bar span { font-size:.55rem; letter-spacing:.18em; }
 .auric-bar b { font-size:.85rem; color:var(--foreground); white-space:nowrap; }
 .auric-bar small { font-size:.42rem; letter-spacing:.2em; opacity:.7; }
@@ -2488,18 +2507,19 @@ html[data-color-mode="light"] .coin-stage--vault .coin-caption span { color: var
 .auric-bar[aria-selected="true"] b { color:var(--background); }
 .auric-bar[aria-selected="true"] i { animation: auric-sweep 2.8s ease-in-out infinite; }
 @keyframes auric-sweep { 0%,40% { transform:translateX(-120%); } 100% { transform:translateX(120%); } }
-.auric-card { border-radius:1rem; transition: box-shadow .3s; }
+.auric-card { border-radius:8px; transition: box-shadow .3s; }
 .auric-card.is-active { box-shadow: 0 0 0 1px var(--au), 0 10px 30px -14px var(--au); }
 @media (prefers-reduced-motion: reduce){ .auric-bar i { animation:none !important; } }
 /* Auric staking terminal header + luxury stake button */
-.auric-terminal { margin-bottom:1rem; border:1px solid color-mix(in oklab, var(--chart-3) 40%, var(--border)); border-radius:14px; padding:.75rem; background:linear-gradient(160deg, color-mix(in oklab, var(--card) 92%, var(--chart-3)), var(--card)); }
-.auric-terminal-title { text-align:center; font-family:Cinzel, serif; font-weight:700; font-size:.62rem; letter-spacing:.22em; color:var(--chart-3); padding-bottom:.6rem; border-bottom:1px solid color-mix(in oklab, var(--chart-3) 30%, transparent); }
+.auric-terminal { margin-bottom:12px; padding:0; background:transparent; }
+.auric-terminal-title { text-align:center; font-family:var(--font-display); font-weight:700; font-size:10px; letter-spacing:0; color:var(--chart-3); }
 .auric-ingots { margin-top:.6rem; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.4rem; }
 .auric-ingots > div { min-width:0; border-radius:10px; padding:.5rem .4rem; text-align:center; border:1px solid color-mix(in oklab, var(--chart-3) 28%, var(--border)); background:color-mix(in oklab, var(--background) 70%, transparent); box-shadow:inset 0 1px 0 color-mix(in oklab, var(--chart-3) 22%, transparent); }
 .auric-ingots span { display:block; font-size:.5rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted-foreground); }
 .auric-ingots b { display:block; margin-top:2px; font-size:.72rem; color:var(--foreground); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .auric-ingots .is-live b { color:var(--chart-3); animation:auric-pulse 2.4s ease-in-out infinite; }
 @keyframes auric-pulse { 50% { opacity:.65; } }
-.auric-card .duration-stake { position:relative; overflow:hidden; background:linear-gradient(135deg, oklch(.9 .1 88), oklch(.72 .15 70)) !important; color:oklch(.2 .03 70) !important; font-weight:800; letter-spacing:.04em; border:0; }
-.auric-card .duration-stake::after { content:""; position:absolute; inset:0; background:linear-gradient(115deg, transparent 35%, oklch(1 0 0 / 45%) 50%, transparent 65%); transform:translateX(-120%); animation:auric-sweep 3.2s ease-in-out infinite; }
+.auric-stake { --au-highlight:oklch(.9 .1 88); --au-base:oklch(.72 .15 70); --au-ink:oklch(.2 .03 70); --au-sheen:oklch(1 0 0 / 30%); }
+.auric-card .duration-stake { position:relative; overflow:hidden; background:linear-gradient(135deg,var(--au-highlight),var(--au-base)) !important; color:var(--au-ink) !important; font-weight:800; letter-spacing:0; border:0; }
+.auric-card .duration-stake::after { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg, transparent 35%, var(--au-sheen) 50%, transparent 65%); transform:translateX(-120%); animation:auric-sweep 6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce){ .auric-ingots .is-live b, .auric-card .duration-stake::after { animation:none; } }
