@@ -2375,3 +2375,17 @@ html[data-color-mode="light"] .reactor-landing .section-title { color: var(--for
 .social-row { display: flex; justify-content: center; gap: 12px; margin: 0 auto 12px; }
 .social-orb { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: var(--chart-3); border: 1px solid color-mix(in oklab, var(--chart-3) 40%, transparent); background: radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--chart-3) 14%, var(--card)), var(--card)); transition: transform .2s, box-shadow .2s; }
 .social-orb:hover, .social-orb:focus-visible { transform: translateY(-2px); box-shadow: 0 0 18px color-mix(in oklab, var(--chart-3) 35%, transparent); }
+
+/* Highlights hub */
+.hub-strip{display:flex;gap:.6rem;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:.25rem;scrollbar-width:none}
+.hub-strip::-webkit-scrollbar{display:none}
+.hub-card{position:relative;flex:0 0 min(72%,15rem);height:5.6rem;border-radius:1rem;overflow:hidden;scroll-snap-align:start;border:1px solid color-mix(in oklab,var(--hub) 60%,transparent);box-shadow:0 6px 18px -8px var(--hub);transition:transform .2s}
+.hub-card:active{transform:scale(.97)}
+.hub-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hub-shade{position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in oklab,var(--background) 88%,transparent) 0%,color-mix(in oklab,var(--background) 45%,transparent) 60%,transparent)}
+.hub-text{position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:.6rem .8rem;max-width:68%;gap:.1rem}
+.hub-text small{align-self:flex-start;font-size:9px;font-weight:800;letter-spacing:.08em;padding:.05rem .4rem;border-radius:999px;background:var(--hub);color:var(--background)}
+.hub-text b{font-size:13px;line-height:1.15;color:var(--foreground)}
+.hub-text em{font-style:normal;font-size:10px;color:var(--muted-foreground);line-height:1.2}
+.hub-gold{--hub:#FFD700}.hub-emerald{--hub:#10b981}.hub-cyan{--hub:#22d3ee}.hub-violet{--hub:#A855F7}.hub-crimson{--hub:#f43f5e}
+@media (min-width:768px){.hub-card{flex-basis:16rem;height:6.4rem}}

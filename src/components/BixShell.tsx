@@ -129,9 +129,7 @@ const SOCIAL_ICONS: Record<string, string> = {
 };
 const SOCIAL_LABELS: Record<string, string> = { telegram: 'Telegram', x: 'X', youtube: 'YouTube', discord: 'Discord', instagram: 'Instagram' };
 function SocialLinks({ links }: { links?: Partial<Record<string, string>> | undefined }) {
-  const items = Object.keys(SOCIAL_ICONS).filter(k => links?.[k]?.startsWith('https://'));
-  if (!items.length) return null;
-  return <nav aria-label="Official social media" className="social-row">{items.map(k => <a key={k} href={links![k]} target="_blank" rel="noopener noreferrer" aria-label={`BIXLINK on ${SOCIAL_LABELS[k]}`} title={SOCIAL_LABELS[k]} className="social-orb"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden><path d={SOCIAL_ICONS[k]}/></svg></a>)}</nav>;
+  return <nav aria-label="Official social media" className="social-row">{Object.keys(SOCIAL_ICONS).map(k => { const url = links?.[k]; const icon = <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden><path d={SOCIAL_ICONS[k]}/></svg>; return url?.startsWith('https://') ? <a key={k} href={url} target="_blank" rel="noopener noreferrer" aria-label={`BIXLINK on ${SOCIAL_LABELS[k]}`} title={SOCIAL_LABELS[k]} className="social-orb">{icon}</a> : <span key={k} aria-label={`${SOCIAL_LABELS[k]} coming soon`} title={`${SOCIAL_LABELS[k]} · coming soon`} className="social-orb opacity-60">{icon}</span>; })}</nav>;
 }
 
 function ViewSwitch() {

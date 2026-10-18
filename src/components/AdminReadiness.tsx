@@ -1,3 +1,4 @@
+import { HUB_COLORS, HUB_IMAGES, defaultHub, type HubItem } from '@/components/HighlightsHub';
 import { useState } from 'react';
 import { WALLET_SKINS } from '@/lib/wallet-skin';
 import { useServerFn } from '@tanstack/react-start';
@@ -58,6 +59,7 @@ export function AdminReadiness({ initial, onMessage, onSaved }: { initial?: Read
       {(['telegram','x','youtube','discord','instagram'] as const).map(k => <label key={k} className="block text-xs capitalize text-muted-foreground">{k === 'x' ? 'X (Twitter)' : k}<input className="form-input mt-2" type="url" maxLength={200} placeholder="https://" value={socials[k] ?? ''} onChange={event => setSocials({ ...socials, [k]: event.target.value })}/></label>)}
       <Button disabled={busy} type="submit"><Save/> Save links</Button>
     </form>
+    <HubEditor flags={flags} busy={busy} onSave={async next => { setBusy(true); try { await change({ data: { key: 'readiness', value: next } }); setFlags(next); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Highlights hub saved.'); } catch (error) { onMessage(error instanceof Error ? error.message : 'Could not save hub.'); } finally { setBusy(false); } }}/>
     <div className="mt-10 flex items-center justify-between gap-3"><h2 className="font-display text-xl font-bold">Official announcements</h2><Button variant="ghost" size="sm" onClick={() => { setEditing(undefined); setForm(empty); }}><Plus/> New</Button></div>
     <form className="mt-5 space-y-3" onSubmit={async e => { e.preventDefault(); setBusy(true); try { await save({ data: { ...form, ...(editing ? { id: editing } : {}) } }); setEditing(undefined); setForm(empty); await qc.invalidateQueries({ queryKey: ['owner-announcements'] }); await qc.invalidateQueries({ queryKey: ['bix-market-updates'] }); onMessage(form.published ? 'Announcement published.' : 'Draft saved.'); } catch (error) { onMessage(error instanceof Error ? error.message : 'Could not save announcement.'); } finally { setBusy(false); } }}>
       <label className="block text-xs text-muted-foreground">Title<input className="form-input mt-2" aria-label="Announcement title" maxLength={120} required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}/></label>
@@ -103,4 +105,22 @@ function WalletLook({ flags, busy, onSave }: { flags: Readiness; busy: boolean; 
     <h3 className="mt-6 font-display text-lg font-bold">Animasi kotak Wallet · ON / OFF</h3>
     <div className="mt-3 grid gap-2 sm:grid-cols-3">{anims.map(([key, label]) => { const on = flags[key] === true; return <Button key={key} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, [key]: !on })}>{label} · {on ? 'ON' : 'OFF'}</Button>; })}</div>
   </div>;
+}
+
+function HubEditor({ flags, busy, onSave }: { flags: Readiness; busy: boolean; onSave: (next: Readiness) => Promise<void> }) {
+  const [enabled, setEnabled] = useState(flags.hub?.enabled !== false);
+  const [items, setItems] = useState<HubItem[]>(flags.hub?.items?.length ? flags.hub.items : defaultHub);
+  const set = (i: number, patch: Partial<HubItem>) => setItems(items.map((it, n) => n === i ? { ...it, ...patch } : it));
+  return <form className="mt-8 space-y-3 border-b border-border pb-6" onSubmit={e => { e.preventDefault(); void onSave({ ...flags, hub: { enabled, items } }); }}>
+    <div className="flex items-center justify-between gap-3"><h3 className="font-display text-lg font-bold">Highlights hub</h3><Button type="button" size="sm" variant={enabled ? 'default' : 'outline'} onClick={() => setEnabled(!enabled)}>{enabled ? 'ON' : 'OFF'}</Button></div>
+    <p className="text-xs text-muted-foreground">Colorful cards above landing, HOME and Market. Link: app path (/stake) or https://</p>
+    {items.map((it, i) => <div key={i} className="space-y-2 rounded-lg border border-border p-3">
+      <div className="grid grid-cols-2 gap-2"><input className="form-input" maxLength={40} placeholder="Title" value={it.title} onChange={e => set(i, { title: e.target.value })}/><input className="form-input" maxLength={16} placeholder="Tag" value={it.tag} onChange={e => set(i, { tag: e.target.value })}/></div>
+      <input className="form-input" maxLength={60} placeholder="Short info" value={it.body} onChange={e => set(i, { body: e.target.value })}/>
+      <input className="form-input" maxLength={200} placeholder="/presale" value={it.href} onChange={e => set(i, { href: e.target.value })}/>
+      <div className="grid grid-cols-2 gap-2"><select className="form-input" value={it.color} onChange={e => set(i, { color: e.target.value as HubItem['color'] })}>{HUB_COLORS.map(c => <option key={c}>{c}</option>)}</select><select className="form-input" value={it.image} onChange={e => set(i, { image: e.target.value as HubItem['image'] })}>{Object.keys(HUB_IMAGES).map(c => <option key={c}>{c}</option>)}</select></div>
+      <div className="flex gap-2"><Button type="button" size="sm" variant="outline" onClick={() => set(i, { enabled: it.enabled === false })}>{it.enabled === false ? 'Hidden' : 'Visible'}</Button><Button type="button" size="sm" variant="ghost" onClick={() => setItems(items.filter((_, n) => n !== i))}>Remove</Button></div>
+    </div>)}
+    <div className="flex gap-2">{items.length < 8 && <Button type="button" variant="outline" onClick={() => setItems([...items, { title: 'New info', tag: 'INFO', body: '', color: 'gold', image: 'launch', href: '/' }])}><Plus/> Add card</Button>}<Button disabled={busy} type="submit"><Save/> Save hub</Button></div>
+  </form>;
 }
