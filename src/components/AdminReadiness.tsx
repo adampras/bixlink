@@ -28,6 +28,7 @@ export function AdminReadiness({ initial, onMessage, onSaved }: { initial?: Read
   const [editing, setEditing] = useState<string | undefined>();
   const [form, setForm] = useState(empty);
   const [footer, setFooter] = useState({ title: flags.footerTitle, body: flags.footerBody, contact: flags.footerContact });
+  const [socials, setSocials] = useState<Record<string, string>>({ ...flags.socials });
   const change = useServerFn(updateSetting);
   const list = useServerFn(getOwnerAnnouncements);
   const save = useServerFn(saveAnnouncement);
@@ -50,6 +51,12 @@ export function AdminReadiness({ initial, onMessage, onSaved }: { initial?: Read
       <label className="block text-xs text-muted-foreground">Description<textarea className="form-input mt-2 min-h-24" maxLength={320} value={footer.body} onChange={event => setFooter({ ...footer, body: event.target.value })}/></label>
       <label className="block text-xs text-muted-foreground">Contact line<input className="form-input mt-2" maxLength={120} value={footer.contact} onChange={event => setFooter({ ...footer, contact: event.target.value })}/></label>
       <Button disabled={busy} type="submit"><Save/> Save footer</Button>
+    </form>
+    <form className="mt-8 space-y-3 border-b border-border pb-6" onSubmit={async event => { event.preventDefault(); const next = { ...flags, socials: Object.fromEntries(Object.entries(socials).map(([k, v]) => [k, v.trim()])) }; setBusy(true); try { await change({ data: { key: 'readiness', value: next } }); setFlags(next); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Social links saved.'); } catch (error) { onMessage(error instanceof Error ? error.message : 'Could not save links.'); } finally { setBusy(false); } }}>
+      <h3 className="font-display text-lg font-bold">Social media links</h3>
+      <p className="text-xs text-muted-foreground">Shown at the bottom of landing and member pages. Empty = hidden. Must start with https://</p>
+      {(['telegram','x','youtube','discord','instagram'] as const).map(k => <label key={k} className="block text-xs capitalize text-muted-foreground">{k === 'x' ? 'X (Twitter)' : k}<input className="form-input mt-2" type="url" maxLength={200} placeholder="https://" value={socials[k] ?? ''} onChange={event => setSocials({ ...socials, [k]: event.target.value })}/></label>)}
+      <Button disabled={busy} type="submit"><Save/> Save links</Button>
     </form>
     <div className="mt-10 flex items-center justify-between gap-3"><h2 className="font-display text-xl font-bold">Official announcements</h2><Button variant="ghost" size="sm" onClick={() => { setEditing(undefined); setForm(empty); }}><Plus/> New</Button></div>
     <form className="mt-5 space-y-3" onSubmit={async e => { e.preventDefault(); setBusy(true); try { await save({ data: { ...form, ...(editing ? { id: editing } : {}) } }); setEditing(undefined); setForm(empty); await qc.invalidateQueries({ queryKey: ['owner-announcements'] }); await qc.invalidateQueries({ queryKey: ['bix-market-updates'] }); onMessage(form.published ? 'Announcement published.' : 'Draft saved.'); } catch (error) { onMessage(error instanceof Error ? error.message : 'Could not save announcement.'); } finally { setBusy(false); } }}>
@@ -89,6 +96,7 @@ function WalletLook({ flags, busy, onSave }: { flags: Readiness; busy: boolean; 
     <h3 className="font-display text-lg font-bold">Model kotak saldo Wallet</h3>
     <p className="mt-1 text-xs text-muted-foreground">ON = kartu metal Sovereign. OFF = desain lama (Classic Vault).</p>
     <Button size="sm" variant="outline" disabled={busy} aria-pressed={flags.walletCard === true} className={`mt-3 ${flags.walletCard ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'}`} onClick={() => onSave({ ...flags, walletCard: !flags.walletCard })}>Sovereign Metal Card · {flags.walletCard ? 'ON' : 'OFF'}</Button>
+    {flags.walletCard && <><p className="mt-4 text-xs text-muted-foreground">Warna solid Sovereign Card:</p><div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">{([['onyx','Obsidian Onyx'],['gold','Royal Gold'],['sapphire','Deep Sapphire'],['emerald','Imperial Emerald'],['ruby','Crimson Ruby']] as const).map(([id,label]) => { const on = (flags.walletCardColor ?? 'onyx') === id; return <Button key={id} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, walletCardColor: id })}><span className="sov-swatch" data-sov-color={id} aria-hidden/>{label}</Button>; })}</div></>}
     <h3 className="mt-6 font-display text-lg font-bold">5 warna kotak saldo Wallet</h3>
     <p className="mt-1 text-xs text-muted-foreground">Only the Wallet balance box changes. 1 color on = fixed. 2–5 on = changes automatically every 24 hours.</p>
     <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">{WALLET_SKINS.map(skin => { const on = colors.includes(skin.id); return <Button key={skin.id} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, walletColors: on ? colors.filter(c => c !== skin.id) : [...colors, skin.id] })}><span className="wallet-swatch" data-skin={skin.id} aria-hidden/>{skin.label} · {on ? 'ON' : 'OFF'}</Button>; })}</div>
