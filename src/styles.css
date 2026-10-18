@@ -2453,3 +2453,13 @@ html[data-color-mode="light"] .landing-hero-compact .hero-title { filter: none; 
 html[data-color-mode="light"] .landing-hero-compact .hero-tagline { color: oklch(0.42 0.09 70); }
 html[data-color-mode="light"] .coin-stage--vault { background-image: radial-gradient(ellipse at 50% 45%, oklch(0.97 0.03 90), oklch(0.92 0.03 85)) !important; }
 html[data-color-mode="light"] .coin-stage--vault .coin-caption span { color: var(--foreground); }
+
+/* Popup precise centering — final override (no transform animations) */
+.site-popup, .site-popup.zoom-dialog { position:fixed !important; inset:0 !important; margin:auto !important; transform:none !important; translate:none !important; scale:none !important; width:min(500px, calc(100vw - 24px)) !important; max-width:none !important; height:fit-content !important; max-height:calc(100dvh - 32px) !important; overflow-y:auto; }
+.site-popup[data-state], .site-popup.zoom-dialog[data-state] { animation:popup-fade .2s ease-out !important; }
+@keyframes popup-fade { from { opacity:0 } to { opacity:1 } }
+.studio-canvas { width:100%; height:auto; border-radius:12px; border:1px solid color-mix(in oklab, var(--chart-3) 45%, var(--border)); }
+.studio-stage { aspect-ratio:16/9; display:grid; place-items:center; text-align:center; padding:6%; border-radius:14px; background:radial-gradient(circle at 50% 30%, color-mix(in oklab, var(--chart-3) 22%, var(--background)), var(--background) 70%); border:1px solid color-mix(in oklab, var(--chart-3) 45%, var(--border)); overflow:hidden; }
+.studio-stage:fullscreen { border-radius:0; border:0; }
+.studio-line { animation:studio-in .7s ease-out both; }
+@keyframes studio-in { from { opacity:0; letter-spacing:.3em } to { opacity:1 } }
