@@ -2305,3 +2305,23 @@ html[data-color-mode="light"] .reactor-landing .section-title { color: var(--for
 .coin-caption strong { color: var(--primary); }
 @keyframes coin-rotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
 @media (prefers-reduced-motion: reduce) { .coin-spin { animation: none; } }
+/* Official 3D coin showcase */
+.coin-stage--lux { padding: 1.5rem 1rem 1.25rem; border-color: color-mix(in oklab, var(--chart-3) 35%, transparent); background: radial-gradient(ellipse at 50% 40%, color-mix(in oklab, var(--chart-3) 16%, transparent), transparent 62%), oklch(0.08 0.005 80); }
+.coin-stage--lux .coin-halo { top: 14%; background: radial-gradient(circle, color-mix(in oklab, var(--chart-3) 30%, transparent), transparent 68%); animation: coin-halo-pulse 4.5s ease-in-out infinite; }
+.coin-beam { position: absolute; top: -10%; left: 50%; width: 70%; height: 80%; transform: translateX(-50%); background: linear-gradient(180deg, color-mix(in oklab, var(--chart-3) 22%, transparent), transparent 80%); clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%); filter: blur(14px); pointer-events: none; }
+.coin-dust { position: absolute; inset: 0; pointer-events: none; }
+.coin-dust i { position: absolute; bottom: 18%; width: 3px; height: 3px; border-radius: 50%; background: var(--chart-3); opacity: 0; animation: coin-dust-rise 7s linear infinite; }
+.coin-float { position: relative; width: min(240px, 62vw); aspect-ratio: 1; border-radius: 50%; animation: coin-levitate 6s ease-in-out infinite; perspective: 900px; }
+.coin-3d { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: lighten; filter: drop-shadow(0 20px 30px oklch(0 0 0 / 60%)) saturate(1.08); }
+.coin-sheen { position: absolute; inset: 8% 18%; border-radius: 50%; overflow: hidden; pointer-events: none; mix-blend-mode: screen; }
+.coin-sheen::after { content: ''; position: absolute; top: -20%; left: -60%; width: 40%; height: 140%; transform: rotate(18deg); background: linear-gradient(90deg, transparent, oklch(1 0.05 90 / 55%), transparent); animation: coin-sheen-sweep 5s ease-in-out infinite; }
+.coin-stage--lux .coin-pedestal { position: relative; margin-top: .25rem; background: radial-gradient(ellipse, color-mix(in oklab, var(--chart-3) 40%, transparent), transparent 70%); border-top-color: color-mix(in oklab, var(--chart-3) 55%, transparent); animation: coin-shadow 6s ease-in-out infinite; }
+.coin-pedestal span { position: absolute; inset: -6px 15%; border-radius: 50%; border: 1px solid color-mix(in oklab, var(--chart-3) 45%, transparent); animation: coin-ring 3s ease-out infinite; }
+.coin-stage--lux .coin-caption strong { color: var(--chart-3); }
+@keyframes coin-levitate { 0%,100% { transform: translateY(0) rotateY(-8deg) rotateZ(-1deg); } 50% { transform: translateY(-12px) rotateY(10deg) rotateZ(1deg); } }
+@keyframes coin-shadow { 0%,100% { transform: scaleX(1); opacity: .9; } 50% { transform: scaleX(.82); opacity: .55; } }
+@keyframes coin-sheen-sweep { 0%,55% { left: -60%; } 85%,100% { left: 130%; } }
+@keyframes coin-halo-pulse { 0%,100% { opacity: .7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+@keyframes coin-ring { from { transform: scale(.7); opacity: .9; } to { transform: scale(1.25); opacity: 0; } }
+@keyframes coin-dust-rise { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .8; } 100% { transform: translateY(-220px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .coin-float, .coin-sheen::after, .coin-dust i, .coin-pedestal span, .coin-stage--lux .coin-halo, .coin-stage--lux .coin-pedestal { animation: none; } }
