@@ -183,13 +183,14 @@ function MediaPlayer() {
   );
 }
 
-function wrap(g: CanvasRenderingContext2D, text: string, x: number, y: number, max: number, lh: number) {
+function wrap(g: CanvasRenderingContext2D, text: string, x: number, y: number, max: number, lh: number): number {
   const words = text.split(" "); let line = ""; let yy = y;
   for (const w of words) {
     const t = line ? line + " " + w : w;
     if (g.measureText(t).width > max && line) { g.fillText(line, x, yy); line = w; yy += lh; } else line = t;
   }
   g.fillText(line, x, yy);
+  return yy;
 }
 
 function PresentationMaker() {
@@ -240,7 +241,7 @@ function PresentationMaker() {
 
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
-      <h2 className="font-bold text-primary">2 · Presentasi bersuara dari teks panjang</h2>
+      <h2 className="font-bold text-primary">3 · Presentasi bersuara dari teks panjang</h2>
       <p className="text-xs text-muted-foreground">Tempel naskah webinar. Setiap kalimat jadi satu slide yang dibacakan narator dengan musik latar lembut. Putar layar penuh lalu bagikan layar di BIXZOOM. Tanpa biaya kredit.</p>
       <Textarea rows={8} value={text} onChange={(e) => setText(e.target.value)} maxLength={20000} placeholder="Tempel naskah webinar di sini..." />
       <div className="flex flex-wrap gap-2">
