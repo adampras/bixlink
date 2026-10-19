@@ -124,3 +124,25 @@ export const saveReviewerPermissions = createServerFn({ method: 'POST' }).middle
     if (error) throw error;
     return readPermissions();
   });
+
+// Owner-only turnover report: approved USDT deposits/withdrawals per sub-owner network vs whole platform.
+export const getOwnerTurnover = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await verifyOwner(context);
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const [roles, refs, txs, clones] = await Promise.all([
+    supabaseAdmin.from('user_roles').select('user_id').eq('role', 'reviewer'),
+    supabaseAdmin.from('referral_codes').select('user_id,referred_by,code'),
+    supabaseAdmin.from('wallet_transactions').select('user_id,type,amount_usd,status').in('type', ['deposit', 'withdraw']).eq('status', 'approved').limit(20000),
+    supabaseAdmin.from('bix_clone_accounts').select('user_id'),
+  ]);
+  const cloneSet = new Set((clones.data ?? []).map(c => c.user_id));
+  const kids = new Map<string, string[]>();
+  for (const r of refs.data ?? []) if (r.referred_by) kids.set(r.referred_by, [...(kids.get(r.referred_by) ?? []), r.user_id]);
+  const sum = (ids: Set<string> | null) => { let dep = 0, wd = 0, n = 0; for (const t of txs.data ?? []) { if (cloneSet.has(t.user_id) || (ids && !ids.has(t.user_id))) continue; if (t.type === 'deposit') { dep += Number(t.amount_usd); n++; } else wd += Number(t.amount_usd); } return { deposit: dep, withdraw: wd, count: n }; };
+  const owners = (roles.data ?? []).map(({ user_id }) => {
+    const seen = new Set<string>(); const stack = [...(kids.get(user_id) ?? [])];
+    while (stack.length) { const id = stack.pop()!; if (seen.has(id)) continue; seen.add(id); stack.push(...(kids.get(id) ?? [])); }
+    return { userId: user_id, code: (refs.data ?? []).find(r => r.user_id === user_id)?.code ?? '—', members: seen.size, ...sum(seen) };
+  });
+  return { total: sum(null), owners };
+});
