@@ -6,6 +6,7 @@ import builder from '@/assets/cards/card-builder.png.asset.json';
 import guardian from '@/assets/cards/card-guardian.png.asset.json';
 import titan from '@/assets/cards/card-titan.png.asset.json';
 import legend from '@/assets/cards/card-legend.png.asset.json';
+import platinum from '@/assets/cards/card-platinum-7000.png.asset.json';
 
 /** Member pass card artwork per staking package ($10–$10,000). */
 export const PACKAGE_CARDS: Record<string, { name: string; url: string }> = {
@@ -16,6 +17,7 @@ export const PACKAGE_CARDS: Record<string, { name: string; url: string }> = {
   BUILDER: { name: 'Builder Tier', url: builder.url },
   GUARDIAN: { name: 'Guardian VIP', url: guardian.url },
   TITAN: { name: 'Titan Elite', url: titan.url },
+  PLATINUM: { name: 'Platinum Prestige', url: platinum.url },
   LEGEND: { name: 'Sovereign Legend', url: legend.url },
 };
 export const packageCard = (id?: string | null) => (id ? PACKAGE_CARDS[id.toUpperCase()] : undefined);
