@@ -28,65 +28,157 @@ function Studio() {
         <p className="text-sm text-muted-foreground">Banner promosi webinar dan presentasi bersuara untuk BIXZOOM. Gratis, dibuat langsung di perangkat Anda.</p>
       </header>
       <BannerMaker />
+      <MediaPlayer />
       <PresentationMaker />
     </main>
   );
 }
 
+const TEMPLATES = {
+  onyx: { name: "Obsidian Onyx Gold", bg: ["#2a2210", "#0b0a08", "#000"], accent: ["#fff1b8", "#ffd700", "#a67c00"], sub: "#e9d9a6" },
+  sapphire: { name: "Cyber Sapphire", bg: ["#0d2a5c", "#071330", "#02060f"], accent: ["#e0f0ff", "#7cc4ff", "#2f6fd6"], sub: "#bcd8ff" },
+  emerald: { name: "Imperial Emerald", bg: ["#0f4a33", "#062218", "#010a06"], accent: ["#fff1b8", "#ffd700", "#a67c00"], sub: "#b7f0d2" },
+  ruby: { name: "Ruby VIP", bg: ["#5c0d1e", "#2a050d", "#0a0103"], accent: ["#fff1b8", "#ffd700", "#a67c00"], sub: "#ffc9d3" },
+  titanium: { name: "Minimalist Titanium", bg: ["#3a3d42", "#1b1d20", "#0b0c0d"], accent: ["#ffffff", "#d7dbe0", "#8b9097"], sub: "#d7dbe0" },
+} as const;
+type TplKey = keyof typeof TEMPLATES;
+
+const loadImg = (src: string) => new Promise<HTMLImageElement | null>((res) => {
+  const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src;
+});
+
 function BannerMaker() {
   const ref = useRef<HTMLCanvasElement>(null);
-  const [f, setF] = useState({ title: "BIXZOOM Global Webinar", date: "Sunday, 25 Oct 2026", time: "20:00 WITA", speaker: "BIXLINK Leadership", size: "1080" });
+  const [f, setF] = useState({ title: "BIXZOOM Global Webinar", subtitle: "BIXZOOM ROOM · LIVE WEBINAR", date: "Sunday, 25 Oct 2026", time: "20:00 WITA", speaker: "BIXLINK Leadership", size: "1080", tpl: "onyx" as TplKey, align: "center", dim: "55" });
+  const [bgUrl, setBgUrl] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value });
+  const pick = (cb: (u: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (file) cb(URL.createObjectURL(file));
+  };
 
   useEffect(() => {
-    const c = ref.current; if (!c) return;
-    const w = f.size === "1080" ? 1080 : 1920, h = 1080;
-    c.width = w; c.height = h;
-    const g = c.getContext("2d")!;
-    const bg = g.createRadialGradient(w / 2, h * 0.3, 50, w / 2, h / 2, w);
-    bg.addColorStop(0, "#2a2210"); bg.addColorStop(0.6, "#0b0a08"); bg.addColorStop(1, "#000");
-    g.fillStyle = bg; g.fillRect(0, 0, w, h);
-    const gold = g.createLinearGradient(0, 0, 0, h);
-    gold.addColorStop(0, "#fff1b8"); gold.addColorStop(0.5, "#ffd700"); gold.addColorStop(1, "#a67c00");
-    g.strokeStyle = gold; g.lineWidth = 6; g.strokeRect(30, 30, w - 60, h - 60);
-    g.lineWidth = 1.5; g.strokeRect(48, 48, w - 96, h - 96);
-    const img = new Image(); img.src = fox;
-    const draw = () => {
-      g.drawImage(img, w / 2 - 90, 110, 180, 180);
-      g.textAlign = "center"; g.fillStyle = gold;
-      g.font = "900 44px Cinzel, serif"; g.fillText("BIXLINK", w / 2, 350);
-      g.font = "700 26px sans-serif"; g.fillStyle = "#e9d9a6"; g.fillText("BIXZOOM ROOM · LIVE WEBINAR", w / 2, 400);
+    let alive = true;
+    (async () => {
+      const c = ref.current; if (!c) return;
+      const w = f.size === "1080" ? 1080 : f.size === "story" ? 1080 : 1920, h = f.size === "story" ? 1920 : 1080;
+      const t = TEMPLATES[f.tpl];
+      const [bgImg, logo] = await Promise.all([bgUrl ? loadImg(bgUrl) : null, loadImg(logoUrl ?? fox)]);
+      if (!alive) return;
+      c.width = w; c.height = h;
+      const g = c.getContext("2d")!;
+      const bg = g.createRadialGradient(w / 2, h * 0.3, 50, w / 2, h / 2, Math.max(w, h));
+      bg.addColorStop(0, t.bg[0]); bg.addColorStop(0.6, t.bg[1]); bg.addColorStop(1, t.bg[2]);
+      g.fillStyle = bg; g.fillRect(0, 0, w, h);
+      if (bgImg) {
+        const s = Math.max(w / bgImg.width, h / bgImg.height);
+        g.drawImage(bgImg, (w - bgImg.width * s) / 2, (h - bgImg.height * s) / 2, bgImg.width * s, bgImg.height * s);
+        g.fillStyle = `rgba(0,0,0,${Number(f.dim) / 100})`; g.fillRect(0, 0, w, h);
+      }
+      const gold = g.createLinearGradient(0, 0, 0, h);
+      gold.addColorStop(0, t.accent[0]); gold.addColorStop(0.5, t.accent[1]); gold.addColorStop(1, t.accent[2]);
+      g.strokeStyle = gold; g.lineWidth = 6; g.strokeRect(30, 30, w - 60, h - 60);
+      g.lineWidth = 1.5; g.strokeRect(48, 48, w - 96, h - 96);
+      const align = f.align as CanvasTextAlign;
+      const x = align === "left" ? 110 : w / 2;
+      const top = h === 1920 ? 360 : 110;
+      if (logo) {
+        const ls = 170, lw = ls * (logo.width / logo.height || 1);
+        g.drawImage(logo, align === "left" ? x : x - lw / 2, top, lw, ls);
+      }
+      g.textAlign = align; g.fillStyle = gold;
+      g.font = "900 44px Cinzel, serif"; g.fillText("BIXLINK", x, top + 240);
+      g.font = "700 26px sans-serif"; g.fillStyle = t.sub; g.fillText(f.subtitle.toUpperCase(), x, top + 290);
       g.fillStyle = gold; g.font = `900 ${w > 1080 ? 92 : 74}px Cinzel, serif`;
-      wrap(g, f.title.toUpperCase(), w / 2, 540, w - 180, w > 1080 ? 100 : 82);
+      const endY = wrap(g, f.title.toUpperCase(), x, top + 430, w - 220, w > 1080 ? 100 : 82);
       g.fillStyle = "#fff"; g.font = "600 40px sans-serif";
-      g.fillText(`${f.date} · ${f.time}`, w / 2, 820);
-      g.fillStyle = "#e9d9a6"; g.font = "500 32px sans-serif"; g.fillText(`Speaker: ${f.speaker}`, w / 2, 880);
-      g.font = "400 20px sans-serif"; g.fillStyle = "#9b8a5a";
+      g.fillText(`${f.date} · ${f.time}`, x, endY + 140);
+      g.fillStyle = t.sub; g.font = "500 32px sans-serif"; g.fillText(`Speaker: ${f.speaker}`, x, endY + 200);
+      g.textAlign = "center"; g.font = "400 20px sans-serif"; g.fillStyle = t.sub;
       g.fillText("© BIXLINK · Informational event. Not financial advice.", w / 2, h - 80);
-    };
-    if (img.complete) draw(); else img.onload = draw;
-  }, [f]);
+    })();
+    return () => { alive = false; };
+  }, [f, bgUrl, logoUrl]);
 
   const download = () => {
     const a = document.createElement("a");
     a.href = ref.current!.toDataURL("image/png"); a.download = "bixzoom-banner.png"; a.click();
   };
+  const sel = "h-10 rounded-md border border-input bg-background px-3 text-sm";
 
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
-      <h2 className="font-bold text-primary">1 · Banner promosi webinar</h2>
+      <h2 className="font-bold text-primary">1 · Banner Studio Pro</h2>
       <div className="grid gap-2 sm:grid-cols-2">
-        <Input value={f.title} onChange={set("title")} placeholder="Judul webinar" maxLength={60} />
+        <Input value={f.title} onChange={set("title")} placeholder="Judul" maxLength={80} />
+        <Input value={f.subtitle} onChange={set("subtitle")} placeholder="Sub-judul" maxLength={50} />
         <Input value={f.speaker} onChange={set("speaker")} placeholder="Pembicara" maxLength={40} />
         <Input value={f.date} onChange={set("date")} placeholder="Tanggal" maxLength={40} />
         <Input value={f.time} onChange={set("time")} placeholder="Jam" maxLength={30} />
-        <select value={f.size} onChange={set("size")} className="h-10 rounded-md border border-input bg-background px-3 text-sm">
-          <option value="1080">1080×1080 (Instagram/WhatsApp)</option>
-          <option value="1920">1920×1080 (YouTube/X)</option>
+        <select value={f.tpl} onChange={set("tpl")} className={sel}>
+          {Object.entries(TEMPLATES).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}
         </select>
+        <select value={f.size} onChange={set("size")} className={sel}>
+          <option value="1080">1080×1080 (Instagram/WhatsApp)</option>
+          <option value="1920">1920×1080 (YouTube/Zoom)</option>
+          <option value="story">1080×1920 (Story/Status)</option>
+        </select>
+        <select value={f.align} onChange={set("align")} className={sel}>
+          <option value="center">Teks di tengah</option>
+          <option value="left">Teks rata kiri</option>
+        </select>
+        <label className="text-xs text-muted-foreground">Foto latar
+          <input type="file" accept="image/*" onChange={pick(setBgUrl)} className="mt-1 block w-full text-xs" />
+        </label>
+        <label className="text-xs text-muted-foreground">Logo / foto sendiri
+          <input type="file" accept="image/*" onChange={pick(setLogoUrl)} className="mt-1 block w-full text-xs" />
+        </label>
+        {bgUrl && <label className="text-xs text-muted-foreground sm:col-span-2">Gelapkan foto latar ({f.dim}%)
+          <input type="range" min="0" max="85" value={f.dim} onChange={set("dim")} className="block w-full" />
+        </label>}
       </div>
       <canvas ref={ref} className="studio-canvas" />
-      <Button onClick={download} className="w-full">Download PNG</Button>
+      <Button onClick={download} className="w-full">Download HD PNG</Button>
+    </section>
+  );
+}
+
+function MediaPlayer() {
+  const [video, setVideo] = useState("");
+  const [music, setMusic] = useState("");
+  const [vol, setVol] = useState(0.25);
+  const v = useRef<HTMLVideoElement>(null);
+  const a = useRef<HTMLAudioElement>(null);
+  const file = (cb: (u: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (f) cb(URL.createObjectURL(f));
+  };
+  useEffect(() => { if (a.current) a.current.volume = vol; }, [vol, music]);
+  const play = () => { v.current?.play().catch(() => {}); a.current?.play().catch(() => {}); };
+  const pause = () => { v.current?.pause(); a.current?.pause(); };
+  return (
+    <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
+      <h2 className="font-bold text-primary">2 · Pemutar video & musik presentasi</h2>
+      <p className="text-xs text-muted-foreground">Pakai video presentasi jadi (MP4) dan musik latar (MP3) rekaman asli — tanpa suara robot. Unggah dari perangkat atau tempel link langsung file (https).</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <label className="text-xs text-muted-foreground">Video MP4
+          <input type="file" accept="video/*" onChange={file(setVideo)} className="mt-1 block w-full text-xs" />
+        </label>
+        <label className="text-xs text-muted-foreground">Musik MP3
+          <input type="file" accept="audio/*" onChange={file(setMusic)} className="mt-1 block w-full text-xs" />
+        </label>
+        <Input placeholder="atau link video https://...mp4" onBlur={(e) => e.target.value.startsWith("https://") && setVideo(e.target.value)} />
+        <Input placeholder="atau link musik https://...mp3" onBlur={(e) => e.target.value.startsWith("https://") && setMusic(e.target.value)} />
+      </div>
+      {video ? <video ref={v} src={video} controls playsInline className="w-full rounded-xl bg-background" /> : <div className="studio-stage"><img src={fox} alt="" className="mx-auto h-14 w-14" /></div>}
+      {music && <audio ref={a} src={music} loop />}
+      <div className="flex flex-wrap items-center gap-2">
+        <Button onClick={play} disabled={!video && !music}>▶ Putar bersama</Button>
+        <Button variant="outline" onClick={pause}>❚❚ Jeda</Button>
+        <Button variant="outline" onClick={() => v.current?.requestFullscreen?.()} disabled={!video}>Layar penuh</Button>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">Musik
+          <input type="range" min="0" max="1" step="0.05" value={vol} onChange={(e) => setVol(Number(e.target.value))} />
+        </label>
+      </div>
     </section>
   );
 }
