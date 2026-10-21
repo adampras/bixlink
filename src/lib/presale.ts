@@ -1,7 +1,7 @@
 import type { StrategySettings } from './presale-strategy';
 
 export type PresalePackage = { usd: number; bix: number; releaseDays: number };
-export type PresaleConfig = { enabled: boolean; sponsorPct: number; poolCap: number; packages: PresalePackage[]; strategies?: StrategySettings; sovereign?: SovereignConfig };
+export type PresaleConfig = { enabled: boolean; sponsorPct: number; poolCap: number; packages: PresalePackage[]; strategies?: StrategySettings; sovereign?: SovereignConfig; stages?: { price: number }[]; activeStage?: number };
 export type SovereignConfig = { enabled: boolean; usd: number; bix: number; releaseDays: number; slots: number };
 
 /** Linear mining-style release of locked presale BIX. Display-only: not spendable balance. */
