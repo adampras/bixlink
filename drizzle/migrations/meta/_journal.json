@@ -449,6 +449,13 @@
       "when": 1792329334338,
       "tag": "0063_bixzoom_room",
       "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1792567861423,
+      "tag": "0064_per_owner_reviewer_permissions",
+      "breakpoints": true
     }
   ]
 }
