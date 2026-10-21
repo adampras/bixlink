@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowUpRight, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowUpRight } from 'lucide-react';
 import { money } from '@/lib/bixlink';
 import { resolveMovement, simulatedQuote, simulationHistory } from '@/lib/internal-market';
 import { CryptoIcon } from '@/components/CryptoIcon';
@@ -22,7 +21,6 @@ export function InternalMarket({ reference, movement, serverNow }: { reference: 
     <div className="internal-market-status"><i className={config?.enabled ? 'bg-chart-2' : 'bg-muted-foreground'}/>{config ? `${config.enabled ? 'RUNNING' : 'PAUSED'} · ${config.intervalSeconds}s steps` : 'MOVEMENT OFF'}</div>
     <div className="internal-market-chart"><svg viewBox="0 0 550 160" role="img" aria-label="Simulated internal reference history"><path d="M20 20H460 M20 75H460 M20 130H460" className="internal-chart-grid"/><text x="470" y="24">{high.toFixed(6)}</text><text x="470" y="79">{((high + low) / 2).toFixed(6)}</text><text x="470" y="134">{low.toFixed(6)}</text>{history.length > 1 ? <polyline points={points} className="internal-chart-line"/> : <path d="M20 75H460" className="internal-chart-line"/>}<text x="20" y="154">{history.length ? new Date(history[0]?.time ?? now).toISOString().slice(11,19) : 'No simulated history'}</text>{history.length > 1 && <text x="365" y="154">{new Date(history.at(-1)?.time ?? now).toISOString().slice(11,19)} UTC</text>}</svg></div>
     <div className="internal-market-stats"><div><span>FIXED SUPPLY</span><b>21.0M BIX</b></div><div><span>DEV BUYBACK · LOCKED</span><b>$0.350000</b></div><div><span>IMPLIED SIMULATED VALUE</span><b>{money(price * 21_000_000, { notation: 'compact' })}</b></div></div>
-    <p className="internal-market-notice"><ShieldCheck size={16}/>Admin-controlled simulation, not exchange trading. Selling BIX to the dev is locked at $0.350000 per BIX; member-to-member pricing is free. Swap and reward calculations still use the owner-set ledger reference of ${reference.toFixed(6)}.</p>
-    <Button asChild className="internal-market-action"><Link to="/wallet">Open internal swap <ArrowUpRight size={16}/></Link></Button>
+    <div className="internal-market-trade"><Link to="/p2p" className="is-buy">BELI BIX <ArrowUpRight size={16}/></Link><Link to="/p2p" className="is-sell">JUAL BIX <ArrowUpRight size={16}/></Link></div>
   </div>;
 }

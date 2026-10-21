@@ -2575,3 +2575,17 @@ html[data-color-mode="light"] .reactor-landing .section-title span { background-
 html[data-color-mode="light"] .landing-hero-compact .hero-3d-bg { display: block !important; opacity: .42; filter: saturate(.85) brightness(1.25) contrast(1.05); }
 html[data-color-mode="light"] .landing-hero-compact .hero-3d-veil { background: radial-gradient(ellipse at 50% 40%, color-mix(in oklch, var(--background) 30%, transparent), color-mix(in oklch, var(--background) 70%, transparent) 80%); backdrop-filter: none; }
 .reactor-landing .hero-section { border-bottom: 1px solid transparent; border-image: linear-gradient(90deg, transparent, color-mix(in oklch, var(--chart-3) 70%, transparent), transparent) 1; box-shadow: 0 1px 0 color-mix(in oklch, var(--chart-3) 18%, transparent), 0 12px 24px -18px color-mix(in oklch, var(--chart-3) 40%, transparent); }
+
+/* Final mobile polish: centered popup, 2-column language list, header fit */
+html, body { overflow-x: clip; }
+.site-popup, .site-popup.zoom-dialog { inset: auto !important; top: 50% !important; left: 50% !important; right: auto !important; bottom: auto !important; margin: 0 !important; transform: none !important; translate: -50% -50% !important; }
+.language-menu--portal, .site-header .language-menu { width: 196px !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; max-height: calc(100dvh - 90px); overflow-y: auto; }
+.language-menu--portal > button { display: flex; align-items: center; justify-content: flex-start; gap: 8px; padding: 0 8px !important; min-width: 0; }
+.language-menu--portal .flag-code { margin-left: 0 !important; font-size: 11px; }
+@media (max-width: 480px) { .site-header .language-trigger .flag-code { display: none; } .site-header .header-island .language-trigger { width: 34px; overflow: hidden; } }
+.hub-divider { height: 1px; margin: 14px auto 0; max-width: 80rem; background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--chart-3) 70%, transparent), transparent); }
+.landing-presale-band { display: flex; justify-content: center; padding: 14px 20px 0; }
+.internal-market-trade { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.internal-market-trade a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 46px; border-radius: 12px; font-weight: 800; letter-spacing: .06em; }
+.internal-market-trade .is-buy { background: var(--chart-2); color: var(--primary-foreground); }
+.internal-market-trade .is-sell { background: var(--destructive); color: var(--destructive-foreground); }
