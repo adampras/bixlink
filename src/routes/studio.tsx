@@ -145,41 +145,77 @@ function BannerMaker() {
     const a = document.createElement("a");
     a.href = ref.current!.toDataURL("image/png"); a.download = "bixzoom-banner.png"; a.click();
   };
-  const sel = "h-10 rounded-md border border-input bg-background px-3 text-sm";
+  const sel = "h-11 rounded-md border border-input bg-background px-3 text-sm";
+  const [step, setStep] = useState(1);
+  const lbl = "text-xs font-semibold text-muted-foreground";
 
   return (
-    <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
-      <h2 className="font-bold text-primary">1 · Banner Studio Pro</h2>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <Input value={f.title} onChange={set("title")} placeholder="Judul" maxLength={80} />
-        <Input value={f.subtitle} onChange={set("subtitle")} placeholder="Sub-judul" maxLength={50} />
-        <Input value={f.speaker} onChange={set("speaker")} placeholder="Pembicara" maxLength={40} />
-        <Input value={f.date} onChange={set("date")} placeholder="Tanggal" maxLength={40} />
-        <Input value={f.time} onChange={set("time")} placeholder="Jam" maxLength={30} />
-        <select value={f.tpl} onChange={set("tpl")} className={sel}>
-          {Object.entries(TEMPLATES).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}
-        </select>
-        <select value={f.size} onChange={set("size")} className={sel}>
-          <option value="1080">1080×1080 (Instagram/WhatsApp)</option>
-          <option value="1920">1920×1080 (YouTube/Zoom)</option>
-          <option value="story">1080×1920 (Story/Status)</option>
-        </select>
-        <select value={f.align} onChange={set("align")} className={sel}>
-          <option value="center">Teks di tengah</option>
-          <option value="left">Teks rata kiri</option>
-        </select>
-        <label className="text-xs text-muted-foreground">Foto latar
-          <input type="file" accept="image/*" onChange={pick(setBgUrl)} className="mt-1 block w-full text-xs" />
-        </label>
-        <label className="text-xs text-muted-foreground">Logo / foto sendiri
-          <input type="file" accept="image/*" onChange={pick(setLogoUrl)} className="mt-1 block w-full text-xs" />
-        </label>
-        {bgUrl && <label className="text-xs text-muted-foreground sm:col-span-2">Gelapkan foto latar ({f.dim}%)
-          <input type="range" min="0" max="85" value={f.dim} onChange={set("dim")} className="block w-full" />
-        </label>}
+    <section className="studio-panel space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="studio-panel-title">DESIGN POSTER</h2>
+        <span className="studio-badge">LIVE PREVIEW</span>
       </div>
+      <div className="studio-progress">
+        {["Tujuan", "Pesan", "Tampilan"].map((s, n) => (
+          <button key={s} onClick={() => setStep(n + 1)} className={step === n + 1 ? "is-active" : step > n + 1 ? "is-done" : ""}>{n + 1}. {s}</button>
+        ))}
+      </div>
+      {step === 1 && (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {PURPOSES.map((p) => (
+            <button key={p.n} onClick={() => { setF({ ...f, title: p.title, subtitle: p.subtitle, tpl: p.tpl }); setStep(2); }} className={`studio-tool ${f.subtitle === p.subtitle ? "is-active" : ""}`}>
+              <span className="block text-sm font-bold text-primary">{p.n}</span>
+              <span className="block text-xs text-muted-foreground">{p.subtitle}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {step === 2 && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className={lbl}>Judul<Input value={f.title} onChange={set("title")} maxLength={80} /></label>
+          <label className={lbl}>Sub-judul<Input value={f.subtitle} onChange={set("subtitle")} maxLength={50} /></label>
+          <label className={lbl}>Tanggal<Input value={f.date} onChange={set("date")} maxLength={40} /></label>
+          <label className={lbl}>Jam<Input value={f.time} onChange={set("time")} maxLength={30} /></label>
+          <label className={lbl}>Pembicara<Input value={f.speaker} onChange={set("speaker")} maxLength={40} /></label>
+          <label className={lbl}>Logo / foto sendiri
+            <input type="file" accept="image/*" onChange={pick(setLogoUrl)} className="mt-1 block w-full text-xs" />
+          </label>
+        </div>
+      )}
+      {step === 3 && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className={lbl}>Tema warna
+            <select value={f.tpl} onChange={set("tpl")} className={`${sel} block w-full`}>
+              {Object.entries(TEMPLATES).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}
+            </select>
+          </label>
+          <label className={lbl}>Ukuran
+            <select value={f.size} onChange={set("size")} className={`${sel} block w-full`}>
+              <option value="1080">Instagram / WhatsApp (1080×1080)</option>
+              <option value="1920">YouTube / Zoom (1920×1080)</option>
+              <option value="story">Story / Status (1080×1920)</option>
+            </select>
+          </label>
+          <label className={lbl}>Posisi teks
+            <select value={f.align} onChange={set("align")} className={`${sel} block w-full`}>
+              <option value="center">Tengah</option>
+              <option value="left">Rata kiri</option>
+            </select>
+          </label>
+          <label className={lbl}>Foto latar (opsional)
+            <input type="file" accept="image/*" onChange={pick(setBgUrl)} className="mt-1 block w-full text-xs" />
+          </label>
+          {bgUrl && <label className={`${lbl} sm:col-span-2`}>Gelapkan foto latar ({f.dim}%)
+            <input type="range" min="0" max="85" value={f.dim} onChange={set("dim")} className="block w-full" />
+          </label>}
+        </div>
+      )}
       <canvas ref={ref} className="studio-canvas" />
-      <Button onClick={download} className="w-full">Download HD PNG</Button>
+      <div className="studio-sticky flex gap-2">
+        {step > 1 && <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1">Kembali</Button>}
+        {step < 3 ? <Button onClick={() => setStep(step + 1)} className="flex-1">Lanjutkan</Button>
+          : <Button onClick={download} className="flex-1">Unduh HD PNG</Button>}
+      </div>
     </section>
   );
 }
