@@ -723,6 +723,84 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_studio_config: {
+        Row: {
+          costs: Json
+          credit_usd: number
+          daily_limit: number
+          enabled: boolean
+          features: Json
+          id: number
+          members_enabled: boolean
+          prices: Json
+          updated_at: string
+        }
+        Insert: {
+          costs?: Json
+          credit_usd?: number
+          daily_limit?: number
+          enabled?: boolean
+          features?: Json
+          id?: number
+          members_enabled?: boolean
+          prices?: Json
+          updated_at?: string
+        }
+        Update: {
+          costs?: Json
+          credit_usd?: number
+          daily_limit?: number
+          enabled?: boolean
+          features?: Json
+          id?: number
+          members_enabled?: boolean
+          prices?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bix_studio_ledger: {
+        Row: {
+          cost_credits: number
+          created_at: string
+          created_by: string | null
+          credits: number
+          feature: string | null
+          id: string
+          kind: string
+          note: string | null
+          paid_usd: number
+          ref_id: string | null
+          user_id: string
+        }
+        Insert: {
+          cost_credits?: number
+          created_at?: string
+          created_by?: string | null
+          credits: number
+          feature?: string | null
+          id?: string
+          kind: string
+          note?: string | null
+          paid_usd?: number
+          ref_id?: string | null
+          user_id: string
+        }
+        Update: {
+          cost_credits?: number
+          created_at?: string
+          created_by?: string | null
+          credits?: number
+          feature?: string | null
+          id?: string
+          kind?: string
+          note?: string | null
+          paid_usd?: number
+          ref_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_team_accounts: {
         Row: {
           active: boolean
@@ -1593,6 +1671,20 @@ export type Database = {
         Args: { p_amount: number; p_days: number }
         Returns: string
       }
+      bix_studio_grant: {
+        Args: {
+          p_code: string
+          p_credits: number
+          p_note: string
+          p_paid_usd: number
+        }
+        Returns: string
+      }
+      bix_studio_refund: { Args: { p_entry: string }; Returns: undefined }
+      bix_studio_report: { Args: never; Returns: Json }
+      bix_studio_save: { Args: { p: Json }; Returns: undefined }
+      bix_studio_spend: { Args: { p_feature: string }; Returns: Json }
+      bix_studio_status: { Args: never; Returns: Json }
       bix_team_sales_usd: { Args: { p_user: string }; Returns: number }
       bix_unstake: { Args: { p_stake: string }; Returns: Json }
       bix_unstake_bix: { Args: { p_stake: string }; Returns: number }

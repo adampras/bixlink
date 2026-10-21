@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import fox from "@/assets/bixlink-fox.png";
+import { StudioProvider, StudioWalletBar, StudioOwnerPanel, useStudio } from "@/components/StudioCredits";
 
 export const Route = createFileRoute("/studio")({
   head: () => ({
@@ -25,11 +26,15 @@ function Studio() {
       <header>
         <Link to="/" className="text-xs text-muted-foreground">← BIXLINK</Link>
         <h1 className="mt-2 text-2xl font-black tracking-wide text-primary">BIX STUDIO</h1>
-        <p className="text-sm text-muted-foreground">Banner promosi webinar dan presentasi bersuara untuk BIXZOOM. Gratis, dibuat langsung di perangkat Anda.</p>
+        <p className="text-sm text-muted-foreground">Banner, poster, dan presentasi bersuara untuk BIXZOOM. Desain dibuat langsung di perangkat Anda; kredit dipotong saat ekspor.</p>
       </header>
-      <BannerMaker />
-      <MediaPlayer />
-      <PresentationMaker />
+      <StudioProvider>
+        <StudioWalletBar />
+        <StudioOwnerPanel />
+        <BannerMaker />
+        <MediaPlayer />
+        <PresentationMaker />
+      </StudioProvider>
     </main>
   );
 }
@@ -100,7 +105,9 @@ function BannerMaker() {
     return () => { alive = false; };
   }, [f, bgUrl, logoUrl]);
 
-  const download = () => {
+  const { charge } = useStudio();
+  const download = async () => {
+    if (!(await charge(f.size === "1080" ? "banner" : "poster"))) return;
     const a = document.createElement("a");
     a.href = ref.current!.toDataURL("image/png"); a.download = "bixzoom-banner.png"; a.click();
   };
@@ -220,8 +227,10 @@ function PresentationMaker() {
     if (document.fullscreenElement) document.exitFullscreen();
   };
 
+  const { charge } = useStudio();
   const play = async () => {
     if (!slides.length) return;
+    if (!(await charge("presentation"))) return;
     stopRef.current = false;
     await stage.current?.requestFullscreen?.().catch(() => {});
     if (music) startMusic();
