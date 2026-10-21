@@ -20,24 +20,58 @@ export const Route = createFileRoute("/studio")({
   component: Studio,
 });
 
+const TOOLS = [
+  { k: "poster", icon: "◆", t: "DESIGN POSTER", d: "Banner & poster promosi, event dan webinar — siap dalam 3 langkah." },
+  { k: "media", icon: "▶", t: "BIXZOOM MEDIA", d: "Putar video presentasi dan musik latar untuk siaran webinar." },
+  { k: "flow", icon: "❖", t: "PRESENTATION FLOW", d: "Tempel naskah, jadi slide layar penuh dengan suara perangkat." },
+] as const;
+type ToolKey = (typeof TOOLS)[number]["k"];
+
 function Studio() {
+  const [tool, setTool] = useState<ToolKey>("poster");
   return (
-    <main className="mx-auto max-w-3xl space-y-8 px-4 py-6">
-      <header>
-        <Link to="/" className="text-xs text-muted-foreground">← BIXLINK</Link>
-        <h1 className="mt-2 text-2xl font-black tracking-wide text-primary">BIX STUDIO</h1>
-        <p className="text-sm text-muted-foreground">Banner, poster, dan presentasi bersuara untuk BIXZOOM. Desain dibuat langsung di perangkat Anda; kredit dipotong saat ekspor.</p>
+    <main className="mx-auto max-w-3xl space-y-6 px-4 py-6">
+      <Link to="/" className="text-xs text-muted-foreground">← BIXLINK</Link>
+      <header className="studio-hero">
+        <img src={fox} alt="BIXLINK fox crest" className="mx-auto h-12 w-12" />
+        <p className="studio-kicker">BIXLINK ECOSYSTEM · CREATIVE UTILITY</p>
+        <h1 className="studio-title">CREATE. PRESENT. LEAD.</h1>
+        <p className="mx-auto max-w-md text-sm text-muted-foreground">BIX Studio — Sovereign Creative Suite. Buat materi profesional untuk tim Anda tanpa keahlian desain.</p>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <Button onClick={() => document.getElementById("studio-tools")?.scrollIntoView({ behavior: "smooth" })}>Mulai Membuat</Button>
+        </div>
+        <ol className="studio-steps">
+          <li><b>1</b> Pilih alat</li><li><b>2</b> Isi pesan</li><li><b>3</b> Unduh / putar</li>
+        </ol>
       </header>
       <StudioProvider>
         <StudioWalletBar />
         <StudioOwnerPanel />
-        <BannerMaker />
-        <MediaPlayer />
-        <PresentationMaker />
+        <div id="studio-tools" className="grid gap-3 sm:grid-cols-3">
+          {TOOLS.map((x) => (
+            <button key={x.k} onClick={() => setTool(x.k)} className={`studio-tool ${tool === x.k ? "is-active" : ""}`}>
+              <span className="studio-tool-icon">{x.icon}</span>
+              <span className="block text-sm font-bold tracking-wider text-primary">{x.t}</span>
+              <span className="block text-xs text-muted-foreground">{x.d}</span>
+            </button>
+          ))}
+        </div>
+        {tool === "poster" && <BannerMaker />}
+        {tool === "media" && <MediaPlayer />}
+        {tool === "flow" && <PresentationMaker />}
       </StudioProvider>
     </main>
   );
 }
+
+const PURPOSES = [
+  { n: "Launch", title: "BIXLINK Soft Launching", subtitle: "OFFICIAL ANNOUNCEMENT", tpl: "onyx" },
+  { n: "Leader Training", title: "Leader Training Class", subtitle: "BIXLINK LEADERSHIP ACADEMY", tpl: "emerald" },
+  { n: "BIXZOOM", title: "BIXZOOM Global Webinar", subtitle: "BIXZOOM ROOM · LIVE WEBINAR", tpl: "sapphire" },
+  { n: "Marketplace", title: "BIXLINK Marketplace", subtitle: "NEW COLLECTION", tpl: "ruby" },
+  { n: "Staking Education", title: "Understanding Staking", subtitle: "EDUCATION SESSION", tpl: "titanium" },
+  { n: "Network Event", title: "BIXLINK Network Gathering", subtitle: "COMMUNITY EVENT", tpl: "emerald" },
+] as const;
 
 const TEMPLATES = {
   onyx: { name: "Obsidian Onyx Gold", bg: ["#2a2210", "#0b0a08", "#000"], accent: ["#fff1b8", "#ffd700", "#a67c00"], sub: "#e9d9a6" },
