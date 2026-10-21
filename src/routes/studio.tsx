@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import fox from "@/assets/bixlink-fox.png";
+import { LionCrest } from "@/components/BixZoom";
 import { StudioProvider, StudioWalletBar, StudioOwnerPanel, useStudio } from "@/components/StudioCredits";
 
 export const Route = createFileRoute("/studio")({
@@ -33,7 +34,7 @@ function Studio() {
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-6">
       <Link to="/" className="text-xs text-muted-foreground">← BIXLINK</Link>
       <header className="studio-hero">
-        <img src={fox} alt="BIXLINK fox crest" className="mx-auto h-12 w-12" />
+        <span className="studio-lion mx-auto block w-fit"><LionCrest size={64}/></span>
         <p className="studio-kicker">BIXLINK ECOSYSTEM · CREATIVE UTILITY</p>
         <h1 className="studio-title">CREATE. PRESENT. LEAD.</h1>
         <p className="mx-auto max-w-md text-sm text-muted-foreground">BIX Studio — Sovereign Creative Suite. Buat materi profesional untuk tim Anda tanpa keahlian desain.</p>
@@ -246,7 +247,7 @@ function MediaPlayer() {
         <Input placeholder="atau link video https://...mp4" onBlur={(e) => e.target.value.startsWith("https://") && setVideo(e.target.value)} />
         <Input placeholder="atau link musik https://...mp3" onBlur={(e) => e.target.value.startsWith("https://") && setMusic(e.target.value)} />
       </div>
-      {video ? <video ref={v} src={video} controls playsInline className="w-full rounded-xl bg-background" /> : <div className="studio-stage"><img src={fox} alt="" className="mx-auto h-14 w-14" /></div>}
+      {video ? <video ref={v} src={video} controls playsInline className="w-full rounded-xl bg-background" /> : <div className="studio-stage"><span className="studio-lion mx-auto block w-fit"><LionCrest size={60}/></span></div>}
       {music && <audio ref={a} src={music} loop />}
       <div className="flex flex-wrap items-center gap-2">
         <Button onClick={play} disabled={!video && !music}>▶ Putar bersama</Button>
@@ -330,7 +331,7 @@ function PresentationMaker() {
       </div>
       <div ref={stage} className="studio-stage">
         <div>
-          <img src={fox} alt="" className="mx-auto mb-4 h-14 w-14" />
+          <span className="studio-lion mx-auto mb-4 block w-fit"><LionCrest size={60}/></span>
           <p key={i} className="studio-line text-xl font-bold leading-snug text-foreground sm:text-3xl">
             {i >= 0 ? slides[i] : slides[0] ?? "BIXLINK · BIXZOOM PRESENTATION"}
           </p>

@@ -28,7 +28,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
   const hero3d = content.hero3dEnabled !== false;
   return <div className="reactor-landing">
     <section className={`hero-section landing-hero-compact relative overflow-hidden border-b border-border ${hero3d ? 'hero-3d' : ''}`}>
-      {hero3d && <><ContentImage path={content.heroImage} alt="" fallbackSrc={heroObsidian} className="hero-3d-bg"/><div className="hero-3d-veil" aria-hidden/></>}
+      {hero3d && <><ContentImage path={content.heroImage} alt="" fallbackSrc={heroObsidian} className="hero-3d-bg"/><div className="hero-3d-veil" aria-hidden/><div className="hero-fox-eyes" aria-hidden><i/><i/></div></>}
       {config?.readiness.heroAnimEnabled !== false && <HeroFlux/>}
       <div className={`landing-hero-content relative mx-auto flex max-w-3xl flex-col items-center justify-center px-5 text-center ${compact ? 'is-compact' : ''}`}>
         <h1 className="hero-title mt-3 text-6xl leading-[0.9] md:text-8xl">BIXLINK</h1>
