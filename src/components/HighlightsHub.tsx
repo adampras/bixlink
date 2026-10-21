@@ -14,6 +14,7 @@ export const HUB_COLORS = ['gold', 'emerald', 'cyan', 'violet', 'crimson'] as co
 export type HubItem = { title: string; tag: string; body: string; color: typeof HUB_COLORS[number]; image: keyof typeof HUB_IMAGES; href: string; enabled?: boolean };
 export const defaultHub: HubItem[] = [
   { title: 'Genesis Launch Hub', tag: 'PRESALE', body: '21M supply · $0.50 / BIX', color: 'gold', image: 'launch', href: '/presale' },
+  { title: 'BIX Booster APY', tag: 'BOOSTER', body: 'Tier ladder · dividends 100% BIX', color: 'emerald', image: 'stake', href: '/boost' },
   { title: 'Yield & Staking', tag: 'STAKE', body: 'Hybrid USDT/BIX · Booster 100% BIX', color: 'emerald', image: 'stake', href: '/stake' },
   { title: 'P2P & Dev Buyback', tag: 'MARKET', body: 'Buyback locked $0.35 · P2P free', color: 'cyan', image: 'p2p', href: '/p2p' },
   { title: 'Fox Arena Quest', tag: 'GAMEFI', body: 'Daily missions · BIXP rewards', color: 'violet', image: 'arena', href: '/arena' },
@@ -25,7 +26,9 @@ export function HighlightsHub() {
   const { data: cfg } = usePublicConfig();
   const ref = useRef<HTMLElement>(null);
   const hub = (cfg?.readiness as { hub?: { enabled?: boolean; items?: HubItem[] } } | undefined)?.hub;
-  const items = hub?.enabled === false ? [] : (hub?.items?.length ? hub.items : defaultHub).filter(i => i.enabled !== false);
+  const base = hub?.items?.length ? hub.items : defaultHub;
+  const withBooster = base.some(i => i.href === '/boost') ? base : [base[0], defaultHub[1], ...base.slice(1)].filter(Boolean) as HubItem[];
+  const items = hub?.enabled === false ? [] : withBooster.filter(i => i.enabled !== false);
   const { active, goTo } = useRailDots(ref, items.length, 3200);
   if (!items.length) return null;
   return <div className="hub-wrap"><nav ref={ref} aria-label="Highlights" className="hub-strip">{items.map((i, n) => {
