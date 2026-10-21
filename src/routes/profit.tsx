@@ -1,11 +1,15 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, ArrowUpRight, Coins, Clock3, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useServerFn } from '@tanstack/react-start';
+import { Activity, ArrowDownToLine, ArrowUpRight, Coins, Clock3, Lock, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
 import { money, number } from '@/lib/bixlink';
 import { useMember, usePublicConfig } from '@/lib/useMember';
+import { getMyLeader } from '@/lib/bixlink.functions';
+import { supabase } from '@/integrations/supabase/client';
 
 export const Route = createFileRoute('/profit')({
   head: () => ({ meta: [
@@ -25,7 +29,14 @@ const YEAR = 365 * 24 * 60 * MINUTE;
 function ProfitPage() {
   const { user, ready, data } = useMember();
   const { data: cfg } = usePublicConfig();
+  const qc = useQueryClient();
   const [now, setNow] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const leaderFn = useServerFn(getMyLeader);
+  const { data: leader } = useQuery({ queryKey: ['my-leader', user?.id], queryFn: () => leaderFn(), enabled: !!user });
+  const { data: claimed } = useQuery({ queryKey: ['profit-claimed', user?.id], enabled: !!user, queryFn: async () => { const { data: c } = await supabase.rpc('bix_profit_claimed'); return new Map((c ?? []).map(x => [x.stake_id, Number(x.profit_usd)])); } });
+  const locked = !!leader && leader.status === 'approved' && !leader.qualified;
 
   useEffect(() => {
     const update = () => setNow(Date.now());
@@ -44,7 +55,7 @@ function ProfitPage() {
     const started = new Date(stake.activated_at ?? stake.created_at).getTime();
     const elapsed = minuteNow === null ? 0 : Math.max(0, Math.min(minuteNow - started, Number(stake.lock_days) * 24 * 60 * MINUTE));
     const annual = Number(stake.amount_usd) * Number(stake.apy) / 100;
-    const accrued = annual * elapsed / YEAR;
+    const accrued = Math.max(0, annual * elapsed / YEAR - (claimed?.get(stake.id) ?? 0));
     const daily = annual / 365;
     return {
       ...stake,
@@ -54,8 +65,17 @@ function ProfitPage() {
       daily,
       minute: daily / 1440,
     };
-  }), [active, bixPrice, minuteNow, splitBix, splitUsdt]);
+  }), [active, bixPrice, minuteNow, splitBix, splitUsdt, claimed]);
   const totals = rows.reduce((sum, row) => ({ accrued: sum.accrued + row.accrued, usdt: sum.usdt + row.usdt, bix: sum.bix + row.bix, daily: sum.daily + row.daily, minute: sum.minute + row.minute }), { accrued: 0, usdt: 0, bix: 0, daily: 0, minute: 0 });
+  const withdraw = async () => {
+    setBusy(true); setMsg(null);
+    const { data: r, error } = await supabase.rpc('bix_claim_stake_profit');
+    setBusy(false);
+    if (error) { setMsg(error.message); return; }
+    const res = r as { usdt: number; bix: number };
+    setMsg(`Moved to main wallet: ${number(res.usdt, { maximumFractionDigits: 4 })} USDT + ${number(res.bix, { maximumFractionDigits: 4 })} BIX.`);
+    await Promise.all([qc.invalidateQueries({ queryKey: ['profit-claimed'] }), qc.invalidateQueries({ queryKey: ['my-bixlink'] })]);
+  };
   const nextRefresh = now === null ? 60 : 60 - Math.floor((now % MINUTE) / 1000);
 
   return <BixShell><main className="profit-page mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
@@ -70,6 +90,14 @@ function ProfitPage() {
         <div className="profit-metric profit-metric--usdt"><WalletCards/><span>USDT profit · {Math.round(splitUsdt * 100)}%</span><strong className="numeric">{number(totals.usdt, { minimumFractionDigits: 8, maximumFractionDigits: 8 })}</strong><small>Virtual USDT allocation</small></div>
         <div className="profit-metric profit-metric--bix"><Coins/><span>BIX profit · {Math.round(splitBix * 100)}%</span><strong className="numeric">{number(totals.bix, { minimumFractionDigits: 8, maximumFractionDigits: 8 })}</strong><small>At ${bixPrice.toFixed(6)} reference</small></div>
         <div className="profit-metric profit-metric--daily"><Clock3/><span>Daily profit</span><strong className="numeric">{money(totals.daily)}</strong><small>+{money(totals.minute)} each minute</small></div>
+      </section>
+
+      <section aria-label="Withdraw profit" className="profit-withdraw mt-5">
+        <div className="profit-withdraw__info"><span className="eyebrow"><WalletCards size={14}/> WITHDRAW TO MAIN WALLET</span><div className="profit-withdraw__amounts"><div><small>USDT</small><b className="numeric">{number(totals.usdt, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</b></div><div><small>BIX</small><b className="numeric">{number(totals.bix, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</b></div></div></div>
+        {locked
+          ? <div className="profit-withdraw__lock"><Lock size={16}/><div><b>Leader withdraw locked</b><small className="numeric">Team turnover {money(leader!.turnover)} / {money(leader!.target)} target</small></div></div>
+          : <button type="button" className="profit-withdraw__btn" disabled={busy || totals.accrued < 0.01} onClick={withdraw}><ArrowDownToLine size={18}/>{busy ? 'Processing…' : 'Withdraw Profit'}</button>}
+        {msg && <p className="profit-withdraw__msg">{msg}</p>}
       </section>
 
        <div className="mt-6 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVE POSITIONS</div><h2 className="mt-2 font-display text-2xl font-black">Profit by stake</h2></div><span className="numeric text-xs text-muted-foreground">{rows.length} active</span></div>

@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { DurationPackageCard } from '@/components/DurationPackageCard';
 import { number, type Package } from '@/lib/bixlink';
 
-export const STAKE_LAYOUTS = ['auric', 'capsule', 'carousel', 'spotlight', 'accordion'] as const;
+export const STAKE_LAYOUTS = ['matrix', 'auric', 'capsule', 'carousel', 'spotlight', 'accordion'] as const;
 export type StakeLayout = (typeof STAKE_LAYOUTS)[number];
-export const STAKE_LAYOUT_LABEL: Record<StakeLayout, string> = { auric: 'E · Kotak batangan emas (Auric Sovereign)', capsule: 'D · Kotak kapsul mewah', carousel: 'C · Carousel halaman', spotlight: 'A · Spotlight', accordion: 'B · Baris accordion' };
+export const STAKE_LAYOUT_LABEL: Record<StakeLayout, string> = { matrix: 'F · Sovereign Ingot Matrix (emerald-gold)', auric: 'E · Kotak batangan emas (Auric Sovereign)', capsule: 'D · Kotak kapsul mewah', carousel: 'C · Carousel halaman', spotlight: 'A · Spotlight', accordion: 'B · Baris accordion' };
 
 type Props = { packages: Package[]; layout?: string | undefined; onStake: (p: Package) => void };
 
@@ -31,6 +31,19 @@ export function StakePackageLayouts({ packages, layout, onStake }: Props) {
       </div>
       <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
         {packages.map((p, n) => <div key={p.id} id={`auric-pkg-${n}`} className={`auric-card ${n === i ? 'is-active' : ''}`}><DurationPackageCard pkg={p} index={n} onStake={onStake} /></div>)}
+      </div>
+    </section>;
+  }
+
+  if (mode === 'matrix') {
+    const i = Math.min(active, packages.length - 1);
+    return <section aria-label="Staking packages" className="ingot-matrix mt-6">
+      <header className="ingot-matrix__head"><span>SOVEREIGN VAULT</span><b>Select your tier</b></header>
+      <div role="tablist" aria-label="Package tier" className="ingot-matrix__grid">
+        {packages.map((p, n) => <button key={p.id} type="button" role="tab" aria-selected={n === i} onClick={() => setActive(n)} className="ingot"><small>TIER {String(n + 1).padStart(2, '0')}</small><b className="numeric">{short(Number(p.price_usd))}</b><em className="numeric">{p.apy}% APY</em></button>)}
+      </div>
+      <div className="mx-auto mt-4 max-w-md ingot-matrix__detail">
+        <DurationPackageCard key={packages[i]!.id} pkg={packages[i]!} index={i} onStake={onStake} />
       </div>
     </section>;
   }

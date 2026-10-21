@@ -2688,3 +2688,49 @@ main section > div > .grid > article, main section .rounded-2xl.border { transit
 .eco-gold { --tone: var(--chart-3); } .eco-emerald { --tone: var(--chart-2); } .eco-violet { --tone: oklch(0.68 0.2 305); } .eco-cyan { --tone: oklch(0.78 0.13 210); } .eco-crimson { --tone: oklch(0.65 0.2 20); }
 /* Hero: lower BIXLINK so fox head stays visible */
 .landing-hero-compact.hero-3d .landing-hero-content { padding-top: clamp(210px, 58vw, 360px) !important; }
+
+/* ===== Profit withdraw (lux) ===== */
+.profit-withdraw { display:grid; gap:14px; padding:18px; border-radius:20px; border:1px solid color-mix(in oklab,var(--chart-3) 40%,var(--border)); background:radial-gradient(circle at 0% 0%,color-mix(in oklab,var(--chart-2) 14%,transparent),transparent 55%),radial-gradient(circle at 100% 100%,color-mix(in oklab,var(--chart-3) 14%,transparent),transparent 55%),color-mix(in oklab,var(--card) 92%,transparent); box-shadow:inset 0 1px 0 color-mix(in oklab,var(--chart-3) 35%,transparent),0 18px 40px -24px var(--chart-3); }
+@media (min-width:768px){ .profit-withdraw { grid-template-columns:1fr auto; align-items:center; } }
+.profit-withdraw__amounts { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+.profit-withdraw__amounts div { padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:color-mix(in oklab,var(--background) 60%,transparent); }
+.profit-withdraw__amounts small { display:block; font-size:10px; font-weight:800; letter-spacing:.18em; color:var(--muted-foreground); }
+.profit-withdraw__amounts b { font-size:1.05rem; color:var(--chart-2); font-variant-numeric:tabular-nums; }
+.profit-withdraw__btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:0 28px; border-radius:999px; font-family:"Cinzel",var(--font-display); font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:oklch(0.18 0.03 70); background:linear-gradient(180deg,oklch(0.95 0.08 92),oklch(0.8 0.14 82) 50%,oklch(0.62 0.12 70)); box-shadow:0 0 0 1px oklch(0.55 0.1 70),inset 0 1px 0 oklch(1 0 0 / 60%),0 10px 26px -10px oklch(0.8 0.14 82); transition:transform .2s,filter .2s; }
+.profit-withdraw__btn:hover:not(:disabled){ transform:translateY(-2px); filter:brightness(1.06); }
+.profit-withdraw__btn:active:not(:disabled){ transform:translateY(0) scale(.98); }
+.profit-withdraw__btn:disabled{ opacity:.5; cursor:not-allowed; }
+.profit-withdraw__lock { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:14px; border:1px dashed color-mix(in oklab,var(--chart-3) 55%,transparent); color:var(--chart-3); }
+.profit-withdraw__lock small { display:block; color:var(--muted-foreground); font-size:11px; }
+.profit-withdraw__msg { grid-column:1/-1; font-size:12px; color:var(--chart-2); }
+
+/* ===== Stake layout F: Sovereign Ingot Matrix ===== */
+.ingot-matrix__head { display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:12px; }
+.ingot-matrix__head span { font-size:10px; font-weight:800; letter-spacing:.32em; color:var(--chart-3); }
+.ingot-matrix__head b { font-family:"Cinzel",var(--font-display); font-size:1.1rem; }
+.ingot-matrix__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+@media (min-width:768px){ .ingot-matrix__grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+.ingot { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:12px 14px; border-radius:14px; overflow:hidden; text-align:left; border:1px solid color-mix(in oklab,var(--chart-3) 30%,var(--border)); background:linear-gradient(160deg,color-mix(in oklab,var(--chart-2) 10%,var(--card)),var(--card)); transition:transform .2s,box-shadow .2s,border-color .2s; }
+.ingot::after { content:""; position:absolute; inset:0 auto 0 -60%; width:40%; background:linear-gradient(100deg,transparent,color-mix(in oklab,var(--chart-3) 25%,transparent),transparent); transform:skewX(-18deg); transition:left .6s; }
+.ingot:hover::after { left:120%; }
+.ingot small { font-size:9px; font-weight:800; letter-spacing:.2em; color:var(--chart-3); }
+.ingot b { font-size:1.25rem; font-weight:900; color:var(--chart-2); }
+.ingot em { font-style:normal; font-size:10px; color:var(--muted-foreground); }
+.ingot[aria-selected="true"] { border-color:var(--chart-3); box-shadow:0 0 0 1px var(--chart-3),0 12px 28px -14px var(--chart-3); transform:translateY(-2px); background:linear-gradient(160deg,color-mix(in oklab,var(--chart-3) 18%,var(--card)),color-mix(in oklab,var(--chart-2) 10%,var(--card))); }
+
+/* ===== BIXCOIN spinning-top (gasing) cinematic ===== */
+.coin-stage--vault .coin-float { perspective:900px !important; transform-style:preserve-3d; }
+.coin-stage--vault .coin-3d { clip-path:none !important; animation:coin-gasing 3.2s linear infinite, coin-gasing-glow 3.2s ease-in-out infinite !important; transform-style:preserve-3d; backface-visibility:visible; }
+@keyframes coin-gasing {
+  0%   { transform:rotateX(14deg) rotateZ(-5deg) rotateY(0deg); }
+  25%  { transform:rotateX(10deg) rotateZ(0deg)  rotateY(90deg); }
+  50%  { transform:rotateX(14deg) rotateZ(5deg)  rotateY(180deg); }
+  75%  { transform:rotateX(10deg) rotateZ(0deg)  rotateY(270deg); }
+  100% { transform:rotateX(14deg) rotateZ(-5deg) rotateY(360deg); }
+}
+@keyframes coin-gasing-glow { 0%,50%,100% { filter:drop-shadow(0 0 22px color-mix(in oklab,var(--chart-3) 60%,transparent)) brightness(1.08); } 25%,75% { filter:drop-shadow(0 0 8px color-mix(in oklab,var(--chart-3) 35%,transparent)) brightness(.9); } }
+.coin-stage--vault .coin-float::before { content:""; position:absolute; left:50%; bottom:-6%; width:70%; height:14%; translate:-50% 0; border-radius:50%; background:radial-gradient(ellipse,color-mix(in oklab,var(--chart-3) 55%,transparent),transparent 70%); filter:blur(6px); animation:coin-gasing-shadow 3.2s ease-in-out infinite; pointer-events:none; }
+@keyframes coin-gasing-shadow { 0%,50%,100% { scale:1 1; opacity:.9; } 25%,75% { scale:.55 1; opacity:.5; } }
+.coin-stage--vault .coin-float::after { animation:coin-sheen-sweep 3.2s ease-in-out infinite !important; }
+.coin-stage--vault { background:radial-gradient(ellipse 60% 40% at 50% 45%,color-mix(in oklab,var(--chart-3) 10%,transparent),transparent 70%), conic-gradient(from 0deg at 50% 45%,transparent 0 10%,color-mix(in oklab,var(--chart-3) 6%,transparent) 12%,transparent 16% 60%,color-mix(in oklab,var(--chart-1) 6%,transparent) 62%,transparent 66%) !important; }
+@media (prefers-reduced-motion:reduce){ .coin-stage--vault .coin-3d, .coin-stage--vault .coin-float::before { animation:none !important; } }
