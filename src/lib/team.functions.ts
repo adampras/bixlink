@@ -29,3 +29,19 @@ export const setTeamAccountActive = createServerFn({ method: 'POST' }).middlewar
     if (error) throw error;
     return { ok: true };
   });
+
+/** Owner 1 only: create a confirmed member account with any email (no inbox confirmation). */
+export const createAccountByOwner = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { email: string; password: string; fullName: string; username: string }) => z.object({
+    email: z.string().trim().email().max(160), password: z.string().min(8).max(200),
+    fullName: z.string().trim().min(2).max(80), username: z.string().trim().toLowerCase().regex(/^[a-z0-9_.]{3,24}$/),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    if (!(await canManage(context))) throw new Error('Owner access required');
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: free } = await supabaseAdmin.rpc('bix_username_available', { p_username: data.username });
+    if (!free) throw new Error('Username sudah dipakai');
+    const { data: u, error } = await supabaseAdmin.auth.admin.createUser({ email: data.email.toLowerCase(), password: data.password, email_confirm: true, user_metadata: { full_name: data.fullName, username: data.username } });
+    if (error) throw new Error(error.message);
+    return { ok: true, userId: u.user?.id ?? null };
+  });
