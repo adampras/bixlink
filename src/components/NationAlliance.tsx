@@ -1,5 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
+import { Dialog, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import avatarSg from '@/assets/alliance-avatar-sg.jpg';
+import avatarId from '@/assets/alliance-avatar-id.jpg';
+import avatarMy from '@/assets/alliance-avatar-my.jpg';
+import avatarHk from '@/assets/alliance-avatar-hk.jpg';
+import avatarAe from '@/assets/alliance-avatar-ae.jpg';
+
+const portraits = [avatarSg, avatarId, avatarMy, avatarHk, avatarAe];
+function AllianceAvatar({ index, code }: { index: number; code: string }) {
+  return <div className="alliance-portrait"><img src={portraits[index]} alt={`${code} illustrative avatar`} width={384} height={384} loading="lazy"/><span>{code}</span></div>;
+}
 
 const NATIONS = [
   { code: 'SG', flag: 'sg', name: 'Singapore', role: 'Core Architecture', body: 'Ledger systems & platform engineering',
@@ -34,23 +47,29 @@ export function NationAlliance() {
     <div className="eyebrow">GLOBAL ALLIANCE</div>
     <h2 id="nation-title" className="section-title">5-NATION <span>CONSORTIUM</span></h2>
     <div ref={rail} className="nation-rail mt-4" onScroll={onScroll} onPointerDown={() => setPaused(true)}>
-      {NATIONS.map((x, i) => <button type="button" key={x.code} className={`nation-slide ${active === i ? 'is-on' : ''}`} onClick={() => setOpen(i)} aria-label={`${x.name} — read more`}>
-        <div className="nation-avatar">{x.code}<img src={`https://flagcdn.com/w40/${x.flag}.png`} alt="" loading="lazy" width={24} height={16}/></div>
+      {NATIONS.map((x, i) => <Button variant="ghost" type="button" key={x.code} className={`nation-slide ${active === i ? 'is-on' : ''}`} onClick={() => setOpen(i)} aria-label={`${x.name} — read more`}>
+        <AllianceAvatar index={i} code={x.code}/>
         <b>{x.name}</b><small>{x.role}</small><p>{x.body}</p><span className="nation-more">READ PROFILE →</span>
-      </button>)}
+      </Button>)}
     </div>
     <div className="nation-dots">{NATIONS.map((x, i) => <button key={x.code} type="button" aria-label={`Show ${x.name}`} className={active === i ? 'is-on' : ''} onClick={() => go(i)}/>)}</div>
     <p className="mt-4 text-center text-[10px] text-muted-foreground">Regional focus roles. Official team profiles are published by BIXLINK GLOBAL after verification.</p>
     <Dialog open={open !== null} onOpenChange={v => !v && setOpen(null)}>
-      <DialogContent className="site-popup">
+      <DialogPrimitive.Portal>
+      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"/>
+      <div className="alliance-dialog-stage">
+      <DialogPrimitive.Content className="alliance-dialog bg-card text-card-foreground">
+        <DialogPrimitive.Close asChild><Button variant="ghost" size="icon" className="alliance-dialog-close" aria-label="Close profile"><X className="h-4 w-4"/></Button></DialogPrimitive.Close>
         {n && <><DialogHeader className="items-center text-center">
-          <div className="nation-avatar">{n.code}<img src={`https://flagcdn.com/w40/${n.flag}.png`} alt="" width={24} height={16}/></div>
+          <AllianceAvatar index={open ?? 0} code={n.code}/>
           <DialogTitle>{n.name}</DialogTitle>
           <DialogDescription className="text-[10px] font-bold uppercase tracking-[.22em] text-chart-2">{n.role}</DialogDescription>
         </DialogHeader>
         <div className="nation-dialog-body"><p>{n.story}</p><ul>{n.focus.map(f => <li key={f}>{f}</li>)}</ul>
-          <p className="mt-3 text-[10px]">Regional focus role description. Named team members are published only after verification.</p></div></>}
-      </DialogContent>
+          <p className="alliance-profile-note">Illustrative avatar and proposed regional role; not a verified team profile.</p></div></>}
+      </DialogPrimitive.Content>
+      </div>
+      </DialogPrimitive.Portal>
     </Dialog>
   </section>;
 }
