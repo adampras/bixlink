@@ -11,6 +11,7 @@ import { AdminStakingControls } from '@/components/AdminStakingControls';
 import { AdminBixMarket } from '@/components/AdminBixMarket';
 import { AdminReferrals } from '@/components/AdminReferrals';
 import { NetworkLeaders } from '@/components/NetworkLeaders';
+import { OwnerRevenueTable } from '@/components/OwnerRevenueTable';
 import { ReviewerDepositWallet } from '@/components/ReviewerDepositWallet';
 
 export const Route = createFileRoute('/review')({
@@ -39,7 +40,7 @@ function Review() {
         <nav aria-label="Owner 2 sections" className="mt-6 grid grid-cols-2 gap-2 border-b border-border pb-4 sm:grid-cols-4">{TABS.filter(t => perms?.[t.perm]).map(({ label, icon: Icon }) => <Button key={label} variant={tab === label ? 'default' : 'outline'} aria-pressed={tab === label} className="h-11 min-w-0 gap-2" onClick={() => { setTab(label); setMsg(''); }}><Icon size={16}/>{label}</Button>)}</nav>
         {perms && !TABS.some(t => perms[t.perm]) && <p className="mt-6 text-sm text-muted-foreground">Owner 1 belum membuka menu apa pun untuk akun ini.</p>}
         {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
-        {tab === 'DOMPET' && perms?.wallet && <><ReviewerDepositWallet wallet={settings?.wallet ?? null} onSaved={refreshSettings} onMessage={setMsg}/><h2 className="mt-10 font-display text-lg font-bold">Review deposit & withdrawal</h2><div className="mt-4 flex flex-wrap gap-2">{['pending', 'approved', 'rejected', 'all'].map(s => <Button key={s} size="sm" variant={filter === s ? 'default' : 'outline'} className="rounded-full capitalize" onClick={() => setFilter(s)}>{s}</Button>)}</div>
+        {tab === 'DOMPET' && perms?.wallet && <><ReviewerDepositWallet wallet={settings?.wallet ?? null} onSaved={refreshSettings} onMessage={setMsg}/><OwnerRevenueTable/><h2 className="mt-10 font-display text-lg font-bold">Review deposit & withdrawal</h2><div className="mt-4 flex flex-wrap gap-2">{['pending', 'approved', 'rejected', 'all'].map(s => <Button key={s} size="sm" variant={filter === s ? 'default' : 'outline'} className="rounded-full capitalize" onClick={() => setFilter(s)}>{s}</Button>)}</div>
         <div className="mt-5 space-y-2">{list.map(t => <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4 text-xs">
           <div className="min-w-0"><b className="text-sm capitalize">{t.type}</b> · {dateTime(t.created_at)}<div className="break-all font-mono text-muted-foreground">{t.tx_hash ?? t.address}</div></div>
           <div className="flex items-center gap-3"><div className="text-right"><div className="text-chart-3">{money(Number(t.amount_usd))}</div>{Number(t.fee_usd) > 0 && <div className="text-muted-foreground">send {money(Number(t.net_usd))}</div>}<div className="capitalize">{t.status}</div></div>
