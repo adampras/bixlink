@@ -5,11 +5,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { getReviewerQueue, getReviewerSettings, reviewerDecide, getReviewerPermissions, type ReviewerPermissions } from '@/lib/reviewer.functions';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
-import { Check, X, Percent, Wallet, TrendingUp, Users } from 'lucide-react';
+import { Check, X, Percent, Wallet, TrendingUp, Users, Crown } from 'lucide-react';
 import { dateTime, money } from '@/lib/bixlink';
 import { AdminStakingControls } from '@/components/AdminStakingControls';
 import { AdminBixMarket } from '@/components/AdminBixMarket';
 import { AdminReferrals } from '@/components/AdminReferrals';
+import { NetworkLeaders } from '@/components/NetworkLeaders';
 import { ReviewerDepositWallet } from '@/components/ReviewerDepositWallet';
 
 export const Route = createFileRoute('/review')({
@@ -47,8 +48,9 @@ function Review() {
         {tab === 'APY' && perms?.apy && <AdminStakingControls onMessage={setMsg}/>}
         {tab === 'Market' && perms?.market && <AdminBixMarket initialPrice={Number(settings?.market?.priceUsd ?? 0.84291)} initialMovement={settings?.market?.movement} onMessage={setMsg} onSaved={refreshSettings}/>}
         {tab === 'Referral' && perms?.referral && <AdminReferrals key={JSON.stringify(settings?.referrals)} initial={settings?.referrals} onMessage={setMsg} onSaved={refreshSettings} settingsOnly/>}
+        {tab === 'Leader' && perms?.leaders && <NetworkLeaders onMessage={setMsg}/>}
       </>}
   </main></BixShell>;
 }
 
-const TABS = [{ label: 'APY', icon: Percent, perm: 'apy' }, { label: 'DOMPET', icon: Wallet, perm: 'wallet' }, { label: 'Market', icon: TrendingUp, perm: 'market' }, { label: 'Referral', icon: Users, perm: 'referral' }] as const;
+const TABS = [{ label: 'APY', icon: Percent, perm: 'apy' }, { label: 'DOMPET', icon: Wallet, perm: 'wallet' }, { label: 'Market', icon: TrendingUp, perm: 'market' }, { label: 'Referral', icon: Users, perm: 'referral' }, { label: 'Leader', icon: Crown, perm: 'leaders' }] as const;

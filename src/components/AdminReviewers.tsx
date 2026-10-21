@@ -34,7 +34,7 @@ export function AdminReviewers({ members, onMessage }: { members: { id: string; 
   </section>;
 }
 
-const PERM_LABEL: Record<keyof ReviewerPermissions, string> = { apy: 'APY & paket staking', wallet: 'Dompet & review deposit/withdraw', market: 'Harga Market', referral: 'Bonus Referral' };
+const PERM_LABEL: Record<keyof ReviewerPermissions, string> = { apy: 'APY & paket staking', wallet: 'Dompet & review deposit/withdraw', market: 'Harga Market', referral: 'Bonus Referral', leaders: 'Leader bersponsor & Team Support' };
 
 export function AdminTurnover({ members }: { members: { id: string; email: string }[] }) {
   const fetchT = useServerFn(getOwnerTurnover);
