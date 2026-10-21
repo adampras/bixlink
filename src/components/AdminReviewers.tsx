@@ -1,7 +1,8 @@
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { listReviewers, getOwnerTurnover, setReviewer, getReviewerPermissions, saveReviewerPermissions, type ReviewerPermissions } from '@/lib/reviewer.functions';
+import { listReviewers, getOwnerTurnover, setReviewer, getAllReviewerPermissions, saveReviewerPermissions, type ReviewerPermissions } from '@/lib/reviewer.functions';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { useState } from 'react';
 import { Loader2, UserCheck } from 'lucide-react';
 
@@ -9,24 +10,31 @@ export function AdminReviewers({ members, onMessage }: { members: { id: string; 
   const list = useServerFn(listReviewers); const save = useServerFn(setReviewer); const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
   const { data: ids = [] } = useQuery({ queryKey: ['admin-reviewers'], queryFn: () => list() });
-  const loadPerms = useServerFn(getReviewerPermissions); const savePerms = useServerFn(saveReviewerPermissions);
-  const { data: perms } = useQuery({ queryKey: ['reviewer-perms'], queryFn: () => loadPerms() });
-  const toggle = async (k: keyof ReviewerPermissions) => { if (!perms) return; try { const next = await savePerms({ data: { ...perms, [k]: !perms[k] } }); qc.setQueryData(['reviewer-perms'], next); onMessage(`Owner 2 menu ${PERM_LABEL[k]} ${next[k] ? 'dibuka' : 'ditutup'}.`); } catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal menyimpan izin.'); } };
+  const loadPerms = useServerFn(getAllReviewerPermissions); const savePerms = useServerFn(saveReviewerPermissions);
+  const { data: perms = {} } = useQuery({ queryKey: ['reviewer-perms-all', ids.length], queryFn: () => loadPerms() });
+  const refresh = () => Promise.all([qc.invalidateQueries({ queryKey: ['admin-reviewers'] }), qc.invalidateQueries({ queryKey: ['reviewer-perms-all'] })]);
+  const toggle = async (userId: string, idx: number, k: keyof ReviewerPermissions) => {
+    const cur = perms[userId]; if (!cur) return;
+    try { const next = await savePerms({ data: { userId, perms: { ...cur, [k]: !cur[k] } } }); qc.setQueryData(['reviewer-perms-all', ids.length], { ...perms, [userId]: next }); onMessage(`Owner ${idx + 2}: ${PERM_LABEL[k]} ${next[k] ? 'dibuka' : 'ditutup'}.`); }
+    catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal menyimpan izin.'); }
+  };
   return <section className="mt-8 max-w-2xl rounded-[20px] border border-primary bg-card p-5">
-    <h3 className="font-display text-lg font-black">Owner 2 (limited reviewer)</h3>
-    <p className="mt-1 text-xs text-muted-foreground">Owner 2 signs in with a normal account and opens /review. They only see the menus you tick below.</p>
-    <form className="mt-4 flex flex-wrap gap-2" onSubmit={async e => { e.preventDefault(); const id = String(new FormData(e.currentTarget).get('user')); setSaving(true); try { await save({ data: { userId: id, enabled: true } }); await qc.invalidateQueries({ queryKey: ['admin-reviewers'] }); onMessage('Owner 2 added.'); } catch (error) { onMessage(error instanceof Error ? error.message : 'Could not add Owner 2. Please try again.'); } finally { setSaving(false); } }}>
-      <select name="user" aria-label="Owner 2 account" className="form-input min-w-0 flex-1" required disabled={saving} defaultValue=""><option value="" disabled>Select member account</option>{members.filter(m => !ids.includes(m.id)).map(m => <option key={m.id} value={m.id}>{m.email}</option>)}</select>
-      <Button disabled={saving} className="rounded-full bg-foreground text-background hover:bg-foreground/90">{saving ? <Loader2 className="animate-spin"/> : <UserCheck/>}{saving ? 'Saving…' : 'Make Owner 2'}</Button>
+    <h3 className="font-display text-lg font-black">Owner 2–5 (operator terbatas)</h3>
+    <p className="mt-1 text-xs text-muted-foreground">Setiap Owner masuk dengan akun biasa lalu membuka /review. Owner baru mulai dengan semua menu tertutup; buka per menu dengan saklar. Mereka hanya melihat jaringan sponsor di bawahnya.</p>
+    <form className="mt-4 flex flex-wrap gap-2" onSubmit={async e => { e.preventDefault(); const id = String(new FormData(e.currentTarget).get('user')); setSaving(true); try { await save({ data: { userId: id, enabled: true } }); await refresh(); onMessage(`Owner ${ids.length + 2} ditambahkan.`); } catch (error) { onMessage(error instanceof Error ? error.message : 'Gagal menambah Owner.'); } finally { setSaving(false); } }}>
+      <select name="user" aria-label="Akun Owner baru" className="form-input min-w-0 flex-1" required disabled={saving} defaultValue=""><option value="" disabled>Pilih akun member</option>{members.filter(m => !ids.includes(m.id)).map(m => <option key={m.id} value={m.id}>{m.email}</option>)}</select>
+      <Button disabled={saving} className="rounded-full bg-foreground text-background hover:bg-foreground/90">{saving ? <Loader2 className="animate-spin"/> : <UserCheck/>}{saving ? 'Menyimpan…' : `Jadikan Owner ${ids.length + 2}`}</Button>
     </form>
-    <div className="mt-5 rounded-2xl border border-border p-4"><h4 className="text-sm font-bold">Izin menu Owner 2</h4><p className="mt-1 text-xs text-muted-foreground">Centang menu yang boleh dibuka Owner 2. Perubahan langsung berlaku.</p>
-      <div className="mt-3 grid gap-2 sm:grid-cols-2">{(Object.keys(PERM_LABEL) as (keyof ReviewerPermissions)[]).map(k => <label key={k} className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-primary" checked={Boolean(perms?.[k])} disabled={!perms} onChange={() => toggle(k)}/>{PERM_LABEL[k]}</label>)}</div>
-      <p className="mt-3 text-[11px] text-muted-foreground">Vault, Users, Presale, Clones, Tim dan pengaturan sensitif lain tetap hanya untuk Owner 1.</p></div>
-    <div className="mt-4 space-y-2">{ids.map(id => <div key={id} className="flex items-center justify-between gap-3 text-sm"><span className="break-all">{members.find(m => m.id === id)?.email ?? id}</span><Button size="sm" variant="outline" className="rounded-full" onClick={async () => { try { await save({ data: { userId: id, enabled: false } }); await qc.invalidateQueries({ queryKey: ['admin-reviewers'] }); onMessage('Owner 2 removed.'); } catch { onMessage('Could not remove.'); } }}>Remove</Button></div>)}</div>
+    <div className="mt-5 space-y-3">{ids.map((id, i) => <div key={id} className="rounded-2xl border border-border p-4">
+      <div className="flex items-center justify-between gap-3"><div className="min-w-0"><b className="text-sm text-primary">Owner {i + 2}</b><p className="break-all text-xs text-muted-foreground">{members.find(m => m.id === id)?.email ?? id}</p></div>
+        <Button size="sm" variant="outline" className="rounded-full" onClick={async () => { try { await save({ data: { userId: id, enabled: false } }); await refresh(); onMessage(`Owner ${i + 2} dihapus.`); } catch { onMessage('Gagal menghapus.'); } }}>Hapus</Button></div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">{(Object.keys(PERM_LABEL) as (keyof ReviewerPermissions)[]).map(k => <label key={k} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-border px-3 py-2 text-xs">{PERM_LABEL[k]}<Switch checked={Boolean(perms[id]?.[k])} disabled={!perms[id]} onCheckedChange={() => toggle(id, i, k)} aria-label={`Owner ${i + 2} ${PERM_LABEL[k]}`}/></label>)}</div>
+    </div>)}</div>
+    <p className="mt-3 text-[11px] text-muted-foreground">Vault, Users, Presale, Clones, Tim, fitur baru dan pengaturan sensitif lain tetap hanya untuk Owner 1.</p>
   </section>;
 }
 
-const PERM_LABEL: Record<keyof ReviewerPermissions, string> = { apy: 'APY & paket staking', wallet: 'Dompet WLT-01 & review deposit/withdraw', market: 'Harga Market', referral: 'Bonus Referral' };
+const PERM_LABEL: Record<keyof ReviewerPermissions, string> = { apy: 'APY & paket staking', wallet: 'Dompet & review deposit/withdraw', market: 'Harga Market', referral: 'Bonus Referral' };
 
 export function AdminTurnover({ members }: { members: { id: string; email: string }[] }) {
   const fetchT = useServerFn(getOwnerTurnover);
