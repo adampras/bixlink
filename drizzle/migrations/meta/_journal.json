@@ -477,6 +477,13 @@
       "when": 1792581331785,
       "tag": "0067_usdt_stake_profit_claims",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1792582691069,
+      "tag": "0068_owner_deposit_wallets_revenue",
+      "breakpoints": true
     }
   ]
 }
