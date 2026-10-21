@@ -36,42 +36,42 @@ type UiKey = keyof typeof ui.en;
 
 const updates = {
   en: [
-    { id: 'languages', title: 'Five languages are now available', body: 'Choose English, Indonesian, Chinese, Japanese, or Korean.' },
+    { id: 'languages', title: '11 languages are now available', body: 'Pick your language from the flag selector.' },
     { id: 'transfer', title: 'Virtual USDT transfer', body: 'Testing access is controlled by the owner.' },
     { id: 'stake-confirm', title: 'Clearer staking confirmation', body: 'Every staking request now includes agreement and confirmation.' },
   ],
   id: [
-    { id: 'languages', title: 'Lima bahasa kini tersedia', body: 'Pilih Inggris, Indonesia, Mandarin, Jepang, atau Korea.' },
+    { id: 'languages', title: 'Kini tersedia 11 bahasa', body: 'Pilih bahasa melalui simbol bendera.' },
     { id: 'transfer', title: 'Transfer USDT virtual', body: 'Akses pengujian dikontrol oleh owner.' },
     { id: 'stake-confirm', title: 'Konfirmasi staking lebih jelas', body: 'Setiap permintaan staking kini dilengkapi persetujuan dan konfirmasi.' },
   ],
   ms: [
-    { id: 'languages', title: 'Lapan bahasa kini tersedia', body: 'Pilih bahasa pilihan anda melalui simbol bendera.' },
+    { id: 'languages', title: 'Kini tersedia 11 bahasa', body: 'Pilih bahasa pilihan anda melalui simbol bendera.' },
     { id: 'transfer', title: 'Pemindahan USDT maya', body: 'Akses ujian dikawal oleh pemilik.' },
     { id: 'stake-confirm', title: 'Pengesahan staking lebih jelas', body: 'Setiap permintaan kini termasuk persetujuan dan pengesahan.' },
   ],
   vi: [
-    { id: 'languages', title: 'Hiện có tám ngôn ngữ', body: 'Chọn ngôn ngữ bằng biểu tượng lá cờ.' },
+    { id: 'languages', title: 'Hiện có 11 ngôn ngữ', body: 'Chọn ngôn ngữ bằng biểu tượng lá cờ.' },
     { id: 'transfer', title: 'Chuyển USDT ảo', body: 'Quyền truy cập thử nghiệm do chủ sở hữu kiểm soát.' },
     { id: 'stake-confirm', title: 'Xác nhận staking rõ ràng hơn', body: 'Mỗi yêu cầu hiện có bước đồng ý và xác nhận.' },
   ],
   th: [
-    { id: 'languages', title: 'รองรับแปดภาษาแล้ว', body: 'เลือกภาษาที่ต้องการผ่านสัญลักษณ์ธง' },
+    { id: 'languages', title: 'รองรับ 11 ภาษาแล้ว', body: 'เลือกภาษาที่ต้องการผ่านสัญลักษณ์ธง' },
     { id: 'transfer', title: 'โอน USDT เสมือน', body: 'เจ้าของควบคุมการเข้าถึงการทดสอบ' },
     { id: 'stake-confirm', title: 'ยืนยันการสเตกชัดเจนขึ้น', body: 'ทุกคำขอมีขั้นตอนยอมรับและยืนยัน' },
   ],
   zh: [
-    { id: 'languages', title: '现已支持五种语言', body: '可选择英语、印尼语、中文、日语或韩语。' },
+    { id: 'languages', title: '现已支持 11 种语言', body: '通过国旗图标选择语言。' },
     { id: 'transfer', title: '虚拟 USDT 转账', body: '测试权限由所有者控制。' },
     { id: 'stake-confirm', title: '更清晰的质押确认', body: '每个质押请求现在都包含同意和确认步骤。' },
   ],
   ja: [
-    { id: 'languages', title: '5言語に対応しました', body: '英語、インドネシア語、中国語、日本語、韓国語から選べます。' },
+    { id: 'languages', title: '11言語に対応しました', body: '国旗アイコンから言語を選べます。' },
     { id: 'transfer', title: '仮想USDT送金', body: 'テスト利用はオーナーが管理します。' },
     { id: 'stake-confirm', title: '明確なステーキング確認', body: '各リクエストに同意と確認が追加されました。' },
   ],
   ko: [
-    { id: 'languages', title: '5개 언어 지원', body: '영어, 인도네시아어, 중국어, 일본어, 한국어를 선택하세요.' },
+    { id: 'languages', title: '11개 언어 지원', body: '국기 아이콘으로 언어를 선택하세요.' },
     { id: 'transfer', title: '가상 USDT 송금', body: '테스트 사용은 소유자가 관리합니다.' },
     { id: 'stake-confirm', title: '명확한 스테이킹 확인', body: '모든 요청에 동의 및 확인 단계가 포함됩니다.' },
   ],
@@ -181,8 +181,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     setLanguageState(initial);
   }, []);
   const setLanguage = useCallback((next: Language) => {
-    setLanguageState(next);
+    const root = document.documentElement;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.localStorage.setItem('bixlink-language', next);
+    if (reduce) { setLanguageState(next); return; }
+    root.classList.add('lang-out');
+    window.setTimeout(() => { setLanguageState(next); root.classList.remove('lang-out'); root.classList.add('lang-in'); window.setTimeout(() => root.classList.remove('lang-in'), 420); }, 160);
   }, []);
   useEffect(() => {
     document.documentElement.lang = language;

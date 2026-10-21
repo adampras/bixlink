@@ -2783,3 +2783,42 @@ html[data-color-mode="light"] .landing-presale-band :is(.hero-ribbon-live b,.her
   .eco-card{flex-basis:100%}
   .hub-strip,.eco-rail{scroll-snap-type:x mandatory}
 }
+
+/* Language switch transition */
+html.lang-out body { opacity:.35; filter:blur(2px); transition:opacity .16s ease, filter .16s ease; }
+html.lang-in body { animation:lang-in .42s cubic-bezier(.2,.7,.2,1); }
+@keyframes lang-in { from { opacity:.35; filter:blur(2px); transform:translateY(4px); } to { opacity:1; filter:none; transform:none; } }
+
+/* Slim presale band */
+.landing-presale-band .hero-ribbon { max-width:420px; gap:6px; padding:10px 12px; margin-top:12px; border-radius:14px; background:linear-gradient(135deg, oklch(0.24 0.06 160), oklch(0.16 0.03 170) 55%, oklch(0.22 0.05 80)); border-color:oklch(0.8 0.13 85 / 70%); box-shadow:inset 0 1px 0 oklch(0.95 0.08 90 / 22%), 0 10px 28px -16px oklch(0.7 0.14 160 / 70%); }
+.landing-presale-band .hero-ribbon-live { font-size:9px; gap:6px; }
+.landing-presale-band .hero-ribbon-live b { font-size:15px; }
+.landing-presale-band .hero-ribbon-path { font-size:12px; }
+.landing-presale-band .hero-ribbon-cta { max-width:220px; padding:8px 14px; font-size:12px; }
+.landing-presale-band .hero-ribbon-note { font-size:9px; opacity:.8; }
+html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:linear-gradient(135deg, oklch(0.97 0.03 160), oklch(0.96 0.04 85)); }
+
+/* Compact lux wallet actions */
+.wallet-actions { gap:10px; margin-top:12px; }
+.wallet-action { height:42px; border-radius:12px; font-size:11px; letter-spacing:.12em; gap:8px; }
+.wallet-action span { width:24px; height:24px; }
+.wallet-action span svg { width:14px; height:14px; }
+
+/* Futuristic Elite card model */
+.wallet-elite { background:radial-gradient(120% 90% at 100% 0%, oklch(0.35 0.09 200 / 55%), transparent 55%), linear-gradient(135deg, oklch(0.14 0.02 260), oklch(0.09 0.01 260) 60%, oklch(0.17 0.04 300)) !important; border-color:oklch(0.8 0.12 200 / 55%) !important; }
+.wallet-elite .elite-grid { position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg, transparent, oklch(0.85 0.12 200 / 12%), transparent); background-size:220% 100%; animation:elite-scan 6s linear infinite; }
+.wallet-elite .elite-orbs { position:absolute; right:18px; bottom:16px; display:flex; pointer-events:none; }
+.wallet-elite .elite-orbs i { width:30px; height:30px; border-radius:50%; background:oklch(0.65 0.2 30 / 85%); }
+.wallet-elite .elite-orbs i + i { margin-left:-12px; background:oklch(0.82 0.16 80 / 85%); }
+@keyframes elite-scan { from { background-position:200% 0; } to { background-position:-20% 0; } }
+@media (prefers-reduced-motion: reduce) { .wallet-elite .elite-grid { animation:none; } }
+
+/* Five-nation alliance */
+.nation-alliance { max-width:72rem; margin:0 auto; padding:2rem 1.25rem; }
+.nation-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:1.25rem; }
+.nation-card { display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px; padding:16px 12px; border-radius:16px; border:1px solid color-mix(in oklab,var(--chart-3) 30%,transparent); background:color-mix(in oklab,var(--card) 80%,transparent); }
+.nation-avatar { position:relative; width:64px; height:64px; border-radius:50%; display:grid; place-items:center; font-weight:800; letter-spacing:.08em; color:var(--chart-3); border:2px solid color-mix(in oklab,var(--chart-3) 70%,transparent); background:radial-gradient(circle at 30% 25%, color-mix(in oklab,var(--chart-3) 25%,transparent), var(--card)); box-shadow:0 8px 22px -12px var(--chart-3); }
+.nation-avatar img { position:absolute; right:-4px; bottom:-2px; width:24px; height:16px; border-radius:3px; object-fit:cover; border:1px solid var(--border); }
+.nation-card b { font-size:13px; }
+.nation-card small { font-size:10px; letter-spacing:.12em; color:var(--chart-2); text-transform:uppercase; }
+.nation-card p { font-size:11px; line-height:1.5; color:var(--muted-foreground); }
