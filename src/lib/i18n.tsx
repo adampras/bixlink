@@ -13,9 +13,13 @@ export const LANGUAGES = [
   { code: 'hi', flag: 'in', label: 'हिन्दी' },
   { code: 'es', flag: 'es', label: 'Español' },
   { code: 'pt', flag: 'br', label: 'Português (BR)' },
+  { code: 'ru', flag: 'ru', label: 'Русский' },
+  { code: 'tr', flag: 'tr', label: 'Türkçe' },
+  { code: 'ar', flag: 'ae', label: 'العربية' },
+  { code: 'tl', flag: 'ph', label: 'Filipino' },
 ] as const;
 
-export const FLAG_CODE: Record<string, string> = { gb: 'ENG', id: 'INA', my: 'MAS', vn: 'VIE', th: 'THA', cn: 'CHN', jp: 'JPN', kr: 'KOR', in: 'HIN', es: 'ESP', br: 'POR' };
+export const FLAG_CODE: Record<string, string> = { gb: 'ENG', id: 'INA', my: 'MAS', vn: 'VIE', th: 'THA', cn: 'CHN', jp: 'JPN', kr: 'KOR', in: 'HIN', es: 'ESP', br: 'POR', ru: 'RUS', tr: 'TUR', ae: 'UAE', ph: 'PHI' };
 export type Language = (typeof LANGUAGES)[number]['code'];
 
 const ui = {
@@ -30,65 +34,89 @@ const ui = {
   hi: { home: 'होम', wallet: 'वॉलेट', stake: 'स्टेक', boost: 'APY बूस्ट', network: 'नेटवर्क', profile: 'प्रोफ़ाइल', settings: 'सेटिंग्स', notifications: 'सूचनाएँ', markRead: 'सभी पढ़े गए', noUpdates: 'कोई नया अपडेट नहीं', signIn: 'साइन इन', language: 'भाषा', updatePrefs: 'अपडेट सूचनाएँ', updatePrefsHelp: 'ऊपर उत्पाद और सेवा घोषणाएँ दिखाएँ।', enabled: 'चालू', disabled: 'बंद', preferences: 'प्राथमिकताएँ', accountSettings: 'खाता सेटिंग्स', savedHere: 'प्राथमिकताएँ इस डिवाइस पर सहेजी गई हैं।', latestUpdates: 'नवीनतम अपडेट' },
   es: { home: 'INICIO', wallet: 'BILLETERA', stake: 'STAKING', boost: 'BOOST APY', network: 'RED', profile: 'Perfil', settings: 'Ajustes', notifications: 'Notificaciones', markRead: 'Marcar todo como leído', noUpdates: 'Sin novedades', signIn: 'Iniciar sesión', language: 'Idioma', updatePrefs: 'Avisos de novedades', updatePrefsHelp: 'Mostrar anuncios de productos y servicios arriba.', enabled: 'Activado', disabled: 'Desactivado', preferences: 'PREFERENCIAS', accountSettings: 'AJUSTES DE CUENTA', savedHere: 'Las preferencias se guardan en este dispositivo.', latestUpdates: 'ÚLTIMAS NOVEDADES' },
   pt: { home: 'INÍCIO', wallet: 'CARTEIRA', stake: 'STAKING', boost: 'BOOST APY', network: 'REDE', profile: 'Perfil', settings: 'Configurações', notifications: 'Notificações', markRead: 'Marcar tudo como lido', noUpdates: 'Sem novidades', signIn: 'Entrar', language: 'Idioma', updatePrefs: 'Avisos de novidades', updatePrefsHelp: 'Mostrar anúncios de produtos e serviços no topo.', enabled: 'Ativado', disabled: 'Desativado', preferences: 'PREFERÊNCIAS', accountSettings: 'CONFIGURAÇÕES DA CONTA', savedHere: 'As preferências ficam salvas neste dispositivo.', latestUpdates: 'ÚLTIMAS NOVIDADES' },
+  ru: { home: 'ГЛАВНАЯ', wallet: 'КОШЕЛЁК', stake: 'СТЕЙКИНГ', boost: 'BOOST APY', network: 'СЕТЬ', profile: 'Профиль', settings: 'Настройки', notifications: 'Уведомления', markRead: 'Прочитать все', noUpdates: 'Нет новых обновлений', signIn: 'Войти', language: 'Язык', updatePrefs: 'Уведомления об обновлениях', updatePrefsHelp: 'Показывать объявления о продуктах вверху.', enabled: 'Вкл', disabled: 'Выкл', preferences: 'ПАРАМЕТРЫ', accountSettings: 'НАСТРОЙКИ АККАУНТА', savedHere: 'Настройки сохранены на этом устройстве.', latestUpdates: 'ПОСЛЕДНИЕ НОВОСТИ' },
+  tr: { home: 'ANA SAYFA', wallet: 'CÜZDAN', stake: 'STAKING', boost: 'BOOST APY', network: 'AĞ', profile: 'Profil', settings: 'Ayarlar', notifications: 'Bildirimler', markRead: 'Tümünü okundu say', noUpdates: 'Yeni güncelleme yok', signIn: 'Giriş yap', language: 'Dil', updatePrefs: 'Güncelleme bildirimleri', updatePrefsHelp: 'Ürün ve hizmet duyurularını üstte göster.', enabled: 'Açık', disabled: 'Kapalı', preferences: 'TERCİHLER', accountSettings: 'HESAP AYARLARI', savedHere: 'Tercihler bu cihazda kaydedilir.', latestUpdates: 'SON GÜNCELLEMELER' },
+  ar: { home: 'الرئيسية', wallet: 'المحفظة', stake: 'التخزين', boost: 'BOOST APY', network: 'الشبكة', profile: 'الملف الشخصي', settings: 'الإعدادات', notifications: 'الإشعارات', markRead: 'تعليم الكل كمقروء', noUpdates: 'لا توجد تحديثات جديدة', signIn: 'تسجيل الدخول', language: 'اللغة', updatePrefs: 'إشعارات التحديث', updatePrefsHelp: 'عرض إعلانات المنتجات والخدمات في الأعلى.', enabled: 'مفعّل', disabled: 'متوقف', preferences: 'التفضيلات', accountSettings: 'إعدادات الحساب', savedHere: 'تُحفظ التفضيلات على هذا الجهاز.', latestUpdates: 'آخر التحديثات' },
+  tl: { home: 'HOME', wallet: 'WALLET', stake: 'STAKE', boost: 'BOOST APY', network: 'NETWORK', profile: 'Profile', settings: 'Mga Setting', notifications: 'Mga Abiso', markRead: 'Markahan lahat na nabasa', noUpdates: 'Walang bagong update', signIn: 'Mag-sign in', language: 'Wika', updatePrefs: 'Mga abiso ng update', updatePrefsHelp: 'Ipakita ang mga anunsyo sa itaas.', enabled: 'Naka-on', disabled: 'Naka-off', preferences: 'MGA KAGUSTUHAN', accountSettings: 'SETTING NG ACCOUNT', savedHere: 'Naka-save ang mga kagustuhan sa device na ito.', latestUpdates: 'PINAKABAGONG UPDATE' },
 } as const;
 
 type UiKey = keyof typeof ui.en;
 
 const updates = {
   en: [
-    { id: 'languages', title: '11 languages are now available', body: 'Pick your language from the flag selector.' },
+    { id: 'languages', title: '15 languages are now available', body: 'Pick your language from the flag selector.' },
     { id: 'transfer', title: 'Virtual USDT transfer', body: 'Testing access is controlled by the owner.' },
     { id: 'stake-confirm', title: 'Clearer staking confirmation', body: 'Every staking request now includes agreement and confirmation.' },
   ],
   id: [
-    { id: 'languages', title: 'Kini tersedia 11 bahasa', body: 'Pilih bahasa melalui simbol bendera.' },
+    { id: 'languages', title: 'Kini tersedia 15 bahasa', body: 'Pilih bahasa melalui simbol bendera.' },
     { id: 'transfer', title: 'Transfer USDT virtual', body: 'Akses pengujian dikontrol oleh owner.' },
     { id: 'stake-confirm', title: 'Konfirmasi staking lebih jelas', body: 'Setiap permintaan staking kini dilengkapi persetujuan dan konfirmasi.' },
   ],
   ms: [
-    { id: 'languages', title: 'Kini tersedia 11 bahasa', body: 'Pilih bahasa pilihan anda melalui simbol bendera.' },
+    { id: 'languages', title: 'Kini tersedia 15 bahasa', body: 'Pilih bahasa pilihan anda melalui simbol bendera.' },
     { id: 'transfer', title: 'Pemindahan USDT maya', body: 'Akses ujian dikawal oleh pemilik.' },
     { id: 'stake-confirm', title: 'Pengesahan staking lebih jelas', body: 'Setiap permintaan kini termasuk persetujuan dan pengesahan.' },
   ],
   vi: [
-    { id: 'languages', title: 'Hiện có 11 ngôn ngữ', body: 'Chọn ngôn ngữ bằng biểu tượng lá cờ.' },
+    { id: 'languages', title: 'Hiện có 15 ngôn ngữ', body: 'Chọn ngôn ngữ bằng biểu tượng lá cờ.' },
     { id: 'transfer', title: 'Chuyển USDT ảo', body: 'Quyền truy cập thử nghiệm do chủ sở hữu kiểm soát.' },
     { id: 'stake-confirm', title: 'Xác nhận staking rõ ràng hơn', body: 'Mỗi yêu cầu hiện có bước đồng ý và xác nhận.' },
   ],
   th: [
-    { id: 'languages', title: 'รองรับ 11 ภาษาแล้ว', body: 'เลือกภาษาที่ต้องการผ่านสัญลักษณ์ธง' },
+    { id: 'languages', title: 'รองรับ 15 ภาษาแล้ว', body: 'เลือกภาษาที่ต้องการผ่านสัญลักษณ์ธง' },
     { id: 'transfer', title: 'โอน USDT เสมือน', body: 'เจ้าของควบคุมการเข้าถึงการทดสอบ' },
     { id: 'stake-confirm', title: 'ยืนยันการสเตกชัดเจนขึ้น', body: 'ทุกคำขอมีขั้นตอนยอมรับและยืนยัน' },
   ],
   zh: [
-    { id: 'languages', title: '现已支持 11 种语言', body: '通过国旗图标选择语言。' },
+    { id: 'languages', title: '现已支持 15 种语言', body: '通过国旗图标选择语言。' },
     { id: 'transfer', title: '虚拟 USDT 转账', body: '测试权限由所有者控制。' },
     { id: 'stake-confirm', title: '更清晰的质押确认', body: '每个质押请求现在都包含同意和确认步骤。' },
   ],
   ja: [
-    { id: 'languages', title: '11言語に対応しました', body: '国旗アイコンから言語を選べます。' },
+    { id: 'languages', title: '15言語に対応しました', body: '国旗アイコンから言語を選べます。' },
     { id: 'transfer', title: '仮想USDT送金', body: 'テスト利用はオーナーが管理します。' },
     { id: 'stake-confirm', title: '明確なステーキング確認', body: '各リクエストに同意と確認が追加されました。' },
   ],
   ko: [
-    { id: 'languages', title: '11개 언어 지원', body: '국기 아이콘으로 언어를 선택하세요.' },
+    { id: 'languages', title: '15개 언어 지원', body: '국기 아이콘으로 언어를 선택하세요.' },
     { id: 'transfer', title: '가상 USDT 송금', body: '테스트 사용은 소유자가 관리합니다.' },
     { id: 'stake-confirm', title: '명확한 스테이킹 확인', body: '모든 요청에 동의 및 확인 단계가 포함됩니다.' },
   ],
   hi: [
-    { id: 'languages', title: 'अब 11 भाषाएँ उपलब्ध', body: 'झंडे के प्रतीक से अपनी भाषा चुनें।' },
+    { id: 'languages', title: 'अब 15 भाषाएँ उपलब्ध', body: 'झंडे के प्रतीक से अपनी भाषा चुनें।' },
     { id: 'transfer', title: 'वर्चुअल USDT ट्रांसफ़र', body: 'परीक्षण पहुँच मालिक द्वारा नियंत्रित है।' },
     { id: 'stake-confirm', title: 'स्पष्ट स्टेकिंग पुष्टि', body: 'हर अनुरोध में सहमति और पुष्टि शामिल है।' },
   ],
   es: [
-    { id: 'languages', title: 'Ya hay 11 idiomas', body: 'Elige tu idioma con el símbolo de la bandera.' },
+    { id: 'languages', title: 'Ya hay 15 idiomas', body: 'Elige tu idioma con el símbolo de la bandera.' },
     { id: 'transfer', title: 'Transferencia USDT virtual', body: 'El acceso de prueba lo controla el propietario.' },
     { id: 'stake-confirm', title: 'Confirmación de staking más clara', body: 'Cada solicitud incluye aceptación y confirmación.' },
   ],
   pt: [
-    { id: 'languages', title: 'Agora com 11 idiomas', body: 'Escolha seu idioma pelo símbolo da bandeira.' },
+    { id: 'languages', title: 'Agora com 15 idiomas', body: 'Escolha seu idioma pelo símbolo da bandeira.' },
     { id: 'transfer', title: 'Transferência USDT virtual', body: 'O acesso de teste é controlado pelo proprietário.' },
     { id: 'stake-confirm', title: 'Confirmação de staking mais clara', body: 'Cada pedido inclui aceite e confirmação.' },
+  ],
+  ru: [
+    { id: 'languages', title: 'Доступно 15 языков', body: 'Выберите язык с помощью флага.' },
+    { id: 'transfer', title: 'Виртуальный перевод USDT', body: 'Тестовый доступ контролирует владелец.' },
+    { id: 'stake-confirm', title: 'Понятное подтверждение стейкинга', body: 'Каждый запрос включает согласие и подтверждение.' },
+  ],
+  tr: [
+    { id: 'languages', title: 'Artık 15 dil mevcut', body: 'Dilinizi bayrak simgesinden seçin.' },
+    { id: 'transfer', title: 'Sanal USDT transferi', body: 'Test erişimi sahip tarafından yönetilir.' },
+    { id: 'stake-confirm', title: 'Daha net staking onayı', body: 'Her talep onay ve kabul adımı içerir.' },
+  ],
+  ar: [
+    { id: 'languages', title: 'أصبحت 15 لغة متاحة', body: 'اختر لغتك من رمز العلم.' },
+    { id: 'transfer', title: 'تحويل USDT افتراضي', body: 'يتحكم المالك في وصول الاختبار.' },
+    { id: 'stake-confirm', title: 'تأكيد تخزين أوضح', body: 'كل طلب يتضمن الموافقة والتأكيد.' },
+  ],
+  tl: [
+    { id: 'languages', title: '15 wika na ang available', body: 'Piliin ang wika gamit ang bandila.' },
+    { id: 'transfer', title: 'Virtual na USDT transfer', body: 'Ang owner ang kumokontrol sa test access.' },
+    { id: 'stake-confirm', title: 'Mas malinaw na kumpirmasyon ng staking', body: 'Bawat request ay may pagsang-ayon at kumpirmasyon.' },
   ],
 } as const;
 
@@ -123,13 +151,25 @@ const manualPhrases: Record<Exclude<Language, 'en'>, Record<string, string>> = {
   pt: {
     'Deposit':'Depositar','Withdraw':'Sacar','Swap':'Trocar','Available balance':'Saldo disponível','Transaction history':'Histórico de transações','Swap history':'Histórico de trocas','Coming soon':'Em breve','Done':'Concluído','CHOOSE PACKAGE':'ESCOLHA O PACOTE','Annual yield':'Rendimento anual','Lock period':'Período de bloqueio','Stake Now':'Fazer staking','Stake now':'Fazer staking','My requests':'Meus pedidos','MY NETWORK':'MINHA REDE','Direct referrals':'Indicações diretas','Total network':'Rede total','Network tree':'Árvore da rede','Referral code':'Código de indicação','Personal link':'Link pessoal','Copy link':'Copiar link','Change password':'Alterar senha','Sign out':'Sair','MEMBER ACCESS':'ACESSO DE MEMBROS','WELCOME BACK':'BEM-VINDO DE VOLTA','Create an account':'Criar uma conta','Create account':'Criar conta','FULL NAME':'NOME COMPLETO','USERNAME':'USUÁRIO','PASSWORD':'SENHA','REFERRAL CODE':'CÓDIGO DE INDICAÇÃO','Forgot password?':'Esqueceu a senha?','Pay':'Pagar','Receive':'Receber','History':'Histórico','Cancel':'Cancelar','Send transfer':'Enviar transferência','BIX balance':'Saldo BIX','Back to BIXLINK':'Voltar ao BIXLINK'
   },
+  ru: {
+    'Deposit':'Пополнить','Withdraw':'Вывести','Swap':'Обмен','Available balance':'Доступный баланс','Transaction history':'История операций','Coming soon':'Скоро','Done':'Готово','CHOOSE PACKAGE':'ВЫБЕРИТЕ ПАКЕТ','Annual yield':'Годовая доходность','Lock period':'Срок блокировки','Stake Now':'Застейкать','My requests':'Мои заявки','MY NETWORK':'МОЯ СЕТЬ','Direct referrals':'Прямые рефералы','Total network':'Вся сеть','Referral code':'Реферальный код','Copy link':'Копировать ссылку','Change password':'Сменить пароль','Sign out':'Выйти','WELCOME BACK':'С ВОЗВРАЩЕНИЕМ','Create account':'Создать аккаунт','FULL NAME':'ПОЛНОЕ ИМЯ','USERNAME':'ИМЯ ПОЛЬЗОВАТЕЛЯ','PASSWORD':'ПАРОЛЬ','Forgot password?':'Забыли пароль?','Pay':'Оплатить','Receive':'Получить','History':'История','Cancel':'Отмена','BIX balance':'Баланс BIX'
+  },
+  tr: {
+    'Deposit':'Yatır','Withdraw':'Çek','Swap':'Takas','Available balance':'Kullanılabilir bakiye','Transaction history':'İşlem geçmişi','Coming soon':'Yakında','Done':'Tamam','CHOOSE PACKAGE':'PAKET SEÇ','Annual yield':'Yıllık getiri','Lock period':'Kilit süresi','Stake Now':'Şimdi stake et','My requests':'Taleplerim','MY NETWORK':'AĞIM','Direct referrals':'Doğrudan referanslar','Total network':'Toplam ağ','Referral code':'Referans kodu','Copy link':'Bağlantıyı kopyala','Change password':'Şifre değiştir','Sign out':'Çıkış yap','WELCOME BACK':'TEKRAR HOŞ GELDİNİZ','Create account':'Hesap oluştur','FULL NAME':'AD SOYAD','USERNAME':'KULLANICI ADI','PASSWORD':'ŞİFRE','Forgot password?':'Şifremi unuttum?','Pay':'Öde','Receive':'Al','History':'Geçmiş','Cancel':'İptal','BIX balance':'BIX bakiyesi'
+  },
+  ar: {
+    'Deposit':'إيداع','Withdraw':'سحب','Swap':'مبادلة','Available balance':'الرصيد المتاح','Transaction history':'سجل المعاملات','Coming soon':'قريباً','Done':'تم','CHOOSE PACKAGE':'اختر الباقة','Annual yield':'العائد السنوي','Lock period':'مدة القفل','Stake Now':'خزّن الآن','My requests':'طلباتي','MY NETWORK':'شبكتي','Direct referrals':'الإحالات المباشرة','Total network':'إجمالي الشبكة','Referral code':'رمز الإحالة','Copy link':'نسخ الرابط','Change password':'تغيير كلمة المرور','Sign out':'تسجيل الخروج','WELCOME BACK':'مرحباً بعودتك','Create account':'إنشاء حساب','FULL NAME':'الاسم الكامل','USERNAME':'اسم المستخدم','PASSWORD':'كلمة المرور','Forgot password?':'نسيت كلمة المرور؟','Pay':'ادفع','Receive':'استلام','History':'السجل','Cancel':'إلغاء','BIX balance':'رصيد BIX'
+  },
+  tl: {
+    'Withdraw':'Mag-withdraw','Available balance':'Available na balanse','Transaction history':'Kasaysayan ng transaksyon','Coming soon':'Malapit na','Done':'Tapos','CHOOSE PACKAGE':'PUMILI NG PACKAGE','Annual yield':'Taunang kita','Lock period':'Panahon ng lock','My requests':'Aking mga request','MY NETWORK':'AKING NETWORK','Change password':'Palitan ang password','Sign out':'Mag-sign out','WELCOME BACK':'MALIGAYANG PAGBABALIK','Create account':'Gumawa ng account','FULL NAME':'BUONG PANGALAN','Forgot password?':'Nakalimutan ang password?','Pay':'Magbayad','Receive':'Tumanggap','History':'Kasaysayan','Cancel':'Kanselahin','BIX balance':'Balanse ng BIX'
+  },
 };
 
 const generated = generatedPhrases as Partial<Record<Exclude<Language, 'en'>, Record<string, string>>>;
 const phrases = Object.fromEntries((Object.keys(manualPhrases) as Exclude<Language, 'en'>[]).map(l => [l, { ...generated[l], ...manualPhrases[l] }])) as Record<Exclude<Language, 'en'>, Record<string, string>>;
 
 type ProductUpdate = { id: string; title: string; body: string };
-const locales: Record<Language, string> = { en: 'en-US', id: 'id-ID', ms: 'ms-MY', vi: 'vi-VN', th: 'th-TH', zh: 'zh-CN', ja: 'ja-JP', ko: 'ko-KR', hi: 'hi-IN', es: 'es-ES', pt: 'pt-BR' };
+const locales: Record<Language, string> = { en: 'en-US', id: 'id-ID', ms: 'ms-MY', vi: 'vi-VN', th: 'th-TH', zh: 'zh-CN', ja: 'ja-JP', ko: 'ko-KR', hi: 'hi-IN', es: 'es-ES', pt: 'pt-BR', ru: 'ru-RU', tr: 'tr-TR', ar: 'ar-AE', tl: 'fil-PH' };
 type I18nValue = { language: Language; setLanguage: (language: Language) => void; t: (key: UiKey) => string; updates: ProductUpdate[]; formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string; formatDate: (value: string | number | Date, options?: Intl.DateTimeFormatOptions) => string; };
 const fallbackI18n: I18nValue = {
   language: 'en',

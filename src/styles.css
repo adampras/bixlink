@@ -2822,3 +2822,32 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .nation-card b { font-size:13px; }
 .nation-card small { font-size:10px; letter-spacing:.12em; color:var(--chart-2); text-transform:uppercase; }
 .nation-card p { font-size:11px; line-height:1.5; color:var(--muted-foreground); }
+
+/* New crypto-market language flags */
+.flag-ru { background: linear-gradient(#ffffff 0 33%, oklch(0.42 0.17 264) 33% 67%, #d62828 67%); }
+.flag-tr { background: #e30a17; }
+.flag-tr::before { content: ""; position: absolute; top: 3px; left: 5px; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 2px 0 0 0 #ffffff; }
+.flag-ae { background: linear-gradient(90deg, #d62828 0 26%, transparent 26%), linear-gradient(oklch(0.55 0.15 150) 0 33%, #ffffff 33% 67%, #111111 67%); }
+.flag-ph { background: linear-gradient(#0038a8 0 50%, #ce1126 50%); }
+.flag-ph::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 11px; background: #ffffff; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+
+/* 5-Nation Consortium rail */
+.nation-rail { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 6px 2px 14px; }
+.nation-rail::-webkit-scrollbar { display: none; }
+.nation-slide { position: relative; flex: 0 0 min(82%, 17rem); scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 22px 16px 18px; border-radius: 22px; border: 1px solid color-mix(in oklab, var(--chart-3) 40%, transparent); background: radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--chart-3) 18%, transparent), transparent 60%), linear-gradient(160deg, var(--card), var(--background)); box-shadow: 0 18px 40px -24px color-mix(in oklab, var(--chart-3) 60%, transparent); overflow: hidden; cursor: pointer; transition: transform .25s ease, box-shadow .25s ease; }
+.nation-slide::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 40%, color-mix(in oklab, var(--chart-3) 22%, transparent) 50%, transparent 60%); transform: translateX(-100%); animation: nation-sheen 5s ease-in-out infinite; pointer-events: none; }
+.nation-slide:active { transform: scale(.97); }
+.nation-slide.is-on { box-shadow: 0 0 0 1px color-mix(in oklab, var(--chart-3) 70%, transparent), 0 22px 46px -20px color-mix(in oklab, var(--chart-3) 70%, transparent); }
+.nation-slide b { font-size: 1.05rem; }
+.nation-slide small { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--chart-2); font-weight: 700; }
+.nation-slide p { font-size: 12px; color: var(--muted-foreground); line-height: 1.5; }
+.nation-slide .nation-more { margin-top: 6px; font-size: 11px; font-weight: 800; letter-spacing: .12em; color: var(--chart-3); }
+.nation-slide .nation-avatar { animation: lux-float 4s ease-in-out infinite; }
+.nation-dots { display: flex; justify-content: center; gap: 6px; }
+.nation-dots button { width: 7px; height: 7px; border-radius: 999px; background: color-mix(in oklab, var(--foreground) 25%, transparent); transition: width .3s, background .3s; }
+.nation-dots button.is-on { width: 22px; background: var(--chart-3); }
+.nation-dialog-body p { font-size: 13px; line-height: 1.7; color: var(--muted-foreground); }
+.nation-dialog-body ul { display: grid; gap: 6px; margin-top: 10px; font-size: 12px; }
+.nation-dialog-body li { border-left: 2px solid var(--chart-3); padding-left: 10px; }
+@keyframes nation-sheen { 0%, 60% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .nation-slide::after, .nation-slide .nation-avatar { animation: none; } }
