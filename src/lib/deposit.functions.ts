@@ -37,8 +37,7 @@ export const saveDepositWallets = createServerFn({ method: 'POST' }).middleware(
 export const verifyDeposit = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { walletCode: string; txHash: string }) => z.object({ walletCode: z.string().trim().min(2).max(20), txHash: z.string().trim().min(10).max(100) }).parse(data))
   .handler(async ({ context, data }) => {
-    const { data: row } = await context.supabase.from('app_settings').select('value').eq('key', 'deposit_wallets').maybeSingle();
-    const wallets = ((row?.value as { wallets?: DepositWallet[] } | null)?.wallets ?? []);
+    const wallets = await memberWallets(context);
     const wallet = wallets.find(w => w.enabled && w.address && w.code === data.walletCode.toUpperCase());
     if (!wallet) return { ok: false as const, reason: 'This deposit wallet is not available.' };
     const hash = wallet.network === 'TRC20' ? data.txHash.replace(/^0x/i, '') : data.txHash;
@@ -68,8 +67,7 @@ export const verifyDeposit = createServerFn({ method: 'POST' }).middleware([requ
 export const createDepositIntent = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { walletCode: string; amount: number }) => z.object({ walletCode: z.string().trim().min(2).max(20), amount: z.number().int().min(1).max(100000) }).parse(data))
   .handler(async ({ context, data }) => {
-    const { data: row } = await context.supabase.from('app_settings').select('value').eq('key', 'deposit_wallets').maybeSingle();
-    const wallets = ((row?.value as { wallets?: DepositWallet[] } | null)?.wallets ?? []);
+    const wallets = await memberWallets(context);
     const wallet = wallets.find(w => w.enabled && w.address && w.code === data.walletCode.toUpperCase());
     if (!wallet) throw new Error('This deposit wallet is not available.');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
@@ -113,3 +111,22 @@ export const claimDepositIntent = createServerFn({ method: 'POST' }).middleware(
     await supabaseAdmin.from('deposit_intents').update({ claim_tx_id: tx.id, claimed_at: new Date().toISOString(), expires_at: expires }).eq('id', intent.id);
     return { ok: true };
   });
+
+// Members under an Owner 2–5 see only that Owner's wallet; everyone else uses Owner 1 wallets.
+async function memberWallets(context: { supabase: any }): Promise<DepositWallet[]> {
+  const { data: own } = await context.supabase.rpc('bix_my_deposit_wallets');
+  if (Array.isArray(own) && own.length) return own as DepositWallet[];
+  const { data: row } = await context.supabase.from('app_settings').select('value').eq('key', 'deposit_wallets').maybeSingle();
+  return ((row?.value as { wallets?: DepositWallet[] } | null)?.wallets ?? []);
+}
+export const getMyDepositWallets = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) =>
+  (await memberWallets(context)).filter(w => w.enabled && w.address));
+
+// Real turnover ledger: Owner 1 sees all rows, Owner 2–5 only their own wallet's rows (RLS).
+export const getOwnerRevenue = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data, error } = await context.supabase.from('bix_owner_revenue').select('id,owner_id,member_id,amount_usd,wallet_code,network,tx_hash,created_at').order('created_at', { ascending: false }).limit(1000);
+  if (error) throw new Error(error.message);
+  const { data: codes } = await context.supabase.from('referral_codes').select('user_id,code');
+  const code = new Map(((codes ?? []) as { user_id: string; code: string }[]).map(c => [c.user_id, c.code]));
+  return (data ?? []).map((r: any) => ({ ...r, amount_usd: Number(r.amount_usd), member_code: code.get(r.member_id) ?? r.member_id.slice(0, 8), owner_code: r.owner_id ? (code.get(r.owner_id) ?? 'Owner') : 'OWNER 1' }));
+});

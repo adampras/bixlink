@@ -11,7 +11,9 @@ export async function matchIntent(admin: Admin, intent: Intent, cache?: Map<stri
   if (new Date(intent.expires_at) < new Date()) { await admin.from('deposit_intents').update({ status: 'expired' }).eq('id', intent.id).eq('status', 'pending'); return { status: 'expired' }; }
   const { data: cfg } = await admin.from('app_settings').select('value').eq('key', 'deposit_wallets').maybeSingle();
   const wallets = ((cfg?.value as { wallets?: { code: string; asset?: DepositAsset }[] } | null)?.wallets ?? []);
-  const asset: DepositAsset = wallets.find(w => w.code === intent.wallet_code)?.asset === 'USDC' ? 'USDC' : 'USDT';
+  let found = wallets.find(w => w.code === intent.wallet_code)?.asset;
+  if (!found && intent.wallet_code.startsWith('OWN-')) { const { data: ow } = await admin.from('bix_owner_deposit_wallets').select('asset').eq('code', intent.wallet_code).maybeSingle(); found = ow?.asset as DepositAsset | undefined; }
+  const asset: DepositAsset = found === 'USDC' ? 'USDC' : 'USDT';
   const key = `${asset}:${intent.network}:${intent.address}`;
   let list = cache?.get(key);
   if (!list) { list = await listIncomingUsdt(intent.network as DepositNetwork, intent.address, asset); cache?.set(key, list); }
