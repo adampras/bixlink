@@ -34,19 +34,30 @@ export const saveReviewerDepositWallet = createServerFn({ method: 'POST' }).midd
     return { ok: true };
   });
 
+// Each reviewer (Owner 2–5) only sees members of their own referral downline; clones always excluded.
+async function reviewerScope(admin: any, reviewerId: string): Promise<string[]> {
+  const [{ data: refs, error }, { data: clones, error: cloneError }] = await Promise.all([
+    admin.from('referral_codes').select('user_id,referred_by'),
+    admin.from('bix_clone_accounts').select('user_id'),
+  ]);
+  if (error) throw error; if (cloneError) throw cloneError;
+  const kids = new Map<string, string[]>();
+  for (const r of (refs ?? []) as { user_id: string; referred_by: string | null }[]) if (r.referred_by) kids.set(r.referred_by, [...(kids.get(r.referred_by) ?? []), r.user_id]);
+  const cloneSet = new Set(((clones ?? []) as { user_id: string }[]).map(c => c.user_id));
+  const seen = new Set<string>(); const stack = [...(kids.get(reviewerId) ?? [])];
+  while (stack.length) { const id = stack.pop()!; if (seen.has(id)) continue; seen.add(id); stack.push(...(kids.get(id) ?? [])); }
+  return [...seen].filter(id => !cloneSet.has(id));
+}
+
 export const getReviewerQueue = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   if (!(await isReviewer(context))) return { reviewer: false as const, items: [] };
   if (!(await readPermissions()).wallet) return { reviewer: true as const, items: [] };
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-  // Hide owner clone accounts from the Owner 2 queue entirely.
-  const { data: clones, error: cloneError } = await supabaseAdmin.from('bix_clone_accounts').select('user_id');
-  if (cloneError) throw cloneError;
-  const cloneIds = (clones ?? []).map((c: { user_id: string }) => c.user_id);
-  let query = supabaseAdmin.from('wallet_transactions')
+  const scope = await reviewerScope(supabaseAdmin, context.userId);
+  if (!scope.length) return { reviewer: true as const, items: [] };
+  const { data, error } = await supabaseAdmin.from('wallet_transactions')
     .select('id,type,amount_usd,net_usd,fee_usd,status,tx_hash,address,network,created_at')
-    .in('type', ['deposit', 'withdraw']).order('created_at', { ascending: false }).limit(200);
-  if (cloneIds.length) query = query.not('user_id', 'in', `(${cloneIds.join(',')})`);
-  const { data, error } = await query;
+    .in('type', ['deposit', 'withdraw']).in('user_id', scope).order('created_at', { ascending: false }).limit(200);
   if (error) throw error;
   return { reviewer: true as const, items: data ?? [] };
 });
@@ -57,15 +68,12 @@ export const reviewerDecide = createServerFn({ method: 'POST' }).middleware([req
     if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
     if (!(await readPermissions()).wallet) throw new Error('This Owner 2 section is turned off');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { data: clones, error: cloneError } = await supabaseAdmin.from('bix_clone_accounts').select('user_id');
-    if (cloneError) throw cloneError;
-    const cloneIds = (clones ?? []).map(c => c.user_id);
-    let query = supabaseAdmin.from('wallet_transactions').update({ status: data.status, reviewed_at: new Date().toISOString() })
-      .eq('id', data.id).eq('status', 'pending').in('type', ['deposit', 'withdraw']);
-    if (cloneIds.length) query = query.not('user_id', 'in', `(${cloneIds.join(',')})`);
-    const { data: changed, error } = await query.select('id').maybeSingle();
+    const scope = await reviewerScope(supabaseAdmin, context.userId);
+    if (!scope.length) throw new Error('Transaction outside your network.');
+    const { data: changed, error } = await supabaseAdmin.from('wallet_transactions').update({ status: data.status, reviewed_at: new Date().toISOString() })
+      .eq('id', data.id).eq('status', 'pending').in('type', ['deposit', 'withdraw']).in('user_id', scope).select('id').maybeSingle();
     if (error) throw error;
-    if (!changed) throw new Error('Transaction unavailable or already reviewed.');
+    if (!changed) throw new Error('Transaction unavailable, outside your network, or already reviewed.');
     await supabaseAdmin.from('deposit_intents').update({ status: 'reviewed' }).eq('claim_tx_id', data.id).eq('status', 'pending');
     return { ok: true };
   });

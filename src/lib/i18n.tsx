@@ -15,6 +15,7 @@ export const LANGUAGES = [
   { code: 'pt', flag: 'br', label: 'Português (BR)' },
 ] as const;
 
+export const FLAG_CODE: Record<string, string> = { gb: 'ENG', id: 'INA', my: 'MAS', vn: 'VIE', th: 'THA', cn: 'CHN', jp: 'JPN', kr: 'KOR', in: 'HIN', es: 'ESP', br: 'POR' };
 export type Language = (typeof LANGUAGES)[number]['code'];
 
 const ui = {
