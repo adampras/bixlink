@@ -1,11 +1,15 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, ArrowUpRight, Coins, Clock3, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useServerFn } from '@tanstack/react-start';
+import { Activity, ArrowDownToLine, ArrowUpRight, Coins, Clock3, Lock, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
 import { money, number } from '@/lib/bixlink';
 import { useMember, usePublicConfig } from '@/lib/useMember';
+import { getMyLeader } from '@/lib/bixlink.functions';
+import { supabase } from '@/integrations/supabase/client';
 
 export const Route = createFileRoute('/profit')({
   head: () => ({ meta: [
