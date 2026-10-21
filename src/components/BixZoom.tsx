@@ -11,12 +11,16 @@ type ZoomPublic = { enabled: boolean; title: string; url: string | null; schedul
 const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
 
 export function BixZoomLogo({ size = 26 }: { size?: number }) {
+  // Lion head crest: radiating mane, face, eyes, nose and muzzle.
+  const mane = Array.from({ length: 14 }, (_, i) => { const a = (i / 14) * Math.PI * 2; const x1 = 24 + Math.cos(a) * 11, y1 = 25 + Math.sin(a) * 11; const x2 = 24 + Math.cos(a + .22) * 20, y2 = 25 + Math.sin(a + .22) * 20; const x3 = 24 + Math.cos(a + .45) * 11, y3 = 25 + Math.sin(a + .45) * 11; return `M${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}L${x3.toFixed(1)} ${y3.toFixed(1)}Z`; }).join('');
   return <svg viewBox="0 0 48 48" width={size} height={size} aria-hidden>
     <defs><linearGradient id="bzg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="var(--zoom-hi)"/><stop offset=".5" stopColor="var(--zoom-mid)"/><stop offset="1" stopColor="var(--zoom-lo)"/></linearGradient></defs>
-    <path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="none" stroke="url(#bzg)" strokeWidth="2.2"/>
-    <rect x="11" y="17" width="18" height="14" rx="3.5" fill="url(#bzg)"/>
-    <path d="M30 21.5 37 17.5v13L30 26.5Z" fill="url(#bzg)"/>
-    <circle cx="20" cy="24" r="3.2" fill="var(--background)"/>
+    <path d={mane} fill="url(#bzg)"/>
+    <path d="M24 13c6 0 10.5 4.6 10.5 10.8 0 5.6-3.4 10.6-10.5 12.7C16.9 34.4 13.5 29.4 13.5 23.8 13.5 17.6 18 13 24 13Z" fill="var(--background)" stroke="url(#bzg)" strokeWidth="1.6"/>
+    <path d="M18.6 22.6l3.4 1-3.4.9zM29.4 22.6l-3.4 1 3.4.9z" fill="url(#bzg)"/>
+    <path d="M21.6 27.4h4.8L24 30.2Z" fill="url(#bzg)"/>
+    <path d="M24 30.2v2.1M24 32.3c-1.4 1-2.8 1-3.8.2M24 32.3c1.4 1 2.8 1 3.8.2" stroke="url(#bzg)" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+    <path d="M24 15.5v5" stroke="url(#bzg)" strokeWidth=".9" opacity=".6"/>
   </svg>;
 }
 
