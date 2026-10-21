@@ -2876,3 +2876,7 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .landing-hero-compact.hero-3d .hero-title { letter-spacing:0; padding-left:0; background-image:linear-gradient(180deg,var(--artwork-gold-light) 0%,var(--artwork-gold-mid) 35%,var(--artwork-gold-dark) 64%,var(--artwork-gold-mid) 85%,var(--artwork-gold-light) 100%) !important; filter:drop-shadow(0 2px 0 var(--artwork-gold-shadow)) drop-shadow(0 5px 6px var(--artwork-gold-shadow)) !important; }
 @keyframes alliance-breathe { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
 @media(prefers-reduced-motion:reduce) { .nation-slide .alliance-portrait,.alliance-dialog { animation:none; } }
+
+/* Clean backgrounds: remove faint grid/line textures everywhere */
+.site-shell[data-presentation-theme="future"] { background-image: none !important; }
+.wallet-summary::before, .wallet-summary[data-wallet-skin]::after, .wallet-sovereign::before, .arena-hud::after { background-image: none !important; background: none !important; }
