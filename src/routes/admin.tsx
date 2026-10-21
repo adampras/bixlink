@@ -22,6 +22,7 @@ import { AdminBixVault } from '@/components/AdminBixVault';
 import { AdminBixToken } from '@/components/AdminBixToken';
 import { AdminReadiness } from '@/components/AdminReadiness';
 import { AdminReviewers, AdminTurnover } from '@/components/AdminReviewers';
+import { NetworkLeaders } from '@/components/NetworkLeaders';
 import { AdminAppearance } from '@/components/AdminAppearance';
 import { AdminSplash } from '@/components/AdminSplash';
 import { AdminReferrals } from '@/components/AdminReferrals';
@@ -93,7 +94,7 @@ function Admin() {
       { title: 'Leader bersponsor', content: <AdminLeaders onMessage={setMessage}/> },
       { title: 'Clones', content: <AdminClones onMessage={setMessage}/> },
     ]}/>}
-    {tab === 'Users' && <><AdminReviewers members={data?.members ?? []} onMessage={setMessage}/><div className="mt-4"><AdminTurnover members={data?.members ?? []}/></div></>}
+    {tab === 'Users' && <><AdminReviewers members={data?.members ?? []} onMessage={setMessage}/><div className="mt-4"><AdminTurnover members={data?.members ?? []}/></div><NetworkLeaders onMessage={setMessage}/></>}
     {tab === 'Desain & Tampilan' && <AdminWorkspace label="Desain & Tampilan" panels={[
       { title: 'Tema & Wallet', content: <AdminAppearance initialReadiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/> },
       { title: 'Visibilitas & Updates', content: <AdminReadiness initial={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} onMessage={setMessage} onSaved={refresh}/> },
