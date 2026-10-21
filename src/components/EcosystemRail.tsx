@@ -55,7 +55,7 @@ export function EcosystemRail({ presale }: { presale: boolean }) {
     <div ref={ref} className="eco-rail">{items.map(item => {
       const I = item.icon;
       const inner = <><span className="eco-icon"><I size={20}/></span><b>{item.title}</b><em>{item.body}</em>{item.soon ? <i className="eco-badge">COMING SOON</i> : <i className="eco-badge is-live">● LIVE</i>}</>;
-      return item.href ? <Link key={item.title} to={item.href} className={`eco-card eco-${item.tone}`}>{inner}</Link> : <div key={item.title} className={`eco-card eco-${item.tone} is-soon`} aria-disabled>{inner}</div>;
+      return item.href ? <Link key={item.title} to={item.href} className={`eco-card eco-${item.tone}`}>{inner}</Link> : <Link key={item.title} to="/coming-soon" className={`eco-card eco-${item.tone} is-soon`}>{inner}</Link>;
     })}</div>
     <RailDots count={items.length} active={active} goTo={goTo} label="Ecosystem"/>
   </section>;
