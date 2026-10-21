@@ -44,6 +44,16 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
+    const msg = String((error as Error)?.message ?? "");
+    if (/dynamically imported module|Importing a module script failed/.test(msg)) {
+      // Stale chunk after a restart/deploy: reload at most once per 30s.
+      const last = Number(sessionStorage.getItem("bix-chunk-reload-at") ?? 0);
+      if (Date.now() - last > 30000) {
+        sessionStorage.setItem("bix-chunk-reload-at", String(Date.now()));
+        window.location.reload();
+        return;
+      }
+    }
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
