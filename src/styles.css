@@ -2638,3 +2638,9 @@ html[data-color-mode="light"] .duration-package { --lux-emerald: oklch(0.48 0.13
 .zoom-dialog a[href^="http"] { background: linear-gradient(180deg, var(--zoom-hi), var(--zoom-mid) 55%, var(--zoom-lo)); color: var(--background); font-weight: 900; letter-spacing: .14em; border-radius: 999px; min-height: 46px; box-shadow: 0 10px 24px -10px var(--chart-3); }
 @keyframes zoom-crest-glow { 50% { box-shadow: 0 0 0 1.5px var(--chart-3), 0 0 0 10px color-mix(in oklab, var(--chart-3) 8%, transparent), 0 0 56px -4px var(--chart-3); } }
 @media (prefers-reduced-motion: reduce) { .zoom-crest { animation: none; } }
+
+/* Landing luxe pass: refined section rhythm, gold headings, glass cards */
+main section h2.font-display { letter-spacing: .04em; background: linear-gradient(180deg, oklch(0.95 0.06 92), oklch(0.8 0.14 82) 55%, oklch(0.6 0.11 68)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hub-divider { height: 1px; margin: 18px auto; max-width: min(1100px, 90vw); background: linear-gradient(90deg, transparent, var(--chart-3), transparent); box-shadow: 0 0 18px color-mix(in oklab, var(--chart-3) 60%, transparent); }
+main section > div > .grid > article, main section .rounded-2xl.border { transition: transform .25s ease, box-shadow .25s ease; }
+@media (hover: hover) { main section .rounded-2xl.border:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -22px var(--chart-3); } }
