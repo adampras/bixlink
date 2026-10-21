@@ -484,6 +484,13 @@
       "when": 1792582691069,
       "tag": "0068_owner_deposit_wallets_revenue",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1792587998391,
+      "tag": "0069_presale_stages",
+      "breakpoints": true
     }
   ]
 }
