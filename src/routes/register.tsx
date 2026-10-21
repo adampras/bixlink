@@ -47,6 +47,12 @@ function RegisterPage() {
       <fieldset className="register-numbered-step"><legend className="sr-only">Account security</legend><span className="register-step-number" aria-hidden>02</span><div className="space-y-2.5"><h2>Security hub</h2>
         <input aria-label="Email address" required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} className="register-numbered-input" placeholder="Email Address"/>
         <div className="relative"><input aria-label="Password" required minLength={6} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={event => setPassword(event.target.value)} className="register-numbered-input pr-12" placeholder="Secure Password"/><Button type="button" variant="ghost" size="icon" className="register-password-toggle" title={showPassword ? 'Hide password' : 'Show password'} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(current => !current)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div>
+        {password.length > 0 && <div className="pw-rules" aria-live="polite">
+          <span className={password.length >= 8 ? 'is-ok' : ''}>8+ characters</span>
+          <span className={/[A-Z]/.test(password) && /[a-z]/.test(password) ? 'is-ok' : ''}>Upper & lower case</span>
+          <span className={/\d/.test(password) ? 'is-ok' : ''}>One number</span>
+          <span className={/[^A-Za-z0-9]/.test(password) && !/\s/.test(password) ? 'is-ok' : ''}>One symbol</span>
+        </div>}
       </div></fieldset>
       <fieldset className="register-numbered-step"><legend className="sr-only">Referral</legend><span className="register-step-number" aria-hidden>03</span><div className="space-y-2.5"><div className="flex items-center justify-between gap-2"><h2>Network code</h2><span className="text-[9px] font-bold uppercase text-muted-foreground">Optional</span></div>
         <input aria-label="Referral code" inputMode="text" maxLength={10} value={referral} onChange={event => setReferral(event.target.value.toUpperCase())} className="register-numbered-input register-network-code" placeholder="BIX-123456"/>
