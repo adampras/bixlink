@@ -37,11 +37,20 @@ export const createAccountByOwner = createServerFn({ method: 'POST' }).middlewar
     fullName: z.string().trim().min(2).max(80), username: z.string().trim().toLowerCase().regex(/^[a-z0-9_.]{3,24}$/),
   }).parse(d))
   .handler(async ({ context, data }) => {
-    if (!(await canManage(context))) throw new Error('Owner access required');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const owner1 = await canManage(context);
+    let reviewer = false;
+    if (!owner1) {
+      const { data: role } = await supabaseAdmin.from('user_roles').select('role').eq('user_id', context.userId).eq('role', 'reviewer').maybeSingle();
+      reviewer = Boolean(role);
+    }
+    if (!owner1 && !reviewer) throw new Error('Owner access required');
     const { data: free } = await supabaseAdmin.rpc('bix_username_available', { p_username: data.username });
     if (!free) throw new Error('Username sudah dipakai');
     const { data: u, error } = await supabaseAdmin.auth.admin.createUser({ email: data.email.toLowerCase(), password: data.password, email_confirm: true, user_metadata: { full_name: data.fullName, username: data.username } });
     if (error) throw new Error(error.message);
-    return { ok: true, userId: u.user?.id ?? null };
+    const newId = u.user?.id ?? null;
+    // Owner 2–5 accounts land directly in that Owner's own network.
+    if (reviewer && newId) await supabaseAdmin.from('referral_codes').update({ referred_by: context.userId }).eq('user_id', newId).is('referred_by', null);
+    return { ok: true, userId: newId };
   });
