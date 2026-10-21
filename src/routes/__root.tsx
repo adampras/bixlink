@@ -11,7 +11,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import installIcon from '@/assets/bixcoin-icon-180.png.asset.json';
+import installIcon from '@/assets/fox-icon-180.png.asset.json';
 import splashArtwork from '@/assets/bixcoin-reactor-splash.jpg.asset.json';
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSplash } from "../components/AppSplash";
