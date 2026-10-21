@@ -2589,3 +2589,19 @@ html, body { overflow-x: clip; }
 .internal-market-trade a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 46px; border-radius: 12px; font-weight: 800; letter-spacing: .06em; }
 .internal-market-trade .is-buy { background: var(--chart-2); color: var(--primary-foreground); }
 .internal-market-trade .is-sell { background: var(--destructive); color: var(--destructive-foreground); }
+
+/* Stake package: luxe emerald ink + institutional accents; final popup centering */
+.duration-package { --lux-emerald: oklch(0.80 0.16 160); }
+html[data-color-mode="light"] .duration-package { --lux-emerald: oklch(0.48 0.13 160); }
+.duration-package h3 { color: var(--lux-emerald) !important; letter-spacing: .02em; text-shadow: 0 0 18px color-mix(in oklab, var(--lux-emerald) 30%, transparent); }
+.duration-package-head p { color: color-mix(in oklab, var(--chart-3) 85%, var(--foreground)) !important; letter-spacing: .14em; text-transform: uppercase; font-size: 10px !important; }
+.duration-package .duration-price { color: var(--lux-emerald) !important; border-color: color-mix(in oklab, var(--chart-3) 45%, transparent) !important; font-variant-numeric: tabular-nums; }
+.duration-package .duration-label { color: color-mix(in oklab, var(--chart-3) 70%, var(--muted-foreground)); letter-spacing: .12em; }
+.duration-package .duration-yield > div:first-child dd { color: var(--lux-emerald); }
+.duration-package .duration-yield dd { font-variant-numeric: tabular-nums lining-nums; font-size: 15px; }
+.duration-package .duration-option { color: color-mix(in oklab, var(--lux-emerald) 70%, var(--muted-foreground)) !important; font-variant-numeric: tabular-nums; }
+.duration-package .duration-option[aria-pressed="true"] { color: var(--lux-emerald) !important; background: color-mix(in oklab, var(--lux-emerald) 14%, transparent) !important; border-color: var(--chart-3) !important; box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--chart-3) 40%, transparent); }
+.duration-package .duration-yield { border-image: linear-gradient(90deg, transparent, color-mix(in oklab, var(--chart-3) 55%, transparent), transparent) 1; }
+.duration-package-head { border-bottom: 1px solid color-mix(in oklab, var(--chart-3) 35%, transparent) !important; }
+
+.site-popup, .site-popup.zoom-dialog { position: fixed !important; inset: 0 !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; margin: auto !important; transform: none !important; translate: none !important; scale: none !important; rotate: none !important; width: min(500px, calc(100vw - 24px)) !important; max-width: none !important; height: fit-content !important; max-height: calc(100dvh - 32px) !important; }
