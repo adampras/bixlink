@@ -22,8 +22,8 @@ const Card = ({ id, icon: I, title, children }: { id: string; icon: typeof Bot; 
 
 function BotDemo() {
   const [pts, setPts] = useState<number[]>(() => Array.from({ length: 30 }, (_, i) => 50 + Math.sin(i / 3) * 12));
-  useEffect(() => { const t = setInterval(() => setPts(p => [...p.slice(1), Math.max(10, Math.min(90, p[p.length - 1] + (Math.random() - 0.5) * 10))]), 900); return () => clearInterval(t); }, []);
-  const last = pts[pts.length - 1], prev = pts[pts.length - 2]; const sig = last > prev ? 'BUY' : 'SELL';
+  useEffect(() => { const t = setInterval(() => setPts(p => [...p.slice(1), Math.max(10, Math.min(90, (p[p.length - 1] ?? 50) + (Math.random() - 0.5) * 10))]), 900); return () => clearInterval(t); }, []);
+  const last = pts[pts.length - 1] ?? 0, prev = pts[pts.length - 2] ?? 0; const sig = last > prev ? 'BUY' : 'SELL';
   return <><svg viewBox="0 0 290 100" className="h-28 w-full"><polyline fill="none" stroke="currentColor" strokeWidth="2" className="text-chart-2" points={pts.map((v, i) => `${i * 10},${100 - v}`).join(' ')}/></svg>
     <p className="text-sm">Demo signal: <b className={sig === 'BUY' ? 'text-chart-2' : 'text-destructive'}>{sig}</b> · random data, not a trading recommendation.</p></>;
 }
