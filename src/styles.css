@@ -2564,3 +2564,14 @@ html[data-color-mode="light"] .reactor-landing .section-title span { background-
 .coin-embers i:nth-child(4n){background:var(--chart-1);box-shadow:0 0 8px 2px var(--chart-1);width:3px;height:3px}
 @keyframes coin-ember{0%{transform:translate(0,0);opacity:0}15%{opacity:.85}80%{opacity:.5}100%{transform:translate(var(--dx,10px),-340px);opacity:0}}
 @media(prefers-reduced-motion:reduce){.coin-stage--vault .coin-3d,.coin-stage--vault .coin-float::after,.coin-embers i{animation:none}}
+
+/* === Final polish: true flag colors, codes, popup centering, light hero, hub divider === */
+.flag-symbol { --foreground: #ffffff; --destructive: #d62828; --chart-3: #ffd60a; border-color: rgba(0,0,0,.18); }
+.flag-code { margin-left: 6px; font-size: 10px; font-weight: 800; letter-spacing: .08em; color: var(--chart-3); }
+.language-menu .flag-code { margin-left: 8px; }
+.language-menu > button { justify-content: flex-start; }
+.site-popup, .site-popup.zoom-dialog { position: fixed !important; inset: 0 !important; margin: auto !important; transform: none !important; translate: none !important; scale: none !important; height: fit-content !important; width: calc(100vw - 24px) !important; max-width: 500px !important; }
+.site-popup[data-state] { animation: popup-fade .2s ease-out !important; }
+html[data-color-mode="light"] .landing-hero-compact .hero-3d-bg { display: block !important; opacity: .42; filter: saturate(.85) brightness(1.25) contrast(1.05); }
+html[data-color-mode="light"] .landing-hero-compact .hero-3d-veil { background: radial-gradient(ellipse at 50% 40%, color-mix(in oklch, var(--background) 30%, transparent), color-mix(in oklch, var(--background) 70%, transparent) 80%); backdrop-filter: none; }
+.reactor-landing .hero-section { border-bottom: 1px solid transparent; border-image: linear-gradient(90deg, transparent, color-mix(in oklch, var(--chart-3) 70%, transparent), transparent) 1; box-shadow: 0 1px 0 color-mix(in oklch, var(--chart-3) 18%, transparent), 0 12px 24px -18px color-mix(in oklch, var(--chart-3) 40%, transparent); }
