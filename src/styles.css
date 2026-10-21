@@ -2880,3 +2880,4 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 /* Clean backgrounds: remove faint grid/line textures everywhere */
 .site-shell[data-presentation-theme="future"] { background-image: none !important; }
 .wallet-summary::before, .wallet-summary[data-wallet-skin]::after, .wallet-sovereign::before, .arena-hud::after { background-image: none !important; background: none !important; }
+.reactor-landing::before { background-image: none !important; }
