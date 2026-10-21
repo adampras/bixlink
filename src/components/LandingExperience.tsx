@@ -5,7 +5,6 @@ import { LandingNarrative } from '@/components/LandingNarrative';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
 import coinCutout from '@/assets/bixcoin-cutout.png';
 import vaultBg from '@/assets/coin-vault-bg.jpg';
-import foxMark from '@/assets/bixlink-header-mark.png.asset.json';
 import heroObsidian from '@/assets/hero-obsidian-gold.jpg';
 import { usePublicConfig, useMember } from '@/lib/useMember';
 import { boosterMaximum } from '@/lib/booster-apy';
@@ -32,13 +31,12 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
       {hero3d && <><ContentImage path={content.heroImage} alt="" fallbackSrc={heroObsidian} className="hero-3d-bg"/><div className="hero-3d-veil" aria-hidden/></>}
       {config?.readiness.heroAnimEnabled !== false && <HeroFlux/>}
       <div className={`landing-hero-content relative mx-auto flex max-w-3xl flex-col items-center justify-center px-5 text-center ${compact ? 'is-compact' : ''}`}>
-        <img src={foxMark.url} alt="" aria-hidden className="hero-crest" width={56} height={56}/>
         <h1 className="hero-title mt-3 text-6xl leading-[0.9] md:text-8xl">BIXLINK</h1>
         <p className="hero-tagline mt-4">Sovereign Staking Infrastructure</p>
-        {config?.readiness.presaleStageEnabled !== false && <HeroPresaleRibbon/>}
       </div>
       <div className="lux-ticker" aria-label="BIXLINK protocol highlights"><div className="lux-ticker-track">{[0,1].map(k => <span key={k} aria-hidden={k===1}>{['21.000.000 BIX FIXED SUPPLY','DEFLATIONARY HALVING','NON-CUSTODIAL MODEL','RWA NARRATIVE','SMART CONTRACT READY','COMMUNITY TO DAO'].map(t => <b key={t}>◆ {t}</b>)}</span>)}</div></div>
     </section>
+    {config?.readiness.presaleStageEnabled !== false && <div className="landing-presale-band"><HeroPresaleRibbon/></div>}
     <section className="mx-auto max-w-3xl px-5 pt-5 pb-2 text-center md:py-10"><div className="eyebrow justify-center">OFFICIAL BIXCOIN</div><div className="coin-stage coin-stage--vault" aria-label="BIXCOIN official coin"><img src={vaultBg} alt="" aria-hidden className="coin-vault-art"/><div className="coin-embers" aria-hidden>{Array.from({length:14},(_,i)=><i key={i} style={{left:`${6+i*6.5}%`,animationDelay:`${(i*0.53)%7}s`,animationDuration:`${6+(i%4)}s`,['--dx' as string]:`${(i%2?1:-1)*(8+i%5*4)}px`}}/>)}</div><div className="coin-float"><img src={coinCutout} alt="BIXCOIN official gold coin" className="coin-3d" width={260} height={260}/></div><div className="coin-pedestal" aria-hidden><span/></div><div className="coin-caption"><span>21,000,000 BIX · FIXED SUPPLY</span><strong>BIX BOOSTER UP TO {maximum}% · PROJECTION</strong></div></div></section>
     <PoweredBy slim/>
     <LandingNarrative content={content}/>
