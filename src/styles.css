@@ -1395,8 +1395,8 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
 /* ===== Landing: Future Blockchain × Obsidian Gold luxury ===== */
 .reactor-landing { --lux-gold: oklch(0.84 0.11 85); position: relative; isolation: isolate; }
 .reactor-landing::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background-image: linear-gradient(color-mix(in oklch, var(--lux-gold) 7%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklch, var(--lux-gold) 7%, transparent) 1px, transparent 1px);
-  background-size: 44px 44px; mask-image: linear-gradient(180deg, black 0%, transparent 38%, transparent 62%, black 85%, transparent 100%); }
+  background-image: linear-gradient(color-mix(in oklch, var(--lux-gold) 4%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklch, var(--lux-gold) 4%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px; mask-image: linear-gradient(180deg, black 0%, transparent 30%, transparent 70%, black 92%, transparent 100%); }
 .reactor-landing .hero-section { background: radial-gradient(ellipse 70% 45% at 50% 0%, color-mix(in oklch, var(--lux-gold) 16%, transparent), transparent 70%), transparent; }
 .reactor-landing .hero-section .grid > div { border-color: color-mix(in oklch, var(--lux-gold) 22%, transparent) !important; box-shadow: inset 0 1px 0 color-mix(in oklch, var(--lux-gold) 25%, transparent), 0 10px 30px -12px color-mix(in oklch, var(--lux-gold) 30%, transparent); }
 .lux-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 12px; font-family: var(--font-display, inherit); font-size: 12px; font-weight: 800; letter-spacing: .14em; transition: transform .2s, box-shadow .2s; backdrop-filter: blur(14px); }
@@ -2718,19 +2718,40 @@ main section > div > .grid > article, main section .rounded-2xl.border { transit
 .ingot em { font-style:normal; font-size:10px; color:var(--muted-foreground); }
 .ingot[aria-selected="true"] { border-color:var(--chart-3); box-shadow:0 0 0 1px var(--chart-3),0 12px 28px -14px var(--chart-3); transform:translateY(-2px); background:linear-gradient(160deg,color-mix(in oklab,var(--chart-3) 18%,var(--card)),color-mix(in oklab,var(--chart-2) 10%,var(--card))); }
 
-/* ===== BIXCOIN spinning-top (gasing) cinematic ===== */
-.coin-stage--vault .coin-float { perspective:900px !important; transform-style:preserve-3d; }
-.coin-stage--vault .coin-3d { clip-path:none !important; animation:coin-gasing 3.2s linear infinite, coin-gasing-glow 3.2s ease-in-out infinite !important; transform-style:preserve-3d; backface-visibility:visible; }
-@keyframes coin-gasing {
-  0%   { transform:rotateX(14deg) rotateZ(-5deg) rotateY(0deg); }
-  25%  { transform:rotateX(10deg) rotateZ(0deg)  rotateY(90deg); }
-  50%  { transform:rotateX(14deg) rotateZ(5deg)  rotateY(180deg); }
-  75%  { transform:rotateX(10deg) rotateZ(0deg)  rotateY(270deg); }
-  100% { transform:rotateX(14deg) rotateZ(-5deg) rotateY(360deg); }
-}
-@keyframes coin-gasing-glow { 0%,50%,100% { filter:drop-shadow(0 0 22px color-mix(in oklab,var(--chart-3) 60%,transparent)) brightness(1.08); } 25%,75% { filter:drop-shadow(0 0 8px color-mix(in oklab,var(--chart-3) 35%,transparent)) brightness(.9); } }
-.coin-stage--vault .coin-float::before { content:""; position:absolute; left:50%; bottom:-6%; width:70%; height:14%; translate:-50% 0; border-radius:50%; background:radial-gradient(ellipse,color-mix(in oklab,var(--chart-3) 55%,transparent),transparent 70%); filter:blur(6px); animation:coin-gasing-shadow 3.2s ease-in-out infinite; pointer-events:none; }
-@keyframes coin-gasing-shadow { 0%,50%,100% { scale:1 1; opacity:.9; } 25%,75% { scale:.55 1; opacity:.5; } }
-.coin-stage--vault .coin-float::after { animation:coin-sheen-sweep 3.2s ease-in-out infinite !important; }
-.coin-stage--vault { background:radial-gradient(ellipse 60% 40% at 50% 45%,color-mix(in oklab,var(--chart-3) 10%,transparent),transparent 70%), conic-gradient(from 0deg at 50% 45%,transparent 0 10%,color-mix(in oklab,var(--chart-3) 6%,transparent) 12%,transparent 16% 60%,color-mix(in oklab,var(--chart-1) 6%,transparent) 62%,transparent 66%) !important; }
+/* ===== BIXCOIN sovereign flat spin — never thins, cinematic ===== */
+.coin-stage--vault .coin-float { perspective:none !important; transform-style:flat; }
+.coin-stage--vault .coin-3d { clip-path:circle(49.5% at 50% 50%) !important; animation:coin-cw-spin 14s linear infinite, coin-sovereign-glow 4.5s ease-in-out infinite !important; transform-origin:50% 50%; }
+@keyframes coin-sovereign-glow { 0%,100% { filter:drop-shadow(0 0 16px color-mix(in oklab,var(--chart-3) 45%,transparent)) saturate(1.1) contrast(1.05) brightness(1); } 50% { filter:drop-shadow(0 0 30px color-mix(in oklab,var(--chart-3) 70%,transparent)) saturate(1.18) contrast(1.08) brightness(1.07); } }
+.coin-stage--vault .coin-float::before { content:""; position:absolute; left:50%; bottom:-6%; width:70%; height:14%; translate:-50% 0; border-radius:50%; background:radial-gradient(ellipse,color-mix(in oklab,var(--chart-3) 55%,transparent),transparent 70%); filter:blur(6px); animation:coin-gasing-shadow 6s ease-in-out infinite; pointer-events:none; }
+@keyframes coin-gasing-shadow { 0%,100% { scale:1 1; opacity:.9; } 50% { scale:.8 1; opacity:.55; } }
+.coin-stage--vault .coin-float::after { animation:coin-sheen-sweep 4.5s ease-in-out infinite !important; }
+.coin-stage--vault { background:radial-gradient(ellipse 60% 40% at 50% 45%,color-mix(in oklab,var(--chart-3) 10%,transparent),transparent 70%) !important; }
+/* Vault backdrop art: soften so no hard boxes distract from the coin */
+.coin-stage--vault .coin-vault-art { opacity:.4 !important; filter:saturate(.7) blur(3px) brightness(.85); -webkit-mask-image:radial-gradient(circle at 50% 50%, #000 22%, transparent 58%) !important; mask-image:radial-gradient(circle at 50% 50%, #000 22%, transparent 58%) !important; }
+html[data-color-mode="light"] .coin-stage--vault .coin-vault-art { opacity:.1 !important; filter:saturate(.5) blur(3px) brightness(1.8); }
 @media (prefers-reduced-motion:reduce){ .coin-stage--vault .coin-3d, .coin-stage--vault .coin-float::before { animation:none !important; } }
+
+/* ===== Coming Soon cards: living preview shimmer ===== */
+.eco-card.is-soon { opacity:1; }
+.eco-card.is-soon::before { content:""; position:absolute; inset:0; background:linear-gradient(115deg,transparent 30%,color-mix(in oklab,var(--tone) 14%,transparent) 50%,transparent 70%); background-size:250% 100%; animation:eco-soon-shine 4.5s ease-in-out infinite; pointer-events:none; }
+@keyframes eco-soon-shine { 0%,100% { background-position:120% 0; } 50% { background-position:-20% 0; } }
+.eco-card.is-soon .eco-badge { position:relative; overflow:hidden; color:var(--tone); border-style:solid; }
+.eco-card.is-soon .eco-badge::after { content:""; position:absolute; left:0; bottom:0; height:2px; width:100%; background:linear-gradient(90deg,var(--tone),transparent); animation:eco-soon-bar 3s ease-in-out infinite; }
+@keyframes eco-soon-bar { 0% { transform:translateX(-100%); } 60%,100% { transform:translateX(100%); } }
+@media (prefers-reduced-motion:reduce){ .eco-card.is-soon::before, .eco-card.is-soon .eco-badge::after { animation:none; } }
+
+/* ===== Auth forms: live password checklist + tighter mobile rhythm ===== */
+.pw-rules { display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; margin-top:8px; font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--muted-foreground); }
+.pw-rules span { display:flex; align-items:center; gap:5px; transition:color .2s; }
+.pw-rules span::before { content:""; width:8px; height:8px; border-radius:50%; border:1px solid currentColor; flex:none; }
+.pw-rules span.is-ok { color:var(--chart-2); }
+.pw-rules span.is-ok::before { background:var(--chart-2); border-color:var(--chart-2); box-shadow:0 0 6px color-mix(in oklab,var(--chart-2) 60%,transparent); }
+@media (max-width:480px){ .register-numbered-step { padding:14px 14px 16px; } .register-numbered { padding-top:12px; } }
+
+/* ===== Network: collapsible bonus explainer ===== */
+.nx-plan-details { margin-top:1.5rem; border:1px solid color-mix(in oklab,var(--chart-3) 30%,var(--border)); border-radius:16px; padding:12px 16px; background:color-mix(in oklab,var(--card) 70%,transparent); }
+.nx-plan-details summary { list-style:none; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.nx-plan-details summary::-webkit-details-marker { display:none; }
+.nx-plan-details summary::after { content:"+"; font-size:16px; color:var(--chart-3); transition:transform .2s; }
+.nx-plan-details[open] summary::after { transform:rotate(45deg); }
+.nx-plan-details .nx-plan { margin-top:14px; }
