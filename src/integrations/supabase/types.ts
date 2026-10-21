@@ -253,6 +253,33 @@ export type Database = {
           },
         ]
       }
+      bix_network_leaders: {
+        Row: {
+          assigned_by: string
+          created_at: string
+          kind: string
+          note: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by: string
+          created_at?: string
+          kind: string
+          note?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string
+          created_at?: string
+          kind?: string
+          note?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_nft_cards: {
         Row: {
           artwork_id: string | null
