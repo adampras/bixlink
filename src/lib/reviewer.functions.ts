@@ -109,9 +109,9 @@ export const setReviewer = createServerFn({ method: 'POST' }).middleware([requir
     return { ok: true };
   });
 
-export const REVIEWER_SECTIONS = ['apy', 'wallet', 'market', 'referral'] as const;
+export const REVIEWER_SECTIONS = ['apy', 'wallet', 'market', 'referral', 'leaders'] as const;
 export type ReviewerPermissions = Record<(typeof REVIEWER_SECTIONS)[number], boolean>;
-const permSchema = z.object({ apy: z.boolean(), wallet: z.boolean(), market: z.boolean(), referral: z.boolean() }).strict();
+const permSchema = z.object({ apy: z.boolean(), wallet: z.boolean(), market: z.boolean(), referral: z.boolean(), leaders: z.boolean() }).strict();
 type PermStore = Partial<ReviewerPermissions> & { users?: Record<string, Partial<ReviewerPermissions>> };
 async function readStore(): Promise<PermStore> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
@@ -122,7 +122,7 @@ async function readStore(): Promise<PermStore> {
 const resolve = (s: PermStore, userId?: string): ReviewerPermissions => {
   const u = userId ? s.users?.[userId] : undefined;
   const pick = (k: keyof ReviewerPermissions) => (u?.[k] ?? s[k]) !== false;
-  return { apy: pick('apy'), wallet: pick('wallet'), market: pick('market'), referral: pick('referral') };
+  return { apy: pick('apy'), wallet: pick('wallet'), market: pick('market'), referral: pick('referral'), leaders: (u?.leaders ?? s.leaders) === true };
 };
 async function readPermissions(userId?: string): Promise<ReviewerPermissions> { return resolve(await readStore(), userId); }
 async function writeUserPermissions(userId: string, perms: ReviewerPermissions) {
@@ -171,3 +171,37 @@ export const getOwnerTurnover = createServerFn({ method: 'GET' }).middleware([re
   });
   return { total: sum(null), owners };
 });
+
+// Sponsored Leader / Team Leader Support designations: label-only roles, no funds moved.
+const leaderSchema = z.object({ userId: z.string().uuid(), kind: z.enum(['sponsored_leader', 'team_support', 'none']), note: z.string().max(200).optional() });
+async function leaderAccess(context: { supabase: any; userId: string }) {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const { data: owner } = await context.supabase.rpc('is_bix_admin');
+  if (owner) return { admin: supabaseAdmin, scope: null as Set<string> | null };
+  if (!(await isReviewer(context)) || !(await readPermissions(context.userId)).leaders) throw new Error('Leader access is turned off for this Owner');
+  return { admin: supabaseAdmin, scope: new Set(await reviewerScope(supabaseAdmin, context.userId)) };
+}
+export const listNetworkLeaders = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { admin, scope } = await leaderAccess(context);
+  const [refs, profs, leaders] = await Promise.all([
+    admin.from('referral_codes').select('user_id,code'),
+    admin.from('profiles').select('user_id,username,full_name'),
+    admin.from('bix_network_leaders').select('user_id,kind,note,updated_at'),
+  ]);
+  const ids = scope ? [...scope] : (refs.data ?? []).map(r => r.user_id);
+  const lead = new Map((leaders.data ?? []).map(l => [l.user_id, l]));
+  const prof = new Map((profs.data ?? []).map(p => [p.user_id, p]));
+  const code = new Map((refs.data ?? []).map(r => [r.user_id, r.code]));
+  return ids.slice(0, 500).map(id => ({ userId: id, code: code.get(id) ?? '—', name: prof.get(id)?.username || prof.get(id)?.full_name || '—', kind: (lead.get(id)?.kind ?? 'none') as 'sponsored_leader' | 'team_support' | 'none', note: lead.get(id)?.note ?? '' }));
+});
+export const setNetworkLeader = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof leaderSchema>) => leaderSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    const { admin, scope } = await leaderAccess(context);
+    if (scope && !scope.has(data.userId)) throw new Error('Member is outside your sponsor network');
+    const res = data.kind === 'none'
+      ? await admin.from('bix_network_leaders').delete().eq('user_id', data.userId)
+      : await admin.from('bix_network_leaders').upsert({ user_id: data.userId, kind: data.kind, note: data.note ?? null, assigned_by: context.userId, updated_at: new Date().toISOString() });
+    if (res.error) throw new Error(res.error.message);
+    return { ok: true };
+  });
