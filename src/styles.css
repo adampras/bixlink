@@ -2747,3 +2747,11 @@ html[data-color-mode="light"] .coin-stage--vault .coin-vault-art { opacity:.1 !i
 .pw-rules span.is-ok { color:var(--chart-2); }
 .pw-rules span.is-ok::before { background:var(--chart-2); border-color:var(--chart-2); box-shadow:0 0 6px color-mix(in oklab,var(--chart-2) 60%,transparent); }
 @media (max-width:480px){ .register-numbered-step { padding:14px 14px 16px; } .register-numbered { padding-top:12px; } }
+
+/* ===== Network: collapsible bonus explainer ===== */
+.nx-plan-details { margin-top:1.5rem; border:1px solid color-mix(in oklab,var(--chart-3) 30%,var(--border)); border-radius:16px; padding:12px 16px; background:color-mix(in oklab,var(--card) 70%,transparent); }
+.nx-plan-details summary { list-style:none; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.nx-plan-details summary::-webkit-details-marker { display:none; }
+.nx-plan-details summary::after { content:"+"; font-size:16px; color:var(--chart-3); transition:transform .2s; }
+.nx-plan-details[open] summary::after { transform:rotate(45deg); }
+.nx-plan-details .nx-plan { margin-top:14px; }
