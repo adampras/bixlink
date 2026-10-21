@@ -17,6 +17,7 @@ import { Route as ArenaRouteImport } from './routes/arena'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BoostRouteImport } from './routes/boost'
 import { Route as BoostTiersRouteImport } from './routes/boost-tiers'
+import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as MarketingRouteImport } from './routes/marketing'
@@ -81,6 +82,11 @@ const BoostRoute = BoostRouteImport.update({
 const BoostTiersRoute = BoostTiersRouteImport.update({
   id: '/boost-tiers',
   path: '/boost-tiers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComingSoonRoute = ComingSoonRouteImport.update({
+  id: '/coming-soon',
+  path: '/coming-soon',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -219,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/boost-tiers': typeof BoostTiersRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/boost-tiers': typeof BoostTiersRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
@@ -290,6 +298,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/boost': typeof BoostRoute
   '/boost-tiers': typeof BoostTiersRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
@@ -327,6 +336,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boost'
     | '/boost-tiers'
+    | '/coming-soon'
     | '/dashboard'
     | '/market'
     | '/marketing'
@@ -362,6 +372,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boost'
     | '/boost-tiers'
+    | '/coming-soon'
     | '/dashboard'
     | '/market'
     | '/marketing'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boost'
     | '/boost-tiers'
+    | '/coming-soon'
     | '/dashboard'
     | '/market'
     | '/marketing'
@@ -433,6 +445,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BoostRoute: typeof BoostRoute
   BoostTiersRoute: typeof BoostTiersRoute
+  ComingSoonRoute: typeof ComingSoonRoute
   DashboardRoute: typeof DashboardRoute
   MarketRoute: typeof MarketRoute
   MarketingRoute: typeof MarketingRoute
@@ -516,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/boost-tiers'
       fullPath: '/boost-tiers'
       preLoaderRoute: typeof BoostTiersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coming-soon': {
+      id: '/coming-soon'
+      path: '/coming-soon'
+      fullPath: '/coming-soon'
+      preLoaderRoute: typeof ComingSoonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -705,6 +725,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BoostRoute: BoostRoute,
   BoostTiersRoute: BoostTiersRoute,
+  ComingSoonRoute: ComingSoonRoute,
   DashboardRoute: DashboardRoute,
   MarketRoute: MarketRoute,
   MarketingRoute: MarketingRoute,
