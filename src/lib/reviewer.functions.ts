@@ -112,25 +112,42 @@ export const setReviewer = createServerFn({ method: 'POST' }).middleware([requir
 export const REVIEWER_SECTIONS = ['apy', 'wallet', 'market', 'referral'] as const;
 export type ReviewerPermissions = Record<(typeof REVIEWER_SECTIONS)[number], boolean>;
 const permSchema = z.object({ apy: z.boolean(), wallet: z.boolean(), market: z.boolean(), referral: z.boolean() }).strict();
-async function readPermissions(): Promise<ReviewerPermissions> {
+type PermStore = Partial<ReviewerPermissions> & { users?: Record<string, Partial<ReviewerPermissions>> };
+async function readStore(): Promise<PermStore> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
   const { data } = await supabaseAdmin.from('app_settings').select('value').eq('key', 'reviewer_permissions').maybeSingle();
-  const v = (data?.value ?? {}) as Partial<ReviewerPermissions>;
-  return { apy: v.apy !== false, wallet: v.wallet !== false, market: v.market !== false, referral: v.referral !== false };
+  return (data?.value ?? {}) as PermStore;
+}
+// Per-owner override first, then the legacy global value (mirrors bix_reviewer_can in the DB).
+const resolve = (s: PermStore, userId?: string): ReviewerPermissions => {
+  const u = userId ? s.users?.[userId] : undefined;
+  const pick = (k: keyof ReviewerPermissions) => (u?.[k] ?? s[k]) !== false;
+  return { apy: pick('apy'), wallet: pick('wallet'), market: pick('market'), referral: pick('referral') };
+};
+async function readPermissions(userId?: string): Promise<ReviewerPermissions> { return resolve(await readStore(), userId); }
+async function writeUserPermissions(userId: string, perms: ReviewerPermissions) {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const store = await readStore();
+  const { error } = await supabaseAdmin.from('app_settings').upsert({ key: 'reviewer_permissions', value: { ...store, users: { ...(store.users ?? {}), [userId]: perms } } as unknown as Json });
+  if (error) throw error;
 }
 export const getReviewerPermissions = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const owner = await context.supabase.rpc('is_bix_admin');
-  if (!owner.data && !(await isReviewer(context))) throw new Error('Access required');
-  return readPermissions();
+  if (!(await isReviewer(context))) { await verifyOwner(context); return readPermissions(); }
+  return readPermissions(context.userId);
+});
+export const getAllReviewerPermissions = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await verifyOwner(context);
+  const store = await readStore();
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const { data } = await supabaseAdmin.from('user_roles').select('user_id').eq('role', 'reviewer');
+  return Object.fromEntries((data ?? []).map(r => [r.user_id as string, resolve(store, r.user_id as string)]));
 });
 export const saveReviewerPermissions = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: ReviewerPermissions) => permSchema.parse(d))
+  .inputValidator((d: { userId: string; perms: ReviewerPermissions }) => z.object({ userId: z.string().uuid(), perms: permSchema }).parse(d))
   .handler(async ({ context, data }) => {
     await verifyOwner(context);
-    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { error } = await supabaseAdmin.from('app_settings').upsert({ key: 'reviewer_permissions', value: data });
-    if (error) throw error;
-    return readPermissions();
+    await writeUserPermissions(data.userId, data.perms);
+    return readPermissions(data.userId);
   });
 
 // Owner-only turnover report: approved USDT deposits/withdrawals per sub-owner network vs whole platform.
