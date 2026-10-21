@@ -22,14 +22,16 @@ export const getReviewerSettings = createServerFn({ method: 'GET' }).middleware(
   if (error) throw error;
   const settings = Object.fromEntries((data ?? []).map(row => [row.key, row.value]));
   const wallets = (settings['deposit_wallets'] as { wallets?: DepositWallet[] } | undefined)?.wallets ?? [];
-  return { wallet: reviewerDepositWallet(wallets), market: settings['bix_market'] as { priceUsd?: number; movement?: Json } | undefined, referrals: settings['referrals'] as Record<string, Json> | undefined };
+  const { data: own } = await context.supabase.from('bix_owner_deposit_wallets').select('code,label,network,asset,address,enabled').eq('owner_id', context.userId).maybeSingle();
+  void wallets; void reviewerDepositWallet;
+  return { wallet: (own ?? { code: 'OWN-NEW', label: '', network: 'BEP20', asset: 'USDT', address: '', enabled: false }) as DepositWallet, market: settings['bix_market'] as { priceUsd?: number; movement?: Json } | undefined, referrals: settings['referrals'] as Record<string, Json> | undefined };
 });
 
 export const saveReviewerDepositWallet = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((wallet: DepositWallet) => reviewerWalletSchema.parse(wallet))
+  .inputValidator((wallet: DepositWallet) => reviewerWalletSchema.parse({ ...wallet, code: 'WLT-01' }))
   .handler(async ({ context, data }) => {
     if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
-    const { error } = await context.supabase.rpc('bix_reviewer_save_wallet', { p_wallet: data });
+    const { error } = await context.supabase.rpc('bix_owner_wallet_save', { p_label: data.label, p_network: data.network, p_asset: data.asset ?? 'USDT', p_address: data.address, p_enabled: data.enabled });
     if (error) throw new Error(error.message);
     return { ok: true };
   });

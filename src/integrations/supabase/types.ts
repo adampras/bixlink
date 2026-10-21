@@ -348,6 +348,78 @@ export type Database = {
           },
         ]
       }
+      bix_owner_deposit_wallets: {
+        Row: {
+          address: string
+          asset: string
+          code: string
+          enabled: boolean
+          label: string
+          network: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          asset?: string
+          code: string
+          enabled?: boolean
+          label?: string
+          network?: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          asset?: string
+          code?: string
+          enabled?: boolean
+          label?: string
+          network?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bix_owner_revenue: {
+        Row: {
+          address: string | null
+          amount_usd: number
+          created_at: string
+          id: string
+          member_id: string
+          network: string | null
+          owner_id: string | null
+          tx_hash: string | null
+          tx_id: string
+          wallet_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          amount_usd: number
+          created_at?: string
+          id?: string
+          member_id: string
+          network?: string | null
+          owner_id?: string | null
+          tx_hash?: string | null
+          tx_id: string
+          wallet_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          amount_usd?: number
+          created_at?: string
+          id?: string
+          member_id?: string
+          network?: string | null
+          owner_id?: string | null
+          tx_hash?: string | null
+          tx_id?: string
+          wallet_code?: string | null
+        }
+        Relationships: []
+      }
       bix_p2p_fills: {
         Row: {
           amount_bix: number
@@ -1582,6 +1654,7 @@ export type Database = {
       bix_claim_stake_profit: { Args: never; Returns: Json }
       bix_claim_vip: { Args: { p_level: number }; Returns: string }
       bix_content_published: { Args: { p_name: string }; Returns: boolean }
+      bix_deposit_owner: { Args: { p_user: string }; Returns: string }
       bix_edit_duration_package: {
         Args: {
           p_apys: Json
@@ -1610,6 +1683,7 @@ export type Database = {
       bix_mining_settle: { Args: never; Returns: Json }
       bix_mining_start: { Args: never; Returns: Json }
       bix_mining_status: { Args: never; Returns: Json }
+      bix_my_deposit_wallets: { Args: never; Returns: Json }
       bix_network_bix_metrics: { Args: never; Returns: Json }
       bix_network_bonus_split: {
         Args: { p_total: number }
@@ -1622,6 +1696,16 @@ export type Database = {
       bix_nft_sell: { Args: { p_card: string }; Returns: Json }
       bix_nft_tier: { Args: { p_days: number; p_usd: number }; Returns: string }
       bix_owner_vault: { Args: never; Returns: Json }
+      bix_owner_wallet_save: {
+        Args: {
+          p_address: string
+          p_asset: string
+          p_enabled: boolean
+          p_label: string
+          p_network: string
+        }
+        Returns: string
+      }
       bix_p2p_bix_delta: { Args: { p_user: string }; Returns: number }
       bix_p2p_cancel: { Args: { p_offer: string }; Returns: undefined }
       bix_p2p_post: {
