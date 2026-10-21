@@ -15,6 +15,7 @@ import installIcon from '@/assets/bixcoin-icon-180.png.asset.json';
 import splashArtwork from '@/assets/bixcoin-reactor-splash.jpg.asset.json';
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSplash } from "../components/AppSplash";
+import { InstallPrompt } from "../components/InstallPrompt";
 import { I18nProvider } from "../lib/i18n";
 
 function NotFoundComponent() {
@@ -134,6 +135,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <AppSplash />
+        <InstallPrompt />
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
       </I18nProvider>

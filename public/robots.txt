@@ -33,3 +33,5 @@ Disallow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://bixlink.com/sitemap.xml
