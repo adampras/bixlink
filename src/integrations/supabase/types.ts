@@ -473,6 +473,47 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_profit_claims: {
+        Row: {
+          bix_amount: number
+          created_at: string
+          id: string
+          price_usd: number
+          profit_usd: number
+          stake_id: string
+          usdt_amount: number
+          user_id: string
+        }
+        Insert: {
+          bix_amount: number
+          created_at?: string
+          id?: string
+          price_usd: number
+          profit_usd: number
+          stake_id: string
+          usdt_amount: number
+          user_id: string
+        }
+        Update: {
+          bix_amount?: number
+          created_at?: string
+          id?: string
+          price_usd?: number
+          profit_usd?: number
+          stake_id?: string
+          usdt_amount?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_profit_claims_stake_id_fkey"
+            columns: ["stake_id"]
+            isOneToOne: false
+            referencedRelation: "stakes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bix_quest_claims: {
         Row: {
           amount_vbix: number
@@ -1538,6 +1579,7 @@ export type Database = {
       }
       bix_booster_withdraw_config: { Args: never; Returns: Json }
       bix_can_manage_packages: { Args: never; Returns: boolean }
+      bix_claim_stake_profit: { Args: never; Returns: Json }
       bix_claim_vip: { Args: { p_level: number }; Returns: string }
       bix_content_published: { Args: { p_name: string }; Returns: boolean }
       bix_edit_duration_package: {
@@ -1606,6 +1648,13 @@ export type Database = {
       bix_presale_paid: { Args: { p_user: string }; Returns: number }
       bix_presale_save: { Args: { p_config: Json }; Returns: Json }
       bix_presale_status: { Args: never; Returns: Json }
+      bix_profit_claimed: {
+        Args: never
+        Returns: {
+          profit_usd: number
+          stake_id: string
+        }[]
+      }
       bix_public_home_stats: { Args: never; Returns: Json }
       bix_quest_claim: {
         Args: { p_answer?: number; p_key: string }
