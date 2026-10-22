@@ -18,7 +18,7 @@ export const registerPlacedMember = createServerFn({ method: 'POST' }).middlewar
     while (cur && !seen.has(cur) && seen.size < 200) {
       if (cur === context.userId) { ok = true; break; }
       seen.add(cur);
-      const { data: row } = await supabaseAdmin.from('referral_codes').select('referred_by').eq('user_id', cur).maybeSingle();
+      const { data: row }: { data: { referred_by: string | null } | null } = await supabaseAdmin.from('referral_codes').select('referred_by').eq('user_id', cur).maybeSingle();
       cur = (row?.referred_by as string | null) ?? null;
     }
     if (!ok) throw new Error('Posisi penempatan harus berada di jaringan Anda');

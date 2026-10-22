@@ -17,7 +17,7 @@ export function PlacementRegister({ open, onOpenChange, options, initial }: { op
   const list = options.filter(o => o.label.toLowerCase().includes(q.trim().toLowerCase())).slice(0, 30);
   const target = options.find(o => o.id === (placement || initial));
   async function submit(e: React.FormEvent) {
-    e.preventDefault(); if (!strong) return toast.error('Password: huruf besar, kecil, angka & simbol (min 8)');
+    e.preventDefault(); if (!strong) { toast.error('Password: huruf besar, kecil, angka & simbol (min 8)'); return; }
     setBusy(true);
     try { await run({ data: { placementId: placement || initial, ...f } }); toast.success('Member terdaftar & aktif'); setF({ fullName: '', username: '', email: '', password: '' }); qc.invalidateQueries(); onOpenChange(false); }
     catch (err) { toast.error(err instanceof Error ? err.message : 'Gagal mendaftarkan'); } finally { setBusy(false); }
