@@ -230,6 +230,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   }, []);
   useEffect(() => {
     document.documentElement.lang = language;
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     translateDocument(language);
     const observer = new MutationObserver(() => translateDocument(language));
     observer.observe(document.body, { childList: true, subtree: true });
