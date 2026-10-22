@@ -1,4 +1,5 @@
 import { AnimatedNumber } from '@/components/AnimatedNumber';
+import { VaultStage } from '@/components/TechSuite';
 import { PoweredBy } from '@/components/PoweredBy';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -63,11 +64,14 @@ function WalletPage() {
     else setNotice('Still waiting for the blockchain to confirm your transfer. This updates automatically.');
   };
   useEffect(() => { if (!intent) return; const t = setInterval(() => { poll(intent.id).catch(() => {}); }, 15000); return () => clearInterval(t); }, [intent?.id]);
+  const [vault, setVault] = useState(false);
   const submit = async () => {
     if (modal === 'withdraw' && (amt < 10 || amt > 10000)) {
       setNotice('Withdrawal amount must be between $10 and $10,000 per day per account.');
       return;
     }
+    if (modal === 'withdraw' && !vault) { setVault(true); return; }
+    setVault(false);
     setBusy(true);
     try {
       if (modal === 'deposit') {
@@ -142,6 +146,7 @@ function WalletPage() {
           {notice && <p className="mt-2 text-xs text-destructive">{notice}</p>}
         </>}
         <Button disabled={busy || (modal === 'deposit' ? !addr || (!intent && !(amt >= 1)) : !field || !amt || amt < 10 || amt > 10000)} className="mt-5 w-full rounded-full bg-chart-3 text-background" onClick={submit}>{busy ? 'Checking blockchain…' : modal === 'deposit' ? (intent ? 'Waiting for transfer… Check now' : 'Get exact deposit amount') : 'Submit withdraw'}</Button>
+        <VaultStage open={vault} label="Withdrawal request" onDone={submit} onCancel={() => setVault(false)}/>
         <p className="tx-hint">{modal === 'deposit' ? 'Send the exact amount on-chain; one credit per transaction ID after the matcher confirms it.' : 'Creates a withdrawal request for review; USDT is not sent until it is approved.'}</p>
       </div></div>}
       {success && <div className="modal-backdrop" onClick={() => setSuccess(null)}><div role="dialog" aria-modal="true" className="deposit-success" onClick={e => e.stopPropagation()}>

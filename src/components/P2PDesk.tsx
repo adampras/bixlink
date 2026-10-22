@@ -1,3 +1,4 @@
+import { DepthVisualizer } from '@/components/TechSuite';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
@@ -47,6 +48,7 @@ export function P2PDesk({ userId }: { userId?: string | undefined }) {
 
   return <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
     <section className="p2p-panel">
+      <DepthVisualizer asks={asks} bids={bids}/>
       <div className="mb-3 flex items-center justify-between"><h2 className="font-display text-lg font-bold">Order book · BIX/USDT</h2><span className="text-[10px] tracking-widest text-muted-foreground">CORRIDOR ${P2P_FLOOR} – ${P2P_CEILING}</span></div>
       {book.isError ? <p role="alert" className="text-destructive">Order book unavailable.</p> : book.isPending ? <p className="text-muted-foreground">Loading…</p> : <>
         <div className="p2p-head"><span>Price</span><span>BIX</span><span>Total</span><span /></div>

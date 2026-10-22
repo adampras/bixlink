@@ -1,3 +1,4 @@
+import { QuantumHud } from '@/components/TechSuite';
 import { BixZoomButton } from '@/components/BixZoom';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';

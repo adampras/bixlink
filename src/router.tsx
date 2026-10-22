@@ -1,6 +1,7 @@
 import { QueryClient, dehydrate, hydrate } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+import { AuricSkeleton } from "./components/TechSuite";
 
 // After a new deploy, old page chunks disappear; reload once to fetch fresh ones.
 if (typeof window !== "undefined") {
@@ -27,6 +28,8 @@ export const getRouter = () => {
       if (dehydrated && typeof dehydrated === 'object' && 'queryState' in dehydrated && typeof dehydrated.queryState === 'string') hydrate(queryClient, JSON.parse(dehydrated.queryState));
     },
     scrollRestoration: true,
+    defaultPendingComponent: AuricSkeleton,
+    defaultPendingMs: 250,
     // Warm the next page (code + loader data) as soon as a nav item is hovered
     // or pressed, so switching menus opens already-loaded content.
     defaultPreload: "intent",
