@@ -99,9 +99,9 @@ function WalletPage() {
         {cfg?.readiness.walletCard && <div className="sov-foot"><span className="numeric">{(user?.id.replace(/\D/g, '').padEnd(4, '0').slice(0, 4) ?? '0000')} •••• •••• 2026</span><span>MEMBER LEDGER PASS</span></div>}
       </div>
       <div className="wallet-actions"><button type="button" className="wallet-action wallet-action--in" onClick={() => setModal('deposit')}><span><ArrowDownToLine size={18}/></span><b>Deposit</b></button><button type="button" className="wallet-action wallet-action--out" onClick={() => setModal('withdraw')}><span><ArrowUpFromLine size={18}/></span><b>Withdraw</b></button></div>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <Link to="/pay" className="wallet-tile wallet-tile--pay"><span className="wallet-tile-top"><span className="wallet-tile-icon"><ScanLine size={18}/></span><span className={`wallet-tile-status${cfg?.bixPay.enabled ? ' is-open' : ''}`}><i/>{cfg?.bixPay.enabled ? 'OPEN' : 'SOON'}</span></span><span><b className="wallet-tile-title">BIX PAY</b><span className="wallet-tile-sub">Scan QR · pay in BIX</span></span></Link>
-        <Link to="/transfer" className="wallet-tile wallet-tile--transfer"><span className="wallet-tile-top"><span className="wallet-tile-icon"><ArrowLeftRight size={18}/></span><span className={`wallet-tile-status${cfg?.usdtTransfer.enabled ? ' is-open' : ''}`}><i/>{cfg?.usdtTransfer.enabled ? 'OPEN' : 'SOON'}</span></span><span><b className="wallet-tile-title">TRANSFER</b><span className="wallet-tile-sub">{isAdmin ? 'Virtual USDT (testing)' : 'Send USDT to members'}</span></span></Link>
+      <div className="mt-3 grid grid-cols-2 gap-2.5">
+        <Link to="/pay" className="wallet-tile wallet-tile--pay"><span className="wallet-tile-icon"><QrCode size={16}/></span><span className="min-w-0 flex-1"><b className="wallet-tile-title">BIX PAY</b><span className="wallet-tile-sub">QR Pay · BIX</span></span><span className={`wallet-tile-status${cfg?.bixPay.enabled ? ' is-open' : ''}`}><i/></span></Link>
+        <Link to="/transfer" className="wallet-tile wallet-tile--transfer"><span className="wallet-tile-icon"><Send size={15}/></span><span className="min-w-0 flex-1"><b className="wallet-tile-title">TRANSFER</b><span className="wallet-tile-sub">Member · USDT</span></span><span className={`wallet-tile-status${cfg?.usdtTransfer.enabled ? ' is-open' : ''}`}><i/></span></Link>
       </div>
       {notice && <p role="status" className="mt-4 text-sm text-chart-2">{notice}</p>}
 
