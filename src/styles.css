@@ -2881,3 +2881,9 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .site-shell[data-presentation-theme="future"] { background-image: none !important; }
 .wallet-summary::before, .wallet-summary[data-wallet-skin]::after, .wallet-sovereign::before, .arena-hud::after { background-image: none !important; background: none !important; }
 .reactor-landing::before { background-image: none !important; }
+
+/* Total clean: no grid, scanline, hatch or dashed textures anywhere */
+.reactor-landing::before, .wallet-summary::before, .wallet-summary[data-wallet-skin]::after, .wallet-sovereign::before, .arena-hud::after, .eco-card::after { content: none !important; display: none !important; background: none !important; }
+.site-shell, .site-shell[data-presentation-theme] { background-image: radial-gradient(ellipse at 50% 0%, color-mix(in oklab, var(--chart-3) 7%, transparent), transparent 55%) !important; background-size: auto !important; }
+.eco-badge, .pay-qr-code, .profit-withdraw__lock { border-style: solid !important; }
+.site-shell .border-dashed { border-style: solid !important; }

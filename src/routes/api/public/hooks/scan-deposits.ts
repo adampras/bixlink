@@ -4,7 +4,9 @@ import { createFileRoute } from '@tanstack/react-router';
 // Idempotent and only credits a confirmed on-chain transfer to the member who requested that exact amount.
 export const Route = createFileRoute('/api/public/hooks/scan-deposits')({
   server: { handlers: { POST: async ({ request }) => {
-    if (!request.headers.get('authorization')?.startsWith('Bearer ')) return new Response('Unauthorized', { status: 401 });
+    const { authenticateCronRequest } = await import('@/integrations/supabase/cron-auth');
+    const denied = await authenticateCronRequest(request);
+    if (denied) return denied;
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { matchIntent } = await import('@/lib/deposit-match.server');
     const { data: intents } = await supabaseAdmin.from('deposit_intents').select('*').eq('status', 'pending').order('created_at').limit(100);
