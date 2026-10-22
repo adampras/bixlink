@@ -27,7 +27,8 @@ export function HighlightsHub() {
   const ref = useRef<HTMLElement>(null);
   const hub = (cfg?.readiness as { hub?: { enabled?: boolean; items?: HubItem[] } } | undefined)?.hub;
   const base = hub?.items?.length ? hub.items : defaultHub;
-  const withBooster = base.some(i => i.href === '/boost') ? base : [base[0], defaultHub[1], ...base.slice(1)].filter(Boolean) as HubItem[];
+  const withPresale = base.some(i => i.href === '/presale') ? base : [defaultHub[0], ...base] as HubItem[];
+  const withBooster = withPresale.some(i => i.href === '/boost') ? withPresale : [withPresale[0], defaultHub[1], ...withPresale.slice(1)].filter(Boolean) as HubItem[];
   const items = hub?.enabled === false ? [] : withBooster.filter(i => i.enabled !== false);
   const { active, goTo } = useRailDots(ref, items.length, 3200);
   if (!items.length) return null;

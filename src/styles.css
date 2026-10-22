@@ -2960,3 +2960,13 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .ingot b { font-size:.95rem; }
 .ingot em { width:100%; font-size:10px; font-style:normal; color:var(--chart-2); }
 .auric-bar[aria-selected="true"], .ingot[aria-selected="true"] { border-color:var(--chart-3); box-shadow:0 0 0 1px var(--chart-3),0 8px 22px -12px var(--chart-3); }
+
+/* Member presale CTA + presale page luxe polish */
+.presale-cta{display:flex;align-items:center;gap:.75rem;margin-top:.75rem;padding:.7rem .9rem;border-radius:16px;border:1px solid color-mix(in oklab,var(--chart-3) 55%,transparent);background:linear-gradient(135deg,color-mix(in oklab,var(--chart-3) 18%,var(--card)),var(--card) 60%);box-shadow:0 10px 28px -16px color-mix(in oklab,var(--chart-3) 70%,transparent);transition:transform .2s}
+.presale-cta:active{transform:scale(.98)}
+.presale-cta__icon{display:grid;place-items:center;width:36px;height:36px;border-radius:999px;background:linear-gradient(135deg,var(--chart-3),color-mix(in oklab,var(--chart-3) 60%,var(--background)));color:var(--background);font-size:18px}
+.presale-cta small{display:block;font-size:9px;font-weight:800;letter-spacing:.2em;color:var(--chart-3)}
+.presale-cta b{display:block;font-size:13px}
+.presale-cta em{font-style:normal;font-size:11px;font-weight:800;color:var(--chart-3)}
+.presale-tabs{border-radius:999px;padding:4px;border:1px solid color-mix(in oklab,var(--chart-3) 35%,transparent);background:color-mix(in oklab,var(--card) 85%,transparent)}
+.presale-tabs .is-active{background:linear-gradient(135deg,var(--chart-3),color-mix(in oklab,var(--chart-3) 65%,var(--background)))!important;color:var(--background)!important;border-radius:999px}
