@@ -2940,3 +2940,23 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .site-shell .wallet-tile-title { font-size:12px; letter-spacing:.1em; color: var(--tile); }
 .site-shell .wallet-tile-sub { min-height:0; font-size:10px; letter-spacing:.04em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .site-shell .wallet-tile-status { align-self:flex-start; }
+
+/* ===== Polish: internal market + compact staking tiers ===== */
+.internal-market-stats { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+.internal-market-stats > div { padding:8px; border-radius:10px; background:color-mix(in oklab,var(--foreground) 4%,transparent); text-align:left !important; }
+.internal-market-stats b { font-size:12px; }
+.internal-market-trade a { height:42px; border-radius:999px; font-size:13px; letter-spacing:.14em; border:1px solid color-mix(in oklab,var(--foreground) 14%,transparent); box-shadow:inset 0 1px 0 color-mix(in oklab,var(--foreground) 22%,transparent),0 6px 18px -10px currentColor; transition:transform .15s,filter .2s; }
+.internal-market-trade a:active { transform:scale(.97); }
+.internal-market-trade .is-buy { background:linear-gradient(135deg,color-mix(in oklab,var(--chart-2) 92%,var(--foreground)),color-mix(in oklab,var(--chart-2) 70%,var(--background))); }
+.internal-market-trade .is-sell { background:linear-gradient(135deg,color-mix(in oklab,var(--destructive) 90%,var(--foreground)),color-mix(in oklab,var(--destructive) 65%,var(--background))); }
+
+.auric-grid, .ingot-matrix__grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:8px; }
+@media (min-width:768px){ .auric-grid, .ingot-matrix__grid { grid-template-columns:repeat(4,minmax(0,1fr)) !important; } }
+.auric-bar { aspect-ratio:auto; height:44px; flex-direction:row; justify-content:space-between; padding:0 12px; border-radius:12px; }
+.auric-bar span { font-size:.6rem; color:var(--chart-3); }
+.auric-bar b { font-size:.9rem; }
+.ingot { flex-direction:row; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:8px 12px; border-radius:12px; gap:0 6px; }
+.ingot small { font-size:9px; letter-spacing:.16em; color:var(--chart-3); }
+.ingot b { font-size:.95rem; }
+.ingot em { width:100%; font-size:10px; font-style:normal; color:var(--chart-2); }
+.auric-bar[aria-selected="true"], .ingot[aria-selected="true"] { border-color:var(--chart-3); box-shadow:0 0 0 1px var(--chart-3),0 8px 22px -12px var(--chart-3); }
