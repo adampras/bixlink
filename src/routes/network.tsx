@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
-import { ArrowLeft, ArrowUpRight, BadgeCheck, ChevronRight, Coins, GitBranch, Lock, Search, ShieldCheck, UserRound, Users } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, ArrowUpRight, BadgeCheck, ChevronRight, Coins, GitBranch, Lock, Search, ShieldCheck, UserPlus, UserRound, Users } from 'lucide-react';
+import { PlacementRegister } from '@/components/PlacementRegister';
+import avatarM from '@/assets/alliance-avatar-id.jpg';
+import avatarF from '@/assets/network-avatar-female.jpg';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { VipRewardPlus } from '@/components/VipRewardPlus';
@@ -18,6 +21,10 @@ function identity(n: Node) { return n.username || n.full_name || n.member_code |
 function NetworkPage() {
  const { user, ready, data, error } = useMember(); const { data: cfg } = usePublicConfig();
  const [selected, setSelected] = useState<string | null>(null); const [showHistory, setShowHistory] = useState(false); const [expanded, setExpanded] = useState<string | null>(null); const [showAllRows, setShowAllRows] = useState(false); const [search, setSearch] = useState(''); const [generation, setGeneration] = useState<number | null>(null);
+ const [gender, setGender] = useState<'m'|'f'>('m'); const [regOpen, setRegOpen] = useState(false); const [regTarget, setRegTarget] = useState('');
+ useEffect(() => { if (localStorage.getItem('bix-avatar') === 'f') setGender('f'); }, []);
+ const pickGender = (g: 'm'|'f') => { setGender(g); localStorage.setItem('bix-avatar', g); };
+ const openRegister = (id: string) => { setRegTarget(id); setRegOpen(true); };
  const tree = (data?.tree ?? []) as Node[];
  const metrics = useMemo(() => new Map((Array.isArray(data?.bixMetrics) ? data.bixMetrics as unknown as BixMetric[] : []).map(m => [m.user_id,m])),[data?.bixMetrics]);
  const children = useMemo(() => {const map = new Map<string, Node[]>();for(const node of tree){const parent=node.parent_id ?? user?.id;if(parent)map.set(parent,[...(map.get(parent) ?? []),node]);}return map;},[tree,user?.id]);
