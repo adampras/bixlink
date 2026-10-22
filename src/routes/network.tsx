@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
-import { ArrowLeft, ArrowUpRight, BadgeCheck, ChevronRight, Coins, GitBranch, Lock, Search, ShieldCheck, UserRound, Users } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, ArrowUpRight, BadgeCheck, ChevronRight, Coins, GitBranch, Lock, Search, ShieldCheck, UserPlus, UserRound, Users } from 'lucide-react';
+import { PlacementRegister } from '@/components/PlacementRegister';
+import avatarM from '@/assets/alliance-avatar-id.jpg';
+import avatarF from '@/assets/network-avatar-female.jpg';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { VipRewardPlus } from '@/components/VipRewardPlus';
@@ -18,6 +21,10 @@ function identity(n: Node) { return n.username || n.full_name || n.member_code |
 function NetworkPage() {
  const { user, ready, data, error } = useMember(); const { data: cfg } = usePublicConfig();
  const [selected, setSelected] = useState<string | null>(null); const [showHistory, setShowHistory] = useState(false); const [expanded, setExpanded] = useState<string | null>(null); const [showAllRows, setShowAllRows] = useState(false); const [search, setSearch] = useState(''); const [generation, setGeneration] = useState<number | null>(null);
+ const [gender, setGender] = useState<'m'|'f'>('m'); const [regOpen, setRegOpen] = useState(false); const [regTarget, setRegTarget] = useState('');
+ useEffect(() => { if (localStorage.getItem('bix-avatar') === 'f') setGender('f'); }, []);
+ const pickGender = (g: 'm'|'f') => { setGender(g); localStorage.setItem('bix-avatar', g); };
+ const openRegister = (id: string) => { setRegTarget(id); setRegOpen(true); };
  const tree = (data?.tree ?? []) as Node[];
  const metrics = useMemo(() => new Map((Array.isArray(data?.bixMetrics) ? data.bixMetrics as unknown as BixMetric[] : []).map(m => [m.user_id,m])),[data?.bixMetrics]);
  const children = useMemo(() => {const map = new Map<string, Node[]>();for(const node of tree){const parent=node.parent_id ?? user?.id;if(parent)map.set(parent,[...(map.get(parent) ?? []),node]);}return map;},[tree,user?.id]);
@@ -50,11 +57,15 @@ function NetworkPage() {
  <MemberGate ready={ready} signedIn={!!user} title="NETWORK">
  <header className="nx-header"><div><div className="eyebrow">MY NETWORK</div><h1 className="mt-2 font-display text-2xl font-bold md:text-3xl">Network <span className="text-chart-3">Explorer</span></h1><p className="mt-1 text-xs text-muted-foreground">L1 = people you invited directly. Tap a member to open their team. Totals are recorded entries, not projections.</p></div><label className="nx-search"><Search size={18}/><input aria-label="Search network members" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search member ID or name"/>{search && <Button variant="ghost" size="sm" onClick={() => setSearch('')}>Clear</Button>}</label></header>
  {error && <p role="alert" className="mt-4 text-destructive">Network records could not load. Please refresh.</p>}
- <section className="nx-root"><div className="nx-root-avatar"><UserRound size={40}/><span>YOU</span></div><h2>{data?.referral?.code ?? user?.id.slice(0,8).toUpperCase()}</h2><div className="nx-root-status"><Users size={14}/>{directNodes.length} direct referrals <span>·</span><GitBranch size={14}/>{deepest} generations</div>
- <dl className="nx-totals"><div><dt>Network USDT stakes</dt><dd>{money(totalUsdt)}</dd></div><div><dt>USDT sponsor bonus</dt><dd className="text-chart-2">{money(usdtDirectBonus)}</dd></div><div><dt>Credited BIX bonus</dt><dd className="text-chart-3">{bix(approved)}</dd></div><div><dt>Pending BIX review</dt><dd>{bix(pending)}</dd></div></dl>
- <div className="nx-milestone-heading"><h3>Matching access</h3><span>{unlocked}/{levels.length} unlocked</span></div>
- <div className="nx-levels">{levels.map((pct,i) => <div key={i} className={i<unlocked ? 'nx-level nx-level-active' : 'nx-level'}><span>LEVEL {i+1}</span><strong>{pct}%</strong><small>{i+1} direct</small>{i<unlocked ? <BadgeCheck size={16}/> : <Lock size={14}/>}</div>)}</div>
+ <section className="nx-root-compact">
+  <div className="nx-root-row"><div className="nx-avatar-halo"><img src={gender==='f' ? avatarF : avatarM} alt="" width={56} height={56}/></div>
+   <div className="min-w-0 flex-1"><span className="eyebrow">AKUN UTAMA</span><h2 className="truncate font-display text-lg font-bold">{data?.referral?.code ?? user?.id.slice(0,8).toUpperCase()}</h2><p className="text-[11px] text-muted-foreground"><Users size={11} className="inline"/> {directNodes.length} direct · <GitBranch size={11} className="inline"/> {deepest} gen</p></div>
+   <div className="nx-gender" role="group" aria-label="Avatar">{(['m','f'] as const).map(g => <button key={g} type="button" aria-pressed={gender===g} onClick={() => pickGender(g)}>{g==='m' ? 'Pria' : 'Wanita'}</button>)}</div></div>
+  <dl className="nx-mini">{[['Network USDT',money(totalUsdt),''],['Sponsor USDT',money(usdtDirectBonus),'text-chart-2'],['BIX credited',bix(approved),'text-chart-3'],['BIX pending',bix(pending),'']].map(([l,v,c]) => <div key={l}><dt>{l}</dt><dd className={`numeric ${c}`}>{v}</dd></div>)}</dl>
+  <div className="nx-pills" aria-label={`Matching access ${unlocked}/${levels.length}`}>{levels.map((pct,i) => <span key={i} className={i<unlocked ? 'on' : ''}>L{i+1} {pct}% {i<unlocked ? <BadgeCheck size={11}/> : <Lock size={10}/>}</span>)}</div>
+  <Button size="sm" className="mt-3 w-full" onClick={() => openRegister(user?.id ?? '')}><UserPlus size={15}/> Daftarkan Member Baru</Button>
  </section>
+ {user && <PlacementRegister open={regOpen} onOpenChange={setRegOpen} initial={regTarget || user.id} options={[{ id: user.id, label: `YOU · ${data?.referral?.code ?? ''} (L1)` }, ...tree.map(n => ({ id: n.user_id, label: `${n.member_code ?? ''} ${identity(n)} → member jadi L${n.depth+1}` }))]}/>}
  <section aria-label="Leader bonus hub" className="mt-6 rounded-2xl border border-chart-3/50 bg-card p-4 md:p-5">
   <div className="eyebrow">LEADER BONUS HUB</div><h2 className="mt-1 font-display text-lg font-bold">My network bonuses</h2>
   <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">{[
