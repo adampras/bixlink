@@ -20,8 +20,9 @@ export async function inDownline(admin: any, root: string, target: string) {
   while (cur && !seen.has(cur) && seen.size < 500) {
     if (cur === root) return true;
     seen.add(cur);
-    const { data }: { data: { referred_by: string | null } | null } = await admin.from('referral_codes').select('referred_by').eq('user_id', cur).maybeSingle();
-    cur = data?.referred_by ?? null;
+    const res: any = await admin.from('referral_codes').select('referred_by').eq('user_id', cur).maybeSingle();
+    const next: string | null = res.data?.referred_by ?? null;
+    cur = next;
   }
   return false;
 }
