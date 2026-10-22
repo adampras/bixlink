@@ -1,3 +1,4 @@
+import { ModuleGate } from '@/components/ModuleGate';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { VaultStardust, VaultLogo, VaultNode } from '@/components/VaultFlourish';
@@ -11,7 +12,7 @@ import { lovable } from '@/integrations/lovable';
 export const Route = createFileRoute('/register')({
   validateSearch: (search: Record<string, unknown>): { ref?: string | undefined; target?: string | undefined } => ({ ref: typeof search['ref'] === 'string' ? search['ref'] : undefined, target: typeof search['target'] === 'string' ? search['target'] : undefined }),
   head: () => ({ links: [{ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap' }], meta: [{ title: 'Create a BIXLINK Account' }, { name: 'description', content: 'Create your BIXLINK member account with an optional referral code.' }, { property: 'og:title', content: 'Create a BIXLINK Account' }, { property: 'og:description', content: 'You are invited to BIXLINK — join the Genesis staking ecosystem with your inviter code.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/c44e33af-5cb2-4bf8-9d9f-ce8af06b3e8b/bix-reactor-poster.jpg' }, { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/c44e33af-5cb2-4bf8-9d9f-ce8af06b3e8b/bix-reactor-poster.jpg' }] }),
-  component: RegisterPage,
+  component: () => <ModuleGate module="register"><RegisterPage/></ModuleGate>,
 
 });
 

@@ -1,3 +1,4 @@
+import { ModuleGate } from '@/components/ModuleGate';
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
@@ -13,7 +14,7 @@ import headerLogo from '@/assets/bixlink-logo-gold.webp';
 
 export const Route = createFileRoute('/arena')({
   head: () => ({ meta: [{ title: 'Fox Arena — BIXLINK' }, { name: 'description', content: 'Daily BIXLINK missions, Fox Den tiers and monthly leaderboard seasons with free promotional BIXP.' }, { property: 'og:title', content: 'Fox Arena — BIXLINK' }, { property: 'og:description', content: 'Complete daily missions and climb the monthly Fox Arena leaderboard.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
-  component: ArenaPage,
+  component: () => <ModuleGate module="arena"><ArenaPage/></ModuleGate>,
 });
 
 const DISCLOSURE = 'BIXP are free promotional points earned by completing missions. Not on-chain BIX, not withdrawable until owner conversion opens. Rankings and rewards are not guaranteed.';
