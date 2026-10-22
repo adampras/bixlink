@@ -1,6 +1,12 @@
-export const QUEST_KEYS = ['checkin', 'quiz', 'streak', 'referral', 'stake7'] as const;
+export const QUEST_KEYS = ['welcome', 'checkin', 'quiz', 'streak', 'referral', 'stake7', 'follow_x', 'join_telegram', 'sub_youtube'] as const;
+export const SOCIAL_KEYS = ['follow_x', 'join_telegram', 'sub_youtube'] as const;
+export type SocialKey = typeof SOCIAL_KEYS[number];
 export type QuestKey = typeof QUEST_KEYS[number];
-export const QUEST_LABELS: Record<QuestKey, { title: string; hint: string; period: 'daily' | 'weekly' }> = {
+export const QUEST_LABELS: Record<QuestKey, { title: string; hint: string; period: 'daily' | 'weekly' | 'one-time' }> = {
+  welcome: { title: 'Welcome bonus', hint: 'New verified members claim their welcome BIXP once.', period: 'one-time' },
+  follow_x: { title: 'Follow BIXLINK on X', hint: 'Open the official X account, follow, then claim.', period: 'one-time' },
+  join_telegram: { title: 'Join BIXLINK Telegram', hint: 'Join the official Telegram community, then claim.', period: 'one-time' },
+  sub_youtube: { title: 'Subscribe on YouTube', hint: 'Subscribe to the official YouTube channel, then claim.', period: 'one-time' },
   checkin: { title: 'Daily check-in', hint: 'Open the Arena and check in once a day.', period: 'daily' },
   quiz: { title: 'Crypto quiz', hint: 'Answer today\'s question correctly. One try per day.', period: 'daily' },
   streak: { title: '7-day streak bonus', hint: 'Check in 7 days in a row.', period: 'daily' },

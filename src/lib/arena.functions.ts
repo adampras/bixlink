@@ -5,11 +5,11 @@ import { QUEST_KEYS, type QuestKey } from './arena';
 
 export type ArenaStatus = {
   enabled: boolean; leaderboard: boolean; rewards: Record<QuestKey, number>; missions: Record<QuestKey, boolean>;
-  quiz: { q: string; options: string[] } | null; day: string; week: string; streak: number; claimed: QuestKey[];
+  quiz: { q: string; options: string[] } | null; links?: Partial<Record<string, string>>; day: string; week: string; streak: number; claimed: QuestKey[];
   questVbix: number; totalVbix: number; monthPoints: number; hasStake: boolean; mining: boolean; cap: number;
 };
 export type LeaderRow = { rank: number; member: string; points: number; is_me: boolean };
-export type ArenaConfig = { enabled: boolean; leaderboard: boolean; cap?: number; rewards: Record<QuestKey, number>; missions: Record<QuestKey, boolean>; quiz: { q: string; options: string[]; answer: number }[]; prizes: number[] };
+export type ArenaConfig = { enabled: boolean; leaderboard: boolean; cap?: number; rewards: Record<QuestKey, number>; missions: Record<QuestKey, boolean>; links?: Partial<Record<string, string>>; quiz: { q: string; options: string[]; answer: number }[]; prizes: number[] };
 export type SeasonPrize = { id: string; season: string; rank: number; points: number; amount_bix: number; status: string; user_id: string };
 
 export const getArenaStatus = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
@@ -32,10 +32,10 @@ export const getArenaAdmin = createServerFn({ method: 'POST' }).middleware([requ
   return data as unknown as { config: ArenaConfig; prizes: SeasonPrize[] };
 });
 
-const bools = z.object(Object.fromEntries(QUEST_KEYS.map(k => [k, z.boolean()])) as Record<QuestKey, z.ZodBoolean>);
-const nums = z.object(Object.fromEntries(QUEST_KEYS.map(k => [k, z.number().min(0).max(10_000)])) as Record<QuestKey, z.ZodNumber>);
+const bools = z.object(Object.fromEntries(QUEST_KEYS.map(k => [k, z.boolean()])) as Record<QuestKey, z.ZodBoolean>).partial();
+const nums = z.object(Object.fromEntries(QUEST_KEYS.map(k => [k, z.number().min(0).max(10_000)])) as Record<QuestKey, z.ZodNumber>).partial();
 export const saveArena = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: ArenaConfig) => z.object({ enabled: z.boolean(), leaderboard: z.boolean(), cap: z.number().min(0).max(100_000_000).optional(), rewards: nums, missions: bools, quiz: z.array(z.object({ q: z.string().trim().min(3).max(200), options: z.array(z.string().trim().min(1).max(80)).min(2).max(4), answer: z.number().int().min(0).max(3) })).max(60), prizes: z.array(z.number().min(0).max(10_000)).max(10) }).parse(d))
+  .inputValidator((d: ArenaConfig) => z.object({ enabled: z.boolean(), leaderboard: z.boolean(), cap: z.number().min(0).max(100_000_000).optional(), rewards: nums, missions: bools, links: z.object({ follow_x: z.string().trim().max(300).regex(/^(https:\/\/.*)?$/), join_telegram: z.string().trim().max(300).regex(/^(https:\/\/.*)?$/), sub_youtube: z.string().trim().max(300).regex(/^(https:\/\/.*)?$/) }).partial().optional(), quiz: z.array(z.object({ q: z.string().trim().min(3).max(200), options: z.array(z.string().trim().min(1).max(80)).min(2).max(4), answer: z.number().int().min(0).max(3) })).max(60), prizes: z.array(z.number().min(0).max(10_000)).max(10) }).parse(d))
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.rpc('bix_arena_save', { p_config: data });
     if (error) throw new Error(error.message);
