@@ -1,3 +1,4 @@
+import { ModuleGate } from '@/components/ModuleGate';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { P2PDesk } from '@/components/P2PDesk';
@@ -11,7 +12,7 @@ export const Route = createFileRoute('/p2p')({
     { property: 'og:description', content: 'Member-to-member BIX order book with escrow in the internal ledger.' },
     { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' },
   ] }),
-  component: P2PPage,
+  component: () => <ModuleGate module="p2p"><P2PPage/></ModuleGate>,
 });
 function P2PPage() {
   const { user } = useMember();

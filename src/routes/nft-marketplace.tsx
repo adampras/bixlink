@@ -1,3 +1,4 @@
+import { ModuleGate } from '@/components/ModuleGate';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { X, Search, ArrowUpRight, Layers, ShoppingBag, SlidersHorizontal, Store, Lock } from 'lucide-react';
@@ -24,7 +25,7 @@ import { cartUnits, type CartLine } from '@/lib/shipping';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 const localPrice=(usd:number)=>`≈ IDR ${number(usd*16250,{maximumFractionDigits:0})} · MYR ${number(usd*4.45,{maximumFractionDigits:2})}`;
-export const Route = createFileRoute('/nft-marketplace')({head:()=>({meta:[{title:'BIXLINK Marketplace — Reactor Collection & Merchandise'},{name:'description',content:'Explore clear-glass BIXLINK reactor certificates and curated merchandise.'},{property:'og:title',content:'BIXLINK Marketplace'},{property:'og:description',content:'Clear-glass reactor collections and BIXLINK merchandise in the luxury marketplace.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:Marketplace});
+export const Route = createFileRoute('/nft-marketplace')({head:()=>({meta:[{title:'BIXLINK Marketplace — Reactor Collection & Merchandise'},{name:'description',content:'Explore clear-glass BIXLINK reactor certificates and curated merchandise.'},{property:'og:title',content:'BIXLINK Marketplace'},{property:'og:description',content:'Clear-glass reactor collections and BIXLINK merchandise in the luxury marketplace.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:() => <ModuleGate module="nft"><Marketplace/></ModuleGate>});
 type Selection={kind:'nft';item:CatalogItem}|{kind:'product';item:ShopProduct};
 function Marketplace(){
  const q=useNftCatalog(),shop=useShopCatalog(),{user}=useMember(),{data:cfg}=usePublicConfig();
