@@ -32,8 +32,8 @@ export const getArenaAdmin = createServerFn({ method: 'POST' }).middleware([requ
   return data as unknown as { config: ArenaConfig; prizes: SeasonPrize[] };
 });
 
-const bools = z.object(Object.fromEntries(QUEST_KEYS.map(k => [k, z.boolean()])) as Record<QuestKey, z.ZodBoolean>);
-const nums = z.object(Object.fromEntries(QUEST_KEYS.map(k => [k, z.number().min(0).max(10_000)])) as Record<QuestKey, z.ZodNumber>);
+const bools = z.object(Object.fromEntries(QUEST_KEYS.map(k => [k, z.boolean()])) as Record<QuestKey, z.ZodBoolean>).partial();
+const nums = z.object(Object.fromEntries(QUEST_KEYS.map(k => [k, z.number().min(0).max(10_000)])) as Record<QuestKey, z.ZodNumber>).partial();
 export const saveArena = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((d: ArenaConfig) => z.object({ enabled: z.boolean(), leaderboard: z.boolean(), cap: z.number().min(0).max(100_000_000).optional(), rewards: nums, missions: bools, links: z.object({ follow_x: z.string().trim().max(300).regex(/^(https:\/\/.*)?$/), join_telegram: z.string().trim().max(300).regex(/^(https:\/\/.*)?$/), sub_youtube: z.string().trim().max(300).regex(/^(https:\/\/.*)?$/) }).partial().optional(), quiz: z.array(z.object({ q: z.string().trim().min(3).max(200), options: z.array(z.string().trim().min(1).max(80)).min(2).max(4), answer: z.number().int().min(0).max(3) })).max(60), prizes: z.array(z.number().min(0).max(10_000)).max(10) }).parse(d))
   .handler(async ({ context, data }) => {
