@@ -14,6 +14,7 @@ import { NetworkLeaders } from '@/components/NetworkLeaders';
 import { OwnerRevenueTable } from '@/components/OwnerRevenueTable';
 import { ReviewerDepositWallet } from '@/components/ReviewerDepositWallet';
 import { AdminCreateAccount } from '@/components/AdminCreateAccount';
+import { AdminChangeEmail } from '@/components/AdminChangeEmail';
 
 export const Route = createFileRoute('/review')({
   head: () => ({ meta: [{ title: 'ADMIN PANEL BIX — BIXLINK' }, { name: 'description', content: 'Limited BIXLINK review console.' }, { property: 'og:title', content: 'ADMIN PANEL BIX — BIXLINK' }, { property: 'og:description', content: 'Limited review console.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }),
@@ -52,6 +53,7 @@ function Review() {
         {tab === 'Referral' && perms?.referral && <AdminReferrals key={JSON.stringify(settings?.referrals)} initial={settings?.referrals} onMessage={setMsg} onSaved={refreshSettings} settingsOnly/>}
         {tab === 'Leader' && perms?.leaders && <NetworkLeaders onMessage={setMsg}/>}
         <AdminCreateAccount onMessage={setMsg} title="Buat akun member (masuk jaringan Anda)"/>
+        <AdminChangeEmail onMessage={setMsg}/>
       </>}
   </main></BixShell>;
 }

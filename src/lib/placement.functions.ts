@@ -27,6 +27,7 @@ export const registerPlacedMember = createServerFn({ method: 'POST' }).middlewar
     const { data: u, error } = await supabaseAdmin.auth.admin.createUser({ email: data.email.toLowerCase(), password: data.password, email_confirm: true, user_metadata: { full_name: data.fullName, username: data.username } });
     if (error) throw new Error(error.message);
     const newId = u.user?.id;
-    if (newId) await supabaseAdmin.from('referral_codes').update({ referred_by: data.placementId }).eq('user_id', newId).is('referred_by', null);
+    const { provisionMember } = await import('./member-account.server');
+    if (newId) await provisionMember(supabaseAdmin, newId, data.fullName, data.username, data.placementId);
     return { ok: true };
   });

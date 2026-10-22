@@ -31,6 +31,7 @@ import { AdminNavigation } from '@/components/AdminNavigation';
 import { AdminWorkspace } from '@/components/AdminWorkspace';
 import { AdminTeams } from '@/components/AdminTeams';
 import { AdminCreateAccount } from '@/components/AdminCreateAccount';
+import { AdminChangeEmail } from '@/components/AdminChangeEmail';
 import { AdminReports } from '@/components/AdminReports';
 import { AdminPresale } from '@/components/AdminPresale';
 import { AdminShopCatalog } from '@/components/AdminShopCatalog';
@@ -94,7 +95,7 @@ function Admin() {
     {tab === 'Wallet' && <AdminBixPay enabled={Boolean((data?.settings.find(s=>s.key==='bix_pay')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>}
     {tab === 'Wallet' && <AdminTransferToggle enabled={Boolean((data?.settings.find(s=>s.key==='usdt_transfer')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>}
     {tab === 'Kepemimpinan & Tim' && <AdminWorkspace label="Kepemimpinan & Tim" panels={[
-      { title: 'Tim & VIP', content: <><AdminCreateAccount onMessage={setMessage}/><AdminTeams onMessage={setMessage}/></> },
+      { title: 'Tim & VIP', content: <><AdminCreateAccount onMessage={setMessage}/><AdminChangeEmail onMessage={setMessage}/><AdminTeams onMessage={setMessage}/></> },
       { title: 'Leader bersponsor', content: <AdminLeaders onMessage={setMessage}/> },
       { title: 'Clones', content: <AdminClones onMessage={setMessage}/> },
     ]}/>}
