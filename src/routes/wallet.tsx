@@ -18,7 +18,7 @@ import { dateTime, money, number } from '@/lib/bixlink';
 import { confirmPin, getFiatCodes, txFeedback } from '@/components/TxFeedback';
 import { pickWalletSkin } from '@/lib/wallet-skin';
 import { WalletFinanceMotion } from '@/components/WalletFinanceMotion';
-import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, ScanLine, CheckCircle2, Clock, Eye, EyeOff } from 'lucide-react';
+import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, CheckCircle2, Clock, Eye, EyeOff, Send } from 'lucide-react';
 import { DepositFlightScanner } from '@/components/DepositFlightScanner';
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
