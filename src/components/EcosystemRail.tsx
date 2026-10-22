@@ -39,7 +39,7 @@ type Item = { title: string; body: string; icon: typeof Crown; tone: string; hre
 
 export function EcosystemRail({ presale }: { presale: boolean }) {
   const items: Item[] = [
-    ...(presale ? [{ title: 'Presale', body: 'Genesis allocation · from $500', icon: Crown, tone: 'gold', href: '/presale' as const }] : []),
+    { title: 'Genesis Presale', body: presale ? 'Packages open · from $500' : 'Genesis packages · from $500', icon: Crown, tone: 'gold', href: '/presale' as const },
     { title: 'Fox Arena', body: 'Daily missions & BIXP quests', icon: Swords, tone: 'emerald', href: '/arena' },
     { title: 'Marketplace', body: 'NFT certificates & merchandise', icon: ShoppingBag, tone: 'violet', href: '/nft-marketplace' },
     { title: 'AI Trading Bot', body: 'Demo simulation · in development', icon: Bot, tone: 'cyan', soon: true },
