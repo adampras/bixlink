@@ -43,8 +43,8 @@ export function MarketShowcase({ onOrder }: { onOrder: () => void }) {
       <div className="ms-cats" role="list">{CATS.map(c => <button type="button" role="listitem" key={c.l} onClick={onOrder} className="ms-cat"><span><c.i size={20} /></span>{c.l}</button>)}</div>
 
       <div className="ms-banner" aria-live="polite">
-        <img src={ITEMS[b * 2].img} alt="" aria-hidden />
-        <div><small>BIXLINK STORE</small><b>{BANNERS[b].t}</b><p>{BANNERS[b].s}</p></div>
+        <img src={ITEMS[b * 2]!.img} alt="" aria-hidden />
+        <div><small>BIXLINK STORE</small><b>{BANNERS[b]!.t}</b><p>{BANNERS[b]!.s}</p></div>
         <span className="ms-dots">{BANNERS.map((_, i) => <i key={i} data-on={i === b} />)}</span>
       </div>
 
