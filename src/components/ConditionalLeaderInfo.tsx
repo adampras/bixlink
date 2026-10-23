@@ -1,14 +1,14 @@
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { usePublicConfig } from '@/lib/useMember';
 import { Crown, Sparkles, X, Copy, Users, Video, Megaphone, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { claimConditionalLeader, getConditionalLeaderAccess, getMyLeader } from '@/lib/bixlink.functions';
 
 const PACKAGES = [
   { id: 'EXPLORER', usd: 100 }, { id: 'PIONEER', usd: 500 }, { id: 'BUILDER', usd: 1000 },
-  { id: 'GUARDIAN', usd: 3000 }, { id: 'TITAN', usd: 5000 },
 ];
 const DAYS = 360;
 type Result = { package: string; value_usd: number; target_usd: number };
@@ -28,10 +28,19 @@ export function ConditionalLeaderInfo() {
   const [err, setErr] = useState('');
   const [done, setDone] = useState<Result | null>(null);
   const [guide, setGuide] = useState(false);
-  if (!data?.allowed) return null;
+  const [invited, setInvited] = useState(false);
+  const { data: cfg } = usePublicConfig();
+  useEffect(() => {
+    const check = () => setInvited(new URLSearchParams(window.location.search).get('loan') === 'open');
+    check(); window.addEventListener('bix-loan-open', check); return () => window.removeEventListener('bix-loan-open', check);
+  }, []);
+  useEffect(() => { if (invited) document.getElementById('loan-account')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, [invited, data?.allowed]);
   const claimed = !!leader.data?.status;
+  const programOpen = cfg?.readiness?.loanEnabled !== false;
+  // Auto-shown for leaders who hold a loan account; otherwise only when opened via FOX AI (?loan=open) while the program is open.
+  if (!data?.allowed || (!claimed && !(invited && programOpen))) return null;
   const rows = [
-    ['Account value', 'Up to a $5,000 package (existing conditional leaders keep their set value)'],
+    ['Account value', 'Up to a $1,000 package (existing conditional leaders keep their set value)'],
     ['Turnover target', '5× the joined package value'],
     ['After 5× reached', 'Special company rewards and challenges'],
     ['BIXCOIN distribution', '5–10% when your members/investors stake with the 70:30 split'],
@@ -46,7 +55,7 @@ export function ConditionalLeaderInfo() {
     } catch (e) { setErr(e instanceof Error ? e.message : 'Could not activate.'); }
     setBusy(false);
   };
-  return <section className="mt-6 rounded-2xl border border-chart-3/50 bg-card p-5">
+  return <section id="loan-account" className="mt-6 rounded-2xl border border-chart-3/50 bg-card p-5">
     <div className="eyebrow flex items-center gap-2 text-chart-3"><Crown size={14}/> CONDITIONAL LEADER ACCOUNT · GLOBAL</div>
     <h2 className="mt-1 font-display text-lg font-black">Conditional loan account for leaders worldwide</h2>
     <dl className="mt-3 space-y-2 text-xs">{rows.map(([k, v]) => <div key={k} className="grid grid-cols-[8.5rem_1fr] gap-2 border-b border-border/60 pb-2"><dt className="text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>)}</dl>
@@ -57,7 +66,7 @@ export function ConditionalLeaderInfo() {
 
     {open && <div className="modal-backdrop" onClick={() => setOpen(false)}><div role="dialog" aria-modal="true" aria-label="Choose loan package" className="modal-panel" onClick={e => e.stopPropagation()}>
       <div className="flex justify-between"><h3 className="font-display text-xl font-black">Choose your leader package</h3><Button variant="ghost" size="icon" aria-label="Close" onClick={() => setOpen(false)}><X/></Button></div>
-      <div role="radiogroup" className="mt-4 grid grid-cols-2 gap-2">{PACKAGES.map(p => <button key={p.id} type="button" role="radio" aria-checked={pick.id === p.id} onClick={() => setPick(p)} className={`rounded-xl border p-3 text-left text-xs ${pick.id === p.id ? 'border-chart-3 bg-chart-3/10' : 'border-border'}`}><b className="block">{p.id}</b><span className="numeric text-lg font-black text-chart-3">${p.usd.toLocaleString()}</span><span className="numeric block text-muted-foreground">Target ${(p.usd * 5).toLocaleString()}</span></button>)}</div>
+      <div role="radiogroup" className="mt-4 grid grid-cols-3 gap-2">{PACKAGES.map(p => <button key={p.id} type="button" role="radio" aria-checked={pick.id === p.id} onClick={() => setPick(p)} className={`rounded-xl border p-3 text-left text-xs ${pick.id === p.id ? 'border-chart-3 bg-chart-3/10' : 'border-border'}`}><b className="block">{p.id}</b><span className="numeric text-lg font-black text-chart-3">${p.usd.toLocaleString()}</span><span className="numeric block text-muted-foreground">Target ${(p.usd * 5).toLocaleString()}</span></button>)}</div>
       <ul className="mt-4 space-y-1 text-xs text-muted-foreground"><li>• Stake activates instantly for {DAYS} days from the loan credit.</li><li>• Principal stays locked until 5× turnover (${(pick.usd * 5).toLocaleString()}) is reached.</li><li>• One claim per account; the owner can review or revoke it.</li></ul>
       <label className="mt-4 flex items-start gap-2 rounded-xl border border-border p-3 text-xs"><input type="checkbox" className="mt-0.5" checked={agree} onChange={e => setAgree(e.target.checked)}/> I accept the conditional leader terms.</label>
       {err && <p role="alert" className="mt-3 text-xs text-destructive">{err}</p>}
