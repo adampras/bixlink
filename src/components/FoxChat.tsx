@@ -41,7 +41,7 @@ export function FoxChat() {
   }
 
   return <>
-    {open && <div className="fox-chat-panel fixed bottom-20 right-3 z-50 flex h-[70vh] max-h-[520px] w-[calc(100vw-1.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-primary/40 bg-card/95 shadow-2xl backdrop-blur">
+    {open && <div className="fox-chat-panel fixed bottom-44 right-3 z-50 flex h-[62vh] max-h-[520px] w-[calc(100vw-1.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-primary/40 bg-card/85 shadow-2xl backdrop-blur-xl backdrop-saturate-150">
       <header className="flex items-center gap-2 border-b border-primary/20 px-3 py-2">
         <img src={fox.url} alt="FOX AI" className="h-8 w-8 rounded-full" />
         <div className="flex-1"><b className="text-sm text-primary">FOX AI Support</b><p className="text-[10px] text-muted-foreground">Bot otomatis · bukan saran keuangan</p></div>
@@ -58,7 +58,7 @@ export function FoxChat() {
         <button type="submit" disabled={busy} aria-label="Kirim" className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-50"><Send size={16} /></button>
       </form>
     </div>}
-    <button type="button" aria-label="FOX AI chat" onClick={() => setOpen((o) => !o)} className="fixed bottom-4 right-3 z-50 grid h-13 w-13 place-items-center rounded-full border border-primary/60 bg-card p-3 text-primary shadow-xl">
+    <button type="button" aria-label="FOX AI chat" onClick={() => setOpen((o) => !o)} className="fixed bottom-28 right-3 z-50 grid h-13 w-13 place-items-center rounded-full border border-primary/60 bg-card p-3 text-primary shadow-xl">
       {open ? <X size={22} /> : <MessageCircle size={22} />}
     </button>
   </>;
