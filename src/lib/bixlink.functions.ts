@@ -506,6 +506,14 @@ export const getConditionalLeaderAccess = createServerFn({ method: 'GET' }).midd
   return { allowed: data === true };
 });
 
+export const claimConditionalLeader = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { packageId: string; days: number }) => z.object({ packageId: z.string().min(1).max(40), days: z.number().int().refine(d => [30, 60, 90, 180, 360].includes(d)) }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: r, error } = await context.supabase.rpc('bix_claim_conditional_leader', { p_package: data.packageId, p_days: data.days });
+    if (error) throw new Error(error.message);
+    return r as unknown as { stake_id: string; package: string; value_usd: number; target_usd: number; days: number };
+  });
+
 export const applyLeader = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { error } = await context.supabase.rpc('apply_bix_leader');
   if (error) throw new Error(error.message);
