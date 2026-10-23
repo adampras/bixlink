@@ -21,7 +21,7 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
   const tier = nftTier(price, days);
   const catalog = useNftCatalog();
   const art = packageArtwork(catalog.data ?? [], index, days, price);
-  const card = valueCard(price) ?? packageCard(pkg.id);
+  const card = valueCard(price) ?? packageCard(pkg.id, price);
   return <article className={`duration-package tier-tone-${index % 8}`} aria-label={`${pkg.id} package`}>
     <header className="duration-package-head">
       <div><p className="text-xs font-bold">Tier {String(index + 1).padStart(2, '0')}</p><h3 className="mt-1 text-2xl font-bold">{pkg.id}</h3></div>
