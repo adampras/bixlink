@@ -3115,3 +3115,19 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .presale-cta--slim{margin-top:.6rem;padding:.5rem .75rem;border-radius:12px;gap:.6rem}
 .presale-cta--slim .presale-cta__icon{width:28px;height:28px;font-size:14px}
 .presale-cta--slim b{font-size:12px}
+
+/* 20 developer teams */
+.dev-team { max-width:72rem; margin:0 auto; padding:2rem 1rem 1rem; }
+.dev-team-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-top:1rem; }
+@media(min-width:768px){ .dev-team-grid { grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; } }
+.dev-tile { display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 4px 8px; border-radius:10px; border:1px solid color-mix(in oklch,var(--chart-3) 30%,var(--border)); background:linear-gradient(160deg,color-mix(in oklch,var(--chart-3) 8%,var(--card)),var(--card)); text-align:center; animation:dev-rise .6s ease-out both, dev-glow 6s ease-in-out infinite; transition:transform .2s; min-width:0; }
+.dev-tile:active { transform:scale(.96); }
+.dev-tile b { font-size:10px; line-height:1.2; color:var(--foreground); }
+.dev-tile small { font-size:8px; line-height:1.25; color:var(--muted-foreground); }
+.dev-tile-img { position:relative; width:44px; height:44px; border-radius:50%; border:1.5px solid var(--chart-3); animation:alliance-breathe 5s ease-in-out infinite; }
+.dev-tile-img img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.dev-tile-img i { position:absolute; bottom:-5px; left:50%; translate:-50% 0; padding:0 4px; border-radius:3px; border:1px solid var(--chart-3); background:var(--card); color:var(--chart-3); font-size:7px; font-style:normal; font-weight:800; }
+.dev-tile-img--lg { width:72px; height:72px; }
+@keyframes dev-rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+@keyframes dev-glow { 0%,100% { box-shadow:none; } 50% { box-shadow:0 0 14px color-mix(in oklch,var(--chart-3) 22%,transparent); } }
+@media(prefers-reduced-motion:reduce){ .dev-tile,.dev-tile-img { animation:none; } }
