@@ -144,3 +144,4 @@
 - [ ] Chinese as default language — waits on owner choosing fixed default vs Admin setting.
 - [ ] BIX Studio launch — waits on owner credit price and top-up method.
 - [ ] Fox Arena phase 2, full Trade terminal, purchase certificates, financial number styling (proposals).
+- [x] Successful staking reveals refreshed history and live projection; movable edge-snapping chat; HOME top arrow; Owner 1 touch feedback switch. Phone interactions, signed-in history and owner OFF/ON saves verified; no new financial transaction performed.

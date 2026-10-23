@@ -12,8 +12,9 @@ import { getOwnerAnnouncements, saveAnnouncement } from '@/lib/updates.functions
 import { defaultReadiness, type Readiness } from '@/lib/readiness';
 import { dateTime } from '@/lib/bixlink';
 
-type AvailabilityKey = 'legalEnabled' | 'kycEnabled' | 'readinessEnabled' | 'homeOverviewEnabled' | 'marketEnabled' | 'footerEnabled' | 'liveActivityEnabled' | 'heroAnimEnabled' | 'presaleStageEnabled';
+type AvailabilityKey = 'legalEnabled' | 'kycEnabled' | 'readinessEnabled' | 'homeOverviewEnabled' | 'marketEnabled' | 'footerEnabled' | 'liveActivityEnabled' | 'heroAnimEnabled' | 'presaleStageEnabled' | 'touchEffectsEnabled';
 const controls: { key: AvailabilityKey; label: string; detail: string }[] = [
+  { key: 'touchEffectsEnabled', label: 'Efek sentuh premium', detail: 'Kilau tepi dan respons tekan halus pada tombol. Mengikuti preferensi kurangi animasi perangkat.' },
   { key: 'legalEnabled', label: 'Legal & About pages', detail: 'Terms, Privacy, Risk Disclosure, About & Support.' },
   { key: 'kycEnabled', label: 'Optional identity check', detail: 'Identity submissions in Settings and Withdraw.' },
   { key: 'readinessEnabled', label: 'Readiness information', detail: 'Additional footer information about the project.' },

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Coins, LockKeyhole, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { confirmPin, txFeedback } from '@/components/TxFeedback';
+import { revealStakingHistory } from '@/lib/interaction-comfort';
 import { number } from '@/lib/bixlink';
 import { nativeBixApy, boosterMaximum } from '@/lib/booster-apy';
 import { usePublicConfig } from '@/lib/useMember';
@@ -14,6 +15,8 @@ const LOCKS = [30, 90, 180, 360, 540];
 
 export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
   const qc = useQueryClient();
+  const historyRef = useRef<HTMLDivElement>(null);
+  const [historyJump, setHistoryJump] = useState(false);
   const stakeBix = useServerFn(stakeNativeBix); const drawProfit = useServerFn(withdrawStakeProfit); const unstakeBix = useServerFn(unstakeNativeBix);
   const { data: cfg } = usePublicConfig();
   const [amount, setAmount] = useState('100');
@@ -38,6 +41,12 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
     },
   });
 
+  useEffect(() => {
+    if (!historyJump) return;
+    const frame = requestAnimationFrame(() => { revealStakingHistory(historyRef.current); setHistoryJump(false); });
+    return () => cancelAnimationFrame(frame);
+  }, [historyJump, q.data]);
+
   const amt = Number(amount) || 0;
   const maximum = boosterMaximum(cfg?.booster.maxApy);
   const apy = nativeBixApy(amt, days, maximum);
@@ -51,8 +60,10 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
     setBusy(true); setMsg('');
     try {
       await stakeBix({ data: { amount: amt, days } });
-      setMsg(`CONGRATULATION — ${number(amt)} BIX staked at ${apy}% per month.`); txFeedback.success('BIX staked', `${number(amt)} BIX at ${apy}% / month`);
+      setMsg(`Staking berhasil — ${number(amt)} BIX. Profit di riwayat adalah proyeksi, bukan saldo yang dapat dibelanjakan.`);
       await qc.invalidateQueries();
+      await q.refetch();
+      setHistoryJump(true);
     } catch (error) { setMsg(error instanceof Error ? error.message : 'Could not stake BIX.'); txFeedback.fail('BIX staking failed', error); }
     finally { setBusy(false); }
   }
@@ -100,10 +111,10 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
     <Button className="mt-4 w-full rounded-xl" disabled={busy || amt < 10 || amt > (q.data?.bal ?? 0)} onClick={stake}><Zap/> {busy ? 'Staking…' : amt > (q.data?.bal ?? 0) ? 'Insufficient BIX balance' : 'Stake BIX now'}</Button>
     <p className="mt-3 text-xs text-chart-3">Direct referral bonus: {cfg?.referrals.bixDirectEnabled === false ? 'Closed' : `${cfg?.referrals.bixDirectPct ?? cfg?.referrals.direct ?? 10}% · 100% BIX · pending owner approval`}</p>
     <p className="mt-2 text-xs text-muted-foreground">Early unstake before lock end applies a 10% BIX penalty. Figures are projections, not guaranteed.</p>
-    {msg && <p className="mt-3 rounded-xl border border-chart-2/40 bg-chart-2/10 p-3 text-sm font-bold text-chart-2">{msg}</p>}
+    {msg && <p role="status" className="mt-3 rounded-xl border border-chart-2/40 bg-chart-2/10 p-3 text-sm font-bold text-chart-2">{msg}</p>}
 
-    {active.length > 0 && <div className="mt-6">
-      <div className="flex justify-between text-sm"><b>My BIX stakes</b><span className="numeric text-chart-2">Live profit {number(live, { maximumFractionDigits: 6 })} BIX</span></div>
+    {active.length > 0 && <div ref={historyRef} tabIndex={-1} className="staking-history-anchor mt-6">
+      <div className="flex justify-between text-sm"><b>My BIX stakes</b><span className="numeric text-chart-2">Live profit · projection {number(live, { maximumFractionDigits: 6 })} BIX</span></div>
       <div className="mt-3 space-y-2">{active.map(s => {
         const end = new Date(s.created_at).getTime() + s.lock_days * 86400000;
         const pct = Math.min(100, (now - new Date(s.created_at).getTime()) / (s.lock_days * 86400000) * 100);
