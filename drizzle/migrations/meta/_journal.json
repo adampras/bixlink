@@ -512,6 +512,13 @@
       "when": 1792714349215,
       "tag": "0072_staking_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1792727808999,
+      "tag": "0073_auto_welcome_bixp",
+      "breakpoints": true
     }
   ]
 }
