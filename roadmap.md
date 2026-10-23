@@ -138,3 +138,9 @@
 - [x] Compact STAKE details, remove duration-triggered popups and verify complete phone action labels.
 - [x] Blend the landing coin backdrop and refine dimensional rotation using existing artwork; verify phone and desktop.
 - [ ] Upgrade $7,000 PLATINUM NFT from the $5,000 pass; improve gold title contrast and emerald numbers; verify phone display.
+- [x] Social links accept t.me/name, x.com/name or @name and auto-complete https.
+- [x] Add TRADE to the member header menu.
+- [ ] Verify institutional STAKE design and live ticker with a member from a selected owner network.
+- [ ] Chinese as default language — waits on owner choosing fixed default vs Admin setting.
+- [ ] BIX Studio launch — waits on owner credit price and top-up method.
+- [ ] Fox Arena phase 2, full Trade terminal, purchase certificates, financial number styling (proposals).
