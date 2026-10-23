@@ -45,3 +45,4 @@
 - Shell/dialogs own phone bounds; consortium uses a centered portal stage to avoid legacy transforms. Package cards use inline durations and full-width actions.
 
 - Size heroes via landing-hero-compact/compact-market-hero; preserve catalogs. Mask vault art behind the transparent coin to blend themes without new assets.
+- Keep app-wide touch feedback and HOME return-to-top in one root-mounted presentation component; store its switch in existing owner-authorized readiness settings to avoid duplicate controls or new permissions.

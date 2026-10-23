@@ -1,8 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { MessageCircle, Send, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import fox from '@/assets/fox-icon-180.png.asset.json';
+import { Button } from '@/components/ui/button';
+import { clampChatPosition } from '@/lib/interaction-comfort';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
@@ -12,6 +14,28 @@ export function FoxChat() {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const end = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const drag = useRef<{ startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
+  const skipClick = useRef(false);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('bixlink-chat-position') ?? 'null');
+      if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) setPosition(clampChatPosition(saved.x, saved.y, window.innerWidth, window.innerHeight));
+    } catch { /* Unavailable device storage keeps the default position. */ }
+    const resize = () => setPosition(current => current ? clampChatPosition(current.x, current.y, window.innerWidth, window.innerHeight) : null);
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, []);
+
+  const finishDrag = (cancelled = false) => {
+    const current = drag.current;
+    drag.current = null;
+    if (!current?.moved) return;
+    skipClick.current = true;
+    const snapped = clampChatPosition(current.x < (window.innerWidth - 52) / 2 ? 12 : window.innerWidth - 64, current.y, window.innerWidth, window.innerHeight);
+    setPosition(snapped);
+    if (!cancelled) try { localStorage.setItem('bixlink-chat-position', JSON.stringify(snapped)); } catch { /* Device storage is optional. */ }
+  };
 
   async function send() {
     const text = input.trim();
@@ -45,7 +69,7 @@ export function FoxChat() {
       <header className="flex items-center gap-2 border-b border-primary/20 px-3 py-2">
         <img src={fox.url} alt="FOX AI" className="h-8 w-8 rounded-full" />
         <div className="flex-1"><b className="text-sm text-primary">FOX AI Support</b><p className="text-[10px] text-muted-foreground">Bot otomatis · bukan saran keuangan</p></div>
-        <button type="button" aria-label="Tutup chat" onClick={() => setOpen(false)}><X size={18} /></button>
+        <Button size="icon" variant="ghost" type="button" aria-label="Tutup chat" onClick={() => setOpen(false)}><X size={18} /></Button>
       </header>
       <div className="flex-1 space-y-3 overflow-y-auto p-3 text-sm">
         {msgs.map((m, i) => <div key={i} className={m.role === 'user' ? 'ml-auto max-w-[85%] rounded-2xl bg-primary px-3 py-2 text-primary-foreground' : 'prose prose-sm prose-invert max-w-none text-foreground'}>
@@ -55,11 +79,43 @@ export function FoxChat() {
       </div>
       <form className="flex gap-2 border-t border-primary/20 p-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
         <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Tulis pertanyaan…" className="form-input flex-1 text-sm" maxLength={2000} />
-        <button type="submit" disabled={busy} aria-label="Kirim" className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-50"><Send size={16} /></button>
+        <Button type="submit" size="icon" disabled={busy} aria-label="Kirim" className="h-10 w-10 shrink-0 rounded-full"><Send size={16} /></Button>
       </form>
     </div>}
-    <button type="button" aria-label="FOX AI chat" onClick={() => setOpen((o) => !o)} className="fixed bottom-28 right-3 z-50 grid h-13 w-13 place-items-center rounded-full border border-primary/60 bg-card p-3 text-primary shadow-xl">
+    <Button type="button" size="icon" variant="outline" aria-label="FOX AI chat" title="FOX AI · geser untuk memindahkan" data-no-touch-effect
+      style={position ? { left: position.x, top: position.y, right: 'auto', bottom: 'auto' } : undefined}
+      onPointerDown={event => {
+        if (event.button !== 0) return;
+        const bounds = event.currentTarget.getBoundingClientRect();
+        skipClick.current = false;
+        drag.current = { startX: event.clientX, startY: event.clientY, x: bounds.x, y: bounds.y, moved: false };
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={event => {
+        const current = drag.current;
+        if (!current) return;
+        const dx = event.clientX - current.startX, dy = event.clientY - current.startY;
+        if (!current.moved && Math.hypot(dx, dy) < 6) return;
+        current.moved = true;
+        const next = clampChatPosition(current.x + dx, current.y + dy, window.innerWidth, window.innerHeight);
+        current.x = next.x; current.y = next.y;
+        current.startX = event.clientX; current.startY = event.clientY;
+        setPosition(next);
+      }}
+      onPointerUp={() => finishDrag()}
+      onPointerCancel={() => finishDrag(true)}
+      onKeyDown={event => {
+        const direction = { ArrowLeft: [-20, 0], ArrowRight: [20, 0], ArrowUp: [0, -20], ArrowDown: [0, 20] }[event.key];
+        if (!direction) return;
+        event.preventDefault();
+        const bounds = event.currentTarget.getBoundingClientRect();
+        const next = clampChatPosition(bounds.x + (direction[0] ?? 0), bounds.y + (direction[1] ?? 0), window.innerWidth, window.innerHeight);
+        setPosition(next);
+        try { localStorage.setItem('bixlink-chat-position', JSON.stringify(next)); } catch { /* Optional device storage. */ }
+      }}
+      onClick={() => { if (skipClick.current) { skipClick.current = false; return; } setOpen(o => !o); }}
+      className="fox-chat-launcher fixed bottom-28 right-3 z-50 h-13 w-13 rounded-full border-primary/60 bg-card p-3 text-primary shadow-xl">
       {open ? <X size={22} /> : <MessageCircle size={22} />}
-    </button>
+    </Button>
   </>;
 }

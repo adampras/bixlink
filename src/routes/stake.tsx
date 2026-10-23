@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,7 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { requestStake, unstakeStake } from '@/lib/bixlink.functions';
 import { date, money, number, type Package } from '@/lib/bixlink';
 import { ArrowUpRight, CheckCircle2, ChevronDown, ChevronUp, Clock3, LockKeyhole, ShieldCheck, X, XCircle, Zap } from 'lucide-react';
+import { revealStakingHistory } from '@/lib/interaction-comfort';
 import { MarketTicker } from '@/components/MarketTicker';
 
 export const Route = createFileRoute('/stake')({ head: () => ({ meta: [{ title: 'Stake — BIXLINK' }, { name: 'description', content: 'Choose a BIXLINK staking package and submit a request.' }, { property: 'og:title', content: 'Stake — BIXLINK' }, { property: 'og:description', content: 'Eight BIXLINK staking packages from $10 to $10,000.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: StakePage });
@@ -22,7 +23,13 @@ function StakePage() {
   const { data: cfg } = usePublicConfig();
   const [chosen, setChosenRaw] = useState<Package | null>(null);
   const [agree, setAgree] = useState(false);
-  const [congrats, setCongrats] = useState<Package | null>(null);
+  const historyRef = useRef<HTMLDivElement>(null);
+  const [historyJump, setHistoryJump] = useState(false);
+  useEffect(() => {
+    if (!historyJump) return;
+    const frame = requestAnimationFrame(() => { revealStakingHistory(historyRef.current); setHistoryJump(false); });
+    return () => cancelAnimationFrame(frame);
+  }, [historyJump]);
   const setChosen = (p: Package | null) => { setAgree(false); setChosenRaw(p); };
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
@@ -67,14 +74,14 @@ function StakePage() {
       {skin.data && <InstitutionalStakeHeader active={activeStakes.length} principal={activeStakes.reduce((n, s) => n + Number(s.amount_usd), 0)} live={liveTotal} perDay={perDay}/>}
       <StakePackageLayouts packages={cfg?.packages ?? []} layout={skin.data ? 'institutional' : cfg?.boosterVisual.stakeLayout} onStake={setChosen}/>
       <div className="mt-6 flex justify-end"><Button asChild variant="outline"><Link to="/nft-marketplace">NFT Marketplace &amp; My collection <ArrowUpRight size={16}/></Link></Button></div>
-      <div className="mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><div className="flex items-center gap-2"><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span><Button variant="outline" size="icon" aria-label={requestsVisible ? "Hide my requests" : "Show my requests"} aria-expanded={requestsVisible} aria-controls="stake-requests" onClick={() => setRequestsVisible(current => !current)}>{requestsVisible ? <ChevronUp/> : <ChevronDown/>}</Button></div></div>
+      <div ref={historyRef} tabIndex={-1} className="staking-history-anchor mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><div className="flex items-center gap-2"><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span><Button variant="outline" size="icon" aria-label={requestsVisible ? "Hide my requests" : "Show my requests"} aria-expanded={requestsVisible} aria-controls="stake-requests" onClick={() => setRequestsVisible(current => !current)}>{requestsVisible ? <ChevronUp/> : <ChevronDown/>}</Button></div></div>
       <div id="stake-requests" hidden={!requestsVisible} className="mt-4 space-y-3">{(data?.stakes ?? []).map(s => {
         const started = s.activated_at ? new Date(s.activated_at).getTime() : null;
         const end = started ? started + s.lock_days * 86400000 : null;
         const progress = now && started && end ? Math.max(0, Math.min(100, ((now - started) / (end - started)) * 100)) : 0;
         const statusStyle = s.status === 'unstaked' ? 'border-border bg-muted/30 text-muted-foreground' : s.status === 'active' ? 'border-chart-2/40 bg-chart-2/10 text-chart-2' : s.status === 'rejected' ? 'border-destructive/40 bg-destructive/10 text-destructive' : s.status === 'completed' ? 'border-chart-3/40 bg-chart-3/10 text-chart-3' : 'border-primary/40 bg-primary/10 text-primary';
         const StatusIcon = s.status === 'active' || s.status === 'completed' ? CheckCircle2 : s.status === 'rejected' ? XCircle : Clock3;
-        return <article key={s.id} className="stake-request p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex items-center gap-2"><strong className="text-lg">{s.package_id}</strong><span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-bold uppercase ${statusStyle}`}><StatusIcon size={11}/>{s.status}</span></div><p className="numeric mt-1 text-xs text-muted-foreground">Requested {date(s.created_at)}</p></div><div className="text-right"><strong className="numeric block text-xl text-chart-3">{money(Number(s.amount_usd))}</strong><span className="numeric text-xs text-muted-foreground">{number(Number(s.apy) / 12, { maximumFractionDigits: 2 })}% / month · {s.lock_days} days</span></div></div>{s.status === 'active' && <div className="mt-4"><div className="mb-2 flex justify-between text-[11px] text-muted-foreground"><span>Lock progress</span><span className="numeric">{Math.round(progress)}%</span></div><div className="stake-progress"><i style={{ width: `${progress}%` }}/></div><div className="mt-2 flex items-center justify-between gap-2"><p className="numeric text-sm font-bold text-chart-2">Live profit ${liveOf(s).toFixed(6)}</p><span className="stake-lux-chip">Simple daily</span></div>{end && <p className="numeric mt-2 text-[11px] text-muted-foreground">Unlock estimate: {date(end)}</p>}</div>}{(s.status === 'active' || s.status === 'completed') && <Button variant="outline" size="sm" className="mt-4 w-full rounded-full border-destructive/50 text-destructive" onClick={() => { setUnAgree(false); setUnstaking(s); }}>Unstake {penaltyFor(s) > 0 ? `(−${penaltyFor(s)}% penalty)` : '(no penalty)'}</Button>}{s.status === 'unstaked' && <p className="numeric mt-3 text-[11px] text-muted-foreground">Unstaked {s.unstaked_at ? date(s.unstaked_at) : ''} · penalty {Number(s.penalty_pct)}% · returned {money(Number(s.refund_usd))}</p>}</article>;
+        return <article key={s.id} className="stake-request p-4 sm:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex items-center gap-2"><strong className="text-lg">{s.package_id}</strong><span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-bold uppercase ${statusStyle}`}><StatusIcon size={11}/>{s.status}</span></div><p className="numeric mt-1 text-xs text-muted-foreground">Requested {date(s.created_at)}</p></div><div className="text-right"><strong className="numeric block text-xl text-chart-3">{money(Number(s.amount_usd))}</strong><span className="numeric text-xs text-muted-foreground">{number(Number(s.apy) / 12, { maximumFractionDigits: 2 })}% / month · {s.lock_days} days</span></div></div>{s.status === 'active' && <div className="mt-4"><div className="mb-2 flex justify-between text-[11px] text-muted-foreground"><span>Lock progress</span><span className="numeric">{Math.round(progress)}%</span></div><div className="stake-progress"><i style={{ width: `${progress}%` }}/></div><div className="mt-2 flex items-center justify-between gap-2"><p className="numeric text-sm font-bold text-chart-2">Live profit · projection ${liveOf(s).toFixed(6)}</p><span className="stake-lux-chip">Simple daily</span></div>{end && <p className="numeric mt-2 text-[11px] text-muted-foreground">Unlock estimate: {date(end)}</p>}</div>}{(s.status === 'active' || s.status === 'completed') && <Button variant="outline" size="sm" className="mt-4 w-full rounded-full border-destructive/50 text-destructive" onClick={() => { setUnAgree(false); setUnstaking(s); }}>Unstake {penaltyFor(s) > 0 ? `(−${penaltyFor(s)}% penalty)` : '(no penalty)'}</Button>}{s.status === 'unstaked' && <p className="numeric mt-3 text-[11px] text-muted-foreground">Unstaked {s.unstaked_at ? date(s.unstaked_at) : ''} · penalty {Number(s.penalty_pct)}% · returned {money(Number(s.refund_usd))}</p>}</article>;
       })}{!data?.stakes.length && <div className="stake-request p-8 text-center"><ShieldCheck className="mx-auto text-primary"/><p className="mt-3 text-sm font-bold">No stake requests yet</p><p className="mt-1 text-xs text-muted-foreground">Choose a package above — it activates instantly from your virtual USDT balance.</p></div>}</div>
       {notice && <p role="status" className="mt-5 text-chart-2">{notice}</p>}
       {chosen && <div className="modal-backdrop" onClick={() => setChosen(null)}><div role="dialog" aria-modal="true" className="modal-panel" onClick={e => e.stopPropagation()}>
@@ -92,15 +99,8 @@ function StakePage() {
         <label className="mt-4 flex items-start gap-2 rounded-xl border border-border p-3 text-xs"><input type="checkbox" className="mt-0.5" checked={agree} onChange={e => setAgree(e.target.checked)}/> I agree to the staking terms: lock period, APY estimate and early-unstake penalties.</label>
         <div className="mt-5 grid grid-cols-2 gap-3">
           <Button variant="outline" className="rounded-full" onClick={() => { setChosen(null); setNotice('Stake cancelled — you did not agree.'); }}>Disagree</Button>
-          <Button disabled={busy || !agree || Number(bal.data ?? 0) < usdtNeed || Number(bixBal.data ?? 0) < bixNeed} className="rounded-full bg-chart-3 text-background" onClick={async () => { if (!(await confirmPin())) return; setBusy(true); try { await submit({ data: { packageId: chosen.id, days: chosen.lock_days, mode } }); setCongrats(chosen); await refreshAll(); await bixBal.refetch(); } catch (e) { const message = e instanceof Error ? e.message : 'Request failed.'; setNotice(message); txFeedback.fail('Staking failed', message); } setBusy(false); setChosen(null); }}>Agree & stake</Button>
+          <Button disabled={busy || !agree || Number(bal.data ?? 0) < usdtNeed || Number(bixBal.data ?? 0) < bixNeed} className="rounded-full bg-chart-3 text-background" onClick={async () => { if (!(await confirmPin())) return; setBusy(true); try { await submit({ data: { packageId: chosen.id, days: chosen.lock_days, mode } }); setChosen(null); await refreshAll(); await bixBal.refetch(); setRequestsVisible(true); setNotice('Staking berhasil — riwayat diperbarui. Profit aktif ditampilkan sebagai proyeksi, bukan saldo yang dapat dibelanjakan.'); setHistoryJump(true); } catch (e) { const message = e instanceof Error ? e.message : 'Request failed.'; setNotice(message); txFeedback.fail('Staking failed', message); } setBusy(false); setChosen(null); }}>Agree & stake</Button>
         </div></>; })()}
-      </div></div>}
-      {congrats && <div className="modal-backdrop" onClick={() => setCongrats(null)}><div role="dialog" aria-modal="true" className="modal-panel deposit-success text-center" onClick={e => e.stopPropagation()}>
-        <CheckCircle2 size={56} className="mx-auto text-chart-2"/>
-        <h3 className="mt-4 font-display text-3xl font-black text-chart-2">CONGRATULATION!</h3>
-        <p className="mt-2 text-sm">Your <b className="text-chart-3">{congrats.id}</b> stake of <b className="numeric text-chart-3">{money(congrats.price_usd)}</b> was submitted successfully.</p>
-        <p className="mt-2 text-xs text-muted-foreground">Your stake is now active.</p>
-        <Button className="mt-6 w-full rounded-full bg-chart-2 text-background" onClick={() => setCongrats(null)}>Done</Button>
       </div></div>}
       {unstaking && (() => { const pct = penaltyFor(unstaking); const amt = Number(unstaking.amount_usd); const fee = amt * pct / 100; return <div className="modal-backdrop" onClick={() => setUnstaking(null)}><div role="dialog" aria-modal="true" className="modal-panel" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between"><h3 className="font-display text-2xl font-black text-destructive">Unstake {unstaking.package_id}</h3><Button variant="ghost" size="icon" onClick={() => setUnstaking(null)}><X/></Button></div>
