@@ -4,6 +4,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { StakePackageLayouts } from '@/components/StakePackageLayouts';
+import { InstitutionalStakeHeader } from '@/components/InstitutionalStake';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ function StakePage() {
   const bal = useQuery({ queryKey: ['vusdt', user?.id], enabled: !!user, queryFn: async () => { if (!user) return 0; return Number((await supabase.rpc('bix_vusdt_balance', { p_user: user.id })).data ?? 0); } });
   const bixBal = useQuery({ queryKey: ['stake-bix-bal', user?.id], enabled: !!user, queryFn: async () => { if (!user) return 0; const r = await supabase.rpc('bix_asset_balances', { p_user: user.id }).single(); return Number((r.data as { bix_balance?: number } | null)?.bix_balance ?? 0); } });
   const [mode, setMode] = useState<'usdt' | 'hybrid'>('usdt');
+  const skin = useQuery({ queryKey: ['staking-skin', user?.id], enabled: !!user, queryFn: async () => Boolean((await supabase.rpc('bix_staking_skin_for_me')).data) });
   const bixRef = Number(cfg?.bixMarket.priceUsd ?? 0.5) || 0.5;
   const tiers = [...(cfg?.unstake.tiers ?? [])].sort((a, b) => a.days - b.days);
   const elapsedDays = (s: { activated_at: string | null; created_at: string }) => now ? (now - new Date(s.activated_at ?? s.created_at).getTime()) / 86400000 : 0;
@@ -61,7 +63,8 @@ function StakePage() {
         <div className="min-w-0 stake-metric rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
       </dl>
       {activeStakes.length > 0 && <section className="mt-4 border-y border-border py-4" aria-label="Seven-day staking projection"><div className="flex justify-between gap-3 text-xs"><b>Next 7 days · projection</b><span className="numeric text-chart-2">${(perDay*7).toFixed(2)} USDT</span></div><div className="mt-3 grid h-20 grid-cols-7 items-end gap-2">{[1,2,3,4,5,6,7].map(day=><div key={day} className="flex flex-col justify-end border-b border-chart-2"><b className="numeric text-[9px] text-muted-foreground">${(perDay*day).toFixed(2)}</b><progress aria-label={`Day ${day} projected accumulation`} className="allocation-progress mt-1" max={7} value={day}/><span className="mt-1 text-[9px] text-muted-foreground">D{day}</span></div>)}</div><p className="mt-2 text-[10px] text-muted-foreground">Indicative simple-rate projection from active contract snapshots; not historical earnings, settlement or spendable balance.</p></section>}
-      <StakePackageLayouts packages={cfg?.packages ?? []} layout={cfg?.boosterVisual.stakeLayout} onStake={setChosen}/>
+      {skin.data && <InstitutionalStakeHeader active={activeStakes.length} principal={activeStakes.reduce((n, s) => n + Number(s.amount_usd), 0)} live={liveTotal} perDay={perDay}/>}
+      <StakePackageLayouts packages={cfg?.packages ?? []} layout={skin.data ? 'institutional' : cfg?.boosterVisual.stakeLayout} onStake={setChosen}/>
       <div className="mt-6 flex justify-end"><Button asChild variant="outline"><Link to="/nft-marketplace">NFT Marketplace &amp; My collection <ArrowUpRight size={16}/></Link></Button></div>
       <div className="mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><div className="flex items-center gap-2"><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span><Button variant="outline" size="icon" aria-label={requestsVisible ? "Hide my requests" : "Show my requests"} aria-expanded={requestsVisible} aria-controls="stake-requests" onClick={() => setRequestsVisible(current => !current)}>{requestsVisible ? <ChevronUp/> : <ChevronDown/>}</Button></div></div>
       <div id="stake-requests" hidden={!requestsVisible} className="mt-4 space-y-3">{(data?.stakes ?? []).map(s => {

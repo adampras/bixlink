@@ -1805,6 +1805,12 @@ export type Database = {
         Args: { p_amount: number; p_days: number }
         Returns: string
       }
+      bix_staking_skin_admin: { Args: never; Returns: Json }
+      bix_staking_skin_for_me: { Args: never; Returns: boolean }
+      bix_staking_skin_save: {
+        Args: { p_codes: string[]; p_enabled: boolean }
+        Returns: Json
+      }
       bix_studio_grant: {
         Args: {
           p_code: string

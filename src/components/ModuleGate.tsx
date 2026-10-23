@@ -5,7 +5,7 @@ import { moduleOpen, type ModuleKey } from '@/lib/readiness';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 
-const LABEL: Record<ModuleKey, string> = { p2p: 'P2P Desk', arena: 'Fox Arena', nft: 'Marketplace', register: 'Registration' };
+const LABEL: Record<ModuleKey, string> = { p2p: 'P2P Desk', arena: 'Fox Arena', nft: 'Marketplace', register: 'Registration', trade: 'Trade Terminal' };
 
 /** Owner master switch: a closed module shows a calm notice; owners still see it. */
 export function ModuleGate({ module, children }: { module: ModuleKey; children: ReactNode }) {
