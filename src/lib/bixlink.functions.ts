@@ -500,6 +500,12 @@ export const getMyLeader = createServerFn({ method: 'GET' }).middleware([require
   return data as unknown as LeaderStatus;
 });
 
+export const getConditionalLeaderAccess = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data, error } = await context.supabase.rpc('bix_in_owner1_network');
+  if (error) return { allowed: false };
+  return { allowed: data === true };
+});
+
 export const applyLeader = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { error } = await context.supabase.rpc('apply_bix_leader');
   if (error) throw new Error(error.message);
