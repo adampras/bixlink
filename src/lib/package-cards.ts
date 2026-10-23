@@ -21,7 +21,7 @@ export const STK_CARDS = [
   { name: 'STK-008 Ruby', url: s8.url },
   { name: 'STK-009 Elite', url: s9.url },
   { name: 'STK-010 Super Premium', url: s10.url },
-];
+] as const;
 export const PACKAGE_CARDS: Record<string, { name: string; url: string }> = {
   SEED: STK_CARDS[0], SPARK: STK_CARDS[1], EXPLORER: STK_CARDS[2], PIONEER: STK_CARDS[3], BUILDER: STK_CARDS[4],
   GUARDIAN: STK_CARDS[5], TITAN: STK_CARDS[6], PLATINUM: STK_CARDS[7], LEGEND: STK_CARDS[8],

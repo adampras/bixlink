@@ -38,7 +38,7 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
     </div>
     {popup && createPortal(<div className="nft-pop" role="dialog" aria-modal="true" aria-label="Package NFT preview" onClick={() => setPopup(false)}>
       <div className="relative" onClick={e => e.stopPropagation()}><Button variant="outline" size="icon" className="absolute -right-3 -top-3 z-10" aria-label="Close NFT preview" onClick={() => setPopup(false)}><X/></Button>{card ? <img src={card.url} alt="Member pass NFT" className="pass-pop"/> : <NftCard tier={tier} packageId={pkg.id} valueUsd={price} days={days} artworkId={art?.id} imagePath={art?.imagePath} compact/>}</div>
-      <p className="nft-pop-note">{valueCard(price)?.name ?? packageCard(pkg.id)?.name ?? art?.name ?? 'Member Pass'} · ${number(price, { maximumFractionDigits: 0 })} · {days}D lock. In-app staking certificate, not a payment card.</p>
+      <p className="nft-pop-note">{valueCard(price)?.name ?? packageCard(pkg.id, price)?.name ?? art?.name ?? 'Member Pass'} · ${number(price, { maximumFractionDigits: 0 })} · {days}D lock. In-app staking certificate, not a payment card.</p>
     </div>, document.body)}
   </article>;
 }
