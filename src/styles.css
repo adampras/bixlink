@@ -3021,3 +3021,21 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
   .vault-metric dd{font-size:.95rem}
 }
 @media (prefers-reduced-motion: reduce){.numeric{animation:none}}
+
+/* ===== Paket 2 polish: presale / platinum / admin ===== */
+.presale-tabs{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.presale-tabs::-webkit-scrollbar{display:none}
+.presale-tabs button{flex:0 0 auto;white-space:nowrap}
+.presale-lux-card{min-width:0;border:1px solid color-mix(in oklab,var(--chart-3) 45%,transparent);box-shadow:inset 0 1px 0 color-mix(in oklab,var(--chart-3) 35%,transparent),0 16px 36px -22px color-mix(in oklab,var(--chart-3) 60%,transparent)}
+.presale-lux-card button{width:100%}
+@media (max-width:420px){.presale-lux-inner{padding:.75rem!important}.presale-lux-inner p{font-size:11px}}
+/* Platinum $7,000: emerald plate + 24K gold title */
+.pass-card:has(img[alt^="Platinum"]){border:1px solid var(--chart-3);background:linear-gradient(150deg,color-mix(in oklab,var(--chart-2) 22%,var(--card)),var(--card) 55%,color-mix(in oklab,var(--chart-3) 18%,var(--card)));box-shadow:0 0 0 1px color-mix(in oklab,var(--chart-2) 35%,transparent),0 22px 48px -24px color-mix(in oklab,var(--chart-2) 70%,transparent)}
+.pass-card:has(img[alt^="Platinum"]) .nft-card-foot b{background:linear-gradient(180deg,var(--foreground),var(--chart-3));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.06em;text-transform:uppercase}
+.pass-card:has(img[alt^="Platinum"]) .nft-card-foot strong{color:var(--chart-2)}
+/* Admin navigation on phones */
+.admin-navigation{position:sticky;top:0;z-index:20;background:color-mix(in oklab,var(--background) 92%,transparent);backdrop-filter:blur(10px)}
+@media (max-width:640px){
+  .admin-navigation [role="group"] button,.admin-navigation .grid button{min-height:2.5rem;font-size:11px;line-height:1.2}
+  .admin-navigation .mt-4{margin-top:.6rem}
+}
