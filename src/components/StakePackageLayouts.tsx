@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DurationPackageCard } from '@/components/DurationPackageCard';
+import { InstitutionalPackageTable } from '@/components/InstitutionalStake';
 import { number, type Package } from '@/lib/bixlink';
 
 export const STAKE_LAYOUTS = ['matrix', 'auric', 'capsule', 'carousel', 'spotlight', 'accordion'] as const;
@@ -18,6 +19,7 @@ export function StakePackageLayouts({ packages, layout, onStake }: Props) {
   const [page, setPage] = useState(0);
   const [open, setOpen] = useState<number | null>(null);
   if (!packages.length) return null;
+  if (layout === 'institutional') return <InstitutionalPackageTable packages={packages} onStake={onStake} />;
 
   if (mode === 'auric') {
     const i = Math.min(active, packages.length - 1);

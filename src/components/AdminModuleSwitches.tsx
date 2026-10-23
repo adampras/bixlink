@@ -17,6 +17,7 @@ const MODULES: Record<ModuleKey, [string, string]> = {
   arena: ['Fox Arena', 'Game, misi dan klaim BIXP.'],
   nft: ['Marketplace & NFT', 'Toko merchandise dan koleksi NFT.'],
   register: ['Pendaftaran umum', 'Halaman daftar mandiri. OFF: hanya Leader/Admin yang bisa mendaftarkan.'],
+  trade: ['Trade Terminal', 'Halaman TRADE BIX/USDT (pasar internal).'],
 };
 
 /** One screen of ON/OFF switches; each switch writes its existing owner-verified setting. */
