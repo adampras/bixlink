@@ -1667,6 +1667,7 @@ export type Database = {
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_find_user_by_email: { Args: { p_email: string }; Returns: string }
       bix_grant_welcome: { Args: { p_user: string }; Returns: undefined }
+      bix_in_owner1_network: { Args: never; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_leaderboard: {
         Args: { p_season?: string }

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useMember, useReviewerAccess } from '@/lib/useMember';
 import { createReferral, assignReferral } from '@/lib/bixlink.functions';
 import { supabase } from '@/integrations/supabase/client';
+import { ConditionalLeaderInfo } from '@/components/ConditionalLeaderInfo';
 import { ArrowRight, BadgeCheck, Check, Crown, Swords, ChevronRight, Copy, Gem, KeyRound, LogOut, Settings, Shield, ShoppingBag, TrendingUp } from 'lucide-react';
 import headerLogo from "@/assets/bixlink-logo-gold.webp";
 const headerMark = { url: headerLogo };
@@ -53,6 +54,7 @@ function ProfilePage() {
         {data && !data.referral?.referred_by && <form className="profile-apply" onSubmit={async e => { e.preventDefault(); try { const r = await link({ data: { code: code.trim().toUpperCase() } }); setNotice(r.linked ? 'Referrer linked.' : 'Code unavailable.'); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Invalid code.'); } }}><input className="form-input" placeholder="Apply referrer code" aria-label="Apply referrer code" value={code} onChange={e => setCode(e.target.value)}/><Button type="submit" variant="outline">Apply</Button></form>}
         <Link to="/network" className="profile-network-link">View my network <ArrowRight/></Link>
       </section>
+      <ConditionalLeaderInfo/>
       <section className="mt-6 rounded-2xl border border-chart-3/40 bg-card p-5"><div className="flex items-center justify-between gap-3"><div><div className="eyebrow">BIXP · ECOSYSTEM POINTS</div><b className="numeric mt-1 block font-display text-2xl text-chart-3">{bixp ? Number(bixp.totalVbix).toFixed(2) : '—'} <small className="text-sm text-muted-foreground">BIXP</small></b></div><Button asChild size="sm"><Link to="/arena">Earn BIXP</Link></Button></div><div className="arena-cap mt-3"><i style={{ width: `${bixp ? (bixp.cap > 0 ? Math.min(100, Number(bixp.questVbix) / bixp.cap * 100) : 100) : 0}%` }}/></div><p className="mt-2 text-[11px] text-muted-foreground">Free promotional points. Not on-chain BIX; conversion only if the owner opens it.</p></section>
       {orders.length > 0 && (() => { const pick = orders.find(o => o.id === openProof) ?? orders[0]!; const total = orders.reduce((s, o) => s + Number(o.package_usd), 0); return <section className="mt-6 rounded-2xl border border-chart-3/40 bg-card p-4">
         <div className="flex items-center justify-between gap-3"><div className="min-w-0"><div className="eyebrow">GENESIS VAULT</div><p className="mt-1 text-xs text-muted-foreground">{orders.length} certificates · <span className="numeric">${number(total)}</span></p></div><Gem size={18} className="shrink-0 text-chart-3"/></div>
