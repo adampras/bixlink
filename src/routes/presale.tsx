@@ -19,9 +19,6 @@ import { Eye, Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { txFeedback } from '@/components/TxFeedback';
 import { BadgeCheck } from 'lucide-react';
-import reactor from '@/assets/presale-rocket-dark.mp4.asset.json';
-import reactorWebm from '@/assets/presale-rocket-dark.webm.asset.json';
-import reactorPoster from '@/assets/presale-rocket-dark-poster.jpg.asset.json';
 import { NFT_ART, NFT_NAME, type NftTier } from '@/lib/nft';
 import { PresalePurchaseDialog, type PresaleSelection } from '@/components/PresalePurchaseDialog';
 import { strategyQuote } from '@/lib/presale-strategy';
@@ -42,12 +39,11 @@ function PresalePage() {
   const q = useQuery({ queryKey: ['presale', user?.id], queryFn: () => load(), enabled: !!user });
   const [now, setNow] = useState(() => Date.now()); const [msg, setMsg] = useState(''); const [busy, setBusy] = useState<number | null>(null);
   const [tab, setTab] = useState<'packages' | 'strategies' | 'calculator' | 'portfolio'>('packages');
-  const [sound, setSound] = useState(false); const vidRef = useRef<HTMLVideoElement>(null);
+
   const [selection, setSelection] = useState<PresaleSelection | null>(null);
   const [purchaseError, setPurchaseError] = useState('');
   const [receipt, setReceipt] = useState<{ usd: number; bix: number; serial: number; dailyUsd: number } | null>(null);
   const [nftPreview, setNftPreview] = useState<NftTier | null>(null);
-  useEffect(() => { if (vidRef.current) vidRef.current.muted = !sound; }, [sound]);
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   const s = q.data; const cfg = s?.config;
   const pool = poolAvailability(cfg?.poolCap ?? 0, s?.poolUsed ?? 0);
