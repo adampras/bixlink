@@ -13,7 +13,7 @@ export const Route = createFileRoute('/api/fox-chat')({
         const token = auth.replace(/^Bearer\s+/i, '');
         if (!token) return new Response('Silakan masuk untuk memakai FOX AI.', { status: 401 });
         const { createClient } = await import('@supabase/supabase-js');
-        const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, { auth: { persistSession: false } });
+        const sb = createClient(process.env['SUPABASE_URL']!, process.env['SUPABASE_PUBLISHABLE_KEY']!, { auth: { persistSession: false } });
         const { data: u } = await sb.auth.getUser(token);
         if (!u?.user) return new Response('Sesi tidak valid.', { status: 401 });
 
@@ -28,8 +28,8 @@ export const Route = createFileRoute('/api/fox-chat')({
         const { createOpenAI } = await import('@ai-sdk/openai');
         const openai = createOpenAI({
           baseURL: 'https://ai.gateway.lovable.dev/v1',
-          apiKey: process.env.LOVABLE_API_KEY,
-          headers: { 'Lovable-API-Key': process.env.LOVABLE_API_KEY ?? '', 'X-Lovable-AIG-SDK': 'vercel-ai-sdk' },
+          apiKey: process.env['LOVABLE_API_KEY'] ?? '',
+          headers: { 'Lovable-API-Key': process.env['LOVABLE_API_KEY'] ?? '', 'X-Lovable-AIG-SDK': 'vercel-ai-sdk' },
         });
         try {
           const result = streamText({
