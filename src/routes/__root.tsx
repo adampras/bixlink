@@ -16,6 +16,7 @@ import splashArtwork from '@/assets/bixcoin-reactor-splash.jpg.asset.json';
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSplash } from "../components/AppSplash";
 import { InstallPrompt } from "../components/InstallPrompt";
+import { FoxChat } from "../components/FoxChat";
 import { I18nProvider } from "../lib/i18n";
 
 function NotFoundComponent() {
@@ -148,6 +149,7 @@ function RootComponent() {
         <InstallPrompt />
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <FoxChat />
       </I18nProvider>
     </QueryClientProvider>
   );
