@@ -35,7 +35,7 @@ export function RailDots({ count, active, goTo, label }: { count: number; active
   return <div className="rail-dots" role="tablist" aria-label={label}>{Array.from({ length: count }, (_, i) => <button key={i} type="button" role="tab" aria-selected={i === active} aria-label={`${label} ${i + 1}`} className={i === active ? 'is-active' : ''} onClick={() => goTo(i)}/>)}</div>;
 }
 
-type Item = { title: string; body: string; icon: typeof Crown; tone: string; href?: '/presale' | '/arena' | '/nft-marketplace'; soon?: boolean };
+type Item = { title: string; body: string; icon: typeof Crown; tone: string; href?: '/presale' | '/arena' | '/nft-marketplace' | '/studio'; soon?: boolean };
 
 export function EcosystemRail({ presale }: { presale: boolean }) {
   const items: Item[] = [
