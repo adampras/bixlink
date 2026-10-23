@@ -533,6 +533,13 @@
       "when": 1792748714550,
       "tag": "0075_conditional_leader_self_claim",
       "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1792750274154,
+      "tag": "0076_loan_leader_max_1000_toggle",
+      "breakpoints": true
     }
   ]
 }
