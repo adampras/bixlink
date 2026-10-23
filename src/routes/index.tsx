@@ -53,7 +53,7 @@ function Home() {
   const presaleVisible = Boolean(user) && presaleOpen(presale.data);
 
   const rd = cfg?.readiness;
-  if (!user) return <BixShell><div className="mx-auto max-w-7xl px-4 pt-3 md:px-8"><HighlightsHub/></div><div className="hub-divider" aria-hidden/><div className="relative"><LandingExperience {...(cfg ? { packages: cfg.packages, booster: cfg.booster.enabled, bixPrice: cfg.bixMarket.priceUsd, content: cfg.landingContent } : {})}/></div>{rd?.liveActivityEnabled !== false && <LiveActivityToast/>}</BixShell>;
+  if (!user) return <BixShell><div className="mx-auto max-w-7xl px-5 pt-4 md:px-8"><HighlightsHub/></div><div className="hub-divider" aria-hidden/><div className="relative"><LandingExperience {...(cfg ? { packages: cfg.packages, booster: cfg.booster.enabled, bixPrice: cfg.bixMarket.priceUsd, content: cfg.landingContent } : {})}/></div>{rd?.liveActivityEnabled !== false && <LiveActivityToast/>}</BixShell>;
   return <BixShell><MarketTicker/><MemberGate ready={ready} signedIn={!!user} title="HOME"><main>
     <div className="mx-auto max-w-7xl px-5 pt-4 md:px-8"><HighlightsHub/></div>
     <section className="mx-auto grid max-w-7xl gap-6 px-5 pt-6 pb-6 md:px-8 lg:grid-cols-[1.05fr_1fr]"><InternalMarket reference={bixPrice} movement={data.movement} serverNow={data.serverNow}/>
