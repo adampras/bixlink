@@ -24,7 +24,7 @@ export function AdminLeaders({ onMessage }: { onMessage: (m: string) => void }) 
     </section>
     <section className="rounded-[20px] border border-primary bg-card p-5">
       <h3 className="flex items-center gap-2 font-display text-lg font-black"><UserPlus size={18}/> Create sponsored leader</h3>
-      <p className="mt-1 text-xs text-muted-foreground">Enter the member's referral code or username. The seed is locked virtual capital in the internal ledger and can't be withdrawn until the leader qualifies (3× direct turnover), unless you switch that off. You can reject it at any time.</p>
+      <p className="mt-1 text-xs text-muted-foreground">Enter the member's referral code or username. The seed is locked virtual capital in the internal ledger and can't be withdrawn until the leader qualifies (5× turnover for new leaders), unless you switch that off. You can reject it at any time.</p>
       <form className="mt-4 space-y-3 text-xs" onSubmit={async e => { e.preventDefault(); setBusy(true); try { await create({ data: { code: nf.code, seedUsd: nf.seed as 100, requireTurnover: nf.req, scope: nf.scope } }); setNf(f => ({ ...f, code: '' })); await refetch(); onMessage('Sponsored leader created.'); } catch (err) { onMessage(err instanceof Error ? err.message : 'Could not create leader.'); } finally { setBusy(false); } }}>
         <input required value={nf.code} onChange={e => setNf(f => ({ ...f, code: e.target.value }))} placeholder="Referral code or username" className="form-input w-full" aria-label="Member code"/>
         <p className="text-[11px] text-chart-3">New conditional leaders: max $5,000 package, 5× turnover target. Existing leaders keep their set value.</p>
