@@ -1651,6 +1651,10 @@ export type Database = {
       }
       bix_booster_withdraw_config: { Args: never; Returns: Json }
       bix_can_manage_packages: { Args: never; Returns: boolean }
+      bix_claim_conditional_leader: {
+        Args: { p_days: number; p_package: string }
+        Returns: Json
+      }
       bix_claim_stake_profit: { Args: never; Returns: Json }
       bix_claim_vip: { Args: { p_level: number }; Returns: string }
       bix_content_published: { Args: { p_name: string }; Returns: boolean }

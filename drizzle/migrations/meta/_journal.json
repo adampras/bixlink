@@ -526,6 +526,13 @@
       "when": 1792747528729,
       "tag": "0074_conditional_leader_owner1",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1792748714550,
+      "tag": "0075_conditional_leader_self_claim",
+      "breakpoints": true
     }
   ]
 }
