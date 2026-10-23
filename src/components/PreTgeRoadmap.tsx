@@ -31,7 +31,7 @@ const tone: Record<Phase['status'], string> = {
 export function PreTgeRoadmap() {
   const [sel, setSel] = useState(0);
   const [open, setOpen] = useState(false);
-  const p = phases[sel];
+  const p = phases[sel] ?? phases[0]!;
   return (
     <section className="mx-auto max-w-7xl px-5 py-10 md:px-8">
       <div className="eyebrow">PROTOCOL ROADMAP · 2026 – 2030</div>
