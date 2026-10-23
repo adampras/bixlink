@@ -19,6 +19,7 @@ import { NationAlliance } from '@/components/NationAlliance';
 import { PreTgeRoadmap } from '@/components/PreTgeRoadmap';
 import { TrustCenter } from '@/components/TrustCenter';
 import { CryptoNewsFeed } from '@/components/CryptoNewsFeed';
+import { DevTeamGrid } from '@/components/DevTeamGrid';
 import { defaultLandingContent, defaultRoadmap, defaultSpaces, type LandingContent } from '@/lib/landing-content';
 export { defaultLandingContent, type LandingContent } from '@/lib/landing-content';
 
@@ -50,6 +51,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><ContentCarousel group="roadmap" title="Roadmap BIXLINK" items={content.roadmap ?? defaultRoadmap}/></section>
     <CryptoNewsFeed />
     <section className="mx-auto max-w-3xl px-5 pb-16 md:px-8"><div className="eyebrow">FAQ</div><h2 className="section-title">PERTANYAAN <span>UMUM</span></h2><div className="mt-6 space-y-3">{FAQ.map(f => <details key={f.q} className="group rounded-2xl border border-chart-3/20 bg-card/50 p-4 backdrop-blur-md"><summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-bold">{f.q}<span className="text-chart-3 transition group-open:rotate-45">+</span></summary><p className="mt-3 text-xs leading-6 text-muted-foreground">{f.a}</p></details>)}</div></section>
+    <DevTeamGrid/>
   </div>;
 }
 const FAQ = [
