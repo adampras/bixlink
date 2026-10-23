@@ -540,6 +540,13 @@
       "when": 1792750274154,
       "tag": "0076_loan_leader_max_1000_toggle",
       "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1792751265572,
+      "tag": "0077_loan_device_binding",
+      "breakpoints": true
     }
   ]
 }

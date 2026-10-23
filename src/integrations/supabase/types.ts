@@ -143,6 +143,39 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_loan_devices: {
+        Row: {
+          created_at: string
+          device_label: string
+          fingerprint: string
+          ip_address: string | null
+          last_ip: string | null
+          last_seen_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_label?: string
+          fingerprint: string
+          ip_address?: string | null
+          last_ip?: string | null
+          last_seen_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_label?: string
+          fingerprint?: string
+          ip_address?: string | null
+          last_ip?: string | null
+          last_seen_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_member_products: {
         Row: {
           category: string
@@ -1682,6 +1715,17 @@ export type Database = {
           rank: number
         }[]
       }
+      bix_loan_device_check: {
+        Args: {
+          p_bind: boolean
+          p_fp: string
+          p_ip: string
+          p_label: string
+          p_ua: string
+        }
+        Returns: Json
+      }
+      bix_loan_device_reset: { Args: { p_user: string }; Returns: undefined }
       bix_member_shop_slots: { Args: { p_user: string }; Returns: number }
       bix_merchant_tier: { Args: { p_user: string }; Returns: string }
       bix_mining_conversion_status: { Args: never; Returns: Json }
