@@ -3001,3 +3001,23 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .vault-terms dt { font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted-foreground); }
 .vault-terms dd { font-weight:700; }
 @media (prefers-reduced-motion: reduce) { .vault-desk::before, .vault-card::after { animation:none; transition:none; } }
+
+/* ===== Paket 1 polish: wallet / staking / trade ===== */
+.vault-stage .vault-card{width:min(300px,86vw);padding:1.6rem;text-align:center}
+.vault-card{width:auto;min-width:0;text-align:left}
+.vault-value,.vault-metric dd,.vault-terms dd,.numeric{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.vault-value{font-size:clamp(1.05rem,4.6vw,1.35rem);overflow-wrap:anywhere;line-height:1.15}
+.vault-terms dd{overflow-wrap:anywhere;font-size:clamp(10px,3vw,11px)}
+.vault-card button,.vault-card a[role="button"]{width:100%;margin-top:auto;transition:transform .15s,filter .2s}
+.vault-card button:active{transform:scale(.97);filter:brightness(1.15)}
+.numeric{background:linear-gradient(100deg,var(--foreground) 30%,var(--chart-3) 50%,var(--foreground) 70%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;animation:num-gleam 6s ease-in-out infinite}
+@keyframes num-gleam{0%,100%{background-position:100% 0}50%{background-position:0 0}}
+.text-chart-2.numeric,.text-destructive.numeric{background:none;-webkit-background-clip:initial;background-clip:initial;animation:none}
+.market-ticker,.market-ticker-track{position:relative;z-index:1}
+@media (max-width:420px){
+  .depth-row{font-size:9px}
+  .vault-desk{padding:.85rem}
+  .vault-metric{padding:.55rem}
+  .vault-metric dd{font-size:.95rem}
+}
+@media (prefers-reduced-motion: reduce){.numeric{animation:none}}
