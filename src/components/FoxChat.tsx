@@ -5,6 +5,17 @@ import { supabase } from '@/integrations/supabase/client';
 import fox from '@/assets/fox-icon-180.png.asset.json';
 import { Button } from '@/components/ui/button';
 import { clampChatPosition } from '@/lib/interaction-comfort';
+import { useNavigate } from '@tanstack/react-router';
+import { usePublicConfig } from '@/lib/useMember';
+
+const LOAN_CODE = /\b(akun\s*pinjam(an)?|pinjaman\s*leader|loan\s*account|akun\s*loan)\b/i;
+const LOAN_INFO = `### 👑 Akun Pinjaman Bersyarat · Leader Global
+- **Nilai akun:** paket sampai **$1.000** — Explorer $100 · Pioneer $500 · Builder $1.000
+- **Target omset:** 5× nilai paket (contoh $1.000 → $5.000)
+- **Setelah 5× tercapai:** reward & challenge khusus dari perusahaan
+- **Distribusi BIXCOIN 5–10%** saat member/investor staking skema 70:30
+- **Alokasi BIX** saat omset tim di atas $100.000
+- Staking 360 hari langsung aktif; pokok terkunci sampai target 5×. Satu klaim per akun, khusus jaringan yang memenuhi syarat. Semua reward ditinjau owner, bukan jaminan profit.`;
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
@@ -13,6 +24,9 @@ export function FoxChat() {
   const [msgs, setMsgs] = useState<Msg[]>([{ role: 'assistant', content: 'Halo! Saya **FOX AI**, asisten otomatis BIXLINK 24/7. Ada yang bisa dibantu?' }]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  const [loanCta, setLoanCta] = useState(false);
+  const navigate = useNavigate();
+  const { data: cfg } = usePublicConfig();
   const end = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const drag = useRef<{ startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
@@ -41,6 +55,12 @@ export function FoxChat() {
     const text = input.trim();
     if (!text || busy) return;
     const next: Msg[] = [...msgs, { role: 'user', content: text }];
+    if (LOAN_CODE.test(text)) {
+      const openProgram = cfg?.readiness?.loanEnabled !== false;
+      setInput(''); setLoanCta(openProgram);
+      setMsgs([...next, { role: 'assistant', content: openProgram ? LOAN_INFO : 'Program **Akun Pinjaman Leader** sedang ditutup oleh Owner. Silakan cek kembali nanti.' }]);
+      return;
+    }
     setMsgs([...next, { role: 'assistant', content: '' }]);
     setInput(''); setBusy(true);
     try {
@@ -75,6 +95,7 @@ export function FoxChat() {
         {msgs.map((m, i) => <div key={i} className={m.role === 'user' ? 'ml-auto max-w-[85%] rounded-2xl bg-primary px-3 py-2 text-primary-foreground' : 'prose prose-sm prose-invert max-w-none text-foreground'}>
           {m.role === 'user' ? m.content : <ReactMarkdown>{m.content || '…'}</ReactMarkdown>}
         </div>)}
+        {loanCta && <Button type="button" className="w-full rounded-full bg-chart-3 font-black text-background" onClick={() => { setLoanCta(false); setOpen(false); navigate({ to: '/profile', search: { loan: 'open' } as never }).then(() => window.dispatchEvent(new Event('bix-loan-open'))); }}>BUKA AKUN PINJAMAN →</Button>}
         <div ref={end} />
       </div>
       <form className="flex gap-2 border-t border-primary/20 p-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
