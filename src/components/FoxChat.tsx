@@ -83,7 +83,7 @@ export function FoxChat() {
       </form>
     </div>}
     <Button type="button" size="icon" variant="outline" aria-label="FOX AI chat" title="FOX AI · geser untuk memindahkan" data-no-touch-effect
-      style={position ? { left: position.x, top: position.y, right: 'auto', bottom: 'auto' } : undefined}
+      style={position && !open ? { left: position.x, top: position.y, right: 'auto', bottom: 'auto' } : undefined}
       onPointerDown={event => {
         if (event.button !== 0) return;
         const bounds = event.currentTarget.getBoundingClientRect();
