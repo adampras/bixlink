@@ -30,7 +30,9 @@ export function HighlightsHub() {
   const base = hub?.items?.length ? hub.items : defaultHub;
   const withPresale = base.some(i => i.href === '/presale') ? base : [defaultHub[0], ...base] as HubItem[];
   const withBooster = withPresale.some(i => i.href === '/boost') ? withPresale : [withPresale[0], defaultHub[1], ...withPresale.slice(1)].filter(Boolean) as HubItem[];
-  const items = hub?.enabled === false ? [] : withBooster.filter(i => i.enabled !== false);
+  const studio = defaultHub.find(i => i.href === '/studio')!;
+  const withStudio = withBooster.some(i => i.href === '/studio') ? withBooster : [...withBooster, studio];
+  const items = hub?.enabled === false ? [] : withStudio.filter(i => i.enabled !== false);
   const { active, goTo } = useRailDots(ref, items.length, 3200);
   if (!items.length) return null;
   return <div className="hub-wrap"><nav ref={ref} aria-label="Highlights" className="hub-strip">{items.map((i, n) => {
