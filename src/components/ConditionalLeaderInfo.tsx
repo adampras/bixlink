@@ -3,9 +3,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { usePublicConfig } from '@/lib/useMember';
-import { Crown, Sparkles, X, Copy, Users, Video, Megaphone, TrendingUp } from 'lucide-react';
+import { Crown, Sparkles, X, Copy, Users, Video, Megaphone, TrendingUp, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { claimConditionalLeader, getConditionalLeaderAccess, getMyLeader } from '@/lib/bixlink.functions';
+import { checkLoanDevice, claimConditionalLeader, getConditionalLeaderAccess, getMyLeader } from '@/lib/bixlink.functions';
+import { deviceFingerprint, deviceLabel } from '@/lib/deviceFingerprint';
 
 const PACKAGES = [
   { id: 'EXPLORER', usd: 100 }, { id: 'PIONEER', usd: 500 }, { id: 'BUILDER', usd: 1000 },
@@ -18,6 +19,7 @@ export function ConditionalLeaderInfo() {
   const fetchAccess = useServerFn(getConditionalLeaderAccess);
   const fetchLeader = useServerFn(getMyLeader);
   const claim = useServerFn(claimConditionalLeader);
+  const checkDevice = useServerFn(checkLoanDevice);
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ['conditional-leader-access'], queryFn: () => fetchAccess() });
   const leader = useQuery({ queryKey: ['my-leader'], queryFn: () => fetchLeader(), enabled: !!data?.allowed });
@@ -36,6 +38,15 @@ export function ConditionalLeaderInfo() {
   }, []);
   useEffect(() => { if (invited) document.getElementById('loan-account')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, [invited, data?.allowed]);
   const claimed = !!leader.data?.status;
+  const [dev, setDev] = useState<{ bound: boolean; match: boolean; taken?: boolean; label?: string } | null>(null);
+  useEffect(() => {
+    if (!data?.allowed || leader.isLoading) return;
+    let live = true;
+    // Existing leaders without a binding are locked to the phone they open it on first.
+    deviceFingerprint().then(fp => checkDevice({ data: { fp, label: deviceLabel(), bind: claimed } })).then(r => { if (live) setDev(r); }).catch(() => {});
+    return () => { live = false; };
+  }, [data?.allowed, claimed, leader.isLoading, checkDevice]);
+  const locked = !!dev && dev.bound && !dev.match;
   const programOpen = cfg?.readiness?.loanEnabled !== false;
   // Auto-shown for leaders who hold a loan account; otherwise only when opened via FOX AI (?loan=open) while the program is open.
   if (!data?.allowed || (!claimed && !(invited && programOpen))) return null;
@@ -49,6 +60,10 @@ export function ConditionalLeaderInfo() {
   const submit = async () => {
     setBusy(true); setErr('');
     try {
+      const d = await checkDevice({ data: { fp: await deviceFingerprint(), label: deviceLabel(), bind: true } });
+      setDev(d);
+      if (d.taken) throw new Error('This phone is already linked to another loan account (1 phone = 1 account).');
+      if (!d.match) throw new Error('This loan account is locked to another phone.');
       const r = await claim({ data: { packageId: pick.id, days: DAYS } });
       setOpen(false); setDone(r);
       await Promise.all([leader.refetch(), qc.invalidateQueries({ queryKey: ['my-bixlink'] }), qc.invalidateQueries({ queryKey: ['my-wallet'] })]);
@@ -59,9 +74,15 @@ export function ConditionalLeaderInfo() {
     <div className="eyebrow flex items-center gap-2 text-chart-3"><Crown size={14}/> CONDITIONAL LEADER ACCOUNT · GLOBAL</div>
     <h2 className="mt-1 font-display text-lg font-black">Conditional loan account for leaders worldwide</h2>
     <dl className="mt-3 space-y-2 text-xs">{rows.map(([k, v]) => <div key={k} className="grid grid-cols-[8.5rem_1fr] gap-2 border-b border-border/60 pb-2"><dt className="text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>)}</dl>
-    {claimed
+    {dev && <div className={`mt-4 flex items-center gap-2 rounded-xl border p-3 text-xs ${locked ? 'border-destructive/60 bg-destructive/10' : 'border-chart-3/40 bg-chart-3/5'}`}><ShieldCheck size={16} className={locked ? 'text-destructive' : 'text-chart-3'}/>
+      {locked ? <span><b className="text-destructive">Access denied:</b> this loan account is locked to its registered phone{dev.label ? ` (${dev.label})` : ''}. Changed phones? Contact Owner 1 to reset the device lock.</span>
+        : dev.taken ? <span><b className="text-destructive">This phone is already linked</b> to another loan account. One phone = one account.</span>
+        : dev.bound ? <span><b className="text-chart-3">Device secured</b> · 1 phone = 1 account{dev.label ? ` · ${dev.label}` : ''}</span>
+        : <span>This phone will be locked to your account when you claim (1 phone = 1 account).</span>}
+    </div>}
+    {locked ? null : claimed
       ? <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-chart-3/40 bg-chart-3/10 p-3 text-xs"><span><b className="text-chart-3">Active leader account</b> · ${Number(leader.data?.virtual_usd ?? 0).toLocaleString()} · target ${Number(leader.data?.target ?? 0).toLocaleString()}</span><Button size="sm" variant="outline" className="rounded-full" onClick={() => setGuide(true)}>Growth guide</Button></div>
-      : <Button className="mt-4 w-full rounded-full bg-chart-3 font-black text-background" onClick={() => { setAgree(false); setErr(''); setOpen(true); }}><Crown/> CLAIM & ACTIVATE LOAN PACKAGE</Button>}
+      : <Button disabled={!!dev?.taken} className="mt-4 w-full rounded-full bg-chart-3 font-black text-background" onClick={() => { setAgree(false); setErr(''); setOpen(true); }}><Crown/> CLAIM & ACTIVATE LOAN PACKAGE</Button>}
     <p className="mt-3 text-[10px] text-muted-foreground">Conditional account is an internal locked credit, not withdrawable funds. Rewards and allocations are reviewed and approved by the owner. Terms apply.</p>
 
     {open && <div className="modal-backdrop" onClick={() => setOpen(false)}><div role="dialog" aria-modal="true" aria-label="Choose loan package" className="modal-panel" onClick={e => e.stopPropagation()}>
