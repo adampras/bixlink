@@ -13,6 +13,7 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { requestStake, unstakeStake } from '@/lib/bixlink.functions';
 import { date, money, number, type Package } from '@/lib/bixlink';
 import { ArrowUpRight, CheckCircle2, ChevronDown, ChevronUp, Clock3, LockKeyhole, ShieldCheck, X, XCircle, Zap } from 'lucide-react';
+import { MarketTicker } from '@/components/MarketTicker';
 
 export const Route = createFileRoute('/stake')({ head: () => ({ meta: [{ title: 'Stake — BIXLINK' }, { name: 'description', content: 'Choose a BIXLINK staking package and submit a request.' }, { property: 'og:title', content: 'Stake — BIXLINK' }, { property: 'og:description', content: 'Eight BIXLINK staking packages from $10 to $10,000.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: StakePage });
 
@@ -47,7 +48,7 @@ function StakePage() {
   const activeStakes = (data?.stakes ?? []).filter(s => s.status === 'active');
   const liveTotal = activeStakes.reduce((n, s) => n + liveOf(s), 0);
   const perDay = activeStakes.reduce((n, s) => n + Number(s.amount_usd) * Number(s.apy) / 100 / 365, 0);
-  return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
+  return <BixShell><MarketTicker/><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="STAKE">
       <div className="stake-lux-head auric-card">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
