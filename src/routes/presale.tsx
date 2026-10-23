@@ -1,4 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import heroLux from '@/assets/presale-hero-lux.jpg';
 import { useEffect, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -72,13 +73,18 @@ function PresalePage() {
     <div className="eyebrow"><Pickaxe size={14}/> EXCLUSIVE</div>
     <h1 className="mt-2 font-display text-3xl font-extrabold leading-tight text-foreground sm:text-5xl">BIX <span className="text-chart-3">PRESALE</span></h1>
     <p className="mt-1 text-sm text-muted-foreground">Genesis allocation with locked BIX released over time.</p>
-    <div className="presale-reactor-stage">
-      <video ref={vidRef} autoPlay muted loop playsInline preload="metadata" poster={reactorPoster.url} className="presale-reactor-video" aria-label="BIXLINK presale rocket launch">
-        <source src={reactorWebm.url} type="video/webm"/>
-        <source src={reactor.url} type="video/mp4"/>
-      </video>
-      <Button type="button" variant="outline" size="icon" className="presale-sound-toggle" aria-label={sound ? 'Mute reactor sound' : 'Unmute reactor sound'} onClick={() => setSound(v => !v)}>{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</Button>
-    </div>
+    <section className="relative mt-4 overflow-hidden rounded-2xl border border-chart-3/40 bg-card">
+      <img src={heroLux} alt="BIXLINK Genesis Presale gold fox coin" width={1280} height={768} className="h-56 w-full object-cover sm:h-80"/>
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"/>
+      <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
+        <p className="text-[10px] font-bold tracking-[0.3em] text-chart-3">GENESIS ROUND 1</p>
+        <h2 className="font-display text-xl font-black text-foreground sm:text-3xl">Exclusive Presale · $0.50 / BIX</h2>
+        <div className="mt-3 flex gap-2">
+          <Button className="flex-1 rounded-lg" onClick={() => setTab('packages')}>Presale packages</Button>
+          <Button asChild variant="outline" className="flex-1 rounded-lg border-chart-3 text-chart-3"><Link to="/boost">BOOST APY</Link></Button>
+        </div>
+      </div>
+    </section>
     <dl className="pro-only mt-4 grid grid-cols-3 gap-2 border-y border-border py-3 text-center">
       <div><dd className="numeric font-display text-lg font-bold text-primary">{number(locked, { maximumFractionDigits: 2 })}</dd><dt className="text-[10px] text-muted-foreground">Locked BIX</dt></div>
       <div><dd className="numeric font-display text-lg font-bold text-chart-2">{number(released, { maximumFractionDigits: 4 })}</dd><dt className="text-[10px] text-muted-foreground">Mined out</dt></div>
