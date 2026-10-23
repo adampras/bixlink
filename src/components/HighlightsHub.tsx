@@ -18,6 +18,7 @@ export const defaultHub: HubItem[] = [
   { title: 'Yield & Staking', tag: 'STAKE', body: 'Hybrid USDT/BIX · Booster 100% BIX', color: 'emerald', image: 'stake', href: '/stake' },
   { title: 'P2P & Dev Buyback', tag: 'MARKET', body: 'Buyback locked $0.35 · P2P free', color: 'cyan', image: 'p2p', href: '/p2p' },
   { title: 'Fox Arena Quest', tag: 'GAMEFI', body: 'Daily missions · BIXP rewards', color: 'violet', image: 'arena', href: '/arena' },
+  { title: 'BIX Studio', tag: 'STUDIO', body: 'Poster · banner · presentasi', color: 'gold', image: 'launch', href: '/studio' },
   { title: 'Official Marketplace', tag: 'STORE', body: 'Luxury merchandise · Member bazaar', color: 'crimson', image: 'market', href: '/nft-marketplace' },
   { title: 'NFT Collection', tag: 'NFT', body: 'Glass reactor & gold bullion cards', color: 'violet', image: 'nft', href: '/nft-marketplace' },
 ];
@@ -29,7 +30,9 @@ export function HighlightsHub() {
   const base = hub?.items?.length ? hub.items : defaultHub;
   const withPresale = base.some(i => i.href === '/presale') ? base : [defaultHub[0], ...base] as HubItem[];
   const withBooster = withPresale.some(i => i.href === '/boost') ? withPresale : [withPresale[0], defaultHub[1], ...withPresale.slice(1)].filter(Boolean) as HubItem[];
-  const items = hub?.enabled === false ? [] : withBooster.filter(i => i.enabled !== false);
+  const studio = defaultHub.find(i => i.href === '/studio')!;
+  const withStudio = withBooster.some(i => i.href === '/studio') ? withBooster : [...withBooster, studio];
+  const items = hub?.enabled === false ? [] : withStudio.filter(i => i.enabled !== false);
   const { active, goTo } = useRailDots(ref, items.length, 3200);
   if (!items.length) return null;
   return <div className="hub-wrap"><nav ref={ref} aria-label="Highlights" className="hub-strip">{items.map((i, n) => {
