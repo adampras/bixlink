@@ -1,4 +1,5 @@
 import { AdminBixZoom } from '@/components/BixZoom';
+import { normalizeSocial } from '@/lib/social-link';
 import { HUB_COLORS, HUB_IMAGES, defaultHub, type HubItem } from '@/components/HighlightsHub';
 import { useState } from 'react';
 import { WALLET_SKINS } from '@/lib/wallet-skin';
