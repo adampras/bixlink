@@ -3045,3 +3045,22 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
   .admin-navigation [role="group"] button,.admin-navigation .grid button{min-height:2.5rem;font-size:11px;line-height:1.2}
   .admin-navigation .mt-4{margin-top:.6rem}
 }
+
+/* Quantum exchange preview */
+.q-stage { --q-gold: var(--primary); --q-violet: var(--accent); }
+.q-head, .q-panel { background: radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--q-violet) 22%, transparent), transparent 70%), color-mix(in oklab, var(--card) 85%, transparent); border: 1px solid color-mix(in oklab, var(--q-gold) 35%, transparent); box-shadow: 0 0 40px -12px color-mix(in oklab, var(--q-violet) 50%, transparent); }
+.q-title { background: linear-gradient(90deg, var(--q-gold), var(--q-violet), var(--q-gold)); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: q-shine 6s linear infinite; }
+@keyframes q-shine { to { background-position: 200% center; } }
+.q-line-gold { stroke: var(--q-gold); stroke-width: .8; opacity: .85; }
+.q-line-violet { stroke: var(--q-violet); stroke-width: .8; opacity: .7; }
+.q-dot { fill: var(--q-gold); filter: drop-shadow(0 0 3px var(--q-gold)); }
+.q-label { fill: var(--foreground); font-size: 9px; font-weight: 900; letter-spacing: .1em; }
+.q-stream { background: color-mix(in oklab, var(--background) 70%, transparent); }
+.q-p { position: absolute; width: 4px; height: 4px; border-radius: 9999px; animation: q-rise linear infinite; }
+.q-p-buy { bottom: 0; background: var(--q-gold); box-shadow: 0 0 8px var(--q-gold); }
+.q-p-sell { top: 0; background: var(--muted-foreground); animation-name: q-fall; }
+@keyframes q-rise { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-190px); opacity: 0; } }
+@keyframes q-fall { from { transform: translateY(0); opacity: 1; } to { transform: translateY(190px); opacity: 0; } }
+.q-orbit { border: 1px solid color-mix(in oklab, var(--q-violet) 50%, transparent); color: var(--q-gold); }
+.q-seat { background: linear-gradient(90deg, var(--q-gold), var(--q-violet)); color: var(--primary-foreground); }
+@media (prefers-reduced-motion: reduce) { .q-p, .q-title { animation: none; } }
