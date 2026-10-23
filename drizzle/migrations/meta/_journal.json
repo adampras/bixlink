@@ -505,6 +505,13 @@
       "when": 1792659900821,
       "tag": "0071_find_user_by_email",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1792714349215,
+      "tag": "0072_staking_skin",
+      "breakpoints": true
     }
   ]
 }
