@@ -506,6 +506,25 @@ export const getConditionalLeaderAccess = createServerFn({ method: 'GET' }).midd
   return { allowed: data === true };
 });
 
+export const checkLoanDevice = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { fp: string; label: string; bind: boolean }) => z.object({ fp: z.string().regex(/^[a-f0-9]{64}$/), label: z.string().max(80), bind: z.boolean() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { getRequestHeader } = await import('@tanstack/react-start/server');
+    const ip = (getRequestHeader('cf-connecting-ip') || getRequestHeader('x-forwarded-for')?.split(',')[0] || '').trim();
+    const ua = getRequestHeader('user-agent') ?? '';
+    const { data: r, error } = await context.supabase.rpc('bix_loan_device_check', { p_fp: data.fp, p_label: data.label, p_ip: ip, p_ua: ua, p_bind: data.bind });
+    if (error) throw new Error(error.message);
+    return r as unknown as { bound: boolean; match: boolean; taken?: boolean; label?: string };
+  });
+
+export const resetLoanDevice = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { userId: string }) => z.object({ userId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc('bix_loan_device_reset', { p_user: data.userId });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const claimConditionalLeader = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { packageId: string; days: number }) => z.object({ packageId: z.string().min(1).max(40), days: z.number().int().refine(d => [30, 60, 90, 180, 360].includes(d)) }).parse(data))
   .handler(async ({ data, context }) => {
