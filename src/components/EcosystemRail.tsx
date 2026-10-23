@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Bot, CreditCard, Crown, Palette, Rocket, ShoppingBag, Store, Swords, Repeat } from 'lucide-react';
+import { Bot, Megaphone, CreditCard, Crown, Palette, Rocket, ShoppingBag, Store, Swords, Repeat } from 'lucide-react';
 
 /** Tracks the active card of a horizontal scroller and auto-advances it. */
 export function useRailDots(ref: RefObject<HTMLElement | null>, count: number, interval = 3400) {
@@ -35,7 +35,7 @@ export function RailDots({ count, active, goTo, label }: { count: number; active
   return <div className="rail-dots" role="tablist" aria-label={label}>{Array.from({ length: count }, (_, i) => <button key={i} type="button" role="tab" aria-selected={i === active} aria-label={`${label} ${i + 1}`} className={i === active ? 'is-active' : ''} onClick={() => goTo(i)}/>)}</div>;
 }
 
-type Item = { title: string; body: string; icon: typeof Crown; tone: string; href?: '/presale' | '/arena' | '/nft-marketplace' | '/studio'; soon?: boolean };
+type Item = { title: string; body: string; icon: typeof Crown; tone: string; href?: '/presale' | '/arena' | '/nft-marketplace' | '/studio' | '/marketing'; soon?: boolean };
 
 export function EcosystemRail({ presale }: { presale: boolean }) {
   const items: Item[] = [
@@ -43,6 +43,7 @@ export function EcosystemRail({ presale }: { presale: boolean }) {
     { title: 'Fox Arena', body: 'Daily missions & BIXP quests', icon: Swords, tone: 'emerald', href: '/arena' },
     { title: 'Marketplace', body: 'NFT certificates & merchandise', icon: ShoppingBag, tone: 'violet', href: '/nft-marketplace' },
     { title: 'BIX Studio', body: 'Posters, banners & presentations', icon: Palette, tone: 'gold', href: '/studio' },
+    { title: 'Marketing Media', body: 'Official posters & video', icon: Megaphone, tone: 'cyan', href: '/marketing' },
     { title: 'AI Trading Bot', body: 'Demo simulation · in development', icon: Bot, tone: 'cyan', soon: true },
     { title: 'BIX Virtual Card', body: 'Planned utility card', icon: CreditCard, tone: 'gold', soon: true },
     { title: 'Launchpool', body: 'Planned project launches', icon: Rocket, tone: 'crimson', soon: true },

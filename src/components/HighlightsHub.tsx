@@ -19,6 +19,7 @@ export const defaultHub: HubItem[] = [
   { title: 'P2P & Dev Buyback', tag: 'MARKET', body: 'Buyback locked $0.35 · P2P free', color: 'cyan', image: 'p2p', href: '/p2p' },
   { title: 'Fox Arena Quest', tag: 'GAMEFI', body: 'Daily missions · BIXP rewards', color: 'violet', image: 'arena', href: '/arena' },
   { title: 'BIX Studio', tag: 'STUDIO', body: 'Poster · banner · presentasi', color: 'gold', image: 'launch', href: '/studio' },
+  { title: 'Marketing Posters', tag: 'MEDIA', body: 'Official posters · video overview', color: 'cyan', image: 'launch', href: '/marketing' },
   { title: 'Official Marketplace', tag: 'STORE', body: 'Luxury merchandise · Member bazaar', color: 'crimson', image: 'market', href: '/nft-marketplace' },
   { title: 'NFT Collection', tag: 'NFT', body: 'Glass reactor & gold bullion cards', color: 'violet', image: 'nft', href: '/nft-marketplace' },
 ];
@@ -32,7 +33,9 @@ export function HighlightsHub() {
   const withBooster = withPresale.some(i => i.href === '/boost') ? withPresale : [withPresale[0], defaultHub[1], ...withPresale.slice(1)].filter(Boolean) as HubItem[];
   const studio = defaultHub.find(i => i.href === '/studio')!;
   const withStudio = withBooster.some(i => i.href === '/studio') ? withBooster : [...withBooster, studio];
-  const items = hub?.enabled === false ? [] : withStudio.filter(i => i.enabled !== false);
+  const mkt = defaultHub.find(i => i.href === '/marketing')!;
+  const withMarketing = withStudio.some(i => i.href === '/marketing') ? withStudio : [...withStudio, mkt];
+  const items = hub?.enabled === false ? [] : withMarketing.filter(i => i.enabled !== false);
   const { active, goTo } = useRailDots(ref, items.length, 3200);
   if (!items.length) return null;
   return <div className="hub-wrap"><nav ref={ref} aria-label="Highlights" className="hub-strip">{items.map((i, n) => {

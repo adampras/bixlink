@@ -3110,3 +3110,8 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .staking-history-anchor:focus-visible { outline: 1px solid var(--chart-3); outline-offset: 6px; }
 .fox-chat-launcher { touch-action: none; user-select: none; }
 .fox-chat-panel { background: color-mix(in oklch, var(--background) 96%, transparent); }
+
+/* Wallet: slim presale strip below quick tiles */
+.presale-cta--slim{margin-top:.6rem;padding:.5rem .75rem;border-radius:12px;gap:.6rem}
+.presale-cta--slim .presale-cta__icon{width:28px;height:28px;font-size:14px}
+.presale-cta--slim b{font-size:12px}
