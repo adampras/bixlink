@@ -29,6 +29,7 @@ import { Route as PresaleRouteImport } from './routes/presale'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProfitRouteImport } from './routes/profit'
+import { Route as QuantumExchangeRouteImport } from './routes/quantum-exchange'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReviewRouteImport } from './routes/review'
@@ -42,6 +43,7 @@ import { Route as TransferRouteImport } from './routes/transfer'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as WhitepaperRouteImport } from './routes/whitepaper'
 import { Route as YieldControlRouteImport } from './routes/yield-control'
+import { Route as ApiFoxChatRouteImport } from './routes/api/fox-chat'
 import { Route as ContentGroupIndexRouteImport } from './routes/content.$group.$index'
 import { Route as ApiPublicHooksScanDepositsRouteImport } from './routes/api/public/hooks/scan-deposits'
 
@@ -145,6 +147,11 @@ const ProfitRoute = ProfitRouteImport.update({
   path: '/profit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuantumExchangeRoute = QuantumExchangeRouteImport.update({
+  id: '/quantum-exchange',
+  path: '/quantum-exchange',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -210,6 +217,11 @@ const YieldControlRoute = YieldControlRouteImport.update({
   path: '/yield-control',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiFoxChatRoute = ApiFoxChatRouteImport.update({
+  id: '/api/fox-chat',
+  path: '/api/fox-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContentGroupIndexRoute = ContentGroupIndexRouteImport.update({
   id: '/content/$group/$index',
   path: '/content/$group/$index',
@@ -243,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/profit': typeof ProfitRoute
+  '/quantum-exchange': typeof QuantumExchangeRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/review': typeof ReviewRoute
@@ -256,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
   '/yield-control': typeof YieldControlRoute
+  '/api/fox-chat': typeof ApiFoxChatRoute
   '/content/$group/$index': typeof ContentGroupIndexRoute
   '/api/public/hooks/scan-deposits': typeof ApiPublicHooksScanDepositsRoute
 }
@@ -280,6 +294,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/profit': typeof ProfitRoute
+  '/quantum-exchange': typeof QuantumExchangeRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/review': typeof ReviewRoute
@@ -293,6 +308,7 @@ export interface FileRoutesByTo {
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
   '/yield-control': typeof YieldControlRoute
+  '/api/fox-chat': typeof ApiFoxChatRoute
   '/content/$group/$index': typeof ContentGroupIndexRoute
   '/api/public/hooks/scan-deposits': typeof ApiPublicHooksScanDepositsRoute
 }
@@ -318,6 +334,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/profit': typeof ProfitRoute
+  '/quantum-exchange': typeof QuantumExchangeRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/review': typeof ReviewRoute
@@ -331,6 +348,7 @@ export interface FileRoutesById {
   '/wallet': typeof WalletRoute
   '/whitepaper': typeof WhitepaperRoute
   '/yield-control': typeof YieldControlRoute
+  '/api/fox-chat': typeof ApiFoxChatRoute
   '/content/$group/$index': typeof ContentGroupIndexRoute
   '/api/public/hooks/scan-deposits': typeof ApiPublicHooksScanDepositsRoute
 }
@@ -357,6 +375,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/profit'
+    | '/quantum-exchange'
     | '/register'
     | '/reset-password'
     | '/review'
@@ -370,6 +389,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/whitepaper'
     | '/yield-control'
+    | '/api/fox-chat'
     | '/content/$group/$index'
     | '/api/public/hooks/scan-deposits'
   fileRoutesByTo: FileRoutesByTo
@@ -394,6 +414,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/profit'
+    | '/quantum-exchange'
     | '/register'
     | '/reset-password'
     | '/review'
@@ -407,6 +428,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/whitepaper'
     | '/yield-control'
+    | '/api/fox-chat'
     | '/content/$group/$index'
     | '/api/public/hooks/scan-deposits'
   id:
@@ -431,6 +453,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/profit'
+    | '/quantum-exchange'
     | '/register'
     | '/reset-password'
     | '/review'
@@ -444,6 +467,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/whitepaper'
     | '/yield-control'
+    | '/api/fox-chat'
     | '/content/$group/$index'
     | '/api/public/hooks/scan-deposits'
   fileRoutesById: FileRoutesById
@@ -469,6 +493,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ProfitRoute: typeof ProfitRoute
+  QuantumExchangeRoute: typeof QuantumExchangeRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ReviewRoute: typeof ReviewRoute
@@ -482,6 +507,7 @@ export interface RootRouteChildren {
   WalletRoute: typeof WalletRoute
   WhitepaperRoute: typeof WhitepaperRoute
   YieldControlRoute: typeof YieldControlRoute
+  ApiFoxChatRoute: typeof ApiFoxChatRoute
   ContentGroupIndexRoute: typeof ContentGroupIndexRoute
   ApiPublicHooksScanDepositsRoute: typeof ApiPublicHooksScanDepositsRoute
 }
@@ -628,6 +654,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quantum-exchange': {
+      id: '/quantum-exchange'
+      path: '/quantum-exchange'
+      fullPath: '/quantum-exchange'
+      preLoaderRoute: typeof QuantumExchangeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -719,6 +752,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof YieldControlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/fox-chat': {
+      id: '/api/fox-chat'
+      path: '/api/fox-chat'
+      fullPath: '/api/fox-chat'
+      preLoaderRoute: typeof ApiFoxChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/content/$group/$index': {
       id: '/content/$group/$index'
       path: '/content/$group/$index'
@@ -757,6 +797,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ProfitRoute: ProfitRoute,
+  QuantumExchangeRoute: QuantumExchangeRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ReviewRoute: ReviewRoute,
@@ -770,6 +811,7 @@ const rootRouteChildren: RootRouteChildren = {
   WalletRoute: WalletRoute,
   WhitepaperRoute: WhitepaperRoute,
   YieldControlRoute: YieldControlRoute,
+  ApiFoxChatRoute: ApiFoxChatRoute,
   ContentGroupIndexRoute: ContentGroupIndexRoute,
   ApiPublicHooksScanDepositsRoute: ApiPublicHooksScanDepositsRoute,
 }
