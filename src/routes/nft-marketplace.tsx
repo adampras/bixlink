@@ -18,6 +18,7 @@ import { SHOP_IMAGES, publishedProducts, type ShopProduct } from '@/lib/shop';
 import { NFT_TIERS } from '@/lib/nft';
 import { money, number } from '@/lib/bixlink';
 import { AuricCardShowcase } from '@/components/AuricCardShowcase';
+import { MarketShowcase } from '@/components/MarketShowcase';
 import { ShopCart } from '@/components/ShopCart';
 import { ShopPromoBanner } from '@/components/ShopPromoBanner';
 import { ShopOrders, shopOrdersKey } from '@/components/ShopOrders';
@@ -70,6 +71,7 @@ function Marketplace(){
     <Button variant="ghost" type="button" aria-label="Sell product" onClick={()=>document.getElementById('sell-product')?.scrollIntoView({behavior:'smooth'})} className="market-sell-action">SELL PRODUCT</Button>
   </div>
 </section>
+<MarketShowcase onOrder={()=>{setView('MERCHANDISE');requestAnimationFrame(()=>document.getElementById('market-grid')?.scrollIntoView({behavior:'smooth'}));}}/>
  <ShopPromoBanner/>
    <div className="shop-tabs atelier-tabs" id="market-grid" role="tablist" aria-label="Marketplace categories">{[['ALL','All collections'],['REACTOR','Reactor NFTs'],['MERCHANDISE','Official products'],['OWNED','My certificates']].map(([id,label])=><Button key={id} role="tab" aria-selected={view===id} variant="ghost" onClick={()=>setView(id??'ALL')}>{label}</Button>)}</div>
  {view==='OWNED'?user?<MyNftCollection userId={user.id} bixPrice={cfg?.bixMarket.priceUsd??.84291}/>:<Button asChild className="mt-8"><Link to="/auth">Sign in to view certificates</Link></Button>:<>
