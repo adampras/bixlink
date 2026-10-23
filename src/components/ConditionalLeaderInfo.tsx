@@ -22,7 +22,7 @@ export function ConditionalLeaderInfo() {
   const { data } = useQuery({ queryKey: ['conditional-leader-access'], queryFn: () => fetchAccess() });
   const leader = useQuery({ queryKey: ['my-leader'], queryFn: () => fetchLeader(), enabled: !!data?.allowed });
   const [open, setOpen] = useState(false);
-  const [pick, setPick] = useState(PACKAGES[2]);
+  const [pick, setPick] = useState<{ id: string; usd: number }>({ id: 'BUILDER', usd: 1000 });
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
