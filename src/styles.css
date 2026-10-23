@@ -2779,7 +2779,13 @@ html[data-color-mode="light"] .landing-presale-band :is(.hero-ribbon-live b,.her
 
 /* Full-card view on phones: no cropped highlight/ecosystem cards */
 @media (max-width:640px){
-  .hub-card{flex-basis:100%;height:6.2rem}
+  .hub-card{flex-basis:calc(50% - .3rem);height:4.9rem}
+  .hub-card:nth-child(odd){scroll-snap-align:start}
+  .hub-card:nth-child(even){scroll-snap-align:none}
+  .hub-text{max-width:100%;padding:.45rem .55rem}
+  .hub-text b{font-size:11.5px}
+  .hub-text em{font-size:9px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .hub-shade{background:linear-gradient(90deg,color-mix(in oklab,var(--background) 90%,transparent),color-mix(in oklab,var(--background) 55%,transparent))}
   .eco-card{flex-basis:100%}
   .hub-strip,.eco-rail{scroll-snap-type:x mandatory}
 }

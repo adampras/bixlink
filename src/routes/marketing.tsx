@@ -4,6 +4,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { useQuery } from '@tanstack/react-query';
 import { Download, FileText, Film, ShieldCheck } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
+import { MarketingPosters } from '@/components/MarketingPosters';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
@@ -26,6 +27,7 @@ function MarketingPage(){
     <div className="my-6 flex flex-wrap gap-3"><Button disabled={busy||!cfg||!presale.data} onClick={async()=>{setBusy(true);setError('');try{if(!plan)return;const {exportMarketingPdf}=await import('@/lib/marketing-pdf');await exportMarketingPdf({language:lang,plan,tables:tables()});}catch(e){setError(e instanceof Error?e.message:'PDF export failed');}finally{setBusy(false);}}}><Download size={16}/>{busy?'…':c[21]}</Button><Button variant="outline" onClick={async()=>{setError('');try{const r=await fetch(video.url);if(!r.ok)throw new Error('Video download unavailable');const url=URL.createObjectURL(await r.blob());const a=document.createElement('a');a.href=url;a.download='BIXLINK-Marketing-2026.mp4';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}catch(e){setError(e instanceof Error?e.message:'Video download failed');}}}><Film size={16}/>{c[22]}</Button></div>{error&&<p role="alert" className="text-sm text-destructive">{error}</p>}
     <video className="aspect-video w-full rounded-lg border border-border bg-card" poster={cover.url} controls playsInline preload="metadata" aria-label="BIXLINK marketing overview"><source src={webVideo.url} type="video/webm"/><source src={video.url} type="video/mp4"/></video>
     <p className="mt-2 text-xs text-muted-foreground">© 2026 BIXLINK · 28 seconds · English / Indonesia · 11 Oct 2026 · Silent overview. PDF reflects current settings; video is a dated presentation.</p>
+    <MarketingPosters/>
     <div className="mt-8 grid gap-x-8 md:grid-cols-2">{content?.sections.map((s,i)=><section key={i} className="border-t border-border py-6"><span className="numeric text-xs text-chart-3">0{i+1}</span><h2 className="mt-2 font-display text-lg font-bold">{s.title}</h2><p className="mt-3 text-sm leading-7 text-muted-foreground">{s.body}</p></section>)}</div>
     <p className="mt-6 flex items-start gap-2 border-t border-border py-6 text-xs leading-6 text-muted-foreground"><ShieldCheck className="shrink-0" size={16}/>{c[11]}</p></>}</MemberGate></main></BixShell>;
 }
