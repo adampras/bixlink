@@ -381,6 +381,21 @@ export type Database = {
           },
         ]
       }
+      bix_notify_log: {
+        Row: {
+          created_at: string
+          event_key: string
+        }
+        Insert: {
+          created_at?: string
+          event_key: string
+        }
+        Update: {
+          created_at?: string
+          event_key?: string
+        }
+        Relationships: []
+      }
       bix_owner_deposit_wallets: {
         Row: {
           address: string
