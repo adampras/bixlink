@@ -86,9 +86,9 @@ export function ConditionalLeaderInfo() {
       : <Button disabled={!!dev?.taken} className="mt-4 w-full rounded-full bg-chart-3 font-black text-background" onClick={() => { setAgree(false); setErr(''); setOpen(true); }}><Crown/> CLAIM & ACTIVATE LOAN PACKAGE</Button>}
     <p className="mt-3 text-[10px] text-muted-foreground">Conditional account is an internal locked credit, not withdrawable funds. Rewards and allocations are reviewed and approved by the owner. Terms apply.</p>
 
-    <LoanDialog open={open} onClose={() => setOpen(false)} label="Pilih paket pinjaman">
+    <LoanDialog open={open} onClose={() => setOpen(false)} label="Choose a loan package">
       <div className="loan-lux-line"/>
-      <div className="flex items-start justify-between gap-2"><div><p className="eyebrow flex items-center gap-1 text-[10px] text-chart-3"><Crown size={11}/> AKUN PINJAMAN LEADER</p><h3 className="mt-0.5 font-display text-base font-black text-foreground">Pilih paket leader Anda</h3></div><Button variant="ghost" size="icon" className="size-8" aria-label="Tutup" onClick={() => setOpen(false)}><X size={16}/></Button></div>
+      <div className="flex items-start justify-between gap-2"><div><p className="eyebrow flex items-center gap-1 text-[10px] text-chart-3"><Crown size={11}/> LEADER LOAN ACCOUNT</p><h3 className="mt-0.5 font-display text-base font-black text-foreground">Choose your leader package</h3></div><Button variant="ghost" size="icon" className="size-8" aria-label="Close" onClick={() => setOpen(false)}><X size={16}/></Button></div>
       <div role="radiogroup" aria-label="Paket leader" className="mt-3 space-y-1.5">{PACKAGES.map(p => { const on = pick.id === p.id; return <Button variant="outline" key={p.id} type="button" role="radio" aria-checked={on} onClick={() => setPick(p)} className={`flex h-auto min-h-16 w-full items-center justify-between gap-2 whitespace-normal rounded-lg border px-3 py-2 text-left transition ${on ? 'border-chart-3 bg-chart-3/10' : 'border-border/70 bg-background'}`}>
         <span className="min-w-0"><b className="flex flex-wrap items-center gap-1 text-[11px] text-foreground">{p.id}{p.usd === 1000 && <span className="rounded bg-chart-3 px-1.5 py-px text-[8px] text-background">REKOMENDASI</span>}</b><span className="numeric block text-[11px] text-foreground/75">Target omset: <b>${(p.usd * 5).toLocaleString()}</b> (5×)</span></span>
         <span className="flex items-center gap-2"><span className="numeric text-lg font-black text-chart-3">${p.usd.toLocaleString()}</span><span className={`grid size-5 shrink-0 place-items-center rounded-full border text-[10px] font-black ${on ? 'border-chart-3 bg-chart-3 text-background' : 'border-border'}`}>{on ? '✓' : ''}</span></span>
@@ -101,7 +101,7 @@ export function ConditionalLeaderInfo() {
 
     <LoanDialog open={!!done} onClose={() => setDone(null)} label="Akun leader aktif" centered>
       {done && <>
-      <Button variant="ghost" size="icon" className="absolute right-3 top-3 size-8" aria-label="Tutup" onClick={() => setDone(null)}><X size={16}/></Button>
+      <Button variant="ghost" size="icon" className="absolute right-3 top-3 size-8" aria-label="Close" onClick={() => setDone(null)}><X size={16}/></Button>
       <div className="loan-lux-line"/>
       <div className="mx-auto grid size-14 place-items-center rounded-full border border-chart-3 bg-chart-3/10 text-chart-3 shadow-[0_0_28px_color-mix(in_oklab,var(--color-chart-3)_55%,transparent)]"><Crown size={26}/></div>
       <p className="eyebrow mt-3 text-[10px] text-chart-3"><Sparkles size={10} className="inline"/> LEADER GLOBAL RESMI BIXLINK</p>
@@ -114,7 +114,7 @@ export function ConditionalLeaderInfo() {
 
     <LoanDialog open={guide} onClose={() => setGuide(false)} label="Panduan leader">
       <div className="loan-lux-line"/>
-      <div className="flex items-center justify-between"><h3 className="font-display text-base font-black text-foreground">Panduan pertumbuhan leader</h3><Button variant="ghost" size="icon" className="size-8" aria-label="Tutup" onClick={() => setGuide(false)}><X size={16}/></Button></div>
+      <div className="flex items-center justify-between"><h3 className="font-display text-base font-black text-foreground">Panduan pertumbuhan leader</h3><Button variant="ghost" size="icon" className="size-8" aria-label="Close" onClick={() => setGuide(false)}><X size={16}/></Button></div>
       <ol className="mt-3 space-y-2 text-[11px] text-foreground/75">
         <li className="flex gap-2"><Copy className="shrink-0 text-chart-3" size={15}/><span><b className="block text-foreground">1. Bagikan link referral</b>Undang partner dengan link resmi BIXLINK dari Profil.</span></li>
         <li className="flex gap-2"><Megaphone className="shrink-0 text-chart-3" size={15}/><span><b className="block text-foreground">2. Presentasi dengan materi resmi</b>Gunakan poster dan video di halaman Marketing.</span></li>

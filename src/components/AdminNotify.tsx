@@ -26,7 +26,7 @@ export function AdminNotify() {
         {LABELS.map(([k, l]) => <label key={k} className="flex items-center justify-between text-sm"><span>{l}</span><Switch checked={t[k]} onCheckedChange={v => setT({ ...t, [k]: v })}/></label>)}
       </div>
       <div className="mt-5 flex gap-2">
-        <Button className="rounded-none" onClick={async () => { try { await save({ data: t }); setMsg('Tersimpan.'); } catch { setMsg('Gagal menyimpan.'); } }}>Simpan</Button>
+        <Button className="rounded-none" onClick={async () => { try { await save({ data: t }); setMsg('Saved.'); } catch { setMsg('Failed to save.'); } }}>Save</Button>
         <Button variant="outline" className="rounded-none" onClick={async () => { setMsg('Mengirim...'); try { const r = await test(); setMsg(Object.keys(r).length ? Object.entries(r).map(([k, v]) => `${k}: ${v}`).join(' · ') : 'Belum ada kanal yang terhubung.'); } catch { setMsg('Uji coba gagal.'); } }}>Kirim uji coba</Button>
       </div>
       {msg && <p className="mt-3 text-xs text-muted-foreground">{msg}</p>}
