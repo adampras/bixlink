@@ -554,6 +554,13 @@
       "when": 1792804141100,
       "tag": "0078_repair_presale_stage_settings_save",
       "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1792808674714,
+      "tag": "0079_welcome_bixp_ledger_credit",
+      "breakpoints": true
     }
   ]
 }
