@@ -21,6 +21,7 @@ import { createPortal } from 'react-dom';
 import { Sun, Moon } from 'lucide-react';
 import { SiteSearch } from '@/components/SiteSearch';
 import { SitePopup } from '@/components/SitePopup';
+import { MemberWelcome } from '@/components/MemberWelcome';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
@@ -116,6 +117,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     {publicConfig && isBlockedByMaintenance(publicConfig.siteControl, publicConfig.isAdmin, path) ? <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-5 py-16 text-center"><img src={headerMark.url} width={72} height={72} alt="" className="rounded-full"/><div className="eyebrow mt-6">SYSTEM MAINTENANCE</div><h1 className="section-title mt-3">BIXLINK <span>MAINTENANCE</span></h1><p className="mt-4 text-sm leading-6 text-muted-foreground">{publicConfig.siteControl.message || 'Sistem BIXLINK sedang dalam pemeliharaan. Silakan kembali beberapa saat lagi.'}</p></main> : children}
     <TxFeedbackHost/>
     <SitePopup path={path} popups={publicConfig?.landingContent.popups} signedIn={!!user}/>
+    {user && !path.startsWith('/admin') && <MemberWelcome userId={user.id}/>}
     <footer className="border-t border-border py-4"><SocialLinks links={publicConfig?.readiness.socials} signedIn={!!user}/><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
     {user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden`}>
       {NAV.filter(n => n.to !== '/boost').map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} title={n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19} className="shrink-0"/><span className="max-w-full truncate">{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')}</span></Link>; })}
