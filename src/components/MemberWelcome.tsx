@@ -58,10 +58,10 @@ export function MemberWelcome({ userId }: { userId: string }) {
 
   return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 p-3 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="mw-title" onClick={close}>
     <style>{CSS}</style>
-    <div onClick={e => e.stopPropagation()} className="relative w-full max-w-[460px] border-2 border-chart-3 bg-background shadow-[0_0_40px_-8px_var(--chart-3)] animate-in fade-in zoom-in-95 duration-300">
+    <div onClick={e => e.stopPropagation()} className="relative w-full max-w-[460px] border border-chart-3 bg-gradient-to-b from-card via-background to-card shadow-[0_0_60px_-12px_var(--chart-3),inset_0_0_0_4px_var(--background),inset_0_0_0_5px_color-mix(in_oklab,var(--chart-3)_40%,transparent)] animate-in fade-in zoom-in-95 duration-300">
       <span className="mw-corner -left-1 -top-1 border-l-4 border-t-4"/><span className="mw-corner -right-1 -top-1 border-r-4 border-t-4"/>
       <span className="mw-corner -bottom-1 -left-1 border-b-4 border-l-4"/><span className="mw-corner -bottom-1 -right-1 border-b-4 border-r-4"/>
-      <div className="h-1 w-full bg-gradient-to-r from-primary via-chart-3 to-primary"/>
+      <div className="mw-sweep h-1.5 w-full bg-gradient-to-r from-primary via-chart-3 to-primary"/>
       <div className="max-h-[86vh] overflow-y-auto px-4 pb-4 pt-5 text-foreground">
         <button type="button" onClick={close} aria-label="Tutup" className="absolute right-3 top-4 grid h-8 w-8 place-items-center border border-chart-3/60 bg-card text-foreground"><X size={16}/></button>
 
