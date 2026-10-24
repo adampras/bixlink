@@ -335,6 +335,7 @@ export const requestDeposit = createServerFn({ method: 'POST' }).middleware([req
   .handler(async ({ context, data }) => {
     const { data: id, error } = await context.supabase.rpc('request_bix_deposit', { p_amount: data.amount, p_tx_hash: data.txHash });
     if (error) throw new Error(error.message);
+    try { const { supabaseAdmin: na } = await import('@/integrations/supabase/client.server'); const { dispatchWalletAlerts } = await import('@/lib/notify.server'); await dispatchWalletAlerts(na); } catch (e) { console.error('notify', e); }
     return { id };
   });
 
@@ -343,6 +344,7 @@ export const requestWithdraw = createServerFn({ method: 'POST' }).middleware([re
   .handler(async ({ context, data }) => {
     const { data: id, error } = await context.supabase.rpc('request_bix_withdraw', { p_amount: data.amount, p_address: data.address });
     if (error) throw new Error(error.message);
+    try { const { supabaseAdmin: na } = await import('@/integrations/supabase/client.server'); const { dispatchWalletAlerts } = await import('@/lib/notify.server'); await dispatchWalletAlerts(na); } catch (e) { console.error('notify', e); }
     return { id };
   });
 
@@ -366,6 +368,7 @@ export const reviewWalletTx = createServerFn({ method: 'POST' }).middleware([req
     // Stop auto-detection for a reported deposit once the owner decided it.
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     await supabaseAdmin.from('deposit_intents').update({ status: 'reviewed' }).eq('claim_tx_id', data.id).eq('status', 'pending');
+    try { const { supabaseAdmin: na } = await import('@/integrations/supabase/client.server'); const { dispatchWalletAlerts } = await import('@/lib/notify.server'); await dispatchWalletAlerts(na); } catch (e) { console.error('notify', e); }
     return { ok: true };
   });
 

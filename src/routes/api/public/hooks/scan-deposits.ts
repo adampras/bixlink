@@ -13,6 +13,7 @@ export const Route = createFileRoute('/api/public/hooks/scan-deposits')({
     const cache = new Map();
     let credited = 0;
     for (const i of intents ?? []) { const r = await matchIntent(supabaseAdmin, i, cache); if (r.status === 'credited') credited++; }
+    try { const { dispatchWalletAlerts } = await import('@/lib/notify.server'); await dispatchWalletAlerts(supabaseAdmin); } catch (e) { console.error('notify', e); }
     return Response.json({ checked: intents?.length ?? 0, credited });
   } } },
 });

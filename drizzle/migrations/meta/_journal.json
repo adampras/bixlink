@@ -568,6 +568,13 @@
       "when": 1792808702398,
       "tag": "0080_welcome_bixp_ledger_kind_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1792811034065,
+      "tag": "0081_admin_notify_log",
+      "breakpoints": true
     }
   ]
 }

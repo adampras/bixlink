@@ -21,6 +21,7 @@ import { AdminPopups } from '@/components/AdminPopups';
 import { AdminBixVault } from '@/components/AdminBixVault';
 import { AdminBixToken } from '@/components/AdminBixToken';
 import { AdminReadiness } from '@/components/AdminReadiness';
+import { AdminNotify } from '@/components/AdminNotify';
 import { AdminReviewers, AdminTurnover } from '@/components/AdminReviewers';
 import { NetworkLeaders } from '@/components/NetworkLeaders';
 import { AdminAppearance } from '@/components/AdminAppearance';
@@ -89,6 +90,7 @@ function Admin() {
          </div>; })}</div>
        <p className="mt-6 text-xs text-muted-foreground">Nonaktif dan Ban sama-sama memblokir login; Aktif membuka kembali akses. Data stake dan referral tetap tersimpan.</p></div>}
     {tab === 'Stakes' && <AdminUnstake initial={(data?.settings.find(s=>s.key==='unstake')?.value as {tiers?: {days:number;pct:number}[]} | undefined)?.tiers} onMessage={setMessage}/>}
+    {tab === 'Wallet' && <AdminNotify/>}
     {tab === 'Stakes' && <div className="mt-8 overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead className="text-xs uppercase text-muted-foreground"><tr>{['Member','Package','Amount','Status','Action'].map(x => <th key={x} className="p-3">{x}</th>)}</tr></thead><tbody>{stakes.map(s => <tr key={s.id} className="border-t border-border"><td className="p-3 font-mono text-xs">{s.user_id.slice(0,8)}…</td><td className="p-3">{s.package_id}</td><td className="p-3 text-chart-3">{money(Number(s.amount_usd))}</td><td className="p-3 capitalize">{s.status}</td><td className="flex gap-2 p-3">{s.status === 'pending' && <><Button title="Approve request" size="icon" className="rounded-full" onClick={async () => {try {await changeStake({data:{id:s.id,status:'active'}});await refresh();} catch {setMessage('Could not approve request.');}}}><Check/></Button><Button title="Reject request" size="icon" variant="destructive" className="rounded-full" onClick={async () => {try {await changeStake({data:{id:s.id,status:'rejected'}});await refresh();} catch {setMessage('Could not reject request.');}}}><X/></Button></>}</td></tr>)}</tbody></table>{!stakes.length && <p className="py-10 text-muted-foreground">No stake requests yet.</p>}</div>}
     {tab === 'Token' && <AdminBixToken saved={data?.settings.find(s=>s.key==='bix_token')?.value as { chainId?: number; address?: string; supply?: number } | undefined} onMessage={setMessage}/>}
     {tab === 'Wallet' && <AdminWallet members={data?.members ?? []} depositWallets={(data?.settings.find(s=>s.key==='deposit_wallets')?.value as {wallets?: DepositWallet[]} | undefined)?.wallets} swapEnabled={Boolean((data?.settings.find(s=>s.key==='swap')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>} 
