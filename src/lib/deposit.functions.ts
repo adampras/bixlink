@@ -113,7 +113,7 @@ export const claimDepositIntent = createServerFn({ method: 'POST' }).middleware(
   });
 
 // Members under an Owner 2–5 see only that Owner's wallet; everyone else uses Owner 1 wallets.
-async function memberWallets(context: { supabase: any }): Promise<DepositWallet[]> {
+async function memberWallets(context: { supabase: any; userId: string }): Promise<DepositWallet[]> {
   const { data: own } = await context.supabase.rpc('bix_my_deposit_wallets');
   if (Array.isArray(own) && own.length) return own as DepositWallet[];
   // Owner 2–5 never fall back to Owner 1 wallets; they only see their own bound wallet.
