@@ -3131,3 +3131,18 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 @keyframes dev-rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 @keyframes dev-glow { 0%,100% { box-shadow:none; } 50% { box-shadow:0 0 14px color-mix(in oklch,var(--chart-3) 22%,transparent); } }
 @media(prefers-reduced-motion:reduce){ .dev-tile,.dev-tile-img { animation:none; } }
+
+/* Fox Arena — lux polish */
+@keyframes arenaSheen { 0% { transform: translateX(-130%) skewX(-18deg); } 55%, 100% { transform: translateX(330%) skewX(-18deg); } }
+.arena-page .arena-title { font-size: clamp(30px, 8vw, 46px); letter-spacing: .14em; filter: drop-shadow(0 0 14px color-mix(in oklab, var(--chart-3) 35%, transparent)); }
+.arena-page .arena-hud { border-radius: 6px; border: 1.5px solid var(--chart-3); box-shadow: 0 0 36px -10px var(--chart-3), inset 0 1px 0 color-mix(in oklab, var(--foreground) 12%, transparent); background: radial-gradient(circle at 12% 40%, color-mix(in oklab, var(--primary) 34%, transparent), transparent 55%), linear-gradient(135deg, color-mix(in oklab, var(--card) 92%, var(--background)), color-mix(in oklab, var(--chart-3) 14%, var(--card))); }
+.arena-page .arena-hud::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 30%; background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--foreground) 18%, transparent), transparent); animation: arenaSheen 4s ease-in-out infinite; pointer-events: none; }
+.arena-page .arena-stats > div { border-radius: 4px; border-color: color-mix(in oklab, var(--chart-3) 45%, var(--border)); background: linear-gradient(180deg, color-mix(in oklab, var(--chart-3) 10%, var(--card)), var(--card)); }
+.arena-page .arena-stats b { font-size: 22px; color: var(--chart-3); }
+.arena-page .arena-quest { border-radius: 4px; border-left: 3px solid var(--chart-3); background: linear-gradient(150deg, color-mix(in oklab, var(--primary) 16%, var(--card)), color-mix(in oklab, var(--card) 94%, var(--background))); box-shadow: 0 10px 28px -18px var(--primary); }
+.arena-page .arena-quest:hover { box-shadow: 0 0 0 1px var(--chart-3), 0 14px 30px -16px var(--chart-3); }
+.arena-page .arena-quest-icon { border-radius: 4px; box-shadow: 0 0 14px -4px var(--chart-3); }
+.arena-page .arena-claim { border-radius: 3px; background: linear-gradient(90deg, var(--chart-3), color-mix(in oklab, var(--chart-3) 70%, var(--foreground))); color: var(--background); }
+.arena-page .arena-step { border-radius: 4px 4px 2px 2px; }
+.arena-page .arena-step.rank-1 { box-shadow: 0 0 30px -8px var(--chart-3); }
+@media (prefers-reduced-motion: reduce) { .arena-page .arena-hud::before { animation: none; } }

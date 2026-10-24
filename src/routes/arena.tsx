@@ -38,7 +38,8 @@ function ArenaPage() {
   const isSocial = (k: QuestKey) => k === 'follow_x' || k === 'join_telegram' || k === 'sub_youtube';
   return <BixShell><MemberGate ready={ready} signedIn={!!user} title="FOX ARENA"><main className="arena-page mx-auto max-w-5xl px-5 py-8 md:px-8">
     <div className="eyebrow"><Swords size={14}/> BIXLINK GAME ECOSYSTEM</div>
-    <h1 className="arena-title mt-3 font-display text-[28px] font-black md:text-4xl">FOX ARENA</h1>
+    <h1 className="arena-title mt-3 font-display font-black">FOX ARENA</h1>
+    <p className="mt-1 inline-flex items-center gap-1.5 border border-chart-3/60 bg-chart-3/10 px-2.5 py-1 text-[10px] font-bold tracking-[0.18em] text-chart-3"><Crown size={11}/> TERBUKA UNTUK SEMUA MEMBER · SEMUA JALUR</p>
     {q.isLoading || !s ? <div className="mt-8 h-40 animate-pulse rounded-2xl bg-muted"/> : !s.enabled ? <div className="mt-10 flex items-center gap-3 text-muted-foreground"><Lock size={20}/><p>Fox Arena is not open yet.</p></div> : <>
       <section className="arena-hud mt-6">
         <div className="arena-hud-avatar"><img src={headerLogo} alt="" width={88} height={88} className={`arena-fox tier-${tier!.level}`}/><span className="arena-lvl">LV {tier!.level}</span></div>
