@@ -86,7 +86,7 @@ export function ConditionalLeaderInfo() {
       : <Button disabled={!!dev?.taken} className="mt-4 w-full rounded-full bg-chart-3 font-black text-background" onClick={() => { setAgree(false); setErr(''); setOpen(true); }}><Crown/> CLAIM & ACTIVATE LOAN PACKAGE</Button>}
     <p className="mt-3 text-[10px] text-muted-foreground">Conditional account is an internal locked credit, not withdrawable funds. Rewards and allocations are reviewed and approved by the owner. Terms apply.</p>
 
-    <LoanDialog open={open} onClose={() => setOpen(false)} label="Pilih paket pinjaman">
+    <LoanDialog open={open} onClose={() => setOpen(false)} label="Choose a loan package">
       <div className="loan-lux-line"/>
       <div className="flex items-start justify-between gap-2"><div><p className="eyebrow flex items-center gap-1 text-[10px] text-chart-3"><Crown size={11}/> AKUN PINJAMAN LEADER</p><h3 className="mt-0.5 font-display text-base font-black text-foreground">Pilih paket leader Anda</h3></div><Button variant="ghost" size="icon" className="size-8" aria-label="Tutup" onClick={() => setOpen(false)}><X size={16}/></Button></div>
       <div role="radiogroup" aria-label="Paket leader" className="mt-3 space-y-1.5">{PACKAGES.map(p => { const on = pick.id === p.id; return <Button variant="outline" key={p.id} type="button" role="radio" aria-checked={on} onClick={() => setPick(p)} className={`flex h-auto min-h-16 w-full items-center justify-between gap-2 whitespace-normal rounded-lg border px-3 py-2 text-left transition ${on ? 'border-chart-3 bg-chart-3/10' : 'border-border/70 bg-background'}`}>
