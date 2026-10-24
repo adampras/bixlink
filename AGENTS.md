@@ -44,6 +44,7 @@
 - Owner-only marketing settings feed browser PDF exports; dated CDN video stays separate to avoid implying re-rendering.
 - Owner navigation uses one searchable category selector; shared staking controls separate daily presets from individual edits to avoid duplicate forms across consoles.
 - Shell/dialogs own phone bounds; consortium uses a centered portal stage to avoid legacy transforms. Package cards use inline durations and full-width actions.
+- All loan dialog states share a Radix body portal with isolated surface tokens; this avoids shell transforms and transparent theme overrides while retaining focus trapping.
 
 - Size heroes via landing-hero-compact/compact-market-hero; preserve catalogs. Mask vault art behind the transparent coin to blend themes without new assets.
 - Keep app-wide touch feedback and HOME return-to-top in one root-mounted presentation component; store its switch in existing owner-authorized readiness settings to avoid duplicate controls or new permissions.

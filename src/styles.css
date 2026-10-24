@@ -3151,6 +3151,32 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .site-shell .wallet-tile { background: linear-gradient(145deg, color-mix(in oklab, var(--tile) 14%, var(--card)), color-mix(in oklab, var(--card) 92%, var(--background))); border-color: color-mix(in oklab, var(--primary) 28%, var(--border)); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--primary) 22%, transparent), 0 10px 24px -18px var(--tile); }
 .site-shell .wallet-tile::after { background: linear-gradient(90deg, transparent, var(--primary), transparent); opacity:.55; }
 
-.loan-solid-backdrop { background: rgb(4 6 12 / 0.96) !important; backdrop-filter: blur(16px); z-index: 120 !important; display: grid !important; place-items: center !important; padding: 1rem !important; }
-.loan-solid-panel { position: relative; background: linear-gradient(160deg, #11141f, #0a0c14) !important; opacity: 1; width: min(22rem, calc(100vw - 2rem)) !important; max-width: 22rem !important; margin: 0 auto !important; transform: none !important; padding: 1rem !important; border-radius: 1rem !important; border: 1px solid color-mix(in oklab, var(--color-chart-3) 55%, transparent); box-shadow: 0 0 0 1px rgb(255 215 0 / 0.06) inset, 0 20px 60px rgb(0 0 0 / 0.75), 0 0 40px color-mix(in oklab, var(--color-chart-3) 18%, transparent); max-height: 86dvh; overflow-y: auto; overflow-x: hidden; }
-.loan-lux-line { position: absolute; inset: 0 0 auto 0; height: 2px; background: linear-gradient(90deg, transparent, var(--color-chart-3), #a855f7, transparent); }
+:root {
+  --loan-surface: oklch(.09 0 0);
+  --loan-ink: oklch(.97 0 0);
+  --loan-muted: oklch(.77 0 0);
+  --loan-gold: oklch(.84 .14 85);
+  --loan-edge: oklch(.4 .035 85);
+  --loan-scrim: oklch(0 0 0 / 82%);
+  --loan-shadow: 0 24px 72px oklch(0 0 0 / 70%);
+}
+.loan-dialog-overlay { position:fixed; inset:0; z-index:400; background:var(--loan-scrim); backdrop-filter:blur(12px); }
+.loan-dialog-content {
+  --background:var(--loan-surface); --card:var(--loan-surface);
+  --foreground:var(--loan-ink); --muted-foreground:var(--loan-muted);
+  --chart-3:var(--loan-gold); --border:var(--loan-edge);
+  --accent:var(--loan-edge); --accent-foreground:var(--loan-ink);
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+  z-index:401; isolation:isolate; box-sizing:border-box;
+  width:min(352px,calc(100vw - 32px)); max-height:calc(100dvh - 32px);
+  margin:0; padding:18px 16px; overflow-y:auto; overscroll-behavior:contain;
+  background:var(--loan-surface); color:var(--loan-ink); opacity:1;
+  border:1px solid var(--loan-edge); border-radius:8px;
+  box-shadow:var(--loan-shadow),inset 0 1px 0 var(--loan-gold);
+  font-size:12px; line-height:1.6; letter-spacing:0;
+}
+.loan-dialog-content :is(h3,p,li,span,b) { overflow-wrap:break-word; letter-spacing:0; }
+.loan-dialog-content h3 { line-height:1.4; }
+.loan-dialog-content button { flex-shrink:0; }
+.loan-dialog-content input { flex-shrink:0; }
+.loan-dialog-content .loan-lux-line { position:absolute; inset:0 16px auto; height:1px; background:var(--loan-gold); }
