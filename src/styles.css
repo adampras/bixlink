@@ -3146,3 +3146,7 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .arena-page .arena-step { border-radius: 4px 4px 2px 2px; }
 .arena-page .arena-step.rank-1 { box-shadow: 0 0 30px -8px var(--chart-3); }
 @media (prefers-reduced-motion: reduce) { .arena-page .arena-hud::before { animation: none; } }
+
+/* Wallet polish */
+.site-shell .wallet-tile { background: linear-gradient(145deg, color-mix(in oklab, var(--tile) 14%, var(--card)), color-mix(in oklab, var(--card) 92%, var(--background))); border-color: color-mix(in oklab, var(--primary) 28%, var(--border)); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--primary) 22%, transparent), 0 10px 24px -18px var(--tile); }
+.site-shell .wallet-tile::after { background: linear-gradient(90deg, transparent, var(--primary), transparent); opacity:.55; }

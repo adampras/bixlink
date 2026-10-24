@@ -99,11 +99,10 @@ function WalletPage() {
         {cfg?.readiness.walletCard && <div className="sov-foot"><span className="numeric">{(user?.id.replace(/\D/g, '').padEnd(4, '0').slice(0, 4) ?? '0000')} •••• •••• 2026</span><span>MEMBER LEDGER PASS</span></div>}
       </div>
       <div className="wallet-actions"><button type="button" className="wallet-action wallet-action--in" onClick={() => setModal('deposit')}><span><ArrowDownToLine size={18}/></span><b>Deposit</b></button><button type="button" className="wallet-action wallet-action--out" onClick={() => setModal('withdraw')}><span><ArrowUpFromLine size={18}/></span><b>Withdraw</b></button></div>
-      <div className="mt-3 grid grid-cols-2 gap-2.5">
+      <div className="mt-4 grid grid-cols-2 gap-3">
         <Link to="/pay" className="wallet-tile wallet-tile--pay"><span className="wallet-tile-icon"><QrCode size={16}/></span><span className="min-w-0 flex-1"><b className="wallet-tile-title">BIX PAY</b><span className="wallet-tile-sub">QR Pay · BIX</span></span><span className={`wallet-tile-status${cfg?.bixPay.enabled ? ' is-open' : ''}`}><i/></span></Link>
         <Link to="/transfer" className="wallet-tile wallet-tile--transfer"><span className="wallet-tile-icon"><Send size={15}/></span><span className="min-w-0 flex-1"><b className="wallet-tile-title">TRANSFER</b><span className="wallet-tile-sub">Member · USDT</span></span><span className={`wallet-tile-status${cfg?.usdtTransfer.enabled ? ' is-open' : ''}`}><i/></span></Link>
       </div>
-      <Link to="/presale" className="presale-cta presale-cta--slim"><span className="presale-cta__icon">♛</span><span className="min-w-0 flex-1"><small>GENESIS PRESALE · LIVE</small><b>Choose a presale package</b></span><em>OPEN →</em></Link>
       {notice && <p role="status" className="mt-4 text-sm text-chart-2">{notice}</p>}
 
       <section className="vault-swap auric-card mt-8 rounded-[20px] border bg-card p-6"><div className="flex items-center justify-between"><div><div className="eyebrow"><ArrowLeftRight size={14}/> INTERNAL SWAP</div><h2 className="mt-2 font-display text-2xl font-black">BIX / USDT</h2></div><div className="flex flex-col items-end gap-1"><span className="vault-pill numeric text-sm font-bold">1 BIX = ${bixPrice.toFixed(6)}</span>{!swapEnabled && <span className="inline-flex items-center gap-1 rounded-full border border-chart-3 bg-chart-3/10 px-3 py-1 text-[11px] font-bold text-chart-3"><Lock size={12}/> Coming soon</span>}</div></div>
