@@ -547,6 +547,13 @@
       "when": 1792751265572,
       "tag": "0077_loan_device_binding",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1792804141100,
+      "tag": "0078_repair_presale_stage_settings_save",
+      "breakpoints": true
     }
   ]
 }
