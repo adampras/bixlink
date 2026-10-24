@@ -17,7 +17,7 @@ const walletSchema = z.object({
 
 export const saveDepositWallets = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { wallets: DepositWallet[] }) => {
-    const parsed = z.object({ wallets: z.array(walletSchema).length(5) }).parse(data);
+    const parsed = z.object({ wallets: z.array(walletSchema).min(1).max(12) }).parse(data);
     const codes = parsed.wallets.map(w => w.code.toUpperCase());
     if (new Set(codes).size !== codes.length) throw new Error('Each wallet code must be unique.');
     for (const w of parsed.wallets) {
@@ -116,6 +116,9 @@ export const claimDepositIntent = createServerFn({ method: 'POST' }).middleware(
 async function memberWallets(context: { supabase: any }): Promise<DepositWallet[]> {
   const { data: own } = await context.supabase.rpc('bix_my_deposit_wallets');
   if (Array.isArray(own) && own.length) return own as DepositWallet[];
+  // Owner 2–5 never fall back to Owner 1 wallets; they only see their own bound wallet.
+  const { data: role } = await context.supabase.from('user_roles').select('role').eq('user_id', context.userId).eq('role', 'reviewer').maybeSingle();
+  if (role) return [];
   const { data: row } = await context.supabase.from('app_settings').select('value').eq('key', 'deposit_wallets').maybeSingle();
   return ((row?.value as { wallets?: DepositWallet[] } | null)?.wallets ?? []);
 }

@@ -3,27 +3,49 @@ import { useServerFn } from '@tanstack/react-start';
 import { useQueryClient } from '@tanstack/react-query';
 import { saveDepositWallets, type DepositWallet } from '@/lib/deposit.functions';
 import { Button } from '@/components/ui/button';
-import { Save, Wallet } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Save, Trash2, Wallet, CheckCircle2, AlertTriangle } from 'lucide-react';
 
-const blank = (i: number): DepositWallet => ({ code: `WLT-0${i + 1}`, label: '', network: 'BEP20', address: '', enabled: false });
+const MAX = 12;
+const NETWORKS: { value: DepositWallet['network']; label: string; hint: string }[] = [
+  { value: 'BEP20', label: 'BNB Smart Chain (BEP20)', hint: 'Alamat diawali 0x… (42 karakter)' },
+  { value: 'TRC20', label: 'TRON (TRC20)', hint: 'Alamat diawali T… (34 karakter)' },
+  { value: 'ERC20', label: 'Ethereum (ERC20)', hint: 'Alamat diawali 0x… (42 karakter)' },
+];
+const validAddr = (w: DepositWallet) => (w.network === 'TRC20' ? /^T[1-9A-HJ-NP-Za-km-z]{33}$/ : /^0x[0-9a-fA-F]{40}$/).test(w.address);
+const nextCode = (rows: DepositWallet[]) => { let i = rows.length + 1; while (rows.some(r => r.code === `WLT-${String(i).padStart(2, '0')}`)) i++; return `WLT-${String(i).padStart(2, '0')}`; };
+const blank = (rows: DepositWallet[]): DepositWallet => ({ code: nextCode(rows), label: '', network: 'BEP20', asset: 'USDT', address: '', enabled: false });
 
 export function AdminDepositWallets({ initial, onMessage }: { initial?: DepositWallet[] | undefined; onMessage: (m: string) => void }) {
   const save = useServerFn(saveDepositWallets);
   const qc = useQueryClient();
-  const [rows, setRows] = useState<DepositWallet[]>(() => Array.from({ length: 5 }, (_, i) => initial?.[i] ?? blank(i)));
+  const [rows, setRows] = useState<DepositWallet[]>(() => (initial?.length ? initial : [blank([])]));
   const [busy, setBusy] = useState(false);
   const set = (i: number, patch: Partial<DepositWallet>) => setRows(r => r.map((w, j) => (j === i ? { ...w, ...patch } : w)));
+  const active = rows.filter(w => w.enabled && validAddr(w)).length;
   return <section className="rounded-[20px] border border-chart-2/60 bg-card p-5">
-    <h3 className="flex items-center gap-2 font-display text-lg font-black"><Wallet size={18}/> Owner deposit wallets (5) · USDT / USDC</h3>
-    <p className="mt-1 text-xs text-muted-foreground">Each wallet has its own code. Member deposits are verified on the blockchain and credited automatically to the wallet code they paid into.</p>
-    <div className="mt-4 space-y-3">{rows.map((w, i) => <div key={i} className="grid gap-2 rounded-xl border border-border p-3 sm:grid-cols-[110px_1fr_90px_100px_2fr_auto] sm:items-center">
-      <input className="form-input font-mono uppercase" value={w.code} onChange={e => set(i, { code: e.target.value.toUpperCase() })} placeholder="Code" aria-label={`Wallet ${i + 1} code`}/>
-      <input className="form-input" value={w.label} onChange={e => set(i, { label: e.target.value })} placeholder="Label (optional)"/>
-      <select aria-label={`Wallet ${i + 1} coin`} className="form-input" value={w.asset ?? 'USDT'} onChange={e => set(i, { asset: e.target.value as 'USDT' | 'USDC' })}><option value="USDT">USDT</option><option value="USDC">USDC</option></select>
-      <select className="form-input" value={w.network} onChange={e => set(i, { network: e.target.value as DepositWallet['network'] })}><option value="BEP20">BEP20</option><option value="TRC20">TRC20</option><option value="ERC20">ERC20</option></select>
-      <input className="form-input font-mono text-xs" value={w.address} onChange={e => set(i, { address: e.target.value.trim() })} placeholder={w.network === 'TRC20' ? 'T…' : '0x…'}/>
-      <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={w.enabled} onChange={e => set(i, { enabled: e.target.checked })}/>{w.enabled ? 'ON' : 'OFF'}</label>
-    </div>)}</div>
-    <Button disabled={busy} className="mt-4 rounded-full" onClick={async () => { setBusy(true); try { await save({ data: { wallets: rows } }); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Deposit wallets saved.'); } catch (e) { onMessage(e instanceof Error ? e.message : 'Could not save wallets.'); } setBusy(false); }}><Save/> Save wallets</Button>
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div><h3 className="flex items-center gap-2 font-display text-lg font-black"><Wallet size={18}/> Wallet deposit Owner 1</h3>
+        <p className="mt-1 text-xs text-muted-foreground">Ikat wallet crypto sebagai pilihan deposit member jaringan Owner 1. Member jaringan Owner 2 hanya melihat wallet milik Owner 2.</p></div>
+      <span className="rounded-full border border-chart-2 px-3 py-1 text-xs font-bold text-chart-2">{active} aktif / {rows.length}</span>
+    </div>
+    <ol className="mt-3 grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-3"><li>1. Pilih koin & jaringan</li><li>2. Tempel alamat wallet Anda</li><li>3. Nyalakan saklar lalu Simpan</li></ol>
+    <div className="mt-4 space-y-3">{rows.map((w, i) => { const ok = !w.address || validAddr(w); const net = NETWORKS.find(n => n.value === w.network)!; return <div key={i} className="rounded-xl border border-border p-3">
+      <div className="flex items-center justify-between gap-2"><span className="font-mono text-sm font-bold text-chart-3">{w.code}</span>
+        <div className="flex items-center gap-3"><label className="flex items-center gap-2 text-xs font-bold"><Switch checked={w.enabled} onCheckedChange={enabled => set(i, { enabled })} aria-label={`Aktifkan ${w.code}`}/>{w.enabled ? 'AKTIF' : 'NONAKTIF'}</label>
+          {rows.length > 1 && <Button type="button" size="icon" variant="ghost" aria-label={`Hapus ${w.code}`} onClick={() => setRows(r => r.filter((_, j) => j !== i))}><Trash2 size={16}/></Button>}</div></div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <label className="text-xs text-muted-foreground">Nama wallet<input className="form-input mt-1" maxLength={40} value={w.label} onChange={e => set(i, { label: e.target.value })} placeholder="mis. BIXLINK Official"/></label>
+        <label className="text-xs text-muted-foreground">Koin<select className="form-input mt-1" value={w.asset ?? 'USDT'} onChange={e => set(i, { asset: e.target.value as 'USDT' | 'USDC' })}><option value="USDT">USDT (Tether)</option><option value="USDC">USDC (USD Coin)</option></select></label>
+        <label className="text-xs text-muted-foreground">Jaringan<select className="form-input mt-1" value={w.network} onChange={e => set(i, { network: e.target.value as DepositWallet['network'] })}>{NETWORKS.map(n => <option key={n.value} value={n.value}>{n.label}</option>)}</select></label>
+      </div>
+      <label className="mt-3 block text-xs text-muted-foreground">Alamat wallet penerima<input className="form-input mt-1 font-mono text-xs" maxLength={120} value={w.address} onChange={e => set(i, { address: e.target.value.trim() })} placeholder={w.network === 'TRC20' ? 'T…' : '0x…'}/></label>
+      <p className={`mt-1 flex items-center gap-1 text-[11px] ${ok ? 'text-muted-foreground' : 'text-destructive'}`}>{w.address && ok ? <CheckCircle2 size={12} className="text-chart-2"/> : !ok ? <AlertTriangle size={12}/> : null}{ok ? net.hint : `Alamat tidak cocok dengan jaringan ${w.network}.`}</p>
+    </div>; })}</div>
+    <div className="mt-4 flex flex-wrap gap-2">
+      <Button type="button" variant="outline" className="rounded-full" disabled={rows.length >= MAX} onClick={() => setRows(r => [...r, blank(r)])}><Plus/> Tambah wallet</Button>
+      <Button disabled={busy} className="rounded-full" onClick={async () => { setBusy(true); try { await save({ data: { wallets: rows } }); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Wallet deposit tersimpan.'); } catch (e) { onMessage(e instanceof Error ? e.message : 'Wallet gagal disimpan.'); } setBusy(false); }}><Save/> {busy ? 'Menyimpan…' : 'Simpan wallet'}</Button>
+    </div>
+    <p className="mt-3 text-[11px] text-muted-foreground">Deposit USDT/USDC di jaringan ini dicek otomatis di blockchain dan dikreditkan ke kode wallet yang dibayar member.</p>
   </section>;
 }
