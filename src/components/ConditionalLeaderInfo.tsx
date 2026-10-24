@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { usePublicConfig } from '@/lib/useMember';
 import { Crown, Sparkles, X, Copy, Users, Video, Megaphone, TrendingUp, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { LoanDialog } from '@/components/LoanDialog';
 import { checkLoanDevice, claimConditionalLeader, getConditionalLeaderAccess, getMyLeader } from '@/lib/bixlink.functions';
 import { deviceFingerprint, deviceLabel } from '@/lib/deviceFingerprint';
 
@@ -85,20 +86,22 @@ export function ConditionalLeaderInfo() {
       : <Button disabled={!!dev?.taken} className="mt-4 w-full rounded-full bg-chart-3 font-black text-background" onClick={() => { setAgree(false); setErr(''); setOpen(true); }}><Crown/> CLAIM & ACTIVATE LOAN PACKAGE</Button>}
     <p className="mt-3 text-[10px] text-muted-foreground">Conditional account is an internal locked credit, not withdrawable funds. Rewards and allocations are reviewed and approved by the owner. Terms apply.</p>
 
-    {open && <div className="modal-backdrop loan-solid-backdrop" onClick={() => setOpen(false)}><div role="dialog" aria-modal="true" aria-label="Pilih paket pinjaman" className="modal-panel loan-solid-panel" onClick={e => e.stopPropagation()}>
+    <LoanDialog open={open} onClose={() => setOpen(false)} label="Pilih paket pinjaman">
       <div className="loan-lux-line"/>
       <div className="flex items-start justify-between gap-2"><div><p className="eyebrow flex items-center gap-1 text-[10px] text-chart-3"><Crown size={11}/> AKUN PINJAMAN LEADER</p><h3 className="mt-0.5 font-display text-base font-black text-foreground">Pilih paket leader Anda</h3></div><Button variant="ghost" size="icon" className="size-8" aria-label="Tutup" onClick={() => setOpen(false)}><X size={16}/></Button></div>
-      <div role="radiogroup" className="mt-3 space-y-1.5">{PACKAGES.map(p => { const on = pick.id === p.id; return <button key={p.id} type="button" role="radio" aria-checked={on} onClick={() => setPick(p)} className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left transition ${on ? 'border-chart-3 bg-chart-3/10 shadow-[0_0_16px_color-mix(in_oklab,var(--color-chart-3)_35%,transparent)]' : 'border-border/70 bg-background/60'}`}>
-        <span className="min-w-0"><b className="flex items-center gap-1.5 text-[11px] tracking-[0.2em] text-foreground">{p.id}{p.usd === 1000 && <span className="rounded-full bg-chart-3 px-1.5 py-px text-[8px] tracking-normal text-background">REKOMENDASI</span>}</b><span className="numeric block text-[11px] text-foreground/75">Target omset: <b>${(p.usd * 5).toLocaleString()}</b> (5×)</span></span>
+      <div role="radiogroup" aria-label="Paket leader" className="mt-3 space-y-1.5">{PACKAGES.map(p => { const on = pick.id === p.id; return <Button variant="outline" key={p.id} type="button" role="radio" aria-checked={on} onClick={() => setPick(p)} className={`flex h-auto min-h-16 w-full items-center justify-between gap-2 whitespace-normal rounded-lg border px-3 py-2 text-left transition ${on ? 'border-chart-3 bg-chart-3/10' : 'border-border/70 bg-background'}`}>
+        <span className="min-w-0"><b className="flex flex-wrap items-center gap-1 text-[11px] text-foreground">{p.id}{p.usd === 1000 && <span className="rounded bg-chart-3 px-1.5 py-px text-[8px] text-background">REKOMENDASI</span>}</b><span className="numeric block text-[11px] text-foreground/75">Target omset: <b>${(p.usd * 5).toLocaleString()}</b> (5×)</span></span>
         <span className="flex items-center gap-2"><span className="numeric text-lg font-black text-chart-3">${p.usd.toLocaleString()}</span><span className={`grid size-5 shrink-0 place-items-center rounded-full border text-[10px] font-black ${on ? 'border-chart-3 bg-chart-3 text-background' : 'border-border'}`}>{on ? '✓' : ''}</span></span>
-      </button>; })}</div>
+      </Button>; })}</div>
       <ul className="mt-3 space-y-1 rounded-lg border border-border/70 bg-background/60 p-2.5 text-[11px] text-foreground/85"><li>• Staking aktif otomatis {DAYS} hari dari kredit pinjaman.</li><li>• Modal terkunci sampai omset 5× (${(pick.usd * 5).toLocaleString()}).</li><li>• Satu klaim per akun; Owner dapat meninjau atau mencabut.</li></ul>
       <label className="mt-2 flex items-center gap-2 rounded-lg border border-border/70 bg-background/60 p-2.5 text-xs text-foreground"><input type="checkbox" className="size-4 accent-[var(--color-chart-3)]" checked={agree} onChange={e => setAgree(e.target.checked)}/> Saya menyetujui syarat akun leader bersyarat.</label>
       {err && <p role="alert" className="mt-2 text-[11px] text-destructive">{err}</p>}
       <Button disabled={!agree || busy} className="mt-3 h-10 w-full rounded-full bg-chart-3 text-xs font-black tracking-wider text-background" onClick={submit}>{busy ? 'Mengaktifkan…' : `AKTIFKAN ${pick.id} · $${pick.usd.toLocaleString()}`}</Button>
-    </div></div>}
+    </LoanDialog>
 
-    {done && <div className="modal-backdrop loan-solid-backdrop" onClick={() => setDone(null)}><div role="dialog" aria-modal="true" aria-label="Akun leader aktif" className="modal-panel loan-solid-panel text-center" onClick={e => e.stopPropagation()}>
+    <LoanDialog open={!!done} onClose={() => setDone(null)} label="Akun leader aktif" centered>
+      {done && <>
+      <Button variant="ghost" size="icon" className="absolute right-3 top-3 size-8" aria-label="Tutup" onClick={() => setDone(null)}><X size={16}/></Button>
       <div className="loan-lux-line"/>
       <div className="mx-auto grid size-14 place-items-center rounded-full border border-chart-3 bg-chart-3/10 text-chart-3 shadow-[0_0_28px_color-mix(in_oklab,var(--color-chart-3)_55%,transparent)]"><Crown size={26}/></div>
       <p className="eyebrow mt-3 text-[10px] text-chart-3"><Sparkles size={10} className="inline"/> LEADER GLOBAL RESMI BIXLINK</p>
@@ -106,9 +109,10 @@ export function ConditionalLeaderInfo() {
       <p className="mt-2 text-[11px] leading-relaxed text-foreground/75">Terima kasih atas dedikasi Anda. Perusahaan mempercayakan modal kerja bersyarat ini sebagai penghargaan atas komitmen Anda membangun BIXLINK.</p>
       <div className="mt-3 grid grid-cols-3 gap-1.5 text-[10px] text-foreground/70"><div className="rounded-lg border border-chart-3/30 bg-background/60 p-2">Paket<b className="block truncate text-xs text-foreground">{done.package}</b></div><div className="rounded-lg border border-chart-3/30 bg-background/60 p-2">Nilai<b className="numeric block text-xs text-chart-3">${Number(done.value_usd).toLocaleString()}</b></div><div className="rounded-lg border border-chart-3/30 bg-background/60 p-2">Target 5×<b className="numeric block text-xs text-foreground">${Number(done.target_usd).toLocaleString()}</b></div></div>
       <div className="mt-4 grid grid-cols-2 gap-2"><Button variant="outline" className="h-9 rounded-full text-xs" asChild><Link to="/stake">Lihat staking</Link></Button><Button className="h-9 rounded-full bg-chart-3 text-xs font-bold text-background" onClick={() => { setDone(null); setGuide(true); }}>Panduan leader</Button></div>
-    </div></div>}
+      </>}
+    </LoanDialog>
 
-    {guide && <div className="modal-backdrop loan-solid-backdrop" onClick={() => setGuide(false)}><div role="dialog" aria-modal="true" aria-label="Panduan leader" className="modal-panel loan-solid-panel" onClick={e => e.stopPropagation()}>
+    <LoanDialog open={guide} onClose={() => setGuide(false)} label="Panduan leader">
       <div className="loan-lux-line"/>
       <div className="flex items-center justify-between"><h3 className="font-display text-base font-black text-foreground">Panduan pertumbuhan leader</h3><Button variant="ghost" size="icon" className="size-8" aria-label="Tutup" onClick={() => setGuide(false)}><X size={16}/></Button></div>
       <ol className="mt-3 space-y-2 text-[11px] text-foreground/75">
@@ -119,6 +123,6 @@ export function ConditionalLeaderInfo() {
       </ol>
       <div className="mt-3 rounded-lg border border-chart-3/40 bg-chart-3/10 p-2.5 text-[11px]"><b className="flex items-center gap-1 text-chart-3"><TrendingUp size={13}/> Potensi keuntungan</b><ul className="mt-1.5 space-y-0.5 text-foreground/75"><li>• Proyeksi hasil staking harian paket leader</li><li>• Bonus jaringan dari staking tim</li><li>• Distribusi BIXCOIN 5–10% pada staking 70:30</li><li>• Hadiah khusus setelah omset 5×</li><li>• Alokasi BIX saat omset tim di atas $100.000</li></ul><p className="mt-1.5 text-[9px] text-muted-foreground">Proyeksi tidak dijamin. Hadiah ditinjau Owner.</p></div>
       <div className="mt-3 grid grid-cols-2 gap-2"><Button variant="outline" className="h-9 rounded-full text-xs" asChild><Link to="/marketing">Marketing</Link></Button><Button className="h-9 rounded-full bg-chart-3 text-xs font-bold text-background" asChild><Link to="/network">Jaringan saya</Link></Button></div>
-    </div></div>}
+    </LoanDialog>
   </section>;
 }
