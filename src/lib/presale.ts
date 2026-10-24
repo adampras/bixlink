@@ -4,7 +4,7 @@ export type PresalePackage = { usd: number; bix: number; releaseDays: number };
 export type PresaleConfig = { enabled: boolean; sponsorPct: number; poolCap: number; packages: PresalePackage[]; strategies?: StrategySettings; sovereign?: SovereignConfig; stages?: { price: number }[]; activeStage?: number };
 export type SovereignConfig = { enabled: boolean; usd: number; bix: number; releaseDays: number; slots: number };
 
-export function withPresaleStages(config: PresaleConfig): PresaleConfig {
+export function withPresaleStages(config: PresaleConfig): PresaleConfig & { stages: { price: number }[]; activeStage: number } {
   const activeStage = config.activeStage ?? 0;
   const stages = [0.5, 0.65, 0.8].map((price, i) => ({ price: config.stages?.[i]?.price ?? (i === activeStage ? presalePrice(config.packages) : price) }));
   return { ...config, activeStage, stages };
