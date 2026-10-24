@@ -122,6 +122,7 @@
 - [x] Fix visible landing animation and replace three effects with wallet-only financial icon motion; verified moving canvas and three enabled wallet effects.
 - [x] Add wallet quick actions, honest staking projection chart, pool-based presale availability, and scoped community simulation.
 - [x] Add owner-editable eight-language marketing materials with member PDF and dated bilingual silent video downloads; verify exports and owner save/readback.
+- [x] Repair presale stage persistence; verified Owner 1 price save/reload and open/close, restored original price and closed state without resetting orders.
 - [ ] Consolidate duplicated owner menu controls without changing delegated permissions.
 - [ ] Polish shared phone layouts and verify all public/member areas and owner navigation.
 - [x] Marketplace: fox emblem header, 2x2 glow boxes, Sell/Buy Now buttons with order checkout via seller link.

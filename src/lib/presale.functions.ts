@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import type { PresaleConfig } from './presale';
+import { presaleSettingsSchema } from './presale-settings';
 
 export type PresaleOrder = { id: string; package_usd: number; bix_amount: number; release_days: number; status: string; created_at: string; strategy?: string; dividend_daily_usd?: number; bonus_bix?: number; serial?: number };
 export type PresaleStatus = { config: PresaleConfig; poolUsed: number; sovereignClaimed?: number; serverNow: string; balanceUsd: number; dividendEarned?: number; orders: PresaleOrder[]; sponsorRewards: { id: string; bix: number; release_days: number; status: string; created_at: string }[] };
@@ -21,10 +22,8 @@ export const buyPresale = createServerFn({ method: 'POST' }).middleware([require
     return r as unknown as { id: string; bix: number; serial: number; dailyUsd: number };
   });
 
-const pkg = z.object({ usd: z.number().positive(), bix: z.number().positive(), releaseDays: z.number().int().min(1) });
-const strategies = z.object({ enabled: z.boolean(), hybridBixPct: z.number().min(10).max(90), hybridDailyPct: z.number().min(0).max(1), dividendDailyPct: z.number().min(0).max(1), founderBonusApy: z.number().min(0).max(100) });
 export const savePresale = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ enabled: z.boolean(), sponsorPct: z.number().min(0).max(10), poolCap: z.number().min(0).max(3_150_000), packages: z.array(pkg).min(1).max(14), strategies: strategies.optional(), stages: z.array(z.object({ price: z.number().positive() })).max(3).optional(), activeStage: z.number().int().min(0).max(2).optional(), sovereign: z.object({ enabled: z.boolean(), usd: z.number().positive(), bix: z.number().positive(), releaseDays: z.number().int().min(1), slots: z.number().int().min(1).max(21) }).optional() }).parse(d))
+  .inputValidator((d) => presaleSettingsSchema.parse(d))
   .handler(async ({ context, data }) => {
     const { data: r, error } = await context.supabase.rpc('bix_presale_save', { p_config: data });
     if (error) throw new Error(error.message);
