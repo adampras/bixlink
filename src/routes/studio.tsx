@@ -213,7 +213,7 @@ function BannerMaker() {
       )}
       <canvas ref={ref} className="studio-canvas" />
       <div className="studio-sticky flex gap-2">
-        {step > 1 && <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1">Kembali</Button>}
+        {step > 1 && <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1">Back</Button>}
         {step < 3 ? <Button onClick={() => setStep(step + 1)} className="flex-1">Lanjutkan</Button>
           : <Button onClick={download} className="flex-1">Unduh HD PNG</Button>}
       </div>
