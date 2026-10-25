@@ -117,6 +117,7 @@ export type Database = {
           reviewed_at: string | null
           scope: string
           status: string
+          support_kind: string
           turnover_multiple: number
           user_id: string
           virtual_usd: number
@@ -127,6 +128,7 @@ export type Database = {
           reviewed_at?: string | null
           scope?: string
           status?: string
+          support_kind?: string
           turnover_multiple?: number
           user_id: string
           virtual_usd?: number
@@ -137,6 +139,7 @@ export type Database = {
           reviewed_at?: string | null
           scope?: string
           status?: string
+          support_kind?: string
           turnover_multiple?: number
           user_id?: string
           virtual_usd?: number

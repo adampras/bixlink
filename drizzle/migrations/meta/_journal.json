@@ -582,6 +582,13 @@
       "when": 1792831234247,
       "tag": "0082_reviewer_own_deposit_wallet",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1792918040607,
+      "tag": "0083_leader_escrow_kinds",
+      "breakpoints": true
     }
   ]
 }
