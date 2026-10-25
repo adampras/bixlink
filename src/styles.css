@@ -3260,3 +3260,21 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .lux-horizon em { flex:1; height:1px; background: linear-gradient(90deg, color-mix(in oklab, var(--chart-3) 20%, transparent), var(--chart-3)); position:relative; }
 .lux-horizon em::after { content:""; position:absolute; right:0; top:-2px; width:5px; height:5px; border-radius:50%; background: var(--chart-3); box-shadow:0 0 10px var(--chart-3); }
 .duration-stake { background: linear-gradient(135deg, color-mix(in oklab, var(--chart-3) 85%, var(--foreground)), var(--chart-3)) !important; color: var(--background) !important; }
+
+/* Admin color-coded categories */
+:root { --cat-gold: oklch(0.83 0.16 85); --cat-cyan: oklch(0.8 0.13 210); --cat-emerald: oklch(0.78 0.16 155); --cat-violet: oklch(0.72 0.19 300); --cat-rose: oklch(0.72 0.19 15); --cat-slate: oklch(0.78 0.03 260); }
+.admin-cat--gold { --cat: var(--cat-gold); } .admin-cat--cyan { --cat: var(--cat-cyan); } .admin-cat--emerald { --cat: var(--cat-emerald); }
+.admin-cat--violet { --cat: var(--cat-violet); } .admin-cat--rose { --cat: var(--cat-rose); } .admin-cat--slate { --cat: var(--cat-slate); }
+.admin-cat { border: 1px solid color-mix(in oklab, var(--cat) 55%, transparent); border-left: 5px solid var(--cat); border-radius: 14px; padding: .75rem; background: color-mix(in oklab, var(--cat) 9%, var(--card)); }
+.admin-cat header { display: flex; flex-direction: column; margin-bottom: .55rem; }
+.admin-cat header b { color: var(--cat); font-size: .82rem; letter-spacing: .04em; text-transform: uppercase; font-weight: 900; }
+.admin-cat header small { color: var(--muted-foreground); font-size: .7rem; }
+.admin-cat-btn { min-height: 2.4rem; border-radius: 10px; padding: .35rem .5rem; font-size: .76rem; font-weight: 700; color: var(--foreground); border: 1px solid color-mix(in oklab, var(--cat) 35%, transparent); background: color-mix(in oklab, var(--cat) 6%, transparent); text-align: left; line-height: 1.2; }
+.admin-cat-btn:hover { background: color-mix(in oklab, var(--cat) 18%, transparent); }
+.admin-cat-btn[aria-pressed="true"] { background: var(--cat); color: oklch(0.16 0.02 260); border-color: var(--cat); }
+.admin-fold { border: 1px solid color-mix(in oklab, var(--cat) 45%, transparent); border-left: 5px solid var(--cat); border-radius: 14px; background: var(--card); overflow: hidden; }
+.admin-fold-head { display: flex; width: 100%; align-items: center; gap: .5rem; padding: .8rem 1rem; text-align: left; color: var(--foreground); background: color-mix(in oklab, var(--cat) 10%, transparent); }
+.admin-fold-head b { color: var(--cat); font-size: .85rem; font-weight: 900; }
+.admin-fold-dot { width: .6rem; height: .6rem; border-radius: 999px; background: var(--cat); flex-shrink: 0; }
+.admin-fold-badge { border-radius: 999px; padding: .05rem .5rem; font-size: .7rem; font-weight: 800; background: var(--cat); color: oklch(0.16 0.02 260); }
+.admin-fold-body { padding: 0 1rem 1rem; }
