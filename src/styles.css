@@ -3278,3 +3278,6 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .admin-fold-dot { width: .6rem; height: .6rem; border-radius: 999px; background: var(--cat); flex-shrink: 0; }
 .admin-fold-badge { border-radius: 999px; padding: .05rem .5rem; font-size: .7rem; font-weight: 800; background: var(--cat); color: oklch(0.16 0.02 260); }
 .admin-fold-body { padding: 0 1rem 1rem; }
+.admin-cat-chip { min-height: 2.6rem; border-radius: 10px; padding: .35rem .5rem; font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .03em; color: var(--cat); border: 1px solid color-mix(in oklab, var(--cat) 55%, transparent); border-left: 4px solid var(--cat); background: color-mix(in oklab, var(--cat) 8%, var(--card)); text-align: left; line-height: 1.2; }
+.admin-cat-chip[aria-pressed="true"] { background: var(--cat); color: oklch(0.16 0.02 260); }
+#admin-content { scroll-margin-top: 80px; }
