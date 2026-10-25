@@ -32,7 +32,15 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
       <div className="duration-options" role="group" aria-label={`${pkg.id} duration`}>
         {PACKAGE_DURATIONS.map(d => <Button key={d} variant="outline" aria-pressed={days === d} className="duration-option" onClick={() => setDays(d)}>{d}D</Button>)}
       </div>
-      <dl className="duration-yield"><div><dt>Daily projection</dt><dd className="numeric">{number(dailyRate(apy), { maximumFractionDigits: 3 })}% · ${number(perDay, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</dd></div><div><dt>Total · {days} days</dt><dd className="numeric">${number(perDay * days, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</dd></div></dl>
+      <dl className="duration-yield"><div><dt>Daily projection</dt><dd className="numeric">{number(dailyRate(apy), { maximumFractionDigits: 3 })}% · ${number(perDay, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</dd></div><div><dt>Profit · {days} days</dt><dd className="numeric">${number(perDay * days, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</dd></div></dl>
+      <div className="lux-ledger" aria-label="Projected settlement">
+        <div><span>Principal</span><b className="numeric">${number(price, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</b></div>
+        <i aria-hidden>+</i>
+        <div><span>Profit</span><b className="numeric">${number(perDay * days, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</b></div>
+        <i aria-hidden>=</i>
+        <div className="lux-ledger-total"><span>Total received</span><b className="numeric">${number(price + perDay * days, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</b></div>
+      </div>
+      <div className="lux-horizon" aria-hidden><span>Day 0</span><em/><span>Day {days} · principal return</span></div>
       {(() => { if (card) return <Button variant="ghost" className="pass-mini" onClick={() => setPopup(true)} aria-label={`Preview ${card.name} NFT`}><img src={card.url} alt={`${card.name} member pass`} loading="lazy"/><span className="text-xs"><b className="block text-chart-3">{card.name}</b><span className="text-muted-foreground">Member Pass NFT</span></span></Button>; const sig = nftSignature(price, days); return <Button variant="ghost" className="nft-mini" style={{ '--nft-hue': `${sig.hue}deg`, '--nft-boost': String(0.9 + sig.power * 0.06) } as CSSProperties} onClick={() => setPopup(true)} aria-label="Preview NFT certificate"><img src={NFT_ART[tier]} alt="" loading="lazy"/><span className="text-xs"><b className="block text-chart-3">{NFT_NAME[tier]}</b><span className="text-muted-foreground">In-app certificate</span></span></Button>; })()}
       <div className="duration-package-action"><Button className="duration-stake" onClick={() => { setPopup(false); onStake({ ...pkg, lock_days: days, apy }); }}>Stake now <ArrowUpRight size={18}/></Button><p className="duration-risk">{days}D lock · APY snapshot · Projection, not guaranteed.</p></div>
     </div>
