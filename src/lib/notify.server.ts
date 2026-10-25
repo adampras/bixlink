@@ -43,6 +43,7 @@ const money = (n: unknown) => `$${Number(n ?? 0).toLocaleString('en-US', { minim
 
 // Scans recent wallet activity and sends each event once (idempotent via bix_notify_log).
 export async function dispatchWalletAlerts(admin: any) {
+  try { const { dispatchGrowthAlert } = await import('./growth.server'); await dispatchGrowthAlert(admin); } catch (e) { console.error('growth-alert', e); }
   const t = await readToggles(admin);
   if (!t.telegram && !t.whatsapp) return 0;
   const since = new Date(Date.now() - 30 * 60_000).toISOString();

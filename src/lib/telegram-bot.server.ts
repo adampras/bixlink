@@ -1,5 +1,5 @@
 // Server-only: two-way Telegram Command Center for the owner chat (TELEGRAM_CHAT_ID only).
-const esc = (s: unknown) => String(s ?? '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]!));
+const esc = (s: unknown) => String(s ?? '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] ?? c));
 const money = (n: unknown) => `$${Number(n ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export async function webhookSecret(token: string) {
@@ -119,7 +119,7 @@ async function loanQuota(admin: any, q: string) {
   return `<b>🎟️ KUOTA LOAN · ${esc(rc.code)}</b>\n${await loanQuotaText(admin, rc.user_id)}`;
 }
 
-const HELP = ['<b>🦊 BIXLINK Command Center</b>', '/ringkasan — laporan lengkap', '/pending — antrean deposit & withdraw (dengan tombol)', '/member KODE — detail member', '/saklar_loan on|off — akun pinjaman', '/saklar_daftar on|off — pendaftaran member', '/loan_kuota KODE — sisa kuota sponsor loan'].join('\n');
+const HELP = ['<b>🦊 BIXLINK Command Center</b>', '/ringkasan — laporan lengkap', '/pending — antrean deposit & withdraw (dengan tombol)', '/member KODE — detail member', '/saklar_loan on|off — akun pinjaman', '/saklar_daftar on|off — pendaftaran member', '/loan_kuota KODE — sisa kuota sponsor loan', '/growth_status — scoped queue & event status', '/flash_event on 24h|off — community event (Owner 2 excluded)', '/freeze_withdraw on|off — pause withdrawal requests (Owner 2 excluded)'].join('\n');
 
 export async function handleUpdate(admin: any, update: any) {
   const owner = String(process.env['TELEGRAM_CHAT_ID'] ?? '');
@@ -130,7 +130,8 @@ export async function handleUpdate(admin: any, update: any) {
     const m = /^(ap|rj):([0-9a-f-]{36})$/.exec(String(cq.data ?? ''));
     if (!m) return;
     const status = m[1] === 'ap' ? 'approved' : 'rejected';
-    const { data: changed } = await admin.from('wallet_transactions').update({ status, reviewed_at: new Date().toISOString() }).eq('id', m[2]).eq('status', 'pending').in('type', ['deposit', 'withdraw']).select('id,type,amount_usd').maybeSingle();
+    const { data: changed, error: reviewError } = await admin.from('wallet_transactions').update({ status, reviewed_at: new Date().toISOString() }).eq('id', m[2]).eq('status', 'pending').in('type', ['deposit', 'withdraw']).select('id,type,amount_usd').maybeSingle();
+    if (reviewError) { await tg('answerCallbackQuery', { callback_query_id: cq.id, text: 'Review blocked. Check Growth & Safety withdrawal pause.', show_alert: true }); return; }
     if (changed) await admin.from('deposit_intents').update({ status: 'reviewed' }).eq('claim_tx_id', m[2]).eq('status', 'pending');
     const msg = changed ? `${status === 'approved' ? '✅ Disetujui' : '❌ Ditolak'} · ${changed.type} ${money(changed.amount_usd)}` : 'Sudah direview sebelumnya.';
     await tg('answerCallbackQuery', { callback_query_id: cq.id, text: msg });
@@ -143,6 +144,11 @@ export async function handleUpdate(admin: any, update: any) {
   if (!owner || String(msg.chat.id) !== owner) return; // ignore strangers silently
   const [cmdRaw, ...rest] = msg.text.trim().split(/\s+/);
   const cmd = cmdRaw.toLowerCase().replace(/@.*$/, ''), arg = rest.join(' ');
+  if (['/growth_status','/flash_event','/freeze_withdraw'].includes(cmd)) {
+    const { growthCommand } = await import('./growth.server');
+    try { const text = await growthCommand(admin, cmd, arg); if (text) return reply(msg.chat.id, esc(text)); }
+    catch { return reply(msg.chat.id, 'Growth command unavailable. Please retry.'); }
+  }
   if (cmd === '/ringkasan') return reply(msg.chat.id, await summary(admin));
   if (cmd === '/pending') return pending(admin, msg.chat.id);
   if (cmd === '/member') return reply(msg.chat.id, await member(admin, arg));
