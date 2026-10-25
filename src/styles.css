@@ -3184,3 +3184,24 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .loan-dialog-content .loan-lux-line { position:absolute; inset:0 0 auto; height:4px; border-radius:14px 14px 0 0; background:linear-gradient(90deg,var(--loan-violet),var(--loan-gold),var(--loan-violet)); background-size:200% 100%; animation:loanLux 4s linear infinite; }
 @keyframes loanLux { to { background-position:200% 0; } }
 .loan-dialog-content [role=radio][aria-checked=true] { box-shadow:0 0 0 1px var(--loan-gold),0 6px 20px oklch(.62 .14 75 / 25%); }
+
+/* Cyber landing */
+.cyber-hud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin:1.1rem auto 0;max-width:44rem;width:100%;border:1px solid color-mix(in oklab,var(--chart-3) 35%,transparent);border-radius:.6rem;overflow:hidden;background:color-mix(in oklab,var(--chart-3) 25%,transparent);backdrop-filter:blur(10px)}
+.cyber-hud-cell{background:color-mix(in oklab,var(--background) 82%,transparent);padding:.5rem .4rem;text-align:center;min-width:0}
+.cyber-hud-cell span{display:block;font-size:.55rem;letter-spacing:.18em;color:var(--muted-foreground)}
+.cyber-hud-cell b{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--foreground);white-space:nowrap}
+.cyber-hud-cell i{width:.4rem;height:.4rem;border-radius:9999px;background:var(--chart-2);box-shadow:0 0 8px var(--chart-2);animation:cyberPulse 1.6s infinite}
+@keyframes cyberPulse{50%{opacity:.3}}
+@media (max-width:520px){.cyber-hud{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cyber-ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem;margin-top:1rem}
+.cyber-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;border-radius:.4rem;font-size:.75rem;font-weight:800;letter-spacing:.14em;border:1px solid color-mix(in oklab,var(--chart-3) 55%,transparent);color:var(--foreground);background:color-mix(in oklab,var(--background) 60%,transparent);transition:transform .2s,box-shadow .2s}
+.cyber-btn:hover{transform:translateY(-1px);box-shadow:0 0 18px color-mix(in oklab,var(--chart-3) 40%,transparent)}
+.cyber-btn--primary{background:linear-gradient(135deg,var(--chart-3),color-mix(in oklab,var(--chart-3) 60%,var(--primary)));color:var(--background);border-color:transparent}
+.cyber-bento{display:grid;gap:.75rem;grid-template-columns:repeat(1,minmax(0,1fr))}
+@media (min-width:768px){.cyber-bento{grid-template-columns:repeat(3,minmax(0,1fr))}.cyber-panel.is-wide{grid-column:span 2}}
+.cyber-panel{position:relative;padding:1.1rem;border-radius:.5rem;background:linear-gradient(160deg,color-mix(in oklab,var(--card) 92%,transparent),color-mix(in oklab,var(--background) 90%,transparent));border:1px solid color-mix(in oklab,var(--primary) 22%,transparent);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));overflow:hidden}
+.cyber-panel::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,var(--chart-3),var(--primary),transparent);opacity:.8}
+.cyber-panel h3{margin-top:.7rem;font-weight:800;letter-spacing:.04em}
+.cyber-panel p{margin-top:.3rem;font-size:.8rem;line-height:1.5;color:var(--muted-foreground)}
+.cyber-panel-icon{color:var(--chart-3)}
+.cyber-tag{font-size:.55rem;letter-spacing:.16em;padding:.2rem .45rem;border-radius:.25rem;border:1px solid color-mix(in oklab,var(--primary) 40%,transparent);color:var(--primary)}
