@@ -75,8 +75,8 @@ export const createDepositIntent = createServerFn({ method: 'POST' }).middleware
     await supabaseAdmin.from('deposit_intents').update({ status: 'expired' }).eq('status', 'pending').lt('expires_at', now);
     await supabaseAdmin.from('deposit_intents').update({ status: 'cancelled' }).eq('status', 'pending').eq('user_id', context.userId).is('claim_tx_id', null);
     for (let i = 0; i < 8; i++) {
-      const cents = 1 + Math.floor(Math.random() * 9998); // 0.0001–0.9999
-      const exact = Number((data.amount + cents / 10000).toFixed(4));
+      const unique = 1 + Math.floor(Math.random() * 999); // 3 unique digits: 0.001–0.999
+      const exact = Number((data.amount + unique / 1000).toFixed(3));
       const { data: intent, error } = await supabaseAdmin.from('deposit_intents').insert({ user_id: context.userId, wallet_code: wallet.code, network: wallet.network, address: wallet.address, amount_exact: exact }).select('id, amount_exact, expires_at').single();
       if (!error && intent) return { id: intent.id, amount: Number(intent.amount_exact), expiresAt: intent.expires_at, walletCode: wallet.code, network: wallet.network, asset: wallet.asset ?? 'USDT', address: wallet.address };
     }
