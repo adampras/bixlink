@@ -5,9 +5,12 @@ import { AuricSkeleton } from "./components/TechSuite";
 
 // After a new deploy, old page chunks disappear; reload once to fetch fresh ones.
 if (typeof window !== "undefined") {
+  // Time-based guard: allow a fresh reload if the last one was >15s ago,
+  // so a stale flag can never leave the page stuck on a blank screen.
   const reloadOnce = () => {
-    if (sessionStorage.getItem("bix-chunk-reload")) return;
-    sessionStorage.setItem("bix-chunk-reload", "1");
+    const last = Number(sessionStorage.getItem("bix-chunk-reload") || 0);
+    if (Date.now() - last < 15000) return;
+    sessionStorage.setItem("bix-chunk-reload", String(Date.now()));
     window.location.reload();
   };
   window.addEventListener("vite:preloadError", (e) => { e.preventDefault(); reloadOnce(); });
@@ -36,8 +39,10 @@ export const getRouter = () => {
     defaultPreloadDelay: 60,
     defaultPreloadStaleTime: 0,
     defaultOnCatch: (err: unknown) => { const error = err as Error;
-      if (typeof window !== "undefined" && /dynamically imported module|Importing a module script failed/.test(error?.message ?? "") && !sessionStorage.getItem("bix-chunk-reload")) {
-        sessionStorage.setItem("bix-chunk-reload", "1");
+      if (typeof window !== "undefined" && /dynamically imported module|Importing a module script failed/.test(error?.message ?? "")) {
+        const last = Number(sessionStorage.getItem("bix-chunk-reload") || 0);
+        if (Date.now() - last < 15000) return;
+        sessionStorage.setItem("bix-chunk-reload", String(Date.now()));
         window.location.reload();
       }
     },
