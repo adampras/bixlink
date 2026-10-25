@@ -533,8 +533,27 @@ export const claimConditionalLeader = createServerFn({ method: 'POST' }).middlew
   .handler(async ({ data, context }) => {
     const { data: r, error } = await context.supabase.rpc('bix_claim_conditional_leader', { p_package: data.packageId, p_days: data.days });
     if (error) throw new Error(error.message);
-    return r as unknown as { stake_id: string; package: string; value_usd: number; target_usd: number; days: number };
+    const res = r as unknown as { stake_id: string; package: string; value_usd: number; target_usd: number; days: number; sponsor_id?: string | null };
+    try {
+      const { supabaseAdmin: admin } = await import('@/integrations/supabase/client.server');
+      const { sendAll, readToggles } = await import('@/lib/notify.server');
+      const { loanQuotaText } = await import('@/lib/telegram-bot.server');
+      const [{ data: me }, { data: sp }] = await Promise.all([
+        admin.from('referral_codes').select('code').eq('user_id', context.userId).maybeSingle(),
+        res.sponsor_id ? admin.from('referral_codes').select('code').eq('user_id', res.sponsor_id).maybeSingle() : Promise.resolve({ data: null }),
+      ]);
+      const fmt = (n: number) => `$${Number(n).toLocaleString('en-US')}`;
+      const html = [`<b>📢 KLAIM AKUN PINJAMAN (LOAN)</b>`, `👤 Member: ${me?.code ?? '-'}`, `📦 Paket: ${fmt(res.value_usd)} (Target 5×: ${fmt(res.target_usd)})`, `🤝 Sponsor: ${sp?.code ?? '-'}`, res.sponsor_id ? await loanQuotaText(admin, res.sponsor_id) : ''].filter(Boolean).join('\n');
+      await sendAll(html, await readToggles(admin));
+    } catch (e) { console.error('loan notify', e); }
+    return res;
   });
+
+export const getMyLoanQuota = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data: rc } = await context.supabase.from('referral_codes').select('referred_by').eq('user_id', context.userId).maybeSingle();
+  const { data: mine } = await context.supabase.rpc('bix_loan_quota', { p_sponsor: context.userId });
+  return { mine: mine as unknown as { sponsor_is_loan: boolean; quota: { price: number; max: number; used: number }[] }, sponsorId: rc?.referred_by ?? null };
+});
 
 export const applyLeader = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { error } = await context.supabase.rpc('apply_bix_leader');
