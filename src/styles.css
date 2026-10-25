@@ -3216,3 +3216,21 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .landing-hero-compact.hero-3d .cyber-hud-cell b { font-size: .6rem; }
 .landing-hero-compact.hero-3d .cyber-ctas { margin-top: .6rem; }
 .landing-hero-compact.hero-3d .cyber-ctas .cyber-btn { padding-block: .55rem; font-size: .7rem; }
+
+/* Quantum Vault 3D stake layout */
+.qv-head { display: flex; justify-content: space-between; align-items: baseline; font-size: .7rem; letter-spacing: .18em; color: var(--chart-3); }
+.qv-head b { letter-spacing: 0; font-size: .95rem; color: var(--foreground); }
+.qv-stage { position: relative; height: 170px; margin-top: 1rem; perspective: 1200px; transform-style: preserve-3d; display: flex; justify-content: center; overflow: hidden; }
+.qv-slab { position: absolute; top: 15px; width: 46%; max-width: 220px; height: 140px; border-radius: 14px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: .2rem;
+  background: linear-gradient(145deg, color-mix(in oklab, var(--card) 85%, var(--foreground) 15%), var(--background)); border: 1px solid color-mix(in oklab, var(--chart-3) 45%, transparent);
+  box-shadow: 0 18px 40px -16px color-mix(in oklab, var(--primary) 60%, transparent), inset 0 1px 0 color-mix(in oklab, var(--foreground) 20%, transparent);
+  transition: transform .5s cubic-bezier(.2,.8,.2,1), opacity .5s; will-change: transform; backface-visibility: hidden; }
+.qv-slab[aria-current="true"] { border-color: var(--chart-3); box-shadow: 0 0 28px -4px color-mix(in oklab, var(--chart-3) 55%, transparent), 0 18px 40px -16px var(--primary); }
+.qv-slab small { font-size: .6rem; letter-spacing: .2em; color: var(--muted-foreground); }
+.qv-slab b { font-size: 1.6rem; font-weight: 900; color: var(--chart-3); }
+.qv-slab em { font-style: normal; font-size: .72rem; color: var(--primary); }
+.qv-nav { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: .5rem; font-size: .8rem; }
+.qv-tilt { perspective: 1000px; }
+.qv-tilt-inner { transition: transform .15s ease-out; transform-style: preserve-3d; will-change: transform; }
+.qv-note { margin-top: .75rem; text-align: center; font-size: .65rem; color: var(--muted-foreground); }
+@media (prefers-reduced-motion: reduce) { .qv-slab, .qv-tilt-inner { transition: none; } }
