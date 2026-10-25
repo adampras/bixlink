@@ -36,7 +36,10 @@ export const getGrowthAdmin = createServerFn({ method: 'GET' }).middleware([requ
   await verifyOwner(context);
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
   const { growthReport } = await import('./growth.server');
-  return growthReport(supabaseAdmin);
+  const report = await growthReport(supabaseAdmin);
+  const { data: scope, error } = await context.supabase.rpc('bix_growth_scope_report');
+  if (error) throw new Error('Network exclusion could not be verified.');
+  return { ...report, scope: scope as unknown as { owner2_excluded: boolean; owner1_excluded: boolean; excluded_members: number } };
 });
 export const saveGrowth = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).inputValidator((input: unknown) => growthSchema.parse(input)).handler(async ({ context, data }) => {
   await verifyOwner(context);
