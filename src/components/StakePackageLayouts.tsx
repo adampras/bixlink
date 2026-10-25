@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type PointerEvent } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DurationPackageCard } from '@/components/DurationPackageCard';
@@ -13,7 +13,7 @@ function QuantumVault({ packages, onStake }: { packages: Package[]; onStake: (p:
   const [active, setActive] = useState(0);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const i = Math.min(active, packages.length - 1);
-  const move = (e: React.PointerEvent<HTMLDivElement>) => {
+  const move = (e: PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
     setTilt({ x: ((e.clientY - r.top) / r.height - 0.5) * -14, y: ((e.clientX - r.left) / r.width - 0.5) * 18 });
   };
