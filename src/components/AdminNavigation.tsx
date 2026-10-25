@@ -7,21 +7,33 @@ export type AdminGroup = { title: string; tone: 'gold' | 'cyan' | 'emerald' | 'v
 /** Color-coded category columns; each column lists its own menus so nothing is hidden behind a second click. */
 export function AdminNavigation({ groups, tab, onSelect }: { groups: AdminGroup[]; tab: string; onSelect: (tab: string) => void }) {
   const [query, setQuery] = useState('');
+  const current = groups.find(g => g.tabs.some(([n]) => n === tab)) ?? groups[0];
+  const [openCat, setOpenCat] = useState(current?.title ?? '');
   const term = query.trim().toLowerCase();
-  const visible = groups.map(g => ({ ...g, tabs: term ? g.tabs.filter(([n, k]) => `${n} ${k} ${g.title}`.toLowerCase().includes(term)) : g.tabs })).filter(g => g.tabs.length);
+  const visible = term
+    ? groups.map(g => ({ ...g, tabs: g.tabs.filter(([n, k]) => `${n} ${k} ${g.title}`.toLowerCase().includes(term)) })).filter(g => g.tabs.length)
+    : groups.filter(g => g.title === openCat);
+  const pick = (name: string) => {
+    onSelect(name); setQuery('');
+    requestAnimationFrame(() => document.getElementById('admin-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  };
   return <nav aria-label="Owner sections" className="admin-navigation mt-6 min-w-0 border-b border-border pb-5">
     <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg border border-border bg-card px-3">
       <Search size={16} className="shrink-0 text-primary"/>
       <input aria-label="Cari menu admin" className="min-w-0 bg-transparent py-3 text-sm outline-none" placeholder="Cari menu admin…" value={query} onChange={e => setQuery(e.target.value)}/>
       {query ? <Button size="icon" variant="ghost" aria-label="Hapus pencarian" className="size-8" onClick={() => setQuery('')}><X size={14}/></Button> : <span className="size-8"/>}
     </div>
-    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {!term && <div role="group" aria-label="Kategori admin" className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-6">
+      {groups.map(g => <button key={g.title} type="button" aria-pressed={openCat === g.title} className={`admin-cat-chip admin-cat--${g.tone}`} onClick={() => setOpenCat(g.title)}>{g.title}</button>)}
+    </div>}
+    <div className="mt-3 grid gap-3">
       {visible.map(g => <section key={g.title} className={`admin-cat admin-cat--${g.tone}`}>
         <header><b>{g.title}</b><small>{g.hint}</small></header>
-        <div className="grid grid-cols-2 gap-1.5">{g.tabs.map(([name]) => <button key={name} type="button" aria-pressed={tab === name} className="admin-cat-btn" onClick={() => { onSelect(name); setQuery(''); }}>{name}</button>)}</div>
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">{g.tabs.map(([name]) => <button key={name} type="button" aria-pressed={tab === name} className="admin-cat-btn" onClick={() => pick(name)}>{name}</button>)}</div>
       </section>)}
     </div>
     {!visible.length && <p role="status" className="mt-4 text-sm text-muted-foreground">Menu tidak ditemukan.</p>}
+    <p className="mt-3 text-xs text-muted-foreground">Menu aktif: <b className="text-foreground">{tab}</b></p>
   </nav>;
 }
 
