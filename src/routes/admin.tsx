@@ -49,12 +49,13 @@ import { AdminSiteControl } from '@/components/AdminSiteControl';
 import type { SiteControl } from '@/lib/site-control';
 import type { LandingContent } from '@/components/LandingExperience';
 import { AdminMarketing } from '@/components/AdminMarketing';
+import { AdminGrowth } from '@/components/AdminGrowth';
 import type { MarketingPlan } from '@/lib/marketing';
 
 export const Route = createFileRoute('/admin')({ head: () => ({ meta: [{ title: 'Owner Panel — BIXLINK' }, { name: 'description', content: 'Private BIXLINK owner operations.' }, { property: 'og:title', content: 'Owner Panel — BIXLINK' }, { property: 'og:description', content: 'BIXLINK owner operations.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }), component: Admin });
 type AdminData = Awaited<ReturnType<typeof getAdminData>>;
 const ADMIN_GROUPS: AdminGroup[] = [
-  { title: '1 · Pusat Kontrol', tone: 'gold', hint: 'Saklar sentral, vault, maintenance', tabs: [['Overview','saklar sentral maintenance vault brankas ringkasan p2p arena register']] },
+  { title: '1 · Pusat Kontrol', tone: 'gold', hint: 'Saklar sentral, vault, maintenance', tabs: [['Overview','saklar sentral maintenance vault brankas ringkasan p2p arena register'],['Growth & Safety','radar aktivitas flash event circuit breaker freeze withdraw telegram']] },
   { title: '2 · Kas & Dompet', tone: 'cyan', hint: 'Deposit, withdraw, BIX PAY, laporan', tabs: [['Wallet','dompet deposit ikat wallet bix pay transfer swap telegram notifikasi'],['Reports','laporan transfer']] },
   { title: '3 · Staking & Yield', tone: 'emerald', hint: 'APY, paket, permintaan stake', tabs: [['Staking','apy profit yield paket durasi'],['Stakes','unstake approve permintaan riwayat']] },
   { title: '4 · Member & Jaringan', tone: 'rose', hint: 'User, audit deposit, leader, loan, kuota', tabs: [['Users','member ban owner 2 omset audit real deposit loan kuota'],['Referrals','bonus komisi sponsor'],['Kepemimpinan & Tim','tim leader vip clones buat akun loan']] },
@@ -73,6 +74,7 @@ function Admin() {
   return <BixShell><main className="mx-auto min-h-[75vh] max-w-7xl px-5 py-12 md:px-8"><div className="admin1-title"><div className="eyebrow">PRIVATE ACCESS</div><h1 className="section-title">OWNER <span>CONSOLE</span></h1></div>{state === 'loading' ? <p className="mt-10 text-muted-foreground">Checking access…</p> : state === 'signin' ? <div className="mt-10"><p className="text-muted-foreground">Sign in with the verified owner account to continue.</p><Button asChild className="mt-5 rounded-full"><Link to="/auth">Sign in</Link></Button></div> : state === 'denied' ? <div className="mt-10">{reviewer.data ? <Button asChild><Link to="/review">Open Owner 2 panel</Link></Button> : <p className="text-destructive">Owner access is unavailable for this account. Sign in with the verified owner email.</p>}</div> : <>
     <AdminNavigation groups={ADMIN_GROUPS} tab={tab} onSelect={next => { setTab(next); setMessage(''); }}/>
     <div id="admin-content"/>
+    {tab === 'Growth & Safety' && <AdminGrowth onMessage={setMessage}/>}
     {message && <p role="status" className="mt-5 text-sm text-chart-2">{message}</p>}
     {tab === 'Overview' && <><AdminModuleSwitches readiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} simple={{ swap: Boolean((data?.settings.find(s=>s.key==='swap')?.value as {enabled?: boolean} | undefined)?.enabled), bix_pay: Boolean((data?.settings.find(s=>s.key==='bix_pay')?.value as {enabled?: boolean} | undefined)?.enabled), usdt_transfer: Boolean((data?.settings.find(s=>s.key==='usdt_transfer')?.value as {enabled?: boolean} | undefined)?.enabled) }} onMessage={setMessage} onSaved={refresh}/><AdminSiteControl initial={data?.settings.find(s => s.key === 'site_control')?.value as SiteControl | undefined} onMessage={setMessage} onSaved={refresh}/><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[['Total Users',String(data?.members.length ?? 0)],['Active staking value',money(total)],['Active positions',String(active.length)],['USDT max / month','30%']].map(([label,value],i) => <div className={`stat-card accent-${i%3}`} key={label}><span className="text-xs text-muted-foreground">{label}</span><strong className="mt-4 block text-2xl">{value}</strong></div>)}</div><AdminBixVault onMessage={setMessage}/></>}
      {tab === 'Users' && <div className="mt-8">

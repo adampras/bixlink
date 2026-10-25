@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowUpRight, BadgeCheck, ChevronRight, Coins, GitBranch, Lock, Search, ShieldCheck, UserPlus, UserRound, Users } from 'lucide-react';
 import { PlacementRegister } from '@/components/PlacementRegister';
+import { DownlineRadar } from '@/components/GrowthExperience';
 import avatarM from '@/assets/alliance-avatar-id.jpg';
 import avatarF from '@/assets/network-avatar-female.jpg';
 import { BixShell } from '@/components/BixShell';
@@ -66,6 +67,7 @@ function NetworkPage() {
   <Button size="sm" className="mt-3 w-full" onClick={() => openRegister(user?.id ?? '')}><UserPlus size={15}/> Daftarkan Member Baru</Button>
  </section>
  {user && <PlacementRegister open={regOpen} onOpenChange={setRegOpen} initial={regTarget || user.id} options={[{ id: user.id, label: `YOU · ${data?.referral?.code ?? ''} (L1)` }, ...tree.map(n => ({ id: n.user_id, label: `${n.member_code ?? ''} ${identity(n)} → member jadi L${n.depth+1}` }))]}/>}
+ <DownlineRadar/>
  <section aria-label="Leader bonus hub" className="mt-6 rounded-2xl border border-chart-3/50 bg-card p-4 md:p-5">
   <div className="eyebrow">LEADER BONUS HUB</div><h2 className="mt-1 font-display text-lg font-bold">My network bonuses</h2>
   <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">{[

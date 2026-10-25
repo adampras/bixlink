@@ -32,7 +32,8 @@ export const testNotify = createServerFn({ method: 'POST' }).middleware([require
 });
 
 // Called right after member/owner wallet actions so alerts arrive immediately; also runs on the deposit cron.
-export const dispatchAlerts = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async () => {
+export const dispatchAlerts = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await owner(context);
   try {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { dispatchWalletAlerts } = await import('./notify.server');
