@@ -1,3 +1,4 @@
+- [ ] Implement scoped real activity, direct-member radar, flash events and withdrawal circuit breaker; exclude Owner 2 and all descendants; verify controls and rules.
 - [x] Connect Cloud authentication and database.
 - [x] Center consortium profile popups, add illustrative portraits, and harmonize the landing title with the uploaded artwork; verified all five profiles at phone and desktop sizes.
 - [x] Present lightweight splash previews and implement selected Cyber pulse minimalist v4 visual.
