@@ -53,13 +53,14 @@ async function summary(admin: any) {
   ].join('\n');
 }
 
-async function pending(admin: any, chat: number) {
+async function pending(admin: any, chat: number): Promise<unknown> {
   const { data } = await admin.from('wallet_transactions').select('id,user_id,type,amount_usd,network,tx_hash,created_at').in('type', ['deposit', 'withdraw']).eq('status', 'pending').order('created_at').limit(10);
   if (!data?.length) return reply(chat, 'Tidak ada transaksi menunggu review.');
   for (const t of data) {
     const { data: p } = await admin.from('profiles').select('username').eq('user_id', t.user_id).maybeSingle();
     await reply(chat, `<b>${t.type === 'deposit' ? '🟢 DEPOSIT' : '🟡 WITHDRAW'}</b> · ${esc(p?.username ?? '-')}\nJumlah: <b>${money(t.amount_usd)}</b>${t.network ? `\nJaringan: ${esc(t.network)}` : ''}${t.tx_hash ? `\nTxID: <code>${esc(t.tx_hash)}</code>` : ''}`, reviewButtons(t.id));
   }
+  return null;
 }
 
 async function member(admin: any, q: string) {
