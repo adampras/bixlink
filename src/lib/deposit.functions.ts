@@ -105,7 +105,7 @@ export const claimDepositIntent = createServerFn({ method: 'POST' }).middleware(
     if (!intent) throw new Error('This deposit request is no longer active.');
     if (intent.claim_tx_id) return { ok: true };
     const amount = Math.floor(Number(intent.amount_exact) * 100) / 100;
-    const { data: tx, error } = await supabaseAdmin.from('wallet_transactions').insert({ user_id: context.userId, type: 'deposit', amount_usd: amount, fee_usd: 0, net_usd: amount, status: 'pending', wallet_code: intent.wallet_code, network: intent.network, address: intent.address, note: `Member reported transfer · exact ${Number(intent.amount_exact).toFixed(4)} stablecoin · ${intent.wallet_code}` }).select('id').single();
+    const { data: tx, error } = await supabaseAdmin.from('wallet_transactions').insert({ user_id: context.userId, type: 'deposit', amount_usd: amount, fee_usd: 0, net_usd: amount, status: 'pending', wallet_code: intent.wallet_code, network: intent.network, address: intent.address, note: `Member reported transfer · exact ${Number(intent.amount_exact).toFixed(3)} stablecoin · ${intent.wallet_code}` }).select('id').single();
     if (error || !tx) throw new Error('Could not record your transfer.');
     const expires = new Date(Date.now() + 24 * 3600_000).toISOString();
     await supabaseAdmin.from('deposit_intents').update({ claim_tx_id: tx.id, claimed_at: new Date().toISOString(), expires_at: expires }).eq('id', intent.id);
