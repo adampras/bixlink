@@ -1,4 +1,5 @@
-import s1 from '@/assets/cards/stk-001.jpg.asset.json';
+import s1url from '@/assets/cards/stk-001-clean.jpg';
+const s1 = { url: s1url };
 import s2 from '@/assets/cards/stk-002.jpg.asset.json';
 import s3 from '@/assets/cards/stk-003.jpg.asset.json';
 import s4 from '@/assets/cards/stk-004.jpg.asset.json';
@@ -11,16 +12,16 @@ import s10 from '@/assets/cards/stk-010.jpg.asset.json';
 
 /** STK voucher NFT series — one card per staking package, ordered by package value. */
 export const STK_CARDS = [
-  { name: 'STK-001 Standard', url: s1.url },
-  { name: 'STK-002 Bronze', url: s2.url },
-  { name: 'STK-003 Silver', url: s3.url },
-  { name: 'STK-004 Gold', url: s4.url },
-  { name: 'STK-005 Platinum', url: s5.url },
-  { name: 'STK-006 Diamond', url: s6.url },
-  { name: 'STK-007 Emerald', url: s7.url },
-  { name: 'STK-008 Ruby', url: s8.url },
-  { name: 'STK-009 Elite', url: s9.url },
-  { name: 'STK-010 Super Premium', url: s10.url },
+  { name: 'SEED', url: s1.url },
+  { name: 'SPARK', url: s2.url },
+  { name: 'EXPLORER', url: s3.url },
+  { name: 'PIONEER', url: s4.url },
+  { name: 'BUILDER', url: s5.url },
+  { name: 'GUARDIAN', url: s6.url },
+  { name: 'TITAN', url: s7.url },
+  { name: 'PLATINUM', url: s8.url },
+  { name: 'LEGEND', url: s9.url },
+  { name: 'SUPER PREMIUM', url: s10.url },
 ] as const;
 export const PACKAGE_CARDS: Record<string, { name: string; url: string }> = {
   SEED: STK_CARDS[0], SPARK: STK_CARDS[1], EXPLORER: STK_CARDS[2], PIONEER: STK_CARDS[3], BUILDER: STK_CARDS[4],

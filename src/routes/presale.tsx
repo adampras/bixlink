@@ -24,7 +24,8 @@ import { PresalePurchaseDialog, type PresaleSelection } from '@/components/Presa
 import { strategyQuote } from '@/lib/presale-strategy';
 import { poolAvailability } from '@/lib/marketing';
 import { maxCapLabel } from '@/lib/max-cap';
-import { valueCard } from '@/lib/value-cards';
+import { stkCardFor } from '@/lib/package-cards';
+const valueCard = (usd: number) => ({ ...stkCardFor(usd), name: `GENESIS ${stkCardFor(usd).name}` });
 const presaleArtTier = (usd: number): NftTier => usd >= 30000 ? 'MYTHIC' : usd >= 10000 ? 'LEGENDARY' : usd >= 5000 ? 'EPIC' : usd >= 1000 ? 'RARE' : 'COMMON';
 
 export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Genesis presale with Hybrid, Dividend and Founder strategies plus the 21-slot $100,000 Sovereign allocation.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }, { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }] }), component: PresalePage });
@@ -96,7 +97,7 @@ function PresalePage() {
           <div className="flex items-baseline justify-between"><h2 className="font-display text-base font-black tracking-wide">{g.name}</h2><span className="text-[11px] text-muted-foreground">{g.range}</span></div>
           <div className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">{list.map(p => { const tier = presaleArtTier(p.usd); return <article key={p.usd} className="presale-lux-card presale-card-uniform">
             <div className="presale-lux-inner flex h-full flex-col">
-              {valueCard(p.usd) && <img src={valueCard(p.usd)!.url} alt={`${valueCard(p.usd)!.name} NFT $${number(p.usd)}`} loading="lazy" className="value-nft mb-3"/>}
+              {valueCard(p.usd) && <img src={valueCard(p.usd)!.url} alt={`${valueCard(p.usd)!.name} NFT $${number(p.usd)}`} loading="lazy" className="value-nft mb-3" style={{ filter: p.usd > 10000 ? `hue-rotate(${Math.round(Math.log10(p.usd / 10000) * 220)}deg)` : undefined }}/>}
               <div className="flex items-center justify-between gap-2"><span className="truncate text-[10px] font-bold text-muted-foreground">{valueCard(p.usd) ? `${valueCard(p.usd)!.name.toUpperCase()} NFT` : `${NFT_NAME[tier].toUpperCase()} · ${tier}`}</span>{!valueCard(p.usd) && <button type="button" className="nft-preview-chip" onClick={() => setNftPreview(tier)}><Eye size={12}/> NFT</button>}</div>
               <h3 className="presale-lux-price numeric font-display text-[clamp(1.25rem,5.5vw,1.875rem)] font-black">${number(p.usd)}</h3>
               <dl className="mt-2 grid grid-cols-2 gap-2 text-xs"><div><dt className="text-muted-foreground">Total BIX</dt><dd className="numeric font-bold text-primary"><Lock size={11} className="inline"/> {number(p.bix)}</dd></div><div><dt className="text-muted-foreground">Release</dt><dd className="numeric font-bold">{p.releaseDays} days</dd></div><div className="col-span-2"><dt className="text-muted-foreground">Earnings limit</dt><dd className="numeric font-bold text-chart-3">{maxCapLabel(p.usd)}</dd></div></dl>
