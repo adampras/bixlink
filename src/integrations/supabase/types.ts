@@ -110,6 +110,51 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_growth_control: {
+        Row: {
+          activity_enabled: boolean
+          circuit_enabled: boolean
+          flash_enabled: boolean
+          flash_ends_at: string | null
+          flash_title: string
+          freeze_reason: string | null
+          frozen: boolean
+          id: number
+          radar_enabled: boolean
+          threshold_usd: number
+          updated_at: string
+          window_minutes: number
+        }
+        Insert: {
+          activity_enabled?: boolean
+          circuit_enabled?: boolean
+          flash_enabled?: boolean
+          flash_ends_at?: string | null
+          flash_title?: string
+          freeze_reason?: string | null
+          frozen?: boolean
+          id?: number
+          radar_enabled?: boolean
+          threshold_usd?: number
+          updated_at?: string
+          window_minutes?: number
+        }
+        Update: {
+          activity_enabled?: boolean
+          circuit_enabled?: boolean
+          flash_enabled?: boolean
+          flash_ends_at?: string | null
+          flash_title?: string
+          freeze_reason?: string | null
+          frozen?: boolean
+          id?: number
+          radar_enabled?: boolean
+          threshold_usd?: number
+          updated_at?: string
+          window_minutes?: number
+        }
+        Relationships: []
+      }
       bix_leaders: {
         Row: {
           created_at: string
@@ -1722,6 +1767,9 @@ export type Database = {
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_find_user_by_email: { Args: { p_email: string }; Returns: string }
       bix_grant_welcome: { Args: { p_user: string }; Returns: undefined }
+      bix_growth_excluded: { Args: { p_user: string }; Returns: boolean }
+      bix_growth_radar: { Args: never; Returns: Json }
+      bix_growth_snapshot: { Args: never; Returns: Json }
       bix_in_owner1_network: { Args: never; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_leaderboard: {
