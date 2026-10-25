@@ -11,12 +11,12 @@ export function channelStatus() {
   };
 }
 
-export async function sendAll(html: string, t: NotifyToggles) {
+export async function sendAll(html: string, t: NotifyToggles, markup?: unknown) {
   const out: Record<string, string> = {};
   const tg = process.env['TELEGRAM_BOT_TOKEN'], chat = process.env['TELEGRAM_CHAT_ID'];
   if (t.telegram && tg && chat) {
     try {
-      const r = await fetch(`https://api.telegram.org/bot${tg}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chat, text: html, parse_mode: 'HTML', disable_web_page_preview: true }) });
+      const r = await fetch(`https://api.telegram.org/bot${tg}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chat, text: html, parse_mode: 'HTML', disable_web_page_preview: true, ...(markup ? { reply_markup: markup } : {}) }) });
       out['telegram'] = r.ok ? 'ok' : `gagal (${r.status})`;
       if (!r.ok) console.error('telegram', r.status, await r.text());
     } catch (e) { out['telegram'] = 'gagal'; console.error(e); }
@@ -70,7 +70,7 @@ export async function dispatchWalletAlerts(admin: any) {
         `Waktu: ${new Date(tx.reviewed_at ?? tx.created_at).toLocaleString('id-ID', { timeZone: 'Asia/Makassar' })} WITA`,
         `Review: https://bixlink.com/admin`,
       ].filter(Boolean);
-      await sendAll(lines.join('\n'), t);
+      await sendAll(lines.join('\n'), t, ev.key.endsWith(':new') && tx.status === 'pending' ? { inline_keyboard: [[{ text: '✅ Setujui', callback_data: `ap:${tx.id}` }, { text: '❌ Tolak', callback_data: `rj:${tx.id}` }]] } : undefined);
       sent++;
     }
   }
