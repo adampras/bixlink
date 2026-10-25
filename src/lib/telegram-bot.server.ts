@@ -38,7 +38,7 @@ async function summary(admin: any) {
   const wd = real.filter((t: any) => t.type === 'withdraw' && t.status === 'approved');
   const pendDep = real.filter((t: any) => t.type === 'deposit' && t.status === 'pending').length;
   const pendWd = real.filter((t: any) => t.type === 'withdraw' && t.status === 'pending').length;
-  const { data: stakes } = await admin.from('bix_duration_stakes').select('user_id,amount_usd,status').eq('status', 'active').limit(100000);
+  const { data: stakes } = await admin.from('stakes').select('user_id,amount_usd,status').eq('status', 'active').limit(100000);
   const act = (stakes ?? []).filter((s: any) => !clones.has(s.user_id));
   const stakers = new Set(act.map((s: any) => s.user_id));
   return [
@@ -74,7 +74,7 @@ async function member(admin: any, q: string) {
     admin.from('profiles').select('username,full_name,created_at').eq('user_id', uid).maybeSingle(),
     admin.from('referral_codes').select('code,referred_by').eq('user_id', uid).maybeSingle(),
     admin.from('wallet_transactions').select('type,status,amount_usd').eq('user_id', uid).in('type', ['deposit', 'withdraw']),
-    admin.from('bix_duration_stakes').select('amount_usd,status').eq('user_id', uid).eq('status', 'active'),
+    admin.from('stakes').select('amount_usd,status').eq('user_id', uid).eq('status', 'active'),
     cloneIds(admin),
   ]);
   let sponsor = '-';
