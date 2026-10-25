@@ -495,7 +495,7 @@ export const allocateBix = createServerFn({ method: 'POST' }).middleware([requir
     return { ok: true };
   });
 
-type LeaderStatus = { status: string | null; virtual_usd: number; require_turnover: boolean; multiple: number; own_stake: number; turnover: number; target: number; qualified: boolean };
+type LeaderStatus = { status: string | null; virtual_usd: number; require_turnover: boolean; multiple: number; own_stake: number; turnover: number; target: number; qualified: boolean; kind?: 'loan' | 'virtual' | null; base?: number; escrow_usd?: number };
 
 export const getMyLeader = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { data, error } = await context.supabase.rpc('bix_leader_status', { p_user: context.userId });
