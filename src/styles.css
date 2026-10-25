@@ -3281,3 +3281,9 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .admin-cat-chip { min-height: 2.6rem; border-radius: 10px; padding: .35rem .5rem; font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .03em; color: var(--cat); border: 1px solid color-mix(in oklab, var(--cat) 55%, transparent); border-left: 4px solid var(--cat); background: color-mix(in oklab, var(--cat) 8%, var(--card)); text-align: left; line-height: 1.2; }
 .admin-cat-chip[aria-pressed="true"] { background: var(--cat); color: oklch(0.16 0.02 260); }
 #admin-content { scroll-margin-top: 80px; }
+/* Admin 1 on phones: full-width workspace, only bottom dock remains */
+@media (max-width: 1279px) {
+  .admin1-shell > header.site-header, .admin1-shell .market-ticker, .admin1-shell .quantum-hud, .admin1-shell .admin1-title, .admin1-shell > footer, .admin1-shell .admin-cat header small, .admin1-shell .admin-navigation > p { display: none !important; }
+  .admin1-shell main { padding-top: .75rem !important; padding-left: .6rem !important; padding-right: .6rem !important; }
+  .admin1-shell .admin-navigation { margin-top: 0; }
+}
