@@ -27,10 +27,13 @@ export function AdminNavigation({ groups, tab, onSelect }: { groups: AdminGroup[
       {groups.map(g => <button key={g.title} type="button" aria-pressed={openCat === g.title} className={`admin-cat-chip admin-cat--${g.tone}`} onClick={() => setOpenCat(g.title)}>{g.title}</button>)}
     </div>}
     <div className="mt-3 grid gap-3">
-      {visible.map(g => <section key={g.title} className={`admin-cat admin-cat--${g.tone}`}>
-        <header><b>{g.title}</b><small>{g.hint}</small></header>
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">{g.tabs.map(([name]) => <button key={name} type="button" aria-pressed={tab === name} className="admin-cat-btn" onClick={() => pick(name)}>{name}</button>)}</div>
-      </section>)}
+      {visible.map(g => {
+        const btns = <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">{g.tabs.map(([name]) => <button key={name} type="button" aria-pressed={tab === name} className="admin-cat-btn" onClick={() => pick(name)}>{name}</button>)}</div>;
+        // Category name already shown by the active chip above, so the big box is only kept while searching.
+        return term
+          ? <section key={g.title} className={`admin-cat admin-cat--${g.tone}`} aria-label={g.title}><header><b>{g.title}</b></header>{btns}</section>
+          : <div key={g.title} role="group" aria-label={g.title} className={`admin-cat-tabs admin-cat--${g.tone}`}>{btns}</div>;
+      })}
     </div>
     {!visible.length && <p role="status" className="mt-4 text-sm text-muted-foreground">Menu tidak ditemukan.</p>}
     <p className="mt-3 text-xs text-muted-foreground">Menu aktif: <b className="text-foreground">{tab}</b></p>
