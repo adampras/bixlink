@@ -1769,6 +1769,7 @@ export type Database = {
       bix_grant_welcome: { Args: { p_user: string }; Returns: undefined }
       bix_growth_excluded: { Args: { p_user: string }; Returns: boolean }
       bix_growth_radar: { Args: never; Returns: Json }
+      bix_growth_scope_report: { Args: never; Returns: Json }
       bix_growth_snapshot: { Args: never; Returns: Json }
       bix_in_owner1_network: { Args: never; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }

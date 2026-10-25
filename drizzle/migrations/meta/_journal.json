@@ -603,6 +603,13 @@
       "when": 1792922696394,
       "tag": "0085_scoped_growth_safety",
       "breakpoints": true
+    },
+    {
+      "idx": 86,
+      "version": "7",
+      "when": 1792922987019,
+      "tag": "0086_growth_exact_owner2_scope",
+      "breakpoints": true
     }
   ]
 }
