@@ -3229,7 +3229,20 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .qv-slab small { font-size: .6rem; letter-spacing: .2em; color: var(--muted-foreground); }
 .qv-slab b { font-size: 1.6rem; font-weight: 900; color: var(--chart-3); }
 .qv-slab em { font-style: normal; font-size: .72rem; color: var(--primary); }
-.qv-nav { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: .5rem; font-size: .8rem; }
+.qv-nav { display: flex; justify-content: center; align-items: center; gap: .9rem; margin-top: .6rem; font-size: .8rem; }
+.qv-stage { cursor: grab; user-select: none; }
+.qv-stage:active { cursor: grabbing; }
+.qv-arrow { position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; color: var(--chart-3);
+  background: radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--chart-3) 28%, var(--background)), var(--background) 70%);
+  border: 1px solid color-mix(in oklab, var(--chart-3) 60%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 25%, transparent), 0 0 18px -4px color-mix(in oklab, var(--chart-3) 60%, transparent);
+  transition: transform .2s, box-shadow .2s; }
+.qv-arrow:active { transform: scale(.92); box-shadow: 0 0 26px 0 color-mix(in oklab, var(--chart-3) 70%, transparent); }
+.qv-arrow svg { width: 20px; height: 20px; }
+.qv-dots { display: flex; align-items: center; gap: 5px; padding: 8px 12px; border-radius: 999px; background: color-mix(in oklab, var(--background) 70%, transparent); border: 1px solid color-mix(in oklab, var(--chart-3) 30%, transparent); }
+.qv-dots button { width: 6px; height: 6px; border-radius: 999px; background: color-mix(in oklab, var(--chart-3) 30%, transparent); transition: width .3s, background .3s; }
+.qv-dots button.is-on { width: 20px; background: linear-gradient(90deg, var(--chart-3), var(--primary)); box-shadow: 0 0 8px var(--chart-3); }
+.qv-dots span { margin-left: 6px; font-size: .62rem; letter-spacing: .12em; color: var(--chart-3); }
 .qv-tilt { perspective: 1000px; }
 .qv-tilt-inner { transition: transform .15s ease-out; transform-style: preserve-3d; will-change: transform; }
 .qv-note { margin-top: .75rem; text-align: center; font-size: .65rem; color: var(--muted-foreground); }
