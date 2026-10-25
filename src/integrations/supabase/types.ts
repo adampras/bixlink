@@ -1744,6 +1744,7 @@ export type Database = {
         Returns: Json
       }
       bix_loan_device_reset: { Args: { p_user: string }; Returns: undefined }
+      bix_loan_quota: { Args: { p_sponsor: string }; Returns: Json }
       bix_member_shop_slots: { Args: { p_user: string }; Returns: number }
       bix_merchant_tier: { Args: { p_user: string }; Returns: string }
       bix_mining_conversion_status: { Args: never; Returns: Json }
