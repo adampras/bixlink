@@ -53,7 +53,7 @@ function RegisterPage() {
     <form onSubmit={submit} className="mt-6 space-y-3.5" aria-label="Create BIXLINK account">
       <label className={label}>FULL NAME<input required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={e => setFullName(e.target.value)} className="form-input mt-1.5" placeholder="Your full name"/></label>
       <label className={label}>USERNAME<input required pattern="[A-Za-z0-9_.]{3,24}" maxLength={24} autoComplete="username" value={username} onChange={e => setUsername(e.target.value)} className="form-input mt-1.5" placeholder="3–24 letters or numbers"/></label>
-      <div className={label}><span id="wa-label">WHATSAPP NUMBER</span><div className="relative mt-1.5 flex gap-2">
+      <div className={label}><span id="wa-label">WHATSAPP NUMBER</span><div className="relative mt-1.5 grid grid-cols-[6.75rem_minmax(0,1fr)] gap-2">
         <button type="button" aria-label="Choose country code" aria-expanded={pickerOpen} onClick={() => { setPickerOpen(v => !v); setQuery(''); }} style={{ width: "6.75rem", flex: "0 0 6.75rem" }} className="form-input flex items-center justify-center gap-1 px-2 text-sm text-foreground"><span>{dial.flag}</span><span>+{dial.dial}</span><span className="text-[10px] opacity-60">▼</span></button>
         <input id="wa-input" aria-labelledby="wa-label" required type="tel" inputMode="tel" autoComplete="tel-national" value={phone} onChange={e => setPhone(e.target.value)} onFocus={() => setPickerOpen(false)} style={{ flex: "1 1 0%", width: "auto" }} className="form-input min-w-0" placeholder="812 3456 7890"/>
         {pickerOpen && <div className="absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-xl">
