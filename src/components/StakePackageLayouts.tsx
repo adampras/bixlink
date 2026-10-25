@@ -1,13 +1,47 @@
-import { useState } from 'react';
+import { useState, type PointerEvent } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DurationPackageCard } from '@/components/DurationPackageCard';
 import { InstitutionalPackageTable } from '@/components/InstitutionalStake';
 import { number, type Package } from '@/lib/bixlink';
 
-export const STAKE_LAYOUTS = ['matrix', 'auric', 'capsule', 'carousel', 'spotlight', 'accordion'] as const;
+export const STAKE_LAYOUTS = ['quantum3d', 'matrix', 'auric', 'capsule', 'carousel', 'spotlight', 'accordion'] as const;
 export type StakeLayout = (typeof STAKE_LAYOUTS)[number];
-export const STAKE_LAYOUT_LABEL: Record<StakeLayout, string> = { matrix: 'F · Sovereign Ingot Matrix (emerald-gold)', auric: 'E · Kotak batangan emas (Auric Sovereign)', capsule: 'D · Kotak kapsul mewah', carousel: 'C · Carousel halaman', spotlight: 'A · Spotlight', accordion: 'B · Baris accordion' };
+export const STAKE_LAYOUT_LABEL: Record<StakeLayout, string> = { quantum3d: 'G · 3D Quantum Vault', matrix: 'F · Sovereign Ingot Matrix (emerald-gold)', auric: 'E · Kotak batangan emas (Auric Sovereign)', capsule: 'D · Kotak kapsul mewah', carousel: 'C · Carousel halaman', spotlight: 'A · Spotlight', accordion: 'B · Baris accordion' };
+
+function QuantumVault({ packages, onStake }: { packages: Package[]; onStake: (p: Package) => void }) {
+  const [active, setActive] = useState(0);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const i = Math.min(active, packages.length - 1);
+  const move = (e: PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setTilt({ x: ((e.clientY - r.top) / r.height - 0.5) * -14, y: ((e.clientX - r.left) / r.width - 0.5) * 18 });
+  };
+  const go = (d: number) => setActive((i + d + packages.length) % packages.length);
+  return <section aria-label="Staking packages" className="qv mt-6">
+    <header className="qv-head"><span>QUANTUM VAULT · 3D</span><b>Select your tier</b></header>
+    <div className="qv-stage">
+      {packages.map((p, n) => {
+        const off = n - i;
+        if (Math.abs(off) > 2) return null;
+        return <button key={p.id} type="button" aria-label={`Tier ${n + 1} ${short(Number(p.price_usd))}`} aria-current={off === 0} onClick={() => setActive(n)} className="qv-slab" style={{ transform: `translateX(${off * 58}%) translateZ(${-Math.abs(off) * 160}px) rotateY(${off * -32}deg)`, zIndex: 10 - Math.abs(off), opacity: 1 - Math.abs(off) * 0.3 }}>
+          <small>STK-{String(n + 1).padStart(3, '0')}</small><b className="numeric">{short(Number(p.price_usd))}</b><em className="numeric">{p.apy}% APY</em>
+        </button>;
+      })}
+    </div>
+    <div className="qv-nav">
+      <Button variant="outline" size="icon" aria-label="Previous tier" onClick={() => go(-1)}><ChevronLeft /></Button>
+      <span className="numeric">{i + 1} / {packages.length}</span>
+      <Button variant="outline" size="icon" aria-label="Next tier" onClick={() => go(1)}><ChevronRight /></Button>
+    </div>
+    <div className="qv-tilt mx-auto mt-4 max-w-md" onPointerMove={move} onPointerLeave={() => setTilt({ x: 0, y: 0 })}>
+      <div className="qv-tilt-inner" style={{ transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}>
+        <DurationPackageCard key={packages[i]!.id} pkg={packages[i]!} index={i} onStake={onStake} />
+      </div>
+    </div>
+    <p className="qv-note">Yield figures are display-only ledger projections, not guaranteed returns.</p>
+  </section>;
+}
 
 type Props = { packages: Package[]; layout?: string | undefined; onStake: (p: Package) => void };
 
@@ -20,6 +54,7 @@ export function StakePackageLayouts({ packages, layout, onStake }: Props) {
   const [open, setOpen] = useState<number | null>(null);
   if (!packages.length) return null;
   if (layout === 'institutional') return <InstitutionalPackageTable packages={packages} onStake={onStake} />;
+  if (mode === 'quantum3d') return <QuantumVault packages={packages} onStake={onStake} />;
 
   if (mode === 'auric') {
     const i = Math.min(active, packages.length - 1);
