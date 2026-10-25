@@ -46,6 +46,7 @@ import { Route as YieldControlRouteImport } from './routes/yield-control'
 import { Route as ApiFoxChatRouteImport } from './routes/api/fox-chat'
 import { Route as ContentGroupIndexRouteImport } from './routes/content.$group.$index'
 import { Route as ApiPublicHooksScanDepositsRouteImport } from './routes/api/public/hooks/scan-deposits'
+import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -233,6 +234,12 @@ const ApiPublicHooksScanDepositsRoute =
     path: '/api/public/hooks/scan-deposits',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicTelegramWebhookRoute =
+  ApiPublicTelegramWebhookRouteImport.update({
+    id: '/api/public/telegram/webhook',
+    path: '/api/public/telegram/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -272,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/api/fox-chat': typeof ApiFoxChatRoute
   '/content/$group/$index': typeof ContentGroupIndexRoute
   '/api/public/hooks/scan-deposits': typeof ApiPublicHooksScanDepositsRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -311,6 +319,7 @@ export interface FileRoutesByTo {
   '/api/fox-chat': typeof ApiFoxChatRoute
   '/content/$group/$index': typeof ContentGroupIndexRoute
   '/api/public/hooks/scan-deposits': typeof ApiPublicHooksScanDepositsRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -351,6 +360,7 @@ export interface FileRoutesById {
   '/api/fox-chat': typeof ApiFoxChatRoute
   '/content/$group/$index': typeof ContentGroupIndexRoute
   '/api/public/hooks/scan-deposits': typeof ApiPublicHooksScanDepositsRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -392,6 +402,7 @@ export interface FileRouteTypes {
     | '/api/fox-chat'
     | '/content/$group/$index'
     | '/api/public/hooks/scan-deposits'
+    | '/api/public/telegram/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -431,6 +442,7 @@ export interface FileRouteTypes {
     | '/api/fox-chat'
     | '/content/$group/$index'
     | '/api/public/hooks/scan-deposits'
+    | '/api/public/telegram/webhook'
   id:
     | '__root__'
     | '/'
@@ -470,6 +482,7 @@ export interface FileRouteTypes {
     | '/api/fox-chat'
     | '/content/$group/$index'
     | '/api/public/hooks/scan-deposits'
+    | '/api/public/telegram/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -510,6 +523,7 @@ export interface RootRouteChildren {
   ApiFoxChatRoute: typeof ApiFoxChatRoute
   ContentGroupIndexRoute: typeof ContentGroupIndexRoute
   ApiPublicHooksScanDepositsRoute: typeof ApiPublicHooksScanDepositsRoute
+  ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -773,6 +787,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksScanDepositsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/telegram/webhook': {
+      id: '/api/public/telegram/webhook'
+      path: '/api/public/telegram/webhook'
+      fullPath: '/api/public/telegram/webhook'
+      preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -814,6 +835,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiFoxChatRoute: ApiFoxChatRoute,
   ContentGroupIndexRoute: ContentGroupIndexRoute,
   ApiPublicHooksScanDepositsRoute: ApiPublicHooksScanDepositsRoute,
+  ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
