@@ -5,6 +5,7 @@ import { number } from '@/lib/bixlink';
 import { DEFAULT_STRATEGIES, genesisTier, strategyQuote, type PresaleStrategy, type StrategySettings } from '@/lib/presale-strategy';
 import type { PresalePackage } from '@/lib/presale';
 import poster from '@/assets/presale-rocket-dark-poster.jpg.asset.json';
+import { stkCardFor } from '@/lib/package-cards';
 import video from '@/assets/presale-rocket-dark.mp4.asset.json';
 
 export function PresaleStrategies({ packages, settings, open, busy, onBuy }: { packages: PresalePackage[]; settings?: StrategySettings | undefined; open: boolean; busy: boolean; onBuy: (usd: number, s: PresaleStrategy) => void }) {
@@ -57,7 +58,7 @@ export function GenesisCertificate({ usd, serial, strategy, bix }: { usd: number
     <video autoPlay muted loop playsInline preload="metadata" poster={poster.url} className="aspect-[4/3] w-full object-contain"><source src={video.url} type="video/mp4"/></video>
     <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background to-transparent p-3">
       <span className="text-[10px] font-bold tracking-widest text-chart-3">GENESIS NODE · {(strategy ?? 'standard').toUpperCase()}</span>
-      <b className="block font-display text-base">{genesisTier(usd)}</b>
+      <b className="block font-display text-base">GENESIS {stkCardFor(usd).name} PASS</b>
       <span className="numeric text-xs text-muted-foreground">#GEN-{String(serial ?? 0).padStart(4, '0')} · ${number(usd)} · {number(bix)} BIX</span>
     </figcaption>
   </figure>;
