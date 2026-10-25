@@ -1,7 +1,8 @@
 import { ModuleGate } from '@/components/ModuleGate';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { VaultStardust, VaultLogo, VaultNode } from '@/components/VaultFlourish';
+import { VaultStardust } from '@/components/VaultFlourish';
+import { DIAL_COUNTRIES, detectCountry, toE164 } from '@/lib/phone-country';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { passwordValid, PASSWORD_HINT } from '@/lib/password-rule';
@@ -18,48 +19,48 @@ export const Route = createFileRoute('/register')({
 
 function RegisterPage() {
   const [email, setEmail] = useState(''); const [fullName, setFullName] = useState(''); const [username, setUsername] = useState(''); const [password, setPassword] = useState(''); const [referral, setReferral] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
+  const [country, setCountry] = useState('ID'); const [phone, setPhone] = useState('');
   const { ref, target } = Route.useSearch();
   useEffect(() => { if (target === 'presale') window.localStorage.setItem('bixlink-target', 'presale'); }, [target]);
+  useEffect(() => { setCountry(detectCountry(Intl.DateTimeFormat().resolvedOptions().timeZone, navigator.language)); }, []);
   const [showPassword, setShowPassword] = useState(false);
   useEffect(() => { const incoming = ref || window.localStorage.getItem('bixlink-ref') || ''; if (/^BIX-\d{6}$/i.test(incoming)) { const normalized = incoming.toUpperCase(); setReferral(normalized); window.localStorage.setItem('bixlink-ref', normalized); } }, [ref]);
+  const dial = DIAL_COUNTRIES.find(c => c.iso === country) ?? DIAL_COUNTRIES[0]!;
   const submit = async (event: React.FormEvent) => {
     event.preventDefault(); setBusy(true); setNotice('');
     try {
       const uname = username.trim().toLowerCase(); const code = referral.trim().toUpperCase();
-      if (!/^[a-z0-9_.]{3,24}$/.test(uname)) throw new Error('Username: 3–24 letters, numbers, _ or .');
       if (fullName.trim().length < 2) throw new Error('Please enter your full name.');
+      if (!/^[a-z0-9_.]{3,24}$/.test(uname)) throw new Error('Username: 3–24 letters, numbers, _ or .');
+      const whatsapp = toE164(dial.dial, phone);
+      if (!whatsapp) throw new Error('Please enter a valid WhatsApp number.');
       if (code && !/^BIX-\d{6}$/.test(code)) throw new Error('Referral code must use the format BIX-123456.');
       const { data: free } = await supabase.rpc('bix_username_available', { p_username: uname });
       if (!free) throw new Error('That username is already taken.');
       if (code) window.localStorage.setItem('bixlink-ref', code); else window.localStorage.removeItem('bixlink-ref');
       if (!passwordValid(password)) throw new Error(PASSWORD_HINT);
-      const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: fullName.trim().slice(0, 80), username: uname } } });
+      const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: fullName.trim().slice(0, 80), username: uname, whatsapp, whatsapp_country: dial.iso } } });
       if (error) throw error;
       setNotice('Check your email to confirm your account, then sign in.');
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
-  return <BixShell><main className="register-numbered"><VaultStardust/><Link to="/" className="relative z-10 mb-3 inline-flex items-center gap-1.5 self-start rounded-full border border-chart-3/30 bg-card/50 px-3 py-1.5 text-xs font-bold text-chart-3 backdrop-blur-md">← Back to HOME</Link><div className="register-numbered-inner register-vault"><nav className="auth-tabs mb-6" aria-label="Account"><Link to="/auth">SIGN IN</Link><Link to="/register" data-active="true">REGISTER</Link></nav>
-    <header className="register-numbered-brand"><VaultLogo/><div className="auth-badge mb-4"><span/>SECURE ONBOARDING</div><h1>BIX<span>LINK</span></h1><VaultNode/></header>
-    <form onSubmit={submit} className="space-y-6" aria-label="Create BIXLINK account">
-      <fieldset className="register-numbered-step"><legend className="sr-only">Personal profile</legend><span className="register-step-number" aria-hidden>01</span><div className="space-y-2.5"><h2>Personal profile</h2>
-        <input aria-label="Full name" required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={event => setFullName(event.target.value)} className="register-numbered-input" placeholder="Full Name"/>
-        <input aria-label="Username" required pattern="[A-Za-z0-9_.]{3,24}" maxLength={24} autoComplete="username" value={username} onChange={event => setUsername(event.target.value)} className="register-numbered-input" placeholder="Username"/>
-      </div></fieldset>
-      <fieldset className="register-numbered-step"><legend className="sr-only">Account security</legend><span className="register-step-number" aria-hidden>02</span><div className="space-y-2.5"><h2>Security hub</h2>
-        <input aria-label="Email address" required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} className="register-numbered-input" placeholder="Email Address"/>
-        <div className="relative"><input aria-label="Password" required minLength={6} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={event => setPassword(event.target.value)} className="register-numbered-input pr-12" placeholder="Secure Password"/><Button type="button" variant="ghost" size="icon" className="register-password-toggle" title={showPassword ? 'Hide password' : 'Show password'} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(current => !current)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div>
-        {password.length > 0 && <div className="pw-rules" aria-live="polite">
-          <span className={password.length >= 8 ? 'is-ok' : ''}>8+ characters</span>
-          <span className={/[A-Z]/.test(password) && /[a-z]/.test(password) ? 'is-ok' : ''}>Upper & lower case</span>
-          <span className={/\d/.test(password) ? 'is-ok' : ''}>One number</span>
-          <span className={/[^A-Za-z0-9]/.test(password) && !/\s/.test(password) ? 'is-ok' : ''}>One symbol</span>
-        </div>}
-      </div></fieldset>
-      <fieldset className="register-numbered-step"><legend className="sr-only">Referral</legend><span className="register-step-number" aria-hidden>03</span><div className="space-y-2.5"><div className="flex items-center justify-between gap-2"><h2>Network code</h2><span className="text-[9px] font-bold uppercase text-muted-foreground">Optional</span></div>
-        <input aria-label="Referral code" inputMode="text" maxLength={10} value={referral} onChange={event => setReferral(event.target.value.toUpperCase())} className="register-numbered-input register-network-code" placeholder="BIX-123456"/>
-      </div></fieldset>
-      {notice && <p role="status" className="text-sm leading-6 text-chart-2">{notice}</p>}
-      <div className="space-y-4 pt-4"><Button type="submit" disabled={busy} className="register-numbered-submit vault-shimmer">{busy ? 'Please wait…' : 'Create account'}<ArrowRight/></Button><div className="text-center text-[10px] font-bold tracking-widest text-muted-foreground">OR</div><Button type="button" variant="outline" className="h-12 w-full rounded-full border-border bg-card" onClick={async () => { const r = await lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/auth` }); if (r.error) setNotice(r.error.message); else if (!r.redirected) window.location.assign('/'); }}>Register with Google</Button><p className="text-center text-sm text-muted-foreground">Already have an account? <Link to="/auth" className="font-bold text-chart-2">Sign in</Link></p></div>
+  const label = 'block text-xs font-bold text-muted-foreground';
+  return <BixShell><main id="member-access" className="auth-vault-page mx-auto flex min-h-[75vh] max-w-md flex-col justify-center px-5 py-10"><VaultStardust/><Link to="/" className="relative z-10 mb-3 inline-flex items-center gap-1.5 self-start rounded-full border border-chart-3/30 bg-card/50 px-3 py-1.5 text-xs font-bold text-chart-3 backdrop-blur-md">← Back to HOME</Link><div className="auth-vault">
+    <div className="flex items-center justify-center gap-2.5"><img src="https://bixlink.com/__l5e/assets-v1/c62ecff6-c5d1-4235-8e7a-e49c0c2b7039/fox-icon-512.png" alt="" className="h-9 w-9 rounded-full border border-chart-3/40"/><div className="text-left"><div className="text-lg font-black leading-none tracking-wide">BIX<span className="text-chart-3">LINK</span></div><div className="mt-1 text-[9px] font-bold tracking-[0.2em] text-muted-foreground">CREATE MEMBER ACCOUNT</div></div></div>
+    <nav className="auth-tabs mt-5" aria-label="Account"><Link to="/auth">SIGN IN</Link><Link to="/register" data-active="true">REGISTER</Link></nav>
+    <form onSubmit={submit} className="mt-6 space-y-3.5" aria-label="Create BIXLINK account">
+      <label className={label}>FULL NAME<input required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={e => setFullName(e.target.value)} className="form-input mt-1.5" placeholder="Your full name"/></label>
+      <label className={label}>USERNAME<input required pattern="[A-Za-z0-9_.]{3,24}" maxLength={24} autoComplete="username" value={username} onChange={e => setUsername(e.target.value)} className="form-input mt-1.5" placeholder="3–24 letters or numbers"/></label>
+      <div className={label}><span id="wa-label">WHATSAPP NUMBER</span><div className="mt-1.5 flex gap-2"><select aria-label="Country code" value={country} onChange={e => setCountry(e.target.value)} className="form-input w-[6.5rem] shrink-0 px-2 text-sm">{DIAL_COUNTRIES.map(c => <option key={c.iso} value={c.iso}>{c.flag} +{c.dial}</option>)}</select><input aria-labelledby="wa-label" required type="tel" inputMode="tel" autoComplete="tel-national" value={phone} onChange={e => setPhone(e.target.value)} className="form-input min-w-0 flex-1" placeholder="812 3456 7890"/></div></div>
+      <label className={label}>EMAIL<input required type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="form-input mt-1.5" placeholder="you@example.com"/></label>
+      <label className={label}>PASSWORD<div className="relative mt-1.5"><input required minLength={6} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} className="form-input pr-12" placeholder="••••••••"/><Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(v => !v)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div></label>
+      {password.length > 0 && <div className="pw-rules" aria-live="polite"><span className={password.length >= 8 ? 'is-ok' : ''}>8+ characters</span><span className={/[A-Z]/.test(password) && /[a-z]/.test(password) ? 'is-ok' : ''}>Upper & lower case</span><span className={/\d/.test(password) ? 'is-ok' : ''}>One number</span><span className={/[^A-Za-z0-9]/.test(password) && !/\s/.test(password) ? 'is-ok' : ''}>One symbol</span></div>}
+      <label className={label}><span className="flex justify-between">REFERRAL CODE<span className="text-[9px] opacity-70">OPTIONAL</span></span><input maxLength={10} value={referral} onChange={e => setReferral(e.target.value.toUpperCase())} className="form-input mt-1.5 font-mono tracking-widest" placeholder="BIX-123456"/></label>
+      {notice && <p role="status" className="text-sm text-chart-2">{notice}</p>}
+      <Button type="submit" disabled={busy} className="mt-2 h-12 w-full rounded-full bg-primary text-sm font-black tracking-widest text-primary-foreground hover:bg-primary/90">{busy ? 'Please wait…' : 'Create account'} <ArrowRight/></Button>
     </form>
+    <div className="my-5 text-center text-[10px] font-bold tracking-widest text-muted-foreground">OR</div>
+    <Button type="button" variant="outline" className="h-12 w-full rounded-full border-border bg-card" onClick={async () => { const r = await lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/auth` }); if (r.error) setNotice(r.error.message); else if (!r.redirected) window.location.assign('/'); }}>Register with Google</Button>
+    <p className="mt-6 text-center text-sm text-muted-foreground">Already have an account? <Link to="/auth" className="font-bold text-chart-2">Sign in</Link></p>
   </div></main></BixShell>;
 }
