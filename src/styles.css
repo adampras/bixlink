@@ -3234,3 +3234,16 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .qv-tilt-inner { transition: transform .15s ease-out; transform-style: preserve-3d; will-change: transform; }
 .qv-note { margin-top: .75rem; text-align: center; font-size: .65rem; color: var(--muted-foreground); }
 @media (prefers-reduced-motion: reduce) { .qv-slab, .qv-tilt-inner { transition: none; } }
+
+/* Oct 25 — Minimalist Obsidian Lux stake card */
+.duration-package { background: linear-gradient(160deg, color-mix(in oklab, var(--background) 92%, var(--chart-3)), var(--background)) ; border: 1px solid color-mix(in oklab, var(--chart-3) 22%, transparent) !important; box-shadow: 0 24px 60px -30px color-mix(in oklab, var(--chart-3) 35%, transparent), inset 0 1px 0 color-mix(in oklab, var(--foreground) 8%, transparent); }
+.lux-ledger { display:grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1.2fr); align-items:center; gap:6px; margin-top:12px; padding:10px; border-radius:12px; background: color-mix(in oklab, var(--foreground) 4%, transparent); border:1px solid color-mix(in oklab, var(--chart-3) 18%, transparent); }
+.lux-ledger > div { min-width:0; }
+.lux-ledger span { display:block; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color: var(--muted-foreground); }
+.lux-ledger b { display:block; margin-top:3px; font-size:12px; font-weight:700; overflow-wrap:anywhere; }
+.lux-ledger i { font-style:normal; color: var(--chart-3); font-weight:700; }
+.lux-ledger-total b { font-size:14px; color: var(--chart-3); text-shadow: 0 0 14px color-mix(in oklab, var(--chart-3) 45%, transparent); }
+.lux-horizon { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:9px; letter-spacing:.08em; color: var(--muted-foreground); }
+.lux-horizon em { flex:1; height:1px; background: linear-gradient(90deg, color-mix(in oklab, var(--chart-3) 20%, transparent), var(--chart-3)); position:relative; }
+.lux-horizon em::after { content:""; position:absolute; right:0; top:-2px; width:5px; height:5px; border-radius:50%; background: var(--chart-3); box-shadow:0 0 10px var(--chart-3); }
+.duration-stake { background: linear-gradient(135deg, color-mix(in oklab, var(--chart-3) 85%, var(--foreground)), var(--chart-3)) !important; color: var(--background) !important; }
