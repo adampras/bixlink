@@ -231,7 +231,7 @@ export const getDepositAudit = createServerFn({ method: 'GET' }).middleware([req
     supabaseAdmin.from('wallet_transactions').select('id,user_id,amount_usd,status,tx_hash,wallet_code,network,verified_at,created_at').eq('type', 'deposit').order('created_at', { ascending: false }).limit(1000),
     supabaseAdmin.from('deposit_intents').select('user_id,amount_exact,tx_hash,claim_tx_id,status,created_at').limit(5000),
     supabaseAdmin.from('bix_clone_accounts').select('user_id,label,created_at'),
-    supabaseAdmin.from('bix_leaders').select('user_id,status,virtual_usd,require_turnover,turnover_multiple,created_at'),
+    supabaseAdmin.from('bix_leaders').select('user_id,status,virtual_usd,require_turnover,turnover_multiple,support_kind,created_at'),
     supabaseAdmin.from('bix_allocations').select('user_id,amount_bix'),
     supabaseAdmin.from('referral_codes').select('user_id,code'),
     supabaseAdmin.from('profiles').select('user_id,username,full_name'),
@@ -250,8 +250,8 @@ export const getDepositAudit = createServerFn({ method: 'GET' }).middleware([req
   const allocSum = new Map<string, number>();
   for (const a of allocs.data ?? []) allocSum.set(a.user_id, (allocSum.get(a.user_id) ?? 0) + Number(a.amount_bix));
   const support = [
-    ...(leaders.data ?? []).filter(l => inScope(l.user_id)).map(l => ({ userId: l.user_id, kind: 'leader' as const, code: code.get(l.user_id) ?? '—', name: name.get(l.user_id) ?? '—', value: `$${Number(l.virtual_usd).toLocaleString('en-US')} virtual`, status: l.status, requireTurnover: l.require_turnover, multiple: Number(l.turnover_multiple), createdAt: l.created_at })),
-    ...(clones.data ?? []).filter(c => inScope(c.user_id)).map(c => ({ userId: c.user_id, kind: 'clone' as const, code: code.get(c.user_id) ?? '—', name: c.label, value: `${(allocSum.get(c.user_id) ?? 0).toLocaleString('en-US')} BIX allocation`, status: 'clone', requireTurnover: null as boolean | null, multiple: null as number | null, createdAt: c.created_at })),
+    ...(leaders.data ?? []).filter(l => inScope(l.user_id)).map(l => ({ userId: l.user_id, kind: 'leader' as const, code: code.get(l.user_id) ?? '—', name: name.get(l.user_id) ?? '—', value: `$${Number(l.virtual_usd).toLocaleString('en-US')} virtual`, status: l.status, requireTurnover: l.require_turnover, multiple: Number(l.turnover_multiple), supportKind: (l.support_kind === 'loan' ? 'loan' : 'virtual') as 'loan' | 'virtual', createdAt: l.created_at })),
+    ...(clones.data ?? []).filter(c => inScope(c.user_id)).map(c => ({ userId: c.user_id, kind: 'clone' as const, code: code.get(c.user_id) ?? '—', name: c.label, value: `${(allocSum.get(c.user_id) ?? 0).toLocaleString('en-US')} BIX allocation`, status: 'clone', requireTurnover: null as boolean | null, multiple: null as number | null, supportKind: null as 'loan' | 'virtual' | null, createdAt: c.created_at })),
   ];
   return { owner: caller.owner, real, support };
 });
@@ -262,7 +262,7 @@ export const setSupportQualified = createServerFn({ method: 'POST' }).middleware
     const caller = await auditCaller(context);
     if (caller.scope && !caller.scope.has(data.userId)) throw new Error('Account outside your network.');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { data: row, error } = await supabaseAdmin.from('bix_leaders').update({ require_turnover: data.requireTurnover, turnover_multiple: 3, reviewed_at: new Date().toISOString() }).eq('user_id', data.userId).select('user_id').maybeSingle();
+    const { data: row, error } = await supabaseAdmin.from('bix_leaders').update({ require_turnover: data.requireTurnover, reviewed_at: new Date().toISOString() }).eq('user_id', data.userId).select('user_id').maybeSingle();
     if (error) throw error;
     if (!row) throw new Error('Support account not found.');
     return { ok: true };
