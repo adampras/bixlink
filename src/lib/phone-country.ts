@@ -38,6 +38,19 @@ export function detectCountry(timeZone?: string, locale?: string): string {
   return 'ID';
 }
 
+/** Detected (default) country first, then China and Singapore, then the rest. */
+export function orderCountries(detected: string): DialCountry[] {
+  const top = [detected, 'CN', 'SG'].filter((v, i, a) => a.indexOf(v) === i);
+  const pinned = top.map(iso => DIAL_COUNTRIES.find(c => c.iso === iso)).filter((c): c is DialCountry => !!c);
+  return [...pinned, ...DIAL_COUNTRIES.filter(c => !top.includes(c.iso))];
+}
+
+export function filterCountries(list: DialCountry[], query: string): DialCountry[] {
+  const q = query.trim().toLowerCase().replace(/^\+/, '');
+  if (!q) return list;
+  return list.filter(c => c.name.toLowerCase().includes(q) || c.iso.toLowerCase() === q || c.dial.startsWith(q));
+}
+
 /** Returns E.164 number (+62812...) or null when invalid. Strips a leading 0 or repeated dial code. */
 export function toE164(dial: string, raw: string): string | null {
   let digits = raw.replace(/\D/g, '');

@@ -2,7 +2,7 @@ import { ModuleGate } from '@/components/ModuleGate';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { VaultStardust } from '@/components/VaultFlourish';
-import { DIAL_COUNTRIES, detectCountry, toE164 } from '@/lib/phone-country';
+import { DIAL_COUNTRIES, detectCountry, toE164, orderCountries, filterCountries } from '@/lib/phone-country';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { passwordValid, PASSWORD_HINT } from '@/lib/password-rule';
@@ -22,10 +22,12 @@ function RegisterPage() {
   const [country, setCountry] = useState('ID'); const [phone, setPhone] = useState('');
   const { ref, target } = Route.useSearch();
   useEffect(() => { if (target === 'presale') window.localStorage.setItem('bixlink-target', 'presale'); }, [target]);
-  useEffect(() => { setCountry(detectCountry(Intl.DateTimeFormat().resolvedOptions().timeZone, navigator.language)); }, []);
   const [showPassword, setShowPassword] = useState(false);
   useEffect(() => { const incoming = ref || window.localStorage.getItem('bixlink-ref') || ''; if (/^BIX-\d{6}$/i.test(incoming)) { const normalized = incoming.toUpperCase(); setReferral(normalized); window.localStorage.setItem('bixlink-ref', normalized); } }, [ref]);
   const dial = DIAL_COUNTRIES.find(c => c.iso === country) ?? DIAL_COUNTRIES[0]!;
+  const [pickerOpen, setPickerOpen] = useState(false); const [query, setQuery] = useState(''); const [detected, setDetected] = useState('ID');
+  useEffect(() => { const d = detectCountry(Intl.DateTimeFormat().resolvedOptions().timeZone, navigator.language); setDetected(d); setCountry(d); }, []);
+  const countryList = filterCountries(orderCountries(detected), query);
   const submit = async (event: React.FormEvent) => {
     event.preventDefault(); setBusy(true); setNotice('');
     try {
@@ -51,7 +53,14 @@ function RegisterPage() {
     <form onSubmit={submit} className="mt-6 space-y-3.5" aria-label="Create BIXLINK account">
       <label className={label}>FULL NAME<input required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={e => setFullName(e.target.value)} className="form-input mt-1.5" placeholder="Your full name"/></label>
       <label className={label}>USERNAME<input required pattern="[A-Za-z0-9_.]{3,24}" maxLength={24} autoComplete="username" value={username} onChange={e => setUsername(e.target.value)} className="form-input mt-1.5" placeholder="3–24 letters or numbers"/></label>
-      <div className={label}><span id="wa-label">WHATSAPP NUMBER</span><div className="mt-1.5 flex gap-2"><select aria-label="Country code" value={country} onChange={e => setCountry(e.target.value)} className="form-input w-[6.5rem] shrink-0 px-2 text-sm">{DIAL_COUNTRIES.map(c => <option key={c.iso} value={c.iso}>{c.flag} +{c.dial}</option>)}</select><input aria-labelledby="wa-label" required type="tel" inputMode="tel" autoComplete="tel-national" value={phone} onChange={e => setPhone(e.target.value)} className="form-input min-w-0 flex-1" placeholder="812 3456 7890"/></div></div>
+      <div className={label}><span id="wa-label">WHATSAPP NUMBER</span><div className="relative mt-1.5 grid grid-cols-[6.75rem_minmax(0,1fr)] gap-2">
+        <button type="button" aria-label="Choose country code" aria-expanded={pickerOpen} onClick={() => { setPickerOpen(v => !v); setQuery(''); }} style={{ width: "6.75rem", flex: "0 0 6.75rem" }} className="form-input flex items-center justify-center gap-1 px-2 text-sm text-foreground"><span>{dial.flag}</span><span>+{dial.dial}</span><span className="text-[10px] opacity-60">▼</span></button>
+        <input id="wa-input" aria-labelledby="wa-label" required type="tel" inputMode="tel" autoComplete="tel-national" value={phone} onChange={e => setPhone(e.target.value)} onFocus={() => setPickerOpen(false)} style={{ flex: "1 1 0%", width: "auto" }} className="form-input min-w-0" placeholder="812 3456 7890"/>
+        {pickerOpen && <div className="absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-xl border border-border bg-background text-foreground shadow-xl">
+          <input autoFocus value={query} onChange={e => setQuery(e.target.value)} placeholder="Search country or code…" aria-label="Search country" className="w-full border-b border-border bg-transparent px-3 py-2.5 text-sm outline-none"/>
+          <ul className="max-h-56 overflow-y-auto py-1" role="listbox">{countryList.length === 0 ? <li className="px-3 py-2 text-xs text-muted-foreground">No country found</li> : countryList.map(c => <li key={c.iso}><button type="button" role="option" aria-selected={c.iso === country} onClick={() => { setCountry(c.iso); setPickerOpen(false); document.getElementById('wa-input')?.focus(); }} className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent ${c.iso === country ? 'text-chart-3' : ''}`}><span>{c.flag}</span><span className="flex-1">{c.name}</span><span className="text-muted-foreground">+{c.dial}</span></button></li>)}</ul>
+        </div>}
+      </div></div>
       <label className={label}>EMAIL<input required type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="form-input mt-1.5" placeholder="you@example.com"/></label>
       <label className={label}>PASSWORD<div className="relative mt-1.5"><input required minLength={6} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} className="form-input pr-12" placeholder="••••••••"/><Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(v => !v)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div></label>
       {password.length > 0 && <div className="pw-rules" aria-live="polite"><span className={password.length >= 8 ? 'is-ok' : ''}>8+ characters</span><span className={/[A-Z]/.test(password) && /[a-z]/.test(password) ? 'is-ok' : ''}>Upper & lower case</span><span className={/\d/.test(password) ? 'is-ok' : ''}>One number</span><span className={/[^A-Za-z0-9]/.test(password) && !/\s/.test(password) ? 'is-ok' : ''}>One symbol</span></div>}
