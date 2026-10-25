@@ -3205,3 +3205,14 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .cyber-panel p{margin-top:.3rem;font-size:.8rem;line-height:1.5;color:var(--muted-foreground)}
 .cyber-panel-icon{color:var(--chart-3)}
 .cyber-tag{font-size:.55rem;letter-spacing:.16em;padding:.2rem .45rem;border-radius:.25rem;border:1px solid color-mix(in oklab,var(--primary) 40%,transparent);color:var(--primary)}
+
+/* ===== Oct 25: BIXLINK title on top, bold; HUD docked low so artwork stays clear ===== */
+.landing-hero-compact.hero-3d .landing-hero-content { padding-top: 22px !important; padding-bottom: 14px !important; min-height: clamp(560px, 150vw, 820px) !important; justify-content: flex-start !important; }
+.landing-hero-compact.hero-3d .hero-title { margin-top: 0 !important; font-size: clamp(64px, 21vw, 150px) !important; font-weight: 900 !important; line-height: .9 !important; letter-spacing: .02em !important; -webkit-text-stroke: 1px color-mix(in oklab, var(--chart-3) 40%, transparent); }
+.landing-hero-compact.hero-3d .hero-tagline { margin-top: .6rem !important; }
+.landing-hero-compact.hero-3d .cyber-hud { margin-top: auto !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; max-width: 40rem; border-radius: .5rem; background: color-mix(in oklab, var(--chart-3) 18%, transparent); }
+.landing-hero-compact.hero-3d .cyber-hud-cell { background: color-mix(in oklab, var(--background) 55%, transparent); padding: .35rem .2rem; }
+.landing-hero-compact.hero-3d .cyber-hud-cell span { font-size: .48rem; letter-spacing: .12em; }
+.landing-hero-compact.hero-3d .cyber-hud-cell b { font-size: .6rem; }
+.landing-hero-compact.hero-3d .cyber-ctas { margin-top: .6rem; }
+.landing-hero-compact.hero-3d .cyber-ctas .cyber-btn { padding-block: .55rem; font-size: .7rem; }
