@@ -1,26 +1,38 @@
-import { useState } from 'react';
-import { Search, X } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { ChevronDown, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-type Group = { title: string; tabs: [string, string][] };
-export function AdminNavigation({ groups, tab, onSelect }: { groups: Group[]; tab: string; onSelect: (tab: string) => void }) {
+export type AdminGroup = { title: string; tone: 'gold' | 'cyan' | 'emerald' | 'violet' | 'rose' | 'slate'; hint: string; tabs: [string, string][] };
+
+/** Color-coded category columns; each column lists its own menus so nothing is hidden behind a second click. */
+export function AdminNavigation({ groups, tab, onSelect }: { groups: AdminGroup[]; tab: string; onSelect: (tab: string) => void }) {
   const [query, setQuery] = useState('');
-  const selectedGroup = groups.find(group => group.tabs.some(([name]) => name === tab)) ?? groups[0];
   const term = query.trim().toLowerCase();
-  const visible = term ? groups.map(group => ({ ...group, tabs: group.tabs.filter(([name, keywords]) => `${name} ${keywords}`.toLowerCase().includes(term)) })).filter(group => group.tabs.length > 0) : selectedGroup ? [selectedGroup] : [];
+  const visible = groups.map(g => ({ ...g, tabs: term ? g.tabs.filter(([n, k]) => `${n} ${k} ${g.title}`.toLowerCase().includes(term)) : g.tabs })).filter(g => g.tabs.length);
   return <nav aria-label="Owner sections" className="admin-navigation mt-6 min-w-0 border-b border-border pb-5">
     <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg border border-border bg-card px-3">
       <Search size={16} className="shrink-0 text-primary"/>
-      <input aria-label="Cari menu admin" className="min-w-0 bg-transparent py-3 text-sm outline-none" placeholder="Cari menu admin…" value={query} onChange={event => setQuery(event.target.value)}/>
+      <input aria-label="Cari menu admin" className="min-w-0 bg-transparent py-3 text-sm outline-none" placeholder="Cari menu admin…" value={query} onChange={e => setQuery(e.target.value)}/>
       {query ? <Button size="icon" variant="ghost" aria-label="Hapus pencarian" className="size-8" onClick={() => setQuery('')}><X size={14}/></Button> : <span className="size-8"/>}
     </div>
-    <div role="group" aria-label="Kategori admin" className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
-      {groups.map(group => <Button key={group.title} variant={selectedGroup?.title === group.title ? 'default' : 'outline'} aria-pressed={selectedGroup?.title === group.title} className="h-auto min-h-11 whitespace-normal px-2 text-xs" onClick={() => { const first = group.tabs[0]; if (first) onSelect(first[0]); setQuery(''); }}>{group.title}</Button>)}
+    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {visible.map(g => <section key={g.title} className={`admin-cat admin-cat--${g.tone}`}>
+        <header><b>{g.title}</b><small>{g.hint}</small></header>
+        <div className="grid grid-cols-2 gap-1.5">{g.tabs.map(([name]) => <button key={name} type="button" aria-pressed={tab === name} className="admin-cat-btn" onClick={() => { onSelect(name); setQuery(''); }}>{name}</button>)}</div>
+      </section>)}
     </div>
-    <div className="mt-4 space-y-4">{visible.map(group => <div key={group.title}>
-      {term && <h2 className="mb-2 text-xs font-bold text-muted-foreground">{group.title}</h2>}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{group.tabs.map(([name]) => <Button key={name} size="sm" variant={tab === name ? 'secondary' : 'ghost'} aria-pressed={tab === name} className="h-auto min-h-10 whitespace-normal border border-border px-2 text-xs" onClick={() => { onSelect(name); setQuery(''); }}>{name}</Button>)}</div>
-    </div>)}</div>
     {!visible.length && <p role="status" className="mt-4 text-sm text-muted-foreground">Menu tidak ditemukan.</p>}
   </nav>;
+}
+
+/** Collapsible section for long lists/history so the page stays short. */
+export function AdminFold({ title, tone = 'slate', badge, defaultOpen = false, children }: { title: string; tone?: AdminGroup['tone']; badge?: ReactNode; defaultOpen?: boolean; children: ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return <section className={`admin-fold admin-cat--${tone} mt-4`}>
+    <button type="button" aria-expanded={open} className="admin-fold-head" onClick={() => setOpen(o => !o)}>
+      <span className="admin-fold-dot"/><b>{title}</b>{badge !== undefined && <span className="admin-fold-badge">{badge}</span>}
+      <span className="ml-auto text-xs">{open ? 'Tutup' : 'Buka'}</span><ChevronDown size={16} className={`transition-transform ${open ? 'rotate-180' : ''}`}/>
+    </button>
+    {open && <div className="admin-fold-body">{children}</div>}
+  </section>;
 }

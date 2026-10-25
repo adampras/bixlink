@@ -104,7 +104,22 @@ async function toggle(admin: any, which: 'loan' | 'register', arg: string) {
   return `✅ ${which === 'loan' ? 'Akun pinjaman' : 'Pendaftaran'} sekarang <b>${on ? 'ON' : 'OFF'}</b>`;
 }
 
-const HELP = ['<b>🦊 BIXLINK Command Center</b>', '/ringkasan — laporan lengkap', '/pending — antrean deposit & withdraw (dengan tombol)', '/member KODE — detail member', '/saklar_loan on|off — akun pinjaman', '/saklar_daftar on|off — pendaftaran member'].join('\n');
+export async function loanQuotaText(admin: any, sponsorId: string) {
+  const { data } = await admin.rpc('bix_loan_quota', { p_sponsor: sponsorId });
+  const q = (data?.quota ?? []) as { price: number; max: number; used: number }[];
+  const lines = q.map(r => `  • $${Number(r.price).toLocaleString('en-US')}: ${r.used}/${r.max} ${r.used >= r.max ? '(PENUH)' : `(Tersedia ${r.max - r.used})`}`);
+  return `${data?.sponsor_is_loan ? '' : '<i>Sponsor bukan akun loan — kuota tidak berlaku.</i>\n'}📊 Kuota direct level 1:\n${lines.join('\n')}`;
+}
+
+async function loanQuota(admin: any, q: string) {
+  const term = q.trim();
+  if (!term) return 'Format: /loan_kuota KODE';
+  const { data: rc } = await admin.from('referral_codes').select('user_id,code').ilike('code', term).maybeSingle();
+  if (!rc) return 'Kode tidak ditemukan.';
+  return `<b>🎟️ KUOTA LOAN · ${esc(rc.code)}</b>\n${await loanQuotaText(admin, rc.user_id)}`;
+}
+
+const HELP = ['<b>🦊 BIXLINK Command Center</b>', '/ringkasan — laporan lengkap', '/pending — antrean deposit & withdraw (dengan tombol)', '/member KODE — detail member', '/saklar_loan on|off — akun pinjaman', '/saklar_daftar on|off — pendaftaran member', '/loan_kuota KODE — sisa kuota sponsor loan'].join('\n');
 
 export async function handleUpdate(admin: any, update: any) {
   const owner = String(process.env['TELEGRAM_CHAT_ID'] ?? '');
@@ -133,5 +148,6 @@ export async function handleUpdate(admin: any, update: any) {
   if (cmd === '/member') return reply(msg.chat.id, await member(admin, arg));
   if (cmd === '/saklar_loan') return reply(msg.chat.id, await toggle(admin, 'loan', arg));
   if (cmd === '/saklar_daftar') return reply(msg.chat.id, await toggle(admin, 'register', arg));
+  if (cmd === '/loan_kuota') return reply(msg.chat.id, await loanQuota(admin, arg));
   return reply(msg.chat.id, HELP);
 }
