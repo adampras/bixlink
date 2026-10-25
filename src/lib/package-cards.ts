@@ -29,5 +29,5 @@ export const PACKAGE_CARDS: Record<string, { name: string; url: string }> = {
 };
 /** Packages without a named card (clones, custom) get the STK card matching their value. */
 const STEPS = [10, 30, 100, 500, 1000, 3000, 5000, 7000, 10000, 10001];
-export const stkCardFor = (usd: number) => STK_CARDS[Math.max(0, STEPS.filter(v => usd >= v).length - 1)];
+export const stkCardFor = (usd: number): { name: string; url: string } => STK_CARDS[Math.max(0, STEPS.filter(v => usd >= v).length - 1)] ?? STK_CARDS[0];
 export const packageCard = (id?: string | null, usd?: number) => (id && PACKAGE_CARDS[id.toUpperCase()]) || (usd != null ? stkCardFor(usd) : undefined);
