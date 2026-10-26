@@ -15,6 +15,11 @@ export const QUEST_LABELS: Record<QuestKey, { title: string; hint: string; perio
 };
 export const VBIX_CAP = 100;
 
+/** Detect a stale read-back instead of reporting an unsaved reward as saved. */
+export function arenaRewardsMatch(expected: { rewards: Partial<Record<QuestKey, number>>; cap?: number }, actual: { rewards: Partial<Record<QuestKey, number>>; cap?: number }) {
+  return (expected.cap ?? 0) === (actual.cap ?? 0) && QUEST_KEYS.every(key => expected.rewards[key] === undefined || expected.rewards[key] === actual.rewards[key]);
+}
+
 /** Reward actually granted: never above the remaining per-account cap or pool. */
 export function questPayout(reward: number, accountTotal: number, poolUsed: number, cap = VBIX_CAP, pool = 1_000_000) {
   return Math.max(0, Math.min(reward, cap - accountTotal, pool - poolUsed));

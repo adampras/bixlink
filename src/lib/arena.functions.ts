@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
-import { QUEST_KEYS, type QuestKey } from './arena';
+import { QUEST_KEYS, arenaRewardsMatch, type QuestKey } from './arena';
 
 export type ArenaStatus = {
   enabled: boolean; leaderboard: boolean; rewards: Record<QuestKey, number>; missions: Record<QuestKey, boolean>;
@@ -39,7 +39,11 @@ export const saveArena = createServerFn({ method: 'POST' }).middleware([requireS
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.rpc('bix_arena_save', { p_config: data });
     if (error) throw new Error(error.message);
-    return { ok: true };
+    const result = await context.supabase.rpc('bix_arena_admin_config');
+    if (result.error) throw new Error(result.error.message);
+    const saved = result.data as unknown as { config: ArenaConfig };
+    if (!arenaRewardsMatch(data, saved.config)) throw new Error('Reward changes could not be verified. Please reload and try again.');
+    return { ok: true, config: saved.config };
   });
 
 export const closeSeason = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
