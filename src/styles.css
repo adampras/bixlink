@@ -3287,7 +3287,7 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 @media (max-width: 1279px) {
   .admin1-shell > header.site-header, .admin1-shell .market-ticker, .admin1-shell .quantum-hud, .admin1-shell .admin1-title, .admin1-shell > footer, .admin1-shell .admin-cat header small, .admin1-shell .admin-navigation > p { display: none !important; }
   .admin1-shell main { padding-top: .75rem !important; padding-left: .6rem !important; padding-right: .6rem !important; }
-  .admin1-shell .admin-navigation { margin-top: 0; }
+  .admin1-shell .admin-navigation { margin-top: 0; position:relative; top:auto; }
 }
 
 /* Swipe deck (widget-stack style) */
