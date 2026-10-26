@@ -20,6 +20,7 @@ import { NationAlliance } from '@/components/NationAlliance';
 import { PreTgeRoadmap } from '@/components/PreTgeRoadmap';
 import { TrustCenter } from '@/components/TrustCenter';
 import { CryptoNewsFeed } from '@/components/CryptoNewsFeed';
+import { LiveActivityTicker } from '@/components/LiveActivityTicker';
 import { DevTeamGrid } from '@/components/DevTeamGrid';
 import { defaultLandingContent, defaultRoadmap, defaultSpaces, type LandingContent } from '@/lib/landing-content';
 export { defaultLandingContent, type LandingContent } from '@/lib/landing-content';
@@ -41,11 +42,12 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
       </div>
       <div className="lux-ticker" aria-label="BIXLINK protocol highlights"><div className="lux-ticker-track">{[0,1].map(k => <span key={k} aria-hidden={k===1}>{['21.000.000 BIX FIXED SUPPLY','DEFLATIONARY HALVING','NON-CUSTODIAL MODEL','RWA NARRATIVE','SMART CONTRACT READY','COMMUNITY TO DAO'].map(t => <b key={t}>◆ {t}</b>)}</span>)}</div></div>
     </section>
-    {config?.readiness.presaleStageEnabled !== false && <div className="landing-presale-band"><HeroPresaleRibbon/></div>}
+    {config?.readiness.presaleStageEnabled !== false && <div className="landing-presale-band"><HeroPresaleRibbon/><LiveActivityTicker/></div>}
     <CyberBento/>
     <section className="mx-auto max-w-3xl px-5 pt-5 pb-2 text-center md:py-10"><div className="eyebrow justify-center">OFFICIAL BIXCOIN</div><div className="coin-stage coin-stage--vault" aria-label="BIXCOIN official coin"><img src={vaultBg} alt="" aria-hidden className="coin-vault-art"/><div className="coin-embers" aria-hidden>{Array.from({length:14},(_,i)=><i key={i} style={{left:`${6+i*6.5}%`,animationDelay:`${(i*0.53)%7}s`,animationDuration:`${6+(i%4)}s`,['--dx' as string]:`${(i%2?1:-1)*(8+i%5*4)}px`}}/>)}</div><div className="coin-float"><img src={coinCutout} alt="BIXCOIN official gold coin" className="coin-3d" width={260} height={260}/></div><div className="coin-pedestal" aria-hidden><span/></div><div className="coin-caption"><span>21,000,000 BIX · FIXED SUPPLY</span><strong>BIX BOOSTER UP TO {maximum}% · PROJECTION</strong></div></div></section>
     <PoweredBy slim/>
     <NationAlliance/>
+    <DevTeamGrid/>
     <LandingNarrative content={content}/>
     <section className="landing-ecosystem border-y border-border"><div className="mx-auto max-w-7xl px-5 py-8 md:px-8 md:py-14"><div className="eyebrow">THE BIXLINK ADVANTAGE</div><h2 className="section-title">PREMIUM <span>ECOSYSTEM</span></h2><div className="mt-5 grid gap-4 md:mt-8 md:gap-5 lg:grid-cols-2"><article className="ecosystem-column"><header><span className="ecosystem-icon text-primary"><Globe2/></span><div><small>CONNECTED UTILITY</small><h3>Ecosystem core</h3></div></header><div className="ecosystem-list">{content.ecosystem.map((item, index) => item.enabled === false ? null : <ContentLink group="ecosystem" index={index} item={item} key={`${item.title}-${index}`}><div><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div></ContentLink>)}</div></article><article className="ecosystem-column ecosystem-column--income"><header><span className="ecosystem-icon text-chart-3"><CircleDollarSign/></span><div><small>DISCLOSED SOURCES</small><h3>Income narrative</h3></div></header><div className="ecosystem-list">{content.income.map((item, index) => item.enabled === false ? null : <ContentLink group="income" index={index} item={item} key={`${item.title}-${index}`}><div><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div></ContentLink>)}</div></article></div><div className="ecosystem-disclosure"><ShieldCheck/><span>Public narratives are owner-managed. Recorded income is not presented as audited revenue or guaranteed return.</span><Building2/></div></div></section>
     <section className="mx-auto max-w-7xl px-5 py-8 md:px-8"><ContentCarousel group="spaces" title="Development Categories" items={content.spaces ?? defaultSpaces}/></section>
@@ -55,7 +57,6 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><ContentCarousel group="roadmap" title="BIXLINK Roadmap" items={content.roadmap ?? defaultRoadmap}/></section>
     <CryptoNewsFeed />
     <section className="mx-auto max-w-3xl px-5 pb-16 md:px-8"><div className="eyebrow">FAQ</div><h2 className="section-title">FREQUENTLY ASKED <span>QUESTIONS</span></h2><div className="mt-6 space-y-3">{FAQ.map(f => <details key={f.q} className="group rounded-2xl border border-chart-3/20 bg-card/50 p-4 backdrop-blur-md"><summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-bold">{f.q}<span className="text-chart-3 transition group-open:rotate-45">+</span></summary><p className="mt-3 text-xs leading-6 text-muted-foreground">{f.a}</p></details>)}</div></section>
-    <DevTeamGrid/>
   </div>;
 }
 const FAQ = [
