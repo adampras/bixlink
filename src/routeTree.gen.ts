@@ -24,6 +24,7 @@ import { Route as MarketRouteImport } from './routes/market'
 import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as NetworkRouteImport } from './routes/network'
 import { Route as NftMarketplaceRouteImport } from './routes/nft-marketplace'
+import { Route as OwnerDeskRouteImport } from './routes/owner-desk'
 import { Route as P2pRouteImport } from './routes/p2p'
 import { Route as PayRouteImport } from './routes/pay'
 import { Route as PresaleRouteImport } from './routes/presale'
@@ -122,6 +123,11 @@ const NetworkRoute = NetworkRouteImport.update({
 const NftMarketplaceRoute = NftMarketplaceRouteImport.update({
   id: '/nft-marketplace',
   path: '/nft-marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OwnerDeskRoute = OwnerDeskRouteImport.update({
+  id: '/owner-desk',
+  path: '/owner-desk',
   getParentRoute: () => rootRouteImport,
 } as any)
 const P2pRoute = P2pRouteImport.update({
@@ -263,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/marketing': typeof MarketingRoute
   '/network': typeof NetworkRoute
   '/nft-marketplace': typeof NftMarketplaceRoute
+  '/owner-desk': typeof OwnerDeskRoute
   '/p2p': typeof P2pRoute
   '/pay': typeof PayRoute
   '/presale': typeof PresaleRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/marketing': typeof MarketingRoute
   '/network': typeof NetworkRoute
   '/nft-marketplace': typeof NftMarketplaceRoute
+  '/owner-desk': typeof OwnerDeskRoute
   '/p2p': typeof P2pRoute
   '/pay': typeof PayRoute
   '/presale': typeof PresaleRoute
@@ -346,6 +354,7 @@ export interface FileRoutesById {
   '/marketing': typeof MarketingRoute
   '/network': typeof NetworkRoute
   '/nft-marketplace': typeof NftMarketplaceRoute
+  '/owner-desk': typeof OwnerDeskRoute
   '/p2p': typeof P2pRoute
   '/pay': typeof PayRoute
   '/presale': typeof PresaleRoute
@@ -389,6 +398,7 @@ export interface FileRouteTypes {
     | '/marketing'
     | '/network'
     | '/nft-marketplace'
+    | '/owner-desk'
     | '/p2p'
     | '/pay'
     | '/presale'
@@ -430,6 +440,7 @@ export interface FileRouteTypes {
     | '/marketing'
     | '/network'
     | '/nft-marketplace'
+    | '/owner-desk'
     | '/p2p'
     | '/pay'
     | '/presale'
@@ -471,6 +482,7 @@ export interface FileRouteTypes {
     | '/marketing'
     | '/network'
     | '/nft-marketplace'
+    | '/owner-desk'
     | '/p2p'
     | '/pay'
     | '/presale'
@@ -513,6 +525,7 @@ export interface RootRouteChildren {
   MarketingRoute: typeof MarketingRoute
   NetworkRoute: typeof NetworkRoute
   NftMarketplaceRoute: typeof NftMarketplaceRoute
+  OwnerDeskRoute: typeof OwnerDeskRoute
   P2pRoute: typeof P2pRoute
   PayRoute: typeof PayRoute
   PresaleRoute: typeof PresaleRoute
@@ -644,6 +657,13 @@ declare module '@tanstack/react-router' {
       path: '/nft-marketplace'
       fullPath: '/nft-marketplace'
       preLoaderRoute: typeof NftMarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/owner-desk': {
+      id: '/owner-desk'
+      path: '/owner-desk'
+      fullPath: '/owner-desk'
+      preLoaderRoute: typeof OwnerDeskRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p2p': {
@@ -833,6 +853,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketingRoute: MarketingRoute,
   NetworkRoute: NetworkRoute,
   NftMarketplaceRoute: NftMarketplaceRoute,
+  OwnerDeskRoute: OwnerDeskRoute,
   P2pRoute: P2pRoute,
   PayRoute: PayRoute,
   PresaleRoute: PresaleRoute,
