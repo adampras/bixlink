@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Activity, BookOpen, Database, Eye, FileCheck, Lock, ShieldCheck, Users } from 'lucide-react';
 import { getMarketSentiment } from '@/lib/sentiment.functions';
+import { GlobalOrbit, SwipeDeck } from '@/components/SwipeDeck';
 
 const pillars = [
   { Icon: Database, title: 'Internal Ledger Engine', desc: 'All balances are transparent internal ledger records, reconciled by the protocol before any on-chain deployment.' },
@@ -20,34 +21,35 @@ export function TrustCenter({ bixPrice, serverNow }: { bixPrice: number; serverN
         <div className="eyebrow"><ShieldCheck size={13}/> TRANSPARENCY &amp; SECURITY</div>
         <h2 className="section-title">PROTOCOL <span>TRUST CENTER</span></h2>
         <p className="mt-2 max-w-2xl text-xs leading-5 text-muted-foreground">BIXLINK is in its pre-TGE stage. Instead of claiming unaudited on-chain status, we publish exactly how the protocol protects members today.</p>
+        <GlobalOrbit caption="TRUSTED BY MEMBERS WORLDWIDE"/>
 
-        <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <div className="rounded-xl border border-border bg-card/70 p-3 backdrop-blur">
+        <div className="mt-6"><SwipeDeck label="Live protocol signals">
+          <div className="rounded-2xl border border-border bg-card/70 p-4 backdrop-blur">
             <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">BIX pre-launch reference</span>
-            <strong className="numeric mt-1 block text-lg text-chart-3">${bixPrice.toFixed(6)}</strong>
+            <strong className="numeric mt-1 block text-2xl text-chart-3">${bixPrice.toFixed(6)}</strong>
             <small className="text-[10px] text-muted-foreground">Owner-managed internal index · not an exchange price</small>
           </div>
-          <div className="rounded-xl border border-border bg-card/70 p-3 backdrop-blur">
+          <div className="rounded-2xl border border-border bg-card/70 p-4 backdrop-blur">
             <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Global market sentiment</span>
-            <strong className="numeric mt-1 block text-lg text-foreground">{sentiment ? `${sentiment.value} · ${sentiment.label}` : '—'}</strong>
+            <strong className="numeric mt-1 block text-2xl text-foreground">{sentiment ? `${sentiment.value} · ${sentiment.label}` : '—'}</strong>
             <small className="text-[10px] text-muted-foreground">Live Fear &amp; Greed Index · alternative.me</small>
           </div>
-          <div className="rounded-xl border border-border bg-card/70 p-3 backdrop-blur">
+          <div className="rounded-2xl border border-border bg-card/70 p-4 backdrop-blur">
             <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Ledger engine status</span>
-            <strong className="mt-1 flex items-center gap-1.5 text-lg text-chart-2"><Activity size={16}/> ONLINE</strong>
+            <strong className="mt-1 flex items-center gap-1.5 text-2xl text-chart-2"><Activity size={18}/> ONLINE</strong>
             <small className="numeric text-[10px] text-muted-foreground">{serverNow ? `Synced ${new Date(serverNow).toUTCString().slice(17, 25)} UTC` : 'Real-time server sync'}</small>
           </div>
-        </div>
+        </SwipeDeck></div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6"><SwipeDeck label="Security pillars" desktopCols="md:grid-cols-3">
           {pillars.map(({ Icon, title, desc }) => (
-            <article key={title} className="rounded-xl border border-border bg-card/60 p-4 backdrop-blur">
+            <article key={title} className="rounded-2xl border border-border bg-card/60 p-4 backdrop-blur">
               <span className="inline-grid h-9 w-9 place-items-center rounded-lg border border-chart-3/30 bg-chart-3/10 text-chart-3"><Icon size={17}/></span>
               <h3 className="mt-3 text-sm font-bold">{title}</h3>
               <p className="mt-1 text-[11px] leading-5 text-muted-foreground">{desc}</p>
             </article>
           ))}
-        </div>
+        </SwipeDeck></div>
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
           <div className="flex items-center gap-2 text-xs text-muted-foreground"><BookOpen size={15} className="text-primary"/><span>Read the full protocol architecture, tokenomics and risk disclosures.</span></div>
