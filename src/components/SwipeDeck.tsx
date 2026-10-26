@@ -27,7 +27,7 @@ export function SwipeDeck({ children, label, desktopCols = 'md:grid-cols-3' }: {
 /** Global-presence visual: orbiting rings over a glowing globe. Decorative only. */
 export function GlobalOrbit({ caption }: { caption: string }) {
   return <div className="global-orbit" aria-hidden>
-    <div className="global-orbit-globe"/>
+    <div className="global-orbit-globe"><span className="gl-mer m1"/><span className="gl-mer m2"/><span className="gl-mer m3"/><span className="gl-lat"/></div>
     <div className="global-orbit-ring r1"><i/></div>
     <div className="global-orbit-ring r2"><i/></div>
     <div className="global-orbit-ring r3"><i/></div>

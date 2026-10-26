@@ -3319,3 +3319,34 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .landing-presale-band .hero-ribbon { width: 100%; }
 .landing-presale-band .live-activity-ticker { width: 100%; max-width: 560px; margin: 0 auto; border-radius: 12px; }
 .landing-presale-band .live-activity-ticker b { margin-right: 36px; }
+
+/* Lux presale button under major coins */
+.lux-presale-btn{margin:12px;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px 16px;border-radius:999px;border:1px solid color-mix(in oklab,var(--primary) 55%,transparent);background:linear-gradient(120deg,color-mix(in oklab,var(--background) 85%,transparent),color-mix(in oklab,var(--primary) 18%,transparent),color-mix(in oklab,var(--background) 85%,transparent));background-size:200% 100%;animation:lux-sheen 6s linear infinite;color:var(--primary);font-size:11px;font-weight:800;letter-spacing:.18em;box-shadow:0 0 24px -8px var(--primary)}
+.lux-presale-btn b{color:var(--foreground);letter-spacing:0}
+.lux-presale-dot{width:7px;height:7px;border-radius:50%;background:var(--chart-2);box-shadow:0 0 10px var(--chart-2)}
+@keyframes lux-sheen{to{background-position:-200% 0}}
+
+/* Lux hero presale */
+.hero-ribbon-lux{position:relative;overflow:hidden;border-radius:20px;border:1px solid color-mix(in oklab,var(--primary) 45%,transparent);background:linear-gradient(160deg,color-mix(in oklab,var(--card) 92%,transparent),color-mix(in oklab,var(--background) 96%,transparent));box-shadow:inset 0 1px 0 color-mix(in oklab,var(--foreground) 10%,transparent),0 20px 50px -25px var(--primary);backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 14px}
+.hero-ribbon-lux::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,color-mix(in oklab,var(--chart-3) 18%,transparent),transparent);transform:translateX(-100%);animation:lux-scan 5s ease-in-out infinite;pointer-events:none}
+@keyframes lux-scan{60%,100%{transform:translateX(100%)}}
+.lux-count{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:340px}
+.lux-count div{border-radius:12px;border:1px solid color-mix(in oklab,var(--chart-3) 35%,transparent);background:color-mix(in oklab,var(--background) 70%,transparent);padding:8px 0;text-align:center}
+.lux-count b{display:block;font-size:22px;color:var(--primary);text-shadow:0 0 14px color-mix(in oklab,var(--primary) 60%,transparent)}
+.lux-count small{font-size:8px;letter-spacing:.2em;color:var(--muted-foreground)}
+
+/* 3D holographic globe */
+.global-orbit{perspective:600px;height:190px}
+.global-orbit-globe{position:relative;width:104px;height:104px;transform-style:preserve-3d;overflow:hidden;background:radial-gradient(circle at 32% 28%,color-mix(in oklab,var(--foreground) 55%,transparent),color-mix(in oklab,var(--chart-3) 70%,transparent) 22%,color-mix(in oklab,var(--primary) 45%,transparent) 60%,color-mix(in oklab,var(--background) 90%,transparent) 78%);box-shadow:inset -14px -12px 30px color-mix(in oklab,var(--background) 80%,transparent),0 0 60px -6px var(--chart-3)}
+.gl-mer{position:absolute;inset:0;border-radius:50%;border:1px solid color-mix(in oklab,var(--chart-3) 55%,transparent);animation:gl-rot 8s linear infinite}
+.gl-mer.m2{animation-delay:-2.7s}.gl-mer.m3{animation-delay:-5.3s}
+@keyframes gl-rot{from{transform:scaleX(1)}50%{transform:scaleX(.05)}to{transform:scaleX(1)}}
+.gl-lat{position:absolute;inset:0;border-radius:50%;background:repeating-linear-gradient(0deg,transparent 0 12px,color-mix(in oklab,var(--chart-3) 30%,transparent) 12px 13px)}
+.global-orbit-ring{transform-style:preserve-3d}
+.global-orbit-ring.r1{transform:rotateX(70deg);animation-name:orbit-spin3d}
+.global-orbit-ring.r2{transform:rotateX(65deg) rotateY(20deg)}
+.global-orbit-ring.r3{transform:rotateX(75deg) rotateY(-15deg)}
+.global-orbit-ring i{background:var(--primary);box-shadow:0 0 14px var(--primary)}
+@keyframes orbit-spin3d{from{transform:rotateX(70deg) rotateZ(0)}to{transform:rotateX(70deg) rotateZ(360deg)}}
+@keyframes orbit-spin{from{transform:rotateX(68deg) rotateZ(0)}to{transform:rotateX(68deg) rotateZ(360deg)}}
+@media (prefers-reduced-motion:reduce){.gl-mer,.lux-presale-btn,.hero-ribbon-lux::before{animation:none}}
