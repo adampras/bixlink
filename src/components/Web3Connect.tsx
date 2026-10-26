@@ -54,15 +54,13 @@ export function Web3Connect() {
     } catch (e) { setErr(e instanceof Error ? e.message : 'Wallet linking cancelled.'); }
     finally { setBusy(false); }
   }
-  return <section className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-primary/40 bg-card/80 px-4 py-3">
-    <div className="flex min-w-0 items-center gap-3"><Wallet className="shrink-0 text-primary" size={20}/>
-      <div className="min-w-0"><b className="block text-sm">{addr ? short(addr) : 'Web3 Wallet'}</b>
-        <span className="text-[11px] text-muted-foreground">{addr ? `${CHAINS[chain] ?? 'Unknown network'} · connected` : 'Connect TokenPocket, MetaMask or Trust Wallet'}</span>
-        {err && <span className="block text-[11px] text-destructive">{err}</span>}</div></div>
-    {addr ? <Button size="sm" variant="outline" className="rounded-full" onClick={() => setAddr('')}><LogOut size={14}/>Disconnect</Button>
-      : <Button size="sm" className="rounded-full" onClick={connect}>Connect Wallet</Button>}
-    {user && addr && <Button size="sm" variant="outline" disabled={busy || linked === addr.toLowerCase()} onClick={enroll}>{busy ? 'Verifying…' : linked === addr.toLowerCase() ? 'Linked for sign-in' : 'Link BNB wallet for sign-in'}</Button>}
-    {linked && <p role="status" className="w-full text-xs text-chart-2">Wallet linked to your existing account. No funds or token approvals were requested.</p>}
-    <p className="flex w-full items-center gap-1 text-[10px] text-muted-foreground"><ShieldCheck size={11}/>Deposits are recorded as PENDING by TxID. Withdrawals and bonuses are always reviewed by the admin.</p>
+  const isLinked = !!addr && linked === addr.toLowerCase();
+  return <section aria-label="Web3 wallet" className="mb-4 flex flex-wrap items-center justify-end gap-1.5">
+    {addr && <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-primary/30 bg-card/60 px-3 text-[11px] font-bold backdrop-blur-md"><i className="size-1.5 rounded-full bg-chart-2"/>{CHAINS[chain] ?? 'Network'} · {short(addr)}</span>}
+    {user && addr && <button type="button" disabled={busy || isLinked} onClick={enroll} className="inline-flex h-8 items-center gap-1 rounded-full border border-chart-3/40 bg-card/60 px-3 text-[11px] font-bold text-chart-3 backdrop-blur-md disabled:opacity-70"><ShieldCheck size={12}/>{busy ? 'Verifying…' : isLinked ? 'Linked' : 'Link'}</button>}
+    {addr ? <button type="button" aria-label="Disconnect wallet" onClick={() => setAddr('')} className="inline-flex size-8 items-center justify-center rounded-full border border-border bg-card/60 text-muted-foreground"><LogOut size={13}/></button>
+      : <button type="button" onClick={connect} title="Withdrawals and bonuses are always reviewed by the admin." className="inline-flex h-8 items-center gap-1.5 rounded-full border border-primary/40 bg-card/60 px-3 text-[11px] font-bold text-primary backdrop-blur-md"><Wallet size={13}/>Connect Web3</button>}
+    {err && <p role="alert" className="w-full text-right text-[10px] text-destructive">{err}</p>}
+    {linked && <p role="status" className="w-full text-right text-[10px] text-chart-2">Linked for sign-in. No funds or approvals requested.</p>}
   </section>;
 }
