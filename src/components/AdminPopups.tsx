@@ -51,6 +51,6 @@ export function AdminPopups({ content, onMessage, onSaved }: { content?: Landing
         <div className="grid gap-2 sm:grid-cols-2"><input className="form-input" maxLength={24} placeholder="Teks tombol (opsional)" value={it.ctaLabel ?? ''} onChange={e => set(i, { ctaLabel: e.target.value })}/><input className="form-input" maxLength={300} placeholder="Link /presale atau https://…" value={it.url ?? ''} onChange={e => set(i, { url: e.target.value })}/></div>
       </div>
     </article>)}
-    <div className="flex flex-wrap gap-2"><Button type="button" variant="outline" disabled={items.length >= 8} onClick={() => setItems(cur => [...cur, { title: '', description: '', placement: 'home', enabled: true }])}><Plus/> Tambah pop-up</Button><Button type="button" disabled={Boolean(busy)} onClick={() => void persist()}><Save/>{busy === 'save' ? 'Menyimpan…' : 'Simpan'}</Button></div>
+    <div className="flex flex-wrap gap-2"><Button type="button" variant="outline" disabled={items.length >= 8} onClick={() => setItems(cur => [...cur, { title: '', description: '', placement: 'home', enabled: true }])}><Plus/> Tambah pop-up</Button><Button type="button" disabled={Boolean(busy)} onClick={() => void persist()}><Save/>{busy === 'save' ? 'Menyimpan…' : 'Save'}</Button></div>
   </section>;
 }

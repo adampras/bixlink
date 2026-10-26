@@ -24,6 +24,6 @@ export function AdminStakingSkin({ onMessage }: { onMessage: (m: string) => void
     <div className="flex items-center justify-between rounded-xl border border-border px-3 py-2"><span className="text-sm">Aktifkan</span><Button size="sm" variant={enabled ? 'default' : 'outline'} aria-pressed={enabled} onClick={() => setEnabled(v => !v)}>{enabled ? 'ON' : 'OFF'}</Button></div>
     <label className="text-xs font-bold uppercase text-muted-foreground">Kode member owner (pisahkan dengan koma)</label>
     <input value={codes} onChange={e => setCodes(e.target.value)} placeholder="BIX-978455, BIX-123456" className="rounded-xl border border-border bg-background px-3 py-2 text-sm"/>
-    <Button disabled={busy} onClick={save}>{busy ? 'Menyimpan…' : 'Simpan'}</Button>
+    <Button disabled={busy} onClick={save}>{busy ? 'Menyimpan…' : 'Save'}</Button>
   </section>;
 }
