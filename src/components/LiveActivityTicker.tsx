@@ -36,7 +36,7 @@ export function LiveActivityTicker() {
   const real: Row[] = (data ?? []).filter(r => r.amount_usd > 0).map(r => ({ ...countryOf(r.dial), text: label(r.kind, r.amount_usd), real: true }));
   const sim: Row[] = SIM.map(([flag, country, kind, usd]) => ({ flag, country, text: label(kind, usd) }));
   const rows: Row[] = [];
-  sim.forEach((s, i) => { rows.push(s); if (i % 3 === 2 && real[Math.floor(i / 3)]) rows.push(real[Math.floor(i / 3)]); });
+  sim.forEach((s, i) => { rows.push(s); const r = i % 3 === 2 ? real[Math.floor(i / 3)] : undefined; if (r) rows.push(r); });
   return <div className="lux-ticker live-activity-ticker" aria-label="Global member activity">
     <div className="lux-ticker-track" style={{ animationDuration: '90s' }}>
       {[0, 1].map(k => <span key={k} aria-hidden={k === 1}>
