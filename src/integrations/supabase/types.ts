@@ -1861,6 +1861,15 @@ export type Database = {
           stake_id: string
         }[]
       }
+      bix_public_activity: {
+        Args: never
+        Returns: {
+          amount_usd: number
+          created_at: string
+          dial: string
+          kind: string
+        }[]
+      }
       bix_public_home_stats: { Args: never; Returns: Json }
       bix_quest_claim: {
         Args: { p_answer?: number; p_key: string }

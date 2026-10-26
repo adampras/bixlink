@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SwipeDeck } from '@/components/SwipeDeck';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import m1 from '@/assets/alliance-avatar-sg.jpg';
 import m2 from '@/assets/alliance-avatar-id.jpg';
@@ -45,12 +46,14 @@ export function DevTeamGrid() {
     <div className="eyebrow justify-center">GLOBAL BUILDERS</div>
     <h2 id="dev-team-title" className="section-title text-center">20 <span>DEVELOPER TEAMS</span></h2>
     <p className="mt-2 text-center text-[11px] text-muted-foreground">Engineers and specialists from 20 countries building BIXLINK together.</p>
-    <div className="dev-team-grid">
-      {TEAMS.map(([code, name, role], i) => <button type="button" key={code} className="dev-tile" style={{ animationDelay: `${(i % 10) * 0.12}s` }} onClick={() => setOpen(i)} aria-label={`${name} — ${role}`}>
-        <span className="dev-tile-img"><img src={img(i)} alt="" width={96} height={96} loading="lazy"/><i>{code}</i></span>
-        <b>{name}</b><small>{role}</small>
-      </button>)}
-    </div>
+    <div className="mt-5"><SwipeDeck label="20 developer teams" desktopCols="md:grid-cols-5">
+      {Array.from({ length: 5 }, (_, page) => <div key={page} className="grid grid-cols-2 gap-2">
+        {TEAMS.slice(page * 4, page * 4 + 4).map(([code, name, role], j) => { const i = page * 4 + j; return <button type="button" key={code} className="dev-tile" onClick={() => setOpen(i)} aria-label={`${name} — ${role}`}>
+          <span className="dev-tile-img"><img src={img(i)} alt="" width={96} height={96} loading="lazy"/><i>{code}</i></span>
+          <b>{name}</b><small>{role}</small>
+        </button>; })}
+      </div>)}
+    </SwipeDeck></div>
     <p className="mt-3 text-center text-[10px] text-muted-foreground">Illustrative avatars and focus roles; official profiles are published after verification.</p>
     <Dialog open={open !== null} onOpenChange={v => !v && setOpen(null)}>
       <DialogContent className="max-w-sm">
