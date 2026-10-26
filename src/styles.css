@@ -3467,3 +3467,4 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 @keyframes orbit-spin3d-c{from{transform:rotateX(76deg) rotateY(-14deg) rotateZ(360deg)}to{transform:rotateX(76deg) rotateY(-14deg) rotateZ(0)}}
 @media (max-width:400px){.global-orbit-ring.r3{width:240px;height:240px}}
 @media (prefers-reduced-motion:reduce){.gl-grid,.gl-node,.global-orbit-halo{animation:none}}
+.tokenomics-allocations-swipe{min-width:0;overflow:hidden}
