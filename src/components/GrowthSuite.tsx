@@ -203,11 +203,12 @@ export function HeroPresaleRibbon() {
   const left = now === null ? 0 : Math.max(0, ROUND_END - now);
   const parts = [Math.floor(left / 864e5), Math.floor(left / 36e5) % 24, Math.floor(left / 6e4) % 60, Math.floor(left / 1e3) % 60];
   const fmt = (v: number) => now === null ? '--' : String(v).padStart(2, '0');
-  return <div className="hero-ribbon z-10 mt-6 w-full">
-    <div className="hero-ribbon-live"><i/><span>ROUND 1 LIVE</span><b className="numeric">{parts.map((v, i) => `${fmt(v)}${['D', 'H', 'M', 'S'][i]}`).join(' : ')}</b></div>
+  return <div className="hero-ribbon hero-ribbon-lux z-10 mt-6 w-full">
+    <div className="hero-ribbon-live"><i/><span>ROUND 1 LIVE</span></div>
+    <div className="lux-count numeric">{parts.map((v, i) => <div key={i}><b>{fmt(v)}</b><small>{['DAYS', 'HRS', 'MIN', 'SEC'][i]}</small></div>)}</div>
     <div className="hero-ribbon-path numeric">{STAGES.slice(0, 3).map(([n, p], i) => <span key={n} className={i === 0 ? 'is-on' : ''}>{i > 0 && <em>→</em>}{p}</span>)}</div>
-    <Link to="/register" className="hero-ribbon-cta">Amankan alokasi</Link>
-    <small className="hero-ribbon-note">Harga ronde adalah referensi ledger internal, bukan jaminan listing.</small>
+    <Link to="/register" className="hero-ribbon-cta">Secure allocation</Link>
+    <small className="hero-ribbon-note">Round prices are internal ledger references, not a listing guarantee.</small>
   </div>;
 }
 
