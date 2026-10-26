@@ -16,7 +16,7 @@ export const QUEST_LABELS: Record<QuestKey, { title: string; hint: string; perio
 export const VBIX_CAP = 100;
 
 /** Detect a stale read-back instead of reporting an unsaved reward as saved. */
-export function arenaRewardsMatch(expected: { rewards: Partial<Record<QuestKey, number>>; cap?: number }, actual: { rewards: Partial<Record<QuestKey, number>>; cap?: number }) {
+export function arenaRewardsMatch(expected: { rewards: Partial<Record<QuestKey, number | undefined>>; cap?: number | undefined }, actual: { rewards: Partial<Record<QuestKey, number | undefined>>; cap?: number | undefined }) {
   return (expected.cap ?? 0) === (actual.cap ?? 0) && QUEST_KEYS.every(key => expected.rewards[key] === undefined || expected.rewards[key] === actual.rewards[key]);
 }
 
