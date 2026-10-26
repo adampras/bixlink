@@ -631,6 +631,13 @@
       "when": 1792991670351,
       "tag": "0089_verified_bnb_wallet_login",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1792995953863,
+      "tag": "0090_wallet_auto_registration_safety",
+      "breakpoints": true
     }
   ]
 }
