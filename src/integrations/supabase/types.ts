@@ -1453,18 +1453,21 @@ export type Database = {
           full_name: string
           user_id: string
           username: string
+          whatsapp: string | null
         }
         Insert: {
           created_at?: string
           full_name: string
           user_id: string
           username: string
+          whatsapp?: string | null
         }
         Update: {
           created_at?: string
           full_name?: string
           user_id?: string
           username?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
