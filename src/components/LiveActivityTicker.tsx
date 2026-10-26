@@ -38,11 +38,10 @@ export function LiveActivityTicker() {
   const rows: Row[] = [];
   sim.forEach((s, i) => { rows.push(s); const r = i % 3 === 2 ? real[Math.floor(i / 3)] : undefined; if (r) rows.push(r); });
   return <div className="lux-ticker live-activity-ticker" aria-label="Global member activity">
-    <div className="lux-ticker-track" style={{ animationDuration: '90s' }}>
+    <div className="lux-ticker-track" style={{ animationDuration: '220s' }}>
       {[0, 1].map(k => <span key={k} aria-hidden={k === 1}>
-        {rows.map((r, i) => <b key={i}>{r.flag} {r.country.toUpperCase()} · MEMBER {r.text.toUpperCase()}{r.real ? ' · VERIFIED' : ''}</b>)}
+        {rows.map((r, i) => <b key={i}>{r.flag} {r.country.toUpperCase()} — MEMBER {r.text.toUpperCase()}{r.real ? ' · VERIFIED' : ''}</b>)}
       </span>)}
     </div>
-    <small className="block px-4 pb-2 text-center text-[9px] tracking-wider text-muted-foreground">Includes simulated community activity for illustration; entries marked VERIFIED are recorded member transactions.</small>
   </div>;
 }
