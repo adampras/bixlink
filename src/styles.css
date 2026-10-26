@@ -3371,3 +3371,75 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .arena-page { letter-spacing:0; }
 @media(min-width:768px) { .arena-mission-visual { height:220px; } .arena-page .arena-title { font-size:46px; } }
 @media(prefers-reduced-motion:reduce) { .arena-mission-visual .arena-artwork { transition:none; } .arena-quest:hover .arena-artwork { transform:none; } }
+
+/* Arena dimensional game surfaces, shared with compact onboarding. */
+:root {
+  --arena-stage: oklch(.13 .012 250);
+  --arena-ink: oklch(.96 .012 210);
+  --arena-muted: oklch(.75 .025 240);
+  --arena-cyan: oklch(.8 .13 205);
+  --arena-gold: oklch(.84 .14 85);
+  --arena-violet: oklch(.73 .18 305);
+  --arena-edge: oklch(.65 .04 240 / 40%);
+  --arena-glass: oklch(.23 .018 250);
+  --arena-depth: 0 12px 24px oklch(.03 0 0 / 35%), inset 0 1px 0 oklch(.96 .012 210 / 20%), inset 0 -4px 0 oklch(.03 0 0 / 45%);
+}
+.arena-page { perspective:1200px; }
+.arena-hero-3d { position:relative; isolation:isolate; height:300px; margin:0 -20px; overflow:hidden; background:var(--arena-stage); color:var(--arena-ink); }
+.arena-hero-3d > img { width:100%; height:100%; object-fit:cover; object-position:66% center; animation:arena-hero-drift 14s ease-in-out infinite alternate; }
+.arena-hero-3d::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,var(--arena-stage),transparent 72%),linear-gradient(0deg,var(--arena-stage),transparent 35%); z-index:0; pointer-events:none; }
+.arena-hero-copy { position:absolute; left:24px; top:38px; z-index:1; }
+.arena-hero-kicker { display:flex; align-items:center; gap:6px; font-size:8px; color:var(--arena-cyan); }
+.arena-page .arena-title { margin-top:18px; font-size:44px; line-height:.96; color:var(--arena-ink); background:none; letter-spacing:0; text-shadow:1px 1px 0 var(--arena-cyan),2px 2px 0 var(--arena-stage),3px 3px 0 var(--arena-cyan); filter:none; }
+.arena-hero-copy p { display:flex; align-items:start; gap:6px; margin-top:18px; font-size:8px; line-height:1.6; color:var(--arena-gold); }
+.arena-hero-season { position:absolute; bottom:17px; left:24px; z-index:1; font-size:9px; color:var(--arena-muted); }
+.arena-page .arena-hud { border-color:var(--arena-edge); background:linear-gradient(125deg,var(--arena-glass),var(--arena-stage)); color:var(--arena-ink); box-shadow:var(--arena-depth); transform:perspective(900px) rotateX(3deg); overflow:visible; }
+.arena-page .arena-hud::before { display:none; }
+.arena-hud-avatar { padding:5px; border:1px solid var(--arena-cyan); border-radius:50%; box-shadow:inset 0 0 10px var(--arena-cyan); }
+.arena-hud-avatar img { animation:arena-emblem-float 5s ease-in-out infinite; }
+.arena-page .arena-hud .text-muted-foreground { color:var(--arena-muted); }
+.arena-page .arena-stats > div { min-width:0; padding:14px 5px; color:var(--arena-cyan); background:linear-gradient(150deg,var(--arena-glass),var(--arena-stage)); border-color:var(--arena-edge); box-shadow:var(--arena-depth); transform:perspective(500px) rotateX(8deg); }
+.arena-page .arena-stats > div:nth-child(2) { color:var(--arena-gold); }
+.arena-page .arena-stats > div:nth-child(3) { color:var(--arena-violet); }
+.arena-page .arena-stats b { color:var(--arena-ink); overflow-wrap:anywhere; }
+.arena-page .arena-stats small { color:var(--arena-muted); letter-spacing:0; }
+.arena-category-nav { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-top:18px; }
+.arena-category-nav button { height:88px; padding:4px; display:flex; flex-direction:column; gap:2px; border:1px solid var(--border); border-radius:6px; background:var(--card); font-size:11px; }
+.arena-category-nav .arena-artwork { width:48px; height:48px; border-radius:4px; transition:transform .3s; }
+.arena-category-nav button[aria-pressed=true] { border-color:var(--chart-3); background:color-mix(in oklab,var(--chart-3) 10%,var(--card)); box-shadow:inset 0 -3px 0 var(--chart-3); }
+.arena-category-nav button[aria-pressed=true] img { transform:perspective(200px) rotateY(-12deg) translateY(-2px); }
+.arena-page .arena-quest { --mission-tone:var(--arena-cyan); box-shadow:var(--arena-depth); border-color:color-mix(in oklab,var(--mission-tone) 35%,var(--border)); border-top:2px solid var(--mission-tone); transition:transform .35s,box-shadow .35s; }
+.arena-page .arena-tone-social { --mission-tone:var(--arena-violet); }
+.arena-page .arena-tone-special { --mission-tone:var(--arena-gold); }
+.arena-page .arena-quest.is-done { opacity:1; }
+.arena-mission-visual { height:190px; background:var(--arena-stage); }
+.arena-mission-visual > img { animation:arena-emblem-float 7s ease-in-out infinite; }
+.arena-mission-visual .arena-reward { background:var(--arena-glass); color:var(--mission-tone); border-color:var(--arena-edge); box-shadow:var(--arena-depth); transform:perspective(400px) rotateY(-8deg); }
+.arena-page .arena-claim { background:linear-gradient(160deg,var(--arena-gold),var(--chart-3)); color:var(--arena-stage); box-shadow:var(--arena-depth); }
+.arena-season-art { background:var(--arena-stage); color:var(--arena-ink); padding-inline:12px; border-color:var(--arena-edge); }
+.arena-season-art .text-muted-foreground { color:var(--arena-muted); }
+.arena-step { box-shadow:var(--arena-depth); }
+.welcome-3d { width:min(330px,calc(100vw - 32px)); max-width:330px; max-height:calc(100dvh - 48px); padding:18px 18px 14px!important; gap:7px; text-align:center; background:linear-gradient(145deg,var(--arena-glass),var(--arena-stage)); color:var(--arena-ink); border:1px solid var(--arena-edge); border-top:2px solid var(--arena-gold); box-shadow:var(--arena-depth); letter-spacing:0; overflow-x:hidden; }
+.welcome-3d > button:last-child { color:var(--arena-ink); }
+.welcome-emblem { width:94px; height:82px; margin:0 auto; perspective:600px; }
+.welcome-emblem img { border-radius:8px; object-fit:cover; animation:welcome-reward-float 6s ease-in-out infinite; box-shadow:var(--arena-depth); }
+.welcome-kicker { display:flex; justify-content:center; align-items:center; gap:5px; color:var(--arena-cyan); font-size:9px; margin-top:3px; }
+.welcome-title { font-size:18px; line-height:1.4; letter-spacing:0; }
+.welcome-description { font-size:11px; color:var(--arena-muted); }
+.welcome-amount { font-size:46px; line-height:1.15; font-weight:900; color:var(--arena-gold); text-shadow:0 2px 0 var(--arena-stage); }
+.welcome-amount small { font-size:16px; margin-left:7px; }
+.welcome-benefits { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:4px 0 7px; }
+.welcome-benefits > div { min-width:0; font-size:9px; color:var(--arena-muted); }
+.welcome-benefits img { height:42px; width:42px; border-radius:5px; margin:0 auto 5px; box-shadow:var(--arena-depth); animation:arena-emblem-float 6s ease-in-out infinite; }
+.welcome-benefits > div:nth-child(2) img { animation-delay:-2s; }
+.welcome-benefits > div:nth-child(3) img { animation-delay:-4s; }
+.welcome-claim { width:100%; min-height:42px; color:var(--arena-stage); background:linear-gradient(140deg,var(--arena-gold),color-mix(in oklab,var(--arena-gold) 72%,var(--arena-ink))); font-weight:800; font-size:12px; box-shadow:var(--arena-depth); }
+.welcome-claim:hover { background:var(--arena-gold); }
+.welcome-risk { display:flex; align-items:start; gap:5px; text-align:left; margin-top:5px; font-size:9px; line-height:1.5; color:var(--arena-muted); }
+.welcome-risk svg { flex-shrink:0; margin-top:1px; }
+@keyframes arena-emblem-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+@keyframes welcome-reward-float { 0%,100%{transform:rotateY(-10deg) translateY(0)} 50%{transform:rotateY(10deg) translateY(-4px)} }
+@keyframes arena-hero-drift { from{transform:scale(1)} to{transform:scale(1.045)} }
+@media(hover:hover) { .arena-page .arena-quest:hover { transform:perspective(1200px) rotateX(2deg) rotateY(-1deg) translateY(-3px); } }
+@media(min-width:768px) { .arena-hero-3d { height:360px; margin-inline:-32px; } .arena-hero-copy { left:40px; top:60px; } .arena-page .arena-title { font-size:64px; } .arena-hero-kicker { font-size:10px; } .arena-hero-copy p { font-size:10px; } .arena-category-nav button { flex-direction:row; height:64px; } }
+@media(prefers-reduced-motion:reduce) { .arena-hero-3d > img,.arena-hud-avatar img,.arena-mission-visual > img,.welcome-emblem img,.welcome-benefits img { animation:none; } .arena-page .arena-quest { transition:none; } .arena-page .arena-quest:hover { transform:none; } }
