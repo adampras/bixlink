@@ -37,7 +37,7 @@ async function issue(address: string, purpose: 'link' | 'login', userId: string 
 }
 async function consume(id: string, signature: string, purpose: 'link' | 'login', userId: string | null) {
   const admin = await enabled();
-  const { data, error } = await admin.rpc('bix_consume_wallet_challenge', { p_id: id, p_purpose: purpose, p_origin: origin(), p_user_id: userId });
+  const { data, error } = await admin.rpc('bix_consume_wallet_challenge', { p_id: id, p_purpose: purpose, p_origin: origin(), ...(userId ? { p_user_id: userId } : {}) });
   const challenge = data?.[0];
   if (error || !challenge) throw new Error('Wallet signature expired or was already used. Please try again.');
   const valid = await verifyMessage({ address: normalizeWalletAddress(challenge.address), message: challenge.message, signature: signature as `0x${string}` });
