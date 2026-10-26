@@ -60,6 +60,7 @@ function OwnerDesk() {
         <div className="mt-2"><Actions id={t.id}/></div></div>)}
       {!pendingWd.length && <p className="text-sm text-muted-foreground">Tidak ada WD tertunda.</p>}</div></section>
 
+    <Link to="/buyback" className="block rounded-xl border border-chart-3 bg-card p-3 text-sm font-bold text-chart-3">⚡ Buka Dev Buyback (lacak sumber BIX) →</Link>
     <section><h2 className="mb-2 font-bold">Jual BIX → USDT · {pendingSell.length}</h2><div className="space-y-2">
       {pendingSell.map(s => { const fast = Number(s.price_usd) <= BUYBACK; return <div key={s.id} className={`rounded-xl border bg-card p-3 text-xs ${fast ? 'border-chart-3' : 'border-border'}`}>
         {fast && <span className="mb-1 inline-flex items-center gap-1 rounded-full border border-chart-3 px-2 py-0.5 text-[10px] font-black text-chart-3"><Zap size={11}/>DEV BUYBACK $0.25 · PRIORITAS</span>}
