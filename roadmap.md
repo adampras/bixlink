@@ -155,4 +155,4 @@
 - [x] Modernize Arena hero, mission categories and animated compact welcome popup; verified 330px phone popup, loaded artwork, category filtering and no overflow; canonical welcome fallback and rule tests pass.
 - [x] Add verified-account BNB wallet linking and signature login with single-use expiring challenges; enrolled a generated test wallet from the active account and logged into that same verified identity without funds; removed test mapping. Signature origin/nonce/purpose tests pass.
 - [ ] Confirm BNB login on physical TokenPocket/Trust/MetaMask/Bitget wallets — waits on owner device testing; injected-provider flow is verified.
-- [ ] Enable signature-verified wallet auto-registration with wallet username; preserve real-email reward gates, existing linked accounts and financial review; test registration and repeat login.
+- [x] Enable signature-verified wallet auto-registration with wallet username and optional name/WhatsApp/recovery email; mobile/desktop registration, profile save and repeat same-account login verified, 12 tests passed, no automatic reward rows or roles. Physical wallet and real-email confirmation delivery remain owner-device checks.

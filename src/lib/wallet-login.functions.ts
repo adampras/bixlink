@@ -118,3 +118,9 @@ export const saveWalletProfile = createServerFn({ method: 'POST' }).middleware([
     }
     return { ok: true };
   });
+
+export const getWalletProfile = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data, error } = await context.supabase.from('profiles').select('full_name,username,whatsapp').eq('user_id', context.userId).single();
+  if (error) throw new Error('Could not load your profile.');
+  return data;
+});

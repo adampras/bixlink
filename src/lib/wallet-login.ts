@@ -16,5 +16,5 @@ export function normalizeWalletAddress(value: string) {
   return value.toLowerCase() as `0x${string}`;
 }
 export function walletProofMessage(origin: string, address: string, nonce: string, purpose: 'link' | 'login', expires: string) {
-  return `${new URL(origin).host} requests a BIXLINK wallet signature.\n\nAddress: ${normalizeWalletAddress(address)}\nAction: ${purpose === 'link' ? 'Link wallet to your verified account' : 'Sign in to your linked account'}\nURI: ${origin}\nChain ID: ${BNB_CHAIN_ID}\nNonce: ${nonce}\nExpiration Time: ${expires}\n\nNo transaction, token approval, payment or withdrawal is authorized.`;
+  return `${new URL(origin).host} requests a BIXLINK wallet signature.\n\nAddress: ${normalizeWalletAddress(address)}\nAction: ${purpose === 'link' ? 'Link wallet to your verified account' : 'Sign in or create a wallet member account'}\nURI: ${origin}\nChain ID: ${BNB_CHAIN_ID}\nNonce: ${nonce}\nExpiration Time: ${expires}\n\nNo transaction, token approval, payment or withdrawal is authorized.`;
 }
