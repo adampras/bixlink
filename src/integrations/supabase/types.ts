@@ -1223,6 +1223,7 @@ export type Database = {
           message: string
           origin: string
           purpose: string
+          referral_code: string | null
           user_id: string | null
         }
         Insert: {
@@ -1234,6 +1235,7 @@ export type Database = {
           message: string
           origin: string
           purpose: string
+          referral_code?: string | null
           user_id?: string | null
         }
         Update: {
@@ -1245,6 +1247,7 @@ export type Database = {
           message?: string
           origin?: string
           purpose?: string
+          referral_code?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -1829,6 +1832,7 @@ export type Database = {
           message: string
           origin: string
           purpose: string
+          referral_code: string | null
           user_id: string | null
         }[]
         SetofOptions: {
@@ -1856,6 +1860,10 @@ export type Database = {
       bix_growth_radar: { Args: never; Returns: Json }
       bix_growth_scope_report: { Args: never; Returns: Json }
       bix_growth_snapshot: { Args: never; Returns: Json }
+      bix_has_real_verified_email: {
+        Args: { p_user: string }
+        Returns: boolean
+      }
       bix_in_owner1_network: { Args: never; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_leaderboard: {
@@ -1942,6 +1950,10 @@ export type Database = {
           profit_usd: number
           stake_id: string
         }[]
+      }
+      bix_provision_wallet_member: {
+        Args: { p_address: string; p_referral?: string; p_user: string }
+        Returns: undefined
       }
       bix_public_activity: {
         Args: never

@@ -9,6 +9,7 @@ import { passwordValid, PASSWORD_HINT } from '@/lib/password-rule';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable';
+import { WalletSignIn } from '@/components/WalletSignIn';
 
 export const Route = createFileRoute('/register')({
   validateSearch: (search: Record<string, unknown>): { ref?: string | undefined; target?: string | undefined } => ({ ref: typeof search['ref'] === 'string' ? search['ref'] : undefined, target: typeof search['target'] === 'string' ? search['target'] : undefined }),
@@ -70,6 +71,7 @@ function RegisterPage() {
     </form>
     <div className="my-5 text-center text-[10px] font-bold tracking-widest text-muted-foreground">OR</div>
     <Button type="button" variant="outline" className="h-12 w-full rounded-full border-border bg-card" onClick={async () => { const r = await lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/auth` }); if (r.error) setNotice(r.error.message); else if (!r.redirected) window.location.assign('/'); }}>Register with Google</Button>
+    <WalletSignIn/>
     <p className="mt-6 text-center text-sm text-muted-foreground">Already have an account? <Link to="/auth" className="font-bold text-chart-2">Sign in</Link></p>
   </div></main></BixShell>;
 }
