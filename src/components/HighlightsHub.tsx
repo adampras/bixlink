@@ -16,7 +16,7 @@ export const defaultHub: HubItem[] = [
   { title: 'Genesis Launch Hub', tag: 'PRESALE', body: '21M supply · $0.50 / BIX', color: 'gold', image: 'launch', href: '/presale' },
   { title: 'BIX Booster APY', tag: 'BOOSTER', body: 'Tier ladder · dividends 100% BIX', color: 'emerald', image: 'stake', href: '/boost' },
   { title: 'Yield & Staking', tag: 'STAKE', body: 'Hybrid USDT/BIX · Booster 100% BIX', color: 'emerald', image: 'stake', href: '/stake' },
-  { title: 'P2P & Dev Buyback', tag: 'MARKET', body: 'Buyback locked $0.35 · P2P free', color: 'cyan', image: 'p2p', href: '/p2p' },
+  { title: 'P2P & Dev Buyback', tag: 'MARKET', body: 'Buyback locked $0.25 · P2P free', color: 'cyan', image: 'p2p', href: '/p2p' },
   { title: 'Fox Arena Quest', tag: 'GAMEFI', body: 'Daily missions · BIXP rewards', color: 'violet', image: 'arena', href: '/arena' },
   { title: 'BIX Studio', tag: 'STUDIO', body: 'Poster · banner · presentasi', color: 'gold', image: 'launch', href: '/studio' },
   { title: 'Marketing Posters', tag: 'MEDIA', body: 'Official posters · video overview', color: 'cyan', image: 'launch', href: '/marketing' },

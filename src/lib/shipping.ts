@@ -18,6 +18,6 @@ export function shippingCost(courierId: string, units: number) {
 }
 export const ORDER_STEPS = ['pending', 'processing', 'shipped', 'completed'] as const;
 /** P2P price corridor: dev buyback floor to presale ceiling. */
-export const P2P_FLOOR = 0.35;
+export const P2P_FLOOR = 0.25;
 export const P2P_CEILING = 0.5;
 export const p2pPriceAllowed = (p: number) => Number.isFinite(p) && p >= P2P_FLOOR && p <= P2P_CEILING;
