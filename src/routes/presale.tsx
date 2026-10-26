@@ -68,27 +68,40 @@ function PresalePage() {
     catch (e) { setPurchaseError(e instanceof Error ? e.message : 'Purchase failed'); } finally { setBusy(null); }
   };
   return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10"><Web3Connect/>
-    <div className="eyebrow"><Pickaxe size={14}/> EXCLUSIVE</div>
-    <h1 className="mt-2 font-display text-3xl font-extrabold leading-tight text-foreground sm:text-5xl">BIX <span className="text-chart-3">PRESALE</span></h1>
-    <p className="mt-1 text-sm text-muted-foreground">Genesis allocation with locked BIX released over time.</p>
-    <section className="relative mt-4 overflow-hidden rounded-2xl border border-chart-3/40 bg-card">
-      <img src={heroLux} alt="BIXLINK Genesis Presale gold fox coin" width={1280} height={768} className="h-56 w-full object-cover sm:h-80"/>
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"/>
-      <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
-        <p className="text-[10px] font-bold tracking-[0.3em] text-chart-3">GENESIS ROUND 1</p>
-        <h2 className="font-display text-xl font-black text-foreground sm:text-3xl">Exclusive Presale · $0.50 / BIX</h2>
-        <div className="mt-3 flex gap-2">
-          <Button className="flex-1 rounded-lg" onClick={() => setTab('packages')}>Presale packages</Button>
-          <Button asChild variant="outline" className="flex-1 rounded-lg border-chart-3 text-chart-3"><Link to="/boost">BOOST APY</Link></Button>
+    {(() => {
+      const stages = cfg?.stages ?? [{ price: 0.5 }, { price: 0.65 }, { price: 0.8 }];
+      const ai = cfg?.activeStage ?? 0; const cur = stages[ai]; const ph = stagePhase(cur, now);
+      const target = ph === 'upcoming' ? cur?.startsAt : ph === 'live' ? cur?.endsAt : null;
+      const left = target ? Math.max(0, Date.parse(target) - now) : 0;
+      const cd = [Math.floor(left / 864e5), Math.floor(left / 36e5) % 24, Math.floor(left / 6e4) % 60, Math.floor(left / 1e3) % 60];
+      return <section className="presale-portal relative mt-1 overflow-hidden rounded-3xl border border-chart-3/40">
+        <img src={heroLux} alt="BIXLINK Genesis Presale gold fox coin" width={1280} height={768} className="presale-portal-img absolute inset-0 h-full w-full object-cover"/>
+        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background"/>
+        <div className="presale-portal-glow" aria-hidden/>
+        <div className="relative p-5 pt-24 sm:p-8 sm:pt-40">
+          <div className="flex items-center gap-2"><span className="presale-live-dot" aria-hidden/><p className="text-[10px] font-bold tracking-[0.35em] text-chart-3">GENESIS · STAGE {ai + 1} OF 3</p></div>
+          <h1 className="mt-2 font-display text-3xl font-black leading-none text-foreground sm:text-5xl">BIX <span className="presale-gold-text">PRESALE</span></h1>
+          <p className="mt-2 text-sm text-muted-foreground">Genesis allocation · locked BIX released by mining over time.</p>
+          <div className="mt-4 flex items-end gap-3"><span className="numeric font-display text-4xl font-black text-foreground">${number(cur?.price ?? 0.5, { maximumFractionDigits: 4 })}</span><span className="pb-1 text-xs text-muted-foreground">per BIX · USDT</span></div>
+          {target ? <div className="mt-4"><p className="text-[10px] font-bold tracking-[0.25em] text-muted-foreground">{ph === 'upcoming' ? 'STAGE OPENS IN' : 'STAGE CLOSES IN'}</p>
+            <div className="mt-1.5 grid max-w-xs grid-cols-4 gap-1.5">{cd.map((v, i) => <div key={i} className="presale-cd-cell"><b className="numeric font-display text-xl">{String(v).padStart(2, '0')}</b><span className="text-[9px] text-muted-foreground">{['DAYS', 'HRS', 'MIN', 'SEC'][i]}</span></div>)}</div></div>
+            : ph === 'ended' ? <p className="mt-4 text-xs font-bold text-destructive">This stage has closed · next stage opens soon.</p> : null}
+          <div className="mt-5 flex gap-2">
+            <Button className="flex-1 rounded-xl" onClick={() => setTab('packages')}>Presale packages</Button>
+            <Button asChild variant="outline" className="flex-1 rounded-xl border-chart-3/60 bg-background/40 text-chart-3 backdrop-blur"><Link to="/boost">BOOST APY</Link></Button>
+          </div>
         </div>
-      </div>
-    </section>
-    <dl className="pro-only mt-4 grid grid-cols-3 gap-2 border-y border-border py-3 text-center">
-      <div><dd className="numeric font-display text-lg font-bold text-primary">{number(locked, { maximumFractionDigits: 2 })}</dd><dt className="text-[10px] text-muted-foreground">Locked BIX</dt></div>
-      <div><dd className="numeric font-display text-lg font-bold text-chart-2">{number(released, { maximumFractionDigits: 4 })}</dd><dt className="text-[10px] text-muted-foreground">Mined out</dt></div>
-      <div><dd className="numeric font-display text-lg font-bold text-chart-3">{cfg?.sponsorPct ?? 10}%</dd><dt className="text-[10px] text-muted-foreground">Sponsor</dt></div>
+        <ol className="relative grid grid-cols-3 gap-px border-t border-chart-3/25 bg-chart-3/15">{stages.map((s, i) => { const p = stagePhase(s, now); const state = i === ai ? 'is-active' : i < ai || p === 'ended' ? 'is-done' : ''; return <li key={i} className={`presale-stage-step ${state}`}>
+          <span className="text-[9px] font-bold tracking-[0.2em] text-muted-foreground">STAGE {i + 1}</span>
+          <b className="numeric font-display text-base">${number(s.price, { maximumFractionDigits: 4 })}</b>
+          <span className="text-[9px] text-muted-foreground">{i === ai ? 'Live now' : i > ai && cur ? `+${number((s.price / cur.price - 1) * 100, { maximumFractionDigits: 1 })}%` : 'Completed'}</span>
+        </li>; })}</ol>
+      </section>;
+    })()}
+    <dl className="pro-only mt-4 grid grid-cols-3 gap-2 text-center">
+      {[[number(locked, { maximumFractionDigits: 2 }), 'Locked BIX', 'text-primary'], [number(released, { maximumFractionDigits: 4 }), 'Mined out', 'text-chart-2'], [`${cfg?.sponsorPct ?? 10}%`, 'Sponsor', 'text-chart-3']].map(([v, l, c]) => <div key={l} className="presale-stat-card"><dd className={`numeric font-display text-lg font-bold ${c}`}>{v}</dd><dt className="text-[10px] text-muted-foreground">{l}</dt></div>)}
     </dl>
-    <p className="mt-4 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-center text-xs font-bold text-primary">Round 1 Presale · 1 BIX = $0.50 USDT · Pool cap 3,150,000 BIX</p>
+    <p className="mt-3 text-center text-[10px] text-muted-foreground">Stage prices are owner-set ledger references, not market quotes. Projections are not guaranteed.</p>
     {!user ? <p className="mt-6 text-sm text-muted-foreground">Sign in to view presale packages.</p> : !cfg ? <p className="mt-6 text-sm text-muted-foreground">Loading…</p> : <>
       {!cfg.enabled && <p className="mt-6 rounded-lg border border-chart-3 p-3 text-sm text-chart-3">Presale is currently closed by the owner.</p>}
       <section aria-label="Presale pool availability" className="mt-5 border-y border-border py-4"><div className="flex flex-wrap justify-between gap-2 text-xs"><b>Shared presale allocation</b><span className="numeric">{number(pool.remaining)} BIX remaining</span></div><progress className="allocation-progress mt-3" max={100} value={pool.percent}/><p className="mt-2 text-[10px] text-muted-foreground">Recorded pool usage · shared across all packages · not a guaranteed reservation.</p></section>
