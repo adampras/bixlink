@@ -86,6 +86,47 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_buyback_details: {
+        Row: {
+          contact_method: string
+          contact_value: string
+          created_at: string
+          review_note: string | null
+          reviewed_by: string | null
+          source: Json
+          swap_id: string
+          user_id: string
+        }
+        Insert: {
+          contact_method: string
+          contact_value: string
+          created_at?: string
+          review_note?: string | null
+          reviewed_by?: string | null
+          source?: Json
+          swap_id: string
+          user_id: string
+        }
+        Update: {
+          contact_method?: string
+          contact_value?: string
+          created_at?: string
+          review_note?: string | null
+          reviewed_by?: string | null
+          source?: Json
+          swap_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_buyback_details_swap_id_fkey"
+            columns: ["swap_id"]
+            isOneToOne: true
+            referencedRelation: "swap_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bix_clone_accounts: {
         Row: {
           created_at: string
@@ -1624,6 +1665,7 @@ export type Database = {
         Row: {
           amount_in: number
           amount_out: number
+          channel: string
           created_at: string
           direction: string
           id: string
@@ -1635,6 +1677,7 @@ export type Database = {
         Insert: {
           amount_in: number
           amount_out: number
+          channel?: string
           created_at?: string
           direction: string
           id?: string
@@ -1646,6 +1689,7 @@ export type Database = {
         Update: {
           amount_in?: number
           amount_out?: number
+          channel?: string
           created_at?: string
           direction?: string
           id?: string
@@ -1809,6 +1853,15 @@ export type Database = {
         }[]
       }
       bix_booster_withdraw_config: { Args: never; Returns: Json }
+      bix_buyback_request: {
+        Args: { p_amount: number; p_contact: string; p_method: string }
+        Returns: string
+      }
+      bix_buyback_review: {
+        Args: { p_approve: boolean; p_id: string; p_note: string }
+        Returns: undefined
+      }
+      bix_buyback_source: { Args: { p_user: string }; Returns: Json }
       bix_can_manage_packages: { Args: never; Returns: boolean }
       bix_claim_conditional_leader: {
         Args: { p_days: number; p_package: string }

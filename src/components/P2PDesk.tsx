@@ -2,7 +2,7 @@ import { DepthVisualizer } from '@/components/TechSuite';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { ArrowDownRight, ArrowUpRight, ShieldCheck, X } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, ShieldCheck, X, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,6 +47,7 @@ export function P2PDesk({ userId }: { userId?: string | undefined }) {
   const row = (o: Offer, kind: 'ask' | 'bid') => <li key={o.id} className={`p2p-row p2p-${kind}`}><span className="numeric">${Number(o.price_usd).toFixed(4)}</span><span className="numeric">{number(Number(o.remaining_bix))}</span><span className="numeric text-muted-foreground">{money(o.remaining_bix * o.price_usd)}</span>{o.user_id === userId ? <span className="text-[10px] text-chart-3">YOURS</span> : <Button size="sm" variant="outline" onClick={() => { setTake(o); setTakeAmt(String(o.remaining_bix)); }}>{kind === 'ask' ? 'Buy' : 'Sell'}</Button>}</li>;
 
   return <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+    <Link to="/buyback" className="flex items-center justify-between rounded-2xl border border-chart-3/60 bg-card px-4 py-3 lg:col-span-2"><span className="flex items-center gap-2 text-sm font-black text-chart-3"><Zap size={16}/>SELL BIX · DEV BUYBACK $0.25</span><span className="text-xs text-muted-foreground">Fast sell →</span></Link>
     <section className="p2p-panel">
       <DepthVisualizer asks={asks} bids={bids}/>
       <div className="mb-3 flex items-center justify-between"><h2 className="font-display text-lg font-bold">Order book · BIX/USDT</h2><span className="text-[10px] tracking-widest text-muted-foreground">CORRIDOR ${P2P_FLOOR} – ${P2P_CEILING}</span></div>
