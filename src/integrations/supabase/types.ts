@@ -1213,6 +1213,63 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_wallet_challenges: {
+        Row: {
+          address: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          message: string
+          origin: string
+          purpose: string
+          user_id: string | null
+        }
+        Insert: {
+          address: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id: string
+          message: string
+          origin: string
+          purpose: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          message?: string
+          origin?: string
+          purpose?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      bix_wallet_identities: {
+        Row: {
+          address: string
+          chain_id: number
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          chain_id?: number
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          chain_id?: number
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_zoom_claims: {
         Row: {
           amount_bix: number
@@ -1756,6 +1813,31 @@ export type Database = {
       }
       bix_claim_stake_profit: { Args: never; Returns: Json }
       bix_claim_vip: { Args: { p_level: number }; Returns: string }
+      bix_consume_wallet_challenge: {
+        Args: {
+          p_id: string
+          p_origin: string
+          p_purpose: string
+          p_user_id?: string
+        }
+        Returns: {
+          address: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          message: string
+          origin: string
+          purpose: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "bix_wallet_challenges"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       bix_content_published: { Args: { p_name: string }; Returns: boolean }
       bix_deposit_owner: { Args: { p_user: string }; Returns: string }
       bix_edit_duration_package: {

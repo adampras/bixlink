@@ -1,0 +1,12 @@
+CREATE TABLE public.bix_wallet_identities (address text PRIMARY KEY CHECK(address ~ '^0x[0-9a-f]{40}$'), user_id uuid NOT NULL, chain_id integer NOT NULL DEFAULT 56 CHECK(chain_id = 56), created_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT ON public.bix_wallet_identities TO authenticated;
+GRANT ALL ON public.bix_wallet_identities TO service_role;
+ALTER TABLE public.bix_wallet_identities ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Read own verified wallet" ON public.bix_wallet_identities FOR SELECT TO authenticated USING (user_id = auth.uid());
+CREATE TABLE public.bix_wallet_challenges (id uuid PRIMARY KEY, address text NOT NULL, purpose text NOT NULL CHECK(purpose IN ('link','login')), user_id uuid, origin text NOT NULL, message text NOT NULL, expires_at timestamptz NOT NULL, consumed_at timestamptz, created_at timestamptz NOT NULL DEFAULT now());
+GRANT ALL ON public.bix_wallet_challenges TO service_role;
+ALTER TABLE public.bix_wallet_challenges ENABLE ROW LEVEL SECURITY;
+CREATE INDEX bix_wallet_challenges_address_time ON public.bix_wallet_challenges(address, created_at);
+CREATE FUNCTION public.bix_consume_wallet_challenge(p_id uuid, p_purpose text, p_origin text, p_user_id uuid DEFAULT NULL) RETURNS SETOF public.bix_wallet_challenges LANGUAGE sql SECURITY DEFINER SET search_path=public AS $$ UPDATE public.bix_wallet_challenges SET consumed_at=now() WHERE id=p_id AND purpose=p_purpose AND origin=p_origin AND user_id IS NOT DISTINCT FROM p_user_id AND consumed_at IS NULL AND expires_at>now() RETURNING * $$;
+REVOKE ALL ON FUNCTION public.bix_consume_wallet_challenge(uuid,text,text,uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.bix_consume_wallet_challenge(uuid,text,text,uuid) TO service_role;
