@@ -36,6 +36,7 @@
 - Tokenomics is presentation-only; honor visibility and terms.
 - Settle vBIX via authenticated RPCs; video never awards funds. Convert through an atomic capped marketing ledger, never the owner vault.
 - Fox Arena quest vBIX is paid only by the server-verified bix_quest_claim RPC, sharing mining's account cap and pool; season prizes are owner-reviewed, never auto-credited — game rewards stay in the promo budget.
+- Arena artwork uses shared bundled mission assets; owner saves read back canonical configuration and invalidate member Arena queries to keep displayed rewards synchronized without changing prior claims.
 - NFT cards: one in-app certificate per stake with immutable artwork snapshot; new artwork selection matches the contract tier through the owner-controlled reactor catalog. Completion replaces USDT refund; buybacks remain owner-reviewed and vault-funded.
 - Marketplace merchandise lives in a separate owner-controlled presentation catalog with optional external HTTPS order links, not automatic payments or certificate settlement; HOME and PROFILE provide store access without a header shop; member listings are auto-approved only by the DB guard trigger.
 - All presale entry points use one accessible confirmation before the authenticated purchase; strategies snapshot rates; dividends settle via bix_wallet_balance.
