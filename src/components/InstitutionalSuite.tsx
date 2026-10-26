@@ -1,10 +1,11 @@
 import { Lock, ShieldCheck, Vault, Crown, Send, Mail } from 'lucide-react';
+import { SwipeDeck } from '@/components/SwipeDeck';
 
 const RESERVES = [
-  { label: 'Fixed total supply', value: '21,000,000 BIX', note: 'Hard cap · no mint planned' },
-  { label: 'Genesis reserve vault', value: '1,000,000 BIX', note: 'Owner-only · locked' },
-  { label: 'Staking rewards pool', value: '7,350,000 BIX', note: '35% · halving every 2 years' },
-  { label: 'Presale allocation', value: '3,150,000 BIX', note: '15% · pool cap' },
+  { label: 'Fixed total supply', value: '21,000,000 BIX', note: 'Hard cap · no mint planned', pct: 100 },
+  { label: 'Genesis reserve vault', value: '1,000,000 BIX', note: 'Owner-only · locked', pct: 4.76 },
+  { label: 'Staking rewards pool', value: '7,350,000 BIX', note: '35% · halving every 2 years', pct: 35 },
+  { label: 'Presale allocation', value: '3,150,000 BIX', note: '15% · pool cap', pct: 15 },
 ];
 
 /** Proof-of-reserve style disclosure. Planned allocations only — not on-chain attestation. */
@@ -12,13 +13,14 @@ export function ReserveTelemetry() {
   return <section className="mx-auto max-w-5xl px-5 py-10">
     <div className="eyebrow"><Vault size={14}/> PROOF OF RESERVE · PRE-TGE</div>
     <h2 className="section-title">RESERVE <span>TELEMETRY</span></h2>
-    <div className="mt-6 grid gap-3 md:grid-cols-3">
+    <div className="mt-6"><SwipeDeck label="Reserve allocations" desktopCols="md:grid-cols-4">
       {RESERVES.map(r => <div key={r.label} className="rounded-2xl border border-chart-3/30 bg-card/60 p-4 backdrop-blur-md">
         <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{r.label}<Lock size={13} className="text-chart-3"/></div>
-        <b className="numeric mt-2 block font-display text-xl text-chart-3">{r.value}</b>
+        <b className="numeric mt-2 block font-display text-2xl text-chart-3">{r.value}</b>
         <small className="text-[11px] text-muted-foreground">{r.note}</small>
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-gradient-to-r from-chart-3 to-primary" style={{ width: `${r.pct}%` }}/></div>
       </div>)}
-    </div>
+    </SwipeDeck></div>
     <p className="mt-4 flex gap-2 text-[11px] leading-5 text-muted-foreground"><ShieldCheck size={14} className="shrink-0 text-chart-2"/>Figures are the planned internal-ledger allocation. The BIX smart contract is not deployed yet, so no on-chain attestation exists. A verifiable contract address will be published at TGE.</p>
   </section>;
 }
