@@ -3468,3 +3468,21 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 @media (max-width:400px){.global-orbit-ring.r3{width:240px;height:240px}}
 @media (prefers-reduced-motion:reduce){.gl-grid,.gl-node,.global-orbit-halo{animation:none}}
 .tokenomics-allocations-swipe{min-width:0;overflow:hidden}
+
+/* Presale Genesis portal */
+.presale-portal { background: var(--card); box-shadow: 0 30px 60px -30px color-mix(in oklab, var(--chart-3) 45%, transparent), inset 0 1px 0 color-mix(in oklab, var(--chart-3) 30%, transparent); }
+.presale-portal-img { opacity: .8; animation: presale-drift 18s ease-in-out infinite alternate; }
+.presale-portal-glow { position: absolute; inset: -40% -20% auto auto; width: 70%; aspect-ratio: 1; border-radius: 9999px; background: radial-gradient(circle, color-mix(in oklab, var(--chart-3) 35%, transparent), transparent 65%); filter: blur(20px); animation: presale-pulse 6s ease-in-out infinite; pointer-events: none; }
+.presale-gold-text { background: linear-gradient(100deg, var(--chart-3), color-mix(in oklab, var(--chart-3) 55%, var(--foreground)), var(--chart-3)); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: presale-shine 5s linear infinite; }
+.presale-live-dot { width: .5rem; height: .5rem; border-radius: 9999px; background: var(--chart-2); box-shadow: 0 0 0 0 color-mix(in oklab, var(--chart-2) 60%, transparent); animation: presale-ping 1.8s infinite; }
+.presale-cd-cell { display: grid; place-items: center; padding: .4rem 0; border-radius: .75rem; border: 1px solid color-mix(in oklab, var(--chart-3) 35%, transparent); background: color-mix(in oklab, var(--background) 65%, transparent); backdrop-filter: blur(8px); }
+.presale-stage-step { display: grid; gap: .1rem; padding: .65rem .5rem; text-align: center; background: color-mix(in oklab, var(--background) 88%, transparent); }
+.presale-stage-step.is-active { background: linear-gradient(180deg, color-mix(in oklab, var(--chart-3) 22%, var(--background)), var(--background)); box-shadow: inset 0 2px 0 var(--chart-3); }
+.presale-stage-step.is-active b { color: var(--chart-3); }
+.presale-stage-step.is-done { opacity: .5; }
+.presale-stat-card { padding: .7rem .4rem; border-radius: 1rem; border: 1px solid var(--border); background: linear-gradient(160deg, color-mix(in oklab, var(--card) 90%, var(--chart-3)), var(--card)); }
+@keyframes presale-drift { from { transform: scale(1.05) translateY(0); } to { transform: scale(1.12) translateY(-3%); } }
+@keyframes presale-pulse { 50% { opacity: .55; transform: scale(1.1); } }
+@keyframes presale-shine { to { background-position: 200% center; } }
+@keyframes presale-ping { 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .presale-portal-img, .presale-portal-glow, .presale-gold-text, .presale-live-dot { animation: none; } }
