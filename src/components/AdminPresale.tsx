@@ -4,7 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useQueryClient } from '@tanstack/react-query';
 import { getPresaleStatus, savePresale } from '@/lib/presale.functions';
-import { bixForUsd, presalePrice, withPresaleStages, editPresaleStage, activatePresaleStage, type PresaleConfig } from '@/lib/presale';
+import { bixForUsd, presalePrice, withPresaleStages, editPresaleStage, activatePresaleStage, setPresaleStageWindow, stagePhase, type PresaleConfig } from '@/lib/presale';
+const pad = (n: number) => String(n).padStart(2, '0');
+const toLocalInput = (iso?: string | null) => { if (!iso) return ''; const d = new Date(iso); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fromLocalInput = (v: string) => v ? new Date(v).toISOString() : null;
 import { presaleSettingsSchema } from '@/lib/presale-settings';
 import { DEFAULT_STRATEGIES } from '@/lib/presale-strategy';
 
@@ -27,9 +30,13 @@ export function AdminPresale({ onMessage }: { onMessage: (m: string) => void }) 
     <div className="flex items-center justify-between gap-3 border-b border-border py-3"><label htmlFor="presale-open" className="text-sm font-bold">Presale {cfg.enabled ? 'BUKA' : 'TUTUP'}</label><Switch id="presale-open" checked={cfg.enabled} disabled={saving} onCheckedChange={enabled => setCfg(prev => prev && ({ ...prev, enabled }))}/></div>
     <p className="text-xs text-muted-foreground">Buka/tutup dan harga berlaku setelah disimpan. Pembelian member yang sudah ada tidak berubah.</p>
     <div className="rounded-lg border border-primary/40 p-3"><h3 className="text-sm font-black text-primary">HARGA PRESALE PER TAHAP</h3><p className="text-[11px] text-muted-foreground">Pilih tahap aktif — harga tahap itu langsung diterapkan ke semua paket. Simpan untuk berlaku.</p>
-      <div className="mt-2 grid gap-2 sm:grid-cols-3">{[0, 1, 2].map(i => { const st = cfg.stages ?? [{ price: 0.5 }, { price: 0.65 }, { price: 0.8 }]; const active = (cfg.activeStage ?? 0) === i; return <div key={i} className={`rounded-md border p-2 ${active ? 'border-primary bg-primary/10' : 'border-border'}`}>
-        <label className="text-xs font-bold">Tahap {i + 1} (USD/BIX)<input type="number" step="0.0001" min="0.0001" className={num} value={st[i]?.price ?? 0.5} onChange={e => { const v = Number(e.target.value); setStagePrice(i, v); if (active) setPrice(v); }}/></label>
-        <Button type="button" variant={active ? 'default' : 'outline'} onClick={() => activateStage(i)} className="mt-1 h-8 w-full text-[11px] font-black">{active ? '● AKTIF' : 'Aktifkan'}</Button></div>; })}</div></div>
+      <div className="mt-2 grid gap-2 sm:grid-cols-3">{[0, 1, 2].map(i => { const st = cfg.stages ?? [{ price: 0.5 }, { price: 0.65 }, { price: 0.8 }]; const active = (cfg.activeStage ?? 0) === i; const ph = stagePhase(st[i], Date.now()); const phLabel = { open: 'Tanpa jadwal', upcoming: 'Mendatang', live: 'Berjalan', ended: 'Selesai' }[ph]; return <div key={i} className={`rounded-md border p-2 ${active ? 'border-primary bg-primary/10' : 'border-border'}`}>
+        <div className="flex items-center justify-between"><span className="text-xs font-bold">Tahap {i + 1}</span><span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${ph === 'live' ? 'border-chart-2 text-chart-2' : ph === 'ended' ? 'border-destructive text-destructive' : ph === 'upcoming' ? 'border-chart-3 text-chart-3' : 'border-border text-muted-foreground'}`}>{phLabel}</span></div>
+        <label className="mt-1 block text-[11px]">Harga (USD/BIX)<input type="number" step="0.0001" min="0.0001" className={num} value={st[i]?.price ?? 0.5} onChange={e => { const v = Number(e.target.value); setStagePrice(i, v); if (active) setPrice(v); }}/></label>
+        <label className="mt-1 block text-[11px]">Waktu buka<input type="datetime-local" className={num} value={toLocalInput(st[i]?.startsAt)} onChange={e => setCfg(prev => prev && setPresaleStageWindow(prev, i, 'startsAt', fromLocalInput(e.target.value)))}/></label>
+        <label className="mt-1 block text-[11px]">Waktu tutup<input type="datetime-local" className={num} value={toLocalInput(st[i]?.endsAt)} onChange={e => setCfg(prev => prev && setPresaleStageWindow(prev, i, 'endsAt', fromLocalInput(e.target.value)))}/></label>
+        <Button type="button" variant={active ? 'default' : 'outline'} onClick={() => activateStage(i)} className="mt-2 h-8 w-full text-[11px] font-black">{active ? '● AKTIF' : 'Aktifkan'}</Button></div>; })}</div>
+      <p className="mt-2 text-[11px] text-muted-foreground">Kosongkan waktu jika tahap dibuka/ditutup manual. Pembelian di tahap aktif ditolak server sebelum waktu buka dan sesudah waktu tutup.</p></div>
     <div className="grid gap-3 sm:grid-cols-3">
       <label className="text-xs">Presale price (USD per BIX)<input type="number" step="0.0001" min="0.0001" className={num} value={price} onChange={e => applyPrice(Number(e.target.value))}/><button type="button" onClick={() => applyPrice(0.5)} className="mt-1 text-[11px] font-bold text-primary underline">Apply $0.50 to all packages</button></label>
       <label className="text-xs">Sponsor % (direct referrer, max 10)<input type="number" className={num} value={cfg.sponsorPct} onChange={e => setCfg({ ...cfg, sponsorPct: Number(e.target.value) })}/></label>
