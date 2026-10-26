@@ -16,8 +16,8 @@ export const Route = createFileRoute('/arbitrage')({
 });
 
 const ROUTES = [
-  { name: 'Dev Buyback Desk', price: 0.35, note: 'Locked floor · sell to developer' },
-  { name: 'Member P2P Order Book', price: 0.425, note: 'Free market range $0.35 – $0.50' },
+  { name: 'Dev Buyback Desk', price: 0.25, note: 'Locked floor · sell to developer' },
+  { name: 'Member P2P Order Book', price: 0.425, note: 'Free market range $0.25 – $0.50' },
   { name: 'Launch Reference', price: 0.5, note: 'Owner-managed reference price' },
 ];
 
@@ -40,8 +40,8 @@ function ArbitragePage() {
       <h2 className="font-display text-lg font-bold">Spread calculator</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         <label className="text-[11px] text-muted-foreground">Amount (BIX)<input className="form-input mt-1" type="number" min={1} max={100000} value={amount} onChange={e => setAmount(Number(e.target.value))}/></label>
-        <label className="text-[11px] text-muted-foreground">Buy price (USDT)<input className="form-input mt-1" type="number" step="0.001" min={0.35} max={0.5} value={buy} onChange={e => setBuy(Number(e.target.value))}/></label>
-        <label className="text-[11px] text-muted-foreground">Sell price (USDT)<input className="form-input mt-1" type="number" step="0.001" min={0.35} max={0.5} value={sell} onChange={e => setSell(Number(e.target.value))}/></label>
+        <label className="text-[11px] text-muted-foreground">Buy price (USDT)<input className="form-input mt-1" type="number" step="0.001" min={0.25} max={0.5} value={buy} onChange={e => setBuy(Number(e.target.value))}/></label>
+        <label className="text-[11px] text-muted-foreground">Sell price (USDT)<input className="form-input mt-1" type="number" step="0.001" min={0.25} max={0.5} value={sell} onChange={e => setSell(Number(e.target.value))}/></label>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-3 text-center">
         <div><p className="text-[10px] text-muted-foreground">Spread</p><b>${spread.toFixed(3)}</b></div>

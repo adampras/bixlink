@@ -638,6 +638,13 @@
       "when": 1792995953863,
       "tag": "0090_wallet_auto_registration_safety",
       "breakpoints": true
+    },
+    {
+      "idx": 91,
+      "version": "7",
+      "when": 1793003383632,
+      "tag": "0091_p2p_floor_025",
+      "breakpoints": true
     }
   ]
 }
