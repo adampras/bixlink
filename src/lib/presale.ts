@@ -1,18 +1,32 @@
 import type { StrategySettings } from './presale-strategy';
 
 export type PresalePackage = { usd: number; bix: number; releaseDays: number };
-export type PresaleConfig = { enabled: boolean; sponsorPct: number; poolCap: number; packages: PresalePackage[]; strategies?: StrategySettings; sovereign?: SovereignConfig; stages?: { price: number }[]; activeStage?: number };
+export type PresaleStage = { price: number; startsAt?: string | null; endsAt?: string | null };
+export type PresaleConfig = { enabled: boolean; sponsorPct: number; poolCap: number; packages: PresalePackage[]; strategies?: StrategySettings; sovereign?: SovereignConfig; stages?: PresaleStage[]; activeStage?: number };
 export type SovereignConfig = { enabled: boolean; usd: number; bix: number; releaseDays: number; slots: number };
 
-export function withPresaleStages(config: PresaleConfig): PresaleConfig & { stages: { price: number }[]; activeStage: number } {
+/** Schedule state of a stage. 'open' = no schedule set (manual control only). */
+export function stagePhase(stage: PresaleStage | undefined, now: number): 'open' | 'upcoming' | 'live' | 'ended' {
+  if (!stage || (!stage.startsAt && !stage.endsAt)) return 'open';
+  if (stage.startsAt && now < Date.parse(stage.startsAt)) return 'upcoming';
+  if (stage.endsAt && now >= Date.parse(stage.endsAt)) return 'ended';
+  return 'live';
+}
+
+export function withPresaleStages(config: PresaleConfig): PresaleConfig & { stages: PresaleStage[]; activeStage: number } {
   const activeStage = config.activeStage ?? 0;
-  const stages = [0.5, 0.65, 0.8].map((price, i) => ({ price: config.stages?.[i]?.price ?? (i === activeStage ? presalePrice(config.packages) : price) }));
+  const stages = [0.5, 0.65, 0.8].map((price, i) => ({ ...config.stages?.[i], price: config.stages?.[i]?.price ?? (i === activeStage ? presalePrice(config.packages) : price) }));
   return { ...config, activeStage, stages };
 }
 
 export function editPresaleStage(config: PresaleConfig, index: number, price: number): PresaleConfig {
   const next = withPresaleStages(config);
-  return { ...next, stages: next.stages?.map((stage, i) => i === index ? { price } : stage), packages: next.activeStage === index && price > 0 ? next.packages.map(p => ({ ...p, bix: bixForUsd(p.usd, price) })) : next.packages };
+  return { ...next, stages: next.stages?.map((stage, i) => i === index ? { ...stage, price } : stage), packages: next.activeStage === index && price > 0 ? next.packages.map(p => ({ ...p, bix: bixForUsd(p.usd, price) })) : next.packages };
+}
+
+export function setPresaleStageWindow(config: PresaleConfig, index: number, key: 'startsAt' | 'endsAt', iso: string | null): PresaleConfig {
+  const next = withPresaleStages(config);
+  return { ...next, stages: next.stages.map((stage, i) => i === index ? { ...stage, [key]: iso } : stage) };
 }
 
 export function activatePresaleStage(config: PresaleConfig, index: number): PresaleConfig {

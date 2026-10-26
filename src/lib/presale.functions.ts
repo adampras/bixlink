@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
-import type { PresaleConfig } from './presale';
+import { stagePhase, type PresaleConfig } from './presale';
 import { presaleSettingsSchema } from './presale-settings';
 
 export type PresaleOrder = { id: string; package_usd: number; bix_amount: number; release_days: number; status: string; created_at: string; strategy?: string; dividend_daily_usd?: number; bonus_bix?: number; serial?: number };
@@ -17,6 +17,13 @@ export const getPresaleStatus = createServerFn({ method: 'POST' }).middleware([r
 export const buyPresale = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ usd: z.number().positive(), strategy: z.enum(['standard', 'hybrid', 'dividend', 'founder']).default('standard') }).parse(d))
   .handler(async ({ context, data }) => {
+    const { data: st, error: se } = await context.supabase.rpc('bix_presale_status');
+    if (se) throw new Error(se.message);
+    const cfg = (st as unknown as PresaleStatus).config;
+    const stage = cfg?.stages?.[cfg.activeStage ?? 0];
+    const phase = stagePhase(stage, Date.now());
+    if (phase === 'upcoming') throw new Error('This presale stage has not opened yet.');
+    if (phase === 'ended') throw new Error('This presale stage has closed.');
     const { data: r, error } = await context.supabase.rpc('bix_presale_buy_strategy', { p_usd: data.usd, p_strategy: data.strategy });
     if (error) throw new Error(error.message);
     return r as unknown as { id: string; bix: number; serial: number; dailyUsd: number };
