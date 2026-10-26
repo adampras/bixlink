@@ -14,6 +14,9 @@ export const QUEST_LABELS: Record<QuestKey, { title: string; hint: string; perio
   stake7: { title: 'Steady staker', hint: 'Keep a stake active for at least 7 days.', period: 'weekly' },
 };
 export const VBIX_CAP = 100;
+export function welcomeReward(rewards?: Partial<Record<QuestKey, number>>): number {
+  return rewards?.welcome ?? 100;
+}
 
 /** Detect a stale read-back instead of reporting an unsaved reward as saved. */
 export function arenaRewardsMatch(expected: { rewards: Partial<Record<QuestKey, number | undefined>>; cap?: number | undefined }, actual: { rewards: Partial<Record<QuestKey, number | undefined>>; cap?: number | undefined }) {

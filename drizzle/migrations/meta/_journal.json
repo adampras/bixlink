@@ -624,6 +624,13 @@
       "when": 1792976763048,
       "tag": "0088_public_live_activity",
       "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "7",
+      "when": 1792991670351,
+      "tag": "0089_verified_bnb_wallet_login",
+      "breakpoints": true
     }
   ]
 }
