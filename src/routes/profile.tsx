@@ -18,11 +18,15 @@ import { usePresaleStatus } from '@/components/PresaleEntry';
 import { GenesisCertificate } from '@/components/PresaleStrategies';
 import { SovereignPlaque } from '@/components/SovereignAllocation';
 import { number } from '@/lib/bixlink';
+import { hasVerifiedEmail, isWalletOnlyAccount } from '@/lib/wallet-login';
+import { WalletAccountDetails } from '@/components/WalletAccountDetails';
 
 export const Route = createFileRoute('/profile')({ head: () => ({ meta: [{ title: 'Profile — BIXLINK' }, { name: 'description', content: 'Your BIXLINK account, referral code and network.' }, { property: 'og:title', content: 'Profile — BIXLINK' }, { property: 'og:description', content: 'Manage your BIXLINK member profile.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: ProfilePage });
 
 function ProfilePage() {
   const { user, ready, data } = useMember();
+  const walletOnly = isWalletOnlyAccount(user);
+  const accountLabel = walletOnly ? user?.app_metadata?.['wallet_address'] : user?.email;
   const reviewer = useReviewerAccess(user?.id);
   const [openProof, setOpenProof] = useState<string | null>(null);
   const [notice, setNotice] = useState(''); const [code, setCode] = useState('');
@@ -35,7 +39,8 @@ function ProfilePage() {
   const arena = useQuery({ queryKey: ['arena', user?.id], queryFn: () => loadArena(), enabled: Boolean(user) });
   const bixp = arena.data?.status;
   const badges = [
-    user?.email_confirmed_at && { Icon: BadgeCheck, label: 'Verified email', cls: 'border-chart-2/40 bg-chart-2/10 text-chart-2' },
+    hasVerifiedEmail(user) && { Icon: BadgeCheck, label: 'Verified email', cls: 'border-chart-2/40 bg-chart-2/10 text-chart-2' },
+    walletOnly && { Icon: Shield, label: 'Verified wallet', cls: 'border-chart-3/40 bg-chart-3/10 text-chart-3' },
     (data?.stakes ?? []).some(s => s.status === 'active') && { Icon: TrendingUp, label: 'Active staker', cls: 'border-primary/40 bg-primary/10 text-primary' },
     orders.length > 0 && { Icon: Gem, label: 'Genesis Founder', cls: 'border-chart-3/40 bg-chart-3/10 text-chart-3' },
     orders.some(o => Number(o.package_usd) >= 100000) && { Icon: Crown, label: 'Sovereign Founder', cls: 'border-chart-3/60 bg-chart-3/15 text-chart-3' },
@@ -46,7 +51,8 @@ function ProfilePage() {
   const copyCode = async () => { if (!data?.referral?.code) return; await navigator.clipboard.writeText(data.referral.code); setNotice('Referral code copied.'); };
   return <BixShell><main className="profile-page mx-auto max-w-3xl px-5 py-8 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="PROFILE">
-      <header className="profile-identity"><div className="profile-avatar"><img src={headerMark.url} alt="BIXLINK member emblem"/></div><div className="min-w-0"><div className="eyebrow">VERIFIED MEMBER</div><h1>{user?.email}</h1><p>Active since {user && formatDate(user.created_at)}</p>{badges.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{badges.map(({ Icon, label, cls }) => <span key={label} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${cls}`}><Icon size={11}/>{label}</span>)}</div>}</div></header>
+      <header className="profile-identity"><div className="profile-avatar"><img src={headerMark.url} alt="BIXLINK member emblem"/></div><div className="min-w-0"><div className="eyebrow">{walletOnly ? 'WALLET MEMBER' : 'MEMBER ACCOUNT'}</div><h1 className="break-all">{accountLabel}</h1><p>Active since {user && formatDate(user.created_at)}</p>{badges.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{badges.map(({ Icon, label, cls }) => <span key={label} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${cls}`}><Icon size={11}/>{label}</span>)}</div>}</div></header>
+      {walletOnly && <WalletAccountDetails/>}
       <section className="profile-referral">
         <div className="profile-section-head"><h2>Referral code</h2>{data?.referral?.code && <span><Check size={11}/> Active</span>}</div>
         {data?.referral?.code ? <><div className="profile-code-row"><div className="profile-code"><b>{data.referral.code}</b><Button size="icon" variant="ghost" title="Copy referral code" onClick={copyCode}><Copy/></Button></div></div>{referralUrl && <div className="mt-2 grid grid-cols-2 gap-2"><Button asChild size="sm" variant="outline" className="rounded-full"><a href={`https://wa.me/?text=${encodeURIComponent(`Join me on BIXLINK: ${referralUrl}`)}`} target="_blank" rel="noopener noreferrer">Share WhatsApp</a></Button><Button asChild size="sm" variant="outline" className="rounded-full"><a href={`https://t.me/share/url?url=${encodeURIComponent(referralUrl)}&text=${encodeURIComponent('Join me on BIXLINK')}`} target="_blank" rel="noopener noreferrer">Share Telegram</a></Button></div>}</> : <Button className="profile-generate" onClick={async () => { try { await makeCode(); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Could not create code.'); } }}>Generate referral code</Button>}
@@ -67,7 +73,7 @@ function ProfilePage() {
         <Button asChild variant="outline"><Link to="/arena"><span className="profile-action-icon"><Swords/></span><span>Fox Arena <small>Daily missions and leaderboard</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
       </section><div className="eyebrow mt-6">SECURITY &amp; ACCOUNT</div><section className="profile-actions">
         <Button asChild variant="outline"><Link to="/settings"><span className="profile-action-icon"><Settings/></span><span>Settings <small>Language, notifications and security</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
-        <Button variant="outline" onClick={async () => { if (!user?.email) return; const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` }); setNotice(error ? error.message : 'Password reset email sent.'); }}><span className="profile-action-icon"><KeyRound/></span><span>Change password</span><ChevronRight className="profile-action-arrow"/></Button>
+        {!walletOnly && <Button variant="outline" onClick={async () => { if (!user?.email) return; const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` }); setNotice(error ? error.message : 'Password reset email sent.'); }}><span className="profile-action-icon"><KeyRound/></span><span>Change password</span><ChevronRight className="profile-action-arrow"/></Button>}
         {data?.isAdmin && <Button asChild variant="outline"><Link to="/admin"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Admin panel <small>Owner only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
         <Button variant="outline" className="profile-signout" onClick={signOut}><span className="profile-action-icon"><LogOut/></span><span>Sign out</span></Button>
       </section>

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { LANGUAGES, type Language, useI18n } from '@/lib/i18n';
 import { useMember } from '@/lib/useMember';
 import { KycCard } from '@/components/KycCard';
+import { isWalletOnlyAccount } from '@/lib/wallet-login';
 
 export const Route = createFileRoute('/settings')({
   head: () => ({ meta: [{ title: 'Settings — BIXLINK' }, { name: 'description', content: 'Manage BIXLINK language and update notification preferences.' }, { property: 'og:title', content: 'Settings — BIXLINK' }, { property: 'og:description', content: 'Choose your BIXLINK language and notification preferences.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
@@ -18,6 +19,7 @@ export const Route = createFileRoute('/settings')({
 
 function SettingsPage() {
   const { user, ready } = useMember();
+  const walletOnly = isWalletOnlyAccount(user);
   const { language, setLanguage, t } = useI18n();
   const [notifications, setNotifications] = useState(true);
   useEffect(() => { setNotifications(window.localStorage.getItem('bixlink-notifications') !== 'off'); }, []);
@@ -36,11 +38,11 @@ function SettingsPage() {
     <div className="eyebrow"><Settings2 size={14}/>{t('preferences')}</div><h1 className="section-title">{t('settings').toUpperCase()}</h1>
     <div className="settings-console mt-7">
       <aside className="settings-rail" aria-label="Settings categories">
-        <div className="settings-member"><span><UserRound/></span><div><b>{user?.email?.split('@')[0]}</b><small>Verified member</small></div></div>
+        <div className="settings-member"><span><UserRound/></span><div className="min-w-0"><b className="break-all">{walletOnly ? 'BNB wallet' : user?.email?.split('@')[0]}</b><small>{walletOnly ? 'Verified wallet' : 'Member account'}</small></div></div>
         <nav><a href="#account"><ShieldCheck/>Account</a><a href="#language" className="active"><Languages/>{t('language')}</a><a href="#currency"><Coins/>Currency</a><a href="#pin"><LockKeyhole/>Transaction PIN</a><a href="#notifications"><Bell/>{t('notifications')}</a></nav>
       </aside>
       <div className="settings-content">
-        <section id="account" className="settings-section"><div className="settings-heading"><span className="is-secure"><ShieldCheck/></span><div><h2>Account &amp; security</h2><p>Your verified account and password controls.</p></div></div><Button asChild variant="ghost" className="settings-account-row"><Link to="/reset-password"><span><KeyRound/>Change password</span><ChevronRight/></Link></Button><div className="mt-3"><KycCard userId={user?.id}/></div></section>
+        <section id="account" className="settings-section"><div className="settings-heading"><span className="is-secure"><ShieldCheck/></span><div><h2>Account &amp; security</h2><p>{walletOnly ? 'Wallet sign-in. Add a real email in Profile for recovery.' : 'Your account and password controls.'}</p></div></div><Button asChild variant="ghost" className="settings-account-row"><Link to={walletOnly ? '/profile' : '/reset-password'}><span><KeyRound/>{walletOnly ? 'Account details' : 'Change password'}</span><ChevronRight/></Link></Button><div className="mt-3"><KycCard userId={user?.id}/></div></section>
         <section id="language" className="settings-section"><div className="settings-heading"><span><Languages/></span><div><h2>{t('language')}</h2><p>{t('savedHere')}</p></div></div><div className="settings-language-grid">{LANGUAGES.map(item => <Button key={item.code} variant="ghost" className={`settings-language${language === item.code ? ' is-active' : ''}`} onClick={() => setLanguage(item.code as Language)}><span className={`flag-symbol flag-${item.flag}`} aria-hidden/><small>{item.label}</small>{language === item.code && <Check/>}</Button>)}</div></section>
         <section id="currency" className="settings-section"><div className="settings-heading"><span><Coins/></span><div><h2>Currency conversion</h2><p>Optional. Pick which currencies appear under your wallet balance.</p></div></div><div className="settings-language-grid">{FIATS.map(([code, label]) => <Button key={code} variant="ghost" className={`settings-language${fiat.includes(code) ? ' is-active' : ''}`} onClick={() => toggleFiat(code)}><b className="numeric">{code}</b><small>{label}</small>{fiat.includes(code) && <Check/>}</Button>)}</div></section>
         <section id="pin" className="settings-section"><div className="settings-row"><div className="settings-heading"><span className="is-secure"><LockKeyhole/></span><div><h2>Transaction PIN</h2><p>Optional 6-digit PIN asked before transfers, payments, staking, swaps and withdrawals on this device.</p></div></div><Button type="button" variant="ghost" className={`settings-switch${pinOn ? ' is-on' : ''}`} aria-pressed={pinOn} aria-label="Transaction PIN" onClick={() => { if (pinOn) { clearPin(); setPinOn(false); txFeedback.success('Transaction PIN turned off'); } else setPinForm(true); }}><i/></Button></div>

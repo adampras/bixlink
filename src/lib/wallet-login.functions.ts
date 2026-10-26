@@ -104,3 +104,17 @@ export const signInWithVerifiedWallet = createServerFn({ method: 'POST' }).input
   if (signError || !signed.session || signed.user?.id !== userId) throw new Error('Could not start your member session.');
   return { access_token: signed.session.access_token, refresh_token: signed.session.refresh_token };
 });
+
+export const saveWalletProfile = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator(d => z.object({ fullName: z.string().trim().max(80), whatsapp: z.string().trim().regex(/^$|^\+[1-9]\d{6,14}$/, 'Use an international WhatsApp number, for example +628123456789.') }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: identity, error } = await context.supabase.auth.getUser();
+    if (error || !isWalletOnlyAccount(identity.user)) throw new Error('Wallet account required.');
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const updates = { ...(data.fullName ? { full_name: data.fullName } : {}), ...(data.whatsapp ? { whatsapp: data.whatsapp } : {}) };
+    if (Object.keys(updates).length) {
+      const { error: saveError } = await supabaseAdmin.from('profiles').update(updates).eq('user_id', context.userId);
+      if (saveError) throw new Error('Could not save your profile.');
+    }
+    return { ok: true };
+  });
