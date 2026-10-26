@@ -152,5 +152,6 @@
 - [x] 20 dev teams swipe deck under consortium + live activity ticker under presale countdown
 - [x] Consortium Vault $2M (PIN) + Web3 Connect Wallet, both with Overview ON/OFF switches
 - [x] Place private consortium access below the owner BIX reserve; polish Arena mission artwork and verify reward setting persistence. Phone/desktop checked; owner save displayed on member mission and original reward restored; six tests pass.
-- [ ] Modernize Arena hero, mission categories and animated compact welcome popup; verify phone fit and claims remain server-controlled.
-- [ ] Add verified-account BNB wallet linking and signature login, preserving owner identity and manual financial review; test replay prevention and end-to-end access.
+- [x] Modernize Arena hero, mission categories and animated compact welcome popup; verified 330px phone popup, loaded artwork, category filtering and no overflow; canonical welcome fallback and rule tests pass.
+- [x] Add verified-account BNB wallet linking and signature login with single-use expiring challenges; enrolled a generated test wallet from the active account and logged into that same verified identity without funds; removed test mapping. Signature origin/nonce/purpose tests pass.
+- [ ] Confirm BNB login on physical TokenPocket/Trust/MetaMask/Bitget wallets — waits on owner device testing; injected-provider flow is verified.
