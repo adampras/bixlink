@@ -1,3 +1,4 @@
+import { Web3Connect } from '@/components/Web3Connect';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import heroLux from '@/assets/presale-hero-lux.jpg';
 import { useEffect, useRef, useState } from 'react';
@@ -66,7 +67,7 @@ function PresalePage() {
     try { const r = await buy({ data: { usd, strategy: strategy as 'standard' | PresaleStrategy } }); setMsg(`Locked ${number(r.bix)} BIX · Genesis certificate #GEN-${String(r.serial ?? 0).padStart(4, '0')}${r.dailyUsd > 0 ? ` · $${number(r.dailyUsd, { maximumFractionDigits: 2 })}/day USDT` : ''}.`); setReceipt({ usd, bix: Number(r.bix), serial: Number(r.serial ?? 0), dailyUsd: Number(r.dailyUsd ?? 0) }); txFeedback.success('Presale purchase successful', `${number(r.bix)} BIX locked.`); setSelection(null); await Promise.all([qc.invalidateQueries({ queryKey: ['presale'] }), qc.invalidateQueries({ queryKey: ['my-wallet'] }), qc.invalidateQueries({ queryKey: ['my-bixlink'] })]); }
     catch (e) { setPurchaseError(e instanceof Error ? e.message : 'Purchase failed'); } finally { setBusy(null); }
   };
-  return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
+  return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10"><Web3Connect/>
     <div className="eyebrow"><Pickaxe size={14}/> EXCLUSIVE</div>
     <h1 className="mt-2 font-display text-3xl font-extrabold leading-tight text-foreground sm:text-5xl">BIX <span className="text-chart-3">PRESALE</span></h1>
     <p className="mt-1 text-sm text-muted-foreground">Genesis allocation with locked BIX released over time.</p>
