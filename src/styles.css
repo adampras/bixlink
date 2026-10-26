@@ -2951,10 +2951,11 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 .internal-market-stats { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
 .internal-market-stats > div { padding:8px; border-radius:10px; background:color-mix(in oklab,var(--foreground) 4%,transparent); text-align:left !important; }
 .internal-market-stats b { font-size:12px; }
-.internal-market-trade a { height:42px; border-radius:999px; font-size:13px; letter-spacing:.14em; border:1px solid color-mix(in oklab,var(--foreground) 14%,transparent); box-shadow:inset 0 1px 0 color-mix(in oklab,var(--foreground) 22%,transparent),0 6px 18px -10px currentColor; transition:transform .15s,filter .2s; }
-.internal-market-trade a:active { transform:scale(.97); }
-.internal-market-trade .is-buy { background:linear-gradient(135deg,color-mix(in oklab,var(--chart-2) 92%,var(--foreground)),color-mix(in oklab,var(--chart-2) 70%,var(--background))); }
-.internal-market-trade .is-sell { background:linear-gradient(135deg,color-mix(in oklab,var(--destructive) 90%,var(--foreground)),color-mix(in oklab,var(--destructive) 65%,var(--background))); }
+.internal-market-trade a { height:44px; border-radius:10px; font-size:13px; letter-spacing:.1em; border:0; box-shadow:none; filter:none; text-shadow:none; transition:none; }
+.internal-market-trade a:active { opacity:.9; }
+.internal-market-trade .is-buy { background:var(--chart-2) !important; color:var(--background) !important; }
+.internal-market-trade .is-sell { background:var(--destructive) !important; color:var(--destructive-foreground) !important; }
+.internal-market-ticker { margin-top:12px; border-radius:10px; overflow:hidden; }
 
 .auric-grid, .ingot-matrix__grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:8px; }
 @media (min-width:768px){ .auric-grid, .ingot-matrix__grid { grid-template-columns:repeat(4,minmax(0,1fr)) !important; } }

@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { money } from '@/lib/bixlink';
 import { resolveMovement, simulatedQuote, simulationHistory } from '@/lib/internal-market';
 import { CryptoIcon } from '@/components/CryptoIcon';
+import { LiveActivityTicker } from '@/components/LiveActivityTicker';
 
 export function InternalMarket({ reference, movement, serverNow }: { reference: number; movement: unknown; serverNow: number }) {
   const config = resolveMovement(movement);
@@ -22,5 +23,6 @@ export function InternalMarket({ reference, movement, serverNow }: { reference: 
     <div className="internal-market-chart"><svg viewBox="0 0 550 160" role="img" aria-label="Simulated internal reference history"><path d="M20 20H460 M20 75H460 M20 130H460" className="internal-chart-grid"/><text x="470" y="24">{high.toFixed(6)}</text><text x="470" y="79">{((high + low) / 2).toFixed(6)}</text><text x="470" y="134">{low.toFixed(6)}</text>{history.length > 1 ? <polyline points={points} className="internal-chart-line"/> : <path d="M20 75H460" className="internal-chart-line"/>}<text x="20" y="154">{history.length ? new Date(history[0]?.time ?? now).toISOString().slice(11,19) : 'No simulated history'}</text>{history.length > 1 && <text x="365" y="154">{new Date(history.at(-1)?.time ?? now).toISOString().slice(11,19)} UTC</text>}</svg></div>
     <div className="internal-market-stats"><div><span>FIXED SUPPLY</span><b>21.0M BIX</b></div><div><span>DEV BUYBACK · LOCKED</span><b>$0.250000</b></div><div><span>IMPLIED SIMULATED VALUE</span><b>{money(price * 21_000_000, { notation: 'compact' })}</b></div></div>
     <div className="internal-market-trade"><Link to="/p2p" className="is-buy">BUY BIX <ArrowUpRight size={15}/></Link><Link to="/p2p" className="is-sell">SELL BIX <ArrowUpRight size={15}/></Link></div>
+    <div className="internal-market-ticker"><LiveActivityTicker/></div>
   </div>;
 }
