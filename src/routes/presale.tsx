@@ -8,7 +8,7 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { useMember } from '@/lib/useMember';
 import { buyPresale, getPresaleStatus } from '@/lib/presale.functions';
-import { presaleReleased, presalePrice } from '@/lib/presale';
+import { presaleReleased, presalePrice, stagePhase } from '@/lib/presale';
 import { ProfitSimulator } from '@/components/ProfitSimulator';
 import { PresaleCommission } from '@/components/PresaleCommission';
 import { GenesisCertificate, PresaleStrategies } from '@/components/PresaleStrategies';
