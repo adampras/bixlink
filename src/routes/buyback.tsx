@@ -37,8 +37,8 @@ function BuybackPage() {
   if (!user) return <main className="mx-auto max-w-md p-6 text-center"><p className="text-muted-foreground">Sign in to sell BIX to the dev buyback desk.</p><Button asChild className="mt-4"><Link to="/auth">Sign in</Link></Button></main>;
   const a = Number(amount);
   const submit = async () => {
-    if (!(a >= 1)) return toast.error('Minimum 1 BIX');
-    if (contact.trim().length < 3) return toast.error('Enter your confirmation contact');
+    if (!(a >= 1)) { toast.error('Minimum 1 BIX'); return; }
+    if (contact.trim().length < 3) { toast.error('Enter your confirmation contact'); return; }
     if (!window.confirm(`Sell ${a} BIX for ${money(a * 0.25)} USDT? BIX is held until the developer reviews it.`)) return;
     setBusy(true);
     try { await req({ data: { amount: a, method, contact } }); toast.success('Buyback request sent — BIX held in escrow'); setAmount(''); await qc.invalidateQueries({ queryKey: ['buyback'] }); }
