@@ -11,7 +11,7 @@ export async function provisionMember(admin: any, userId: string, fullName: stri
     const { error } = await admin.from('referral_codes').insert({ user_id: userId, code, referred_by: sponsorId });
     if (!error) return;
   }
-  throw new Error('Gagal membuat kode member');
+  throw new Error('Failed to generate member code');
 }
 
 /** True when target is inside root's downline (cycle-safe walk up sponsors). */

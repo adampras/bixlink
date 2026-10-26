@@ -58,8 +58,8 @@ export function ContentCarousel({ items: rawItems, group, title }: { items: Cont
     <header className="mb-5 flex items-center justify-between gap-3">
       <h2 className="min-w-0 break-words text-lg font-bold uppercase leading-6">{title}</h2>
       <div className="flex shrink-0 gap-2">
-        <Button type="button" size="icon" variant="outline" className="size-8 rounded-full bg-card/50" aria-label={`${title}: sebelumnya`} title="Sebelumnya" disabled={position === 0} onClick={() => move(-1)}><ChevronLeft size={16}/></Button>
-        <Button type="button" size="icon" variant="outline" className="size-8 rounded-full bg-card/50" aria-label={`${title}: berikutnya`} title="Berikutnya" disabled={atEnd || visible.length < 2} onClick={() => move(1)}><ChevronRight size={16}/></Button>
+        <Button type="button" size="icon" variant="outline" className="size-8 rounded-full bg-card/50" aria-label={`${title}: previous`} title="Previous" disabled={position === 0} onClick={() => move(-1)}><ChevronLeft size={16}/></Button>
+        <Button type="button" size="icon" variant="outline" className="size-8 rounded-full bg-card/50" aria-label={`${title}: next`} title="Next" disabled={atEnd || visible.length < 2} onClick={() => move(1)}><ChevronRight size={16}/></Button>
       </div>
     </header>
     <div ref={track} className="content-carousel-track" tabIndex={0} role="region" aria-label={title} onScroll={event => {
@@ -67,12 +67,12 @@ export function ContentCarousel({ items: rawItems, group, title }: { items: Cont
       setPosition(element.scrollLeft);
       setAtEnd(element.scrollLeft + element.clientWidth >= element.scrollWidth - 2);
     }}>
-      {visible.map(({ item, index }) => <button type="button" key={`${item.title}-${index}`} className="content-carousel-slide block min-w-0 rounded-lg text-left focus-visible:ring-2 focus-visible:ring-primary motion-safe:active:scale-[0.98]" aria-label={`Detail ${item.title}`} onClick={() => setOpen(index)}>
+      {visible.map(({ item, index }) => <button type="button" key={`${item.title}-${index}`} className="content-carousel-slide block min-w-0 rounded-lg text-left focus-visible:ring-2 focus-visible:ring-primary motion-safe:active:scale-[0.98]" aria-label={`${item.title} details`} onClick={() => setOpen(index)}>
         {group === 'spaces' ? <IncomeCategoryCard item={item}/> : <RoadmapCard item={item} index={index}/>}
-        <span className="mt-2 block text-center text-[10px] font-bold uppercase tracking-[0.15em] text-chart-3">Ketuk untuk detail ▸</span>
+        <span className="mt-2 block text-center text-[10px] font-bold uppercase tracking-[0.15em] text-chart-3">Tap for details ▸</span>
       </button>)}
     </div>
-    {group === 'roadmap' && <p className="mt-5 text-xs leading-5 text-muted-foreground">Rencana pengembangan, bukan jaminan hasil atau jadwal penyelesaian.</p>}
-    <ContentDetailModal item={open === null ? null : items[open] ?? null} eyebrow={open === null ? '' : group === 'roadmap' ? `PHASE ${open + 1}${items[open]?.quarter ? ` · ${items[open]?.quarter}` : ''}` : 'KATEGORI PENGEMBANGAN'} fallbackSrc={open === null ? undefined : group === 'spaces' ? categoryImage((items[open]?.title ?? "")) : roadmapImage((items[open]?.title ?? ""), open)} onClose={() => { setOpen(null); paused.current = false; }}/>
+    {group === 'roadmap' && <p className="mt-5 text-xs leading-5 text-muted-foreground">Development roadmap, not a guarantee of outcomes or completion timelines.</p>}
+    <ContentDetailModal item={open === null ? null : items[open] ?? null} eyebrow={open === null ? '' : group === 'roadmap' ? `PHASE ${open + 1}${items[open]?.quarter ? ` · ${items[open]?.quarter}` : ''}` : 'DEVELOPMENT CATEGORY'} fallbackSrc={open === null ? undefined : group === 'spaces' ? categoryImage((items[open]?.title ?? "")) : roadmapImage((items[open]?.title ?? ""), open)} onClose={() => { setOpen(null); paused.current = false; }}/>
   </div>;
 }

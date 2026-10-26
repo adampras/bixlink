@@ -4,7 +4,7 @@ import { getCryptoFeed } from '@/lib/crypto-news.functions';
 
 function ago(iso: string) {
   const m = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
-  return m < 60 ? `${m}m` : m < 1440 ? `${Math.round(m / 60)}j` : `${Math.round(m / 1440)}h`;
+  return m < 60 ? `${m}m` : m < 1440 ? `${Math.round(m / 60)}h` : `${Math.round(m / 1440)}d`;
 }
 
 export function CryptoNewsFeed() {
@@ -14,12 +14,12 @@ export function CryptoNewsFeed() {
   return (
     <section className="mx-auto max-w-6xl px-5 pb-16 md:px-8">
       <div className="eyebrow">LIVE GLOBAL MARKET</div>
-      <h2 className="section-title">MARKET <span>TRENDING</span> & BERITA</h2>
+      <h2 className="section-title">MARKET <span>TRENDING</span> & NEWS</h2>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-chart-3/20 bg-card/50 p-4 backdrop-blur-md">
-          <div className="mb-3 text-xs font-bold tracking-widest text-chart-3">TOP MOVERS 24J</div>
+          <div className="mb-3 text-xs font-bold tracking-widest text-chart-3">TOP MOVERS 24H</div>
           {isLoading && <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-10 animate-pulse rounded-xl bg-muted/40" />)}</div>}
-          {!isLoading && !coins.length && <p className="text-xs text-muted-foreground">Data market sedang tidak tersedia.</p>}
+          {!isLoading && !coins.length && <p className="text-xs text-muted-foreground">Market data is currently unavailable.</p>}
           <ul className="space-y-2">
             {coins.map(c => {
               const up = c.change24h >= 0;
@@ -35,9 +35,9 @@ export function CryptoNewsFeed() {
           </ul>
         </div>
         <div className="rounded-2xl border border-chart-3/20 bg-card/50 p-4 backdrop-blur-md">
-          <div className="mb-3 text-xs font-bold tracking-widest text-chart-3">BERITA CRYPTO TERKINI</div>
+          <div className="mb-3 text-xs font-bold tracking-widest text-chart-3">LATEST CRYPTO NEWS</div>
           {isLoading && <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-12 animate-pulse rounded-xl bg-muted/40" />)}</div>}
-          {!isLoading && !news.length && <p className="text-xs text-muted-foreground">Berita sedang tidak tersedia.</p>}
+          {!isLoading && !news.length && <p className="text-xs text-muted-foreground">News is currently unavailable.</p>}
           <ul className="space-y-2">
             {news.map(n => (
               <li key={n.link}>
@@ -50,7 +50,7 @@ export function CryptoNewsFeed() {
           </ul>
         </div>
       </div>
-      <p className="mt-3 text-[10px] text-muted-foreground">Data pasar global dari CoinGecko dan berita dari sumber publik, diperbarui otomatis tiap 60 menit. Informasi umum, bukan saran investasi, dan tidak terkait saldo internal BIXLINK.</p>
+      <p className="mt-3 text-[10px] text-muted-foreground">Global market data from CoinGecko and news from public sources, automatically updated every 60 minutes. General information only, not investment advice, and unrelated to internal BIXLINK balances.</p>
     </section>
   );
 }

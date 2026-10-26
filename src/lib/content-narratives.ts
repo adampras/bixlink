@@ -2,87 +2,87 @@ import type { ContentItem } from '@/lib/landing-content';
 
 /** Bundled long-form narratives used when the owner has not written a custom detail. */
 export const spaceNarratives: Record<string, string> = {
-  FOREX: `BIXLINK mempelajari pasar valuta asing sebagai salah satu pilar diversifikasi ekosistem. Fokus kajian mencakup pasangan mata uang utama, pengelolaan risiko lintas mata uang, serta model lindung nilai (hedging) yang disiplin.
+  FOREX: `BIXLINK explores foreign exchange markets as a foundational pillar of ecosystem diversification. Research focuses on major currency pairs, cross-currency risk management, and disciplined hedging models.
 
-Setiap aktivitas yang berkaitan dengan kategori ini hanya ditampilkan setelah benar-benar tercatat dan ditinjau oleh pengelola. Tidak ada hasil yang dijanjikan; data historis tidak menjamin kinerja di masa depan.
+All activities related to this category are displayed only after being fully recorded and verified by management. No returns are guaranteed; historical data does not guarantee future performance.
 
-Pilar utama:
-• Kajian pasar global dan analisis pasangan mata uang utama
-• Kerangka manajemen risiko dan batas eksposur yang jelas
-• Pelaporan berkala yang dapat ditinjau komunitas`,
-  CRYPTO: `Kategori CRYPTO mengembangkan utilitas BIX di dalam ekosistem BIXLINK: staking, BIX PAY, booster, dan konversi internal yang tercatat rapi pada ledger aplikasi.
+Core pillars:
+• Global market research and major currency pair analysis
+• Robust risk management framework and clear exposure limits
+• Periodic reporting available for community review`,
+  CRYPTO: `The CRYPTO vertical drives BIX utility within the BIXLINK ecosystem: staking, BIX PAY, boosters, and internal conversions tracked seamlessly on the app ledger.
 
-BIXLINK memisahkan tegas antara catatan internal BIX dan token on-chain. Rencana penerbitan token BIX dengan suplai tetap 21.000.000 di BNB Chain merupakan langkah terpisah yang ditandatangani langsung dari dompet pemilik, tanpa aplikasi pernah menyimpan kunci pribadi.
+BIXLINK maintains a strict separation between internal BIX ledger records and on-chain tokens. The planned issuance of the BIX token with a fixed supply of 21,000,000 on BNB Chain is an independent process signed directly from the owner's wallet, with the platform never holding private keys.
 
-Pilar utama:
-• Utilitas BIX untuk staking, transfer, dan booster
-• Model non-kustodial dan catatan transaksi transparan
-• Persiapan smart contract suplai tetap di BNB Chain`,
-  RWA: `Real-World Asset (RWA) adalah visi BIXLINK untuk menghubungkan nilai ekonomi nyata dengan ekosistem digital. Kajian mencakup properti, komoditas, dan usaha produktif yang dapat diverifikasi.
+Core pillars:
+• BIX utility across staking, transfers, and boosters
+• Non-custodial architecture and transparent transaction records
+• Fixed-supply smart contract deployment preparation on BNB Chain`,
+  RWA: `Real-World Assets (RWA) represent BIXLINK's vision to connect tangible economic value with the digital ecosystem. Scope includes verifiable real estate, commodities, and productive enterprises.
 
-Sebelum aset apa pun diintegrasikan, diperlukan verifikasi kepemilikan, penilaian independen, dan kepatuhan hukum yang berlaku. Selama tahap ini, RWA adalah rencana pengembangan, bukan aset yang sudah dimiliki atau dijaminkan.
+Prior to integrating any asset, rigorous ownership verification, independent appraisal, and regulatory compliance are required. In this phase, RWA represents a development roadmap, not currently owned or pledged assets.
 
-Pilar utama:
-• Kurasi dan verifikasi aset nyata secara bertahap
-• Kerangka legal dan kepatuhan sebelum integrasi
-• Pelaporan terbuka atas status setiap aset`,
-  ADVERTISING: `BIXLINK menyiapkan ruang promosi di aplikasi, situs, dan kanal komunitas sebagai sumber nilai ekosistem. Mitra Web3, merchant, dan proyek komunitas dapat menjangkau anggota BIXLINK secara tepat sasaran.
+Core pillars:
+• Phased curation and verification of real-world assets
+• Comprehensive legal and regulatory compliance framework prior to onboarding
+• Transparent public reporting on asset status`,
+  ADVERTISING: `BIXLINK deploys promotional placements across its app, web portal, and community channels as an ecosystem value generator. Web3 partners, merchants, and community initiatives can reach targeted BIXLINK members.
 
-Pendapatan dari kategori ini hanya ditampilkan setelah tercatat dan ditinjau. Rencana ke depan adalah mengalokasikan sebagian nilai iklan untuk penguatan ekosistem dan program komunitas.
+Revenues from this vertical are recognized only after being fully recorded and reviewed. Future roadmaps allocate a portion of advertising value toward ecosystem sustainability and community initiatives.
 
-Pilar utama:
-• Ruang iklan di aplikasi, situs, dan komunitas
-• Kemitraan sponsor dan merchant Web3
-• Pencatatan pendapatan yang transparan dan dapat ditinjau`,
-  MARKETPLACE: `Marketplace BIXLINK dirancang sebagai pusat pertukaran utilitas di dalam ekosistem: produk digital, voucher jasa, layanan merchant, dan penawaran komunitas yang dapat dibayar menggunakan BIX PAY.
+Core pillars:
+• Ad placements across application, web, and community channels
+• Web3 merchant and sponsorship partnerships
+• Transparent, auditable revenue reporting`,
+  MARKETPLACE: `The BIXLINK Marketplace is designed as an ecosystem utility exchange hub: digital assets, service vouchers, merchant offerings, and community products payable via BIX PAY.
 
-Transaksi direncanakan tercatat instan di ledger internal tanpa biaya gas, dengan verifikasi penjual dan perlindungan pembeli. Marketplace masih dalam tahap perencanaan; fitur akan dirilis bertahap setelah pengujian dan peninjauan.
+Transactions are slated to settle instantly on the internal ledger with zero gas fees, featuring seller verification and buyer protection. The Marketplace is currently in development; features will roll out progressively following testing and review.
 
-Pilar utama:
-• Pembayaran BIX PAY untuk merchant dan anggota
-• Verifikasi penjual serta sistem ulasan yang jujur
-• Katalog produk digital, voucher, dan layanan komunitas`,
+Core pillars:
+• BIX PAY settlements for merchants and members
+• Verified merchant onboarding and authentic review systems
+• Catalog of digital products, vouchers, and community services`,
 };
 
 export const roadmapNarratives: Record<string, string> = {
-  PELUNCURAN: `Fase awal membangun fondasi BIXLINK: identitas merek, sistem akun dengan verifikasi email, keamanan login, dan ledger internal non-kustodial.
+  PELUNCURAN: `The foundational phase establishes BIXLINK infrastructure: brand identity, email-verified account architecture, authentication security, and a non-custodial internal ledger.
 
-Target fase:
-• Peluncuran landing page dan aplikasi member
-• Registrasi, verifikasi akun, dan kode referral otomatis
-• Fondasi ledger internal BIX dan USDT yang dapat ditinjau`,
-  'STAKING BETA': `Fase uji staking menghadirkan delapan paket USDT dan BIX BOOST dengan proyeksi imbal hasil yang ditampilkan secara langsung.
+Phase targets:
+• Launch of landing portal and member dashboard
+• User registration, account verification, and automated referral routing
+• Core auditable internal ledger infrastructure for BIX and USDT`,
+  'STAKING BETA': `The staking test phase introduces eight USDT and BIX BOOST tiers with real-time projected yields.
 
-Target fase:
-• Pengujian paket staking dan kalkulasi proyeksi harian
-• Persetujuan deposit dan penarikan yang ditinjau pengelola
-• Riwayat transaksi lengkap untuk setiap anggota
-Proyeksi bukan jaminan hasil.`,
-  'DAFTAR RWA': `Fase ini menyusun kerangka verifikasi aset dunia nyata sebelum integrasi apa pun dilakukan.
+Phase targets:
+• Staking tier validation and daily yield projection modeling
+• Management-reviewed deposit and withdrawal settlement workflows
+• Comprehensive transaction history for every member
+Projections do not constitute guaranteed returns.`,
+  'DAFTAR RWA': `This phase formalizes the real-world asset verification framework prior to any on-chain integration.
 
-Target fase:
-• Standar kurasi dan penilaian aset
-• Kajian aspek hukum dan kepatuhan
-• Format pelaporan terbuka untuk status setiap aset`,
-  EKOSISTEM: `Fase ekspansi memperkuat utilitas BIX dan komunitas: BIX PAY, market internal, mining BIXP, serta persiapan Marketplace.
+Phase targets:
+• Asset curation and appraisal standards
+• Legal due diligence and compliance frameworks
+• Transparent public status reporting protocols for all assets`,
+  EKOSISTEM: `The expansion phase scales BIX utility and community adoption: BIX PAY, internal market, BIXP mining, and Marketplace integration prep.
 
-Target fase:
-• Transfer BIX antar-anggota secara instan
-• Program komunitas dan kemitraan merchant
-• Persiapan Marketplace berbasis BIX PAY`,
-  DAO: `Fase tata kelola merancang peran komunitas dalam keputusan ekosistem melalui Treasury DAO Reserve.
+Phase targets:
+• Instant peer-to-peer BIX member transfers
+• Community incentive programs and merchant partnerships
+• BIX PAY Marketplace infrastructure readiness`,
+  DAO: `The governance phase establishes community-driven ecosystem decision-making powered by the Treasury DAO Reserve.
 
-Target fase:
-• Rancangan mekanisme proposal dan pemungutan suara
-• Aturan pengelolaan treasury yang transparan
-• Transisi bertahap menuju keputusan berbasis komunitas`,
-  '21 JUTA MILESTONE': `Fase peninjauan menyeluruh atas perkembangan ekosistem dengan rencana suplai tetap 21.000.000 BIX dan jadwal halving.
+Phase targets:
+• Governance proposal and voting mechanism design
+• Transparent treasury management protocols
+• Progressive transition toward community-led governance`,
+  '21 JUTA MILESTONE': `Comprehensive ecosystem milestone review aligned with the fixed 21,000,000 BIX supply cap and halving schedule.
 
-Target fase:
-• Evaluasi distribusi alokasi tokenomics
-• Peninjauan jadwal rilis dan halving
-• Laporan perkembangan terbuka untuk komunitas
-Ini adalah tonggak pengembangan, bukan target harga.`,
+Phase targets:
+• Tokenomics distribution and allocation audit
+• Emission schedule and halving roadmap review
+• Public progress and audit reporting for the community
+This represents a development milestone, not a price target.`,
 };
 
 Object.assign(roadmapNarratives, { LAUNCH: roadmapNarratives['PELUNCURAN'], 'STAKING APP BETA': roadmapNarratives['STAKING BETA'], 'RWA LISTING': roadmapNarratives['DAFTAR RWA'], ECOSYSTEM: roadmapNarratives['EKOSISTEM'] });

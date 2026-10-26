@@ -40,13 +40,13 @@ function Cockpit() {
   const [bix, setBix] = useState(1000); const [ms, setMs] = useState<number | null>(null);
   const [seat, setSeat] = useState<string | null>(null);
   return <div className="grid gap-3 text-sm">
-    <label className="grid gap-1">Jumlah BIX: <b className="numeric text-2xl text-primary">{bix.toLocaleString()}</b>
+    <label className="grid gap-1">BIX Amount: <b className="numeric text-2xl text-primary">{bix.toLocaleString()}</b>
       <input type="range" min={10} max={100000} step={10} value={bix} onChange={(e) => { setBix(+e.target.value); setMs(Math.round(Math.random() * 300 + 120) / 1000); }} /></label>
-    <p>≈ <b className="numeric text-chart-2">{(bix * REF).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDT</b> · ref. internal ${REF}{ms !== null && <> · simulasi eksekusi <b className="numeric">{ms} ms</b></>}</p>
+    <p>≈ <b className="numeric text-chart-2">{(bix * REF).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDT</b> · internal ref. ${REF}{ms !== null && <> · simulated execution <b className="numeric">{ms} ms</b></>}</p>
     <button type="button" onClick={() => setSeat(`#PIONEER-${String(Math.floor(1000 + Math.random() * 9000))}`)} className="q-seat rounded-full px-5 py-3 text-xs font-black tracking-widest">
       {seat ? `PIONEER SEAT ${seat} · DEMO` : 'CLAIM PIONEER SEAT (DEMO)'}
     </button>
-    <p className="text-[11px] text-muted-foreground">Simulasi visual saja. Tidak ada order, dana, atau kursi nyata yang dibuat.</p>
+    <p className="text-[11px] text-muted-foreground">Visual simulation only. No real orders, funds, or seats are created.</p>
   </div>;
 }
 
@@ -56,7 +56,7 @@ function Quantum() {
       <header className="q-head rounded-2xl p-4 text-center">
         <p className="text-[10px] font-black tracking-[0.35em] text-muted-foreground">QUANTUM HYBRID PROTOCOL · STATUS: CORE SYNCING</p>
         <h1 className="q-title mt-2 font-display text-3xl font-black md:text-5xl">BIXLINK QUANTUM EXCHANGE</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Konsep exchanger masa depan — <b className="text-primary">COMING SOON</b>. Halaman ini demo visual, belum ada perdagangan nyata.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Future exchange concept — <b className="text-primary">COMING SOON</b>. This page is a visual demo; no real trading is active.</p>
       </header>
       <div className="grid gap-5 md:grid-cols-2">
         <section className="q-panel rounded-2xl p-4"><h2 className="mb-2 text-xs font-black tracking-widest text-primary">HOLOGRAPHIC LIQUIDITY RADAR</h2><Radar /></section>

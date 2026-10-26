@@ -51,32 +51,32 @@ export function MemberMining({ emailVerified }: { emailVerified: boolean }) {
   const act = async (fn: () => Promise<MiningStatus>, ok: string) => {
     setBusy(true); setMsg('');
     try { qc.setQueryData(['bix-mining', user?.id], await fn()); setMsg(ok); }
-    catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal, coba lagi.'); }
+    catch (e) { setMsg(e instanceof Error ? e.message : 'Failed. Please try again.'); }
     finally { setBusy(false); }
   };
 
-  const state = !emailVerified ? 'Verifikasi email diperlukan sebelum mesin bisa dijalankan.'
-    : !s?.enabled ? 'Mining sedang dinonaktifkan oleh owner.'
-    : !s.started ? 'Tekan Mulai mining untuk menyalakan mesin.' : 'Mesin berjalan — BIXP terus bertambah walau aplikasi ditutup.';
+  const state = !emailVerified ? 'Email verification required before starting the engine.'
+    : !s?.enabled ? 'Mining is currently disabled by owner.'
+    : !s.started ? 'Click Start Mining to run the engine.' : 'Engine running — BIXP accrues continuously even when the app is closed.';
 
   return <section className="member-mining" aria-labelledby="member-mining-title">
-    <div className="mining-heading"><h2 id="member-mining-title">BIX MINING</h2><span className={emailVerified ? 'mining-verified' : 'mining-unverified'}>{emailVerified ? <BadgeCheck size={15}/> : <LockKeyhole size={15}/>} {emailVerified ? 'Terverifikasi' : 'Verifikasi email'}</span></div>
-    <dl className="mining-balances"><div><dt>Saldo BIXP</dt><dd>{vbixBalance === null ? '—' : fmt(vbixBalance)} <small>BIXP</small></dd></div><div><dt>Saldo BIX</dt><dd>{c ? fmt(Number(c.bixBalance)) : '—'} <small>BIX</small></dd></div></dl>
+    <div className="mining-heading"><h2 id="member-mining-title">BIX MINING</h2><span className={emailVerified ? 'mining-verified' : 'mining-unverified'}>{emailVerified ? <BadgeCheck size={15}/> : <LockKeyhole size={15}/>} {emailVerified ? 'Verified' : 'Verify Email'}</span></div>
+    <dl className="mining-balances"><div><dt>BIXP Balance</dt><dd>{vbixBalance === null ? '—' : fmt(vbixBalance)} <small>BIXP</small></dd></div><div><dt>BIX Balance</dt><dd>{c ? fmt(Number(c.bixBalance)) : '—'} <small>BIX</small></dd></div></dl>
     <div className="mining-engine">
-      <video ref={video} muted loop playsInline preload="auto" poster={poster.url} aria-label="Mesin mining BIX"><source src={webEngine.url} type="video/webm"/><source src={engine.url} type="video/mp4"/></video>
+      <video ref={video} muted loop playsInline preload="auto" poster={poster.url} aria-label="BIX mining engine"><source src={webEngine.url} type="video/webm"/><source src={engine.url} type="video/mp4"/></video>
     </div>
     <dl className="mining-figures">
-      <div><dt>BIXP mining</dt><dd>{fmt(Number(s?.miningVbix ?? 0) + pending)} <small>BIXP</small></dd></div>
-      <div><dt>Bonus jaringan</dt><dd>{fmt(Number(s?.networkVbix ?? 0))} <small>BIXP</small></dd></div>
-      <div><dt>Laju mining</dt><dd>{Number(s?.ratePerDay ?? 0).toLocaleString('id-ID', { maximumFractionDigits: 4 })} <small>BIXP/hari</small></dd></div>
-      <div><dt>Bonus staking</dt><dd>{s?.boosted ? 'Aktif' : 'Tidak aktif'}</dd></div>
+      <div><dt>Mining BIXP</dt><dd>{fmt(Number(s?.miningVbix ?? 0) + pending)} <small>BIXP</small></dd></div>
+      <div><dt>Network Bonus</dt><dd>{fmt(Number(s?.networkVbix ?? 0))} <small>BIXP</small></dd></div>
+      <div><dt>Mining Rate</dt><dd>{Number(s?.ratePerDay ?? 0).toLocaleString('id-ID', { maximumFractionDigits: 4 })} <small>BIXP/day</small></dd></div>
+      <div><dt>Staking Bonus</dt><dd>{s?.boosted ? 'Active' : 'Inactive'}</dd></div>
     </dl>
     {!s?.started
-      ? <Button variant="outline" className="mining-start" disabled={busy || !emailVerified || !s?.enabled} onClick={() => act(() => start(), 'Mesin mining menyala.')}><Play size={16}/> Mulai mining</Button>
-      : <Button variant="outline" className="mining-start" disabled={busy || !running} onClick={() => act(() => settle(), 'BIXP tersimpan ke saldo mining.')}><Download size={16}/> Simpan BIXP</Button>}
+      ? <Button variant="outline" className="mining-start" disabled={busy || !emailVerified || !s?.enabled} onClick={() => act(() => start(), 'Mining engine started.')}><Play size={16}/> Start Mining</Button>
+      : <Button variant="outline" className="mining-start" disabled={busy || !running} onClick={() => act(() => settle(), 'BIXP saved to mining balance.')}><Download size={16}/> Claim BIXP</Button>}
     <p className="mining-state" role="status">{msg || state}</p>
-    <Button variant="outline" className="mining-start" disabled={busy || !emailVerified || !c?.enabled || quote <= 0} onClick={async () => { setBusy(true); setMsg(''); try { const result = await convert(); qc.setQueryData(['bix-mining-conversion', user?.id], result); await Promise.all([qc.invalidateQueries({ queryKey: ['bix-mining'] }), qc.invalidateQueries({ queryKey: ['my-wallet'] })]); setMsg('Konversi tersimpan ke saldo BIX internal.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Konversi gagal.'); } finally { setBusy(false); } }}><ArrowLeftRight size={16}/>{c?.enabled ? `Konversi BIXP → ${fmt(quote)} BIX` : 'Konversi BIXP · Ditutup'}</Button>
-    {(error || conversionError) && <p className="mining-state text-destructive">Saldo mining tidak dapat dimuat. Coba kembali.</p>}
-    <div className="mining-disclosures"><p>BIXP adalah poin mining internal · Saldo BIX bukan token on-chain</p><p>{c?.vbixPerBix ? `${Number(c.vbixPerBix).toLocaleString('id-ID')} BIXP = 1 BIX · ` : 'Nilai konversi belum ditentukan · '}Pool <strong>1.000.000 BIX</strong> Marketing & Community · Maks. 100 BIX/akun</p><p>Sudah dikonversi: {c ? fmt(Number(c.convertedBix)) : '—'} / 100 BIX</p></div>
+    <Button variant="outline" className="mining-start" disabled={busy || !emailVerified || !c?.enabled || quote <= 0} onClick={async () => { setBusy(true); setMsg(''); try { const result = await convert(); qc.setQueryData(['bix-mining-conversion', user?.id], result); await Promise.all([qc.invalidateQueries({ queryKey: ['bix-mining'] }), qc.invalidateQueries({ queryKey: ['my-wallet'] })]); setMsg('Conversion credited to internal BIX balance.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Conversion failed.'); } finally { setBusy(false); } }}><ArrowLeftRight size={16}/>{c?.enabled ? `Convert BIXP → ${fmt(quote)} BIX` : 'Convert BIXP · Closed'}</Button>
+    {(error || conversionError) && <p className="mining-state text-destructive">Failed to load mining balance. Please try again.</p>}
+    <div className="mining-disclosures"><p>BIXP is an internal mining point · BIX balance is not an on-chain token</p><p>{c?.vbixPerBix ? `${Number(c.vbixPerBix).toLocaleString('id-ID')} BIXP = 1 BIX · ` : 'Conversion rate not set · '}Pool <strong>1.000.000 BIX</strong> Marketing & Community · Max. 100 BIX/account</p><p>Converted: {c ? fmt(Number(c.convertedBix)) : '—'} / 100 BIX</p></div>
   </section>;
 }
