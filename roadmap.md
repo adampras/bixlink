@@ -152,3 +152,5 @@
 - [x] 20 dev teams swipe deck under consortium + live activity ticker under presale countdown
 - [x] Consortium Vault $2M (PIN) + Web3 Connect Wallet, both with Overview ON/OFF switches
 - [x] Place private consortium access below the owner BIX reserve; polish Arena mission artwork and verify reward setting persistence. Phone/desktop checked; owner save displayed on member mission and original reward restored; six tests pass.
+- [ ] Modernize Arena hero, mission categories and animated compact welcome popup; verify phone fit and claims remain server-controlled.
+- [ ] Add verified-account BNB wallet linking and signature login, preserving owner identity and manual financial review; test replay prevention and end-to-end access.
