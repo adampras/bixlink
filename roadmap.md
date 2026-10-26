@@ -150,3 +150,4 @@
 - [x] Successful staking reveals refreshed history and live projection; movable edge-snapping chat; HOME top arrow; Owner 1 touch feedback switch. Phone interactions, signed-in history and owner OFF/ON saves verified; no new financial transaction performed.
 
 - [x] 20 dev teams swipe deck under consortium + live activity ticker under presale countdown
+- [x] Consortium Vault $2M (PIN) + Web3 Connect Wallet, both with Overview ON/OFF switches
