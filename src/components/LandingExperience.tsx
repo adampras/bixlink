@@ -48,19 +48,19 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
     <NationAlliance/>
     <LandingNarrative content={content}/>
     <section className="landing-ecosystem border-y border-border"><div className="mx-auto max-w-7xl px-5 py-8 md:px-8 md:py-14"><div className="eyebrow">THE BIXLINK ADVANTAGE</div><h2 className="section-title">PREMIUM <span>ECOSYSTEM</span></h2><div className="mt-5 grid gap-4 md:mt-8 md:gap-5 lg:grid-cols-2"><article className="ecosystem-column"><header><span className="ecosystem-icon text-primary"><Globe2/></span><div><small>CONNECTED UTILITY</small><h3>Ecosystem core</h3></div></header><div className="ecosystem-list">{content.ecosystem.map((item, index) => item.enabled === false ? null : <ContentLink group="ecosystem" index={index} item={item} key={`${item.title}-${index}`}><div><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div></ContentLink>)}</div></article><article className="ecosystem-column ecosystem-column--income"><header><span className="ecosystem-icon text-chart-3"><CircleDollarSign/></span><div><small>DISCLOSED SOURCES</small><h3>Income narrative</h3></div></header><div className="ecosystem-list">{content.income.map((item, index) => item.enabled === false ? null : <ContentLink group="income" index={index} item={item} key={`${item.title}-${index}`}><div><i/><div><ContentImage path={item.image} alt={item.title}/><h4>{item.title}</h4><p>{item.description}</p></div></div></ContentLink>)}</div></article></div><div className="ecosystem-disclosure"><ShieldCheck/><span>Public narratives are owner-managed. Recorded income is not presented as audited revenue or guaranteed return.</span><Building2/></div></div></section>
-    <section className="mx-auto max-w-7xl px-5 py-8 md:px-8"><ContentCarousel group="spaces" title="Kategori Pengembangan" items={content.spaces ?? defaultSpaces}/></section>
+    <section className="mx-auto max-w-7xl px-5 py-8 md:px-8"><ContentCarousel group="spaces" title="Development Categories" items={content.spaces ?? defaultSpaces}/></section>
     <PreTgeRoadmap/>
     <TrustCenter bixPrice={bixPrice}/>
     <LandingTokenomics content={content}/>
-    <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><ContentCarousel group="roadmap" title="Roadmap BIXLINK" items={content.roadmap ?? defaultRoadmap}/></section>
+    <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><ContentCarousel group="roadmap" title="BIXLINK Roadmap" items={content.roadmap ?? defaultRoadmap}/></section>
     <CryptoNewsFeed />
-    <section className="mx-auto max-w-3xl px-5 pb-16 md:px-8"><div className="eyebrow">FAQ</div><h2 className="section-title">PERTANYAAN <span>UMUM</span></h2><div className="mt-6 space-y-3">{FAQ.map(f => <details key={f.q} className="group rounded-2xl border border-chart-3/20 bg-card/50 p-4 backdrop-blur-md"><summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-bold">{f.q}<span className="text-chart-3 transition group-open:rotate-45">+</span></summary><p className="mt-3 text-xs leading-6 text-muted-foreground">{f.a}</p></details>)}</div></section>
+    <section className="mx-auto max-w-3xl px-5 pb-16 md:px-8"><div className="eyebrow">FAQ</div><h2 className="section-title">FREQUENTLY ASKED <span>QUESTIONS</span></h2><div className="mt-6 space-y-3">{FAQ.map(f => <details key={f.q} className="group rounded-2xl border border-chart-3/20 bg-card/50 p-4 backdrop-blur-md"><summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-bold">{f.q}<span className="text-chart-3 transition group-open:rotate-45">+</span></summary><p className="mt-3 text-xs leading-6 text-muted-foreground">{f.a}</p></details>)}</div></section>
     <DevTeamGrid/>
   </div>;
 }
 const FAQ = [
-  { q: 'Apa itu BIXLINK?', a: 'BIXLINK adalah ekosistem staking BIXCOIN (21 juta BIX fixed supply) dengan narasi DeFi, exchange, dan RWA menuju tata kelola DAO.' },
-  { q: 'Bagaimana cara kerja staking?', a: 'Member memilih paket USDT atau BIX BOOST. Imbal hasil yang ditampilkan adalah proyeksi, bukan jaminan, dan dicatat di ledger internal.' },
-  { q: 'Apakah saldo internal sama dengan token on-chain?', a: 'Belum. Saldo di aplikasi adalah catatan ledger internal. Penarikan diproses melalui peninjauan dan verifikasi jaringan.' },
-  { q: 'Kapan smart contract BIX dirilis?', a: 'Peluncuran smart contract mengikuti roadmap dan diumumkan resmi oleh tim. Jadwal roadmap adalah rencana, bukan jaminan.' },
+  { q: 'What is BIXLINK?', a: 'BIXLINK is a BIXCOIN staking ecosystem (21M BIX fixed supply) featuring DeFi, exchange, and RWA narratives progressing toward DAO governance.' },
+  { q: 'How does staking work?', a: 'Members select a USDT or BIX BOOST package. Displayed yields are projections, not guarantees, and are recorded on the internal ledger.' },
+  { q: 'Are internal balances identical to on-chain tokens?', a: 'Not yet. In-app balances reflect internal ledger records. Withdrawals are processed subject to review and network verification.' },
+  { q: 'When will the BIX smart contract be deployed?', a: 'Smart contract deployment follows the roadmap and will be officially announced by the team. Roadmap timelines are planned targets, not guarantees.' },
 ];

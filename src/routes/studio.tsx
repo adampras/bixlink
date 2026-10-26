@@ -22,9 +22,9 @@ export const Route = createFileRoute("/studio")({
 });
 
 const TOOLS = [
-  { k: "poster", icon: "◆", t: "DESIGN POSTER", d: "Banner & poster promosi, event dan webinar — siap dalam 3 langkah." },
-  { k: "media", icon: "▶", t: "BIXZOOM MEDIA", d: "Putar video presentasi dan musik latar untuk siaran webinar." },
-  { k: "flow", icon: "❖", t: "PRESENTATION FLOW", d: "Tempel naskah, jadi slide layar penuh dengan suara perangkat." },
+  { k: "poster", icon: "◆", t: "DESIGN POSTER", d: "Promotional banners and event posters — ready in 3 steps." },
+  { k: "media", icon: "▶", t: "BIXZOOM MEDIA", d: "Play presentation videos and background audio for webinar streams." },
+  { k: "flow", icon: "❖", t: "PRESENTATION FLOW", d: "Paste script to generate fullscreen slides with device voiceover." },
 ] as const;
 type ToolKey = (typeof TOOLS)[number]["k"];
 
@@ -37,12 +37,12 @@ function Studio() {
         <span className="studio-lion mx-auto block w-fit"><LionCrest size={64}/></span>
         <p className="studio-kicker">BIXLINK ECOSYSTEM · CREATIVE UTILITY</p>
         <h1 className="studio-title">CREATE. PRESENT. LEAD.</h1>
-        <p className="mx-auto max-w-md text-sm text-muted-foreground">BIX Studio — Sovereign Creative Suite. Buat materi profesional untuk tim Anda tanpa keahlian desain.</p>
+        <p className="mx-auto max-w-md text-sm text-muted-foreground">BIX Studio — Sovereign Creative Suite. Build professional collateral for your team with zero design experience required.</p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
-          <Button onClick={() => document.getElementById("studio-tools")?.scrollIntoView({ behavior: "smooth" })}>Mulai Membuat</Button>
+          <Button onClick={() => document.getElementById("studio-tools")?.scrollIntoView({ behavior: "smooth" })}>Get Started</Button>
         </div>
         <ol className="studio-steps">
-          <li><b>1</b> Pilih alat</li><li><b>2</b> Isi pesan</li><li><b>3</b> Unduh / putar</li>
+          <li><b>1</b> Select tool</li><li><b>2</b> Enter details</li><li><b>3</b> Download / present</li>
         </ol>
       </header>
       <StudioProvider>
@@ -157,7 +157,7 @@ function BannerMaker() {
         <span className="studio-badge">LIVE PREVIEW</span>
       </div>
       <div className="studio-progress">
-        {["Tujuan", "Pesan", "Tampilan"].map((s, n) => (
+        {["Purpose", "Details", "Layout"].map((s, n) => (
           <button key={s} onClick={() => setStep(n + 1)} className={step === n + 1 ? "is-active" : step > n + 1 ? "is-done" : ""}>{n + 1}. {s}</button>
         ))}
       </div>
@@ -173,40 +173,40 @@ function BannerMaker() {
       )}
       {step === 2 && (
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className={lbl}>Judul<Input value={f.title} onChange={set("title")} maxLength={80} /></label>
-          <label className={lbl}>Sub-judul<Input value={f.subtitle} onChange={set("subtitle")} maxLength={50} /></label>
-          <label className={lbl}>Tanggal<Input value={f.date} onChange={set("date")} maxLength={40} /></label>
-          <label className={lbl}>Jam<Input value={f.time} onChange={set("time")} maxLength={30} /></label>
-          <label className={lbl}>Pembicara<Input value={f.speaker} onChange={set("speaker")} maxLength={40} /></label>
-          <label className={lbl}>Logo / foto sendiri
+          <label className={lbl}>Title<Input value={f.title} onChange={set("title")} maxLength={80} /></label>
+          <label className={lbl}>Subtitle<Input value={f.subtitle} onChange={set("subtitle")} maxLength={50} /></label>
+          <label className={lbl}>Date<Input value={f.date} onChange={set("date")} maxLength={40} /></label>
+          <label className={lbl}>Time<Input value={f.time} onChange={set("time")} maxLength={30} /></label>
+          <label className={lbl}>Speaker<Input value={f.speaker} onChange={set("speaker")} maxLength={40} /></label>
+          <label className={lbl}>Custom logo / photo
             <input type="file" accept="image/*" onChange={pick(setLogoUrl)} className="mt-1 block w-full text-xs" />
           </label>
         </div>
       )}
       {step === 3 && (
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className={lbl}>Tema warna
+          <label className={lbl}>Color theme
             <select value={f.tpl} onChange={set("tpl")} className={`${sel} block w-full`}>
               {Object.entries(TEMPLATES).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}
             </select>
           </label>
-          <label className={lbl}>Ukuran
+          <label className={lbl}>Dimensions
             <select value={f.size} onChange={set("size")} className={`${sel} block w-full`}>
               <option value="1080">Instagram / WhatsApp (1080×1080)</option>
               <option value="1920">YouTube / Zoom (1920×1080)</option>
               <option value="story">Story / Status (1080×1920)</option>
             </select>
           </label>
-          <label className={lbl}>Posisi teks
+          <label className={lbl}>Text alignment
             <select value={f.align} onChange={set("align")} className={`${sel} block w-full`}>
-              <option value="center">Tengah</option>
-              <option value="left">Rata kiri</option>
+              <option value="center">Center</option>
+              <option value="left">Left</option>
             </select>
           </label>
-          <label className={lbl}>Foto latar (opsional)
+          <label className={lbl}>Background image (optional)
             <input type="file" accept="image/*" onChange={pick(setBgUrl)} className="mt-1 block w-full text-xs" />
           </label>
-          {bgUrl && <label className={`${lbl} sm:col-span-2`}>Gelapkan foto latar ({f.dim}%)
+          {bgUrl && <label className={`${lbl} sm:col-span-2`}>Background overlay ({f.dim}%)
             <input type="range" min="0" max="85" value={f.dim} onChange={set("dim")} className="block w-full" />
           </label>}
         </div>
@@ -214,8 +214,8 @@ function BannerMaker() {
       <canvas ref={ref} className="studio-canvas" />
       <div className="studio-sticky flex gap-2">
         {step > 1 && <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1">Back</Button>}
-        {step < 3 ? <Button onClick={() => setStep(step + 1)} className="flex-1">Lanjutkan</Button>
-          : <Button onClick={download} className="flex-1">Unduh HD PNG</Button>}
+        {step < 3 ? <Button onClick={() => setStep(step + 1)} className="flex-1">Continue</Button>
+          : <Button onClick={download} className="flex-1">Download HD PNG</Button>}
       </div>
     </section>
   );
@@ -235,25 +235,25 @@ function MediaPlayer() {
   const pause = () => { v.current?.pause(); a.current?.pause(); };
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
-      <h2 className="font-bold text-primary">2 · Pemutar video & musik presentasi</h2>
-      <p className="text-xs text-muted-foreground">Pakai video presentasi jadi (MP4) dan musik latar (MP3) rekaman asli — tanpa suara robot. Unggah dari perangkat atau tempel link langsung file (https).</p>
+      <h2 className="font-bold text-primary">2 · Presentation Video & Audio Player</h2>
+      <p className="text-xs text-muted-foreground">Stream pre-rendered presentation videos (MP4) and authentic audio tracks (MP3) without synthetic voice artifacts. Upload locally or provide a direct link (https).</p>
       <div className="grid gap-2 sm:grid-cols-2">
-        <label className="text-xs text-muted-foreground">Video MP4
+        <label className="text-xs text-muted-foreground">Video (MP4)
           <input type="file" accept="video/*" onChange={file(setVideo)} className="mt-1 block w-full text-xs" />
         </label>
-        <label className="text-xs text-muted-foreground">Musik MP3
+        <label className="text-xs text-muted-foreground">Audio (MP3)
           <input type="file" accept="audio/*" onChange={file(setMusic)} className="mt-1 block w-full text-xs" />
         </label>
-        <Input placeholder="atau link video https://...mp4" onBlur={(e) => e.target.value.startsWith("https://") && setVideo(e.target.value)} />
-        <Input placeholder="atau link musik https://...mp3" onBlur={(e) => e.target.value.startsWith("https://") && setMusic(e.target.value)} />
+        <Input placeholder="or video direct link https://...mp4" onBlur={(e) => e.target.value.startsWith("https://") && setVideo(e.target.value)} />
+        <Input placeholder="or audio direct link https://...mp3" onBlur={(e) => e.target.value.startsWith("https://") && setMusic(e.target.value)} />
       </div>
       {video ? <video ref={v} src={video} controls playsInline className="w-full rounded-xl bg-background" /> : <div className="studio-stage"><span className="studio-lion mx-auto block w-fit"><LionCrest size={60}/></span></div>}
       {music && <audio ref={a} src={music} loop />}
       <div className="flex flex-wrap items-center gap-2">
-        <Button onClick={play} disabled={!video && !music}>▶ Putar bersama</Button>
-        <Button variant="outline" onClick={pause}>❚❚ Jeda</Button>
-        <Button variant="outline" onClick={() => v.current?.requestFullscreen?.()} disabled={!video}>Layar penuh</Button>
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">Musik
+        <Button onClick={play} disabled={!video && !music}>▶ Sync Play</Button>
+        <Button variant="outline" onClick={pause}>❚❚ Pause</Button>
+        <Button variant="outline" onClick={() => v.current?.requestFullscreen?.()} disabled={!video}>Fullscreen</Button>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">Music
           <input type="range" min="0" max="1" step="0.05" value={vol} onChange={(e) => setVol(Number(e.target.value))} />
         </label>
       </div>
@@ -321,13 +321,13 @@ function PresentationMaker() {
 
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
-      <h2 className="font-bold text-primary">3 · Presentasi bersuara dari teks panjang</h2>
-      <p className="text-xs text-muted-foreground">Tempel naskah webinar. Setiap kalimat jadi satu slide yang dibacakan narator dengan musik latar lembut. Putar layar penuh lalu bagikan layar di BIXZOOM. Tanpa biaya kredit.</p>
-      <Textarea rows={8} value={text} onChange={(e) => setText(e.target.value)} maxLength={20000} placeholder="Tempel naskah webinar di sini..." />
+      <h2 className="font-bold text-primary">3 · Narrated Slides from Long-Form Script</h2>
+      <p className="text-xs text-muted-foreground">Paste webinar script. Each sentence converts into an individual slide narrated with ambient background sound. Present in fullscreen and screen-share in BIXZOOM. Zero credit cost.</p>
+      <Textarea rows={8} value={text} onChange={(e) => setText(e.target.value)} maxLength={20000} placeholder="Paste webinar script here..." />
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" onClick={build}>Buat slide ({slides.length})</Button>
-        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={music} onChange={(e) => setMusic(e.target.checked)} /> Musik latar</label>
-        {i < 0 ? <Button onClick={play} disabled={!slides.length}>▶ Putar presentasi</Button> : <Button variant="destructive" onClick={stop}>■ Stop</Button>}
+        <Button variant="outline" onClick={build}>Generate Slides ({slides.length})</Button>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={music} onChange={(e) => setMusic(e.target.checked)} /> Background Music</label>
+        {i < 0 ? <Button onClick={play} disabled={!slides.length}>▶ Start Presentation</Button> : <Button variant="destructive" onClick={stop}>■ Stop</Button>}
       </div>
       <div ref={stage} className="studio-stage">
         <div>

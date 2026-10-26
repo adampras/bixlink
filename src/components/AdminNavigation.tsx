@@ -46,7 +46,7 @@ export function AdminFold({ title, tone = 'slate', badge, defaultOpen = false, c
   return <section className={`admin-fold admin-cat--${tone} mt-4`}>
     <button type="button" aria-expanded={open} className="admin-fold-head" onClick={() => setOpen(o => !o)}>
       <span className="admin-fold-dot"/><b>{title}</b>{badge !== undefined && <span className="admin-fold-badge">{badge}</span>}
-      <span className="ml-auto text-xs">{open ? 'Tutup' : 'Buka'}</span><ChevronDown size={16} className={`transition-transform ${open ? 'rotate-180' : ''}`}/>
+      <span className="ml-auto text-xs">{open ? 'Close' : 'Open'}</span><ChevronDown size={16} className={`transition-transform ${open ? 'rotate-180' : ''}`}/>
     </button>
     {open && <div className="admin-fold-body">{children}</div>}
   </section>;

@@ -21,9 +21,9 @@ export const registerPlacedMember = createServerFn({ method: 'POST' }).middlewar
       const { data: row }: { data: { referred_by: string | null } | null } = await supabaseAdmin.from('referral_codes').select('referred_by').eq('user_id', cur).maybeSingle();
       cur = (row?.referred_by as string | null) ?? null;
     }
-    if (!ok) throw new Error('Posisi penempatan harus berada di jaringan Anda');
+    if (!ok) throw new Error('Placement must be within your network');
     const { data: free } = await supabaseAdmin.rpc('bix_username_available', { p_username: data.username });
-    if (!free) throw new Error('Username sudah dipakai');
+    if (!free) throw new Error('Username is already taken');
     const { data: u, error } = await supabaseAdmin.auth.admin.createUser({ email: data.email.toLowerCase(), password: data.password, email_confirm: true, user_metadata: { full_name: data.fullName, username: data.username } });
     if (error) throw new Error(error.message);
     const newId = u.user?.id;

@@ -11,18 +11,18 @@ export const Route = createFileRoute('/api/fox-chat')({
       POST: async ({ request }) => {
         const auth = request.headers.get('authorization') ?? '';
         const token = auth.replace(/^Bearer\s+/i, '');
-        if (!token) return new Response('Silakan masuk untuk memakai FOX AI.', { status: 401 });
+        if (!token) return new Response('Please sign in to use FOX AI.', { status: 401 });
         const { createClient } = await import('@supabase/supabase-js');
         const sb = createClient(process.env['SUPABASE_URL']!, process.env['SUPABASE_PUBLISHABLE_KEY']!, { auth: { persistSession: false } });
         const { data: u } = await sb.auth.getUser(token);
-        if (!u?.user) return new Response('Sesi tidak valid.', { status: 401 });
+        if (!u?.user) return new Response('Invalid session.', { status: 401 });
 
         const body = (await request.json().catch(() => null)) as { messages?: { role: string; content: string }[] } | null;
         const messages = (body?.messages ?? [])
           .filter((m) => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
           .slice(-20)
           .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content.slice(0, 2000) }));
-        if (!messages.length) return new Response('Pesan kosong.', { status: 400 });
+        if (!messages.length) return new Response('Empty message.', { status: 400 });
 
         const { streamText } = await import('ai');
         const { createOpenAI } = await import('@ai-sdk/openai');
@@ -41,7 +41,7 @@ export const Route = createFileRoute('/api/fox-chat')({
           });
           return result.toTextStreamResponse();
         } catch (e) {
-          return new Response('FOX AI sedang sibuk, coba lagi nanti.', { status: 500 });
+          return new Response('FOX AI is currently busy. Please try again later.', { status: 500 });
         }
       },
     },

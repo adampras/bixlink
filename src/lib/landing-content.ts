@@ -11,19 +11,19 @@ export type ContentGroup = typeof contentGroups[number];
 export const sizeSpan = (item: ContentItem) => item.size === 'lg' ? 'col-span-2' : '';
 export const hasPage = (item: ContentItem) => item.pageOpen !== false && Boolean(item.detail?.trim() || item.detailImage);
 export const defaultSpaces: ContentItem[] = [
-  ['FOREX', 'Rencana kajian valuta asing untuk diversifikasi BIXLINK. Hasil hanya ditampilkan setelah tercatat dan ditinjau.'],
-  ['CRYPTO', 'Pengembangan utilitas digital dan kajian kripto. Catatan internal BIX terpisah dari perdagangan dan token on-chain.'],
-  ['RWA', 'Rencana pelaporan aset nyata yang transparan. Verifikasi aset dan aspek hukum diperlukan sebelum integrasi.'],
-  ['ADVERTISING', 'Rencana ruang promosi di aplikasi, situs dan komunitas. Pendapatan ditampilkan setelah tercatat dan ditinjau.'],
-  ['MARKETPLACE', 'Rencana pusat pertukaran produk, voucher dan layanan merchant dengan BIX PAY. Dirilis bertahap setelah pengujian.'],
+  ['FOREX', 'Foreign exchange research plan for BIXLINK diversification. Results are displayed only after being recorded and reviewed.'],
+  ['CRYPTO', 'Digital utility development and crypto research. Internal BIX records are separate from trading and on-chain tokens.'],
+  ['RWA', 'Transparent real-world asset reporting framework. Asset verification and legal compliance are required prior to integration.'],
+  ['ADVERTISING', 'Promotional space plan across the app, website, and community. Revenue is displayed only after being recorded and reviewed.'],
+  ['MARKETPLACE', 'Planned hub for products, vouchers, and merchant services via BIX PAY. Phased release following testing.'],
 ].map(([title, description]) => ({ title: title ?? '', description: description ?? '', enabled: true, size: 'md' }));
 export const defaultRoadmap: ContentItem[] = [
-  ['Q1 2026', 'Peluncuran', 'Menyiapkan identitas BIXLINK dan akses akun.'],
-  ['Q2 2026', 'Staking Beta', 'Menguji staking dan catatan internal.'],
-  ['Q3 2026', 'Daftar RWA', 'Menyusun kerangka verifikasi aset.'],
-  ['Q4 2026', 'Ekosistem', 'Mengembangkan utilitas dan komunitas.'],
-  ['Q1 2027', 'DAO', 'Merancang tata kelola komunitas.'],
-  ['Q2 2027', '21 Juta Milestone', 'Meninjau perkembangan ekosistem dengan rencana suplai 21 juta BIX, bukan target harga.'],
+  ['Q1 2026', 'Launch', 'Establishing BIXLINK identity and account access.'],
+  ['Q2 2026', 'Staking Beta', 'Testing staking and internal records.'],
+  ['Q3 2026', 'RWA Listing', 'Structuring the asset verification framework.'],
+  ['Q4 2026', 'Ecosystem', 'Expanding utility and community.'],
+  ['Q1 2027', 'DAO', 'Designing community governance.'],
+  ['Q2 2027', '21 Million Milestone', 'Reviewing ecosystem progress with the planned 21 million BIX supply, not a price target.'],
 ].map(([quarter, title, description]) => ({ quarter: quarter ?? '', title: title ?? '', description: description ?? '', enabled: true, size: 'md' }));
 export const defaultNarrative: ContentItem[] = [
   { title: 'Internal BIX records', description: 'BIX balances and member transfers are recorded inside the application. On-chain token deployment remains a separate step.', enabled: true },

@@ -41,9 +41,9 @@ function Review() {
       : state === 'denied' ? <p className="mt-8 text-destructive">This account is not an ADMIN PANEL BIX account.</p>
       : <>
         <nav aria-label="Owner 2 sections" className="mt-6 grid grid-cols-2 gap-2 border-b border-border pb-4 sm:grid-cols-4">{TABS.filter(t => perms?.[t.perm]).map(({ label, icon: Icon }) => <Button key={label} variant={tab === label ? 'default' : 'outline'} aria-pressed={tab === label} className="h-11 min-w-0 gap-2" onClick={() => { setTab(label); setMsg(''); }}><Icon size={16}/>{label}</Button>)}</nav>
-        {perms && !TABS.some(t => perms[t.perm]) && <p className="mt-6 text-sm text-muted-foreground">Owner 1 belum membuka menu apa pun untuk akun ini.</p>}
+        {perms && !TABS.some(t => perms[t.perm]) && <p className="mt-6 text-sm text-muted-foreground">Owner 1 has not granted access to any sections for this account.</p>}
         {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
-        {tab === 'DOMPET' && perms?.wallet && <><ReviewerDepositWallet wallet={settings?.wallet ?? null} onSaved={refreshSettings} onMessage={setMsg}/><OwnerRevenueTable/><DepositAudit onMessage={setMsg}/><h2 className="mt-10 font-display text-lg font-bold">Review deposit & withdrawal</h2><div className="mt-4 flex flex-wrap gap-2">{['pending', 'approved', 'rejected', 'all'].map(s => <Button key={s} size="sm" variant={filter === s ? 'default' : 'outline'} className="rounded-full capitalize" onClick={() => setFilter(s)}>{s}</Button>)}</div>
+        {tab === 'Wallet' && perms?.wallet && <><ReviewerDepositWallet wallet={settings?.wallet ?? null} onSaved={refreshSettings} onMessage={setMsg}/><OwnerRevenueTable/><DepositAudit onMessage={setMsg}/><h2 className="mt-10 font-display text-lg font-bold">Review deposit & withdrawal</h2><div className="mt-4 flex flex-wrap gap-2">{['pending', 'approved', 'rejected', 'all'].map(s => <Button key={s} size="sm" variant={filter === s ? 'default' : 'outline'} className="rounded-full capitalize" onClick={() => setFilter(s)}>{s}</Button>)}</div>
         <div className="mt-5 space-y-2">{list.map(t => <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4 text-xs">
           <div className="min-w-0"><b className="text-sm capitalize">{t.type}</b> · {dateTime(t.created_at)}<div className="break-all font-mono text-muted-foreground">{t.tx_hash ?? t.address}</div></div>
           <div className="flex items-center gap-3"><div className="text-right"><div className="text-chart-3">{money(Number(t.amount_usd))}</div>{Number(t.fee_usd) > 0 && <div className="text-muted-foreground">send {money(Number(t.net_usd))}</div>}<div className="capitalize">{t.status}</div></div>
@@ -53,10 +53,10 @@ function Review() {
         {tab === 'Market' && perms?.market && <AdminBixMarket initialPrice={Number(settings?.market?.priceUsd ?? 0.84291)} initialMovement={settings?.market?.movement} onMessage={setMsg} onSaved={refreshSettings}/>}
         {tab === 'Referral' && perms?.referral && <AdminReferrals key={JSON.stringify(settings?.referrals)} initial={settings?.referrals} onMessage={setMsg} onSaved={refreshSettings} settingsOnly/>}
         {tab === 'Leader' && perms?.leaders && <NetworkLeaders onMessage={setMsg}/>}
-        <AdminCreateAccount onMessage={setMsg} title="Buat akun member (masuk jaringan Anda)"/>
+        <AdminCreateAccount onMessage={setMsg} title="Create member account (under your network)"/>
         <AdminChangeEmail onMessage={setMsg}/>
       </>}
   </main></BixShell>;
 }
 
-const TABS = [{ label: 'APY', icon: Percent, perm: 'apy' }, { label: 'DOMPET', icon: Wallet, perm: 'wallet' }, { label: 'Market', icon: TrendingUp, perm: 'market' }, { label: 'Referral', icon: Users, perm: 'referral' }, { label: 'Leader', icon: Crown, perm: 'leaders' }] as const;
+const TABS = [{ label: 'APY', icon: Percent, perm: 'apy' }, { label: 'Wallet', icon: Wallet, perm: 'wallet' }, { label: 'Market', icon: TrendingUp, perm: 'market' }, { label: 'Referral', icon: Users, perm: 'referral' }, { label: 'Leader', icon: Crown, perm: 'leaders' }] as const;

@@ -46,7 +46,7 @@ export const createAccountByOwner = createServerFn({ method: 'POST' }).middlewar
     }
     if (!owner1 && !reviewer) throw new Error('Owner access required');
     const { data: free } = await supabaseAdmin.rpc('bix_username_available', { p_username: data.username });
-    if (!free) throw new Error('Username sudah dipakai');
+    if (!free) throw new Error('Username already taken');
     const { data: u, error } = await supabaseAdmin.auth.admin.createUser({ email: data.email.toLowerCase(), password: data.password, email_confirm: true, user_metadata: { full_name: data.fullName, username: data.username } });
     if (error) throw new Error(error.message);
     const newId = u.user?.id ?? null;
@@ -78,15 +78,15 @@ export const changeMemberEmail = createServerFn({ method: 'POST' }).middleware([
       targetId = rc?.user_id ?? null;
       if (!targetId) { const { data: p } = await supabaseAdmin.from('profiles').select('user_id').ilike('username', key.toLowerCase()).maybeSingle(); targetId = p?.user_id ?? null; }
     }
-    if (!targetId) throw new Error('Member tidak ditemukan');
+    if (!targetId) throw new Error('Member not found');
     const { data: target } = await supabaseAdmin.auth.admin.getUserById(targetId);
-    if (target.user?.email?.toLowerCase() === 'bixdevpras@gmail.com') throw new Error('Email Owner 1 tidak bisa diubah di sini');
+    if (target.user?.email?.toLowerCase() === 'bixdevpras@gmail.com') throw new Error('Owner 1 email cannot be modified here');
     if (!owner1) {
       const { inDownline } = await import('./member-account.server');
-      if (targetId === context.userId || !(await inDownline(supabaseAdmin, context.userId, targetId))) throw new Error('Member bukan bagian dari jaringan Anda');
+      if (targetId === context.userId || !(await inDownline(supabaseAdmin, context.userId, targetId))) throw new Error('Member is not part of your network');
     }
     const { error } = await supabaseAdmin.auth.admin.updateUserById(targetId, { email: data.newEmail.toLowerCase(), email_confirm: true });
-    if (error) throw new Error(error.message.includes('already') ? 'Email sudah dipakai akun lain' : error.message);
+    if (error) throw new Error(error.message.includes('already') ? 'Email already in use by another account' : error.message);
     await supabaseAdmin.from('bix_team_accounts').update({ email: data.newEmail.toLowerCase() }).eq('user_id', targetId);
     await supabaseAdmin.from('bix_clone_accounts').update({ email: data.newEmail.toLowerCase() }).eq('user_id', targetId);
     return { ok: true };

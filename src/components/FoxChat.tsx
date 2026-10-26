@@ -9,19 +9,19 @@ import { useNavigate } from '@tanstack/react-router';
 import { usePublicConfig } from '@/lib/useMember';
 
 const LOAN_CODE = /\b(akun\s*pinjam(an)?|pinjaman\s*leader|loan\s*account|akun\s*loan)\b/i;
-const LOAN_INFO = `### 👑 Akun Pinjaman Bersyarat · Leader Global
-- **Nilai akun:** paket sampai **$1.000** — Explorer $100 · Pioneer $500 · Builder $1.000
-- **Target omset:** 5× nilai paket (contoh $1.000 → $5.000)
-- **Setelah 5× tercapai:** reward & challenge khusus dari perusahaan
-- **Distribusi BIXCOIN 5–10%** saat member/investor staking skema 70:30
-- **Alokasi BIX** saat omset tim di atas $100.000
-- Staking 360 hari langsung aktif; pokok terkunci sampai target 5×. Satu klaim per akun, khusus jaringan yang memenuhi syarat. Semua reward ditinjau owner, bukan jaminan profit.`;
+const LOAN_INFO = `### 👑 Conditional Loan Account · Global Leader
+- **Account value:** packages up to **$1.000** — Explorer $100 · Pioneer $500 · Builder $1.000
+- **Turnover target:** 5× package value (e.g. $1.000 → $5.000)
+- **Once 5× is reached:** exclusive company rewards & challenges
+- **5–10% BIXCOIN distribution** upon member/investor staking in a 70:30 scheme
+- **BIX allocation** when team turnover exceeds $100.000
+- 360-day staking activates immediately; principal locked until 5× target is reached. One claim per account, eligible networks only. All rewards reviewed by owner, not a profit guarantee.`;
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
 export function FoxChat() {
   const [open, setOpen] = useState(false);
-  const [msgs, setMsgs] = useState<Msg[]>([{ role: 'assistant', content: 'Halo! Saya **FOX AI**, asisten otomatis BIXLINK 24/7. Ada yang bisa dibantu?' }]);
+  const [msgs, setMsgs] = useState<Msg[]>([{ role: 'assistant', content: 'Hello! I am **FOX AI**, BIXLINK\'s 24/7 automated assistant. How can I help?' }]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [loanCta, setLoanCta] = useState(false);
@@ -58,7 +58,7 @@ export function FoxChat() {
     if (LOAN_CODE.test(text)) {
       const openProgram = cfg?.readiness?.loanEnabled !== false;
       setInput(''); setLoanCta(openProgram);
-      setMsgs([...next, { role: 'assistant', content: openProgram ? LOAN_INFO : 'Program **Akun Pinjaman Leader** sedang ditutup oleh Owner. Silakan cek kembali nanti.' }]);
+      setMsgs([...next, { role: 'assistant', content: openProgram ? LOAN_INFO : 'The **Leader Loan Account** program is currently closed by the Owner. Please check back later.' }]);
       return;
     }
     setMsgs([...next, { role: 'assistant', content: '' }]);
@@ -78,9 +78,9 @@ export function FoxChat() {
         setMsgs([...next, { role: 'assistant', content: acc }]);
         end.current?.scrollIntoView({ block: 'end' });
       }
-      if (!acc) setMsgs([...next, { role: 'assistant', content: 'Maaf, belum ada jawaban. Coba lagi.' }]);
+      if (!acc) setMsgs([...next, { role: 'assistant', content: 'Sorry, no response yet. Please try again.' }]);
     } catch (e) {
-      setMsgs([...next, { role: 'assistant', content: (e as Error).message || 'FOX AI sedang tidak tersedia.' }]);
+      setMsgs([...next, { role: 'assistant', content: (e as Error).message || 'FOX AI is currently unavailable.' }]);
     } finally { setBusy(false); }
   }
 
@@ -88,22 +88,22 @@ export function FoxChat() {
     {open && <div className="fox-chat-panel fixed bottom-44 right-3 z-50 flex h-[62vh] max-h-[520px] w-[calc(100vw-1.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-primary/40 bg-card/85 shadow-2xl backdrop-blur-xl backdrop-saturate-150">
       <header className="flex items-center gap-2 border-b border-primary/20 px-3 py-2">
         <img src={fox.url} alt="FOX AI" className="h-8 w-8 rounded-full" />
-        <div className="flex-1"><b className="text-sm text-primary">FOX AI Support</b><p className="text-[10px] text-muted-foreground">Bot otomatis · bukan saran keuangan</p></div>
-        <Button size="icon" variant="ghost" type="button" aria-label="Tutup chat" onClick={() => setOpen(false)}><X size={18} /></Button>
+        <div className="flex-1"><b className="text-sm text-primary">FOX AI Support</b><p className="text-[10px] text-muted-foreground">Automated bot · not financial advice</p></div>
+        <Button size="icon" variant="ghost" type="button" aria-label="Close chat" onClick={() => setOpen(false)}><X size={18} /></Button>
       </header>
       <div className="flex-1 space-y-3 overflow-y-auto p-3 text-sm">
         {msgs.map((m, i) => <div key={i} className={m.role === 'user' ? 'ml-auto max-w-[85%] rounded-2xl bg-primary px-3 py-2 text-primary-foreground' : 'prose prose-sm prose-invert max-w-none text-foreground'}>
           {m.role === 'user' ? m.content : <ReactMarkdown>{m.content || '…'}</ReactMarkdown>}
         </div>)}
-        {loanCta && <Button type="button" className="w-full rounded-full bg-chart-3 font-black text-background" onClick={() => { setLoanCta(false); setOpen(false); navigate({ to: '/profile', search: { loan: 'open' } as never }).then(() => window.dispatchEvent(new Event('bix-loan-open'))); }}>BUKA AKUN PINJAMAN →</Button>}
+        {loanCta && <Button type="button" className="w-full rounded-full bg-chart-3 font-black text-background" onClick={() => { setLoanCta(false); setOpen(false); navigate({ to: '/profile', search: { loan: 'open' } as never }).then(() => window.dispatchEvent(new Event('bix-loan-open'))); }}>OPEN LOAN ACCOUNT →</Button>}
         <div ref={end} />
       </div>
       <form className="flex gap-2 border-t border-primary/20 p-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
-        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Tulis pertanyaan…" className="form-input flex-1 text-sm" maxLength={2000} />
-        <Button type="submit" size="icon" disabled={busy} aria-label="Kirim" className="h-10 w-10 shrink-0 rounded-full"><Send size={16} /></Button>
+        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type a question…" className="form-input flex-1 text-sm" maxLength={2000} />
+        <Button type="submit" size="icon" disabled={busy} aria-label="Send" className="h-10 w-10 shrink-0 rounded-full"><Send size={16} /></Button>
       </form>
     </div>}
-    <Button type="button" size="icon" variant="outline" aria-label="FOX AI chat" title="FOX AI · geser untuk memindahkan" data-no-touch-effect
+    <Button type="button" size="icon" variant="outline" aria-label="FOX AI chat" title="FOX AI · drag to move" data-no-touch-effect
       style={position && !open ? { left: position.x, top: position.y, right: 'auto', bottom: 'auto' } : undefined}
       onPointerDown={event => {
         if (event.button !== 0) return;
