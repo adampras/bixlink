@@ -7,6 +7,7 @@ import { claimQuest, getArenaStatus } from '@/lib/arena.functions';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { ArenaArtwork } from '@/components/ArenaArtwork';
+import { welcomeReward } from '@/lib/arena';
 
 const KEY = 'bixlink-member-welcome:';
 export function MemberWelcome({ userId }: { userId: string }) {
@@ -19,7 +20,7 @@ export function MemberWelcome({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ['arena', userId], queryFn: () => load(), enabled: open, staleTime: 0 });
   const status = data?.status;
-  const amount = status?.rewards.welcome;
+  const amount = status ? welcomeReward(status.rewards) : undefined;
   const claimed = status?.claimed.includes('welcome');
   useEffect(() => {
     try { if (localStorage.getItem(KEY + userId)) return; } catch { return; }
