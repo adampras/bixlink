@@ -18,6 +18,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BoostRouteImport } from './routes/boost'
 import { Route as BoostTiersRouteImport } from './routes/boost-tiers'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
+import { Route as ConsortiumVaultRouteImport } from './routes/consortium-vault'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as MarketingRouteImport } from './routes/marketing'
@@ -91,6 +92,11 @@ const BoostTiersRoute = BoostTiersRouteImport.update({
 const ComingSoonRoute = ComingSoonRouteImport.update({
   id: '/coming-soon',
   path: '/coming-soon',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsortiumVaultRoute = ConsortiumVaultRouteImport.update({
+  id: '/consortium-vault',
+  path: '/consortium-vault',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -251,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/boost': typeof BoostRoute
   '/boost-tiers': typeof BoostTiersRoute
   '/coming-soon': typeof ComingSoonRoute
+  '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
@@ -291,6 +298,7 @@ export interface FileRoutesByTo {
   '/boost': typeof BoostRoute
   '/boost-tiers': typeof BoostTiersRoute
   '/coming-soon': typeof ComingSoonRoute
+  '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
@@ -332,6 +340,7 @@ export interface FileRoutesById {
   '/boost': typeof BoostRoute
   '/boost-tiers': typeof BoostTiersRoute
   '/coming-soon': typeof ComingSoonRoute
+  '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
@@ -374,6 +383,7 @@ export interface FileRouteTypes {
     | '/boost'
     | '/boost-tiers'
     | '/coming-soon'
+    | '/consortium-vault'
     | '/dashboard'
     | '/market'
     | '/marketing'
@@ -414,6 +424,7 @@ export interface FileRouteTypes {
     | '/boost'
     | '/boost-tiers'
     | '/coming-soon'
+    | '/consortium-vault'
     | '/dashboard'
     | '/market'
     | '/marketing'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/boost'
     | '/boost-tiers'
     | '/coming-soon'
+    | '/consortium-vault'
     | '/dashboard'
     | '/market'
     | '/marketing'
@@ -495,6 +507,7 @@ export interface RootRouteChildren {
   BoostRoute: typeof BoostRoute
   BoostTiersRoute: typeof BoostTiersRoute
   ComingSoonRoute: typeof ComingSoonRoute
+  ConsortiumVaultRoute: typeof ConsortiumVaultRoute
   DashboardRoute: typeof DashboardRoute
   MarketRoute: typeof MarketRoute
   MarketingRoute: typeof MarketingRoute
@@ -589,6 +602,13 @@ declare module '@tanstack/react-router' {
       path: '/coming-soon'
       fullPath: '/coming-soon'
       preLoaderRoute: typeof ComingSoonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consortium-vault': {
+      id: '/consortium-vault'
+      path: '/consortium-vault'
+      fullPath: '/consortium-vault'
+      preLoaderRoute: typeof ConsortiumVaultRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -807,6 +827,7 @@ const rootRouteChildren: RootRouteChildren = {
   BoostRoute: BoostRoute,
   BoostTiersRoute: BoostTiersRoute,
   ComingSoonRoute: ComingSoonRoute,
+  ConsortiumVaultRoute: ConsortiumVaultRoute,
   DashboardRoute: DashboardRoute,
   MarketRoute: MarketRoute,
   MarketingRoute: MarketingRoute,

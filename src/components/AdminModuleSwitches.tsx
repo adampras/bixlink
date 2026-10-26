@@ -45,6 +45,10 @@ export function AdminModuleSwitches({ readiness, simple, onMessage, onSaved }: {
         const next = { ...ready, modules: { ...ready.modules, [k]: !on } };
         run(async () => { await save({ data: { key: 'readiness', value: next as unknown as Record<string, unknown> } }); setReady(next); }, `${label} ${on ? 'ditutup' : 'dibuka'}.`);
       }); })}
+      {([['consortiumVaultEnabled','Consortium Vault $2M','Halaman privat /consortium-vault dengan PIN.'],['web3WalletEnabled','Web3 Connect Wallet','Tombol connect TokenPocket/MetaMask di STAKE, WALLET, PRESALE.']] as const).map(([k,label,detail]) => { const on = Boolean(ready[k]); return row(k, label, detail, on, () => {
+        const next = { ...ready, [k]: !on };
+        run(async () => { await save({ data: { key: 'readiness', value: next as unknown as Record<string, unknown> } }); setReady(next); }, `${label} ${on ? 'ditutup' : 'dibuka'}.`);
+      }); })}
       {SIMPLE.map(s => row(s.key, s.label, s.detail, flags[s.key], () => {
         const on = !flags[s.key];
         run(async () => { await save({ data: { key: s.key, value: { enabled: on } } }); setFlags(f => ({ ...f, [s.key]: on })); }, `${s.label} ${on ? 'dibuka' : 'ditutup'}.`);

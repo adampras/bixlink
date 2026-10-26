@@ -1,3 +1,4 @@
+import { Web3Connect } from '@/components/Web3Connect';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
@@ -55,7 +56,7 @@ function StakePage() {
   const activeStakes = (data?.stakes ?? []).filter(s => s.status === 'active');
   const liveTotal = activeStakes.reduce((n, s) => n + liveOf(s), 0);
   const perDay = activeStakes.reduce((n, s) => n + Number(s.amount_usd) * Number(s.apy) / 100 / 365, 0);
-  return <BixShell><MarketTicker/><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
+  return <BixShell><MarketTicker/><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10"><Web3Connect/>
     <MemberGate ready={ready} signedIn={!!user} title="STAKE">
       <div className="stake-lux-head auric-card">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
