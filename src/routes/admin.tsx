@@ -38,6 +38,7 @@ import { AdminReports } from '@/components/AdminReports';
 import { AdminPresale } from '@/components/AdminPresale';
 import { AdminShopCatalog } from '@/components/AdminShopCatalog';
 import { AdminShopOrders } from '@/components/AdminShopOrders';
+import { AdminMiningRigs } from '@/components/AdminMiningRigs';
 import { AdminMemberShop, type MemberShopConfig } from '@/components/MemberShop';
 import { AdminLeaders } from '@/components/AdminLeaders';
 import { AdminArena } from '@/components/AdminArena';
@@ -114,6 +115,7 @@ function Admin() {
       { title: 'Booster', content: <AdminBoosterVisual initialVisual={((data?.settings.find(s=>s.key==='booster_visual')?.value as {visual?: BoosterVisual} | undefined)?.visual ?? 'video')} enabled={Boolean((data?.settings.find(s=>s.key==='booster')?.value as {enabled?: boolean})?.enabled)} onMessage={setMessage} onSaved={refresh}/> },
     ]}/>}
     {tab === 'Market' && <AdminBixMarket initialMovement={(data?.settings.find(s=>s.key==='bix_market')?.value as { movement?: unknown } | undefined)?.movement} initialPrice={Number((data?.settings.find(s=>s.key==='bix_market')?.value as {priceUsd?: number} | undefined)?.priceUsd ?? 0.84291)} onMessage={setMessage} onSaved={refresh}/>} 
+    {tab === 'Market' && <AdminMiningRigs onMessage={setMessage}/>}
     {tab === 'Staking' && <AdminStakingControls onMessage={setMessage}/>}
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
      {tab === 'Reports' && <AdminReports onMessage={setMessage}/>}
