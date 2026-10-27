@@ -77,5 +77,10 @@ function RegisterPage() {
     <Button type="button" variant="outline" className="h-12 w-full rounded-full border-border bg-card" onClick={async () => { const r = await lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/auth` }); if (r.error) setNotice(r.error.message); else if (!r.redirected) window.location.assign('/'); }}>Register with Google</Button>
     <WalletSignIn/>
     <p className="mt-6 text-center text-sm text-muted-foreground">Already have an account? <Link to="/auth" className="font-bold text-chart-2">Sign in</Link></p>
-  </div></main></BixShell>;
+  </div></main>
+  <Dialog open={!!done} onOpenChange={() => {}}><DialogContent className="max-w-sm border-chart-3/40 bg-card" onInteractOutside={e => e.preventDefault()}>
+    <DialogHeader><DialogTitle className="text-center text-xl font-black tracking-wide">ACCOUNT CREATED</DialogTitle><DialogDescription className="text-center">Save your login details, then sign in manually with your password.</DialogDescription></DialogHeader>
+    {done && <dl className="space-y-2 rounded-xl border border-border bg-background/60 p-3 text-sm">{([['Username', done.username], ['Email', done.email], ['WhatsApp', done.whatsapp], ['Sponsor', done.referral || '—']] as const).map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-muted-foreground">{k}</dt><dd className="truncate font-bold">{v}</dd></div>)}</dl>}
+    <div className="grid gap-2"><Button variant="outline" className="rounded-full" onClick={copyAccount}>{copied ? 'Copied ✓' : 'Copy account details'}</Button><Button className="rounded-full bg-primary font-black text-primary-foreground" onClick={() => window.location.assign('/auth')}>Continue to sign in <ArrowRight/></Button></div>
+  </DialogContent></Dialog></BixShell>;
 }
