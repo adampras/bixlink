@@ -27,7 +27,7 @@ function Mining() {
   const [th, setTh] = useState(50); const [epoch, setEpoch] = useState(0);
   const [spin, setSpin] = useState(0);
   useEffect(() => { const i = setInterval(() => setSpin((s) => s + 1), 80); return () => clearInterval(i); }, []);
-  const daily = th * BIX_PER_TH_DAY * EPOCHS[epoch].r;
+  const daily = th * BIX_PER_TH_DAY * (EPOCHS[epoch]?.r ?? 1);
 
   return <BixShell>
     <div className="mx-auto max-w-5xl space-y-5 px-4 py-6">

@@ -20,13 +20,13 @@ export function ExchangeTerminal() {
   useEffect(() => { setCandles(seed(PAIRS[pair])); }, [pair]);
   useEffect(() => {
     const i = setInterval(() => {
-      setCandles((cs) => { const last = cs[cs.length - 1]; const c = last.c * (1 + (Math.random() - 0.5) * 0.008);
+      setCandles((cs) => { const last = cs[cs.length - 1]!; const c = last.c * (1 + (Math.random() - 0.5) * 0.008);
         return [...cs.slice(1), { o: last.c, c, h: Math.max(last.c, c) * 1.002, l: Math.min(last.c, c) * 0.998 }]; });
       setTps(1_700_000 + Math.round(Math.random() * 200_000));
     }, 1200);
     return () => clearInterval(i);
   }, []);
-  const price = candles[candles.length - 1].c;
+  const price = candles[candles.length - 1]?.c ?? PAIRS[pair];
   const hi = Math.max(...candles.map((c) => c.h)), lo = Math.min(...candles.map((c) => c.l));
   const y = (v: number) => 4 + ((hi - v) / (hi - lo || 1)) * 152;
   const dp = price < 10 ? 5 : 2;
