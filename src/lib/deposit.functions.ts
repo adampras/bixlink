@@ -4,7 +4,9 @@ import { z } from 'zod';
 import type { Json } from '@/integrations/supabase/types';
 import { verifyUsdtDeposit, type DepositNetwork, type DepositAsset } from './deposit.server';
 
-export type DepositWallet = { code: string; label: string; network: DepositNetwork; asset?: DepositAsset; address: string; enabled: boolean };
+export type DepositWallet = { code: string; label: string; network: DepositNetwork; asset?: DepositAsset; address: string; enabled: boolean; mode?: DepositMode };
+export type DepositMode = 'both' | 'flex' | 'unique';
+export const walletFits = (w: { mode?: DepositMode }, m: 'flex' | 'unique') => !w.mode || w.mode === 'both' || w.mode === m;
 
 const walletSchema = z.object({
   code: z.string().trim().regex(/^[A-Za-z0-9_-]{2,20}$/),
@@ -13,6 +15,7 @@ const walletSchema = z.object({
   asset: z.enum(['USDT', 'USDC']).optional(),
   address: z.string().trim().max(120),
   enabled: z.boolean(),
+  mode: z.enum(['both', 'flex', 'unique']).optional(),
 });
 
 export const saveDepositWallets = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
@@ -38,7 +41,7 @@ export const verifyDeposit = createServerFn({ method: 'POST' }).middleware([requ
   .inputValidator((data: { walletCode: string; txHash: string }) => z.object({ walletCode: z.string().trim().min(2).max(20), txHash: z.string().trim().min(10).max(100) }).parse(data))
   .handler(async ({ context, data }) => {
     const wallets = await memberWallets(context);
-    const wallet = wallets.find(w => w.enabled && w.address && w.code === data.walletCode.toUpperCase());
+    const wallet = wallets.find(w => w.enabled && w.address && walletFits(w, 'flex') && w.code === data.walletCode.toUpperCase());
     if (!wallet) return { ok: false as const, reason: 'This deposit wallet is not available.' };
     const hash = wallet.network === 'TRC20' ? data.txHash.replace(/^0x/i, '') : data.txHash;
 
@@ -68,7 +71,7 @@ export const createDepositIntent = createServerFn({ method: 'POST' }).middleware
   .inputValidator((data: { walletCode: string; amount: number }) => z.object({ walletCode: z.string().trim().min(2).max(20), amount: z.number().int().min(1).max(100000) }).parse(data))
   .handler(async ({ context, data }) => {
     const wallets = await memberWallets(context);
-    const wallet = wallets.find(w => w.enabled && w.address && w.code === data.walletCode.toUpperCase());
+    const wallet = wallets.find(w => w.enabled && w.address && walletFits(w, 'unique') && w.code === data.walletCode.toUpperCase());
     if (!wallet) throw new Error('This deposit wallet is not available.');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const now = new Date().toISOString();
@@ -133,3 +136,16 @@ export const getOwnerRevenue = createServerFn({ method: 'GET' }).middleware([req
   const code = new Map(((codes ?? []) as { user_id: string; code: string }[]).map(c => [c.user_id, c.code]));
   return (data ?? []).map((r: any) => ({ ...r, amount_usd: Number(r.amount_usd), member_code: code.get(r.member_id) ?? r.member_id.slice(0, 8), owner_code: r.owner_id ? (code.get(r.owner_id) ?? 'Owner') : 'OWNER 1' }));
 });
+
+export const getOwner1DepositLocks = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data, error } = await context.supabase.rpc('bix_deposit_lock_list');
+  if (error) throw new Error(error.message);
+  return (data ?? []) as { code: string | null; username: string | null; created_at: string }[];
+});
+export const setOwner1DepositLock = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { code: string; lock: boolean }) => z.object({ code: z.string().trim().min(2).max(60), lock: z.boolean() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.rpc('bix_deposit_lock_owner1', { p_code: data.code, p_lock: data.lock });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

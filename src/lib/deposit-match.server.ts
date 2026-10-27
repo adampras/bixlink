@@ -13,6 +13,7 @@ export async function matchIntent(admin: Admin, intent: Intent, cache?: Map<stri
   const wallets = ((cfg?.value as { wallets?: { code: string; asset?: DepositAsset }[] } | null)?.wallets ?? []);
   let found = wallets.find(w => w.code === intent.wallet_code)?.asset;
   if (!found && intent.wallet_code.startsWith('OWN-')) { const { data: ow } = await admin.from('bix_owner_deposit_wallets').select('asset').eq('code', intent.wallet_code).maybeSingle(); found = ow?.asset as DepositAsset | undefined; }
+  if (!found && intent.wallet_code.startsWith('UNQ-')) { const { data: uw } = await admin.from('bix_owner_deposit_wallets').select('unique_asset').eq('unique_code', intent.wallet_code).maybeSingle(); found = uw?.unique_asset as DepositAsset | undefined; }
   const asset: DepositAsset = found === 'USDC' ? 'USDC' : 'USDT';
   const key = `${asset}:${intent.network}:${intent.address}`;
   let list = cache?.get(key);

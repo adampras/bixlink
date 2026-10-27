@@ -22,16 +22,18 @@ export const getReviewerSettings = createServerFn({ method: 'GET' }).middleware(
   if (error) throw error;
   const settings = Object.fromEntries((data ?? []).map(row => [row.key, row.value]));
   const wallets = (settings['deposit_wallets'] as { wallets?: DepositWallet[] } | undefined)?.wallets ?? [];
-  const { data: own } = await context.supabase.from('bix_owner_deposit_wallets').select('code,label,network,asset,address,enabled').eq('owner_id', context.userId).maybeSingle();
+  const { data: own } = await context.supabase.from('bix_owner_deposit_wallets').select('code,label,network,asset,address,enabled,unique_code,unique_label,unique_network,unique_asset,unique_address,unique_enabled').eq('owner_id', context.userId).maybeSingle();
   void wallets; void reviewerDepositWallet;
-  return { wallet: (own ?? { code: 'OWN-NEW', label: '', network: 'BEP20', asset: 'USDT', address: '', enabled: false }) as DepositWallet, market: settings['bix_market'] as { priceUsd?: number; movement?: Json } | undefined, referrals: settings['referrals'] as Record<string, Json> | undefined };
+  const wallet = own && own.address ? { code: own.code, label: own.label, network: own.network, asset: own.asset, address: own.address, enabled: own.enabled, mode: 'flex' } : { code: own?.code ?? 'OWN-NEW', label: own?.label ?? '', network: own?.network ?? 'BEP20', asset: own?.asset ?? 'USDT', address: own?.address ?? '', enabled: own?.enabled ?? false, mode: 'flex' };
+  const uniqueWallet = { code: own?.unique_code ?? 'UNQ-NEW', label: own?.unique_label ?? '', network: own?.unique_network ?? 'BEP20', asset: own?.unique_asset ?? 'USDT', address: own?.unique_address ?? '', enabled: own?.unique_enabled ?? false, mode: 'unique' };
+  return { wallet: wallet as DepositWallet, uniqueWallet: uniqueWallet as DepositWallet, market: settings['bix_market'] as { priceUsd?: number; movement?: Json } | undefined, referrals: settings['referrals'] as Record<string, Json> | undefined };
 });
 
 export const saveReviewerDepositWallet = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((wallet: DepositWallet) => reviewerWalletSchema.parse({ ...wallet, code: 'WLT-01' }))
+  .inputValidator((wallet: DepositWallet) => { const { mode, code: _c, ...rest } = wallet; return { ...reviewerWalletSchema.parse({ ...rest, code: 'WLT-01' }), unique: mode === 'unique' }; })
   .handler(async ({ context, data }) => {
     if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
-    const { error } = await context.supabase.rpc('bix_owner_wallet_save', { p_label: data.label, p_network: data.network, p_asset: data.asset ?? 'USDT', p_address: data.address, p_enabled: data.enabled });
+    const { error } = await context.supabase.rpc(data.unique ? 'bix_owner_wallet_save_unique' : 'bix_owner_wallet_save', { p_label: data.label, p_network: data.network, p_asset: data.asset ?? 'USDT', p_address: data.address, p_enabled: data.enabled });
     if (error) throw new Error(error.message);
     return { ok: true };
   });

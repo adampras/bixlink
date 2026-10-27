@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQueryClient } from '@tanstack/react-query';
-import { saveDepositWallets, type DepositWallet } from '@/lib/deposit.functions';
+import { saveDepositWallets, type DepositWallet, type DepositMode } from '@/lib/deposit.functions';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Owner1DepositLocks } from '@/components/Owner1DepositLocks';
 import { Plus, Save, Trash2, Wallet, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 const MAX = 12;
@@ -34,6 +35,7 @@ export function AdminDepositWallets({ initial, onMessage }: { initial?: DepositW
       <div className="flex items-center justify-between gap-2"><span className="font-mono text-sm font-bold text-chart-3">{w.code}</span>
         <div className="flex items-center gap-3"><label className="flex items-center gap-2 text-xs font-bold"><Switch checked={w.enabled} onCheckedChange={enabled => set(i, { enabled })} aria-label={`Aktifkan ${w.code}`}/>{w.enabled ? 'AKTIF' : 'NONAKTIF'}</label>
           {rows.length > 1 && <Button type="button" size="icon" variant="ghost" aria-label={`Hapus ${w.code}`} onClick={() => setRows(r => r.filter((_, j) => j !== i))}><Trash2 size={16}/></Button>}</div></div>
+      <label className="mt-3 block text-xs text-muted-foreground">Model deposit<select className="form-input mt-1" value={w.mode ?? 'both'} onChange={e => set(i, { mode: e.target.value as DepositMode })}><option value="flex">Wallet A · Bebas nominal (TxID)</option><option value="unique">Wallet B · Kode unik (3 digit)</option><option value="both">Keduanya</option></select></label>
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         <label className="text-xs text-muted-foreground">Nama wallet<input className="form-input mt-1" maxLength={40} value={w.label} onChange={e => set(i, { label: e.target.value })} placeholder="mis. BIXLINK Official"/></label>
         <label className="text-xs text-muted-foreground">Koin<select className="form-input mt-1" value={w.asset ?? 'USDT'} onChange={e => set(i, { asset: e.target.value as 'USDT' | 'USDC' })}><option value="USDT">USDT (Tether)</option><option value="USDC">USDC (USD Coin)</option></select></label>
@@ -46,6 +48,7 @@ export function AdminDepositWallets({ initial, onMessage }: { initial?: DepositW
       <Button type="button" variant="outline" className="rounded-full" disabled={rows.length >= MAX} onClick={() => setRows(r => [...r, blank(r)])}><Plus/> Tambah wallet</Button>
       <Button disabled={busy} className="rounded-full" onClick={async () => { setBusy(true); try { await save({ data: { wallets: rows } }); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Wallet deposit tersimpan.'); } catch (e) { onMessage(e instanceof Error ? e.message : 'Wallet gagal disimpan.'); } setBusy(false); }}><Save/> {busy ? 'Menyimpan…' : 'Simpan wallet'}</Button>
     </div>
+    <Owner1DepositLocks onMessage={onMessage}/>
     <p className="mt-3 text-[11px] text-muted-foreground">Deposit USDT/USDC di jaringan ini dicek otomatis di blockchain dan dikreditkan ke kode wallet yang dibayar member.</p>
   </section>;
 }
