@@ -73,7 +73,7 @@ function Roster({ kind }: { kind: 'leader' | 'loan' }) {
   if (q.isLoading) return <p className="text-sm text-muted-foreground">Memuat…</p>;
   if (q.error) return <p className="text-sm text-destructive">{(q.error as Error).message}</p>;
   return <div className="space-y-2">
-    <p className="text-xs text-muted-foreground">{kind === 'leader' ? 'Target 3× dari omset staking riil pribadi.' : 'Target 5× dari omset staking riil tim L1.'} Kunci 360 hari. Hangus otomatis bila dalam 30 hari omset riil < 10% nilai paket. Akun virtual, clone dan loan lain tidak dihitung.</p>
+    <p className="text-xs text-muted-foreground">{kind === 'leader' ? 'Target 3× dari omset staking riil pribadi.' : 'Target 5× dari omset staking riil tim L1.'} Kunci 360 hari. Hangus otomatis bila dalam 30 hari omset riil kurang dari 10% nilai paket. Akun virtual, clone dan loan lain tidak dihitung.</p>
     {msg && <p className="text-xs text-primary">{msg}</p>}
     {rows.length === 0 && <p className="rounded-xl border border-border p-4 text-sm text-muted-foreground">Belum ada akun.</p>}
     {rows.map(l => {
