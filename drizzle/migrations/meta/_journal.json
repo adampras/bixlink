@@ -701,6 +701,13 @@
       "when": 1793118475131,
       "tag": "0099_vusdt_clawback_and_30d_expiry",
       "breakpoints": true
+    },
+    {
+      "idx": 100,
+      "version": "7",
+      "when": 1793118964070,
+      "tag": "0100_leader_loan_bix_bonus_lock",
+      "breakpoints": true
     }
   ]
 }
