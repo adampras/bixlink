@@ -29,9 +29,9 @@ export const Route = createFileRoute('/leader-control')({
 const usd = (n: number) => `$${Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 
 function Page() {
-  const { user } = useMember();
+  const { user, ready } = useMember();
   const owner1 = useQuery({ queryKey: ['is-owner1', user?.id], enabled: !!user, queryFn: async () => { const { data } = await supabase.rpc('bix_is_owner1' as never); return data === true; } });
-  return <BixShell><MemberGate>
+  return <BixShell><MemberGate ready={ready} signedIn={!!user} title="Leader & Loan control">
     <div className="mx-auto max-w-5xl space-y-4 px-4 py-6">
       <Link to="/profile" className="inline-flex items-center gap-1 text-xs text-muted-foreground"><ArrowLeft size={14}/> Profil</Link>
       <h1 className="font-display text-xl font-black text-primary">Kontrol Leader & Loan</h1>
