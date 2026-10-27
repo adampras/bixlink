@@ -694,6 +694,13 @@
       "when": 1793095454451,
       "tag": "0098_mining_rig_preorders",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "7",
+      "when": 1793118475131,
+      "tag": "0099_vusdt_clawback_and_30d_expiry",
+      "breakpoints": true
     }
   ]
 }
