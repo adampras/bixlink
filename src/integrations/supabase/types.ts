@@ -2003,6 +2003,10 @@ export type Database = {
       bix_arena_config: { Args: never; Returns: Json }
       bix_arena_save: { Args: { p_config: Json }; Returns: undefined }
       bix_arena_streak: { Args: { p_user: string }; Returns: number }
+      bix_assert_bix_unlocked: {
+        Args: { p_amount: number; p_user: string }
+        Returns: undefined
+      }
       bix_asset_balances: {
         Args: { p_user: string }
         Returns: {
@@ -2108,6 +2112,7 @@ export type Database = {
       bix_loan_package_config: { Args: never; Returns: Json }
       bix_loan_package_save: { Args: { p_config: Json }; Returns: Json }
       bix_loan_quota: { Args: { p_sponsor: string }; Returns: Json }
+      bix_locked_bonus_bix: { Args: { p_user: string }; Returns: number }
       bix_member_shop_slots: { Args: { p_user: string }; Returns: number }
       bix_merchant_tier: { Args: { p_user: string }; Returns: string }
       bix_mining_conversion_status: { Args: never; Returns: Json }
