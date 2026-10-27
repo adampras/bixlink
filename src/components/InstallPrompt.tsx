@@ -31,3 +31,23 @@ export function InstallPrompt() {
         <Button className="mt-3 w-full rounded-full" onClick={async () => { if (!evt) return; await evt.prompt(); await evt.userChoice; close(); }}><Download/> Install sekarang</Button></>}
   </div>;
 }
+
+/** Always-available Profile install action (manifest-only; no offline caching). */
+export function InstallAppButton() {
+  const [evt, setEvt] = useState<BIPEvent | null>(null);
+  const [mode, setMode] = useState<'hidden' | 'ios' | 'android' | 'manual'>('hidden');
+  const [tip, setTip] = useState(false);
+  useEffect(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone;
+    if (standalone) return;
+    setMode(/iphone|ipad|ipod/i.test(navigator.userAgent) ? 'ios' : 'manual');
+    const onPrompt = (e: Event) => { e.preventDefault(); setEvt(e as BIPEvent); setMode('android'); };
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
+  }, []);
+  if (mode === 'hidden') return null;
+  return <div className="rounded-2xl border border-primary/40 bg-card/70 p-3">
+    <Button variant="outline" className="w-full" onClick={async () => { if (evt) { await evt.prompt(); await evt.userChoice; setEvt(null); } else setTip(true); }}><Download/> Install BIXLINK app</Button>
+    {tip && <p className="mt-2 text-xs text-muted-foreground">{mode === 'ios' ? <>Tap <Share size={12} className="inline"/> <b>Share</b> in Safari, then <b>Add to Home Screen</b>.</> : <>Open the browser menu (⋮) and choose <b>Install app</b> or <b>Add to Home screen</b>.</>}</p>}
+  </div>;
+}
