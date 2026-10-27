@@ -594,3 +594,34 @@ export const createSponsoredLeader = createServerFn({ method: 'POST' }).middlewa
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+const verifyOwner1 = async (context: { supabase: any }) => {
+  const { data, error } = await context.supabase.rpc('bix_is_owner1');
+  if (error || data !== true) throw new Error('Owner 1 access required');
+};
+
+export const updateDockHub = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((data: { dockHub: Record<string, boolean> }) => z.object({ dockHub: z.record(z.string().max(24), z.boolean()) }).strict().parse(data))
+  .handler(async ({ context, data }) => {
+    await verifyOwner1(context);
+    const { data: current, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', 'readiness').maybeSingle();
+    if (readError) throw readError;
+    const value = { ...(current?.value && typeof current.value === 'object' && !Array.isArray(current.value) ? current.value : {}), dockHub: data.dockHub };
+    const { error } = await context.supabase.from('app_settings').upsert({ key: 'readiness', value: value as Json });
+    if (error) throw error;
+    const { data: saved } = await context.supabase.from('app_settings').select('value').eq('key', 'readiness').single();
+    if (canonicalJson((saved?.value as Record<string, unknown> | undefined)?.['dockHub']) !== canonicalJson(data.dockHub)) throw new Error('Could not confirm saved HUB menu.');
+    return { ok: true };
+  });
+
+/** Owner 1 roster: members who have not taken a sponsored-leader or loan package yet. */
+export const getLeaderCandidates = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  await verifyOwner1(context);
+  const [leaders, profiles] = await Promise.all([
+    context.supabase.from('bix_leaders').select('user_id'),
+    context.supabase.from('profiles').select('user_id, full_name, username, created_at').order('created_at', { ascending: false }).limit(300),
+  ]);
+  if (profiles.error) throw profiles.error;
+  const taken = new Set((leaders.data ?? []).map(l => l.user_id));
+  return { members: (profiles.data ?? []).filter(p => !taken.has(p.user_id)).map(p => ({ user_id: p.user_id, username: p.username ?? '', full_name: p.full_name ?? '' })) };
+});
