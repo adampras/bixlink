@@ -1,6 +1,6 @@
 import { signInWithIdentifier } from '@/lib/login.functions';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable';
 import { BixShell } from '@/components/BixShell';
@@ -14,6 +14,7 @@ export const Route = createFileRoute('/auth')({ head: () => ({ meta: [{ title: '
 function Auth() {
   const [mode, setMode] = useState<'signin'|'forgot'>('signin');
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false); const [show, setShow] = useState(false);
+  useEffect(() => { const saved = window.localStorage.getItem('bixlink-login-identifier'); if (saved) { setEmail(saved); setNotice('Account ready. Enter your password to sign in.'); } }, []);
   const navigate = useNavigate();
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setNotice('');
