@@ -1,5 +1,6 @@
 import { Children, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import arenaGlobe from '@/assets/arena-globe.png';
 
 /** Phone-widget style swipe deck: one card per page with snap + dots. Desktop shows a grid unless `alwaysSwipe`. */
 export function SwipeDeck({ children, label, desktopCols = 'md:grid-cols-3', autoPlayMs, alwaysSwipe = false }: { children: ReactNode; label: string; desktopCols?: string; autoPlayMs?: number; alwaysSwipe?: boolean }) {
@@ -48,13 +49,12 @@ export function SwipeDeck({ children, label, desktopCols = 'md:grid-cols-3', aut
 export function GlobalOrbit({ caption }: { caption: string }) {
   return <div className="global-orbit" aria-hidden>
     <div className="global-orbit-halo"/>
-    <div className="global-orbit-globe">
-      <span className="gl-grid"/>
-      <span className="gl-mer m1"/><span className="gl-mer m2"/><span className="gl-mer m3"/>
-      <span className="gl-lat"/>
-      {[[28, 34], [62, 26], [44, 58], [72, 62], [22, 66], [54, 40]].map(([x, y], i) => <b key={i} className="gl-node" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${i * 0.6}s` }}/>)}
+    <div className="global-orbit-globe arena-globe">
+      <img src={arenaGlobe} alt="" width={816} height={816} loading="lazy" className="arena-globe-img"/>
+      {[[30, 32], [60, 28], [46, 58], [72, 60], [24, 64], [55, 42]].map(([x, y], i) => <b key={i} className="gl-node" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${i * 0.6}s` }}/>)}
       <span className="gl-shine"/>
     </div>
+    <span className="arena-globe-floor"/>
     <div className="global-orbit-ring r1"><i/></div>
     <div className="global-orbit-ring r2"><i/></div>
     <div className="global-orbit-ring r3"><i/></div>

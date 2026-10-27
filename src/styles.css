@@ -3487,3 +3487,34 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 @keyframes presale-shine { to { background-position: 200% center; } }
 @keyframes presale-ping { 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
 @media (prefers-reduced-motion: reduce) { .presale-portal-img, .presale-portal-glow, .presale-gold-text, .presale-live-dot { animation: none; } }
+
+/* Arena-style 3D globe v3 */
+.global-orbit-globe.arena-globe{width:132px;height:132px;overflow:visible;border:0;background:none;box-shadow:none;animation:arena-globe-float 6s ease-in-out infinite;filter:drop-shadow(0 0 22px color-mix(in oklab,var(--primary) 55%,transparent)) drop-shadow(0 0 40px color-mix(in oklab,var(--chart-3) 30%,transparent))}
+.arena-globe-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:50%;animation:arena-globe-spin 40s linear infinite}
+.arena-globe .gl-shine{background:radial-gradient(circle at 30% 22%,color-mix(in oklab,var(--foreground) 30%,transparent),transparent 38%);box-shadow:inset -16px -14px 28px color-mix(in oklab,var(--background) 70%,transparent)}
+.arena-globe-floor{position:absolute;bottom:34px;width:120px;height:16px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in oklab,var(--primary) 45%,transparent),transparent);filter:blur(4px);animation:arena-floor 6s ease-in-out infinite}
+@keyframes arena-globe-float{50%{transform:translateY(-8px) rotateX(6deg)}}
+@keyframes arena-globe-spin{to{transform:rotate(360deg)}}
+@keyframes arena-floor{50%{transform:scaleX(.82);opacity:.6}}
+@media (prefers-reduced-motion:reduce){.global-orbit-globe.arena-globe,.arena-globe-img,.arena-globe-floor{animation:none}}
+
+/* Mobile clarity polish */
+@media (max-width:480px){
+  html,body{overflow-x:hidden}
+  main img,main video{max-width:100%}
+  .eyebrow{font-size:10px;letter-spacing:.18em}
+  .section-title{font-size:clamp(1.35rem,6.4vw,1.75rem);line-height:1.15}
+  main p{overflow-wrap:anywhere}
+  main button,main a[role="button"],main [data-slot="button"]{min-height:40px}
+}
+
+/* Micro-interaction feedback */
+@media (hover:none),(pointer:coarse){
+  button,a,[role="button"],[role="tab"]{-webkit-tap-highlight-color:transparent}
+}
+button:not(:disabled),[role="tab"],a[class*="btn"],.nation-slide,.terminal-asset{transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,filter .2s ease}
+button:not(:disabled):active,[role="tab"]:active,a[class*="btn"]:active,.nation-slide:active,.terminal-asset:active{transform:scale(.96);filter:brightness(1.12)}
+button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px solid var(--chart-3);outline-offset:2px;box-shadow:0 0 0 4px color-mix(in oklab,var(--chart-3) 25%,transparent)}
+[role="tab"][data-state="active"]{animation:micro-glow .5s ease-out}
+@keyframes micro-glow{0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--chart-3) 55%,transparent)}100%{box-shadow:0 0 0 8px transparent}}
+@media (prefers-reduced-motion:reduce){button:active,[role="tab"]:active,a[class*="btn"]:active{transform:none}[role="tab"][data-state="active"]{animation:none}}
