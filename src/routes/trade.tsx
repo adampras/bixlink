@@ -27,6 +27,7 @@ function TradePage() {
       </div>
       <p className="mt-3 text-[11px] text-muted-foreground">Internal market — not an exchange listing. Trades settle in the BIXLINK internal ledger between members.</p>
       <Link to="/quantum-exchange" className="q-seat mt-3 inline-block rounded-full px-4 py-2 text-[11px] font-black tracking-widest">QUANTUM EXCHANGE · COMING SOON →</Link>
+      <Link to="/mining" className="q-seat mt-3 ml-2 inline-block rounded-full px-4 py-2 text-[11px] font-black tracking-widest">BIX MINING · COMING SOON →</Link>
     </section>
     <div className="mt-5"><P2PDesk userId={user?.id} /></div>
   </main></BixShell>;
