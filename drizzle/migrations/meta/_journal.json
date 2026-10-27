@@ -680,6 +680,13 @@
       "when": 1793089520237,
       "tag": "0096_dual_deposit_wallets_owner1_lock",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "7",
+      "when": 1793092949195,
+      "tag": "0097_leader_loan_lock_360",
+      "breakpoints": true
     }
   ]
 }
