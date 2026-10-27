@@ -14,7 +14,7 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { KycCard } from '@/components/KycCard';
 import { getMyWallet, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
 import { getFiatRates } from '@/lib/market.functions';
-import { getMyDepositWallets, createDepositIntent, checkDepositIntent, claimDepositIntent } from '@/lib/deposit.functions';
+import { getMyDepositWallets, createDepositIntent, checkDepositIntent, claimDepositIntent, verifyDeposit } from '@/lib/deposit.functions';
 import { dateTime, money, number } from '@/lib/bixlink';
 import { confirmPin, getFiatCodes, txFeedback } from '@/components/TxFeedback';
 import { pickWalletSkin } from '@/lib/wallet-skin';
@@ -35,6 +35,7 @@ const STATUS: Record<string, string> = { pending: 'text-chart-3', approved: 'tex
 function WalletPage() {
   const { user, ready } = useMember();
   const { data: cfg } = usePublicConfig();
+  const verifyTx = useServerFn(verifyDeposit); const [flex, setFlex] = useState(true); const [txHash, setTxHash] = useState('');
   const fetchWallet = useServerFn(getMyWallet); const fetchFiat = useServerFn(getFiatRates); const createIntent = useServerFn(createDepositIntent); const checkIntent = useServerFn(checkDepositIntent); const claimIntent = useServerFn(claimDepositIntent); const [claimed, setClaimed] = useState(false); const withdraw = useServerFn(requestWithdraw); const swap = useServerFn(requestSwap);
   const qc = useQueryClient(); const isAdmin = !!useMember().data?.isAdmin;
   const { data } = useQuery({ queryKey: ['my-wallet', user?.id], queryFn: () => fetchWallet(), enabled: !!user });
@@ -76,6 +77,11 @@ function WalletPage() {
     setBusy(true);
     try {
       if (modal === 'deposit') {
+        if (flex) {
+          const r = await verifyTx({ data: { walletCode: selWallet?.code ?? '', txHash: txHash.trim() } });
+          if (!r.ok) { setNotice(r.reason); setBusy(false); return; }
+          setSuccess({ amount: r.amount, walletCode: r.walletCode, network: r.network, txHash: r.txHash }); setTxHash(''); close(); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); setBusy(false); return;
+        }
         if (intent) { await poll(intent.id); setBusy(false); return; }
         const r = await createIntent({ data: { walletCode: selWallet?.code ?? '', amount: Math.floor(amt) } });
         setIntent(r); setNotice(''); setBusy(false); return;
@@ -132,7 +138,11 @@ function WalletPage() {
           <div className="mt-4 grid grid-cols-2 gap-2"><Button variant={depMode === 'copy' ? 'default' : 'outline'} className="rounded-full" onClick={() => setDepMode('copy')}><Copy/> Copy wallet</Button><Button variant={depMode === 'qr' ? 'default' : 'outline'} className="rounded-full" onClick={() => setDepMode('qr')}><QrCode/> Scan QR</Button></div>
           {depMode === 'copy' ? <div className="mt-3 rounded-2xl border border-border p-3"><div className="text-xs text-muted-foreground">{selWallet?.code} · {selWallet?.asset ?? 'USDT'} {selWallet?.network}</div><div className="mt-1 break-all font-mono text-sm text-chart-3">{addr}</div><Button size="sm" className="mt-3 rounded-full" onClick={async () => { await navigator.clipboard.writeText(addr); setNotice('Wallet address copied.'); }}><Copy/> Copy address</Button></div>
             : <div className="mt-3 flex flex-col items-center gap-2"><div className="rounded-2xl bg-foreground p-3"><QRCodeSVG value={addr} size={180}/></div><div className="text-xs text-muted-foreground">{selWallet?.code} · {selWallet?.asset ?? 'USDT'} {selWallet?.network}</div></div>}
-          {!intent ? <><p className="mt-4 text-xs text-muted-foreground">2. Enter how much {selWallet?.asset ?? 'USDT'} you want to deposit (credited 1:1 as USD).</p>
+          {!intent && <div className="mt-4 grid grid-cols-2 gap-2" role="group" aria-label="Deposit method"><Button size="sm" variant={flex ? 'default' : 'outline'} className="h-auto min-h-9 whitespace-normal rounded-full" onClick={() => { setFlex(true); setNotice(''); }}>Any amount · TxID</Button><Button size="sm" variant={!flex ? 'default' : 'outline'} className="h-auto min-h-9 whitespace-normal rounded-full" onClick={() => { setFlex(false); setNotice(''); }}>Auto-match · 3 unique digits</Button></div>}
+          {flex && !intent ? <><p className="mt-3 text-xs text-muted-foreground">2. Send any amount (min 1 {selWallet?.asset ?? 'USDT'}) to the address above, then paste the transaction ID (TxID). We verify recipient, token, network, confirmations and one-time use on-chain, then credit your wallet balance 1:1. Choose a staking package afterwards.</p>
+          <input className="form-input mt-2 font-mono text-xs" placeholder="Transaction ID / hash" maxLength={100} value={txHash} onChange={e => setTxHash(e.target.value)}/>
+          </>
+          : !intent ? <><p className="mt-4 text-xs text-muted-foreground">2. Enter how much {selWallet?.asset ?? 'USDT'} you want to deposit (credited 1:1 as USD).</p>
           <input className="form-input mt-2" type="number" min="1" step="1" placeholder="Amount USDT (e.g. 50)" value={amount} onChange={e => setAmount(e.target.value)}/></>
           : <div className="mt-4 rounded-2xl border border-chart-2 bg-chart-2/10 p-3 text-center"><div className="text-xs text-muted-foreground">Send EXACTLY this amount of {selWallet?.asset ?? 'USDT'} {intent.network}</div><div className="numeric mt-1 text-2xl font-black text-chart-2">{intent.amount.toFixed(3)}</div><Button size="sm" variant="outline" className="mt-2 rounded-full" onClick={async () => { await navigator.clipboard.writeText(intent.amount.toFixed(3)); setNotice('Exact amount copied.'); }}><Copy/> Copy amount</Button><DepositFlightScanner done={matched}/><p className="mt-2 text-[11px] text-muted-foreground">The unique decimals identify your deposit. Balance is credited automatically once the blockchain confirms. Valid for 2 hours.</p>{claimed ? <p className="mt-3 rounded-xl border border-chart-3/50 bg-chart-3/10 p-2 text-xs text-chart-3">Transfer reported. You can close this page — we keep checking the blockchain every 5 minutes for 24 hours, and the owner can approve it manually.</p> : <Button size="sm" className="mt-3 w-full rounded-full bg-chart-2 text-background" disabled={busy} onClick={async () => { setBusy(true); try { await claimIntent({ data: { id: intent.id } }); setClaimed(true); setNotice(''); txFeedback.success('Transfer reported', 'We will credit your balance once the blockchain confirms.'); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); } catch (e) { setNotice(e instanceof Error ? e.message : 'Could not record your transfer.'); txFeedback.fail('Could not record your transfer', e); } setBusy(false); }}>I have transferred</Button>}</div>}
           {notice && <p className={`mt-2 text-xs ${intent ? 'text-chart-3' : 'text-destructive'}`}>{notice}</p>}
@@ -146,7 +156,7 @@ function WalletPage() {
           <div className="mt-4 space-y-1 rounded-2xl border border-border p-3 text-xs"><div className="flex justify-between"><span>Admin fee</span><span>$1.00</span></div><div className="flex justify-between"><span>Gas fee (0.5%)</span><span>{money(Math.round(amt * 0.5) / 100)}</span></div><div className="flex justify-between border-t border-border pt-1 font-bold"><span>You receive</span><span className="text-chart-2">{money(Math.max(0, amt - (amt ? fee(amt) : 0)))}</span></div></div>
           {notice && <p className="mt-2 text-xs text-destructive">{notice}</p>}
         </>}
-        <Button disabled={busy || (modal === 'deposit' ? !addr || (!intent && !(amt >= 1)) : !field || !amt || amt < 10 || amt > 10000)} className="mt-5 w-full rounded-full bg-chart-3 text-background" onClick={submit}>{busy ? 'Checking blockchain…' : modal === 'deposit' ? (intent ? 'Waiting for transfer… Check now' : 'Get exact deposit amount') : 'Submit withdraw'}</Button>
+        <Button disabled={busy || (modal === 'deposit' ? !addr || (flex && !intent ? txHash.trim().length < 10 : (!intent && !(amt >= 1))) : !field || !amt || amt < 10 || amt > 10000)} className="mt-5 w-full rounded-full bg-chart-3 text-background" onClick={submit}>{busy ? 'Checking blockchain…' : modal === 'deposit' ? (flex && !intent ? 'Verify TxID & credit' : intent ? 'Waiting for transfer… Check now' : 'Get exact deposit amount') : 'Submit withdraw'}</Button>
         <VaultStage open={vault} label="Withdrawal request" onDone={submit} onCancel={() => setVault(false)}/>
         <p className="tx-hint">{modal === 'deposit' ? 'Send the exact amount on-chain; one credit per transaction ID after the matcher confirms it.' : 'Creates a withdrawal request for review; USDT is not sent until it is approved.'}</p>
       </div></div>}

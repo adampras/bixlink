@@ -666,6 +666,13 @@
       "when": 1793071250933,
       "tag": "0094_owner1_loan_package_editor",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1793082837352,
+      "tag": "0095_leader_personal3x_team5x",
+      "breakpoints": true
     }
   ]
 }
