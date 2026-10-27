@@ -1,6 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { BixShell } from '@/components/BixShell';
+import { ExchangeTerminal } from '@/components/ExchangeTerminal';
 
 export const Route = createFileRoute('/quantum-exchange')({
   head: () => ({ meta: [
@@ -62,8 +63,10 @@ function Quantum() {
         <section className="q-panel rounded-2xl p-4"><h2 className="mb-2 text-xs font-black tracking-widest text-primary">HOLOGRAPHIC LIQUIDITY RADAR</h2><Radar /></section>
         <section className="q-panel rounded-2xl p-4"><h2 className="mb-2 text-xs font-black tracking-widest text-primary">QUANTUM DEPTH STREAM</h2><Particles /></section>
       </div>
+      <ExchangeTerminal />
       <div className="q-orbit rounded-full py-2 text-center text-[11px] font-black tracking-[0.3em]">HUD ORBIT · ATOMIC LEDGER ENGINE · SIMULATION</div>
       <section className="q-panel rounded-2xl p-5"><h2 className="mb-3 text-xs font-black tracking-widest text-primary">FUTURE EXECUTION COCKPIT</h2><Cockpit /></section>
+      <div className="text-center"><Link to="/mining" className="q-seat inline-block rounded-full px-5 py-3 text-xs font-black tracking-widest">BIX QUANTUM MINING · COMING SOON →</Link></div>
     </div>
   </BixShell>;
 }
