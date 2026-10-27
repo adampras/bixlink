@@ -687,6 +687,13 @@
       "when": 1793092949195,
       "tag": "0097_leader_loan_lock_360",
       "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "7",
+      "when": 1793095454451,
+      "tag": "0098_mining_rig_preorders",
+      "breakpoints": true
     }
   ]
 }
