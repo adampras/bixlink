@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable';
 import { WalletSignIn } from '@/components/WalletSignIn';
+import { createManualAccount, LOGIN_IDENTIFIER_KEY } from '@/lib/manual-registration';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export const Route = createFileRoute('/register')({
   validateSearch: (search: Record<string, unknown>): { ref?: string | undefined; target?: string | undefined } => ({ ref: typeof search['ref'] === 'string' ? search['ref'] : undefined, target: typeof search['target'] === 'string' ? search['target'] : undefined }),
@@ -20,6 +22,8 @@ export const Route = createFileRoute('/register')({
 
 function RegisterPage() {
   const [email, setEmail] = useState(''); const [fullName, setFullName] = useState(''); const [username, setUsername] = useState(''); const [password, setPassword] = useState(''); const [referral, setReferral] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<{ username: string; email: string; whatsapp: string; referral: string } | null>(null); const [copied, setCopied] = useState(false);
+  const copyAccount = async () => { if (!done) return; try { await navigator.clipboard.writeText(`BIXLINK account\nUsername: ${done.username}\nEmail: ${done.email}\nWhatsApp: ${done.whatsapp}\nSponsor: ${done.referral || '-'}`); setCopied(true); } catch { setCopied(false); } };
   const [country, setCountry] = useState('ID'); const [phone, setPhone] = useState('');
   const { ref, target } = Route.useSearch();
   useEffect(() => { if (target === 'presale') window.localStorage.setItem('bixlink-target', 'presale'); }, [target]);
@@ -42,10 +46,9 @@ function RegisterPage() {
       if (!free) throw new Error('That username is already taken.');
       if (code) window.localStorage.setItem('bixlink-ref', code); else window.localStorage.removeItem('bixlink-ref');
       if (!passwordValid(password)) throw new Error(PASSWORD_HINT);
-      const { data: signed, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: fullName.trim().slice(0, 80), username: uname, whatsapp, whatsapp_country: dial.iso } } });
-      if (error) throw error;
-      if (signed.session) { setNotice('Account created. Opening your dashboard…'); window.location.assign('/dashboard'); return; }
-      setNotice('Account created. Please sign in.');
+      await createManualAccount(() => supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: fullName.trim().slice(0, 80), username: uname, whatsapp, whatsapp_country: dial.iso } } }), () => supabase.auth.signOut());
+      window.localStorage.setItem(LOGIN_IDENTIFIER_KEY, uname);
+      setDone({ username: uname, email: email.trim(), whatsapp, referral: code });
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
   const label = 'block text-xs font-bold text-muted-foreground';
