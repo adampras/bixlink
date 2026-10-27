@@ -14,7 +14,7 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { KycCard } from '@/components/KycCard';
 import { getMyWallet, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
 import { getFiatRates } from '@/lib/market.functions';
-import { getMyDepositWallets, createDepositIntent, checkDepositIntent, claimDepositIntent } from '@/lib/deposit.functions';
+import { getMyDepositWallets, createDepositIntent, checkDepositIntent, claimDepositIntent, verifyDeposit } from '@/lib/deposit.functions';
 import { dateTime, money, number } from '@/lib/bixlink';
 import { confirmPin, getFiatCodes, txFeedback } from '@/components/TxFeedback';
 import { pickWalletSkin } from '@/lib/wallet-skin';
@@ -35,6 +35,7 @@ const STATUS: Record<string, string> = { pending: 'text-chart-3', approved: 'tex
 function WalletPage() {
   const { user, ready } = useMember();
   const { data: cfg } = usePublicConfig();
+  const verifyTx = useServerFn(verifyDeposit); const [flex, setFlex] = useState(true); const [txHash, setTxHash] = useState('');
   const fetchWallet = useServerFn(getMyWallet); const fetchFiat = useServerFn(getFiatRates); const createIntent = useServerFn(createDepositIntent); const checkIntent = useServerFn(checkDepositIntent); const claimIntent = useServerFn(claimDepositIntent); const [claimed, setClaimed] = useState(false); const withdraw = useServerFn(requestWithdraw); const swap = useServerFn(requestSwap);
   const qc = useQueryClient(); const isAdmin = !!useMember().data?.isAdmin;
   const { data } = useQuery({ queryKey: ['my-wallet', user?.id], queryFn: () => fetchWallet(), enabled: !!user });
@@ -76,6 +77,11 @@ function WalletPage() {
     setBusy(true);
     try {
       if (modal === 'deposit') {
+        if (flex) {
+          const r = await verifyTx({ data: { walletCode: selWallet?.code ?? '', txHash: txHash.trim() } });
+          if (!r.ok) { setNotice(r.reason); setBusy(false); return; }
+          setSuccess({ amount: r.amount, walletCode: r.walletCode, network: r.network, txHash: r.txHash }); setTxHash(''); close(); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); setBusy(false); return;
+        }
         if (intent) { await poll(intent.id); setBusy(false); return; }
         const r = await createIntent({ data: { walletCode: selWallet?.code ?? '', amount: Math.floor(amt) } });
         setIntent(r); setNotice(''); setBusy(false); return;
