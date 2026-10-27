@@ -32,7 +32,7 @@ export function ExchangeTerminal() {
     }, 1200);
     return () => clearInterval(i);
   }, []);
-  const price = candles[candles.length - 1]?.c ?? PAIRS[pair];
+  const price = pair === 'BIX/USDT' && bixRef ? bixRef : candles[candles.length - 1]?.c ?? PAIRS[pair];
   const hi = Math.max(...candles.map((c) => c.h)), lo = Math.min(...candles.map((c) => c.l));
   const y = (v: number) => 4 + ((hi - v) / (hi - lo || 1)) * 152;
   const dp = price < 10 ? 5 : 2;
