@@ -3506,7 +3506,11 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
   .section-title{font-size:clamp(1.35rem,6.4vw,1.75rem);line-height:1.15}
   main p{overflow-wrap:anywhere}
   main button,main a[role="button"],main [data-slot="button"]{min-height:40px}
+  main :is(.rail-dots,.nation-dots,.qv-dots) button,main .swipe-deck-dot{min-height:0;height:6px;padding:0}
 }
+/* Carousel dots stay slim everywhere */
+:is(.rail-dots,.nation-dots,.qv-dots) button,.swipe-deck-dot{min-height:0!important;height:6px!important;padding:0;flex:0 0 auto}
+:is(.rail-dots,.nation-dots,.qv-dots) button:active,.swipe-deck-dot:active{transform:none;filter:none}
 
 /* Micro-interaction feedback */
 @media (hover:none),(pointer:coarse){
