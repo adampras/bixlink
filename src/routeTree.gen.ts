@@ -23,6 +23,7 @@ import { Route as ConsortiumVaultRouteImport } from './routes/consortium-vault'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as MarketingRouteImport } from './routes/marketing'
+import { Route as MiningRouteImport } from './routes/mining'
 import { Route as NetworkRouteImport } from './routes/network'
 import { Route as NftMarketplaceRouteImport } from './routes/nft-marketplace'
 import { Route as OwnerDeskRouteImport } from './routes/owner-desk'
@@ -119,6 +120,11 @@ const MarketRoute = MarketRouteImport.update({
 const MarketingRoute = MarketingRouteImport.update({
   id: '/marketing',
   path: '/marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MiningRoute = MiningRouteImport.update({
+  id: '/mining',
+  path: '/mining',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NetworkRoute = NetworkRouteImport.update({
@@ -274,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
+  '/mining': typeof MiningRoute
   '/network': typeof NetworkRoute
   '/nft-marketplace': typeof NftMarketplaceRoute
   '/owner-desk': typeof OwnerDeskRoute
@@ -317,6 +324,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
+  '/mining': typeof MiningRoute
   '/network': typeof NetworkRoute
   '/nft-marketplace': typeof NftMarketplaceRoute
   '/owner-desk': typeof OwnerDeskRoute
@@ -361,6 +369,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
+  '/mining': typeof MiningRoute
   '/network': typeof NetworkRoute
   '/nft-marketplace': typeof NftMarketplaceRoute
   '/owner-desk': typeof OwnerDeskRoute
@@ -406,6 +415,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/market'
     | '/marketing'
+    | '/mining'
     | '/network'
     | '/nft-marketplace'
     | '/owner-desk'
@@ -449,6 +459,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/market'
     | '/marketing'
+    | '/mining'
     | '/network'
     | '/nft-marketplace'
     | '/owner-desk'
@@ -492,6 +503,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/market'
     | '/marketing'
+    | '/mining'
     | '/network'
     | '/nft-marketplace'
     | '/owner-desk'
@@ -536,6 +548,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   MarketRoute: typeof MarketRoute
   MarketingRoute: typeof MarketingRoute
+  MiningRoute: typeof MiningRoute
   NetworkRoute: typeof NetworkRoute
   NftMarketplaceRoute: typeof NftMarketplaceRoute
   OwnerDeskRoute: typeof OwnerDeskRoute
@@ -663,6 +676,13 @@ declare module '@tanstack/react-router' {
       path: '/marketing'
       fullPath: '/marketing'
       preLoaderRoute: typeof MarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mining': {
+      id: '/mining'
+      path: '/mining'
+      fullPath: '/mining'
+      preLoaderRoute: typeof MiningRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/network': {
@@ -872,6 +892,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   MarketRoute: MarketRoute,
   MarketingRoute: MarketingRoute,
+  MiningRoute: MiningRoute,
   NetworkRoute: NetworkRoute,
   NftMarketplaceRoute: NftMarketplaceRoute,
   OwnerDeskRoute: OwnerDeskRoute,
