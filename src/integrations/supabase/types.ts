@@ -199,6 +199,7 @@ export type Database = {
       bix_leaders: {
         Row: {
           created_at: string
+          loan_package_id: string | null
           require_turnover: boolean
           reviewed_at: string | null
           scope: string
@@ -210,6 +211,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          loan_package_id?: string | null
           require_turnover?: boolean
           reviewed_at?: string | null
           scope?: string
@@ -221,6 +223,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          loan_package_id?: string | null
           require_turnover?: boolean
           reviewed_at?: string | null
           scope?: string
@@ -1939,6 +1942,8 @@ export type Database = {
         Returns: Json
       }
       bix_loan_device_reset: { Args: { p_user: string }; Returns: undefined }
+      bix_loan_package_config: { Args: never; Returns: Json }
+      bix_loan_package_save: { Args: { p_config: Json }; Returns: Json }
       bix_loan_quota: { Args: { p_sponsor: string }; Returns: Json }
       bix_member_shop_slots: { Args: { p_user: string }; Returns: number }
       bix_merchant_tier: { Args: { p_user: string }; Returns: string }
