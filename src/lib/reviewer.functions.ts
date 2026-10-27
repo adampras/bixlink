@@ -30,7 +30,7 @@ export const getReviewerSettings = createServerFn({ method: 'GET' }).middleware(
 });
 
 export const saveReviewerDepositWallet = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((wallet: DepositWallet) => ({ ...reviewerWalletSchema.parse({ ...wallet, code: 'WLT-01' }), unique: wallet.mode === 'unique' }))
+  .inputValidator((wallet: DepositWallet) => { const { mode, code: _c, ...rest } = wallet; return { ...reviewerWalletSchema.parse({ ...rest, code: 'WLT-01' }), unique: mode === 'unique' }; })
   .handler(async ({ context, data }) => {
     if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
     const { error } = await context.supabase.rpc(data.unique ? 'bix_owner_wallet_save_unique' : 'bix_owner_wallet_save', { p_label: data.label, p_network: data.network, p_asset: data.asset ?? 'USDT', p_address: data.address, p_enabled: data.enabled });
