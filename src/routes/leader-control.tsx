@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Crown, Landmark, UserPlus, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, Crown, Landmark, UserPlus, LayoutGrid, Wallet } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
@@ -42,13 +42,13 @@ function Page() {
   </MemberGate></BixShell>;
 }
 
-type Tab = 'leader' | 'loan' | 'none' | 'packages' | 'hub';
+type Tab = 'leader' | 'loan' | 'none' | 'packages' | 'hub' | 'withdraw';
 
 function Control() {
   const [tab, setTab] = useState<Tab>('leader');
   const tabs: { id: Tab; label: string; Icon: typeof Crown }[] = [
     { id: 'leader', label: 'Leader 3×', Icon: Crown }, { id: 'loan', label: 'Loan 5×', Icon: Landmark },
-    { id: 'none', label: 'Belum ambil', Icon: UserPlus }, { id: 'packages', label: 'Paket loan', Icon: Landmark }, { id: 'hub', label: 'Menu HUB', Icon: LayoutGrid },
+    { id: 'none', label: 'Belum ambil', Icon: UserPlus }, { id: 'packages', label: 'Paket loan', Icon: Landmark }, { id: 'hub', label: 'Menu HUB', Icon: LayoutGrid }, { id: 'withdraw', label: 'Tarik USDT virtual', Icon: Wallet },
   ];
   return <>
     <div className="flex gap-2 overflow-x-auto pb-1">{tabs.map(t => <button key={t.id} onClick={() => setTab(t.id)} className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${tab === t.id ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground'}`}><t.Icon size={13}/>{t.label}</button>)}</div>
@@ -56,6 +56,7 @@ function Control() {
     {tab === 'none' && <Candidates/>}
     {tab === 'packages' && <Packages/>}
     {tab === 'hub' && <HubToggles/>}
+    {tab === 'withdraw' && <VusdtWithdraw/>}
   </>;
 }
 
@@ -72,7 +73,7 @@ function Roster({ kind }: { kind: 'leader' | 'loan' }) {
   if (q.isLoading) return <p className="text-sm text-muted-foreground">Memuat…</p>;
   if (q.error) return <p className="text-sm text-destructive">{(q.error as Error).message}</p>;
   return <div className="space-y-2">
-    <p className="text-xs text-muted-foreground">{kind === 'leader' ? 'Target 3× dari omset staking riil pribadi.' : 'Target 5× dari omset staking riil tim L1.'} Kunci 360 hari. Akun virtual, clone dan loan lain tidak dihitung.</p>
+    <p className="text-xs text-muted-foreground">{kind === 'leader' ? 'Target 3× dari omset staking riil pribadi.' : 'Target 5× dari omset staking riil tim L1.'} Kunci 360 hari. Hangus otomatis bila dalam 30 hari omset riil < 10% nilai paket. Akun virtual, clone dan loan lain tidak dihitung.</p>
     {msg && <p className="text-xs text-primary">{msg}</p>}
     {rows.length === 0 && <p className="rounded-xl border border-border p-4 text-sm text-muted-foreground">Belum ada akun.</p>}
     {rows.map(l => {
@@ -86,6 +87,7 @@ function Roster({ kind }: { kind: 'leader' | 'loan' }) {
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${pct}%` }}/></div>
         <div className="mt-1 flex justify-between text-[11px] text-muted-foreground"><span>{usd(done)} / {usd(target)} ({mult}×)</span><span>{pct.toFixed(0)}%</span></div>
+        {l.status === 'approved' && l.require_turnover && <Expiry30 userId={l.user_id}/>}
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Input className="h-8 w-28 text-xs" inputMode="decimal" value={edit[l.user_id] ?? String(l.virtual_usd)} onChange={e => setEdit(v => ({ ...v, [l.user_id]: e.target.value }))} aria-label="Nilai paket USD"/>
           <Button size="sm" onClick={() => act(l.user_id, 'approved', l.virtual_usd, l.require_turnover)}>Simpan / Setujui</Button>
@@ -135,5 +137,51 @@ function HubToggles() {
     <div className="grid gap-2 sm:grid-cols-2">{HUB_ITEMS.map(it => <label key={it.id} className="flex items-center justify-between rounded-xl border border-border bg-card/70 px-3 py-2 text-sm"><span>{it.label} <small className="text-muted-foreground">{it.note}</small></span><Switch checked={hubVisible(cfg, it.id)} onCheckedChange={v => setCfg(c => ({ ...c, [it.id]: v }))}/></label>)}</div>
     {msg && <p className="text-xs text-primary">{msg}</p>}
     <Button onClick={async () => { setMsg(''); try { await save({ data: { dockHub: cfg } }); qc.invalidateQueries(); setMsg('Menu HUB tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } }}>Simpan menu HUB</Button>
+  </div>;
+}
+
+type Recipient = { user_id: string; username: string | null; code: string | null; received: number; transfer_balance: number; leader_virtual: number; wallet_balance: number; kind: string | null };
+
+function VusdtWithdraw() {
+  const qc = useQueryClient(); const [f, setF] = useState(''); const [amt, setAmt] = useState<Record<string, string>>({}); const [msg, setMsg] = useState('');
+  const q = useQuery({ queryKey: ['vusdt-recipients'], queryFn: async () => { const { data, error } = await supabase.rpc('bix_vusdt_recipients' as never); if (error) throw error; return (data ?? []) as unknown as Recipient[]; } });
+  const rows = (q.data ?? []).filter(r => !f || `${r.username} ${r.code}`.toLowerCase().includes(f.toLowerCase()));
+  const pull = async (r: Recipient, max: number, full: boolean) => {
+    const v = full ? max : Number(amt[r.user_id]);
+    if (!v || v <= 0) return setMsg('Isi nominal penarikan.');
+    if (!confirm(`Tarik ${usd(v)} USDT virtual dari ${r.username || r.code}?`)) return;
+    setMsg('');
+    const { error } = await supabase.rpc('bix_vusdt_clawback' as never, { p_user: r.user_id, p_amount: Math.round(v * 100) / 100, p_note: 'Owner 1' } as never);
+    if (error) return setMsg(error.message);
+    setMsg(`Berhasil menarik ${usd(v)}.`); setAmt(a => ({ ...a, [r.user_id]: '' })); qc.invalidateQueries({ queryKey: ['vusdt-recipients'] }); qc.invalidateQueries({ queryKey: ['owner-leaders'] });
+  };
+  return <div className="space-y-2">
+    <p className="text-xs text-muted-foreground">Tarik saldo USDT virtual dari member/leader yang menerima transfer Owner 1. Nominal bebas, maksimal sisa saldo virtual yang belum dipakai staking.</p>
+    <Input placeholder="Cari username / kode…" value={f} onChange={e => setF(e.target.value)}/>
+    {msg && <p className="text-xs text-primary">{msg}</p>}
+    {q.isLoading && <p className="text-sm text-muted-foreground">Memuat…</p>}
+    {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
+    {rows.length === 0 && !q.isLoading && <p className="rounded-xl border border-border p-4 text-sm text-muted-foreground">Belum ada penerima.</p>}
+    {rows.map(r => { const max = Math.max(0, Math.min(Number(r.transfer_balance) + Number(r.leader_virtual), Number(r.wallet_balance)));
+      return <div key={r.user_id} className="rounded-2xl border border-border bg-card/70 p-3">
+        <div className="flex justify-between gap-2"><div className="min-w-0"><div className="truncate text-sm font-bold">{r.username || r.code || r.user_id.slice(0, 8)}</div><div className="text-[11px] text-muted-foreground">{r.code}{r.kind ? ` · ${r.kind === 'loan' ? 'Loan' : 'Leader'}` : ''} · diterima {usd(r.received)}</div></div>
+          <div className="text-right"><div className="text-sm font-black text-primary">{usd(max)}</div><div className="text-[10px] text-muted-foreground">bisa ditarik</div></div></div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Input className="h-8 w-28 text-xs" inputMode="decimal" placeholder="Nominal" value={amt[r.user_id] ?? ''} onChange={e => setAmt(a => ({ ...a, [r.user_id]: e.target.value }))}/>
+          <Button size="sm" disabled={max <= 0} onClick={() => pull(r, max, false)}>Tarik</Button>
+          <Button size="sm" variant="outline" disabled={max <= 0} onClick={() => pull(r, max, true)}>Tarik semua</Button>
+        </div>
+      </div>; })}
+  </div>;
+}
+
+function Expiry30({ userId }: { userId: string }) {
+  const q = useQuery({ queryKey: ['leader-30d', userId], queryFn: async () => { const { data } = await supabase.rpc('bix_leader_30d_progress' as never, { p_user: userId } as never); return data as unknown as { deadline: string; required: number; achieved: number; expired_at: string | null } | null; } });
+  const d = q.data; if (!d) return null;
+  const met = Number(d.achieved) >= Number(d.required);
+  const days = Math.ceil((new Date(d.deadline).getTime() - Date.now()) / 86400000);
+  const label = d.expired_at ? 'HANGUS' : met ? 'Syarat 10% tercapai' : days > 0 ? `${days} hari lagi` : 'Menunggu proses hangus';
+  return <div className={`mt-2 rounded-lg border px-2 py-1 text-[11px] ${d.expired_at || (!met && days <= 0) ? 'border-destructive/50 text-destructive' : met ? 'border-chart-2/40 text-chart-2' : 'border-border text-muted-foreground'}`}>
+    Batas 30 hari: omset {usd(d.achieved)} / min {usd(d.required)} (10%) · <b>{label}</b>
   </div>;
 }
