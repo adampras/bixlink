@@ -42,9 +42,10 @@ function RegisterPage() {
       if (!free) throw new Error('That username is already taken.');
       if (code) window.localStorage.setItem('bixlink-ref', code); else window.localStorage.removeItem('bixlink-ref');
       if (!passwordValid(password)) throw new Error(PASSWORD_HINT);
-      const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: fullName.trim().slice(0, 80), username: uname, whatsapp, whatsapp_country: dial.iso } } });
+      const { data: signed, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: fullName.trim().slice(0, 80), username: uname, whatsapp, whatsapp_country: dial.iso } } });
       if (error) throw error;
-      setNotice('Check your email to confirm your account, then sign in.');
+      if (signed.session) { setNotice('Account created. Opening your dashboard…'); window.location.assign('/dashboard'); return; }
+      setNotice('Account created. Please sign in.');
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
   const label = 'block text-xs font-bold text-muted-foreground';
