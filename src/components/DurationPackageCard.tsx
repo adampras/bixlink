@@ -11,9 +11,15 @@ import { useNftCatalog } from '@/lib/useNftCatalog';
 import { createPortal } from 'react-dom';
 import { packageCard } from '@/lib/package-cards';
 import { valueCard } from '@/lib/value-cards';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useMember } from '@/lib/useMember';
 
 export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; index: number; onStake: (p: Package) => void }) {
-  const [days, setDays] = useState(initialDuration(pkg));
+  const { user } = useMember();
+  const lock = useQuery({ queryKey: ['requires-360', user?.id], enabled: !!user, staleTime: 60_000, queryFn: async () => Boolean((await supabase.rpc('bix_requires_360', { p_user: user!.id })).data) });
+  const [pickedDays, setDays] = useState(initialDuration(pkg));
+  const days = lock.data ? 360 : pickedDays;
   const [popup, setPopup] = useState(false);
   const apy = packageApy(pkg, days);
   const price = Number(pkg.price_usd);
@@ -30,8 +36,9 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
     <div className="duration-package-body">
       <p className="duration-label">Choose duration</p>
       <div className="duration-options" role="group" aria-label={`${pkg.id} duration`}>
-        {PACKAGE_DURATIONS.map(d => <Button key={d} variant="outline" aria-pressed={days === d} className="duration-option" onClick={() => setDays(d)}>{d}D</Button>)}
+        {PACKAGE_DURATIONS.map(d => <Button key={d} variant="outline" aria-pressed={days === d} disabled={!!lock.data && d !== 360} className="duration-option" onClick={() => setDays(d)}>{d}D</Button>)}
       </div>
+      {lock.data && <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-chart-3">360 Days Mandatory Lock · Leader / Loan account</p>}
       <dl className="duration-yield"><div><dt>Daily projection</dt><dd className="numeric">{number(dailyRate(apy), { maximumFractionDigits: 3 })}% · ${number(perDay, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</dd></div><div><dt>Profit · {days} days</dt><dd className="numeric">${number(perDay * days, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</dd></div></dl>
       <div className="lux-ledger" aria-label="Projected settlement">
         <div><span>Principal</span><b className="numeric">${number(price, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</b></div>
