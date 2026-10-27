@@ -151,6 +151,24 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_deposit_owner1_lock: {
+        Row: {
+          created_at: string
+          locked_by: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          locked_by: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          locked_by?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_growth_control: {
         Row: {
           activity_enabled: boolean
@@ -497,6 +515,12 @@ export type Database = {
           label: string
           network: string
           owner_id: string
+          unique_address: string
+          unique_asset: string
+          unique_code: string | null
+          unique_enabled: boolean
+          unique_label: string
+          unique_network: string
           updated_at: string
         }
         Insert: {
@@ -507,6 +531,12 @@ export type Database = {
           label?: string
           network?: string
           owner_id: string
+          unique_address?: string
+          unique_asset?: string
+          unique_code?: string | null
+          unique_enabled?: boolean
+          unique_label?: string
+          unique_network?: string
           updated_at?: string
         }
         Update: {
@@ -517,6 +547,12 @@ export type Database = {
           label?: string
           network?: string
           owner_id?: string
+          unique_address?: string
+          unique_asset?: string
+          unique_code?: string | null
+          unique_enabled?: boolean
+          unique_label?: string
+          unique_network?: string
           updated_at?: string
         }
         Relationships: []
@@ -1899,6 +1935,11 @@ export type Database = {
         }
       }
       bix_content_published: { Args: { p_name: string }; Returns: boolean }
+      bix_deposit_lock_list: { Args: never; Returns: Json }
+      bix_deposit_lock_owner1: {
+        Args: { p_code: string; p_lock: boolean }
+        Returns: Json
+      }
       bix_deposit_owner: { Args: { p_user: string }; Returns: string }
       bix_edit_duration_package: {
         Args: {
@@ -1967,6 +2008,16 @@ export type Database = {
       bix_nft_tier: { Args: { p_days: number; p_usd: number }; Returns: string }
       bix_owner_vault: { Args: never; Returns: Json }
       bix_owner_wallet_save: {
+        Args: {
+          p_address: string
+          p_asset: string
+          p_enabled: boolean
+          p_label: string
+          p_network: string
+        }
+        Returns: string
+      }
+      bix_owner_wallet_save_unique: {
         Args: {
           p_address: string
           p_asset: string

@@ -673,6 +673,13 @@
       "when": 1793082837352,
       "tag": "0095_leader_personal3x_team5x",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1793089520237,
+      "tag": "0096_dual_deposit_wallets_owner1_lock",
+      "breakpoints": true
     }
   ]
 }
