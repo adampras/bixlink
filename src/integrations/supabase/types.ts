@@ -217,6 +217,7 @@ export type Database = {
       bix_leaders: {
         Row: {
           created_at: string
+          expired_at: string | null
           loan_package_id: string | null
           require_turnover: boolean
           reviewed_at: string | null
@@ -229,6 +230,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          expired_at?: string | null
           loan_package_id?: string | null
           require_turnover?: boolean
           reviewed_at?: string | null
@@ -241,6 +243,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          expired_at?: string | null
           loan_package_id?: string | null
           require_turnover?: boolean
           reviewed_at?: string | null
@@ -1376,6 +1379,39 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_vusdt_clawbacks: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          created_by: string
+          from_leader: number
+          from_transfer: number
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          created_by: string
+          from_leader?: number
+          from_transfer?: number
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          created_by?: string
+          from_leader?: number
+          from_transfer?: number
+          id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_wallet_challenges: {
         Row: {
           address: string
@@ -2033,6 +2069,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      bix_expire_conditional_leaders: { Args: never; Returns: number }
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_find_user_by_email: { Args: { p_email: string }; Returns: string }
       bix_grant_welcome: { Args: { p_user: string }; Returns: undefined }
@@ -2046,6 +2083,7 @@ export type Database = {
       }
       bix_in_owner1_network: { Args: never; Returns: boolean }
       bix_is_owner1: { Args: never; Returns: boolean }
+      bix_leader_30d_progress: { Args: { p_user: string }; Returns: Json }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_leaderboard: {
         Args: { p_season?: string }
@@ -2281,7 +2319,12 @@ export type Database = {
         }[]
       }
       bix_vusdt_balance: { Args: { p_user: string }; Returns: number }
+      bix_vusdt_clawback: {
+        Args: { p_amount: number; p_note: string; p_user: string }
+        Returns: Json
+      }
       bix_vusdt_component: { Args: { p_user: string }; Returns: number }
+      bix_vusdt_recipients: { Args: never; Returns: Json }
       bix_vusdt_send: {
         Args: { p_amount: number; p_code: string; p_note: string }
         Returns: string
