@@ -2106,6 +2106,7 @@ export type Database = {
           weekly_turnover_usd: number
         }[]
       }
+      bix_requires_360: { Args: { p_user: string }; Returns: boolean }
       bix_review_referral_bonus: {
         Args: { p_approve: boolean; p_bonus: string }
         Returns: undefined
