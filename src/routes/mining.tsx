@@ -16,11 +16,6 @@ export const Route = createFileRoute('/mining')({
   component: Mining,
 });
 
-const RIGS = [
-  { name: 'FOX RIG NANO', th: 10, price: 300, icon: Cpu, note: 'Starter cloud rig' },
-  { name: 'FOX RIG PRO', th: 50, price: 1500, icon: Gauge, note: 'For active leaders' },
-  { name: 'QUANTUM FOX ASIC MASTER', th: 250, price: 10000, icon: Zap, note: 'Master Node certificate' },
-];
 const POOL = 3_150_000; // planned mining pool reference
 const EPOCHS = [{ e: 'Epoch 1', r: 1 }, { e: 'Epoch 2', r: 0.5 }, { e: 'Epoch 3', r: 0.25 }, { e: 'Epoch 4', r: 0.125 }];
 const BIX_PER_TH_DAY = 0.12; // illustrative epoch-1 emission
