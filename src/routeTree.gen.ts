@@ -21,6 +21,7 @@ import { Route as BuybackRouteImport } from './routes/buyback'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as ConsortiumVaultRouteImport } from './routes/consortium-vault'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as LeaderControlRouteImport } from './routes/leader-control'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as MarketingRouteImport } from './routes/marketing'
 import { Route as MiningRouteImport } from './routes/mining'
@@ -110,6 +111,11 @@ const ConsortiumVaultRoute = ConsortiumVaultRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderControlRoute = LeaderControlRouteImport.update({
+  id: '/leader-control',
+  path: '/leader-control',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketRoute = MarketRouteImport.update({
@@ -278,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/coming-soon': typeof ComingSoonRoute
   '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
+  '/leader-control': typeof LeaderControlRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
   '/mining': typeof MiningRoute
@@ -322,6 +329,7 @@ export interface FileRoutesByTo {
   '/coming-soon': typeof ComingSoonRoute
   '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
+  '/leader-control': typeof LeaderControlRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
   '/mining': typeof MiningRoute
@@ -367,6 +375,7 @@ export interface FileRoutesById {
   '/coming-soon': typeof ComingSoonRoute
   '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
+  '/leader-control': typeof LeaderControlRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
   '/mining': typeof MiningRoute
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/coming-soon'
     | '/consortium-vault'
     | '/dashboard'
+    | '/leader-control'
     | '/market'
     | '/marketing'
     | '/mining'
@@ -457,6 +467,7 @@ export interface FileRouteTypes {
     | '/coming-soon'
     | '/consortium-vault'
     | '/dashboard'
+    | '/leader-control'
     | '/market'
     | '/marketing'
     | '/mining'
@@ -501,6 +512,7 @@ export interface FileRouteTypes {
     | '/coming-soon'
     | '/consortium-vault'
     | '/dashboard'
+    | '/leader-control'
     | '/market'
     | '/marketing'
     | '/mining'
@@ -546,6 +558,7 @@ export interface RootRouteChildren {
   ComingSoonRoute: typeof ComingSoonRoute
   ConsortiumVaultRoute: typeof ConsortiumVaultRoute
   DashboardRoute: typeof DashboardRoute
+  LeaderControlRoute: typeof LeaderControlRoute
   MarketRoute: typeof MarketRoute
   MarketingRoute: typeof MarketingRoute
   MiningRoute: typeof MiningRoute
@@ -662,6 +675,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leader-control': {
+      id: '/leader-control'
+      path: '/leader-control'
+      fullPath: '/leader-control'
+      preLoaderRoute: typeof LeaderControlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/market': {
@@ -890,6 +910,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComingSoonRoute: ComingSoonRoute,
   ConsortiumVaultRoute: ConsortiumVaultRoute,
   DashboardRoute: DashboardRoute,
+  LeaderControlRoute: LeaderControlRoute,
   MarketRoute: MarketRoute,
   MarketingRoute: MarketingRoute,
   MiningRoute: MiningRoute,

@@ -22,6 +22,7 @@ import { Sun, Moon } from 'lucide-react';
 import { SiteSearch } from '@/components/SiteSearch';
 import { SitePopup } from '@/components/SitePopup';
 import { MemberWelcome } from '@/components/MemberWelcome';
+import { DockHub } from '@/components/DockHub';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
@@ -120,7 +121,8 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     {user && !path.startsWith('/admin') && <MemberWelcome userId={user.id}/>}
     <footer className="border-t border-border py-4"><SocialLinks links={publicConfig?.readiness.socials} signedIn={!!user}/><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
     {user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden`}>
-      {NAV.filter(n => n.to !== '/boost').map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} title={n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19} className="shrink-0"/><span className="max-w-full truncate">{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')}</span></Link>; })}
+      <DockHub path={path} cfg={publicConfig?.readiness.dockHub}/>
+      {NAV.filter(n => n.to !== '/boost' && n.to !== '/').map(n => n as typeof NAV[number]).map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} title={n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19} className="shrink-0"/><span className="max-w-full truncate">{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')}</span></Link>; })}
     </nav>}
   </div>;
 }
