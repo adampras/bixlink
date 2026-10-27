@@ -396,6 +396,89 @@ export type Database = {
           },
         ]
       }
+      bix_mining_preorders: {
+        Row: {
+          created_at: string
+          hashrate_th: number
+          id: string
+          price_usd: number
+          reviewed_at: string | null
+          rig_id: string
+          status: string
+          units: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hashrate_th: number
+          id?: string
+          price_usd: number
+          reviewed_at?: string | null
+          rig_id: string
+          status?: string
+          units: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hashrate_th?: number
+          id?: string
+          price_usd?: number
+          reviewed_at?: string | null
+          rig_id?: string
+          status?: string
+          units?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_mining_preorders_rig_id_fkey"
+            columns: ["rig_id"]
+            isOneToOne: false
+            referencedRelation: "bix_mining_rigs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bix_mining_rigs: {
+        Row: {
+          enabled: boolean
+          hashrate_th: number
+          id: string
+          name: string
+          note: string
+          price_usd: number
+          quota: number
+          reserved: number
+          sort: number
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          hashrate_th: number
+          id: string
+          name: string
+          note?: string
+          price_usd: number
+          quota?: number
+          reserved?: number
+          sort?: number
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          hashrate_th?: number
+          id?: string
+          name?: string
+          note?: string
+          price_usd?: number
+          quota?: number
+          reserved?: number
+          sort?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bix_network_leaders: {
         Row: {
           assigned_by: string
@@ -1962,6 +2045,7 @@ export type Database = {
         Returns: boolean
       }
       bix_in_owner1_network: { Args: never; Returns: boolean }
+      bix_is_owner1: { Args: never; Returns: boolean }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_leaderboard: {
         Args: { p_season?: string }
@@ -1990,7 +2074,27 @@ export type Database = {
       bix_merchant_tier: { Args: { p_user: string }; Returns: string }
       bix_mining_conversion_status: { Args: never; Returns: Json }
       bix_mining_convert: { Args: never; Returns: Json }
+      bix_mining_preorder: {
+        Args: { p_rig: string; p_units: number }
+        Returns: string
+      }
+      bix_mining_preorder_review: {
+        Args: { p_approve: boolean; p_id: string }
+        Returns: undefined
+      }
       bix_mining_rate: { Args: { p_user: string }; Returns: number }
+      bix_mining_rig_save: {
+        Args: {
+          p_enabled: boolean
+          p_id: string
+          p_name: string
+          p_note: string
+          p_price: number
+          p_quota: number
+          p_th: number
+        }
+        Returns: undefined
+      }
       bix_mining_settle: { Args: never; Returns: Json }
       bix_mining_start: { Args: never; Returns: Json }
       bix_mining_status: { Args: never; Returns: Json }

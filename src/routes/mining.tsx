@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { Cpu, Gauge, Zap } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { BixShell } from '@/components/BixShell';
+import { MiningPreorder } from '@/components/MiningPreorder';
+import { fetchBixPrice } from '@/lib/mining-rigs';
 
 export const Route = createFileRoute('/mining')({
   head: () => ({ meta: [
@@ -14,11 +16,6 @@ export const Route = createFileRoute('/mining')({
   component: Mining,
 });
 
-const RIGS = [
-  { name: 'FOX RIG NANO', th: 10, price: 300, icon: Cpu, note: 'Starter cloud rig' },
-  { name: 'FOX RIG PRO', th: 50, price: 1500, icon: Gauge, note: 'For active leaders' },
-  { name: 'QUANTUM FOX ASIC MASTER', th: 250, price: 10000, icon: Zap, note: 'Master Node certificate' },
-];
 const POOL = 3_150_000; // planned mining pool reference
 const EPOCHS = [{ e: 'Epoch 1', r: 1 }, { e: 'Epoch 2', r: 0.5 }, { e: 'Epoch 3', r: 0.25 }, { e: 'Epoch 4', r: 0.125 }];
 const BIX_PER_TH_DAY = 0.12; // illustrative epoch-1 emission
@@ -26,6 +23,7 @@ const BIX_PER_TH_DAY = 0.12; // illustrative epoch-1 emission
 function Mining() {
   const [th, setTh] = useState(50); const [epoch, setEpoch] = useState(0);
   const [spin, setSpin] = useState(0);
+  const { data: bixPrice = 0.84291 } = useQuery({ queryKey: ['bix-ref-price'], queryFn: fetchBixPrice });
   useEffect(() => { const i = setInterval(() => setSpin((s) => s + 1), 80); return () => clearInterval(i); }, []);
   const daily = th * BIX_PER_TH_DAY * (EPOCHS[epoch]?.r ?? 1);
 
@@ -41,17 +39,8 @@ function Mining() {
         </svg>
       </header>
 
-      <div className="grid gap-3 md:grid-cols-3">
-        {RIGS.map(({ name, th: t, price, icon: I, note }) =>
-          <section key={name} className="q-panel rounded-2xl p-4 text-center">
-            <I className="mx-auto text-primary" size={28} />
-            <h2 className="mt-2 text-xs font-black tracking-widest text-primary">{name}</h2>
-            <p className="numeric mt-1 text-3xl font-black">{t} <span className="text-sm">TH/s</span></p>
-            <p className="text-xs text-muted-foreground">{note}</p>
-            <p className="numeric mt-2 text-sm">Planned price <b className="text-chart-2">${price.toLocaleString()} USDT</b></p>
-            <button type="button" disabled className="mt-3 w-full rounded-full border border-primary/50 py-2 text-[11px] font-black tracking-widest text-primary opacity-80">PRE-ORDER · COMING SOON</button>
-          </section>)}
-      </div>
+      <p className="numeric text-center text-xs text-muted-foreground">BIX reference price (staking ledger): <b className="text-primary">${bixPrice.toFixed(6)}</b></p>
+      <MiningPreorder bixPrice={bixPrice} />
 
       <section className="q-panel space-y-3 rounded-2xl p-5">
         <h2 className="text-xs font-black tracking-widest text-primary">HASHRATE PROJECTION SIMULATOR</h2>

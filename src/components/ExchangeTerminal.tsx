@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import { fetchBixPrice } from '@/lib/mining-rigs';
 
 const PAIRS = { 'BIX/USDT': 0.84291, 'BTC/USDT': 68420, 'ETH/USDT': 3520 } as const;
 type Pair = keyof typeof PAIRS;
@@ -12,12 +15,15 @@ function seed(base: number): Candle[] {
 }
 
 export function ExchangeTerminal() {
+  const { data: bixRef } = useQuery({ queryKey: ['bix-ref-price'], queryFn: fetchBixPrice });
+  const base = (p: Pair) => (p === 'BIX/USDT' ? bixRef ?? PAIRS[p] : PAIRS[p]);
   const [pair, setPair] = useState<Pair>('BIX/USDT');
   const [candles, setCandles] = useState<Candle[]>(() => seed(PAIRS['BIX/USDT']));
   const [side, setSide] = useState<'BUY' | 'SELL'>('BUY');
   const [type, setType] = useState('Limit');
   const [tps, setTps] = useState(1_800_000);
-  useEffect(() => { setCandles(seed(PAIRS[pair])); }, [pair]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { setCandles(seed(base(pair))); }, [pair, bixRef]);
   useEffect(() => {
     const i = setInterval(() => {
       setCandles((cs) => { const last = cs[cs.length - 1]!; const c = last.c * (1 + (Math.random() - 0.5) * 0.008);
@@ -26,7 +32,7 @@ export function ExchangeTerminal() {
     }, 1200);
     return () => clearInterval(i);
   }, []);
-  const price = candles[candles.length - 1]?.c ?? PAIRS[pair];
+  const price = pair === 'BIX/USDT' && bixRef ? bixRef : candles[candles.length - 1]?.c ?? PAIRS[pair];
   const hi = Math.max(...candles.map((c) => c.h)), lo = Math.min(...candles.map((c) => c.l));
   const y = (v: number) => 4 + ((hi - v) / (hi - lo || 1)) * 152;
   const dp = price < 10 ? 5 : 2;
@@ -63,8 +69,10 @@ export function ExchangeTerminal() {
         <button key={s} type="button" onClick={() => setSide(s)} className={`rounded-lg py-2 text-xs font-black ${side === s ? (s === 'BUY' ? 'bg-chart-2 text-background' : 'bg-destructive text-destructive-foreground') : 'border border-border text-muted-foreground'}`}>{s}</button>)}</div>
       <div className="flex gap-1">{['Limit', 'Market', 'Stop-Limit'].map((t) =>
         <button key={t} type="button" onClick={() => setType(t)} className={`flex-1 rounded-md py-1 text-[11px] font-bold ${type === t ? 'text-primary underline' : 'text-muted-foreground'}`}>{t}</button>)}</div>
-      <button type="button" disabled className="rounded-lg border border-primary/50 py-2 text-xs font-black tracking-widest text-primary opacity-80">{side} {pair} · OPENS AT LAUNCH</button>
-      <p className="text-[10px] text-muted-foreground">Simulated market data. Trading is not live; no orders are placed.</p>
+      {pair === 'BIX/USDT'
+        ? <Link to="/trade" className={`rounded-lg py-2 text-center text-xs font-black tracking-widest ${side === 'BUY' ? 'bg-chart-2 text-background' : 'bg-destructive text-destructive-foreground'}`}>{side} BIX · OPEN MEMBER ORDER BOOK</Link>
+        : <button type="button" disabled className="rounded-lg border border-primary/50 py-2 text-xs font-black tracking-widest text-primary opacity-80">{side} {pair} · OPENS AT LAUNCH</button>}
+      <p className="text-[10px] text-muted-foreground">BIX/USDT is anchored to the staking ledger reference price; real orders are member-to-member on the internal order book. Chart movement and BTC/ETH data are illustrative.</p>
     </div>
     <div className="flex flex-wrap justify-center gap-2 text-[10px] font-black tracking-widest text-muted-foreground">
       <span className="rounded-full border border-border px-2 py-1">MULTI-SIG COLD VAULT · PLANNED</span>
