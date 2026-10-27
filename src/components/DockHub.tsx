@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { HUB_ITEMS, hubVisible } from '@/lib/dock-hub';
 
 /** Mobile dock HUB (replaces HOME): opens owner-selected shortcuts. */
-export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, boolean> }) {
+export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, boolean> | undefined }) {
   const [open, setOpen] = useState(false);
   const items = HUB_ITEMS.filter(i => hubVisible(cfg, i.id));
   const on = open || items.some(i => i.to === path && !['/stake', '/wallet', '/profit', '/network'].includes(i.to));
