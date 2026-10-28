@@ -78,10 +78,12 @@ function SovereignApp() {
     ['BNB', 'Gas fee', bal?.bnb ?? null, '◆', '#F3BA2F', '#FFE08A'],
   ];
 
-  return <div className="fixed inset-0 z-[60] overflow-y-auto bg-background">
-    <main className="mx-auto max-w-md px-4 pb-10 pt-5">
+  return <div className="sov-lux fixed inset-0 z-[60] overflow-y-auto bg-background">
+    <div className="sov-lux-aura" aria-hidden/>
+    <main className="relative mx-auto max-w-md px-4 pb-10 pt-5">
       <div className="flex items-center justify-between"><span className="sov-kicker"><Sparkles size={12}/> BIX SOVEREIGN WALLET</span><span className="sov-soon">{bix ? 'LIVE · BSC' : 'CONTRACT PENDING'}</span></div>
-      <section className="sov-card mt-4">
+      <div className="sov-chains mt-3" aria-label="Network">{['BNB Chain', 'BEP-20', 'Self-custody'].map((c, i) => <span key={c} aria-current={i === 0 ? 'true' : undefined}>{c}</span>)}</div>
+      <section className="sov-card sov-hero mt-4">
         <small>SELF-CUSTODY · BNB SMART CHAIN</small>
         {addr ? <>
           <div className="mt-1 flex items-center gap-2 font-mono text-xs"><span className="truncate">{addr}</span><button type="button" aria-label="Copy address" onClick={() => void navigator.clipboard.writeText(addr)}><Copy size={14}/></button></div>
