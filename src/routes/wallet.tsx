@@ -21,7 +21,6 @@ import { pickWalletSkin } from '@/lib/wallet-skin';
 import { WalletFinanceMotion } from '@/components/WalletFinanceMotion';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, CheckCircle2, Clock, Eye, EyeOff, Send } from 'lucide-react';
 import { DepositFlightScanner } from '@/components/DepositFlightScanner';
-import { SovereignWallet } from '@/components/SovereignWallet';
 import { OnchainWallet } from '@/components/OnchainWallet';
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
@@ -176,7 +175,6 @@ function WalletPage() {
       </div></div>}
     </MemberGate>
   <OnchainWallet/>
-  <SovereignWallet/>
   <PoweredBy slim/>
   <section className="wallet-partners" aria-label="Partnership ecosystem">
     <div className="wallet-partners-title">PARTNERSHIP</div>

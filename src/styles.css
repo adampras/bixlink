@@ -3766,3 +3766,5 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @keyframes sw-shine { 0%, 60% { background-position: 150% 0; } 100% { background-position: -100% 0; } }
 @keyframes sw-float { 50% { transform: translateY(-4px); } }
 @media (prefers-reduced-motion: reduce) { .sw-coin::after, .sw-emblem-fox { animation: none; } }
+.sw-emblem-xl { width: 8.5rem; height: 8.5rem; object-fit: contain; margin: -1rem -1rem -1rem 0; background: none; animation: sw-float 4.5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .sw-emblem-xl { animation: none; } }
