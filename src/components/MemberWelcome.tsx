@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { ArenaArtwork } from '@/components/ArenaArtwork';
 import { welcomeReward } from '@/lib/arena';
+import { setWelcomeActive } from '@/lib/popup-queue';
 
 const KEY = 'bixlink-member-welcome:';
 export function MemberWelcome({ userId }: { userId: string }) {
@@ -24,10 +25,11 @@ export function MemberWelcome({ userId }: { userId: string }) {
   const claimed = status?.claimed.includes('welcome');
   useEffect(() => {
     try { if (localStorage.getItem(KEY + userId)) return; } catch { return; }
+    setWelcomeActive(true);
     const t = window.setTimeout(() => setOpen(true), 1200);
-    return () => window.clearTimeout(t);
+    return () => { window.clearTimeout(t); setWelcomeActive(false); };
   }, [userId]);
-  const close = () => { try { localStorage.setItem(KEY + userId, '1'); } catch { /* optional storage */ } setOpen(false); };
+  const close = () => { try { localStorage.setItem(KEY + userId, '1'); } catch { /* optional storage */ } setOpen(false); setWelcomeActive(false); };
   const onClaim = async () => {
     if (claimed) { close(); void navigate({ to: '/profile', hash: 'bixp' }); return; }
     setBusy(true); setMsg('');

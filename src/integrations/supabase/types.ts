@@ -214,6 +214,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_leader_challenge_claims: {
+        Row: {
+          challenge: string
+          created_at: string
+          id: string
+          note: string | null
+          reviewed_at: string | null
+          reward_bix: number
+          status: string
+          user_id: string
+          verified_count: number
+        }
+        Insert: {
+          challenge?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          reviewed_at?: string | null
+          reward_bix: number
+          status?: string
+          user_id: string
+          verified_count: number
+        }
+        Update: {
+          challenge?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          reviewed_at?: string | null
+          reward_bix?: number
+          status?: string
+          user_id?: string
+          verified_count?: number
+        }
+        Relationships: []
+      }
       bix_leaders: {
         Row: {
           created_at: string
@@ -2025,6 +2061,7 @@ export type Database = {
       }
       bix_buyback_source: { Args: { p_user: string }; Returns: Json }
       bix_can_manage_packages: { Args: never; Returns: boolean }
+      bix_challenge_verified_team: { Args: { p_user: string }; Returns: number }
       bix_claim_conditional_leader: {
         Args: { p_days: number; p_package: string }
         Returns: Json
@@ -2088,6 +2125,13 @@ export type Database = {
       bix_in_owner1_network: { Args: never; Returns: boolean }
       bix_is_owner1: { Args: never; Returns: boolean }
       bix_leader_30d_progress: { Args: { p_user: string }; Returns: Json }
+      bix_leader_challenge_claim: { Args: never; Returns: Json }
+      bix_leader_challenge_list: { Args: never; Returns: Json }
+      bix_leader_challenge_review: {
+        Args: { p_approve: boolean; p_id: string; p_note?: string }
+        Returns: Json
+      }
+      bix_leader_challenge_status: { Args: never; Returns: Json }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_leaderboard: {
         Args: { p_season?: string }
