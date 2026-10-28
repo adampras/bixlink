@@ -40,6 +40,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as RiskRouteImport } from './routes/risk'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SovereignWalletRouteImport } from './routes/sovereign-wallet'
 import { Route as StakeRouteImport } from './routes/stake'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -208,6 +209,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SovereignWalletRoute = SovereignWalletRouteImport.update({
+  id: '/sovereign-wallet',
+  path: '/sovereign-wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StakeRoute = StakeRouteImport.update({
   id: '/stake',
   path: '/stake',
@@ -303,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/review': typeof ReviewRoute
   '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
+  '/sovereign-wallet': typeof SovereignWalletRoute
   '/stake': typeof StakeRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -348,6 +355,7 @@ export interface FileRoutesByTo {
   '/review': typeof ReviewRoute
   '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
+  '/sovereign-wallet': typeof SovereignWalletRoute
   '/stake': typeof StakeRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -394,6 +402,7 @@ export interface FileRoutesById {
   '/review': typeof ReviewRoute
   '/risk': typeof RiskRoute
   '/settings': typeof SettingsRoute
+  '/sovereign-wallet': typeof SovereignWalletRoute
   '/stake': typeof StakeRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -441,6 +450,7 @@ export interface FileRouteTypes {
     | '/review'
     | '/risk'
     | '/settings'
+    | '/sovereign-wallet'
     | '/stake'
     | '/studio'
     | '/terms'
@@ -486,6 +496,7 @@ export interface FileRouteTypes {
     | '/review'
     | '/risk'
     | '/settings'
+    | '/sovereign-wallet'
     | '/stake'
     | '/studio'
     | '/terms'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/review'
     | '/risk'
     | '/settings'
+    | '/sovereign-wallet'
     | '/stake'
     | '/studio'
     | '/terms'
@@ -577,6 +589,7 @@ export interface RootRouteChildren {
   ReviewRoute: typeof ReviewRoute
   RiskRoute: typeof RiskRoute
   SettingsRoute: typeof SettingsRoute
+  SovereignWalletRoute: typeof SovereignWalletRoute
   StakeRoute: typeof StakeRoute
   StudioRoute: typeof StudioRoute
   TermsRoute: typeof TermsRoute
@@ -810,6 +823,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sovereign-wallet': {
+      id: '/sovereign-wallet'
+      path: '/sovereign-wallet'
+      fullPath: '/sovereign-wallet'
+      preLoaderRoute: typeof SovereignWalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stake': {
       id: '/stake'
       path: '/stake'
@@ -929,6 +949,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReviewRoute: ReviewRoute,
   RiskRoute: RiskRoute,
   SettingsRoute: SettingsRoute,
+  SovereignWalletRoute: SovereignWalletRoute,
   StakeRoute: StakeRoute,
   StudioRoute: StudioRoute,
   TermsRoute: TermsRoute,

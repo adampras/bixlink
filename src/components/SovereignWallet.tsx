@@ -27,7 +27,7 @@ const FEATURES = [
 export function SovereignWallet() {
   const [chain, setChain] = useState(0);
   return <section className="sov-wallet" aria-label="BIX Sovereign Wallet preview">
-    <div className="flex items-center justify-between gap-2"><span className="sov-kicker"><Sparkles size={12}/> BIX SOVEREIGN WALLET</span><span className="sov-soon">COMING SOON</span></div>
+    <div className="flex items-center justify-between gap-2"><span className="sov-kicker"><Sparkles size={12}/> BIX SOVEREIGN WALLET</span><a href="/sovereign-wallet" className="sov-soon">OPEN APP ↗</a></div>
     <div className="sov-card mt-3">
       <div className="flex items-start justify-between"><div><small>ON-CHAIN PREVIEW</small><b className="font-display">BIXLINK Sovereign</b></div><span className="sov-fox" aria-hidden>🦊</span></div>
       <div className="sov-addr font-mono">0xB1X…F0X7 · {CHAINS[chain]}</div>
