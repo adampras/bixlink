@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
-import { Activity, ArrowDownToLine, ArrowUpRight, Coins, Clock3, Lock, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpRight, ChevronDown, Coins, Clock3, Lock, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,7 @@ function ProfitPage() {
   const [now, setNow] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [showPositions, setShowPositions] = useState(false);
   const leaderFn = useServerFn(getMyLeader);
   const { data: leader } = useQuery({ queryKey: ['my-leader', user?.id], queryFn: () => leaderFn(), enabled: !!user });
   const { data: claimed } = useQuery({ queryKey: ['profit-claimed', user?.id], enabled: !!user, queryFn: async () => { const { data: c } = await supabase.rpc('bix_profit_claimed'); return new Map((c ?? []).map(x => [x.stake_id, Number(x.profit_usd)])); } });
@@ -80,9 +81,9 @@ function ProfitPage() {
 
   return <BixShell><main className="profit-page mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="PROFIT">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div><div className="eyebrow"><Activity size={14}/> ACTIVE YIELD LEDGER</div><h1 className="section-title">STAKING <span>PROFIT</span></h1><p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Your active BIXCOIN staking projection is recalculated every minute and allocated between USDT and BIX.</p></div>
-        <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-bold ${boosterActive ? 'border-chart-2/40 bg-chart-2/10 text-chart-2' : 'border-border bg-muted text-muted-foreground'}`}><i className={`h-2 w-2 rounded-full ${boosterActive ? 'animate-pulse bg-chart-2' : 'bg-muted-foreground'}`}/> {boosterActive ? `BOOSTER LIVE · ${nextRefresh}s` : 'BOOSTER PAUSED'}</span>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="min-w-0 whitespace-nowrap font-display text-lg font-extrabold leading-tight sm:text-3xl lg:text-4xl">STAKING <span className="text-chart-3">PROFIT</span></h1>
+        <span className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-1.5 text-[9px] font-bold sm:px-3 sm:text-xs ${boosterActive ? 'border-chart-2/40 bg-chart-2/10 text-chart-2' : 'border-border bg-muted text-muted-foreground'}`}><i className={`h-1.5 w-1.5 rounded-full ${boosterActive ? 'animate-pulse bg-chart-2' : 'bg-muted-foreground'}`}/> {boosterActive ? `BOOSTER LIVE · ${nextRefresh}s` : 'BOOSTER PAUSED'}</span>
       </div>
 
        <section aria-label="Profit summary" className="profit-summary mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -95,13 +96,13 @@ function ProfitPage() {
       <section aria-label="Withdraw profit" className="profit-withdraw mt-5">
         <div className="profit-withdraw__info"><span className="eyebrow"><WalletCards size={14}/> WITHDRAW TO MAIN WALLET</span><div className="profit-withdraw__amounts"><div><small>USDT</small><b className="numeric">{number(totals.usdt, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</b></div><div><small>BIX</small><b className="numeric">{number(totals.bix, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</b></div></div></div>
         {locked
-          ? <div className="profit-withdraw__lock"><Lock size={16}/><div><b>Leader withdraw locked</b><small className="numeric">Team turnover {money(leader!.turnover)} / {money(leader!.target)} target</small></div></div>
+          ? <div className="profit-withdraw__lock"><Lock size={16}/><div><b>Leader withdraw locked</b><small className="numeric">Team turnover {money(leader?.turnover ?? 0)} / {money(leader?.target ?? 0)} target</small></div></div>
           : <button type="button" className="profit-withdraw__btn" disabled={busy || totals.accrued < 0.01} onClick={withdraw}><ArrowDownToLine size={18}/>{busy ? 'Processing…' : 'Withdraw Profit'}</button>}
         {msg && <p className="profit-withdraw__msg">{msg}</p>}
       </section>
 
-       <div className="mt-6 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVE POSITIONS</div><h2 className="mt-2 font-display text-2xl font-black">Profit by stake</h2></div><span className="numeric text-xs text-muted-foreground">{rows.length} active</span></div>
-      <section className="mt-4 space-y-3">
+      <h2 className="mt-6"><Button variant="ghost" className="h-auto w-full justify-between gap-3 px-0 py-3 hover:bg-transparent" aria-expanded={showPositions} aria-controls="profit-positions" onClick={() => setShowPositions(value => !value)}><span className="font-display text-sm font-bold sm:text-lg">PROFIT PER STAKE</span><span className="flex items-center gap-2"><span className="numeric text-xs text-muted-foreground">{rows.length} active</span><ChevronDown size={16} className={`transition-transform motion-reduce:transition-none ${showPositions ? 'rotate-180' : ''}`}/></span></Button></h2>
+      <section id="profit-positions" aria-label="Profit per stake" hidden={!showPositions} className="mt-2 space-y-3">
         {rows.map(row => <article key={row.id} className="profit-position">
           <div className="flex flex-wrap items-start justify-between gap-3"><div><span className="text-[10px] font-extrabold uppercase text-chart-2">Yield active</span><h3 className="mt-1 font-display text-lg font-black">{row.package_id}</h3><p className="numeric text-xs text-muted-foreground">{money(Number(row.amount_usd))} · {row.apy}% APY</p></div><div className="text-right"><span className="text-[10px] uppercase text-muted-foreground">Accrued total</span><strong className="numeric block text-xl text-chart-3">{number(row.accrued, { minimumFractionDigits: 8, maximumFractionDigits: 8 })} USD</strong></div></div>
           <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-4 text-xs"><div><span className="text-muted-foreground">USDT</span><b className="numeric mt-1 block text-chart-2">{number(row.usdt, { minimumFractionDigits: 8, maximumFractionDigits: 8 })}</b></div><div><span className="text-muted-foreground">BIX</span><b className="numeric mt-1 block text-primary">{number(row.bix, { minimumFractionDigits: 8, maximumFractionDigits: 8 })}</b></div><div><span className="text-muted-foreground">Per minute</span><b className="numeric mt-1 block">{money(row.minute)}</b></div></div>
