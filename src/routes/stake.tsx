@@ -55,17 +55,13 @@ function StakePage() {
   const activeStakes = (data?.stakes ?? []).filter(s => s.status === 'active');
   const liveTotal = activeStakes.reduce((n, s) => n + liveOf(s), 0);
   const perDay = activeStakes.reduce((n, s) => n + Number(s.amount_usd) * Number(s.apy) / 100 / 365, 0);
-  return <BixShell><MarketTicker/><main className="mx-auto max-w-7xl px-5 py-4 md:px-8 md:py-10">
+  return <BixShell><main className="stake-compact mx-auto max-w-7xl px-5 py-3 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="STAKE">
       <div className="stake-lux-head auric-card">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-          <div className="eyebrow">CHOOSE PACKAGE</div>
-          <span className="stake-lux-chip">Instant · {data?.isAdmin ? 'Virtual USDT' : 'USDT'}</span>
-        </div>
-        <h1 className="section-title stake-lux-title !text-3xl !tracking-normal sm:!text-5xl">STAKING <span>CRYPTO</span></h1>
+        <h1 className="section-title stake-lux-title !text-xl !tracking-normal sm:!text-4xl">STAKING PACKAGE <span>CRYPTO</span></h1>
         
       </div>
-      <dl aria-label="Staking summary" className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
+      <dl aria-label="Staking summary" className="mt-2 grid grid-cols-3 gap-2 sm:gap-3">
         <div className="min-w-0 stake-metric rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">BIX supply</dt><dd className="mt-1 font-display text-xs font-bold text-chart-3 sm:text-lg">21M BIX</dd></div>
         <div className="min-w-0 stake-metric rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 sm:text-lg">{money(bal.data ?? 0)}</dd></div>
         <div className="min-w-0 stake-metric rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
@@ -73,7 +69,6 @@ function StakePage() {
       
       {skin.data && <InstitutionalStakeHeader active={activeStakes.length} principal={activeStakes.reduce((n, s) => n + Number(s.amount_usd), 0)} live={liveTotal} perDay={perDay}/>}
       <StakePackageLayouts packages={cfg?.packages ?? []} layout={skin.data ? 'institutional' : cfg?.boosterVisual.stakeLayout} onStake={setChosen}/>
-      <div className="mt-6 flex justify-end"><Button asChild variant="outline"><Link to="/nft-marketplace">NFT Marketplace &amp; My collection <ArrowUpRight size={16}/></Link></Button></div>
       <div ref={historyRef} tabIndex={-1} className="staking-history-anchor mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><div className="flex items-center gap-2"><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span><Button variant="outline" size="icon" aria-label={requestsVisible ? "Hide my requests" : "Show my requests"} aria-expanded={requestsVisible} aria-controls="stake-requests" onClick={() => setRequestsVisible(current => !current)}>{requestsVisible ? <ChevronUp/> : <ChevronDown/>}</Button></div></div>
       <div id="stake-requests" hidden={!requestsVisible} className="mt-4 space-y-3">{(data?.stakes ?? []).map(s => {
         const started = s.activated_at ? new Date(s.activated_at).getTime() : null;

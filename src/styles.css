@@ -3532,3 +3532,18 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .tier-bar em{font-style:normal;font-size:.65rem;font-weight:700;color:var(--primary);padding:2px 6px;border-radius:999px;background:color-mix(in oklab,var(--primary) 12%,transparent)}
 .tier-bar[aria-selected="true"]{border-color:var(--chart-3);background:color-mix(in oklab,var(--chart-3) 12%,var(--card));box-shadow:0 0 16px -4px color-mix(in oklab,var(--chart-3) 60%,transparent)}
 .tier-bar[aria-selected="true"] b{color:var(--chart-3)}
+
+/* Compact one-screen staking page */
+.stake-compact .stake-lux-head{padding:.6rem .9rem}
+.stake-compact .stake-metric{padding-top:.4rem;padding-bottom:.4rem}
+.stake-compact .qv,.stake-compact .auric-stake{margin-top:.6rem}
+.stake-compact .qv-tilt{margin-top:.6rem}
+.stake-compact .duration-package-head{padding-top:.6rem;padding-bottom:.5rem}
+.stake-compact .duration-package-head h3{font-size:1.15rem;margin-top:0}
+.stake-compact .duration-package-body{padding-top:.5rem;padding-bottom:.6rem}
+.stake-compact .duration-yield,.stake-compact .lux-horizon{display:none}
+.stake-compact .lux-ledger{margin-top:.5rem}
+.stake-compact .pass-mini,.stake-compact .nft-mini{margin-top:.5rem;max-height:3.25rem;overflow:hidden}
+.stake-compact .pass-mini img,.stake-compact .nft-mini img{max-height:2.75rem;width:auto}
+.stake-compact .duration-package-action{margin-top:.5rem}
+.stake-compact .qv-note{margin-top:.35rem;font-size:9px}
