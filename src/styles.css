@@ -3682,3 +3682,8 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sov-quick a:active,.sov-token:active,.sov-feats button:active{transform:scale(.95)}
 .sov-feats button{text-align:left}
 @media (prefers-reduced-motion:reduce){.sov-emblem-img{animation:none}}
+
+/* Wallet art merged into the card as logo + background */
+.sov-art-card { position: relative; overflow: hidden; isolation: isolate; }
+.sov-art-bg { position: absolute; right: -18%; top: 50%; width: 78%; max-width: none; transform: translateY(-50%) rotate(-8deg); opacity: .28; z-index: -1; pointer-events: none; filter: saturate(1.15) drop-shadow(0 0 24px color-mix(in oklab, var(--primary) 40%, transparent)); -webkit-mask-image: radial-gradient(circle at 60% 50%, #000 35%, transparent 72%); mask-image: radial-gradient(circle at 60% 50%, #000 35%, transparent 72%); }
+.sov-art-logo { width: 56px; height: 56px; object-fit: contain; border-radius: 14px; filter: drop-shadow(0 6px 14px color-mix(in oklab, var(--primary) 45%, transparent)); flex-shrink: 0; }
