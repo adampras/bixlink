@@ -3651,3 +3651,4 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @keyframes sov-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
 @keyframes sov-shine { from { transform: translateX(-30%) } to { transform: translateX(30%) } }
 @media (prefers-reduced-motion: reduce) { .sov-token, .sov-card::after { animation: none; } }
+.sov-onchain-btn{display:inline-flex;align-items:center;gap:.35rem;border:1px solid color-mix(in oklab,var(--chart-3) 60%,transparent);border-radius:999px;padding:.4rem .8rem;font-size:.72rem;font-weight:700;color:var(--chart-3);background:color-mix(in oklab,var(--chart-3) 10%,transparent)}
