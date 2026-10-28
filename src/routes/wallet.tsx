@@ -26,6 +26,7 @@ function EmptyState({ text, action, onAction }: { text: string; action?: string;
   return <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border bg-card/60 p-8 text-center"><span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary"><Inbox size={22}/></span><p className="text-sm text-muted-foreground">{text}</p>{action && onAction && <Button size="sm" variant="outline" className="rounded-full" onClick={onAction}>{action}</Button>}</div>;
 }
 
+const PARTNERS = [['Binance Pay', 'Crypto payments'], ['Mastercard', 'Card rails'], ['Visa', 'Global settlement'], ['Tether', 'USDT liquidity'], ['BNB Chain', 'BEP-20 network'], ['Alchemy Pay', 'Fiat gateway'], ['MoonPay', 'On-ramp'], ['Chainlink', 'Price oracle']] as const;
 export const Route = createFileRoute('/wallet')({ head: () => ({ meta: [{ title: 'Wallet — BIXLINK' }, { name: 'description', content: 'BIXLINK wallet: deposit, withdraw and staking reward history.' }, { property: 'og:title', content: 'Wallet — BIXLINK' }, { property: 'og:description', content: 'Deposit, withdraw and track BIXLINK rewards.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: WalletPage });
 
 const fee = (a: number) => Math.round((1 + a * 0.005) * 100) / 100;
