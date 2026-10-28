@@ -76,7 +76,7 @@ function SovereignApp() {
     void (async () => {
       try {
         const syms = ['BNBUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ADAUSDT', 'TRXUSDT', 'TONUSDT', 'LINKUSDT'];
-        const r = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(syms))}`);
+        const r = await fetch(`https://data-api.binance.vision/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(syms))}`);
         const j = (await r.json()) as { symbol: string; lastPrice: string; priceChangePercent: string }[];
         const m: Record<string, { p: number; c: number }> = {};
         j.forEach((t) => { m[t.symbol.replace('USDT', '')] = { p: Number(t.lastPrice), c: Number(t.priceChangePercent) }; });
@@ -162,7 +162,7 @@ function SovereignApp() {
         </header>
 
         <section className="sw-wallet mt-5" aria-label="Wallet balance">
-          <div className="sw-wallet-card"><img src={foxMark} alt="" width={40} height={40} /><span>BIXLINK</span></div>
+          <div className="sw-wallet-card"><span>BIXLINK</span></div>
           <div className="sw-wallet-pocket">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2"><span className="sw-chip"><img src={foxMark} alt="" width={16} height={16} /> BIX</span><small className="sw-muted">Total assets</small></div>
@@ -173,7 +173,7 @@ function SovereignApp() {
               {addr ? <button type="button" className="sw-muted mt-3 flex items-center gap-2 font-mono text-sm" onClick={() => { void navigator.clipboard.writeText(addr); setMsg('Address copied.'); }}>{short(addr)} <Copy size={14} /></button>
                 : <button type="button" className="sw-gold-btn mt-3 !px-4 !py-2 text-sm" onClick={() => void connect()}><Wallet size={14} /> Connect wallet</button>}
             </div>
-            <span className="sw-emblem"><img src={walletArt} alt="" aria-hidden className="sw-emblem-bg" /><img src={foxMark} alt="BIXLINK fox" className="sw-emblem-fox" /></span>
+            <img src={walletArt} alt="BIXLINK wallet" className="sw-emblem sw-emblem-xl" />
           </div>
         </section>
 
@@ -395,7 +395,7 @@ function Spark({ sym, flat }: { sym: string | null; flat?: boolean }) {
   useEffect(() => {
     if (!sym) { setPts([]); return; }
     let on = true;
-    void fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}&interval=${iv}&limit=48`).then((r) => r.json()).then((k: string[][]) => { if (on) setPts(k.map((x) => Number(x[4]))); }).catch(() => on && setPts([]));
+    void fetch(`https://data-api.binance.vision/api/v3/klines?symbol=${sym}&interval=${iv}&limit=48`).then((r) => r.json()).then((k: string[][]) => { if (on) setPts(k.map((x) => Number(x[4]))); }).catch(() => on && setPts([]));
     return () => { on = false; };
   }, [sym, iv]);
   const W = 320, Hh = 120;

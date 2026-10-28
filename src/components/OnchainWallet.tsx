@@ -69,7 +69,7 @@ export function OnchainWallet() {
       </div>
     </div>
     {msg && <p className="sov-note">{msg}</p>}
-    <div className="mt-3"><InstallAppButton/></div>
+    <div className="mt-3 flex flex-wrap items-center gap-2"><InstallAppButton/><a href="/sovereign-wallet" className="sov-onchain-btn font-bold tracking-wider">OPEN APPS WALLET ↗</a></div>
     <p className="sov-note">On-chain balances are read directly from BNB Chain and are separate from your BIXLINK app ledger balance. {live ? 'Verify the contract address, not just the ticker.' : 'The official BIX contract address will appear here once the owner deploys it.'}</p>
   </section>;
 }
