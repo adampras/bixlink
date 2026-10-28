@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { getAdminLeaders, getLeaderCandidates, reviewLeader, updateDockHub } from '@/lib/bixlink.functions';
 import { getLoanPackages, saveLoanPackages } from '@/lib/loan-packages.functions';
-import { loanQuota, type LoanConfig } from '@/lib/loan-packages';
+import { type LoanConfig } from '@/lib/loan-packages';
 import { HUB_ITEMS, hubVisible } from '@/lib/dock-hub';
 
 export const Route = createFileRoute('/leader-control')({
@@ -117,14 +117,20 @@ function Packages() {
   useEffect(() => { if (q.data) setCfg(q.data); }, [q.data]);
   if (!cfg) return <p className="text-sm text-muted-foreground">{q.error ? (q.error as Error).message : 'Memuat…'}</p>;
   const set = (i: number, p: Partial<LoanConfig['packages'][number]>) => setCfg({ packages: cfg.packages.map((r, j) => j === i ? { ...r, ...p } : r) });
+  const remove = (i: number) => { if (cfg.packages.length > 1 && confirm(`Hapus paket ${cfg.packages[i].id}?`)) setCfg({ packages: cfg.packages.filter((_, j) => j !== i) }); };
+  const add = () => setCfg({ packages: [...cfg.packages, { id: `PAKET${cfg.packages.length + 1}`, usd: 100, enabled: true, quota: 10 }] });
   return <div className="space-y-2">
-    {cfg.packages.map((p, i) => <div key={p.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card/70 p-3">
-      <div className="w-24 text-sm font-black">{p.id}<div className="text-[10px] font-normal text-muted-foreground">Kuota sponsor {loanQuota(p.id)} · 360 hari · 5×</div></div>
-      <Input className="h-8 w-32" inputMode="decimal" value={p.usd} onChange={e => set(i, { usd: Number(e.target.value) || 0 })} aria-label={`Nilai ${p.id}`}/>
-      <label className="flex items-center gap-2 text-xs"><Switch checked={p.enabled} onCheckedChange={v => set(i, { enabled: v })}/>{p.enabled ? 'Buka' : 'Tutup'}</label>
+    <p className="text-xs text-muted-foreground">Semua paket: 360 hari · target 5× · popup member langsung mengikuti perubahan setelah disimpan. Paket yang sudah diklaim member tetap berjalan.</p>
+    {cfg.packages.map((p, i) => <div key={i} className="flex flex-wrap items-end gap-2 rounded-2xl border border-border bg-card/70 p-3">
+      <label className="text-[10px] text-muted-foreground">Nama<Input className="h-8 w-32 uppercase" value={p.id} onChange={e => set(i, { id: e.target.value.toUpperCase() })}/></label>
+      <label className="text-[10px] text-muted-foreground">Nilai USD<Input className="h-8 w-28" inputMode="decimal" value={p.usd} onChange={e => set(i, { usd: Number(e.target.value) || 0 })}/></label>
+      <label className="text-[10px] text-muted-foreground">Kuota sponsor<Input className="h-8 w-20" inputMode="numeric" value={p.quota} onChange={e => set(i, { quota: Number(e.target.value) || 1 })}/></label>
+      <label className="flex h-8 items-center gap-2 text-xs"><Switch checked={p.enabled} onCheckedChange={v => set(i, { enabled: v })}/>{p.enabled ? 'Buka' : 'Tutup'}</label>
+      <Button size="sm" variant="outline" className="h-8 text-destructive" disabled={cfg.packages.length <= 1} onClick={() => remove(i)}>Hapus</Button>
     </div>)}
+    <Button variant="outline" onClick={add} disabled={cfg.packages.length >= 20}>+ Tambah paket</Button>
     {msg && <p className="text-xs text-primary">{msg}</p>}
-    <Button onClick={async () => { setMsg(''); try { const r = await save({ data: cfg }); setCfg(r); qc.invalidateQueries({ queryKey: ['loan-packages'] }); setMsg('Paket loan tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } }}>Simpan paket loan</Button>
+    <Button onClick={async () => { setMsg(''); try { const r = await save({ data: cfg }); setCfg(r); qc.invalidateQueries({ queryKey: ['loan-packages'] }); qc.invalidateQueries({ queryKey: ['loan-packages-member'] }); setMsg('Paket loan tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } }}>Simpan paket loan</Button>
   </div>;
 }
 
