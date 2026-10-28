@@ -3,7 +3,7 @@ import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { VaultStage } from '@/components/TechSuite';
 import { PoweredBy } from '@/components/PoweredBy';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
@@ -176,7 +176,7 @@ function WalletPage() {
   <PoweredBy slim/>
   <section className="wallet-partners" aria-label="Partnership ecosystem">
     <div className="wallet-partners-title">PARTNERSHIP</div>
-    <div className="wallet-partners-grid">{PARTNERS.map(([n, s, shape, c1, c2], i) => <div key={n} className="wallet-partner" style={{ '--c1': c1, '--c2': c2, animationDelay: `${i * -0.6}s` } as React.CSSProperties}><span className={`wp-mark wp-${shape}`} aria-hidden>{shape === 'rings' ? <><i/><i/></> : shape === 'word' ? 'VISA' : shape === 'circle' && n === 'Tether' ? '₮' : null}</span><b>{n}</b><span>{s}</span></div>)}</div>
+    <div className="wallet-partners-grid">{PARTNERS.map(([n, s, shape, c1, c2], i) => <div key={n} className="wallet-partner" style={{ '--c1': c1, '--c2': c2, animationDelay: `${i * -0.6}s` } as CSSProperties}><span className={`wp-mark wp-${shape}`} aria-hidden>{shape === 'rings' ? <><i/><i/></> : shape === 'word' ? 'VISA' : shape === 'circle' && n === 'Tether' ? '₮' : null}</span><b>{n}</b><span>{s}</span></div>)}</div>
     <p className="wallet-partners-note">Supported networks & payment rails in the ecosystem. Trademarks belong to their owners; no official partnership or endorsement implied.</p>
   </section>
   <div className="h-24 md:h-0" aria-hidden/></main></BixShell>;
