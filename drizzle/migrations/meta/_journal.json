@@ -708,6 +708,13 @@
       "when": 1793118964070,
       "tag": "0100_leader_loan_bix_bonus_lock",
       "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "7",
+      "when": 1793179240184,
+      "tag": "0101_dynamic_loan_packages_auto_active",
+      "breakpoints": true
     }
   ]
 }

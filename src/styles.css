@@ -3595,3 +3595,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .wp-rings i+i{margin-left:-9px;background:radial-gradient(circle at 32% 28%,color-mix(in oklab,var(--c2) 50%,#fff),var(--c2) 60%);opacity:.92}
 @keyframes wp-spin{0%,100%{rotate:0deg}50%{rotate:-8deg}}
 @media (prefers-reduced-motion:reduce){.wallet-partner,.wp-mark{animation:none}}
+
+/* Mastercard emblem: right side, aligned with balance figure */
+.wallet-summary .wallet-mc{right:20px;top:50px;transform:scale(1.1);transform-origin:right center}
+.wallet-summary .wallet-balance-block{padding-right:72px}
