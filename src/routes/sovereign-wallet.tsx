@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   ArrowDownLeft, ArrowUpRight, Bell, BarChart3, Camera, ChevronDown, ChevronLeft, ChevronRight, ClipboardPaste, Compass,
@@ -196,7 +196,7 @@ function SovereignApp() {
   </div>;
 }
 
-function TopBar({ title, onBack, right }: { title: string; onBack: () => void; right?: React.ReactNode }) {
+function TopBar({ title, onBack, right }: { title: string; onBack: () => void; right?: ReactNode }) {
   return <header className="relative mb-6 flex items-center justify-center">
     <button type="button" className="sw-round absolute left-0" aria-label="Back" onClick={onBack}><ChevronLeft size={20} /></button>
     <b className="font-display text-xl">{title}</b>
@@ -426,7 +426,7 @@ function DiscoverTab() {
 }
 
 function MeTab({ addr, go }: { addr: string; go: (s: Screen) => void }) {
-  const Item = ({ i, t, d, on }: { i: React.ReactNode; t: string; d: string; on: () => void }) =>
+  const Item = ({ i, t, d, on }: { i: ReactNode; t: string; d: string; on: () => void }) =>
     <button type="button" className="sw-list-item w-full" onClick={on}><span className="sw-icon-box">{i}</span><span className="min-w-0 flex-1 text-left"><b className="block">{t}</b><small className="sw-muted block truncate">{d}</small></span><ChevronRight size={18} className="sw-muted" /></button>;
   return <>
     <b className="block text-center font-display text-2xl">Personal Center</b>
