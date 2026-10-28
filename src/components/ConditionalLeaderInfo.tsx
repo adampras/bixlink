@@ -9,9 +9,6 @@ import { LoanDialog } from '@/components/LoanDialog';
 import { checkLoanDevice, claimConditionalLeader, getConditionalLeaderAccess, getMyLeader } from '@/lib/bixlink.functions';
 import { deviceFingerprint, deviceLabel } from '@/lib/deviceFingerprint';
 
-const PACKAGES = [
-  { id: 'EXPLORER', usd: 100 }, { id: 'PIONEER', usd: 500 }, { id: 'BUILDER', usd: 1000 },
-];
 const DAYS = 360;
 type Result = { package: string; value_usd: number; target_usd: number };
 
@@ -21,11 +18,17 @@ export function ConditionalLeaderInfo() {
   const fetchLeader = useServerFn(getMyLeader);
   const claim = useServerFn(claimConditionalLeader);
   const checkDevice = useServerFn(checkLoanDevice);
+  const loadPackages = useServerFn(getLoanPackages);
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ['conditional-leader-access'], queryFn: () => fetchAccess() });
   const leader = useQuery({ queryKey: ['my-leader'], queryFn: () => fetchLeader(), enabled: !!data?.allowed });
   const [open, setOpen] = useState(false);
-  const [pick, setPick] = useState<{ id: string; usd: number }>({ id: 'BUILDER', usd: 1000 });
+  const pkgQ = useQuery({ queryKey: ['loan-packages-member'], queryFn: () => loadPackages(), enabled: !!data?.allowed, refetchOnWindowFocus: true });
+  const PACKAGES = (pkgQ.data?.packages ?? []).filter(p => p.enabled);
+  const topUsd = PACKAGES.reduce((m, p) => Math.max(m, p.usd), 0);
+  const [pickId, setPickId] = useState('');
+  const pick = PACKAGES.find(p => p.id === pickId) ?? PACKAGES[PACKAGES.length - 1] ?? { id: '', usd: 0 };
+  const setPick = (p: { id: string }) => setPickId(p.id);
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');

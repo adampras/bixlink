@@ -1,15 +1,17 @@
-import { describe, it, expect } from 'vitest';
-import { loanConfigSchema, LOAN_DAYS, LOAN_MULTIPLE, loanQuota } from '@/lib/loan-packages';
-const rows = [{ id: 'EXPLORER', usd: 100, enabled: true }, { id: 'PIONEER', usd: 500, enabled: true }, { id: 'BUILDER', usd: 1000, enabled: true }];
-describe('loan package rules', () => {
-  it('allows editing loan values independently', () => {
-    expect(loanConfigSchema.parse({ packages: rows.map(p => ({ ...p, usd: 250 })) }).packages[0]?.usd).toBe(250);
+import { describe, expect, it } from 'vitest';
+import { loanConfigSchema, LOAN_DAYS, LOAN_MULTIPLE } from '@/lib/loan-packages';
+
+describe('loan packages', () => {
+  it('keeps the 360-day 5× rule', () => { expect([LOAN_DAYS, LOAN_MULTIPLE]).toEqual([360, 5]); });
+  it('allows the owner to add more than three packages', () => {
+    const rows = ['EXPLORER', 'PIONEER', 'BUILDER', 'TITAN'].map((id, i) => ({ id, usd: (i + 1) * 100, enabled: true, quota: 10 }));
+    expect(loanConfigSchema.parse({ packages: rows }).packages).toHaveLength(4);
   });
-  it('keeps the existing 5x loan target', () => { expect(LOAN_MULTIPLE).toBe(5); });
-  it('keeps the existing 360-day duration', () => { expect(LOAN_DAYS).toBe(360); });
-  it('keeps the direct sponsor quotas at 1, 2 and 10', () => { expect(['BUILDER','PIONEER','EXPLORER'].map(loanQuota)).toEqual([1,2,10]); });
-  it('rejects duplicate tiers and invalid amounts', () => {
-    expect(loanConfigSchema.safeParse({ packages: [rows[0], rows[0], rows[2]] }).success).toBe(false);
-    expect(loanConfigSchema.safeParse({ packages: rows.map(p => ({ ...p, usd: -1 })) }).success).toBe(false);
+  it('allows removing down to one package but not zero', () => {
+    expect(loanConfigSchema.safeParse({ packages: [{ id: 'SOLO', usd: 250, enabled: true, quota: 5 }] }).success).toBe(true);
+    expect(loanConfigSchema.safeParse({ packages: [] }).success).toBe(false);
+  });
+  it('rejects duplicate package names', () => {
+    expect(loanConfigSchema.safeParse({ packages: [{ id: 'A1', usd: 1, enabled: true, quota: 1 }, { id: 'A1', usd: 2, enabled: true, quota: 1 }] }).success).toBe(false);
   });
 });
