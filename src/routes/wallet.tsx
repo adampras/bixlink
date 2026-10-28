@@ -99,7 +99,7 @@ function WalletPage() {
   return <BixShell><main className="mx-auto max-w-5xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="WALLET">
       <div data-sov-color={cfg?.readiness.walletCard ? (cfg?.readiness.walletCardColor ?? 'onyx') : undefined} data-wallet-skin={cfg?.readiness.walletCard ? undefined : pickWalletSkin(cfg?.readiness.walletColors)} className={`wallet-summary wallet-vault auric-card relative overflow-hidden rounded-[20px] border p-6${cfg?.readiness.walletCard ? ' wallet-sovereign' : ''}${cfg?.readiness.walletCard && cfg?.readiness.walletCardModel === 'elite' ? ' wallet-elite' : ''}`}>
-        {cfg?.readiness.walletCard ? <><span className="sov-sheen" aria-hidden/><span className="sov-chip sov-chip--side" aria-hidden/>{cfg?.readiness.walletCardModel === 'elite' && <><span className="elite-grid" aria-hidden/><span className="elite-orbs" aria-hidden><i/><i/></span></>}</> : <WalletFinanceMotion settings={cfg?.readiness}/>}
+        {cfg?.readiness.walletCard ? <><span className="sov-sheen" aria-hidden/><span className="wallet-mc" aria-hidden><i/><i/></span>{cfg?.readiness.walletCardModel === 'elite' && <><span className="elite-grid" aria-hidden/><span className="elite-orbs" aria-hidden><i/><i/></span></>}</> : <WalletFinanceMotion settings={cfg?.readiness}/>}
         <div className="wallet-balance-block">
           <div className="flex items-center gap-2 text-xs tracking-[.14em] uppercase text-muted-foreground"><Wallet size={14}/> Available balance<Button type="button" size="icon" variant="ghost" className="vault-pill! size-7 rounded-full" aria-label={hidden ? 'Show balance' : 'Hide balance'} aria-pressed={hidden} title={hidden ? 'Show balance' : 'Hide balance'} onClick={toggleHidden}>{hidden ? <Eye size={14}/> : <EyeOff size={14}/>}</Button></div>
           <strong className="numeric mt-1 block break-all text-[28px] leading-tight font-black text-foreground md:text-[34px]">{hidden ? '••••••••' : <><AnimatedNumber value={data?.balance ?? 0}/> USDT</>}</strong>
@@ -171,7 +171,12 @@ function WalletPage() {
         <p className="mt-4 break-all font-mono text-[11px] text-muted-foreground">TxID {success.txHash}</p>
         <Button className="mt-6 w-full rounded-full bg-chart-2 text-background hover:bg-chart-2/90" onClick={() => setSuccess(null)}>Done</Button>
       </div></div>}
-      <nav aria-label="Wallet quick actions" className="wallet-quick-actions"><Button variant="ghost" size="sm" onClick={() => setModal('deposit')}><ArrowDownToLine size={16}/> Deposit</Button><span className="h-5 w-px bg-border"/><Button variant="ghost" size="sm" onClick={() => setModal('withdraw')}><ArrowUpFromLine size={16}/> Withdraw</Button></nav>
     </MemberGate>
-  <PoweredBy slim/><div className="h-24 md:h-0" aria-hidden/></main></BixShell>;
+  <PoweredBy slim/>
+  <section className="wallet-partners" aria-label="Partnership ecosystem">
+    <div className="wallet-partners-title">PARTNERSHIP</div>
+    <div className="wallet-partners-grid">{PARTNERS.map(([n, s]) => <div key={n} className="wallet-partner"><b>{n}</b><span>{s}</span></div>)}</div>
+    <p className="wallet-partners-note">Supported networks & payment rails in the ecosystem. Trademarks belong to their owners; no official partnership or endorsement implied.</p>
+  </section>
+  <div className="h-24 md:h-0" aria-hidden/></main></BixShell>;
 }
