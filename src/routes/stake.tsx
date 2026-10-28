@@ -14,7 +14,6 @@ import { requestStake, unstakeStake } from '@/lib/bixlink.functions';
 import { date, money, number, type Package } from '@/lib/bixlink';
 import { ArrowUpRight, CheckCircle2, ChevronDown, ChevronUp, Clock3, LockKeyhole, ShieldCheck, X, XCircle, Zap } from 'lucide-react';
 import { revealStakingHistory } from '@/lib/interaction-comfort';
-import { MarketTicker } from '@/components/MarketTicker';
 
 export const Route = createFileRoute('/stake')({ head: () => ({ meta: [{ title: 'Stake — BIXLINK' }, { name: 'description', content: 'Choose a BIXLINK staking package and submit a request.' }, { property: 'og:title', content: 'Stake — BIXLINK' }, { property: 'og:description', content: 'Eight BIXLINK staking packages from $10 to $10,000.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: StakePage });
 
