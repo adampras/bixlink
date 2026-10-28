@@ -3597,5 +3597,22 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @media (prefers-reduced-motion:reduce){.wallet-partner,.wp-mark{animation:none}}
 
 /* Mastercard emblem: right side, aligned with balance figure */
-.wallet-summary .wallet-mc{right:20px;top:50px;transform:scale(1.1);transform-origin:right center}
-.wallet-summary .wallet-balance-block{padding-right:72px}
+.wallet-summary .wallet-mc--inline{position:static;flex:0 0 auto}
+.wallet-summary .wallet-mc--inline i{width:26px;height:26px}
+.wallet-summary .wallet-mc--inline i:last-child{margin-left:-10px}
+
+/* Install access popup */
+.install-pop-backdrop{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;background:oklch(0 0 0/.6);backdrop-filter:blur(6px);animation:ip-fade .3s ease}
+.install-pop{position:relative;width:100%;max-width:340px;padding:26px 22px 20px;border-radius:24px;text-align:center;color:var(--foreground);background:linear-gradient(160deg,oklch(0.27 0.02 60),oklch(0.16 0.01 60));border:1px solid oklch(0.78 0.15 70/.6);box-shadow:0 0 0 1px oklch(0 0 0/.4),0 20px 50px -10px oklch(0.7 0.17 55/.45);animation:ip-up .4s cubic-bezier(.2,.9,.3,1.2)}
+.install-pop-close{position:absolute;right:14px;top:14px;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;color:oklch(0.82 0.15 75);border:1px solid oklch(0.78 0.15 70/.6);background:oklch(0 0 0/.25)}
+.install-pop-avatar{width:88px;height:88px;margin:0 auto;border-radius:50%;padding:4px;background:oklch(0.15 0.01 60);border:3px solid oklch(0.72 0.17 55);box-shadow:0 0 24px oklch(0.72 0.17 55/.6),0 0 0 6px oklch(0.72 0.17 55/.15)}
+.install-pop-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.install-pop h2{margin-top:14px;font-size:24px;line-height:1.2;font-weight:900}
+.install-pop h2 em,.install-pop p b{font-style:normal;color:oklch(0.8 0.16 70)}
+.install-pop p{margin-top:10px;font-size:14px;line-height:1.55;color:oklch(0.92 0.01 80)}
+.install-pop-cta{margin-top:18px;width:100%;min-height:50px;border-radius:999px;font-weight:900;letter-spacing:.04em;color:oklch(0.18 0.02 50);background:linear-gradient(90deg,oklch(0.68 0.2 45),oklch(0.82 0.15 75));box-shadow:0 8px 24px -6px oklch(0.7 0.19 50/.7)}
+.install-pop-cta:active{transform:scale(.97)}
+.install-pop-line{display:block;width:45%;height:3px;margin:14px auto 0;border-radius:3px;background:linear-gradient(90deg,transparent,oklch(0.72 0.17 55),transparent)}
+@keyframes ip-fade{from{opacity:0}}
+@keyframes ip-up{from{opacity:0;transform:translateY(24px) scale(.94)}}
+@media (prefers-reduced-motion:reduce){.install-pop,.install-pop-backdrop{animation:none}}
