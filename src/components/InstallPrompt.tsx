@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Download, Share, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import logo from '@/assets/bixlink-logo-gold.webp';
+import { isWelcomeActive, onWelcomeDone } from '@/lib/popup-queue';
 
 type BIPEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 const KEY = 'bix-install-dismissed';
@@ -20,8 +21,11 @@ export function InstallPrompt() {
     setIos(/iphone|ipad|ipod/i.test(navigator.userAgent));
     const onPrompt = (e: Event) => { e.preventDefault(); setEvt(e as BIPEvent); };
     window.addEventListener('beforeinstallprompt', onPrompt);
-    const t = setTimeout(() => setOpen(true), 3000);
-    return () => { clearTimeout(t); window.removeEventListener('beforeinstallprompt', onPrompt); };
+    let t2: ReturnType<typeof setTimeout> | undefined; let off: (() => void) | undefined;
+    // Never stack on the welcome reward: wait until it is closed, then a calm 4s pause.
+    const show = () => { if (isWelcomeActive()) { off = onWelcomeDone(() => { t2 = setTimeout(show, 4000); }); } else setOpen(true); };
+    const t = setTimeout(show, 3000);
+    return () => { clearTimeout(t); if (t2) clearTimeout(t2); off?.(); window.removeEventListener('beforeinstallprompt', onPrompt); };
   }, []);
   if (!open) return null;
   const close = () => { localStorage.setItem(KEY, String(Date.now())); setOpen(false); };
