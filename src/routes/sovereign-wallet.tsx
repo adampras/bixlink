@@ -9,7 +9,8 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { InstallAppButton } from '@/components/InstallPrompt';
 import walletArt from '@/assets/bix-lux-wallet.png';
-import foxMark from '@/assets/bixlink-fox.png';
+import foxIcon from '@/assets/fox-icon-512.png.asset.json';
+const foxMark = foxIcon.url;
 
 export const Route = createFileRoute('/sovereign-wallet')({
   head: () => ({
@@ -60,6 +61,7 @@ function SovereignApp() {
   const [msg, setMsg] = useState('');
   const [prefillTo, setPrefillTo] = useState('');
   const [bixRef, setBixRef] = useState(0);
+  const [asset, setAsset] = useState<string | null>(null);
   const eth = () => (globalThis as unknown as { ethereum?: Eth }).ethereum;
 
   useEffect(() => {
@@ -111,6 +113,29 @@ function SovereignApp() {
   const total = bal ? bal.bix * bixRef + bal.usdt + bal.bnb * bnbP : 0;
   const money = (n: number) => (hide ? '••••' : `$${fmt(n, 2)}`);
 
+  if (asset && !screen) {
+    const p = asset === 'BIX' ? bixRef : asset === 'USDT' ? 1 : bnbP;
+    const v = asset === 'BIX' ? (bix ? bal?.bix : undefined) : asset === 'USDT' ? bal?.usdt : bal?.bnb;
+    const url = asset === 'BIX' ? (bix ? `${SCAN}/token/${bix}${addr ? `?a=${addr}` : ''}` : SCAN) : asset === 'USDT' ? `${SCAN}/token/${USDT}${addr ? `?a=${addr}` : ''}` : addr ? `${SCAN}/address/${addr}` : SCAN;
+    return <div className="sw-app"><main className="sw-main">
+      <TopBar title={asset} onBack={() => setAsset(null)} />
+      <div className="sw-asset-hero text-center">
+        <span className={`sw-coin sw-coin-lg sw-coin-${asset.toLowerCase()}`}>{asset === 'BIX' ? <img src={foxMark} alt="" /> : <b>{asset === 'USDT' ? '₮' : '◆'}</b>}</span>
+        <b className="numeric mt-3 block font-display text-3xl">{hide ? '••••' : v === undefined ? '—' : fmt(v)} {asset}</b>
+        <small className="sw-muted">≈ {v === undefined ? '—' : money(v * p)} · {p ? `$${fmt(p, 4)}` : '—'}{asset === 'BIX' ? ' internal ref.' : ''}</small>
+      </div>
+      <Spark sym={asset === 'BNB' ? 'BNBUSDT' : null} flat={asset !== 'BNB'} />
+      <div className="mt-5 grid grid-cols-3 gap-2">
+        <button type="button" className="sw-action" onClick={() => { setAsset(null); void need('send'); }}><span className="sw-gold-dot"><ArrowUpRight size={18} /></span><b>Send</b></button>
+        <button type="button" className="sw-action" onClick={() => { setAsset(null); void need('receive'); }}><span className="sw-gold-dot"><ArrowDownLeft size={18} /></span><b>Receive</b></button>
+        <a className="sw-action" href={url} target="_blank" rel="noreferrer"><span className="sw-gold-dot"><Search size={18} /></span><b>Explorer</b></a>
+      </div>
+      {asset === 'BIX' && <button type="button" className="sw-gold-btn mt-4 w-full" onClick={() => void addToken()}><Plus size={16} /> Add BIX to wallet</button>}
+      <p className="sw-note">{asset === 'BIX' ? 'BIX value uses the BIXLINK internal reference, not a traded market price.' : asset === 'USDT' ? 'USDT BEP-20 on BNB Chain.' : 'BNB is used for network fees on BNB Chain.'}</p>
+      {msg && <p className="sw-note">{msg}</p>}
+    </main></div>;
+  }
+
   if (screen) {
     return <div className="sw-app"><main className="sw-main">
       {screen === 'send' && <SendScreen addr={addr} bix={bix} bal={bal} initialTo={prefillTo} onBack={() => { setScreen(null); setPrefillTo(''); }} onScan={() => setScreen('scan')} onBook={() => setScreen('book')} onDone={() => void load()} />}
@@ -148,7 +173,7 @@ function SovereignApp() {
               {addr ? <button type="button" className="sw-muted mt-3 flex items-center gap-2 font-mono text-sm" onClick={() => { void navigator.clipboard.writeText(addr); setMsg('Address copied.'); }}>{short(addr)} <Copy size={14} /></button>
                 : <button type="button" className="sw-gold-btn mt-3 !px-4 !py-2 text-sm" onClick={() => void connect()}><Wallet size={14} /> Connect wallet</button>}
             </div>
-            <img src={walletArt} alt="BIXLINK wallet emblem" width={96} height={96} className="sw-emblem" />
+            <span className="sw-emblem"><img src={walletArt} alt="" aria-hidden className="sw-emblem-bg" /><img src={foxMark} alt="BIXLINK fox" className="sw-emblem-fox" /></span>
           </div>
         </section>
 
@@ -171,14 +196,14 @@ function SovereignApp() {
             { s: 'BIX', icon: <img src={foxMark} alt="" width={40} height={40} />, p: bixRef, c: null as number | null, v: bix ? bal?.bix : undefined, cls: 'sw-coin-bix', note: 'Internal ref.' },
             { s: 'USDT', icon: <b>₮</b>, p: 1, c: 0, v: bal?.usdt, cls: 'sw-coin-usdt', note: '' },
             { s: 'BNB', icon: <b>◆</b>, p: bnbP, c: px['BNB']?.c ?? null, v: bal?.bnb, cls: 'sw-coin-bnb', note: '' },
-          ].map((a) => <a key={a.s} href={a.s === 'BIX' && bix ? `${SCAN}/token/${bix}` : a.s === 'USDT' ? `${SCAN}/token/${USDT}` : SCAN} target="_blank" rel="noreferrer" className="sw-row">
+          ].map((a) => <button type="button" key={a.s} onClick={() => setAsset(a.s)} className="sw-row w-full text-left">
             <span className={`sw-coin ${a.cls}`}>{a.icon}</span>
             <div className="min-w-0 flex-1"><b className="block text-lg">{a.s}</b>
               <span className="sw-muted text-sm">{a.p ? `$${fmt(a.p, 4)}` : '—'}</span>{' '}
               {a.c !== null ? <span className={a.c >= 0 ? 'sw-up' : 'sw-down'}>{a.c >= 0 ? '+' : ''}{a.c.toFixed(2)}%</span> : <span className="sw-muted text-xs">{a.note}</span>}
             </div>
             <div className="text-right"><b className="numeric block text-lg">{hide ? '••••' : a.v === undefined ? '—' : fmt(a.v)}</b><small className="sw-muted">≈ {a.v === undefined ? '—' : money(a.v * a.p)}</small></div>
-          </a>)}
+          </button>)}
         </section>
         {msg && <p className="sw-note">{msg}</p>}
         <p className="sw-note">Self-custody: your keys stay in your own wallet app. On-chain balances are separate from your BIXLINK app ledger. BIX value uses the internal reference, not a market price.</p>
@@ -363,6 +388,32 @@ function InfoScreen({ title, onBack }: { title: string; onBack: () => void }) {
   </>;
 }
 
+const IV = ['1h', '4h', '1d'] as const;
+function Spark({ sym, flat }: { sym: string | null; flat?: boolean }) {
+  const [iv, setIv] = useState<(typeof IV)[number]>('1h');
+  const [pts, setPts] = useState<number[]>([]);
+  useEffect(() => {
+    if (!sym) { setPts([]); return; }
+    let on = true;
+    void fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}&interval=${iv}&limit=48`).then((r) => r.json()).then((k: string[][]) => { if (on) setPts(k.map((x) => Number(x[4]))); }).catch(() => on && setPts([]));
+    return () => { on = false; };
+  }, [sym, iv]);
+  const W = 320, Hh = 120;
+  const data = pts.length > 1 ? pts : flat ? [1, 1] : [];
+  const mn = Math.min(...data), mx = Math.max(...data), rg = mx - mn || 1;
+  const xy = data.map((v, i) => [(i / (data.length - 1)) * W, Hh - 8 - ((v - mn) / rg) * (Hh - 16)]);
+  const line = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${x!.toFixed(1)},${y!.toFixed(1)}`).join(' ');
+  const up = data.length > 1 && data[data.length - 1]! >= data[0]!;
+  return <div className="mt-3">
+    {data.length > 1 ? <svg viewBox={`0 0 ${W} ${Hh}`} className={`sw-spark ${up ? 'sw-spark-up' : 'sw-spark-down'}`} role="img" aria-label="Price chart">
+      <defs><linearGradient id="swg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="currentColor" stopOpacity=".35" /><stop offset="1" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs>
+      {[0.25, 0.5, 0.75].map((g) => <line key={g} x1="0" x2={W} y1={Hh * g} y2={Hh * g} className="sw-grid" />)}
+      <path d={`${line} L${W},${Hh} L0,${Hh} Z`} fill="url(#swg)" /><path d={line} fill="none" stroke="currentColor" strokeWidth="2" />
+    </svg> : <div className="sw-spark grid place-items-center sw-muted text-sm">Loading chart…</div>}
+    {sym && <div className="mt-2 flex justify-center gap-2">{IV.map((i) => <button key={i} type="button" onClick={() => setIv(i)} className={`sw-chg ${iv === i ? 'sw-up-bg' : 'sw-muted'}`}>{i}</button>)}</div>}
+  </div>;
+}
+
 function MarketTab({ px, bixRef }: { px: Record<string, { p: number; c: number }>; bixRef: number }) {
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<'n' | 'p' | 'c'>('n');
@@ -371,16 +422,23 @@ function MarketTab({ px, bixRef }: { px: Record<string, { p: number; c: number }
     .filter((r) => r.s.toLowerCase().includes(q.toLowerCase()))
     .sort((a, b) => dir * (sort === 'n' ? a.s.localeCompare(b.s) : sort === 'p' ? a.p - b.p : a.c - b.c));
   const H = ({ k, l }: { k: 'n' | 'p' | 'c'; l: string }) => <button type="button" className="sw-muted text-sm" onClick={() => { if (sort === k) setDir(-dir); else { setSort(k); setDir(1); } }}>{l} ⇅</button>;
+  const [sel, setSel] = useState('BTC');
+  const sp = px[sel];
   return <>
-    <div className="sw-field flex items-center gap-3"><Search size={18} className="sw-gold-text" /><input className="flex-1 bg-transparent outline-none" placeholder="Search currency" value={q} onChange={(e) => setQ(e.target.value)} /></div>
+    <section className="sw-chart-card">
+      <div className="flex items-end justify-between"><div><small className="sw-muted">{sel}/USDT</small><b className="numeric block font-display text-2xl">{sp ? `$${fmt(sp.p, sp.p < 1 ? 6 : 2)}` : '—'}</b></div>
+        {sp && <span className={`sw-chg ${sp.c >= 0 ? 'sw-up-bg' : 'sw-down-bg'}`}>{sp.c >= 0 ? '+' : ''}{sp.c.toFixed(2)}%</span>}</div>
+      <Spark sym={`${sel}USDT`} />
+    </section>
+    <div className="sw-field mt-4 flex items-center gap-3"><Search size={18} className="sw-gold-text" /><input className="flex-1 bg-transparent outline-none" placeholder="Search currency" value={q} onChange={(e) => setQ(e.target.value)} /></div>
     <div className="mt-5 flex items-center justify-between px-2"><H k="n" l="Name" /><span className="flex gap-6"><H k="p" l="Last price" /><H k="c" l="24h" /></span></div>
     <div className="mt-2 space-y-1">
       {rows.length === 0 && <p className="sw-note mt-16 text-center">No matching currency found.</p>}
-      {rows.map((r) => <div key={r.s} className="sw-row !py-3">
+      {rows.map((r) => <button type="button" key={r.s} onClick={() => !r.ref && setSel(r.s)} aria-pressed={sel === r.s} className={`sw-row w-full text-left !py-3 ${sel === r.s ? 'sw-row-on' : ''}`}>
         <b className="flex-1">{r.s}<small className="sw-muted"> /USDT</small></b>
         <span className="numeric">{r.p ? `$${fmt(r.p, r.p < 1 ? 6 : 2)}` : '—'}</span>
         {r.ref ? <span className="sw-chg sw-muted text-xs">Ref.</span> : <span className={`sw-chg ${r.c >= 0 ? 'sw-up-bg' : 'sw-down-bg'}`}>{r.c >= 0 ? '+' : ''}{r.c.toFixed(2)}%</span>}
-      </div>)}
+      </button>)}
     </div>
     <p className="sw-note">Prices from Binance public data. BIX shows the internal reference, not a traded market price.</p>
   </>;

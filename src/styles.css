@@ -3711,7 +3711,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sw-wallet-pocket::before { content: ''; position: absolute; inset: 12px; border-radius: 1.2rem; border: 1px dashed color-mix(in oklab, var(--primary) 50%, transparent); pointer-events: none; }
 .sw-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .6rem; border-radius: 999px; background: var(--card); border: 1px solid var(--border); color: var(--primary); font-size: .8rem; font-weight: 700; }
 .sw-chip img { object-fit: contain; }
-.sw-emblem { width: 5.5rem; height: 5.5rem; flex: none; object-fit: cover; border-radius: .9rem; filter: drop-shadow(0 6px 16px color-mix(in oklab, var(--primary) 45%, transparent)); }
+.sw-emblem { position: relative; display: grid; place-items: center; width: 5.5rem; height: 5.5rem; flex: none; border-radius: .9rem; filter: drop-shadow(0 6px 16px color-mix(in oklab, var(--primary) 45%, transparent)); }
 .sw-gold-btn { display: inline-flex; align-items: center; gap: .4rem; padding: .6rem 1.1rem; border-radius: 999px; font-weight: 800; color: var(--primary-foreground);
   background: linear-gradient(180deg, color-mix(in oklab, var(--primary) 75%, white), var(--primary) 55%, color-mix(in oklab, var(--primary) 70%, black)); box-shadow: inset 0 1px 0 color-mix(in oklab, white 55%, transparent), 0 6px 16px -6px color-mix(in oklab, var(--primary) 70%, transparent); transition: transform .15s; }
 .sw-gold-btn:active { transform: translateY(1px) scale(.98); }
@@ -3745,3 +3745,24 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sw-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 61; display: grid; grid-template-columns: repeat(4, 1fr); padding: .5rem 0 calc(.5rem + env(safe-area-inset-bottom)); background: var(--card); border-top: 1px solid var(--border); }
 .sw-dock button { display: flex; flex-direction: column; align-items: center; gap: .2rem; color: var(--muted-foreground); font-size: .8rem; font-weight: 600; }
 .sw-dock button[aria-current='page'] { color: var(--primary); }
+
+/* wallet polish v2 */
+.sw-wallet-pocket { background: linear-gradient(160deg, color-mix(in oklab, var(--card) 92%, var(--primary) 8%), color-mix(in oklab, var(--background) 96%, black)) !important; }
+.sw-wallet-pocket b, .sw-wallet-pocket .sw-muted { text-shadow: 0 1px 2px color-mix(in oklab, black 70%, transparent); }
+.sw-wallet-pocket .sw-muted { color: color-mix(in oklab, var(--foreground) 78%, transparent); }
+.sw-emblem-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .35; border-radius: .9rem; }
+.sw-emblem-fox { position: relative; width: 78%; height: 78%; object-fit: contain; border-radius: 999px; animation: sw-float 4s ease-in-out infinite; }
+.sw-coin { position: relative; background-clip: padding-box; box-shadow: inset 0 2px 3px color-mix(in oklab, white 45%, transparent), inset 0 -3px 6px color-mix(in oklab, black 45%, transparent), 0 6px 14px -6px color-mix(in oklab, var(--primary) 60%, transparent); transition: transform .3s ease; }
+.sw-coin::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(115deg, transparent 35%, color-mix(in oklab, white 40%, transparent) 50%, transparent 65%); background-size: 250% 100%; animation: sw-shine 4.5s ease-in-out infinite; pointer-events: none; }
+.sw-coin img { width: 100%; height: 100%; object-fit: cover; }
+.sw-row:active .sw-coin, .sw-row:hover .sw-coin { transform: scale(1.08) rotate(-6deg); }
+.sw-coin-lg { width: 5rem; height: 5rem; font-size: 2.2rem; margin-inline: auto; }
+.sw-row-on { border-color: var(--primary); }
+.sw-chart-card { padding: 1rem; border-radius: 1.2rem; border: 1px solid color-mix(in oklab, var(--primary) 40%, var(--border)); background: var(--card); }
+.sw-spark { width: 100%; height: 8rem; }
+.sw-spark-up { color: oklch(0.72 0.17 150); } .sw-spark-down { color: oklch(0.65 0.2 25); }
+.sw-grid { stroke: var(--border); stroke-dasharray: 3 4; }
+.sw-asset-hero { padding: 1.2rem; border-radius: 1.2rem; background: var(--card); border: 1px solid var(--border); }
+@keyframes sw-shine { 0%, 60% { background-position: 150% 0; } 100% { background-position: -100% 0; } }
+@keyframes sw-float { 50% { transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .sw-coin::after, .sw-emblem-fox { animation: none; } }
