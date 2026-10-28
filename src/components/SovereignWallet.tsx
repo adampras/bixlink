@@ -4,7 +4,7 @@ import walletArt from '@/assets/bix-lux-wallet.png';
 
 /** Brand-colored token badges (symbol glyphs, not official artwork). */
 const TOKENS: [string, string, string, string, string][] = [
-  ['BIX', 'BIXCOIN', '🦊', '#FFD700', '#A855F7'],
+  ['BIX', 'BIXCOIN', '🦊', 'var(--chart-3)', 'var(--primary)'],
   ['BTC', 'Bitcoin', '₿', '#F7931A', '#FFB84D'],
   ['ETH', 'Ethereum', 'Ξ', '#627EEA', '#A3B5FF'],
   ['BNB', 'BNB', '◆', '#F3BA2F', '#FFE08A'],

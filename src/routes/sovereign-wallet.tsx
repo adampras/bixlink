@@ -75,7 +75,7 @@ function SovereignApp() {
   };
   const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 4 });
   const assets: [string, string, number | null, string, string, string][] = [
-    ['BIX', 'BIXCOIN · BEP-20', bix ? bal?.bix ?? null : null, '🦊', '#FFD700', '#A855F7'],
+    ['BIX', 'BIXCOIN · BEP-20', bix ? bal?.bix ?? null : null, '🦊', 'var(--chart-3)', 'var(--primary)'],
     ['USDT', 'Tether · BEP-20', bal?.usdt ?? null, '₮', '#26A17B', '#6FE3BE'],
     ['BNB', 'Gas fee', bal?.bnb ?? null, '◆', '#F3BA2F', '#FFE08A'],
   ];
