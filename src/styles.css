@@ -3569,8 +3569,9 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .wallet-summary .sov-chip--side{display:none}
 .wallet-mc{position:absolute;right:18px;top:20px;z-index:1;display:flex;pointer-events:none}
 .wallet-mc i{width:30px;height:30px;border-radius:50%;box-shadow:inset 0 1px 0 oklch(1 0 0/.6),0 4px 12px -4px oklch(0 0 0/.5)}
-.wallet-mc i:first-child{background:radial-gradient(circle at 35% 30%,oklch(0.95 0.1 92),oklch(0.78 0.15 82) 55%,oklch(0.6 0.12 70))}
-.wallet-mc i:last-child{margin-left:-12px;background:radial-gradient(circle at 35% 30%,oklch(1 0 0),oklch(0.93 0.005 90) 60%,oklch(0.82 0.01 90));opacity:.92;mix-blend-mode:screen}
+.wallet-mc i:first-child{background:radial-gradient(circle at 35% 30%,oklch(0.75 0.2 25),oklch(0.55 0.22 25) 55%,oklch(0.38 0.15 22))}
+.wallet-mc i:last-child{margin-left:-12px;background:radial-gradient(circle at 35% 30%,oklch(0.97 0.1 95),oklch(0.8 0.15 82) 55%,oklch(0.6 0.13 70));opacity:.9}
+.wallet-mc{filter:drop-shadow(0 0 6px oklch(0.8 0.14 80/.35))}
 .wallet-partners{max-width:64rem;margin:14px auto 0;padding:0 16px;text-align:center}
 .wallet-partners-title{font-size:10px;font-weight:900;letter-spacing:.28em;color:var(--chart-3)}
 .wallet-partners-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
@@ -3579,3 +3580,18 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .wallet-partner b{font-size:13px;font-weight:900;color:oklch(0.2 0.02 260);letter-spacing:.01em}
 .wallet-partner span{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.55 0.08 75)}
 .wallet-partners-note{margin-top:8px;font-size:9px;color:var(--muted-foreground)}
+
+/* Partnership 3D floating marks */
+.wallet-partner{animation:wp-float 4.2s ease-in-out infinite;transition:transform .25s,box-shadow .25s}
+.wallet-partner:hover{box-shadow:0 14px 26px -12px color-mix(in oklab,var(--c1) 60%,transparent)}
+@keyframes wp-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.wp-mark{display:grid;place-items:center;width:30px;height:30px;margin-bottom:4px;font-size:15px;font-weight:900;color:#fff;background:radial-gradient(circle at 32% 28%,color-mix(in oklab,var(--c1) 55%,#fff),var(--c1) 55%,color-mix(in oklab,var(--c1) 70%,#000));box-shadow:inset 0 2px 2px rgba(255,255,255,.55),inset 0 -3px 4px rgba(0,0,0,.25),0 6px 10px -4px color-mix(in oklab,var(--c1) 70%,transparent);animation:wp-spin 6s ease-in-out infinite}
+.wp-circle{border-radius:50%}
+.wp-diamond{border-radius:6px;transform:rotate(45deg) scale(.8)}
+.wp-hex{clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%)}
+.wp-word{width:auto;height:24px;padding:0 8px;border-radius:6px;font-size:12px;font-style:italic;letter-spacing:.04em;border-bottom:3px solid var(--c2)}
+.wp-rings{background:none;box-shadow:none;display:flex;width:auto}
+.wp-rings i{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 32% 28%,color-mix(in oklab,var(--c1) 50%,#fff),var(--c1) 60%);box-shadow:inset 0 -2px 3px rgba(0,0,0,.25)}
+.wp-rings i+i{margin-left:-9px;background:radial-gradient(circle at 32% 28%,color-mix(in oklab,var(--c2) 50%,#fff),var(--c2) 60%);opacity:.92}
+@keyframes wp-spin{0%,100%{rotate:0deg}50%{rotate:-8deg}}
+@media (prefers-reduced-motion:reduce){.wallet-partner,.wp-mark{animation:none}}
