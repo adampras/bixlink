@@ -3715,7 +3715,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sw-gold-btn { display: inline-flex; align-items: center; gap: .4rem; padding: .6rem 1.1rem; border-radius: 999px; font-weight: 800; color: var(--primary-foreground);
   background: linear-gradient(180deg, color-mix(in oklab, var(--primary) 75%, white), var(--primary) 55%, color-mix(in oklab, var(--primary) 70%, black)); box-shadow: inset 0 1px 0 color-mix(in oklab, white 55%, transparent), 0 6px 16px -6px color-mix(in oklab, var(--primary) 70%, transparent); transition: transform .15s; }
 .sw-gold-btn:active { transform: translateY(1px) scale(.98); }
-.sw-action { display: flex; width: 100%; align-items: center; justify-content: center; gap: .55rem; padding: .8rem .6rem; border-radius: 1rem; border: 1px solid color-mix(in oklab, var(--primary) 25%, var(--border)); background: var(--card); }
+.sw-action { display: flex; flex-direction: column; text-align: center; width: 100%; align-items: center; justify-content: center; gap: .4rem; padding: .8rem .6rem; border-radius: 1rem; border: 1px solid color-mix(in oklab, var(--primary) 25%, var(--border)); background: var(--card); }
 .sw-action:active { transform: scale(.97); }
 .sw-gold-dot { display: grid; place-items: center; width: 2.3rem; height: 2.3rem; flex: none; border-radius: 999px; color: var(--primary-foreground); background: radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--primary) 70%, white), var(--primary) 60%, color-mix(in oklab, var(--primary) 65%, black)); }
 .sw-tab-pill { padding: .5rem 1.3rem; border-radius: 999px; font-weight: 800; color: var(--primary-foreground); background: var(--primary); }

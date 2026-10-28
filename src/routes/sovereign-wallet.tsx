@@ -155,7 +155,7 @@ function SovereignApp() {
         <div className="mt-5 grid grid-cols-3 gap-2">
           {([['send', 'Transfer', 'Send crypto', ArrowUpRight], ['receive', 'Receive', 'Get crypto', ArrowDownLeft], ['scan', 'Scan', 'QR code', ScanLine]] as const).map(([s, t, d, I]) =>
             <button key={s} type="button" className="sw-action" onClick={() => (s === 'scan' ? setScreen('scan') : void need(s))}>
-              <span className="sw-gold-dot"><I size={18} /></span><span className="min-w-0 text-left"><b className="block truncate">{t}</b><small className="sw-muted block truncate">{d}</small></span>
+              <span className="sw-gold-dot"><I size={18} /></span><span className="min-w-0 text-center"><b className="block truncate">{t}</b><small className="sw-muted block truncate">{d}</small></span>
             </button>)}
         </div>
 
@@ -295,7 +295,7 @@ function ScanScreen({ onBack, onResult }: { onBack: () => void; onResult: (v: st
     <div className="sw-scan"><video ref={video} muted playsInline className="h-full w-full object-cover" /><span className="sw-scan-frame" aria-hidden /><Camera className="sw-scan-cam" size={28} aria-hidden /></div>
     {err && <p className="sw-note">{err}</p>}
     <input ref={file} type="file" accept="image/*" hidden onChange={(e) => void fromFile(e.target.files?.[0])} />
-    <button type="button" className="sw-action mx-auto mt-6 !w-auto !px-8 !py-4" onClick={() => file.current?.click()}><ImageIcon size={20} /> <b>My album</b></button>
+    <button type="button" className="sw-action mx-auto mt-6 !w-auto !flex-row !px-8 !py-4" onClick={() => file.current?.click()}><ImageIcon size={20} /> <b>My album</b></button>
   </>;
 }
 
