@@ -34,7 +34,7 @@ const QUICK = [
 
 type Sheet = { kind: 'token'; i: number } | { kind: 'feat'; i: number } | null;
 
-export function SovereignWallet() {
+export function SovereignWallet({ inApp = false }: { inApp?: boolean }) {
   const [chain, setChain] = useState(0);
   const [sheet, setSheet] = useState<Sheet>(null);
   const [price, setPrice] = useState<{ p: number; c: number } | null>(null);
@@ -48,21 +48,19 @@ export function SovereignWallet() {
   };
 
   return <section className="sov-wallet" aria-label="BIX Sovereign Wallet">
+    {!inApp && <>
     <div className="flex items-center justify-between gap-2"><span className="sov-kicker"><Sparkles size={12}/> BIX SOVEREIGN WALLET</span><a href="/sovereign-wallet" className="sov-soon">OPEN APP ↗</a></div>
 
-    <div className="sov-emblem mt-3">
-      <img src={walletArt} alt="BIXLINK luxury wallet emblem" width={816} height={816} className="sov-emblem-img"/>
-      <div className="text-center"><b className="font-display sov-emblem-title">WALLET BIXLINK</b><small className="block">Sovereign self-custody · BNB Smart Chain</small></div>
-    </div>
-
-    <div className="sov-card mt-3">
-      <div className="flex items-start justify-between"><div><small>ON-CHAIN PREVIEW</small><b className="font-display">BIXLINK Sovereign</b></div><span className="sov-fox" aria-hidden>🦊</span></div>
+    <div className="sov-card sov-art-card mt-3">
+      <img src={walletArt} alt="" aria-hidden width={816} height={816} className="sov-art-bg"/>
+      <div className="relative flex items-start justify-between"><div><small>WALLET BIXLINK</small><b className="font-display sov-emblem-title">BIXLINK Sovereign</b></div><img src={walletArt} alt="BIXLINK wallet emblem" width={56} height={56} className="sov-art-logo"/></div>
       <button type="button" className="sov-addr font-mono" onClick={() => void navigator.clipboard?.writeText('0xB1X…F0X7')} aria-label="Copy preview address">0xB1X…F0X7 · {CHAINS[chain][0]} <Copy size={12} className="ml-1 inline"/></button>
       <div className="sov-chains" role="group" aria-label="Network">{CHAINS.map(([c], i) => <button key={c} type="button" aria-pressed={i === chain} onClick={() => setChain(i)}>{c}</button>)}</div>
       <div className="mt-2 flex items-center justify-between text-xs"><span className="flex items-center gap-1"><Fuel size={12}/> {chain === 0 ? '≈1 Gwei · Fast' : 'Preview network'}</span><a href={CHAINS[chain][1]} target="_blank" rel="noreferrer" className="flex items-center gap-1 underline">Explorer <ExternalLink size={11}/></a></div>
     </div>
 
     <div className="sov-quick mt-3">{QUICK.map(({ Icon, t, href }) => <a key={t} href={href}><Icon size={16}/><span>{t}</span></a>)}</div>
+    </>}
 
     <div className="sov-tokens mt-4">{TOKENS.map(([s, n, g, c1, c2], i) => <button type="button" key={s} onClick={() => openToken(i)} className="sov-token" style={{ '--c1': c1, '--c2': c2, animationDelay: `${i * -0.45}s` } as CSSProperties}><span className="sov-coin" aria-hidden>{g}</span><b>{s}</b><small>{n}</small></button>)}</div>
     <div className="sov-feats mt-4">{FEATURES.map(({ Icon, t, d }, i) => <button type="button" key={t} onClick={() => setSheet({ kind: 'feat', i })}><Icon size={16}/><b>{t}</b><small>{d}</small></button>)}</div>

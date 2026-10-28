@@ -4,6 +4,8 @@ import { QRCodeSVG } from 'qrcode.react';
 import { ArrowDownLeft, ArrowUpRight, Copy, ExternalLink, PlusCircle, RefreshCw, Wallet, X, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { InstallAppButton } from '@/components/InstallPrompt';
+import { SovereignWallet } from '@/components/SovereignWallet';
+import walletArt from '@/assets/bix-lux-wallet.png';
 
 export const Route = createFileRoute('/sovereign-wallet')({
   head: () => ({
@@ -83,12 +85,15 @@ function SovereignApp() {
     <main className="relative mx-auto max-w-md px-4 pb-10 pt-5">
       <div className="flex items-center justify-between"><span className="sov-kicker"><Sparkles size={12}/> BIX SOVEREIGN WALLET</span><span className="sov-soon">{bix ? 'LIVE · BSC' : 'CONTRACT PENDING'}</span></div>
       <div className="sov-chains mt-3" aria-label="Network">{['BNB Chain', 'BEP-20', 'Self-custody'].map((c, i) => <span key={c} aria-current={i === 0 ? 'true' : undefined}>{c}</span>)}</div>
-      <section className="sov-card sov-hero mt-4">
-        <small>SELF-CUSTODY · BNB SMART CHAIN</small>
+      <section className="sov-card sov-art-card sov-hero mt-4">
+        <img src={walletArt} alt="" aria-hidden width={816} height={816} className="sov-art-bg"/>
+        <div className="relative">
+        <div className="flex items-start justify-between gap-2"><div><small>SELF-CUSTODY · BNB SMART CHAIN</small><b className="block font-display sov-emblem-title">WALLET BIXLINK</b></div><img src={walletArt} alt="BIXLINK wallet emblem" width={56} height={56} className="sov-art-logo"/></div>
         {addr ? <>
           <div className="mt-1 flex items-center gap-2 font-mono text-xs"><span className="truncate">{addr}</span><button type="button" aria-label="Copy address" onClick={() => void navigator.clipboard.writeText(addr)}><Copy size={14}/></button></div>
           <b className="numeric mt-3 block font-display text-3xl">{bal ? fmt(bal.bix) : '…'} <span className="text-base">BIX</span></b>
         </> : <button type="button" className="sov-onchain-btn mt-3" onClick={() => void connect()}><Wallet size={14}/> Connect wallet</button>}
+        </div>
       </section>
       {addr && <div className="mt-4 grid grid-cols-3 gap-2">
         <button type="button" className="sov-onchain-btn justify-center" onClick={() => setSheet('send')}><ArrowUpRight size={14}/> Send</button>
@@ -108,6 +113,7 @@ function SovereignApp() {
         {bix && addr && <button type="button" className="sov-onchain-btn" onClick={() => void addToken()}><PlusCircle size={14}/> Add BIX</button>}
       </div>
       {msg && <p className="sov-note">{msg}</p>}
+      <div className="mt-5"><SovereignWallet inApp/></div>
       <div className="mt-4"><InstallAppButton/></div>
       <p className="sov-note">Self-custody: your keys stay in your own wallet app; BIXLINK never stores them. On-chain balances are separate from your BIXLINK app ledger. Always verify the contract address. Blockchain transfers are final.</p>
     </main>
