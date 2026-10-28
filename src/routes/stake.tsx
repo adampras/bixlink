@@ -1,4 +1,3 @@
-import { Web3Connect } from '@/components/Web3Connect';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
