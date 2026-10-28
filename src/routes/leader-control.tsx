@@ -117,7 +117,7 @@ function Packages() {
   useEffect(() => { if (q.data) setCfg(q.data); }, [q.data]);
   if (!cfg) return <p className="text-sm text-muted-foreground">{q.error ? (q.error as Error).message : 'Memuat…'}</p>;
   const set = (i: number, p: Partial<LoanConfig['packages'][number]>) => setCfg({ packages: cfg.packages.map((r, j) => j === i ? { ...r, ...p } : r) });
-  const remove = (i: number) => { if (cfg.packages.length > 1 && confirm(`Hapus paket ${cfg.packages[i].id}?`)) setCfg({ packages: cfg.packages.filter((_, j) => j !== i) }); };
+  const remove = (i: number) => { if (cfg.packages.length > 1 && confirm(`Hapus paket ${cfg.packages[i]?.id}?`)) setCfg({ packages: cfg.packages.filter((_, j) => j !== i) }); };
   const add = () => setCfg({ packages: [...cfg.packages, { id: `PAKET${cfg.packages.length + 1}`, usd: 100, enabled: true, quota: 10 }] });
   return <div className="space-y-2">
     <p className="text-xs text-muted-foreground">Semua paket: 360 hari · target 5× · popup member langsung mengikuti perubahan setelah disimpan. Paket yang sudah diklaim member tetap berjalan.</p>
