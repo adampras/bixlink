@@ -3522,3 +3522,13 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 [role="tab"][data-state="active"]{animation:micro-glow .5s ease-out}
 @keyframes micro-glow{0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--chart-3) 55%,transparent)}100%{box-shadow:0 0 0 8px transparent}}
 @media (prefers-reduced-motion:reduce){button:active,[role="tab"]:active,a[class*="btn"]:active{transform:none}[role="tab"][data-state="active"]{animation:none}}
+
+/* Slim horizontal staking tier strip */
+.tier-strip{display:flex;gap:.5rem;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 6px;scrollbar-width:none}
+.tier-strip::-webkit-scrollbar{display:none}
+.tier-bar{flex:0 0 auto;scroll-snap-align:start;display:flex;align-items:center;gap:.5rem;min-height:44px!important;padding:0 .85rem;border-radius:12px;border:1px solid color-mix(in oklab,var(--chart-3) 22%,transparent);background:color-mix(in oklab,var(--card) 55%,transparent);backdrop-filter:blur(12px);transition:border-color .2s,box-shadow .2s,background .2s}
+.tier-bar small{font-size:.58rem;letter-spacing:.14em;color:var(--muted-foreground)}
+.tier-bar b{font-size:.95rem;font-weight:800;color:var(--foreground);white-space:nowrap}
+.tier-bar em{font-style:normal;font-size:.65rem;font-weight:700;color:var(--primary);padding:2px 6px;border-radius:999px;background:color-mix(in oklab,var(--primary) 12%,transparent)}
+.tier-bar[aria-selected="true"]{border-color:var(--chart-3);background:color-mix(in oklab,var(--chart-3) 12%,var(--card));box-shadow:0 0 16px -4px color-mix(in oklab,var(--chart-3) 60%,transparent)}
+.tier-bar[aria-selected="true"] b{color:var(--chart-3)}

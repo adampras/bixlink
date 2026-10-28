@@ -21,24 +21,12 @@ function QuantumVault({ packages, onStake }: { packages: Package[]; onStake: (p:
   const [startX, setStartX] = useState<number | null>(null);
   const [drag, setDrag] = useState(0);
   const end = () => { if (Math.abs(drag) > 40) go(drag < 0 ? 1 : -1); setStartX(null); setDrag(0); };
-  return <section aria-label="Staking packages" className="qv mt-6">
-    <header className="qv-head"><span>QUANTUM VAULT · 3D</span><b>Swipe to select</b></header>
-    <div className="qv-stage" style={{ touchAction: 'pan-y' }}
-      onPointerDown={e => setStartX(e.clientX)}
-      onPointerMove={e => { if (startX !== null) setDrag(e.clientX - startX); }}
-      onPointerUp={end} onPointerCancel={end} onPointerLeave={() => startX !== null && end()}>
-      {packages.map((p, n) => {
-        const off = n - i;
-        if (Math.abs(off) > 2) return null;
-        return <button key={p.id} type="button" aria-label={`Tier ${n + 1} ${short(Number(p.price_usd))}`} aria-current={off === 0} onClick={() => { if (Math.abs(drag) < 6) setActive(n); }} className="qv-slab" style={{ transform: `translateX(calc(${off * 58}% + ${drag * 0.6}px)) translateZ(${-Math.abs(off) * 160}px) rotateY(${off * -32 + drag * 0.08}deg)`, zIndex: 10 - Math.abs(off), opacity: 1 - Math.abs(off) * 0.3, transition: startX !== null ? 'none' : undefined }}>
-          <small>STK-{String(n + 1).padStart(3, '0')}</small><b className="numeric">{short(Number(p.price_usd))}</b><em className="numeric">{p.apy}% APY</em>
-        </button>;
-      })}
-    </div>
-    <div className="qv-nav">
-      <button type="button" className="qv-arrow" aria-label="Previous tier" onClick={() => go(-1)}><ChevronLeft /></button>
-      <div className="qv-dots">{packages.map((p, n) => <button key={p.id} type="button" aria-label={`Tier ${n + 1}`} className={n === i ? 'is-on' : ''} onClick={() => setActive(n)} />)}<span className="numeric">{String(i + 1).padStart(2, '0')} / {String(packages.length).padStart(2, '0')}</span></div>
-      <button type="button" className="qv-arrow" aria-label="Next tier" onClick={() => go(1)}><ChevronRight /></button>
+  void startX; void setStartX; void end; void go;
+  return <section aria-label="Staking packages" className="qv mt-4">
+    <div role="tablist" aria-label="Package tier" className="tier-strip">
+      {packages.map((p, n) => <button key={p.id} type="button" role="tab" aria-selected={n === i} onClick={() => setActive(n)} className="tier-bar">
+        <small>STK-{String(n + 1).padStart(2, '0')}</small><b className="numeric">{short(Number(p.price_usd))}</b><em className="numeric">{p.apy}%</em>
+      </button>)}
     </div>
     <div className="qv-tilt mx-auto mt-4 max-w-md" onPointerMove={move} onPointerLeave={() => setTilt({ x: 0, y: 0 })}>
       <div className="qv-tilt-inner" style={{ transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}>
@@ -51,7 +39,7 @@ function QuantumVault({ packages, onStake }: { packages: Package[]; onStake: (p:
 
 type Props = { packages: Package[]; layout?: string | undefined; onStake: (p: Package) => void };
 
-const short = (v: number) => v >= 1000 ? `$${number(v / 1000, { maximumFractionDigits: 1 })}K` : `$${number(v, { maximumFractionDigits: 0 })}`;
+const short = (v: number) => `$${number(v, { maximumFractionDigits: 0 })}`;
 
 export function StakePackageLayouts({ packages, layout, onStake }: Props) {
   const mode: StakeLayout = (STAKE_LAYOUTS as readonly string[]).includes(layout ?? '') ? (layout as StakeLayout) : 'auric';
