@@ -1,4 +1,5 @@
-- [ ] Compact Profit heading and collapsible per-stake details; move Network account to top and search into Leader Bonus Hub; verify signed-in phone and desktop.
+- [x] Compact Profit heading and collapsible per-stake details; move Network account to top and search into Leader Bonus Hub; automatic build passed, financial logic unchanged.
+- [ ] Verify polished Profit and Network signed-in phone/desktop interactions — blocked by preview session remaining on Restoring your session, including after minting a fresh self session.
 - [ ] Require manual email/username login after email registration without storing passwords.
 - [ ] Build Owner 1 loan-package editor with authoritative save/readback and unchanged existing loans.
 - [x] Implement scoped real activity, direct-member radar, flash events and withdrawal circuit breaker; server scope confirms Owner 2 ancestry exclusion, owner save/readback and radar WhatsApp tested on phone, rule tests pass.
