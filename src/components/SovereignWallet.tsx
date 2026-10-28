@@ -41,7 +41,7 @@ export function SovereignWallet({ inApp = false }: { inApp?: boolean }) {
 
   const openToken = (i: number) => {
     setSheet({ kind: 'token', i }); setPrice(null);
-    const s = TOKENS[i][0];
+    const s = TOKENS[i]![0];
     if (s === 'USDT') { setPrice({ p: 1, c: 0 }); return; }
     const pair = BINANCE[s]; if (!pair) return;
     fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${pair}`).then(r => r.json()).then((d: { lastPrice?: string; priceChangePercent?: string }) => { if (d.lastPrice) setPrice({ p: Number(d.lastPrice), c: Number(d.priceChangePercent) }); }).catch(() => {});
@@ -54,9 +54,9 @@ export function SovereignWallet({ inApp = false }: { inApp?: boolean }) {
     <div className="sov-card sov-art-card mt-3">
       <img src={walletArt} alt="" aria-hidden width={816} height={816} className="sov-art-bg"/>
       <div className="relative flex items-start justify-between"><div><small>WALLET BIXLINK</small><b className="font-display sov-emblem-title">BIXLINK Sovereign</b></div><img src={walletArt} alt="BIXLINK wallet emblem" width={56} height={56} className="sov-art-logo"/></div>
-      <button type="button" className="sov-addr font-mono" onClick={() => void navigator.clipboard?.writeText('0xB1X…F0X7')} aria-label="Copy preview address">0xB1X…F0X7 · {CHAINS[chain][0]} <Copy size={12} className="ml-1 inline"/></button>
+      <button type="button" className="sov-addr font-mono" onClick={() => void navigator.clipboard?.writeText('0xB1X…F0X7')} aria-label="Copy preview address">0xB1X…F0X7 · {CHAINS[chain]![0]} <Copy size={12} className="ml-1 inline"/></button>
       <div className="sov-chains" role="group" aria-label="Network">{CHAINS.map(([c], i) => <button key={c} type="button" aria-pressed={i === chain} onClick={() => setChain(i)}>{c}</button>)}</div>
-      <div className="mt-2 flex items-center justify-between text-xs"><span className="flex items-center gap-1"><Fuel size={12}/> {chain === 0 ? '≈1 Gwei · Fast' : 'Preview network'}</span><a href={CHAINS[chain][1]} target="_blank" rel="noreferrer" className="flex items-center gap-1 underline">Explorer <ExternalLink size={11}/></a></div>
+      <div className="mt-2 flex items-center justify-between text-xs"><span className="flex items-center gap-1"><Fuel size={12}/> {chain === 0 ? '≈1 Gwei · Fast' : 'Preview network'}</span><a href={CHAINS[chain]![1]} target="_blank" rel="noreferrer" className="flex items-center gap-1 underline">Explorer <ExternalLink size={11}/></a></div>
     </div>
 
     <div className="sov-quick mt-3">{QUICK.map(({ Icon, t, href }) => <a key={t} href={href}><Icon size={16}/><span>{t}</span></a>)}</div>
@@ -69,7 +69,7 @@ export function SovereignWallet({ inApp = false }: { inApp?: boolean }) {
     {sheet && <div className="fixed inset-0 z-[70] flex items-end justify-center bg-background/80 p-3" role="dialog" aria-modal="true" onClick={() => setSheet(null)}>
       <div className="sov-card w-full max-w-md space-y-3" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-end"><button type="button" aria-label="Close" onClick={() => setSheet(null)}><X size={18}/></button></div>
-        {sheet.kind === 'token' ? (() => { const [s, n, g, c1, c2] = TOKENS[sheet.i]; const onchain = ['BIX', 'USDT', 'BNB'].includes(s); return <>
+        {sheet.kind === 'token' ? (() => { const [s, n, g, c1, c2] = TOKENS[sheet.i]!; const onchain = ['BIX', 'USDT', 'BNB'].includes(s); return <>
           <div className="flex items-center gap-3" style={{ '--c1': c1, '--c2': c2 } as CSSProperties}><span className="sov-coin" aria-hidden>{g}</span><div><b className="font-display text-lg">{s}</b><small className="block">{n}</small></div></div>
           <div className="numeric text-2xl font-bold">{s === 'BIX' ? 'Internal reference' : price ? `$${price.p.toLocaleString('en-US', { maximumFractionDigits: 6 })}` : '…'}{price && s !== 'USDT' && <span className={`ml-2 text-sm ${price.c >= 0 ? 'text-chart-2' : 'text-destructive'}`}>{price.c >= 0 ? '+' : ''}{price.c.toFixed(2)}% 24h</span>}</div>
           <small className="block">{onchain ? 'Live balance, Send and Receive on BNB Smart Chain are available in OPEN APP.' : 'Preview asset — wallet support for this network is planned.'}</small>
@@ -79,7 +79,7 @@ export function SovereignWallet({ inApp = false }: { inApp?: boolean }) {
             <a className="sov-onchain-btn justify-center" href="/wallet"><Repeat size={14}/> Swap</a>
             <a className="sov-onchain-btn justify-center" href={`https://www.coingecko.com/en/search?query=${s}`} target="_blank" rel="noreferrer"><ExternalLink size={14}/> Info</a>
           </div>
-        </>; })() : (() => { const f = FEATURES[sheet.i]; return <>
+        </>; })() : (() => { const f = FEATURES[sheet.i]!; return <>
           <div className="flex items-center gap-2"><f.Icon size={20}/><b className="font-display text-lg">{f.t}</b></div>
           <p className="text-sm">{f.body}</p>
           {f.link && <a className="sov-onchain-btn w-full justify-center" href={f.link}>Open</a>}
