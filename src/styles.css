@@ -3547,3 +3547,20 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .stake-compact .pass-mini img,.stake-compact .nft-mini img{max-height:2.75rem;width:auto}
 .stake-compact .duration-package-action{margin-top:.5rem}
 .stake-compact .qv-note{margin-top:.35rem;font-size:9px}
+
+/* Wallet lux polish v2 */
+.wallet-summary .sov-chip--side { position:absolute !important; right:20px; top:22px; width:30px; height:64px; border-radius:7px; background:linear-gradient(160deg, oklch(0.9 0.11 85), oklch(0.66 0.13 60) 45%, oklch(0.86 0.1 80)); box-shadow:inset 0 0 0 1px oklch(0.45 0.08 60 / .6), 0 6px 18px -8px oklch(0.75 0.14 70 / .8); z-index:1; }
+.wallet-summary .sov-chip--side::after { inset:10px 7px; }
+.wallet-balance-block { padding-right:48px; margin-top:-4px; }
+.wallet-actions--inside { margin-top:18px; padding-top:14px; border-top:1px solid color-mix(in oklab, var(--chart-3) 25%, transparent); }
+.vault-swap > * + * { margin-top:1.25rem; }
+.site-shell .wallet-tile.wallet-tile--square { flex-direction:column; align-items:flex-start; justify-content:flex-end; gap:6px; aspect-ratio:1/0.82; padding:16px; border-radius:18px; }
+.site-shell .wallet-tile--square .wallet-tile-icon { width:48px; height:48px; margin-bottom:auto; }
+.site-shell .wallet-tile--square .wallet-tile-title { font-size:15px; }
+.site-shell .wallet-tile--square .wallet-tile-status { position:absolute; top:14px; right:14px; }
+.wallet-fold { border:1px solid color-mix(in oklab, var(--chart-3) 30%, var(--border)); border-radius:18px; padding:14px 16px; background:linear-gradient(150deg, color-mix(in oklab, var(--card) 94%, var(--chart-3)), var(--card)); }
+.wallet-fold summary { display:flex; align-items:center; justify-content:space-between; cursor:pointer; list-style:none; }
+.wallet-fold summary::-webkit-details-marker { display:none; }
+.wallet-fold summary::after { content:"▾"; color:var(--chart-3); transition:transform .2s; }
+.wallet-fold[open] summary::after { transform:rotate(180deg); }
+.wallet-fold-count { margin-left:auto; margin-right:10px; font-size:11px; font-weight:800; padding:2px 9px; border-radius:999px; color:var(--chart-3); border:1px solid color-mix(in oklab, var(--chart-3) 45%, transparent); }
