@@ -11,6 +11,7 @@ import { VipRewardPlus } from '@/components/VipRewardPlus';
 import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { money, number } from '@/lib/bixlink';
+import { LeaderChallenge } from '@/components/LeaderChallenge';
 
 export const Route = createFileRoute('/network')({ head: () => ({ meta: [{ title: 'Network Explorer — BIXLINK' }, { name: 'description', content: 'Explore every referral generation, USDT and BIX stakes, and owner-reviewed BIX direct bonuses.' }, { property: 'og:title', content: 'Network Explorer — BIXLINK' }, { property: 'og:description', content: 'Your BIXLINK referral hierarchy, staking activity and BIX direct bonus records.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: NetworkPage });
 
@@ -67,6 +68,7 @@ function NetworkPage() {
  </section>
  {user && <PlacementRegister open={regOpen} onOpenChange={setRegOpen} initial={regTarget || user.id} options={[{ id: user.id, label: `YOU · ${data?.referral?.code ?? ''} (L1)` }, ...tree.map(n => ({ id: n.user_id, label: `${n.member_code ?? ''} ${identity(n)} → member jadi L${n.depth+1}` }))]}/>}
  <DownlineRadar/>
+ {user && <LeaderChallenge userId={user.id}/>}
  <section aria-label="Leader bonus hub" className="mt-6 rounded-2xl border border-chart-3/50 bg-card p-4 md:p-5">
   <div className="eyebrow">LEADER BONUS HUB</div><h2 className="mt-1 font-display text-lg font-bold">My network bonuses</h2>
   <label className="nx-search mt-3 !w-full"><Search size={18} className="shrink-0"/><input aria-label="Search network members" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search member ID or name"/>{search && <Button variant="ghost" size="sm" className="shrink-0" onClick={() => setSearch('')}>Clear</Button>}</label>
