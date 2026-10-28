@@ -31,7 +31,7 @@ type Screen = null | 'send' | 'receive' | 'scan' | 'book' | 'node' | 'security' 
 const USDT = '0x55d398326f99059fF775485246999027B3197955';
 const NODES = ['https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io', 'https://bsc-dataseed1.ninicoin.io', 'https://bsc.publicnode.com'];
 const SCAN = 'https://bscscan.com';
-const getNode = () => (typeof localStorage !== 'undefined' && localStorage.getItem('sov_node')) || NODES[0];
+const getNode = () => (typeof localStorage !== 'undefined' && localStorage.getItem('sov_node')) || NODES[0]!;
 
 async function rpc(method: string, params: unknown[]) {
   const r = await fetch(getNode(), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) });
@@ -107,7 +107,7 @@ function SovereignApp() {
     try { await eth()?.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: bix, symbol: 'BIX', decimals: 18 } } }); } catch { setMsg('Token was not added.'); }
   };
 
-  const bnbP = px.BNB?.p ?? 0;
+  const bnbP = px['BNB']?.p ?? 0;
   const total = bal ? bal.bix * bixRef + bal.usdt + bal.bnb * bnbP : 0;
   const money = (n: number) => (hide ? '••••' : `$${fmt(n, 2)}`);
 
@@ -170,7 +170,7 @@ function SovereignApp() {
           {[
             { s: 'BIX', icon: <img src={foxMark} alt="" width={40} height={40} />, p: bixRef, c: null as number | null, v: bix ? bal?.bix : undefined, cls: 'sw-coin-bix', note: 'Internal ref.' },
             { s: 'USDT', icon: <b>₮</b>, p: 1, c: 0, v: bal?.usdt, cls: 'sw-coin-usdt', note: '' },
-            { s: 'BNB', icon: <b>◆</b>, p: bnbP, c: px.BNB?.c ?? null, v: bal?.bnb, cls: 'sw-coin-bnb', note: '' },
+            { s: 'BNB', icon: <b>◆</b>, p: bnbP, c: px['BNB']?.c ?? null, v: bal?.bnb, cls: 'sw-coin-bnb', note: '' },
           ].map((a) => <a key={a.s} href={a.s === 'BIX' && bix ? `${SCAN}/token/${bix}` : a.s === 'USDT' ? `${SCAN}/token/${USDT}` : SCAN} target="_blank" rel="noreferrer" className="sw-row">
             <span className={`sw-coin ${a.cls}`}>{a.icon}</span>
             <div className="min-w-0 flex-1"><b className="block text-lg">{a.s}</b>
@@ -322,7 +322,7 @@ function BookScreen({ onBack, onPick }: { onBack: () => void; onPick: (a: string
 }
 
 function NodeScreen({ onBack }: { onBack: () => void }) {
-  const [cur, setCur] = useState(NODES[0]);
+  const [cur, setCur] = useState(NODES[0]!);
   const [ms, setMs] = useState<Record<string, number>>({});
   useEffect(() => {
     setCur(getNode());
