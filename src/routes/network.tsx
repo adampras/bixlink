@@ -56,9 +56,8 @@ function NetworkPage() {
  const pending = bonuses.filter(b => b.status==='pending').reduce((s,b) => s+Number(b.amount_bix),0);
  return <BixShell><main className="network-explorer mx-auto max-w-6xl px-4 py-8 md:px-8">
  <MemberGate ready={ready} signedIn={!!user} title="NETWORK">
- <header className="nx-header"><div><div className="eyebrow">MY NETWORK</div><h1 className="mt-2 font-display text-2xl font-bold md:text-3xl">Network <span className="text-chart-3">Explorer</span></h1><p className="mt-1 text-xs text-muted-foreground">L1 = people you invited directly. Tap a member to open their team. Totals are recorded entries, not projections.</p></div><label className="nx-search"><Search size={18}/><input aria-label="Search network members" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search member ID or name"/>{search && <Button variant="ghost" size="sm" onClick={() => setSearch('')}>Clear</Button>}</label></header>
  {error && <p role="alert" className="mt-4 text-destructive">Network records could not load. Please refresh.</p>}
- <section className="nx-root-compact">
+ <section aria-label="Main account" className="nx-root-compact !mt-0">
   <div className="nx-root-row"><div className="nx-avatar-halo"><img src={gender==='f' ? avatarF : avatarM} alt="" width={56} height={56}/></div>
    <div className="min-w-0 flex-1"><span className="eyebrow">AKUN UTAMA</span><h2 className="truncate font-display text-lg font-bold">{data?.referral?.code ?? user?.id.slice(0,8).toUpperCase()}</h2><p className="text-[11px] text-muted-foreground"><Users size={11} className="inline"/> {directNodes.length} direct · <GitBranch size={11} className="inline"/> {deepest} gen</p></div>
    <div className="nx-gender" role="group" aria-label="Avatar">{(['m','f'] as const).map(g => <button key={g} type="button" aria-pressed={gender===g} onClick={() => pickGender(g)}>{g==='m' ? 'Pria' : 'Wanita'}</button>)}</div></div>
@@ -70,6 +69,7 @@ function NetworkPage() {
  <DownlineRadar/>
  <section aria-label="Leader bonus hub" className="mt-6 rounded-2xl border border-chart-3/50 bg-card p-4 md:p-5">
   <div className="eyebrow">LEADER BONUS HUB</div><h2 className="mt-1 font-display text-lg font-bold">My network bonuses</h2>
+  <label className="nx-search mt-3 !w-full"><Search size={18} className="shrink-0"/><input aria-label="Search network members" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search member ID or name"/>{search && <Button variant="ghost" size="sm" className="shrink-0" onClick={() => setSearch('')}>Clear</Button>}</label>
   <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">{[
    ['Direct sponsor', money(usdtDirectBonus), 'text-chart-2'],
    ['Matching profit', money(matchingTotal), 'text-chart-3'],
