@@ -3687,3 +3687,61 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sov-art-card { position: relative; overflow: hidden; isolation: isolate; }
 .sov-art-bg { position: absolute; right: -18%; top: 50%; width: 78%; max-width: none; transform: translateY(-50%) rotate(-8deg); opacity: .28; z-index: -1; pointer-events: none; filter: saturate(1.15) drop-shadow(0 0 24px color-mix(in oklab, var(--primary) 40%, transparent)); -webkit-mask-image: radial-gradient(circle at 60% 50%, #000 35%, transparent 72%); mask-image: radial-gradient(circle at 60% 50%, #000 35%, transparent 72%); }
 .sov-art-logo { width: 56px; height: 56px; object-fit: contain; border-radius: 14px; filter: drop-shadow(0 6px 14px color-mix(in oklab, var(--primary) 45%, transparent)); flex-shrink: 0; }
+
+/* BIX Sovereign Wallet app (reference layout) */
+.sw-app { position: fixed; inset: 0; z-index: 60; overflow-y: auto; background: var(--background); color: var(--foreground); }
+.sw-main { position: relative; margin: 0 auto; max-width: 28rem; padding: 1.25rem 1rem 2rem; }
+.sw-muted { color: var(--muted-foreground); }
+.sw-gold-text { color: var(--primary); font-weight: 700; }
+.sw-up { color: oklch(0.75 0.16 160); } .sw-down { color: var(--destructive); }
+.sw-up-bg, .sw-down-bg, .sw-chg { min-width: 4.5rem; margin-left: .75rem; text-align: center; border-radius: .5rem; padding: .25rem .4rem; font-size: .8rem; font-weight: 700; }
+.sw-up-bg { background: color-mix(in oklab, oklch(0.75 0.16 160) 18%, transparent); color: oklch(0.8 0.16 160); }
+.sw-down-bg { background: color-mix(in oklab, var(--destructive) 18%, transparent); color: var(--destructive); }
+.sw-avatar { display: grid; place-items: center; height: 3.25rem; width: 3.25rem; flex: none; border-radius: 999px; overflow: hidden; border: 2px solid var(--primary); background: radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--primary) 45%, transparent), var(--card)); box-shadow: 0 0 18px color-mix(in oklab, var(--primary) 35%, transparent); }
+.sw-avatar img { width: 82%; height: 82%; object-fit: contain; }
+.sw-pill { display: inline-flex; align-items: center; gap: .35rem; margin-top: .2rem; padding: .1rem .7rem; border-radius: 999px; border: 1px solid var(--primary); color: var(--primary); font-size: .75rem; font-weight: 700; background: color-mix(in oklab, var(--primary) 12%, transparent); }
+.sw-pill i { width: .45rem; height: .45rem; border-radius: 999px; background: oklch(0.75 0.18 150); }
+.sw-round { display: grid; place-items: center; height: 2.6rem; width: 2.6rem; flex: none; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--primary) 30%, var(--border)); background: var(--card); color: var(--primary); }
+.sw-wallet { position: relative; padding-top: 2.6rem; }
+.sw-wallet-card { position: absolute; top: 0; left: 8%; right: 8%; height: 5.5rem; border-radius: 1rem 1rem 0 0; padding: .8rem 1.2rem; display: flex; align-items: flex-start; gap: .5rem; font-weight: 800; letter-spacing: .15em; color: var(--primary-foreground);
+  background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 70%, white) 0%, var(--primary) 45%, color-mix(in oklab, var(--primary) 60%, black) 100%); box-shadow: inset 0 1px 0 color-mix(in oklab, white 50%, transparent), 0 -4px 20px color-mix(in oklab, var(--primary) 30%, transparent); }
+.sw-wallet-card img { width: 1.7rem; height: 1.7rem; object-fit: contain; }
+.sw-wallet-pocket { position: relative; display: flex; align-items: center; gap: .75rem; padding: 2rem 1.2rem 1.6rem; border-radius: 1.6rem; border: 2px solid color-mix(in oklab, var(--primary) 55%, transparent);
+  background: radial-gradient(120% 90% at 20% 0%, color-mix(in oklab, var(--card) 85%, white 4%), var(--background)); box-shadow: inset 0 0 0 6px var(--background), inset 0 0 0 7px color-mix(in oklab, var(--primary) 45%, transparent), 0 18px 40px -16px color-mix(in oklab, var(--primary) 45%, transparent); }
+.sw-wallet-pocket::before { content: ''; position: absolute; inset: 12px; border-radius: 1.2rem; border: 1px dashed color-mix(in oklab, var(--primary) 50%, transparent); pointer-events: none; }
+.sw-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .6rem; border-radius: 999px; background: var(--card); border: 1px solid var(--border); color: var(--primary); font-size: .8rem; font-weight: 700; }
+.sw-chip img { object-fit: contain; }
+.sw-emblem { width: 5.5rem; height: 5.5rem; flex: none; object-fit: cover; border-radius: .9rem; filter: drop-shadow(0 6px 16px color-mix(in oklab, var(--primary) 45%, transparent)); }
+.sw-gold-btn { display: inline-flex; align-items: center; gap: .4rem; padding: .6rem 1.1rem; border-radius: 999px; font-weight: 800; color: var(--primary-foreground);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--primary) 75%, white), var(--primary) 55%, color-mix(in oklab, var(--primary) 70%, black)); box-shadow: inset 0 1px 0 color-mix(in oklab, white 55%, transparent), 0 6px 16px -6px color-mix(in oklab, var(--primary) 70%, transparent); transition: transform .15s; }
+.sw-gold-btn:active { transform: translateY(1px) scale(.98); }
+.sw-action { display: flex; width: 100%; align-items: center; justify-content: center; gap: .55rem; padding: .8rem .6rem; border-radius: 1rem; border: 1px solid color-mix(in oklab, var(--primary) 25%, var(--border)); background: var(--card); }
+.sw-action:active { transform: scale(.97); }
+.sw-gold-dot { display: grid; place-items: center; width: 2.3rem; height: 2.3rem; flex: none; border-radius: 999px; color: var(--primary-foreground); background: radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--primary) 70%, white), var(--primary) 60%, color-mix(in oklab, var(--primary) 65%, black)); }
+.sw-tab-pill { padding: .5rem 1.3rem; border-radius: 999px; font-weight: 800; color: var(--primary-foreground); background: var(--primary); }
+.sw-row { display: flex; align-items: center; gap: .8rem; padding: 1rem; border-radius: 1.1rem; border: 1px solid var(--border); background: var(--card); }
+.sw-coin { display: grid; place-items: center; width: 3rem; height: 3rem; flex: none; border-radius: 999px; font-size: 1.4rem; overflow: hidden; border: 2px solid var(--primary); }
+.sw-coin img { width: 80%; height: 80%; object-fit: contain; }
+.sw-coin-bix { background: radial-gradient(circle, color-mix(in oklab, var(--primary) 30%, black), black); }
+.sw-coin-usdt { background: oklch(0.62 0.12 170); color: white; border-color: oklch(0.62 0.12 170); }
+.sw-coin-bnb { background: oklch(0.82 0.15 85); color: black; border-color: oklch(0.82 0.15 85); }
+.sw-note { margin-top: 1rem; font-size: .75rem; color: var(--muted-foreground); }
+.sw-field { padding: .9rem 1.2rem; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--primary) 60%, transparent); background: var(--card); color: var(--foreground); }
+.sw-menu { position: absolute; right: 0; top: 110%; z-index: 5; display: grid; min-width: 7rem; border-radius: .8rem; border: 1px solid var(--border); background: var(--popover); overflow: hidden; }
+.sw-menu button { padding: .6rem 1rem; text-align: left; font-weight: 700; } .sw-menu button:hover { background: var(--accent); }
+.sw-panel { padding: 1.3rem; border-radius: 1.5rem; border: 1px solid color-mix(in oklab, var(--primary) 22%, var(--border)); background: var(--card); overflow: hidden; }
+.sw-gold-banner { padding: .9rem 1rem; border-radius: .8rem; font-weight: 700; color: var(--primary-foreground); background: linear-gradient(90deg, color-mix(in oklab, var(--primary) 80%, white), color-mix(in oklab, var(--primary) 70%, black)); }
+.sw-qr { width: fit-content; padding: 1rem; border-radius: 1.4rem; background: white; border: 2px solid var(--primary); box-shadow: 0 0 30px color-mix(in oklab, var(--primary) 30%, transparent); }
+.sw-scan { position: relative; margin: 0 -1rem; height: 60vh; background: black; overflow: hidden; }
+.sw-scan-frame { position: absolute; inset: 20% 15%; border: 3px solid var(--primary); border-radius: 1.2rem; box-shadow: 0 0 0 999px color-mix(in oklab, black 40%, transparent); }
+.sw-scan-cam { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: var(--primary); opacity: .4; }
+.sw-discover { background: radial-gradient(80% 120% at 100% 0%, color-mix(in oklab, var(--primary) 18%, transparent), var(--card)); }
+.sw-section-title { padding-left: .7rem; border-left: 4px solid var(--primary); font-size: 1.25rem; }
+.sw-count { min-width: 2rem; padding: .1rem .6rem; text-align: center; border-radius: 999px; background: var(--muted); font-size: .8rem; }
+.sw-app-icon { display: grid; place-items: center; width: 3rem; height: 3rem; flex: none; border-radius: .8rem; font-size: 1.5rem; background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 35%, var(--card)), var(--background)); border: 1px solid var(--border); }
+.sw-list-item { display: flex; align-items: center; gap: .9rem; padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); }
+.sw-list-item:last-child { border-bottom: 0; }
+.sw-icon-box { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; flex: none; border-radius: .7rem; background: var(--muted); }
+.sw-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 61; display: grid; grid-template-columns: repeat(4, 1fr); padding: .5rem 0 calc(.5rem + env(safe-area-inset-bottom)); background: var(--card); border-top: 1px solid var(--border); }
+.sw-dock button { display: flex; flex-direction: column; align-items: center; gap: .2rem; color: var(--muted-foreground); font-size: .8rem; font-weight: 600; }
+.sw-dock button[aria-current='page'] { color: var(--primary); }

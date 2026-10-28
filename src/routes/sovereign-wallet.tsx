@@ -67,10 +67,9 @@ function SovereignApp() {
     const prev = link?.href;
     if (link) link.href = '/sovereign.webmanifest';
     void supabase.from('app_settings').select('value').eq('key', 'bix_token').maybeSingle().then(({ data }) => setBix(((data?.value as { address?: string }) ?? {}).address ?? ''));
-    void supabase.from('app_settings').select('value').eq('key', 'bix_price').maybeSingle().then(({ data }) => {
-      const v = data?.value as { usd?: number; price?: number } | number | null;
-      const n = typeof v === 'number' ? v : Number(v?.usd ?? v?.price ?? 0);
-      if (n > 0) setBixRef(n);
+    void supabase.from('app_settings').select('value').eq('key', 'bix_market').maybeSingle().then(({ data }) => {
+      const n = Number((data?.value as { priceUsd?: number } | null)?.priceUsd ?? 0.84291);
+      setBixRef(n > 0 ? n : 0.84291);
     });
     void (async () => {
       try {
