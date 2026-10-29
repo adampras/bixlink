@@ -4,9 +4,10 @@ import { QRCodeSVG } from 'qrcode.react';
 import {
   ArrowDownLeft, ArrowUpRight, Bell, BarChart3, Camera, ChevronDown, ChevronLeft, ChevronRight, ClipboardPaste, Compass,
   Copy, Eye, EyeOff, Globe, ImageIcon, Languages, Moon, Network, Plus, ScanLine, Search, Shield, SlidersHorizontal, Star,
-  Trash2, User, Wallet, FileText, Download,
+  Trash2, User, Wallet, FileText, Download, Zap, ShieldCheck, RefreshCw,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useMember } from '@/lib/useMember';
 import { InstallAppButton } from '@/components/InstallPrompt';
 import walletArt from '@/assets/bix-lux-wallet.png';
 import foxIcon from '@/assets/fox-icon-512.png.asset.json';
@@ -62,6 +63,10 @@ function SovereignApp() {
   const [prefillTo, setPrefillTo] = useState('');
   const [bixRef, setBixRef] = useState(0);
   const [asset, setAsset] = useState<string | null>(null);
+  const [mode, setMode] = useState<'ledger' | 'web3'>('ledger');
+  const member = useMember();
+  useEffect(() => { const s = localStorage.getItem('sov_mode'); if (s === 'web3' || s === 'ledger') setMode(s); }, []);
+  const pickMode = (m: 'ledger' | 'web3') => { setMode(m); setMsg(''); localStorage.setItem('sov_mode', m); };
   const eth = () => (globalThis as unknown as { ethereum?: Eth }).ethereum;
 
   useEffect(() => {
@@ -112,6 +117,32 @@ function SovereignApp() {
   const bnbP = px['BNB']?.p ?? 0;
   const total = bal ? bal.bix * bixRef + bal.usdt + bal.bnb * bnbP : 0;
   const money = (n: number) => (hide ? '••••' : `$${fmt(n, 2)}`);
+  const ledger = mode === 'ledger';
+  const md = member.data as { bixBalance?: number; usdtBalance?: number; referral?: { code?: string } | null } | undefined;
+  const lBix = Number(md?.bixBalance ?? 0);
+  const lUsdt = Number(md?.usdtBalance ?? 0);
+  const bixId = md?.referral?.code;
+  const ledgerTotal = lBix * bixRef + lUsdt;
+
+  if (asset && !screen && ledger) {
+    const p = asset === 'BIX' ? bixRef : 1;
+    const v = member.user ? (asset === 'BIX' ? lBix : lUsdt) : undefined;
+    return <div className="sw-app"><main className="sw-main">
+      <TopBar title={`${asset} · Account`} onBack={() => setAsset(null)} />
+      <div className="sw-asset-hero text-center">
+        <span className={`sw-coin sw-coin-lg sw-coin-${asset.toLowerCase()}`}>{asset === 'BIX' ? <img src={foxMark} alt="" /> : <b>₮</b>}</span>
+        <b className="numeric mt-3 block font-display text-3xl">{hide ? '••••' : v === undefined ? '—' : fmt(v)} {asset}</b>
+        <small className="sw-muted">≈ {v === undefined ? '—' : money(v * p)} · {asset === 'BIX' ? `$${fmt(p, 4)} internal ref.` : 'BIXLINK app balance'}</small>
+      </div>
+      <div className="mt-5 grid grid-cols-3 gap-2">
+        <Link to={asset === 'BIX' ? '/pay' : '/transfer'} className="sw-action"><span className="sw-gold-dot"><ArrowUpRight size={18} /></span><b>Send</b></Link>
+        <button type="button" className="sw-action" onClick={() => { setAsset(null); if (member.user) setScreen('myid'); }}><span className="sw-gold-dot"><ArrowDownLeft size={18} /></span><b>Receive</b></button>
+        <Link to="/wallet" className="sw-action"><span className="sw-gold-dot"><FileText size={18} /></span><b>History</b></Link>
+      </div>
+      {asset === 'USDT' && <Link to="/wallet" className="sw-gold-btn mt-4 w-full justify-center"><Plus size={16} /> Deposit USDT</Link>}
+      <p className="sw-note">{asset === 'BIX' ? 'Account BIX moves instantly between BIX IDs via BIX PAY, without gas. It is an internal ledger balance, not an on-chain token.' : 'Account USDT is your BIXLINK app balance. Deposits and withdrawals are reviewed by the owner.'}</p>
+    </main></div>;
+  }
 
   if (asset && !screen) {
     const p = asset === 'BIX' ? bixRef : asset === 'USDT' ? 1 : bnbP;
@@ -139,6 +170,7 @@ function SovereignApp() {
   if (screen) {
     return <div className="sw-app"><main className="sw-main">
       {screen === 'send' && <SendScreen addr={addr} bix={bix} bal={bal} initialTo={prefillTo} onBack={() => { setScreen(null); setPrefillTo(''); }} onScan={() => setScreen('scan')} onBook={() => setScreen('book')} onDone={() => void load()} />}
+      {screen === 'myid' && <MyIdScreen code={bixId ?? ''} onBack={() => setScreen(null)} />}
       {screen === 'receive' && <ReceiveScreen addr={addr} onBack={() => setScreen(null)} />}
       {screen === 'scan' && <ScanScreen onBack={() => setScreen(null)} onResult={(v) => { const m = v.match(/0x[a-fA-F0-9]{40}/); if (m) { setPrefillTo(m[0]); setScreen('send'); } else setMsg('QR code does not contain a BNB Chain address.'); }} />}
       {screen === 'book' && <BookScreen onBack={() => setScreen(prefillTo === '' && addr ? 'send' : null)} onPick={(a) => { setPrefillTo(a); setScreen('send'); }} />}
