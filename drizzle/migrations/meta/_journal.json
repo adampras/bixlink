@@ -736,6 +736,13 @@
       "when": 1793252188640,
       "tag": "0104_buyback_early_minimum_validation",
       "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "7",
+      "when": 1793258026065,
+      "tag": "0105_deposit_pending_txid_unique",
+      "breakpoints": true
     }
   ]
 }

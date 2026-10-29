@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS wallet_tx_pending_hash_uniq ON public.wallet_transactions (lower(tx_hash)) WHERE type = 'deposit' AND status = 'pending' AND tx_hash IS NOT NULL;
