@@ -11,6 +11,8 @@ import { useMember } from '@/lib/useMember';
 import { useQuery } from '@tanstack/react-query';
 import { Button as BaseButton, type ButtonProps } from '@/components/ui/button';
 import { AccountLogin, AccountTransfer, AccountHistory, AccountProfile, WalletLanguage } from '@/components/sovereign/AccountScreens';
+import { MarketChart, MarketTerminal } from '@/components/sovereign/MarketTerminal';
+import { readMarketSnapshot, type MarketQuote } from '@/lib/sovereign-market';
 import { parseWalletRecipient } from '@/lib/sovereign-flow';
 import { useI18n } from '@/lib/i18n';
 function Button(props: ButtonProps) { return <BaseButton variant="wallet" size="wallet" {...props} />; }
@@ -68,6 +70,8 @@ function SovereignApp() {
   const [addr, setAddr] = useState('');
   const [bal, setBal] = useState<{ bix: number; usdt: number; bnb: number } | null>(null);
   const [px, setPx] = useState<Record<string, { p: number; c: number }>>({});
+  const [gas, setGas] = useState<number | null>(null);
+  const [snapshot, setSnapshot] = useState('Connecting…');
   const [hide, setHide] = useState(false);
   const [msg, setMsg] = useState('');
   const [prefillTo, setPrefillTo] = useState('');
@@ -81,7 +85,7 @@ function SovereignApp() {
   const walletQ = useQuery({ queryKey: ['my-wallet', member.user?.id], queryFn: () => fetchWallet(), enabled: !!member.user, staleTime: 15_000 });
   useEffect(() => { const s = localStorage.getItem('sov_mode'); if (s === 'web3' || s === 'ledger') setMode(s); }, []);
   const accountGo = (s: Screen) => { setAsset(null); setScreen(member.user ? s : 'login'); };
-  const pickMode = (m: 'ledger' | 'web3') => { setMode(m); setMsg(''); localStorage.setItem('sov_mode', m); };
+  const pickMode = (m: 'ledger' | 'web3') => { if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) navigator.vibrate?.(8); setMode(m); setMsg(''); localStorage.setItem('sov_mode', m); };
   const eth = () => (globalThis as unknown as { ethereum?: Eth }).ethereum;
   useEffect(() => { document.querySelector('.sw-app')?.scrollTo(0, 0); }, [screen, asset, tab]);
 
@@ -94,17 +98,21 @@ function SovereignApp() {
       const n = Number((data?.value as { priceUsd?: number } | null)?.priceUsd ?? 0.84291);
       setBixRef(n > 0 ? n : 0.84291);
     });
-    void (async () => {
+    const cached = readMarketSnapshot<Record<string, MarketQuote>>(localStorage.getItem('sov-quotes'));
+    if (cached) { setPx(cached.data); setSnapshot(`Saved ${new Date(cached.savedAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}`); }
+    const prices = async () => {
       try {
         const syms = ['BNBUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ADAUSDT', 'TRXUSDT', 'TONUSDT', 'LINKUSDT'];
         const r = await fetch(`https://data-api.binance.vision/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(syms))}`);
         const j = (await r.json()) as { symbol: string; lastPrice: string; priceChangePercent: string }[];
         const m: Record<string, { p: number; c: number }> = {};
         j.forEach((t) => { m[t.symbol.replace('USDT', '')] = { p: Number(t.lastPrice), c: Number(t.priceChangePercent) }; });
-        setPx(m);
-      } catch { /* offline */ }
-    })();
-    return () => { if (link && prev) link.href = prev; };
+        setPx(m); setSnapshot(`Updated ${new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}`);
+        try { localStorage.setItem('sov-quotes', JSON.stringify({ savedAt: Date.now(), data: m })); } catch {}
+      } catch { setSnapshot(cached ? 'Offline snapshot' : 'Data unavailable'); }
+    };
+    void prices(); const timer = setInterval(() => void prices(), 30000);
+    return () => { clearInterval(timer); if (link && prev) link.href = prev; };
   }, []);
 
   const load = async (a = addr) => {
@@ -114,6 +122,7 @@ function SovereignApp() {
       setBal({ bix: b, usdt: u, bnb: toNum(n) }); setMsg('');
     } catch { setMsg('Could not reach BNB Chain. Try another node in Me → Node.'); }
   };
+  useEffect(() => { let active = true; const update = () => { void rpc('eth_gasPrice', []).then(g => { if (active) setGas(Number(BigInt(g)) / 1e9); }).catch(() => { if (active) setGas(null); }); }; if (mode === 'web3') update(); const timer = setInterval(() => { if (mode === 'web3') update(); }, 30000); return () => { active = false; clearInterval(timer); }; }, [mode]);
   useEffect(() => { if (addr) void load(addr); }, [addr, bix]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const connect = async () => {
@@ -174,7 +183,7 @@ function SovereignApp() {
         <b className="numeric mt-3 block font-display text-3xl">{hide ? '••••' : v === undefined ? '—' : fmt(v)} {asset}</b>
         <small className="sw-muted">≈ {v === undefined ? '—' : money(v * p)} · {p ? `$${fmt(p, 4)}` : '—'}{asset === 'BIX' ? ' internal ref.' : ''}</small>
       </div>
-      <Spark sym={asset === 'BNB' ? 'BNBUSDT' : null} flat={asset !== 'BNB'} />
+      <MarketChart symbol={asset === 'BNB' ? 'BNBUSDT' : null} />
       <div className="mt-5 grid grid-cols-3 gap-2">
         <Button type="button" className="sw-action" onClick={() => { setSendToken(asset); setAsset(null); void need('send'); }}><span className="sw-gold-dot"><ArrowUpRight size={18} /></span><b>Send</b></Button>
         <Button type="button" className="sw-action" onClick={() => { setAsset(null); void need('receive'); }}><span className="sw-gold-dot"><ArrowDownLeft size={18} /></span><b>Receive</b></Button>
@@ -210,10 +219,10 @@ function SovereignApp() {
           <span className="sw-avatar"><img src={foxMark} alt="" width={44} height={44} /></span>
           <div className="min-w-0 flex-1">
             <b className="block truncate font-display text-lg">{ledger ? (bixId ?? 'BIXLINK Account') : addr ? short(addr) : 'BIXLINK Wallet'}</b>
-            <span className={`sw-pill ${ledger ? 'sw-pill-live' : ''}`}><i aria-hidden /> {ledger ? 'Internal ledger' : 'BSC Mainnet'}</span>
+            <span className={`sw-pill ${ledger ? 'sw-pill-live' : ''}`}><i aria-hidden /> {ledger ? 'Ledger · Gasless · Zero fee' : `BSC · Gas ${gas === null ? '—' : fmt(gas, 3) + ' Gwei'}`}</span>
           </div>
           <Button type="button" className="sw-round" aria-label="Notifications" onClick={() => setScreen('notify')}><Bell size={18} /></Button>
-          <Button className="sw-round" aria-label="Language" onClick={() => setScreen('language')}><Globe size={18} /></Button>
+          <Button className="sw-round" aria-label="Scan QR" onClick={() => ledger ? accountGo('scan') : setScreen('scan')}><ScanLine size={18} /></Button>
         </header>
 
         <div className="sw-mode mt-5" role="tablist" aria-label="Wallet mode">
@@ -228,7 +237,7 @@ function SovereignApp() {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2"><span className="sw-chip">{ledger ? <><ShieldCheck size={13} /> Gasless</> : <><Network size={13} /> BEP-20</>}</span><small className="sw-muted">Total assets</small></div>
               <div className="mt-2 flex items-center gap-2">
-                <b className="numeric font-display text-3xl">{ledger ? (member.user ? walletQ.isPending || walletQ.isError ? '—' : money(ledgerTotal) : '$0.00') : addr ? (bal ? money(total) : '…') : '$0.00'}</b>
+                <b className="numeric font-display text-3xl">{ledger ? (member.user ? walletQ.isPending ? <span className="sw-skeleton inline-block h-9 w-24" aria-label="Loading balance"/> : walletQ.isError ? '—' : money(ledgerTotal) : '$0.00') : addr ? (bal ? money(total) : <span className="sw-skeleton inline-block h-9 w-24" aria-label="Loading balance"/>) : '$0.00'}</b>
                 <Button type="button" aria-label={hide ? 'Show balance' : 'Hide balance'} onClick={() => setHide(!hide)} className="sw-muted">{hide ? <EyeOff size={18} /> : <Eye size={18} />}</Button>
               </div>
               {ledger
@@ -242,17 +251,22 @@ function SovereignApp() {
           </div>
         </section>
 
-        <div className="mt-5 grid grid-cols-3 gap-2">
+        <div className="sw-quad mt-5">
           {ledger ? <>
-            <Button className="sw-action" onClick={() => { setSendToken('BIX'); accountGo('accountsend'); }}><span className="sw-gold-dot"><ArrowUpRight size={18} /></span><span className="min-w-0 text-center"><b className="block truncate">Transfer</b><small className="sw-muted block truncate">BIX PAY</small></span></Button>
-            <Button type="button" className="sw-action" onClick={() => accountGo('myid')}><span className="sw-gold-dot"><ArrowDownLeft size={18} /></span><span className="min-w-0 text-center"><b className="block truncate">Receive</b><small className="sw-muted block truncate">My BIX ID</small></span></Button>
-            <Button className="sw-action" onClick={() => { setSendToken('BIX'); accountGo('scan'); }}><span className="sw-gold-dot"><ScanLine size={18} /></span><span className="min-w-0 text-center"><b className="block truncate">Scan</b><small className="sw-muted block truncate">Pay by QR</small></span></Button>
-          </> : ([['send', 'Transfer', 'Send crypto', ArrowUpRight], ['receive', 'Receive', 'Get crypto', ArrowDownLeft], ['scan', 'Scan', 'QR code', ScanLine]] as const).map(([s, t, d, I]) =>
-            <Button key={s} type="button" className="sw-action" onClick={() => (s === 'scan' ? setScreen('scan') : void need(s))}>
-              <span className="sw-gold-dot"><I size={18} /></span><span className="min-w-0 text-center"><b className="block truncate">{t}</b><small className="sw-muted block truncate">{d}</small></span>
-            </Button>)}
+            <Button className="sw-action" onClick={() => { setSendToken('BIX'); accountGo('accountsend'); }}><span className="sw-gold-dot"><ArrowUpRight size={18} /></span><span className="min-w-0 text-center"><b className="block">Send</b></span></Button>
+            <Button type="button" className="sw-action" onClick={() => accountGo('myid')}><span className="sw-gold-dot"><ArrowDownLeft size={18} /></span><span className="min-w-0 text-center"><b className="block">Receive</b></span></Button>
+            <Button className="sw-action" onClick={() => { setSendToken('BIX'); accountGo('scan'); }}><span className="sw-gold-dot"><ScanLine size={18} /></span><b>BIX PAY</b></Button>
+            <Button className="sw-action" onClick={() => accountGo('history')}><span className="sw-gold-dot"><FileText size={18}/></span><b>History</b></Button>
+          </> : <>
+            <Button className="sw-action" onClick={() => void need('send')}><span className="sw-gold-dot"><ArrowUpRight size={18}/></span><b>Send</b></Button>
+            <Button className="sw-action" onClick={() => void need('receive')}><span className="sw-gold-dot"><ArrowDownLeft size={18}/></span><b>Receive</b></Button>
+            <BaseButton variant="wallet" size="wallet" asChild className="sw-action"><a href={addr ? `${SCAN}/address/${addr}` : SCAN} target="_blank" rel="noreferrer"><span className="sw-gold-dot"><Search size={18}/></span><b>Explorer</b></a></BaseButton>
+            <Button className="sw-action" onClick={() => void addToken()}><span className="sw-gold-dot"><Plus size={18}/></span><b>Add BIX</b></Button>
+          </>}
         </div>
 
+        {ledger && member.user && <div className="sw-stake-strip mt-4"><ShieldCheck size={14}/><span>Active stakes</span><b>{member.data?.stakes.filter(s => s.status === 'active').length ?? 0}</b><small>Projection stays separate</small></div>}
+        {!ledger && addr && <p className="sw-note">Portfolio 24h P&L unavailable without verified historical holdings.</p>}
         <div className="mt-5 flex items-center gap-2">
           <span className="sw-tab-pill">{ledger ? 'Account assets' : 'On-chain assets'}</span><span className="flex-1" />
           <Button type="button" className="sw-round" aria-label="Search market" onClick={() => setTab('market')}><Search size={16} /></Button>
@@ -285,7 +299,7 @@ function SovereignApp() {
           : 'Self-custody: your keys stay in your own wallet app. On-chain balances are separate from your BIXLINK app ledger. BIX value uses the internal reference, not a market price.'}</p>
       </>}
 
-      {tab === 'market' && <MarketTab px={px} bixRef={bixRef} />}
+      {tab === 'market' && <MarketTerminal px={px} bixRef={bixRef} snapshot={snapshot} />}
       {tab === 'discover' && <DiscoverTab />}
       {tab === 'me' && <><AccountProfile addr={addr} go={s => setScreen(s as Screen)} disconnect={() => { setAddr(''); setBal(null); }} /><div className="mt-6"><InstallAppButton /></div></>}
     </main>
@@ -461,65 +475,6 @@ function InfoScreen({ title, onBack }: { title: string; onBack: () => void }) {
       <p><b className="sw-gold-text">Verify.</b> Always check the BIX contract address on BscScan before sending or adding tokens.</p>
       <p><b className="sw-gold-text">Final.</b> Blockchain transfers cannot be reversed.</p>
     </div>
-  </>;
-}
-
-const IV = ['1h', '4h', '1d'] as const;
-function Spark({ sym, flat }: { sym: string | null; flat?: boolean }) {
-  const [iv, setIv] = useState<(typeof IV)[number]>('1h');
-  const [pts, setPts] = useState<number[]>([]);
-  const [chartState, setChartState] = useState('Loading chart…');
-  useEffect(() => {
-    if (!sym) { setPts([]); return; }
-    let on = true; setPts([]); setChartState('Loading chart…');
-    const abort = new AbortController();
-    const timeout = setTimeout(() => abort.abort(), 10000);
-    void fetch(`https://data-api.binance.vision/api/v3/klines?symbol=${sym}&interval=${iv}&limit=48`, { signal: abort.signal }).then((r) => { if (!r.ok) throw new Error(); return r.json(); }).then((k: string[][]) => { if (!Array.isArray(k) || k.length < 2) throw new Error(); if (on) setPts(k.map((x) => Number(x[4]))); }).catch(() => { if (on) setChartState('Market data unavailable. Try another timeframe.'); }).finally(() => clearTimeout(timeout));
-    return () => { on = false; abort.abort(); clearTimeout(timeout); };
-  }, [sym, iv]);
-  const W = 320, Hh = 120;
-  const data = pts.length > 1 ? pts : flat ? [1, 1] : [];
-  const mn = Math.min(...data), mx = Math.max(...data), rg = mx - mn || 1;
-  const xy = data.map((v, i) => [(i / (data.length - 1)) * W, Hh - 8 - ((v - mn) / rg) * (Hh - 16)]);
-  const line = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${(x ?? 0).toFixed(1)},${(y ?? 0).toFixed(1)}`).join(' ');
-  const up = data.length > 1 && (data[data.length - 1] ?? 0) >= (data[0] ?? 0);
-  return <div className="mt-3">
-    {data.length > 1 ? <svg viewBox={`0 0 ${W} ${Hh}`} className={`sw-spark ${up ? 'sw-spark-up' : 'sw-spark-down'}`} role="img" aria-label="Price chart">
-      <defs><linearGradient id="swg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="currentColor" stopOpacity=".35" /><stop offset="1" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs>
-      {[0.25, 0.5, 0.75].map((g) => <line key={g} x1="0" x2={W} y1={Hh * g} y2={Hh * g} className="sw-grid" />)}
-      <path d={`${line} L${W},${Hh} L0,${Hh} Z`} fill="url(#swg)" /><path d={line} fill="none" stroke="currentColor" strokeWidth="2" />
-    </svg> : <div className="sw-spark grid place-items-center sw-muted text-sm">{chartState}</div>}
-    {sym && <div className="mt-2 flex justify-center gap-2">{IV.map((i) => <Button key={i} type="button" onClick={() => setIv(i)} className={`sw-chg ${iv === i ? 'sw-up-bg' : 'sw-muted'}`}>{i}</Button>)}</div>}
-  </div>;
-}
-
-function MarketTab({ px, bixRef }: { px: Record<string, { p: number; c: number }>; bixRef: number }) {
-  const [q, setQ] = useState('');
-  const [sort, setSort] = useState<'n' | 'p' | 'c'>('n');
-  const [dir, setDir] = useState(1);
-  const rows = [{ s: 'BIX', p: bixRef, c: 0, ref: true }, ...Object.entries(px).map(([s, v]) => ({ s, p: v.p, c: v.c, ref: false }))]
-    .filter((r) => r.s.toLowerCase().includes(q.toLowerCase()))
-    .sort((a, b) => dir * (sort === 'n' ? a.s.localeCompare(b.s) : sort === 'p' ? a.p - b.p : a.c - b.c));
-  const H = ({ k, l }: { k: 'n' | 'p' | 'c'; l: string }) => <Button type="button" className="sw-muted text-sm" onClick={() => { if (sort === k) setDir(-dir); else { setSort(k); setDir(1); } }}>{l} ⇅</Button>;
-  const [sel, setSel] = useState('BTC');
-  const sp = px[sel];
-  return <>
-    <section className="sw-chart-card">
-      <div className="flex items-end justify-between"><div><small className="sw-muted">{sel}/USDT</small><b className="numeric block font-display text-2xl">{sp ? `$${fmt(sp.p, sp.p < 1 ? 6 : 2)}` : '—'}</b></div>
-        {sp && <span className={`sw-chg ${sp.c >= 0 ? 'sw-up-bg' : 'sw-down-bg'}`}>{sp.c >= 0 ? '+' : ''}{sp.c.toFixed(2)}%</span>}</div>
-      <Spark sym={`${sel}USDT`} />
-    </section>
-    <div className="sw-field mt-4 flex items-center gap-3"><Search size={18} className="sw-gold-text" /><input className="flex-1 bg-transparent outline-none" placeholder="Search currency" value={q} onChange={(e) => setQ(e.target.value)} /></div>
-    <div className="mt-5 flex items-center justify-between px-2"><H k="n" l="Name" /><span className="flex gap-6"><H k="p" l="Last price" /><H k="c" l="24h" /></span></div>
-    <div className="mt-2 space-y-1">
-      {rows.length === 0 && <p className="sw-note mt-16 text-center">No matching currency found.</p>}
-      {rows.map((r) => <Button type="button" key={r.s} onClick={() => !r.ref && setSel(r.s)} aria-pressed={sel === r.s} className={`sw-row w-full text-left !py-3 ${sel === r.s ? 'sw-row-on' : ''}`}>
-        <b className="flex-1">{r.s}<small className="sw-muted"> /USDT</small></b>
-        <span className="numeric">{r.p ? `$${fmt(r.p, r.p < 1 ? 6 : 2)}` : '—'}</span>
-        {r.ref ? <span className="sw-chg sw-muted text-xs">Ref.</span> : <span className={`sw-chg ${r.c >= 0 ? 'sw-up-bg' : 'sw-down-bg'}`}>{r.c >= 0 ? '+' : ''}{r.c.toFixed(2)}%</span>}
-      </Button>)}
-    </div>
-    <p className="sw-note">Prices from Binance public data. BIX shows the internal reference, not a traded market price.</p>
   </>;
 }
 
