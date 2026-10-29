@@ -10,7 +10,7 @@ describe('Owner-selected presentation themes', () => {
     expect(resolvePresentationTheme(undefined)).toBe('original');
   });
   it('supports the additional clear-glass model without retiring existing themes', () => {
-    expect(PRESENTATION_THEMES).toEqual(['original', 'emerald', 'graphite', 'royal', 'glass', 'future']);
+    expect(PRESENTATION_THEMES).toEqual(['original', 'emerald', 'graphite', 'royal', 'glass', 'future', 'matcha']);
     expect(resolvePresentationTheme('glass')).toBe('glass');
   });
 });
