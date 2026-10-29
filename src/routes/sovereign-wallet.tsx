@@ -7,7 +7,7 @@ import {
   Trash2, User, Wallet, FileText, Download, Zap, ShieldCheck, RefreshCw,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useMember } from '@/lib/useMember';
+import { useMember, usePublicConfig } from '@/lib/useMember';
 import { useQuery } from '@tanstack/react-query';
 import { Button as BaseButton, type ButtonProps } from '@/components/ui/button';
 import { AccountLogin, AccountTransfer, AccountHistory, AccountProfile, WalletLanguage } from '@/components/sovereign/AccountScreens';
@@ -81,6 +81,7 @@ function SovereignApp() {
   const [asset, setAsset] = useState<string | null>(null);
   const [mode, setMode] = useState<'ledger' | 'web3'>('ledger');
   const member = useMember();
+  const { data: swCfg } = usePublicConfig();
   const fetchWallet = useServerFn(getMyWallet);
   const walletQ = useQuery({ queryKey: ['my-wallet', member.user?.id], queryFn: () => fetchWallet(), enabled: !!member.user, staleTime: 15_000 });
   useEffect(() => { const s = localStorage.getItem('sov_mode'); if (s === 'web3' || s === 'ledger') setMode(s); }, []);
@@ -151,6 +152,12 @@ function SovereignApp() {
   const lUsdt = Number(walletQ.data?.usdtBalance ?? md?.usdtBalance ?? 0);
   const bixId = md?.referral?.code;
   const ledgerTotal = lBix * bixRef + lUsdt;
+
+  if (swCfg && swCfg.readiness.sovereignWalletEnabled === false && !member.data?.isAdmin) {
+    return <div className="sw-app"><main className="sw-main grid min-h-[70vh] place-items-center text-center">
+      <div><img src={walletArt} alt="BIXLINK wallet" className="sw-emblem sw-emblem-xl mx-auto" /><b className="mt-4 block font-display text-2xl">Wallet under maintenance</b><p className="sw-note">BIXLINK Wallet is temporarily closed by the owner. Your account balance is safe in the BIXLINK app.</p><a href="/wallet" className="sw-gold-btn mt-4 inline-flex px-5 py-2">Back to BIXLINK</a></div>
+    </main></div>;
+  }
 
   if (asset && !screen && ledger) {
     const p = asset === 'BIX' ? bixRef : 1;
