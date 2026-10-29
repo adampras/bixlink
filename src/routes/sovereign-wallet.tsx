@@ -18,6 +18,7 @@ import { useI18n } from '@/lib/i18n';
 function Button(props: ButtonProps) { return <BaseButton variant="wallet" size="wallet" {...props} />; }
 import { useServerFn } from '@tanstack/react-start';
 import { getMyWallet } from '@/lib/bixlink.functions';
+import { getFiatRates } from '@/lib/market.functions';
 import { InstallAppButton } from '@/components/InstallPrompt';
 import walletArt from '@/assets/bix-lux-wallet.png';
 import foxIcon from '@/assets/fox-icon-512.png.asset.json';
@@ -267,15 +268,15 @@ function SovereignApp() {
 
         <div className="sw-quad mt-5">
           {ledger ? <>
-            <Button className="sw-action" onClick={() => { setSendToken('BIX'); accountGo('accountsend'); }}><span className="sw-gold-dot"><ArrowUpRight size={18} /></span><span className="min-w-0 text-center"><b className="block">Send</b></span></Button>
-            <Button type="button" className="sw-action" onClick={() => accountGo('myid')}><span className="sw-gold-dot"><ArrowDownLeft size={18} /></span><span className="min-w-0 text-center"><b className="block">Receive</b></span></Button>
-            <Button className="sw-action" onClick={() => { setSendToken('BIX'); accountGo('scan'); }}><span className="sw-gold-dot"><ScanLine size={18} /></span><b>BIX PAY</b></Button>
-            <Button className="sw-action" onClick={() => accountGo('history')}><span className="sw-gold-dot"><FileText size={18}/></span><b>History</b></Button>
+            <Button className="sw-action" data-tone="gold" onClick={() => { setSendToken('BIX'); accountGo('accountsend'); }}><span className="sw-gold-dot"><ArrowUpRight size={18} /></span><span className="min-w-0 text-center"><b className="block">Send</b></span></Button>
+            <Button type="button" className="sw-action" data-tone="emerald" onClick={() => accountGo('myid')}><span className="sw-gold-dot"><ArrowDownLeft size={18} /></span><span className="min-w-0 text-center"><b className="block">Receive</b></span></Button>
+            <Button className="sw-action" data-tone="violet" onClick={() => { setSendToken('BIX'); accountGo('scan'); }}><span className="sw-gold-dot"><ScanLine size={18} /></span><b>BIX PAY</b></Button>
+            <Button className="sw-action" data-tone="cyan" onClick={() => accountGo('history')}><span className="sw-gold-dot"><FileText size={18}/></span><b>History</b></Button>
           </> : <>
-            <Button className="sw-action" onClick={() => void need('send')}><span className="sw-gold-dot"><ArrowUpRight size={18}/></span><b>Send</b></Button>
-            <Button className="sw-action" onClick={() => void need('receive')}><span className="sw-gold-dot"><ArrowDownLeft size={18}/></span><b>Receive</b></Button>
-            <BaseButton variant="wallet" size="wallet" asChild className="sw-action"><a href={addr ? `${SCAN}/address/${addr}` : SCAN} target="_blank" rel="noreferrer"><span className="sw-gold-dot"><Search size={18}/></span><b>Explorer</b></a></BaseButton>
-            <Button className="sw-action" onClick={() => void addToken()}><span className="sw-gold-dot"><Plus size={18}/></span><b>Add BIX</b></Button>
+            <Button className="sw-action" data-tone="gold" onClick={() => void need('send')}><span className="sw-gold-dot"><ArrowUpRight size={18}/></span><b>Send</b></Button>
+            <Button className="sw-action" data-tone="emerald" onClick={() => void need('receive')}><span className="sw-gold-dot"><ArrowDownLeft size={18}/></span><b>Receive</b></Button>
+            <BaseButton variant="wallet" size="wallet" asChild className="sw-action" data-tone="violet"><a href={addr ? `${SCAN}/address/${addr}` : SCAN} target="_blank" rel="noreferrer"><span className="sw-gold-dot"><Search size={18}/></span><b>Explorer</b></a></BaseButton>
+            <Button className="sw-action" data-tone="cyan" onClick={() => void addToken()}><span className="sw-gold-dot"><Plus size={18}/></span><b>Add BIX</b></Button>
           </>}
         </div>
 
@@ -584,4 +585,16 @@ function MyIdScreen({ code, onBack }: { code: string; onBack: () => void }) {
       <Button type="button" className="sw-gold-btn mx-auto mt-6 w-4/5 justify-center !py-3" disabled={!code} onClick={() => { void navigator.clipboard.writeText(code); setC(true); }}><Copy size={18} /> {c ? 'Copied' : 'Copy BIX ID'}</Button>
     </section>
   </>;
+}
+
+function FiatStrip({ usd, hide, split }: { usd: number; hide: boolean; split: number | null }) {
+  const fetchFiat = useServerFn(getFiatRates);
+  const fx = useQuery({ queryKey: ['wallet-fiat-rates'], queryFn: () => fetchFiat(), staleTime: 3_600_000 });
+  const rows = (fx.data ?? []).filter(r => ['IDR', 'MYR', 'CNY', 'SGD', 'AED', 'INR'].includes(r.code));
+  return <div className="sw-fx" aria-label="Currency conversions">
+    <div className="sw-fx-grid">{rows.length ? rows.map(r => <div key={r.code}><small>{r.code}</small><b className="numeric">{hide ? '••••' : (usd * r.rate).toLocaleString('en-US', { maximumFractionDigits: r.code === 'IDR' || r.code === 'INR' ? 0 : 2 })}</b></div>)
+      : Array.from({ length: 6 }, (_, k) => <div key={k}><span className="sw-skeleton inline-block h-6 w-full" /></div>)}</div>
+    {split !== null && <div className="sw-split" aria-label="Portfolio split"><div className="sw-split-bar"><span style={{ width: `${(split * 100).toFixed(1)}%` }} /></div><small><b>BIX {(split * 100).toFixed(1)}%</b> · USDT {((1 - split) * 100).toFixed(1)}%</small></div>}
+    <small className="sw-muted block text-[.65rem]">Reference FX rates · display only</small>
+  </div>;
 }

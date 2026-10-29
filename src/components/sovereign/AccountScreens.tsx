@@ -8,7 +8,7 @@ import { signInWithIdentifier } from '@/lib/login.functions';
 import { lookupBixPay, sendBixPay, getBixPay, getMyWallet } from '@/lib/bixlink.functions';
 import { getSovereignVirtual, sendSovereignVirtual } from '@/lib/sovereign-account.functions';
 import { useMember, usePublicConfig } from '@/lib/useMember';
-import { LANGUAGES, useI18n } from '@/lib/i18n';
+import { FLAG_CODE, LANGUAGES, useI18n } from '@/lib/i18n';
 import { hasPin, checkPin } from '@/components/TxFeedback';
 import { useNavigate } from '@tanstack/react-router';
 import { WalletSignIn } from '@/components/WalletSignIn';
