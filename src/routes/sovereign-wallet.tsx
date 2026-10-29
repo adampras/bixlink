@@ -45,7 +45,9 @@ const getNode = () => (typeof localStorage !== 'undefined' && localStorage.getIt
 
 async function rpc(method: string, params: unknown[]) {
   const r = await fetch(getNode(), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) });
-  return ((await r.json()) as { result?: string }).result ?? '0x0';
+  const data = await r.json() as { result?: string; error?: unknown };
+  if (!r.ok || data.error || typeof data.result !== 'string') throw new Error('BNB Chain unavailable');
+  return data.result;
 }
 const toNum = (hex: string) => (hex && hex !== '0x' ? Number(BigInt(hex) / 10n ** 12n) / 1e6 : 0);
 const balOf = async (token: string, a: string) => toNum(await rpc('eth_call', [{ to: token, data: '0x70a08231' + a.slice(2).toLowerCase().padStart(64, '0') }, 'latest']));
@@ -81,6 +83,7 @@ function SovereignApp() {
   const accountGo = (s: Screen) => { setAsset(null); setScreen(member.user ? s : 'login'); };
   const pickMode = (m: 'ledger' | 'web3') => { setMode(m); setMsg(''); localStorage.setItem('sov_mode', m); };
   const eth = () => (globalThis as unknown as { ethereum?: Eth }).ethereum;
+  useEffect(() => { document.querySelector('.sw-app')?.scrollTo(0, 0); }, [screen, asset, tab]);
 
   useEffect(() => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
@@ -117,14 +120,17 @@ function SovereignApp() {
     const w = eth();
     if (!w) { setMsg('Open this page inside TokenPocket, Trust Wallet or MetaMask to connect your wallet.'); return false; }
     try {
-      try { await w.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] }); } catch { /* already on BSC */ }
-      const [a] = await w.request({ method: 'eth_requestAccounts' }); setAddr(a); return true;
+      await w.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] });
+      const [a] = await w.request({ method: 'eth_requestAccounts' });
+      if (typeof a !== 'string' || !isAddr(a)) return false;
+      setAddr(a); return true;
     } catch { setMsg('Connection cancelled.'); return false; }
   };
   const need = async (s: Screen) => { if (addr || (await connect())) setScreen(s); };
   const addToken = async () => {
     if (!bix) return setMsg('BIX contract is not published yet.');
-    try { await eth()?.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: bix, symbol: 'BIX', decimals: 18 } } }); } catch { setMsg('Token was not added.'); }
+    if (!eth()) { await connect(); return; }
+    try { const added = await eth()?.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: bix, symbol: 'BIX', decimals: 18 } } }); setMsg(added ? 'BIX added to wallet.' : 'Token was not added.'); } catch { setMsg('Token was not added.'); }
   };
 
   const bnbP = px['BNB']?.p ?? 0;
@@ -222,7 +228,7 @@ function SovereignApp() {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2"><span className="sw-chip">{ledger ? <><ShieldCheck size={13} /> Gasless</> : <><Network size={13} /> BEP-20</>}</span><small className="sw-muted">Total assets</small></div>
               <div className="mt-2 flex items-center gap-2">
-                <b className="numeric font-display text-3xl">{ledger ? (member.user ? money(ledgerTotal) : '$0.00') : addr ? (bal ? money(total) : '…') : '$0.00'}</b>
+                <b className="numeric font-display text-3xl">{ledger ? (member.user ? walletQ.isPending || walletQ.isError ? '—' : money(ledgerTotal) : '$0.00') : addr ? (bal ? money(total) : '…') : '$0.00'}</b>
                 <Button type="button" aria-label={hide ? 'Show balance' : 'Hide balance'} onClick={() => setHide(!hide)} className="sw-muted">{hide ? <EyeOff size={18} /> : <Eye size={18} />}</Button>
               </div>
               {ledger
@@ -273,6 +279,7 @@ function SovereignApp() {
           </Button>)}
         </section>
         {msg && <p className="sw-note">{msg}</p>}
+        {ledger && walletQ.isError && <p role="alert" className="sw-note">Balance unavailable. <Button className="sw-gold-text" onClick={() => void walletQ.refetch()}>Retry</Button></p>}
         <p className="sw-note">{ledger
           ? 'BIXLINK Account shows your app ledger: instant, gas-free transfers between BIX IDs. These balances are not on-chain tokens and staking profit shown elsewhere is a projection.'
           : 'Self-custody: your keys stay in your own wallet app. On-chain balances are separate from your BIXLINK app ledger. BIX value uses the internal reference, not a market price.'}</p>
@@ -376,7 +383,7 @@ function ScanScreen({ onBack, onResult }: { onBack: () => void; onResult: (v: st
     void (async () => {
       try {
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        if (!alive || !video.current) return;
+        if (!alive || !video.current) { stream.getTracks().forEach(t => t.stop()); return; }
         video.current.srcObject = stream; await video.current.play();
         if (!BD) { setErr('Live scanning is not supported in this browser. Use My album.'); return; }
         const det = new BD({ formats: ['qr_code'] });
@@ -388,7 +395,12 @@ function ScanScreen({ onBack, onResult }: { onBack: () => void; onResult: (v: st
   }, [onResult]);
   const fromFile = async (f?: File) => {
     const BD = (globalThis as unknown as { BarcodeDetector?: new (o: unknown) => { detect: (s: unknown) => Promise<{ rawValue: string }[]> } }).BarcodeDetector;
-    if (!f || !BD) return setErr('QR reading from images is not supported in this browser.');
+    if (!f) return;
+    if (!BD) {
+      try { const { Html5Qrcode } = await import('html5-qrcode'); const reader = new Html5Qrcode('sw-file-reader'); const text = await reader.scanFile(f, false); reader.clear(); onResult(text); }
+      catch { setErr('No QR code found in that image.'); }
+      return;
+    }
     try { const r = await new BD({ formats: ['qr_code'] }).detect(await createImageBitmap(f)); r[0] ? onResult(r[0].rawValue) : setErr('No QR code found in that image.'); } catch { setErr('Could not read that image.'); }
   };
   return <>
@@ -396,6 +408,7 @@ function ScanScreen({ onBack, onResult }: { onBack: () => void; onResult: (v: st
     <div className="sw-scan"><video ref={video} muted playsInline className="h-full w-full object-cover" /><span className="sw-scan-frame" aria-hidden /><Camera className="sw-scan-cam" size={28} aria-hidden /></div>
     {err && <p className="sw-note">{err}</p>}
     <input ref={file} type="file" accept="image/*" hidden onChange={(e) => void fromFile(e.target.files?.[0])} />
+    <div id="sw-file-reader" className="hidden" />
     <Button type="button" className="sw-action mx-auto mt-6 !w-auto !flex-row !px-8 !py-4" onClick={() => file.current?.click()}><ImageIcon size={20} /> <b>My album</b></Button>
   </>;
 }
