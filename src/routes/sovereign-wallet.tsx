@@ -559,3 +559,16 @@ function MeTab({ addr, go }: { addr: string; go: (s: Screen) => void }) {
     <div className="mt-4"><InstallAppButton /></div>
   </>;
 }
+
+function MyIdScreen({ code, onBack }: { code: string; onBack: () => void }) {
+  const [c, setC] = useState(false);
+  return <>
+    <TopBar title="Receive · BIX ID" onBack={onBack} />
+    <section className="sw-panel">
+      <p className="sw-gold-banner">Share this BIX ID to receive BIX instantly from other BIXLINK members. Gas-free, inside the BIXLINK ledger.</p>
+      <div className="sw-qr mx-auto mt-6"><QRCodeSVG value={code || 'BIXLINK'} size={210} /></div>
+      <b className="mt-6 block text-center font-display text-2xl tracking-widest">{code || '—'}</b>
+      <button type="button" className="sw-gold-btn mx-auto mt-6 w-4/5 justify-center !py-3" disabled={!code} onClick={() => { void navigator.clipboard.writeText(code); setC(true); }}><Copy size={18} /> {c ? 'Copied' : 'Copy BIX ID'}</button>
+    </section>
+  </>;
+}
