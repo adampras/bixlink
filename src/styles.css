@@ -4013,3 +4013,11 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 [data-presentation-theme="matcha"] .theme-swatches i:nth-child(1), .theme-miniature[data-presentation-theme="matcha"] .theme-swatches i:nth-child(1) { background: var(--matcha-gloss); }
 [data-presentation-theme="matcha"] .theme-swatches i:nth-child(2) { background: var(--silver-gloss); }
 [data-presentation-theme="matcha"] .theme-swatches i:nth-child(3) { background: var(--orange-gloss); }
+
+/* Restrained color roles: matcha actions/yield, silver totals, orange pending. */
+[data-presentation-theme="matcha"] :is(.duration-stake,.header-signin,.launch-app-btn) { background: var(--matcha-gloss); color: var(--background); }
+[data-presentation-theme="matcha"] :is(.duration-yield dd,.lux-ledger > div:nth-of-type(2) b) { color: var(--primary); }
+[data-presentation-theme="matcha"] .lux-ledger-total b { color: var(--chart-2); }
+[data-presentation-theme="matcha"] .tier-bar[aria-pressed="true"] { border-color: var(--primary); }
+.stake-detail-dialog { background: var(--card); color: var(--foreground); border-color: var(--border); }
+.stake-receipt { background: color-mix(in oklab, var(--primary) 5%, transparent); }

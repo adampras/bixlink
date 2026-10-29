@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -110,9 +111,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: installIcon.url },
       { rel: "preload", as: "image", href: splashArtwork.url },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
@@ -126,11 +124,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const wallet = useRouterState({ select: state => state.location.pathname === '/sovereign-wallet' });
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: "try{var d=document.documentElement,m=localStorage.getItem('bixlink-color-mode'),t=localStorage.getItem('bixlink-theme');d.dataset.colorMode=m==='light'?'light':'dark';if(t)d.dataset.presentationTheme=t}catch(e){}" }} />
         <HeadContent />
+        <link rel="manifest" href={wallet ? '/sovereign.webmanifest' : '/manifest.webmanifest'} />
+        <link rel="icon" type="image/png" href={wallet ? '/wallet-icons/wallet-192.png' : '/favicon.png'} />
+        <link rel="apple-touch-icon" href={wallet ? '/wallet-icons/wallet-180.png' : installIcon.url} />
       </head>
       <body>
         {children}
