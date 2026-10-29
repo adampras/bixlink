@@ -268,7 +268,7 @@ function SovereignApp() {
 
     <nav className="sw-dock" aria-label="Wallet navigation">
       {([['wallet', 'Wallet', Wallet], ['market', 'Market', BarChart3], ['discover', 'Discover', Compass], ['me', 'Me', User]] as const).map(([k, l, I]) =>
-        <button key={k} type="button" aria-current={tab === k ? 'page' : undefined} onClick={() => { setTab(k); window.scrollTo(0, 0); }}><I size={22} /><span>{l}</span></button>)}
+        <button key={k} type="button" data-tone={k} aria-current={tab === k ? 'page' : undefined} onClick={() => { setTab(k); window.scrollTo(0, 0); }}><span className="sw-dock-orb"><I size={20} /></span><span>{l}</span></button>)}
     </nav>
   </div>;
 }
