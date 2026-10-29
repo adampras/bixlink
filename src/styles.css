@@ -3951,3 +3951,24 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @keyframes sw-lux-rise { from { opacity: 0; transform: translateY(60px) scale(.85) rotateX(25deg); } }
 @keyframes sw-lux-shine { to { transform: translateX(120%); } }
 @media (prefers-reduced-motion: reduce) { .sw-lux-card, .sw-lux-card::after, .sw-lux-overlay { animation: none; } }
+
+/* Sovereign wallet: Black Matcha theme (owner toggle) */
+.sw-app[data-wtheme='matcha'] {
+  --background: oklch(0.13 0.008 140); --foreground: oklch(0.97 0.01 120);
+  --card: oklch(0.18 0.012 140); --card-foreground: oklch(0.97 0.01 120);
+  --muted: oklch(0.23 0.015 140); --muted-foreground: oklch(0.72 0.03 130);
+  --border: oklch(0.32 0.04 135);
+  --primary: oklch(0.80 0.19 128); --primary-foreground: oklch(0.14 0.02 140);
+  --accent: oklch(0.94 0.02 110); --accent-foreground: oklch(0.14 0.02 140);
+  --chart-1: oklch(0.80 0.19 128); --chart-2: oklch(0.70 0.16 150); --chart-3: oklch(0.88 0.17 115); --chart-4: oklch(0.95 0.02 110);
+  --sw-gold: var(--primary);
+  background: radial-gradient(120% 60% at 50% 0%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 60%), linear-gradient(90deg, oklch(0.16 0.01 140) 0 50%, oklch(0.11 0.005 140) 50% 100%);
+}
+.sw-app[data-wtheme='matcha'] .sw-wallet-pocket { background: linear-gradient(160deg, oklch(0.96 0.015 110) 0 4%, oklch(0.2 0.02 140) 4%, oklch(0.12 0.006 140)) !important; border-color: color-mix(in oklab, var(--primary) 45%, transparent) !important; }
+
+/* Discover browser: full screen, dock hidden */
+.sw-app .sw-browser { position: fixed; inset: 0; z-index: 70; display: flex; flex-direction: column; gap: .4rem; padding: calc(.5rem + env(safe-area-inset-top)) .5rem calc(.5rem + env(safe-area-inset-bottom)); background: var(--background); }
+.sw-app .sw-browser .sw-browser-frame { flex: 1; min-height: 0; border-radius: .75rem; }
+.sw-app:has(.sw-browser) .sw-dock { display: none; }
+.sw-app .sw-browser-note { margin: 0; font-size: .65rem; }
+.sw-app .sw-exit { background: var(--primary) !important; color: var(--primary-foreground) !important; }
