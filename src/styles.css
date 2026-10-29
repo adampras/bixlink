@@ -3251,12 +3251,23 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 
 /* Oct 25 — Minimalist Obsidian Lux stake card */
 .duration-package { background: linear-gradient(160deg, color-mix(in oklab, var(--background) 92%, var(--chart-3)), var(--background)) ; border: 1px solid color-mix(in oklab, var(--chart-3) 22%, transparent) !important; box-shadow: 0 24px 60px -30px color-mix(in oklab, var(--chart-3) 35%, transparent), inset 0 1px 0 color-mix(in oklab, var(--foreground) 8%, transparent); }
-.lux-ledger { display:grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1.2fr); align-items:center; gap:6px; margin-top:12px; padding:10px; border-radius:12px; background: color-mix(in oklab, var(--foreground) 4%, transparent); border:1px solid color-mix(in oklab, var(--chart-3) 18%, transparent); }
+.lux-ledger { display:grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1.2fr); align-items:center; gap:8px; margin-top:14px; padding:16px 14px; border-radius:14px; background: linear-gradient(180deg, color-mix(in oklab, var(--foreground) 7%, transparent), color-mix(in oklab, var(--foreground) 3%, transparent)); border:1px solid color-mix(in oklab, var(--chart-3) 24%, transparent); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--chart-3) 10%, transparent); }
 .lux-ledger > div { min-width:0; }
-.lux-ledger span { display:block; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color: var(--muted-foreground); }
-.lux-ledger b { display:block; margin-top:3px; font-size:12px; font-weight:700; overflow-wrap:anywhere; }
-.lux-ledger i { font-style:normal; color: var(--chart-3); font-weight:700; }
-.lux-ledger-total b { font-size:14px; color: var(--chart-3); text-shadow: 0 0 14px color-mix(in oklab, var(--chart-3) 45%, transparent); }
+.lux-ledger span { display:block; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color: var(--muted-foreground); }
+.lux-ledger b { display:block; margin-top:5px; font-size:clamp(17px,4.4vw,22px); font-weight:900; line-height:1.15; letter-spacing:-.01em; overflow-wrap:anywhere; font-variant-numeric:tabular-nums lining-nums; }
+.lux-ledger i { font-style:normal; color: var(--chart-3); font-weight:800; font-size:16px; }
+.lux-ledger-total b { font-size:clamp(20px,5.2vw,27px); color: var(--chart-3); text-shadow: 0 0 18px color-mix(in oklab, var(--chart-3) 45%, transparent); }
+/* Phones: the settlement box grows downward into clear stacked rows so profit and total read at a glance */
+@media (max-width:639px){
+  .lux-ledger { grid-template-columns:minmax(0,1fr); gap:0; padding:12px 14px 15px; }
+  .lux-ledger > div { display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:9px 0; border-top:1px solid color-mix(in oklab, var(--chart-3) 14%, transparent); }
+  .lux-ledger > div:first-of-type { border-top:0; padding-top:2px; }
+  .lux-ledger span { display:inline-block; }
+  .lux-ledger b { margin-top:0; text-align:right; flex:0 0 auto; }
+  .lux-ledger i { display:none; }
+  .lux-ledger-total { border-top-color:color-mix(in oklab, var(--chart-3) 38%, transparent) !important; padding-top:11px !important; }
+  .lux-ledger-total b { font-size:clamp(24px,7.2vw,30px); }
+}
 .lux-horizon { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:9px; letter-spacing:.08em; color: var(--muted-foreground); }
 .lux-horizon em { flex:1; height:1px; background: linear-gradient(90deg, color-mix(in oklab, var(--chart-3) 20%, transparent), var(--chart-3)); position:relative; }
 .lux-horizon em::after { content:""; position:absolute; right:0; top:-2px; width:5px; height:5px; border-radius:50%; background: var(--chart-3); box-shadow:0 0 10px var(--chart-3); }
@@ -3524,13 +3535,13 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @media (prefers-reduced-motion:reduce){button:active,[role="tab"]:active,a[class*="btn"]:active{transform:none}[role="tab"][data-state="active"]{animation:none}}
 
 /* Slim horizontal staking tier strip */
-.tier-strip{display:flex;gap:.5rem;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 6px;scrollbar-width:none}
+.tier-strip{display:flex;gap:.6rem;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 8px;scrollbar-width:none}
 .tier-strip::-webkit-scrollbar{display:none}
-.tier-bar{flex:0 0 auto;scroll-snap-align:start;display:flex;align-items:center;gap:.5rem;min-height:44px!important;padding:0 .85rem;border-radius:12px;border:1px solid color-mix(in oklab,var(--chart-3) 22%,transparent);background:color-mix(in oklab,var(--card) 55%,transparent);backdrop-filter:blur(12px);transition:border-color .2s,box-shadow .2s,background .2s}
-.tier-bar small{font-size:.58rem;letter-spacing:.14em;color:var(--muted-foreground)}
-.tier-bar b{font-size:.95rem;font-weight:800;color:var(--foreground);white-space:nowrap}
-.tier-bar em{font-style:normal;font-size:.65rem;font-weight:700;color:var(--primary);padding:2px 6px;border-radius:999px;background:color-mix(in oklab,var(--primary) 12%,transparent)}
-.tier-bar[aria-selected="true"]{border-color:var(--chart-3);background:color-mix(in oklab,var(--chart-3) 12%,var(--card));box-shadow:0 0 16px -4px color-mix(in oklab,var(--chart-3) 60%,transparent)}
+.tier-bar{flex:0 0 auto;scroll-snap-align:start;display:flex;align-items:center;gap:.55rem;min-width:5.75rem;min-height:70px!important;padding:.75rem 1.05rem;border-radius:12px;border:1px solid color-mix(in oklab,var(--chart-3) 22%,transparent);background:color-mix(in oklab,var(--card) 55%,transparent);backdrop-filter:blur(12px);transition:border-color .2s,box-shadow .2s,background .2s}
+.tier-bar small{font-size:.66rem;letter-spacing:.14em;color:var(--muted-foreground)}
+.tier-bar b{font-size:1.18rem;font-weight:900;color:var(--foreground);white-space:nowrap}
+.tier-bar em{font-style:normal;font-size:.74rem;font-weight:800;color:var(--primary);padding:3px 9px;border-radius:999px;background:color-mix(in oklab,var(--primary) 12%,transparent)}
+.tier-bar[aria-selected="true"]{border-color:var(--chart-3);background:color-mix(in oklab,var(--chart-3) 12%,var(--card));box-shadow:0 0 18px -4px color-mix(in oklab,var(--chart-3) 60%,transparent)}
 .tier-bar[aria-selected="true"] b{color:var(--chart-3)}
 
 /* Compact one-screen staking page */
@@ -3538,11 +3549,13 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .stake-compact .stake-metric{padding-top:.4rem;padding-bottom:.4rem}
 .stake-compact .qv,.stake-compact .auric-stake{margin-top:.6rem}
 .stake-compact .qv-tilt{margin-top:.6rem}
-.stake-compact .duration-package-head{padding-top:.6rem;padding-bottom:.5rem}
-.stake-compact .duration-package-head h3{font-size:1.15rem;margin-top:0}
-.stake-compact .duration-package-body{padding-top:.5rem;padding-bottom:.6rem}
+.stake-compact .duration-package-head{padding-top:.75rem;padding-bottom:.7rem}
+.stake-compact .duration-package-head h3{font-size:1.3rem;margin-top:0}
+.stake-compact .duration-package-body{padding-top:.7rem;padding-bottom:.8rem}
 .stake-compact .duration-yield,.stake-compact .lux-horizon{display:none}
-.stake-compact .lux-ledger{margin-top:.5rem}
+.stake-compact .lux-ledger{margin-top:.6rem}
+.stake-compact .duration-option{height:42px;font-size:12px}
+.stake-compact .duration-stake{height:50px;font-size:14px}
 .stake-compact .pass-mini,.stake-compact .nft-mini{margin-top:.5rem;max-height:3.25rem;overflow:hidden}
 .stake-compact .pass-mini img,.stake-compact .nft-mini img{max-height:2.75rem;width:auto}
 .stake-compact .duration-package-action{margin-top:.5rem}
