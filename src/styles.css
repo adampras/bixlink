@@ -3768,3 +3768,17 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @media (prefers-reduced-motion: reduce) { .sw-coin::after, .sw-emblem-fox { animation: none; } }
 .sw-emblem-xl { width: 8.5rem; height: 8.5rem; object-fit: contain; margin: -1rem -1rem -1rem 0; background: none; animation: sw-float 4.5s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .sw-emblem-xl { animation: none; } }
+
+/* Dual-mode switch (BIXLINK Account / Web3 On-Chain) */
+.sw-mode { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: .3rem; border-radius: 999px; background: color-mix(in oklab, var(--background) 70%, black); border: 1px solid color-mix(in oklab, var(--chart-3) 45%, transparent); box-shadow: inset 0 2px 6px color-mix(in oklab, black 60%, transparent), 0 8px 24px -12px color-mix(in oklab, var(--chart-3) 40%, transparent); }
+.sw-mode button { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: .4rem; padding: .65rem .4rem; border-radius: 999px; font-size: .8rem; font-weight: 800; letter-spacing: .02em; color: var(--muted-foreground); transition: color .3s; white-space: nowrap; }
+.sw-mode button[aria-selected="true"] { color: var(--primary-foreground); }
+.sw-mode-thumb { position: absolute; top: .3rem; bottom: .3rem; left: .3rem; width: calc(50% - .3rem); border-radius: 999px; background: linear-gradient(135deg, color-mix(in oklab, var(--chart-3) 85%, white), var(--chart-3) 45%, color-mix(in oklab, var(--chart-3) 60%, black)); box-shadow: 0 0 0 1px color-mix(in oklab, var(--chart-3) 70%, white) inset, 0 6px 18px -6px var(--chart-3); transition: transform .45s cubic-bezier(.2,.9,.2,1); }
+.sw-mode-thumb[data-pos="r"] { transform: translateX(100%); }
+.sw-pill-live { border-color: oklch(0.75 0.18 150); color: oklch(0.8 0.17 150); background: color-mix(in oklab, oklch(0.75 0.18 150) 12%, transparent); }
+.sw-pill-live i { animation: sw-blink 1.6s ease-in-out infinite; }
+.sw-wallet-card small { margin-left: auto; font-size: .62rem; letter-spacing: .25em; opacity: .85; }
+.sw-fade { animation: sw-fade-in .45s ease both; }
+@keyframes sw-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes sw-blink { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .sw-fade, .sw-pill-live i { animation: none; } .sw-mode-thumb { transition: none; } }

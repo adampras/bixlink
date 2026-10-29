@@ -4,9 +4,10 @@ import { QRCodeSVG } from 'qrcode.react';
 import {
   ArrowDownLeft, ArrowUpRight, Bell, BarChart3, Camera, ChevronDown, ChevronLeft, ChevronRight, ClipboardPaste, Compass,
   Copy, Eye, EyeOff, Globe, ImageIcon, Languages, Moon, Network, Plus, ScanLine, Search, Shield, SlidersHorizontal, Star,
-  Trash2, User, Wallet, FileText, Download,
+  Trash2, User, Wallet, FileText, Download, Zap, ShieldCheck, RefreshCw,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useMember } from '@/lib/useMember';
 import { InstallAppButton } from '@/components/InstallPrompt';
 import walletArt from '@/assets/bix-lux-wallet.png';
 import foxIcon from '@/assets/fox-icon-512.png.asset.json';
@@ -28,7 +29,7 @@ export const Route = createFileRoute('/sovereign-wallet')({
 
 type Eth = { request: (a: { method: string; params?: unknown }) => Promise<any> };
 type Tab = 'wallet' | 'market' | 'discover' | 'me';
-type Screen = null | 'send' | 'receive' | 'scan' | 'book' | 'node' | 'security' | 'notify';
+type Screen = null | 'myid' | 'send' | 'receive' | 'scan' | 'book' | 'node' | 'security' | 'notify';
 const USDT = '0x55d398326f99059fF775485246999027B3197955';
 const NODES = ['https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io', 'https://bsc-dataseed1.ninicoin.io', 'https://bsc.publicnode.com'];
 const SCAN = 'https://bscscan.com';
@@ -62,6 +63,10 @@ function SovereignApp() {
   const [prefillTo, setPrefillTo] = useState('');
   const [bixRef, setBixRef] = useState(0);
   const [asset, setAsset] = useState<string | null>(null);
+  const [mode, setMode] = useState<'ledger' | 'web3'>('ledger');
+  const member = useMember();
+  useEffect(() => { const s = localStorage.getItem('sov_mode'); if (s === 'web3' || s === 'ledger') setMode(s); }, []);
+  const pickMode = (m: 'ledger' | 'web3') => { setMode(m); setMsg(''); localStorage.setItem('sov_mode', m); };
   const eth = () => (globalThis as unknown as { ethereum?: Eth }).ethereum;
 
   useEffect(() => {
@@ -112,6 +117,32 @@ function SovereignApp() {
   const bnbP = px['BNB']?.p ?? 0;
   const total = bal ? bal.bix * bixRef + bal.usdt + bal.bnb * bnbP : 0;
   const money = (n: number) => (hide ? '••••' : `$${fmt(n, 2)}`);
+  const ledger = mode === 'ledger';
+  const md = member.data as { bixBalance?: number; usdtBalance?: number; referral?: { code?: string } | null } | undefined;
+  const lBix = Number(md?.bixBalance ?? 0);
+  const lUsdt = Number(md?.usdtBalance ?? 0);
+  const bixId = md?.referral?.code;
+  const ledgerTotal = lBix * bixRef + lUsdt;
+
+  if (asset && !screen && ledger) {
+    const p = asset === 'BIX' ? bixRef : 1;
+    const v = member.user ? (asset === 'BIX' ? lBix : lUsdt) : undefined;
+    return <div className="sw-app"><main className="sw-main">
+      <TopBar title={`${asset} · Account`} onBack={() => setAsset(null)} />
+      <div className="sw-asset-hero text-center">
+        <span className={`sw-coin sw-coin-lg sw-coin-${asset.toLowerCase()}`}>{asset === 'BIX' ? <img src={foxMark} alt="" /> : <b>₮</b>}</span>
+        <b className="numeric mt-3 block font-display text-3xl">{hide ? '••••' : v === undefined ? '—' : fmt(v)} {asset}</b>
+        <small className="sw-muted">≈ {v === undefined ? '—' : money(v * p)} · {asset === 'BIX' ? `$${fmt(p, 4)} internal ref.` : 'BIXLINK app balance'}</small>
+      </div>
+      <div className="mt-5 grid grid-cols-3 gap-2">
+        <Link to={asset === 'BIX' ? '/pay' : '/transfer'} className="sw-action"><span className="sw-gold-dot"><ArrowUpRight size={18} /></span><b>Send</b></Link>
+        <button type="button" className="sw-action" onClick={() => { setAsset(null); if (member.user) setScreen('myid'); }}><span className="sw-gold-dot"><ArrowDownLeft size={18} /></span><b>Receive</b></button>
+        <Link to="/wallet" className="sw-action"><span className="sw-gold-dot"><FileText size={18} /></span><b>History</b></Link>
+      </div>
+      {asset === 'USDT' && <Link to="/wallet" className="sw-gold-btn mt-4 w-full justify-center"><Plus size={16} /> Deposit USDT</Link>}
+      <p className="sw-note">{asset === 'BIX' ? 'Account BIX moves instantly between BIX IDs via BIX PAY, without gas. It is an internal ledger balance, not an on-chain token.' : 'Account USDT is your BIXLINK app balance. Deposits and withdrawals are reviewed by the owner.'}</p>
+    </main></div>;
+  }
 
   if (asset && !screen) {
     const p = asset === 'BIX' ? bixRef : asset === 'USDT' ? 1 : bnbP;
@@ -139,6 +170,7 @@ function SovereignApp() {
   if (screen) {
     return <div className="sw-app"><main className="sw-main">
       {screen === 'send' && <SendScreen addr={addr} bix={bix} bal={bal} initialTo={prefillTo} onBack={() => { setScreen(null); setPrefillTo(''); }} onScan={() => setScreen('scan')} onBook={() => setScreen('book')} onDone={() => void load()} />}
+      {screen === 'myid' && <MyIdScreen code={bixId ?? ''} onBack={() => setScreen(null)} />}
       {screen === 'receive' && <ReceiveScreen addr={addr} onBack={() => setScreen(null)} />}
       {screen === 'scan' && <ScanScreen onBack={() => setScreen(null)} onResult={(v) => { const m = v.match(/0x[a-fA-F0-9]{40}/); if (m) { setPrefillTo(m[0]); setScreen('send'); } else setMsg('QR code does not contain a BNB Chain address.'); }} />}
       {screen === 'book' && <BookScreen onBack={() => setScreen(prefillTo === '' && addr ? 'send' : null)} onPick={(a) => { setPrefillTo(a); setScreen('send'); }} />}
@@ -154,49 +186,67 @@ function SovereignApp() {
         <header className="flex items-center gap-3">
           <span className="sw-avatar"><img src={foxMark} alt="" width={44} height={44} /></span>
           <div className="min-w-0 flex-1">
-            <b className="block truncate font-display text-lg">{addr ? short(addr) : 'BIXLINK Wallet'}</b>
-            <span className="sw-pill"><i aria-hidden /> BSC</span>
+            <b className="block truncate font-display text-lg">{ledger ? (bixId ?? 'BIXLINK Account') : addr ? short(addr) : 'BIXLINK Wallet'}</b>
+            <span className={`sw-pill ${ledger ? 'sw-pill-live' : ''}`}><i aria-hidden /> {ledger ? 'Internal ledger' : 'BSC Mainnet'}</span>
           </div>
           <button type="button" className="sw-round" aria-label="Notifications" onClick={() => setScreen('notify')}><Bell size={18} /></button>
           <Link to="/settings" className="sw-round" aria-label="Language"><Globe size={18} /></Link>
         </header>
 
-        <section className="sw-wallet mt-5" aria-label="Wallet balance">
-          <div className="sw-wallet-card"><span>BIXLINK</span></div>
+        <div className="sw-mode mt-5" role="tablist" aria-label="Wallet mode">
+          <span className="sw-mode-thumb" data-pos={ledger ? 'l' : 'r'} aria-hidden />
+          <button type="button" role="tab" aria-selected={ledger} onClick={() => pickMode('ledger')}><Zap size={15} /> BIXLINK Account</button>
+          <button type="button" role="tab" aria-selected={!ledger} onClick={() => pickMode('web3')}><Globe size={15} /> Web3 On-Chain</button>
+        </div>
+
+        <section key={mode} className="sw-wallet sw-fade mt-4" aria-label="Wallet balance">
+          <div className="sw-wallet-card"><span>BIXLINK</span><small>{ledger ? 'ACCOUNT' : 'ON-CHAIN'}</small></div>
           <div className="sw-wallet-pocket">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2"><span className="sw-chip"><img src={foxMark} alt="" width={16} height={16} /> BIX</span><small className="sw-muted">Total assets</small></div>
+              <div className="flex items-center gap-2"><span className="sw-chip">{ledger ? <><ShieldCheck size={13} /> Gasless</> : <><Network size={13} /> BEP-20</>}</span><small className="sw-muted">Total assets</small></div>
               <div className="mt-2 flex items-center gap-2">
-                <b className="numeric font-display text-3xl">{addr ? (bal ? money(total) : '…') : '$0.00'}</b>
+                <b className="numeric font-display text-3xl">{ledger ? (member.user ? money(ledgerTotal) : '$0.00') : addr ? (bal ? money(total) : '…') : '$0.00'}</b>
                 <button type="button" aria-label={hide ? 'Show balance' : 'Hide balance'} onClick={() => setHide(!hide)} className="sw-muted">{hide ? <EyeOff size={18} /> : <Eye size={18} />}</button>
               </div>
-              {addr ? <button type="button" className="sw-muted mt-3 flex items-center gap-2 font-mono text-sm" onClick={() => { void navigator.clipboard.writeText(addr); setMsg('Address copied.'); }}>{short(addr)} <Copy size={14} /></button>
-                : <button type="button" className="sw-gold-btn mt-3 !px-4 !py-2 text-sm" onClick={() => void connect()}><Wallet size={14} /> Connect wallet</button>}
+              {ledger
+                ? (member.user
+                  ? <button type="button" className="sw-muted mt-3 flex items-center gap-2 font-mono text-sm" onClick={() => { if (bixId) { void navigator.clipboard.writeText(bixId); setMsg('BIX ID copied.'); } }}>{bixId ?? '…'} <Copy size={14} /></button>
+                  : <Link to="/auth" className="sw-gold-btn mt-3 !px-4 !py-2 text-sm"><User size={14} /> Sign in</Link>)
+                : addr ? <button type="button" className="sw-muted mt-3 flex items-center gap-2 font-mono text-sm" onClick={() => { void navigator.clipboard.writeText(addr); setMsg('Address copied.'); }}>{short(addr)} <Copy size={14} /></button>
+                  : <button type="button" className="sw-gold-btn mt-3 !px-4 !py-2 text-sm" onClick={() => void connect()}><Wallet size={14} /> Connect wallet</button>}
             </div>
             <img src={walletArt} alt="BIXLINK wallet" className="sw-emblem sw-emblem-xl" />
           </div>
         </section>
 
         <div className="mt-5 grid grid-cols-3 gap-2">
-          {([['send', 'Transfer', 'Send crypto', ArrowUpRight], ['receive', 'Receive', 'Get crypto', ArrowDownLeft], ['scan', 'Scan', 'QR code', ScanLine]] as const).map(([s, t, d, I]) =>
+          {ledger ? <>
+            <Link to="/pay" className="sw-action"><span className="sw-gold-dot"><ArrowUpRight size={18} /></span><span className="min-w-0 text-center"><b className="block truncate">Transfer</b><small className="sw-muted block truncate">BIX PAY</small></span></Link>
+            <button type="button" className="sw-action" onClick={() => (member.user ? setScreen('myid') : setMsg('Sign in to show your BIX ID.'))}><span className="sw-gold-dot"><ArrowDownLeft size={18} /></span><span className="min-w-0 text-center"><b className="block truncate">Receive</b><small className="sw-muted block truncate">My BIX ID</small></span></button>
+            <Link to="/pay" className="sw-action"><span className="sw-gold-dot"><ScanLine size={18} /></span><span className="min-w-0 text-center"><b className="block truncate">Scan</b><small className="sw-muted block truncate">Pay by QR</small></span></Link>
+          </> : ([['send', 'Transfer', 'Send crypto', ArrowUpRight], ['receive', 'Receive', 'Get crypto', ArrowDownLeft], ['scan', 'Scan', 'QR code', ScanLine]] as const).map(([s, t, d, I]) =>
             <button key={s} type="button" className="sw-action" onClick={() => (s === 'scan' ? setScreen('scan') : void need(s))}>
               <span className="sw-gold-dot"><I size={18} /></span><span className="min-w-0 text-center"><b className="block truncate">{t}</b><small className="sw-muted block truncate">{d}</small></span>
             </button>)}
         </div>
 
         <div className="mt-5 flex items-center gap-2">
-          <span className="sw-tab-pill">Assets</span><span className="flex-1" />
+          <span className="sw-tab-pill">{ledger ? 'Account assets' : 'On-chain assets'}</span><span className="flex-1" />
           <button type="button" className="sw-round" aria-label="Search market" onClick={() => setTab('market')}><Search size={16} /></button>
-          <button type="button" className="sw-round" aria-label="Add BIX token to wallet" onClick={() => void addToken()}><Plus size={16} /></button>
-          <button type="button" className="sw-round" aria-label="Refresh balances" onClick={() => void load()}><SlidersHorizontal size={16} /></button>
+          {ledger ? <Link to="/wallet" className="sw-round" aria-label="Transaction history"><FileText size={16} /></Link>
+            : <button type="button" className="sw-round" aria-label="Add BIX token to wallet" onClick={() => void addToken()}><Plus size={16} /></button>}
+          <button type="button" className="sw-round" aria-label="Refresh balances" onClick={() => (ledger ? void member.refetch() : void load())}><RefreshCw size={16} /></button>
         </div>
 
-        <section className="mt-3 space-y-3" aria-label="Assets">
-          {[
+        <section key={`a-${mode}`} className="sw-fade mt-3 space-y-3" aria-label="Assets">
+          {(ledger ? [
+            { s: 'BIX', icon: <img src={foxMark} alt="" width={40} height={40} />, p: bixRef, c: null as number | null, v: member.user ? lBix : undefined, cls: 'sw-coin-bix', note: 'Internal ref.' },
+            { s: 'USDT', icon: <b>₮</b>, p: 1, c: null as number | null, v: member.user ? lUsdt : undefined, cls: 'sw-coin-usdt', note: 'App balance' },
+          ] : [
             { s: 'BIX', icon: <img src={foxMark} alt="" width={40} height={40} />, p: bixRef, c: null as number | null, v: bix ? bal?.bix : undefined, cls: 'sw-coin-bix', note: 'Internal ref.' },
             { s: 'USDT', icon: <b>₮</b>, p: 1, c: 0, v: bal?.usdt, cls: 'sw-coin-usdt', note: '' },
             { s: 'BNB', icon: <b>◆</b>, p: bnbP, c: px['BNB']?.c ?? null, v: bal?.bnb, cls: 'sw-coin-bnb', note: '' },
-          ].map((a) => <button type="button" key={a.s} onClick={() => setAsset(a.s)} className="sw-row w-full text-left">
+          ]).map((a) => <button type="button" key={a.s} onClick={() => setAsset(a.s)} className="sw-row w-full text-left">
             <span className={`sw-coin ${a.cls}`}>{a.icon}</span>
             <div className="min-w-0 flex-1"><b className="block text-lg">{a.s}</b>
               <span className="sw-muted text-sm">{a.p ? `$${fmt(a.p, 4)}` : '—'}</span>{' '}
@@ -206,7 +256,9 @@ function SovereignApp() {
           </button>)}
         </section>
         {msg && <p className="sw-note">{msg}</p>}
-        <p className="sw-note">Self-custody: your keys stay in your own wallet app. On-chain balances are separate from your BIXLINK app ledger. BIX value uses the internal reference, not a market price.</p>
+        <p className="sw-note">{ledger
+          ? 'BIXLINK Account shows your app ledger: instant, gas-free transfers between BIX IDs. These balances are not on-chain tokens and staking profit shown elsewhere is a projection.'
+          : 'Self-custody: your keys stay in your own wallet app. On-chain balances are separate from your BIXLINK app ledger. BIX value uses the internal reference, not a market price.'}</p>
       </>}
 
       {tab === 'market' && <MarketTab px={px} bixRef={bixRef} />}
@@ -505,5 +557,18 @@ function MeTab({ addr, go }: { addr: string; go: (s: Screen) => void }) {
       <Item i={<Download size={18} />} t="BIXLINK main app" d="Open staking & ledger dashboard" on={() => { window.location.href = '/dashboard'; }} />
     </div>
     <div className="mt-4"><InstallAppButton /></div>
+  </>;
+}
+
+function MyIdScreen({ code, onBack }: { code: string; onBack: () => void }) {
+  const [c, setC] = useState(false);
+  return <>
+    <TopBar title="Receive · BIX ID" onBack={onBack} />
+    <section className="sw-panel">
+      <p className="sw-gold-banner">Share this BIX ID to receive BIX instantly from other BIXLINK members. Gas-free, inside the BIXLINK ledger.</p>
+      <div className="sw-qr mx-auto mt-6"><QRCodeSVG value={code || 'BIXLINK'} size={210} /></div>
+      <b className="mt-6 block text-center font-display text-2xl tracking-widest">{code || '—'}</b>
+      <button type="button" className="sw-gold-btn mx-auto mt-6 w-4/5 justify-center !py-3" disabled={!code} onClick={() => { void navigator.clipboard.writeText(code); setC(true); }}><Copy size={18} /> {c ? 'Copied' : 'Copy BIX ID'}</button>
+    </section>
   </>;
 }
