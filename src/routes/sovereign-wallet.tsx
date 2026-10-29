@@ -262,6 +262,7 @@ function SovereignApp() {
             </div>
             <img src={walletArt} alt="BIXLINK wallet" className="sw-emblem sw-emblem-xl" />
           </div>
+          <FiatStrip usd={ledger ? (member.user ? ledgerTotal : 0) : (addr && bal ? total : 0)} hide={hide} split={ledger && member.user && ledgerTotal > 0 ? (lBix * bixRef) / ledgerTotal : null} />
         </section>
 
         <div className="sw-quad mt-5">
