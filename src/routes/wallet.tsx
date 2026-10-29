@@ -82,7 +82,7 @@ function WalletPage() {
     try {
       if (modal === 'deposit') {
         if (flex) {
-          const r = await verifyTx({ data: { walletCode: selWallet?.code ?? '', txHash: txHash.trim(), expectedAmount: amt >= 1 ? amt : undefined } });
+          const r = await verifyTx({ data: { walletCode: selWallet?.code ?? '', txHash: txHash.trim(), ...(amt >= 1 ? { expectedAmount: amt } : {}) } });
           if (!r.ok && 'queued' in r && r.queued) { setNotice(r.reason); setTxHash(''); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); setBusy(false); return; }
           if (!r.ok) { setNotice(r.reason); setBusy(false); return; }
           setSuccess({ amount: r.amount, walletCode: r.walletCode, network: r.network, txHash: r.txHash }); setTxHash(''); close(); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); setBusy(false); return;
