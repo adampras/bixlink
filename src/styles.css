@@ -3911,3 +3911,29 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sw-lang-code { font-size: .72rem; letter-spacing: .08em; color: var(--primary); }
 .sw-lang-name { flex: 1; min-width: 0; font-size: .75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .sw-app .sw-wallet-card { animation: none; } }
+
+/* Sovereign wallet v3: calm lux, flat accents, floating card */
+.sw-app .sw-wallet { padding-top: 2.4rem; }
+.sw-app .sw-wallet-card { top: 0; height: 4.4rem; z-index: 0; animation: sw-card-float 4.5s ease-in-out infinite; box-shadow: 0 -4px 16px -8px color-mix(in oklab, var(--primary) 50%, transparent); }
+.sw-app .sw-wallet-pocket { z-index: 1; padding: 1.6rem 1.1rem 1.4rem; border-radius: 1.4rem 1.4rem 0 0; border-bottom: 0; box-shadow: none; }
+.sw-app .sw-wallet-pocket::before { inset: 10px 10px 0; border-bottom: 0; border-radius: 1rem 1rem 0 0; }
+.sw-app .sw-fx { position: relative; z-index: 1; margin-top: 0; padding: .3rem 1.1rem 1.1rem; border-radius: 0 0 1.4rem 1.4rem; border: 2px solid color-mix(in oklab, var(--primary) 55%, transparent); border-top: 0; background: color-mix(in oklab, var(--background) 96%, black); gap: .5rem; }
+.sw-fx-row { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; }
+.sw-fx-row::-webkit-scrollbar { display: none; }
+.sw-fx-row > span { flex: none; display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .65rem; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--primary) 22%, transparent); background: var(--card); font-size: .7rem; }
+.sw-fx-row small { color: var(--primary); font-weight: 700; font-size: .62rem; letter-spacing: .08em; }
+.sw-lang-pill { display: inline-flex; align-items: center; gap: .35rem; height: 2.6rem; padding: 0 .75rem; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--primary) 30%, var(--border)); background: var(--card); font-size: .72rem; color: var(--foreground); }
+/* flat, quiet action tiles: 2 columns with breathing room */
+.sw-app .sw-quad { grid-template-columns: repeat(2, minmax(0,1fr)); gap: .75rem; margin-top: 1.25rem !important; }
+.sw-app .sw-quad .sw-action, .sw-app .sw-quad .sw-action[data-tone] { flex-direction: row; justify-content: flex-start; gap: .7rem; min-height: 3.6rem; padding: .7rem .9rem; border-radius: 1rem; background: var(--card) !important; border: 1px solid var(--border) !important; box-shadow: none !important; font-size: .85rem; }
+.sw-app .sw-action .sw-gold-dot { width: 2.1rem; height: 2.1rem; background: color-mix(in oklab, var(--t, var(--primary)) 14%, transparent) !important; color: var(--t, var(--primary)) !important; box-shadow: none !important; border: 0 !important; }
+.sw-app .sw-coin, .sw-app .sw-coin::after { box-shadow: none; animation: none; background-image: none; }
+.sw-app .sw-coin::after { display: none; }
+.sw-app .sw-app-icon { background: var(--card); }
+/* minimal dock */
+.sw-app .sw-dock { padding: .5rem .3rem calc(.5rem + env(safe-area-inset-bottom)); border-radius: 1.2rem; background: color-mix(in oklab, var(--background) 92%, black); border: 1px solid var(--border); box-shadow: 0 10px 30px -12px color-mix(in oklab, black 80%, transparent); }
+.sw-app .sw-dock button { --tone: var(--primary) !important; font-size: .66rem; font-weight: 600; gap: .15rem; }
+.sw-app .sw-dock-orb, .sw-app .sw-dock button[aria-current='page'] .sw-dock-orb { width: 2rem; height: 1.6rem; background: none; border: 0; box-shadow: none; transform: none; color: inherit; }
+.sw-app .sw-dock button[aria-current='page'] { color: var(--primary); }
+.sw-app .sw-dock button[aria-current='page'] .sw-dock-orb::after { content: ''; display: block; position: absolute; }
+@media (prefers-reduced-motion: reduce) { .sw-app .sw-wallet-card { animation: none; } }

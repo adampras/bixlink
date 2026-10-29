@@ -14,7 +14,7 @@ import { AccountLogin, AccountTransfer, AccountHistory, AccountProfile, WalletLa
 import { MarketChart, MarketTerminal } from '@/components/sovereign/MarketTerminal';
 import { readMarketSnapshot, type MarketQuote } from '@/lib/sovereign-market';
 import { parseWalletRecipient } from '@/lib/sovereign-flow';
-import { useI18n } from '@/lib/i18n';
+import { FLAG_CODE, LANGUAGES, useI18n } from '@/lib/i18n';
 function Button(props: ButtonProps) { return <BaseButton variant="wallet" size="wallet" {...props} />; }
 import { useServerFn } from '@tanstack/react-start';
 import { getMyWallet } from '@/lib/bixlink.functions';
@@ -79,7 +79,8 @@ function SovereignApp() {
   const [prefillTo, setPrefillTo] = useState('');
   const [bixRef, setBixRef] = useState(0);
   const [sendToken, setSendToken] = useState('BIX');
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const curLang = LANGUAGES.find(l => l.code === language) ?? LANGUAGES[0];
   const [asset, setAsset] = useState<string | null>(null);
   const [mode, setMode] = useState<'ledger' | 'web3'>('ledger');
   const member = useMember();
@@ -236,7 +237,7 @@ function SovereignApp() {
             <span className={`sw-pill ${ledger ? 'sw-pill-live' : ''}`}><i aria-hidden /> {ledger ? 'Ledger · Gasless · Zero fee' : `BSC · Gas ${gas === null ? '—' : fmt(gas, 3) + ' Gwei'}`}</span>
           </div>
           <Button type="button" className="sw-round" aria-label="Notifications" onClick={() => setScreen('notify')}><Bell size={18} /></Button>
-          <Button className="sw-round" aria-label="Scan QR" onClick={() => ledger ? accountGo('scan') : setScreen('scan')}><ScanLine size={18} /></Button>
+          <Button type="button" className="sw-lang-pill" aria-label="Language" onClick={() => setScreen('language')}><span className={`flag-symbol flag-${curLang.flag}`} aria-hidden /><b>{FLAG_CODE[curLang.flag]}</b></Button>
         </header>
 
         <div className="sw-mode mt-5" role="tablist" aria-label="Wallet mode">
@@ -592,9 +593,8 @@ function FiatStrip({ usd, hide, split }: { usd: number; hide: boolean; split: nu
   const fx = useQuery({ queryKey: ['wallet-fiat-rates'], queryFn: () => fetchFiat(), staleTime: 3_600_000 });
   const rows = (fx.data ?? []).filter(r => ['IDR', 'MYR', 'CNY', 'SGD', 'AED', 'INR'].includes(r.code));
   return <div className="sw-fx" aria-label="Currency conversions">
-    <div className="sw-fx-grid">{rows.length ? rows.map(r => <div key={r.code}><small>{r.code}</small><b className="numeric">{hide ? '••••' : (usd * r.rate).toLocaleString('en-US', { maximumFractionDigits: r.code === 'IDR' || r.code === 'INR' ? 0 : 2 })}</b></div>)
-      : Array.from({ length: 6 }, (_, k) => <div key={k}><span className="sw-skeleton inline-block h-6 w-full" /></div>)}</div>
-    {split !== null && <div className="sw-split" aria-label="Portfolio split"><div className="sw-split-bar"><span style={{ width: `${(split * 100).toFixed(1)}%` }} /></div><small><b>BIX {(split * 100).toFixed(1)}%</b> · USDT {((1 - split) * 100).toFixed(1)}%</small></div>}
-    <small className="sw-muted block text-[.65rem]">Reference FX rates · display only</small>
+    <div className="sw-fx-row">{rows.length ? rows.map(r => <span key={r.code}><small>{r.code}</small><b className="numeric">{hide ? '••••' : (usd * r.rate).toLocaleString('en-US', { maximumFractionDigits: r.code === 'IDR' || r.code === 'INR' ? 0 : 2 })}</b></span>)
+      : Array.from({ length: 4 }, (_, k) => <span key={k} className="sw-skeleton inline-block h-6 w-20" />)}</div>
+    {split !== null && <small className="sw-muted block text-[.65rem]">BIX {(split * 100).toFixed(1)}% · USDT {((1 - split) * 100).toFixed(1)}% · reference rates, display only</small>}
   </div>;
 }
