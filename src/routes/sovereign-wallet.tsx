@@ -86,7 +86,7 @@ function SovereignApp() {
   const member = useMember();
   const { data: swCfg } = usePublicConfig();
   const fetchWallet = useServerFn(getMyWallet);
-  const walletQ = useQuery({ queryKey: ['my-wallet', member.user?.id], queryFn: () => fetchWallet(), enabled: !!member.user, staleTime: 15_000 });
+  const walletQ = useQuery({ queryKey: ['my-wallet', member.user?.id], queryFn: () => fetchWallet(), enabled: !!member.user, staleTime: 15_000, refetchInterval: 30_000 });
   useEffect(() => { const s = localStorage.getItem('sov_mode'); if (s === 'web3' || s === 'ledger') setMode(s); }, []);
   const accountGo = (s: Screen) => { setAsset(null); setScreen(member.user ? s : 'login'); };
   const pickMode = (m: 'ledger' | 'web3') => { if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) navigator.vibrate?.(8); setMode(m); setMsg(''); localStorage.setItem('sov_mode', m); };
@@ -99,9 +99,6 @@ function SovereignApp() {
   }, []);
 
   useEffect(() => {
-    const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
-    const prev = link?.href;
-    if (link) link.href = '/sovereign.webmanifest';
     void supabase.from('app_settings').select('value').eq('key', 'bix_token').maybeSingle().then(({ data }) => setBix(((data?.value as { address?: string }) ?? {}).address ?? ''));
     void supabase.from('app_settings').select('value').eq('key', 'bix_market').maybeSingle().then(({ data }) => {
       const n = Number((data?.value as { priceUsd?: number } | null)?.priceUsd ?? 0.84291);
@@ -121,7 +118,7 @@ function SovereignApp() {
       } catch { setSnapshot(cached ? 'Offline snapshot' : 'Data unavailable'); }
     };
     void prices(); const timer = setInterval(() => void prices(), 30000);
-    return () => { clearInterval(timer); if (link && prev) link.href = prev; };
+    return () => { clearInterval(timer); };
   }, []);
 
   const load = async (a = addr) => {
@@ -319,7 +316,7 @@ function SovereignApp() {
 
       {tab === 'market' && <MarketTerminal px={px} bixRef={bixRef} snapshot={snapshot} />}
       {tab === 'discover' && <DiscoverTab />}
-      {tab === 'me' && <><AccountProfile addr={addr} go={s => setScreen(s as Screen)} disconnect={() => { setAddr(''); setBal(null); }} /><div className="mt-6"><InstallAppButton /></div></>}
+      {tab === 'me' && <><AccountProfile addr={addr} go={s => setScreen(s as Screen)} disconnect={() => { setAddr(''); setBal(null); }} /><div className="mt-6"><InstallAppButton wallet /></div></>}
     </main>
 
     <nav className="sw-dock" aria-label="Wallet navigation">

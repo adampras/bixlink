@@ -73,6 +73,7 @@ export function useMember() {
     queryFn: () => fetchMine(),
     enabled: !!user,
     staleTime: 15_000,
+    refetchInterval: 30_000,
   });
 
   // A disabled query (no session yet) stays "pending" forever, so only count

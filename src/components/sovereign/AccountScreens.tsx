@@ -11,6 +11,7 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { FLAG_CODE, LANGUAGES, useI18n } from '@/lib/i18n';
 import { hasPin, checkPin, savePin, clearPin } from '@/components/TxFeedback';
 import { useNavigate } from '@tanstack/react-router';
+import { stakingUpdates } from '@/lib/staking-activity';
 import { WalletSignIn } from '@/components/WalletSignIn';
 
 function Button(props: ButtonProps) { return <BaseButton variant="wallet" size="wallet" {...props} />; }
@@ -82,11 +83,12 @@ export function AccountHistory({ back, alerts = false }: { back: () => void; ale
   const virtual = useQuery({ queryKey: ['sovereign-virtual', member.user?.id], queryFn: () => virtualFn(), enabled: !!member.user });
   const [filter, setFilter] = useState('All');
   const rows = [
+    ...stakingUpdates(member.data?.stakes ?? []).map(s => ({ id: s.id, date: s.date, title: s.title, amount: '', status: s.body, group: 'Staking' })),
     ...(pay.data?.transfers ?? []).map(t => ({ id: t.id, date: t.created_at, title: `${t.outgoing ? 'To' : 'From'} ${t.outgoing ? t.recipient_code : t.sender_code}`, amount: `${t.outgoing ? '−' : '+'}${Number(t.amount_bix).toLocaleString()} BIX`, status: t.status, group: 'BIX' })),
     ...(wallet.data?.transactions ?? []).map(t => ({ id: t.id, date: t.created_at, title: t.type, amount: `${Number(t.amount_usd).toLocaleString()} USDT`, status: t.status, group: 'USDT' })),
     ...(virtual.data?.list ?? []).map(t => ({ id: t.id, date: t.created_at, title: `${t.sender_id === member.user?.id ? 'To' : 'From'} ${t.sender_id === member.user?.id ? t.recipient_code : t.sender_code}`, amount: `${Number(t.amount_usd).toLocaleString()} vUSDT`, status: 'Virtual transfer', group: 'vUSDT' })),
   ].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-  return <><Header title={alerts ? 'Notifications' : 'Transaction history'} back={back} /><div className="mb-5 flex flex-wrap gap-2">{['All', 'BIX', 'USDT', 'vUSDT'].map(f => <Button key={f} className="sw-pill" aria-pressed={f === filter} onClick={() => setFilter(f)}>{f}</Button>)}</div>
+  return <><Header title={alerts ? 'Notifications' : 'Transaction history'} back={back} /><div className="mb-5 flex flex-wrap gap-2">{['All', 'Staking', 'BIX', 'USDT', 'vUSDT'].map(f => <Button key={f} className="sw-pill" aria-pressed={f === filter} onClick={() => setFilter(f)}>{f}</Button>)}</div>
     {!member.user ? <p className="sw-note">Sign in to view your account activity.</p> : pay.isPending || wallet.isPending ? <p role="status" className="sw-note">Loading activity…</p> : <>
     {(pay.isError || wallet.isError || virtual.isError) && <p role="alert" className="sw-note">Some activity could not be loaded.<Button className="sw-gold-text ml-2" onClick={() => { void pay.refetch(); void wallet.refetch(); void virtual.refetch(); }}>Retry</Button></p>}
     {rows.filter(r => filter === 'All' || r.group === filter).map(r => <article key={r.id} className="border-b border-border py-4"><div className="flex flex-wrap justify-between gap-2"><b>{r.title}</b><b className="sw-gold-text">{r.amount}</b></div><small className="sw-muted block mt-2">{new Date(r.date).toLocaleString()} · {r.status}</small></article>)}
