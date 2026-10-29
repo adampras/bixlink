@@ -1,3 +1,6 @@
+- [ ] Lock vUSDT sending to verified Owner 1 across both wallets and direct RPC; verify rejection without moving funds.
+- [ ] Enforce 500 BIX minimum developer buyback request and approval for all authorized reviewers; test boundary rules.
+- [ ] Add compact English company PDF in Marketing using current terms, original artwork and uploaded reference; inspect every page and verify download.
 - [x] Polish Sovereign Wallet unified account/Web3 sign-in, four mode-specific actions, real gas status, interactive market/chart filters/watchlist/depth and offline snapshots; no running ticker. Eleven tests passed; phone/desktop, signed-in receive QR and watchlist verified without funds moved. Physical wallet signature remains device-dependent; no fabricated P&L or depth.
 - [x] Make Sovereign Wallet self-contained: in-place sign-in/out, authenticated BIX transfer review, separate virtual USDT, receive/scan/history, language and streamlined profile; signed-in phone navigation and self-recipient rejection verified, 11 tests passed, no funds moved. Physical camera, installation, credential login and real transfers remain unverified.
 - [x] Compact Profit heading and collapsible per-stake details; move Network account to top and search into Leader Bonus Hub; automatic build passed, financial logic unchanged.
