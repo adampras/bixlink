@@ -18,15 +18,15 @@ export function MarketChart({ symbol }: { symbol: string | null }) {
     const key = `sov-chart:${symbol}:${interval}`;
     const cached = readMarketSnapshot<Point[]>(localStorage.getItem(key));
     setPoints(cached?.data ?? []); setState(cached ? 'cached' : 'loading');
-    const controller = new AbortController();
+    const controller = new AbortController(); let active = true;
     const timeout = setTimeout(() => controller.abort(), 10000);
     void fetch(`${API}/klines?symbol=${symbol}&interval=${interval}&limit=72`, { signal: controller.signal }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then((rows: unknown[][]) => {
       const data = rows.map(r => ({ time: Number(r[0]), price: Number(r[4]) })).filter(r => Number.isFinite(r.time) && Number.isFinite(r.price));
       if (data.length < 2) throw new Error();
-      setPoints(data); setState('live');
+      if (!active) return; setPoints(data); setState('live');
       try { localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data })); } catch { /* storage full */ }
-    }).catch(() => { if (!controller.signal.aborted || timeout) setState(cached ? 'cached' : 'unavailable'); }).finally(() => clearTimeout(timeout));
-    return () => { controller.abort(); clearTimeout(timeout); };
+    }).catch(() => { if (active) setState(cached ? 'cached' : 'unavailable'); }).finally(() => clearTimeout(timeout));
+    return () => { active = false; controller.abort(); clearTimeout(timeout); };
   }, [symbol, interval]);
   const up = (points.at(-1)?.price ?? 0) >= (points[0]?.price ?? 0);
   return <div className="sw-terminal-chart">

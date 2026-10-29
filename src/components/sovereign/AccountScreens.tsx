@@ -14,7 +14,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { WalletSignIn } from '@/components/WalletSignIn';
 
 function Button(props: ButtonProps) { return <BaseButton variant="wallet" size="wallet" {...props} />; }
-function Header({ title, back }: { title: string; back: () => void }) { return <header className="relative mb-6 flex min-h-11 items-center justify-center"><Button className="sw-round absolute left-0" aria-label="Back" onClick={back}><ChevronLeft /></Button><h1 className="font-display text-xl">{title}</h1></header>; }
+function Header({ title, back }: { title: string; back: () => void }) { return <header className="relative mb-6 flex min-h-11 items-center justify-center px-12"><Button className="sw-round absolute left-0" aria-label="Back" onClick={back}><ChevronLeft /></Button><h1 className="text-center font-display text-lg">{title}</h1></header>; }
 const errorText = (e: unknown) => e instanceof Error ? e.message : 'Unable to complete this request. Please retry.';
 
 export function AccountLogin({ back, done }: { back: () => void; done: () => void }) {
