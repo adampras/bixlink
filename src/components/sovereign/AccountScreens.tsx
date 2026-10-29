@@ -94,7 +94,7 @@ export function AccountHistory({ back, alerts = false }: { back: () => void; ale
     {alerts && <p className="sw-note">Recorded account activity. Push delivery is not enabled; on-chain alerts remain in your connected wallet.</p>}</>;
 }
 
-export function WalletLanguage({ back }: { back: () => void }) { const { language, setLanguage, t } = useI18n(); return <><Header title={t('language')} back={back} /><div className="space-y-2">{LANGUAGES.map(l => <Button key={l.code} className="sw-list-item w-full" aria-pressed={language === l.code} onClick={() => setLanguage(l.code)}><span className="flex-1 text-left">{l.label}</span>{language === l.code && <ShieldCheck className="sw-gold-text" />}</Button>)}</div></>; }
+export function WalletLanguage({ back }: { back: () => void }) { const { language, setLanguage, t } = useI18n(); return <><Header title={t('language')} back={back} /><div data-no-translate className="sw-lang-grid">{LANGUAGES.map(l => <Button key={l.code} className="sw-lang" aria-pressed={language === l.code} onClick={() => setLanguage(l.code)}><span className={`flag-symbol flag-${l.flag}`} aria-hidden /><b className="sw-lang-code">{FLAG_CODE[l.flag]}</b><span className="sw-lang-name">{l.label}</span>{language === l.code && <ShieldCheck size={16} className="sw-gold-text" />}</Button>)}</div></>; }
 
 export function AccountProfile({ addr, go, disconnect }: { addr: string; go: (s: string) => void; disconnect: () => void }) {
   const member = useMember(); const qc = useQueryClient(); const navigate = useNavigate(); const { t } = useI18n(); const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
