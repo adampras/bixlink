@@ -47,7 +47,13 @@ def panel(x,y,w,h,title,body,num=None):
   c.setFillColor(GREEN);c.setFont('Bold',13);c.drawString(x+20,y-29,num)
  top=y-48 if num else y-23
  end=text(title,x+20,top,w-40,'label',GOLD)
- end=text(body,x+20,end-13,w-40)
+ available=end-13-(y-h+18)
+ st=styles['body'].clone('fitted')
+ for size in (17,16,15,14):
+  st.fontSize=size;st.leading=size*1.45
+  p=Paragraph(body,st);_,height=p.wrap(w-40,1000)
+  if height<=available:break
+ p.drawOn(c,x+20,end-13-height);end=end-13-height
  assert end>=y-h+18,(page,title,end,y-h)
 
 def finish():c.showPage()
