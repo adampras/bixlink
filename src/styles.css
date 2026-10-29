@@ -3811,3 +3811,8 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
   background: linear-gradient(135deg, oklch(0.9 0.1 90) 0%, oklch(0.76 0.13 80) 45%, oklch(0.52 0.1 70) 100%);
   color: oklch(0.16 0.02 70);
 }
+.sw-app button { white-space: normal; letter-spacing: 0; }
+.sw-app input, .sw-app label { letter-spacing: 0; text-transform: none; }
+.sw-app .sw-mode button[aria-pressed="true"], .sw-app .sw-pill[aria-pressed="true"] { background: var(--primary); color: var(--primary-foreground); }
+.sw-app .sw-list-item { min-height: 3.5rem; border-radius: 0; }
+.sw-app .sw-note { line-height: 1.6; overflow-wrap: anywhere; }

@@ -10,6 +10,7 @@ import { getSovereignVirtual, sendSovereignVirtual } from '@/lib/sovereign-accou
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { LANGUAGES, useI18n } from '@/lib/i18n';
 import { hasPin, checkPin } from '@/components/TxFeedback';
+import { useNavigate } from '@tanstack/react-router';
 
 function Button(props: ButtonProps) { return <BaseButton variant="wallet" size="wallet" {...props} />; }
 function Header({ title, back }: { title: string; back: () => void }) { return <header className="relative mb-6 flex min-h-11 items-center justify-center"><Button className="sw-round absolute left-0" aria-label="Back" onClick={back}><ChevronLeft /></Button><h1 className="font-display text-xl">{title}</h1></header>; }
@@ -93,12 +94,12 @@ export function AccountHistory({ back, alerts = false }: { back: () => void; ale
 export function WalletLanguage({ back }: { back: () => void }) { const { language, setLanguage, t } = useI18n(); return <><Header title={t('language')} back={back} /><div className="space-y-2">{LANGUAGES.map(l => <Button key={l.code} className="sw-list-item w-full" aria-pressed={language === l.code} onClick={() => setLanguage(l.code)}><span className="flex-1 text-left">{l.label}</span>{language === l.code && <ShieldCheck className="sw-gold-text" />}</Button>)}</div></>; }
 
 export function AccountProfile({ addr, go, disconnect }: { addr: string; go: (s: string) => void; disconnect: () => void }) {
-  const member = useMember(); const qc = useQueryClient(); const { t } = useI18n(); const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
+  const member = useMember(); const qc = useQueryClient(); const navigate = useNavigate(); const { t } = useI18n(); const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
   const Item = ({ title, icon, screen }: { title: string; icon: React.ReactNode; screen: string }) => <Button className="sw-list-item w-full" onClick={() => go(screen)}>{icon}<span className="flex-1 text-left">{title}</span></Button>;
   return <><h1 className="text-center font-display text-2xl">{t('profile')}</h1><section className="py-7 text-center"><Wallet size={48} className="sw-gold-text mx-auto" /><b className="block mt-4">BIXLINK Wallet</b><p className="sw-muted mt-2 break-all">{member.data?.referral?.code ?? 'Not signed in'}</p>{member.user && <p className="sw-muted text-sm mt-2 break-all">{member.user.email}</p>}{addr && <p className="sw-muted mt-2 text-xs break-all">BSC: {addr}</p>}</section>
   {!member.user && <Button className="sw-gold-btn w-full justify-center mb-5" onClick={() => go('login')}>{t('signIn')}</Button>}
   <div className="divide-y divide-border"><Item title="Transaction history" icon={<Copy />} screen="history" /><Item title="Security & verification" icon={<ShieldCheck />} screen="security" /><Item title={t('language')} icon={<Languages />} screen="language" /><Item title="Address book" icon={<Star />} screen="book" /><Item title="BNB Chain node" icon={<Network />} screen="node" /><Item title={t('notifications')} icon={<Bell />} screen="notify" /></div>
   {addr && <Button className="sw-action mt-6 w-full" onClick={disconnect}>Disconnect Web3</Button>}
-  {member.user && <Button disabled={busy} className="sw-action mt-4 w-full !flex-row" onClick={async () => { if (busy) return; setBusy(true); try { await qc.cancelQueries(); qc.clear(); const { error } = await supabase.auth.signOut(); if (error) throw error; window.history.replaceState(null, '', '/sovereign-wallet'); go('login'); } catch (e) { setMessage(errorText(e)); } finally { setBusy(false); } }}><LogOut />{busy ? 'Please wait…' : 'Sign out'}</Button>}
+  {member.user && <Button disabled={busy} className="sw-action mt-4 w-full !flex-row" onClick={async () => { if (busy) return; setBusy(true); try { await qc.cancelQueries(); qc.clear(); const { error } = await supabase.auth.signOut(); if (error) throw error; await navigate({ to: '/sovereign-wallet', replace: true }); go('login'); } catch (e) { setMessage(errorText(e)); } finally { setBusy(false); } }}><LogOut />{busy ? 'Please wait…' : 'Sign out'}</Button>}
   {message && <p role="status" className="sw-note">{message}</p>}<p className="sw-note">Account sign-out also signs out the main app on this browser. Disconnecting Web3 does not revoke wallet permissions.</p></>;
 }
