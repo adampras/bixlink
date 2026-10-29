@@ -33,11 +33,19 @@ function publish(user: User | null) {
 function watchSession(listener: () => void) {
   if (!watching) {
     watching = true;
+    // Read the stored session first (it refreshes an expired token locally) so a
+    // slow or failed network check never signs a valid member out. Auth events
+    // that arrive later always win over this initial read.
+    let evented = false;
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'INITIAL_SESSION' && !session && !evented) return; // wait for getSession
+      evented = true;
+      publish(session?.user ?? null);
+    });
     supabase.auth
-      .getUser()
-      .then(({ data }) => publish(data.user ?? null))
-      .catch(() => publish(null));
-    supabase.auth.onAuthStateChange((_event, session) => publish(session?.user ?? null));
+      .getSession()
+      .then(({ data }) => { if (!evented || !snapshot.ready) publish(data.session?.user ?? null); })
+      .catch(() => { if (!snapshot.ready) publish(null); });
   }
   listeners.add(listener);
   return () => {

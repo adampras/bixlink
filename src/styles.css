@@ -3742,9 +3742,22 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sw-list-item { display: flex; align-items: center; gap: .9rem; padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); }
 .sw-list-item:last-child { border-bottom: 0; }
 .sw-icon-box { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; flex: none; border-radius: .7rem; background: var(--muted); }
-.sw-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 61; display: grid; grid-template-columns: repeat(4, 1fr); padding: .5rem 0 calc(.5rem + env(safe-area-inset-bottom)); background: var(--card); border-top: 1px solid var(--border); }
-.sw-dock button { display: flex; flex-direction: column; align-items: center; gap: .2rem; color: var(--muted-foreground); font-size: .8rem; font-weight: 600; }
-.sw-dock button[aria-current='page'] { color: var(--primary); }
+.sw-dock { position: fixed; bottom: .6rem; left: .75rem; right: .75rem; z-index: 61; display: grid; grid-template-columns: repeat(4, 1fr); padding: .55rem .3rem calc(.55rem + env(safe-area-inset-bottom)); border-radius: 1.4rem;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--card) 92%, white 4%), color-mix(in oklab, var(--background) 94%, black));
+  border: 1px solid color-mix(in oklab, var(--chart-3) 40%, var(--border));
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 14%, transparent), 0 14px 36px -10px color-mix(in oklab, black 80%, transparent), 0 0 24px -8px color-mix(in oklab, var(--chart-3) 45%, transparent); }
+.sw-dock button { --tone: var(--chart-3); display: flex; flex-direction: column; align-items: center; gap: .25rem; color: var(--muted-foreground); font-size: .72rem; font-weight: 800; letter-spacing: .04em; transition: color .2s, transform .15s; }
+.sw-dock button[data-tone='market'] { --tone: var(--chart-2); }
+.sw-dock button[data-tone='discover'] { --tone: var(--primary); }
+.sw-dock button[data-tone='me'] { --tone: var(--chart-4, var(--chart-1)); }
+.sw-dock button:active { transform: scale(.94); }
+.sw-dock-orb { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 999px; color: var(--tone);
+  background: radial-gradient(circle at 35% 28%, color-mix(in oklab, var(--tone) 30%, var(--card)), color-mix(in oklab, var(--background) 90%, black) 75%);
+  border: 1px solid color-mix(in oklab, var(--tone) 45%, transparent); box-shadow: inset 0 1px 0 color-mix(in oklab, white 18%, transparent), 0 4px 10px -4px color-mix(in oklab, black 70%, transparent); transition: all .2s; }
+.sw-dock button[aria-current='page'] { color: var(--tone); }
+.sw-dock button[aria-current='page'] .sw-dock-orb { color: var(--background); transform: translateY(-4px);
+  background: radial-gradient(circle at 35% 28%, color-mix(in oklab, var(--tone) 55%, white), var(--tone) 60%, color-mix(in oklab, var(--tone) 60%, black));
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 55%, transparent), 0 8px 18px -6px var(--tone), 0 0 16px -4px var(--tone); }
 
 /* wallet polish v2 */
 .sw-wallet-pocket { background: linear-gradient(160deg, color-mix(in oklab, var(--card) 92%, var(--primary) 8%), color-mix(in oklab, var(--background) 96%, black)) !important; }
