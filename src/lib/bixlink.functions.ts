@@ -56,7 +56,9 @@ export const requestStake = createServerFn({ method: 'POST' }).middleware([requi
   .handler(async ({ data, context }) => {
     const { data: id, error } = await context.supabase.rpc('request_bix_duration_stake_mode', { p_package: data.packageId, p_days: data.days, p_mode: data.mode });
     if (error) throw new Error(error.message);
-    return { id };
+    const record = await context.supabase.from('stakes').select('id,status').eq('id', id).eq('user_id', context.userId).single();
+    // The mutation has already succeeded; never invite a duplicate submission if readback is delayed.
+    return { id: String(id), status: record.data?.status ?? 'pending' };
   });
 
 export const setStakeCompound = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])

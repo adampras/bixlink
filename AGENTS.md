@@ -56,3 +56,6 @@
 - Size heroes via landing-hero-compact/compact-market-hero; preserve catalogs. Mask vault art behind the transparent coin to blend themes without new assets.
 - Keep app-wide touch feedback and HOME return-to-top in one root-mounted presentation component; store its switch in existing owner-authorized readiness settings to avoid duplicate controls or new permissions.
 - Growth features share an authoritative singleton control and cycle-safe database scope; exclude delegated-owner ancestry on reads and withdrawal guards so client presentation cannot bypass safety. Flash events never change contract terms; public activity contains only masked verified deposit records, never inferred payouts.
+
+- Share wallet staking notifications from authenticated stake records and status-specific IDs; receipts read back the RPC result without inferring completion or settlement.
+- Select the manifest from the root matched location during SSR; keep Sovereign Wallet manifest identity and scope stable so installation launches its existing in-place screens.

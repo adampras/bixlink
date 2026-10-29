@@ -23,6 +23,7 @@ import { Sun, Moon } from 'lucide-react';
 import { SiteSearch } from '@/components/SiteSearch';
 import { SitePopup } from '@/components/SitePopup';
 import { MemberWelcome } from '@/components/MemberWelcome';
+import { stakingUpdates } from '@/lib/staking-activity';
 import { DockHub } from '@/components/DockHub';
 
 const NAV = [
@@ -35,7 +36,7 @@ const NAV = [
 ] as const;
 
 export function BixShell({ children }: { children: React.ReactNode }) {
-  const { user } = useMember();
+  const { user, data: memberData } = useMember();
   const { data: publicConfig } = usePublicConfig();
   const presentationTheme = resolvePresentationTheme(publicConfig?.readiness.presentationTheme);
   useEffect(() => {
@@ -68,7 +69,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     });
   }, [myWallet.data]);
   const baseUpdates = marketEnabled && official.data?.announcements.length ? official.data.announcements.map(post => ({ id: `${post.id}:${post.published_at}`, title: post.title, body: post.body })) : updates;
-  const visibleUpdates = useMemo(() => [...txUpdates, ...baseUpdates], [txUpdates, baseUpdates]);
+  const visibleUpdates = useMemo(() => [...stakingUpdates(memberData?.stakes ?? []), ...txUpdates, ...baseUpdates], [memberData?.stakes, txUpdates, baseUpdates]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [readIds, setReadIds] = useState<string[]>([]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
