@@ -50,7 +50,7 @@ export const verifyDeposit = createServerFn({ method: 'POST' }).middleware([requ
     if (used?.length) return { ok: false as const, reason: 'This transaction has already been credited.' };
 
     const { data: queued } = await supabaseAdmin.from('wallet_transactions').select('id,user_id').eq('type', 'deposit').eq('status', 'pending').ilike('tx_hash', hash).limit(1);
-    if (queued?.length) return queued[0].user_id === context.userId
+    if (queued?.length) return queued[0]?.user_id === context.userId
       ? { ok: false as const, queued: true as const, reason: 'This TxID is already in the queue. It is credited automatically once confirmed.' }
       : { ok: false as const, reason: 'This transaction has already been submitted.' };
 
