@@ -15,6 +15,7 @@ const options: { id: PresentationTheme; name: string; detail: string }[] = [
   { id: 'royal', name: 'Royal Gold & Jade', detail: 'Pearl / Gold / Jade · Violet accents' },
   { id: 'glass', name: 'Spectrum Clear Glass', detail: '8 category colors · Clear glass' },
   { id: 'future', name: 'BIXLINK Future Glass', detail: 'Crystal / Cyan / Gold · Transparent' },
+  { id: 'matcha', name: 'Black Matcha Lux', detail: 'Obsidian / Glossy Matcha / Silver / Orange' },
 ];
 export function AdminAppearance({ initialTheme, initialReadiness, onSaved, onMessage }: { initialTheme?: PresentationTheme | undefined; initialReadiness?: Readiness | undefined; onSaved: () => Promise<void>; onMessage: (message: string) => void }) {
   const current = resolvePresentationTheme(initialTheme);

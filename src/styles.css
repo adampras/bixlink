@@ -930,7 +930,7 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
   --secondary: oklch(0.3 0.009 258);
   --muted-foreground: oklch(0.75 0.011 258);
 }
-[data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"] {
+[data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"] {
   --foreground: oklch(0.97 0.004 160);
   --card-foreground: var(--foreground);
   --popover: var(--card);
@@ -957,30 +957,30 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
   --theme-inset: inset 0 1px 0 color-mix(in oklab, var(--foreground) 5%, transparent);
   --settings-blue: var(--primary);
 }
-.site-shell:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) { background-image: none; font-family: 'Manrope', sans-serif; }
-.site-shell:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(h1,h2,h3,.font-display,.brand-mark) { font-family: 'Sora', sans-serif; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .site-header { background: color-mix(in oklab, var(--background) 94%, transparent); backdrop-filter: blur(10px); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .site-header::after { background: linear-gradient(90deg, var(--primary), var(--chart-3), var(--chart-2)); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.metric-panel,.stat-card,.roadmap-item,.market-panel,.package-card,.terminal-balance,.terminal-kpi,.terminal-market,.boost-engine,.boost-tier,.boost-fact,.stake-lux-card,.bix-ledger,.stake-request,.network-stat,.network-tree-panel,.network-plan,.profile-identity,.profile-referral,.profile-leader,.settings-panel,.ecosystem-column) { background: var(--theme-glass); border-color: var(--border); box-shadow: var(--sh-1), var(--theme-inset); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.hero-section,.booster-band,.booster-vault,.terminal-hero,.settings-console) { background: var(--background); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.bix-ledger-metrics,.terminal-chart,.profile-actions>a,.profile-actions>button,.settings-rail,.profile-leader-note) { background: var(--secondary); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.hero-halo,.bix-ledger-glow,.bix-ledger-scan) { display: none; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.bix-ledger-mark i,.boost-engine-live i,.terminal-live i,.mobile-nav-on::before) { animation: none; box-shadow: none; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.nav-link.active,.bix-ledger-status,.boost-tier-rank,.admin-visual-option--active) { background: color-mix(in oklab, var(--chart-3) 9%, var(--background)); border-color: color-mix(in oklab, var(--chart-3) 30%, transparent); box-shadow: none; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .form-input:focus { border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 15%, transparent); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.package-card:hover,.boost-tier:hover,.stat-card:hover) { border-color: var(--primary); box-shadow: var(--sh-2); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .boost-split-bar i:first-child { background: var(--chart-3); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.bix-ledger-mark,.profile-action-icon) { border-color: var(--border); box-shadow: none; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .register-numbered {
+.site-shell:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) { background-image: none; font-family: 'Manrope', sans-serif; }
+.site-shell:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(h1,h2,h3,.font-display,.brand-mark) { font-family: 'Sora', sans-serif; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .site-header { background: color-mix(in oklab, var(--background) 94%, transparent); backdrop-filter: blur(10px); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .site-header::after { background: linear-gradient(90deg, var(--primary), var(--chart-3), var(--chart-2)); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.metric-panel,.stat-card,.roadmap-item,.market-panel,.package-card,.terminal-balance,.terminal-kpi,.terminal-market,.boost-engine,.boost-tier,.boost-fact,.stake-lux-card,.bix-ledger,.stake-request,.network-stat,.network-tree-panel,.network-plan,.profile-identity,.profile-referral,.profile-leader,.settings-panel,.ecosystem-column) { background: var(--theme-glass); border-color: var(--border); box-shadow: var(--sh-1), var(--theme-inset); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.hero-section,.booster-band,.booster-vault,.terminal-hero,.settings-console) { background: var(--background); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.bix-ledger-metrics,.terminal-chart,.profile-actions>a,.profile-actions>button,.settings-rail,.profile-leader-note) { background: var(--secondary); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.hero-halo,.bix-ledger-glow,.bix-ledger-scan) { display: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.bix-ledger-mark i,.boost-engine-live i,.terminal-live i,.mobile-nav-on::before) { animation: none; box-shadow: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.nav-link.active,.bix-ledger-status,.boost-tier-rank,.admin-visual-option--active) { background: color-mix(in oklab, var(--chart-3) 9%, var(--background)); border-color: color-mix(in oklab, var(--chart-3) 30%, transparent); box-shadow: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .form-input:focus { border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 15%, transparent); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.package-card:hover,.boost-tier:hover,.stat-card:hover) { border-color: var(--primary); box-shadow: var(--sh-2); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .boost-split-bar i:first-child { background: var(--chart-3); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.bix-ledger-mark,.profile-action-icon) { border-color: var(--border); box-shadow: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .register-numbered {
   --register-background: var(--background); --register-surface: var(--card); --register-foreground: var(--foreground); --register-muted: var(--muted-foreground); --register-border: var(--border); --register-gold: var(--chart-3); --register-gold-light: var(--chart-3); --register-gold-deep: var(--primary); --register-submit-shadow: var(--sh-1); font-family: 'Manrope', sans-serif;
 }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .terminal-asset { padding-block: 15px; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.terminal-market,.terminal-balance) { padding: 22px; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .terminal-asset { padding-block: 15px; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.terminal-market,.terminal-balance) { padding: 22px; }
 @media (min-width: 768px) {
-  :is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) main>section { padding-top: 48px; padding-bottom: 48px; }
-  :is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.package-grid,.boost-ladder,.profile-actions) { gap: 18px; }
+  :is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) main>section { padding-top: 48px; padding-bottom: 48px; }
+  :is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.package-grid,.boost-ladder,.profile-actions) { gap: 18px; }
 }
-@media (max-width: 480px) { :is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.terminal-market,.terminal-balance) { padding: 17px; } }
+@media (max-width: 480px) { :is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.terminal-market,.terminal-balance) { padding: 17px; } }
 .theme-option { height: auto; min-width: 0; display: flex; flex-direction: column; align-items: stretch; gap: 15px; padding: 14px; border-radius: 8px; white-space: normal; }
 .theme-option[aria-pressed="true"] { border-color: var(--ring); box-shadow: inset 0 0 0 1px var(--ring); }
 .theme-miniature { display: block; width: 100%; aspect-ratio: 1.7; overflow: hidden; border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--background); color: var(--foreground); }
@@ -993,16 +993,16 @@ label { font-size: 11px; text-transform: uppercase; font-weight: 700; }
 .theme-miniature-chart { display: block; height: 15px; margin-top: 10px; border-bottom: 2px solid var(--chart-2); transform: skewY(-8deg); }
 .theme-miniature-ribbon { display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px; }.theme-miniature-ribbon i { height:5px;border-radius:2px;background:var(--primary); }.theme-miniature-ribbon i:nth-child(2){background:var(--chart-2)}.theme-miniature-ribbon i:nth-child(3){background:var(--chart-3)}.theme-miniature-ribbon i:nth-child(4){background:var(--chart-1)}
 /* Theme-specific refinements found during signed-in phone checks. */
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .network-tree-panel { max-width: 100%; overflow-x: auto; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) main .grid>section { min-width: 0; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.stake-lux-btn,.stake-lux-card--pop .stake-lux-btn) { background: var(--primary); color: var(--primary-foreground); box-shadow: var(--sh-1); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .stake-pool { background: linear-gradient(90deg, color-mix(in oklab, var(--chart-3) 12%, transparent), transparent 72%); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .stake-pool-ico { background: color-mix(in oklab, var(--chart-3) 12%, transparent); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.stake-lux-title span,.brand-mark) { text-shadow: none; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.stake-lux-notch,.stake-lux-notch--gold) { color: var(--background); box-shadow: none; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) :is(.profile-code,.profile-personal-link,.ref-tree-metrics b) { background: var(--background); border-color: var(--border); }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .profile-referral::after { display: none; }
-:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"]) .profile-action-icon { background: color-mix(in oklab, var(--primary) 12%, transparent); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .network-tree-panel { max-width: 100%; overflow-x: auto; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) main .grid>section { min-width: 0; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.stake-lux-btn,.stake-lux-card--pop .stake-lux-btn) { background: var(--primary); color: var(--primary-foreground); box-shadow: var(--sh-1); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .stake-pool { background: linear-gradient(90deg, color-mix(in oklab, var(--chart-3) 12%, transparent), transparent 72%); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .stake-pool-ico { background: color-mix(in oklab, var(--chart-3) 12%, transparent); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.stake-lux-title span,.brand-mark) { text-shadow: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.stake-lux-notch,.stake-lux-notch--gold) { color: var(--background); box-shadow: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) :is(.profile-code,.profile-personal-link,.ref-tree-metrics b) { background: var(--background); border-color: var(--border); }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .profile-referral::after { display: none; }
+:is([data-presentation-theme="emerald"], [data-presentation-theme="graphite"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"]) .profile-action-icon { background: color-mix(in oklab, var(--primary) 12%, transparent); }
 
 /* NETWORK — selected premium glass explorer, using the shared theme roles. */
 .network-explorer { --nx-surface: color-mix(in oklab, var(--card) 80%, var(--background)); --nx-glass: color-mix(in oklab, var(--foreground) 3%, transparent); --nx-gold-line: color-mix(in oklab, var(--chart-3) 40%, transparent); --nx-shadow: 0 14px 35px color-mix(in oklab, var(--background) 70%, transparent); letter-spacing: 0; }
@@ -1607,7 +1607,7 @@ html[data-color-mode="light"] .site-shell .wallet-vault { box-shadow:inset 0 1px
 
 /* Adaptive auric marketplace; no independent page background. */
 :root { --shop-gold:oklch(.82 .11 85); --shop-line:oklch(.82 .11 85 / 38%); --shop-photo:oklch(.9 .005 240); --shop-photo-ink:oklch(.27 .035 80); --shop-shadow:0 10px 30px oklch(.05 0 0 / 13%); }
-html[data-color-mode="light"], [data-presentation-theme="royal"] { --shop-gold:oklch(.45 .09 80); --shop-line:oklch(.55 .09 80 / 40%); }
+html[data-color-mode="light"], [data-presentation-theme="royal"], [data-presentation-theme="matcha"] { --shop-gold:oklch(.45 .09 80); --shop-line:oklch(.55 .09 80 / 40%); }
 .lux-shop { color:var(--foreground); letter-spacing:0; }
 .shop-heading { display:flex; justify-content:space-between; align-items:end; gap:24px; padding-bottom:28px; border-bottom:1px solid var(--shop-line); }
 .shop-eyebrow { font-size:10px; font-weight:700; color:var(--shop-gold); }
