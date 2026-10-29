@@ -21,6 +21,7 @@ import { confirmPin, getFiatCodes, txFeedback } from '@/components/TxFeedback';
 import { pickWalletSkin } from '@/lib/wallet-skin';
 import { WalletFinanceMotion } from '@/components/WalletFinanceMotion';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, CheckCircle2, Clock, Eye, EyeOff, Send } from 'lucide-react';
+import { CoinMark, networkName } from '@/components/deposit/CoinBadge';
 import { DepositFlightScanner } from '@/components/DepositFlightScanner';
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
@@ -81,7 +82,8 @@ function WalletPage() {
     try {
       if (modal === 'deposit') {
         if (flex) {
-          const r = await verifyTx({ data: { walletCode: selWallet?.code ?? '', txHash: txHash.trim() } });
+          const r = await verifyTx({ data: { walletCode: selWallet?.code ?? '', txHash: txHash.trim(), expectedAmount: amt >= 1 ? amt : undefined } });
+          if (!r.ok && 'queued' in r && r.queued) { setNotice(r.reason); setTxHash(''); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); setBusy(false); return; }
           if (!r.ok) { setNotice(r.reason); setBusy(false); return; }
           setSuccess({ amount: r.amount, walletCode: r.walletCode, network: r.network, txHash: r.txHash }); setTxHash(''); close(); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); setBusy(false); return;
         }
@@ -139,11 +141,14 @@ function WalletPage() {
           {!intent && <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Deposit method"><Button size="sm" variant={flex ? 'default' : 'outline'} className="h-auto min-h-9 whitespace-normal rounded-full" onClick={() => { setFlex(true); setWalletCode(''); setNotice(''); }}>Any amount · TxID</Button><Button size="sm" variant={!flex ? 'default' : 'outline'} className="h-auto min-h-9 whitespace-normal rounded-full" onClick={() => { setFlex(false); setWalletCode(''); setNotice(''); }}>Auto-match · 3 unique digits</Button></div>}
           {!depWallets.length ? <p className="mt-4 text-sm text-destructive">No wallet is set for this deposit method yet. Try the other method or check back later. Please check back later.</p> : <>
           <p className="mt-3 text-xs text-muted-foreground">1. Choose coin & network (USDT or USDC)</p>
-          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">{depWallets.map(w => <button key={w.code} type="button" onClick={() => setWalletCode(w.code)} data-active={selWallet?.code === w.code} className="dep-chip"><b>{w.code}</b><span>{w.asset ?? 'USDT'} · {w.network}</span></button>)}</div>
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">{depWallets.map(w => <button key={w.code} type="button" onClick={() => setWalletCode(w.code)} data-active={selWallet?.code === w.code} aria-pressed={selWallet?.code === w.code} className="dep-coin-card"><CoinMark asset={w.asset ?? 'USDT'} network={w.network}/><span className="min-w-0"><b>{w.asset ?? 'USDT'} · {w.network.replace('20', '-20')}</b><small>{networkName(w.network)}</small><em>Ref: {w.code}</em></span></button>)}</div>
           <div className="mt-4 grid grid-cols-2 gap-2"><Button variant={depMode === 'copy' ? 'default' : 'outline'} className="rounded-full" onClick={() => setDepMode('copy')}><Copy/> Copy wallet</Button><Button variant={depMode === 'qr' ? 'default' : 'outline'} className="rounded-full" onClick={() => setDepMode('qr')}><QrCode/> Scan QR</Button></div>
-          {depMode === 'copy' ? <div className="mt-3 rounded-2xl border border-border p-3"><div className="text-xs text-muted-foreground">{selWallet?.code} · {selWallet?.asset ?? 'USDT'} {selWallet?.network}</div><div className="mt-1 break-all font-mono text-sm text-chart-3">{addr}</div><Button size="sm" className="mt-3 rounded-full" onClick={async () => { await navigator.clipboard.writeText(addr); setNotice('Wallet address copied.'); }}><Copy/> Copy address</Button></div>
+          {depMode === 'copy' ? <div className="mt-3 rounded-2xl border border-border p-3"><div className="flex items-center gap-2 text-xs text-muted-foreground"><CoinMark asset={selWallet?.asset ?? 'USDT'} network={selWallet?.network ?? ''} size={22}/>{selWallet?.asset ?? 'USDT'} · {networkName(selWallet?.network ?? '')} only</div><div className="mt-1 break-all font-mono text-sm text-chart-3">{addr}</div><Button size="sm" className="mt-3 rounded-full" onClick={async () => { await navigator.clipboard.writeText(addr); setNotice('Wallet address copied.'); }}><Copy/> Copy address</Button></div>
             : <div className="mt-3 flex flex-col items-center gap-2"><div className="rounded-2xl bg-foreground p-3"><QRCodeSVG key={addr} value={addr} size={180}/></div><div className="text-xs text-muted-foreground">{selWallet?.code} · {selWallet?.asset ?? 'USDT'} {selWallet?.network}</div></div>}
-          {flex && !intent ? <><p className="mt-3 text-xs text-muted-foreground">2. Send any amount (min 1 {selWallet?.asset ?? 'USDT'}) to the address above, then paste the transaction ID (TxID). We verify recipient, token, network, confirmations and one-time use on-chain, then credit your wallet balance 1:1. Choose a staking package afterwards.</p>
+          {flex && !intent ? <><p className="mt-3 text-xs text-muted-foreground">2. Enter the amount you are sending from your exchange (min 1 {selWallet?.asset ?? 'USDT'}).</p>
+          <input className="form-input mt-2" type="number" min="1" step="0.01" inputMode="decimal" placeholder={`Amount ${selWallet?.asset ?? 'USDT'} (e.g. 100)`} value={amount} onChange={e => setAmount(e.target.value)}/>
+          <p className="dep-warn mt-2">Your exchange may deduct a withdrawal fee. You are credited 1:1 with the amount that actually arrives on-chain.</p>
+          <p className="mt-3 text-xs text-muted-foreground">3. After the transfer, paste the transaction ID (TxID). We verify recipient, token, network, confirmations and one-time use on-chain. If your exchange is still processing, the TxID is saved and credited automatically once confirmed.</p>
           <input className="form-input mt-2 font-mono text-xs" placeholder="Transaction ID / hash" maxLength={100} value={txHash} onChange={e => setTxHash(e.target.value)}/>
           </>
           : !intent ? <><p className="mt-4 text-xs text-muted-foreground">2. Enter how much {selWallet?.asset ?? 'USDT'} you want to deposit (credited 1:1 as USD).</p>
