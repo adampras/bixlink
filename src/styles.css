@@ -4022,3 +4022,16 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .stake-detail-dialog { background: var(--card); color: var(--foreground); border-color: var(--border); }
 .stake-receipt { background: color-mix(in oklab, var(--primary) 5%, transparent); }
 .stake-detail-dialog label { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+/* Black Matcha Lux — structured 80/12/8 coverage */
+[data-presentation-theme="matcha"] :is(.tier-bar[aria-pressed="true"],.duration-option[aria-pressed="true"]) { background: color-mix(in oklab, var(--primary) 16%, var(--background)) !important; border-color: var(--primary) !important; color: var(--primary) !important; box-shadow: none !important; }
+[data-presentation-theme="matcha"] .tier-bar em { background: color-mix(in oklab, var(--primary) 16%, transparent); color: var(--primary); border-radius: 999px; padding: 1px 7px; }
+[data-presentation-theme="matcha"] .duration-stake { background: var(--matcha-gloss) !important; color: var(--background) !important; }
+[data-presentation-theme="matcha"] .lux-ledger { border-color: color-mix(in oklab, var(--chart-2) 30%, transparent); background: color-mix(in oklab, var(--foreground) 4%, var(--background)); box-shadow: none; }
+[data-presentation-theme="matcha"] .lux-ledger-total b { color: var(--primary); text-shadow: none; }
+[data-presentation-theme="matcha"] .lux-ledger i { color: var(--chart-3); }
+[data-presentation-theme="matcha"] :is(.stat-card,.package-card,.metric-panel) b { color: var(--foreground); }
+[data-presentation-theme="matcha"] :is(.badge-pending,[data-status="pending"],.status-pending) { color: var(--chart-3); border-color: color-mix(in oklab, var(--chart-3) 40%, transparent); background: color-mix(in oklab, var(--chart-3) 10%, transparent); }
+[data-presentation-theme="matcha"] :is(.mobile-nav,.mobile-dock,.bottom-nav) { background: color-mix(in oklab, var(--background) 92%, transparent) !important; border-top: 1px solid color-mix(in oklab, var(--chart-2) 22%, transparent) !important; box-shadow: none !important; }
+[data-presentation-theme="matcha"] .mobile-nav-on { color: var(--primary) !important; }
+[data-presentation-theme="matcha"] .mobile-nav-on::before { background: var(--chart-3) !important; }
