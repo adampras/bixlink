@@ -37,6 +37,7 @@ export const Route = createFileRoute('/sovereign-wallet')({
   component: SovereignApp,
 });
 
+import { CustomTokens } from '@/components/sovereign/CustomTokens';
 type Eth = { request: (a: { method: string; params?: unknown }) => Promise<any> };
 type Tab = 'wallet' | 'market' | 'discover' | 'me';
 type Screen = 'login' | 'accountsend' | 'history' | 'language' | null | 'myid' | 'send' | 'receive' | 'scan' | 'book' | 'node' | 'security' | 'notify';
@@ -299,6 +300,7 @@ function SovereignApp() {
             <div className="text-right"><b className="numeric block text-lg">{hide ? '••••' : a.v === undefined ? '—' : fmt(a.v)}</b><small className="sw-muted">≈ {a.v === undefined ? '—' : money(a.v * a.p)}</small></div>
           </Button>)}
         </section>
+        {!ledger && <CustomTokens addr={addr} node={getNode()} hide={hide} />}
         {msg && <p className="sw-note">{msg}</p>}
         {ledger && walletQ.isError && <p role="alert" className="sw-note">Balance unavailable. <Button className="sw-gold-text" onClick={() => void walletQ.refetch()}>Retry</Button></p>}
         <p className="sw-note">{ledger

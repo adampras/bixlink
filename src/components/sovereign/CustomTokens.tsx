@@ -16,7 +16,7 @@ async function call(node: string, to: string, data: string) {
 }
 function decodeString(hex: string) {
   const h = hex.slice(2);
-  if (h.length === 64) return Buffer.from ? decodeBytes32(h) : decodeBytes32(h);
+  if (h.length === 64) return decodeBytes32(h);
   const len = parseInt(h.slice(64, 128), 16);
   const bytes = h.slice(128, 128 + len * 2);
   return new TextDecoder().decode(new Uint8Array(bytes.match(/../g)?.map((b) => parseInt(b, 16)) ?? []));
