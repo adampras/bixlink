@@ -3817,3 +3817,30 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sw-app .sw-list-item { min-height: 3.5rem; border-radius: 0; }
 .sw-app .sw-note { line-height: 1.6; overflow-wrap: anywhere; }
 .sw-app .sw-dock { left: 50%; right: auto; transform: translateX(-50%); width: min(26rem, calc(100% - 1.5rem)); }
+.sw-app { --wallet-positive: oklch(.76 .15 160); --wallet-negative: var(--destructive); --wallet-depth-bid: color-mix(in oklab, var(--wallet-positive) 16%, transparent); --wallet-depth-ask: color-mix(in oklab, var(--wallet-negative) 16%, transparent); --wallet-shimmer: linear-gradient(110deg, var(--muted) 25%, color-mix(in oklab, var(--primary) 14%, var(--card)) 45%, var(--muted) 65%); }
+.sw-quad { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
+.sw-quad .sw-action { min-height: 5.5rem; padding: .65rem .2rem; border-radius: .5rem; font-size: .75rem; background: linear-gradient(155deg, color-mix(in oklab, var(--primary) 9%, var(--card)), var(--background)); box-shadow: inset 0 1px 0 var(--border); }
+.sw-auth-heading { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2rem 0; }
+.sw-auth-choice { display: flex; justify-content: center; gap: .75rem; min-height: 4rem; padding: 1rem; border: 1px solid var(--primary); border-radius: .5rem; background: linear-gradient(145deg, color-mix(in oklab, var(--primary) 12%, var(--card)), var(--background)); color: var(--primary); font-weight: 700; }
+.sw-stake-strip { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; color: var(--primary); font-size: .75rem; padding: .75rem 0; border-block: 1px solid var(--border); }
+.sw-stake-strip small { margin-left: auto; color: var(--muted-foreground); }
+.sw-skeleton { border-radius: .5rem; background: var(--wallet-shimmer); background-size: 220% 100%; animation: sw-shimmer 1.8s linear infinite; }
+@keyframes sw-shimmer { to { background-position: -220% 0; } }
+.sw-chart-tools { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3rem; margin-block: 1rem .25rem; }
+.sw-chart-tools button, .sw-market-filters button { padding: .45rem; border-radius: .4rem; color: var(--muted-foreground); background: var(--background); font-size: .7rem; }
+.sw-chart-tools button[aria-pressed='true'], .sw-market-filters button[aria-pressed='true'] { color: var(--primary); background: color-mix(in oklab, var(--primary) 12%, var(--card)); box-shadow: inset 0 0 0 1px var(--border); }
+.sw-chart-positive { color: var(--wallet-positive); } .sw-chart-negative { color: var(--wallet-negative); }
+.sw-market-empty { display: grid; place-items: center; height: 200px; text-align: center; font-size: .8rem; color: var(--muted-foreground); }
+.sw-market-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding-top: 1rem; font-size: .7rem; color: var(--muted-foreground); }
+.sw-market-stats b { display: block; color: var(--foreground); margin-top: .3rem; font-size: .85rem; }
+.sw-market-filters { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+.sw-market-filters button { display: flex; align-items: center; justify-content: center; gap: .35rem; min-height: 2.2rem; }
+.sw-market-row { display: flex; align-items: center; gap: .75rem; border-bottom: 1px solid var(--border); padding: 1rem .25rem; font-size: .85rem; }
+.sw-market-row button { min-width: 0; } .sw-market-row small { min-width: 3.5rem; text-align: right; }
+.sw-depth { border-block: 1px solid var(--border); padding-block: 1rem; }
+.sw-depth-row { position: relative; isolation: isolate; display: flex; justify-content: space-between; gap: .2rem; padding: .5rem .15rem; font-size: .65rem; font-variant-numeric: tabular-nums; }
+.sw-depth-row progress { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; appearance: none; opacity: .7; }
+.sw-depth-row progress::-webkit-progress-bar { background: transparent; }
+.sw-depth-row progress::-webkit-progress-value { background: var(--wallet-depth-bid); }
+.sw-depth-row[data-side='asks'] progress::-webkit-progress-value { background: var(--wallet-depth-ask); }
+@media (prefers-reduced-motion: reduce) { .sw-skeleton { animation: none; } }
