@@ -47,6 +47,8 @@
 - Presale stage editing uses shared atomic helpers and a shared settings validator; owner saves merge the stored config and read it back to preserve auxiliary settings and verify persistence without resetting orders.
 
 - Owner-only marketing settings feed browser PDF exports; dated CDN video stays separate to avoid implying re-rendering.
+- Enforce virtual sender authorization in the shared RPC and insert guard, and developer buyback limits with a table trigger as well as shared input validation; direct API calls must not bypass the wallet rules.
+- Serve the English company overview as a versioned, dated PDF with page-image previews; changes to live financial settings require regeneration, not changes to the dated video.
 - Owner navigation uses one searchable category selector; shared staking controls separate daily presets from individual edits to avoid duplicate forms across consoles.
 - Shell/dialogs own phone bounds; consortium uses a centered portal stage to avoid legacy transforms. Package cards use inline durations and full-width actions.
 - All loan dialog states share a Radix body portal with isolated surface tokens; this avoids shell transforms and transparent theme overrides while retaining focus trapping.

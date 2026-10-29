@@ -49,11 +49,11 @@ export function AccountTransfer({ initialCode, initialToken, back, scan, done }:
   const [review, setReview] = useState(false); const [busy, setBusy] = useState(false); const [message, setMessage] = useState(''); const [pin, setPin] = useState('');
   const wallet = useQuery({ queryKey: ['my-wallet', member.user?.id], queryFn: () => walletFn(), enabled: !!member.user });
   const virtual = useQuery({ queryKey: ['sovereign-virtual', member.user?.id], queryFn: () => virtualFn(), enabled: !!member.user && token === 'vUSDT' });
-  const enabled = token === 'BIX' ? cfg.data?.bixPay.enabled : cfg.data?.usdtTransfer.enabled;
+  const enabled = token === 'BIX' ? cfg.data?.bixPay.enabled : cfg.data?.usdtTransfer.enabled && virtual.data?.canSend === true;
   const balance = token === 'BIX' ? wallet.data?.bixBalance : virtual.data?.balance;
   const valid = /^BIX-\d{6}$/i.test(code) && Number.isFinite(Number(amount)) && Number(amount) > 0 && balance !== undefined && Number(amount) <= balance;
   return <><Header title="Transfer · Account" back={back} /><div className="sw-mode mb-5">{['BIX', 'vUSDT'].map(t => <Button key={t} aria-pressed={token === t} onClick={() => { setToken(t); setReview(false); setAmount(''); setMessage(''); }}>{t === 'vUSDT' ? 'Virtual USDT' : t}</Button>)}</div>
-  {token === 'vUSDT' && <p className="sw-note">Virtual test USDT only. Separate from your account USDT and on-chain USDT; it cannot be withdrawn.</p>}
+  {token === 'vUSDT' && <p className="sw-note">Only Owner 1 can send virtual USDT. Separate from your account USDT and on-chain USDT; it cannot be withdrawn.</p>}
   <p className="sw-muted mb-4">Available balance: <b>{balance === undefined ? '—' : balance.toLocaleString()} {token}</b></p>
   {!enabled && <p role="status" className="sw-note">{cfg.isPending ? 'Checking availability…' : 'Coming soon — transfers are currently closed by the owner.'}</p>}
   <form className="space-y-5" onSubmit={async e => {
