@@ -14,39 +14,51 @@ const EVM = {
 } as const;
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 
-export type VerifyResult = { ok: true; amount: number } | { ok: false; reason: string };
+export type VerifyResult = { ok: true; amount: number } | { ok: false; reason: string; pending?: boolean };
 
 function units(raw: bigint, decimals: number) {
   const base = 10n ** BigInt(decimals);
   return Number(raw / base) + Number(raw % base) / Number(base);
 }
 
+const EVM_RPC = {
+  BEP20: ['https://bsc-rpc.publicnode.com', 'https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io'],
+  ERC20: ['https://ethereum-rpc.publicnode.com', 'https://eth.llamarpc.com', 'https://cloudflare-eth.com'],
+} as const;
+
+/** Keyless EVM verification through public chain RPC nodes (no explorer API key needed). */
 async function verifyEvm(net: 'BEP20' | 'ERC20', hash: string, to: string, asset: DepositAsset): Promise<VerifyResult> {
-  const key = process.env['ETHERSCAN_API_KEY'];
-  if (!key) return { ok: false, reason: 'Automatic verification for this network is not configured yet.' };
-  if (!/^0x[0-9a-fA-F]{64}$/.test(hash)) return { ok: false, reason: 'Invalid transaction hash format.' };
+  if (!/^0x[0-9a-fA-F]{64}$/.test(hash)) return { ok: false, reason: 'Invalid transaction hash format. It starts with 0x and has 64 characters.' };
   const cfg = evmCfg(net, asset);
-  const call = async (action: string, extra = '') => {
-    const r = await fetch(`https://api.etherscan.io/v2/api?chainid=${cfg.chainId}&module=proxy&action=${action}${extra}&apikey=${key}`);
-    if (!r.ok) throw new Error('explorer');
-    return (await r.json()) as { result: any };
-  };
-  const [rc, bn] = await Promise.all([call('eth_getTransactionReceipt', `&txhash=${hash}`), call('eth_blockNumber')]);
-  const receipt = rc.result;
-  if (!receipt || typeof receipt !== 'object') return { ok: false, reason: 'Transaction not found yet. Wait a minute and try again.' };
-  if (receipt.status !== '0x1') return { ok: false, reason: 'This transaction failed on the blockchain.' };
-  const conf = Number(BigInt(bn.result) - BigInt(receipt.blockNumber));
-  if (conf < cfg.minConf) return { ok: false, reason: `Waiting for confirmations (${Math.max(conf, 0)}/${cfg.minConf}). Try again shortly.` };
-  const target = to.toLowerCase().replace(/^0x/, '').padStart(64, '0');
-  let total = 0n;
-  for (const log of receipt.logs ?? []) {
-    if (String(log.address).toLowerCase() !== cfg.contract) continue;
-    if (log.topics?.[0] !== TRANSFER_TOPIC) continue;
-    if (String(log.topics?.[2]).toLowerCase().replace(/^0x/, '') !== target) continue;
-    total += BigInt(log.data);
+  let lastErr: unknown;
+  for (const url of EVM_RPC[net]) {
+    try {
+      const [receipt, bn] = await Promise.all([rpcCall(url, 'eth_getTransactionReceipt', [hash]), rpcCall(url, 'eth_blockNumber', [])]);
+      if (!receipt || typeof receipt !== 'object') return { ok: false, pending: true, reason: 'Transaction not on the blockchain yet. Exchanges often take 5–20 minutes to broadcast.' };
+      if (receipt.status !== '0x1') return { ok: false, reason: 'This transaction failed on the blockchain.' };
+      const conf = Number(BigInt(bn) - BigInt(receipt.blockNumber));
+      if (conf < cfg.minConf) return { ok: false, pending: true, reason: `Waiting for confirmations (${Math.max(conf, 0)}/${cfg.minConf}).` };
+      const target = to.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+      let total = 0n;
+      for (const log of receipt.logs ?? []) {
+        if (String(log.address).toLowerCase() !== cfg.contract) continue;
+        if (log.topics?.[0] !== TRANSFER_TOPIC) continue;
+        if (String(log.topics?.[2]).toLowerCase().replace(/^0x/, '') !== target) continue;
+        total += BigInt(log.data);
+      }
+      if (total === 0n) return { ok: false, reason: `No ${asset} ${net} transfer to this deposit wallet was found in that transaction. Check the coin and network.` };
+      return { ok: true, amount: units(total, cfg.decimals) };
+    } catch (e) { lastErr = e; }
   }
-  if (total === 0n) return { ok: false, reason: `No ${asset} transfer to this wallet was found in that transaction.` };
-  return { ok: true, amount: units(total, cfg.decimals) };
+  throw lastErr ?? new Error('rpc');
+}
+
+async function rpcCall(url: string, method: string, params: unknown[]) {
+  const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) });
+  if (!r.ok) throw new Error('rpc');
+  const j = (await r.json()) as { result?: any; error?: { message: string } };
+  if (j.error) throw new Error(j.error.message);
+  return j.result;
 }
 
 async function verifyTron(hash: string, to: string, asset: DepositAsset): Promise<VerifyResult> {
@@ -54,9 +66,9 @@ async function verifyTron(hash: string, to: string, asset: DepositAsset): Promis
   const r = await fetch(`https://apilist.tronscanapi.com/api/transaction-info?hash=${hash}`);
   if (!r.ok) throw new Error('explorer');
   const tx = (await r.json()) as any;
-  if (!tx || !tx.hash) return { ok: false, reason: 'Transaction not found yet. Wait a minute and try again.' };
+  if (!tx || !tx.hash) return { ok: false, pending: true, reason: 'Transaction not on the blockchain yet. Exchanges often take 5–20 minutes to broadcast.' };
   if (tx.contractRet && tx.contractRet !== 'SUCCESS') return { ok: false, reason: 'This transaction failed on the blockchain.' };
-  if (!tx.confirmed) return { ok: false, reason: 'Waiting for confirmations. Try again shortly.' };
+  if (!tx.confirmed) return { ok: false, pending: true, reason: 'Waiting for confirmations.' };
   let total = 0n;
   for (const t of tx.trc20TransferInfo ?? []) {
     if (t.contract_address !== TOKENS[asset].TRC20 || t.to_address !== to) continue;
@@ -71,7 +83,7 @@ export async function verifyUsdtDeposit(net: DepositNetwork, hash: string, to: s
     return net === 'TRC20' ? await verifyTron(hash, to, asset) : await verifyEvm(net, hash, to, asset);
   } catch (e) {
     console.error('deposit verify failed', e);
-    return { ok: false, reason: 'Blockchain explorer is busy. Please try again in a moment.' };
+    return { ok: false, pending: true, reason: 'Blockchain network is busy right now.' };
   }
 }
 

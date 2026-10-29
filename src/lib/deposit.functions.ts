@@ -38,7 +38,7 @@ export const saveDepositWallets = createServerFn({ method: 'POST' }).middleware(
   });
 
 export const verifyDeposit = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { walletCode: string; txHash: string }) => z.object({ walletCode: z.string().trim().min(2).max(20), txHash: z.string().trim().min(10).max(100) }).parse(data))
+  .inputValidator((data: { walletCode: string; txHash: string; expectedAmount?: number }) => z.object({ walletCode: z.string().trim().min(2).max(20), txHash: z.string().trim().min(10).max(100), expectedAmount: z.number().min(1).max(100000).optional() }).parse(data))
   .handler(async ({ context, data }) => {
     const wallets = await memberWallets(context);
     const wallet = wallets.find(w => w.enabled && w.address && walletFits(w, 'flex') && w.code === data.walletCode.toUpperCase());
@@ -49,8 +49,24 @@ export const verifyDeposit = createServerFn({ method: 'POST' }).middleware([requ
     const { data: used } = await supabaseAdmin.from('wallet_transactions').select('id').eq('type', 'deposit').not('verified_at', 'is', null).ilike('tx_hash', hash).limit(1);
     if (used?.length) return { ok: false as const, reason: 'This transaction has already been credited.' };
 
+    const { data: queued } = await supabaseAdmin.from('wallet_transactions').select('id,user_id').eq('type', 'deposit').eq('status', 'pending').ilike('tx_hash', hash).limit(1);
+    if (queued?.length) return queued[0].user_id === context.userId
+      ? { ok: false as const, queued: true as const, reason: 'This TxID is already in the queue. It is credited automatically once confirmed.' }
+      : { ok: false as const, reason: 'This transaction has already been submitted.' };
+
     const result = await verifyUsdtDeposit(wallet.network, hash, wallet.address, wallet.asset ?? 'USDT');
-    if (!result.ok) return { ok: false as const, reason: result.reason };
+    if (!result.ok) {
+      if (!result.pending) return { ok: false as const, reason: result.reason };
+      // Smart queue: exchange withdrawals broadcast late; keep the TxID and let the 5-minute scanner credit it once confirmed.
+      const expected = data.expectedAmount ?? 0;
+      const { error: qErr } = await supabaseAdmin.from('wallet_transactions').insert({
+        user_id: context.userId, type: 'deposit', amount_usd: expected, fee_usd: 0, net_usd: expected, status: 'pending',
+        tx_hash: hash, wallet_code: wallet.code, network: wallet.network, address: wallet.address,
+        note: `${QUEUE_NOTE} · ${wallet.asset ?? 'USDT'} ${wallet.code}${expected ? ` · expected ${expected}` : ''}`,
+      });
+      if (qErr) return { ok: false as const, reason: qErr.code === '23505' ? 'This transaction has already been submitted.' : 'Could not queue this TxID. Please try again.' };
+      return { ok: false as const, queued: true as const, reason: `${result.reason} Your TxID is saved — it is credited automatically once confirmed (checked every 5 minutes).` };
+    }
     if (result.amount < 1) return { ok: false as const, reason: 'Minimum deposit is 1 USD stablecoin.' };
 
     const amount = Math.floor(result.amount * 100) / 100;
@@ -66,6 +82,8 @@ export const verifyDeposit = createServerFn({ method: 'POST' }).middleware([requ
     }
     return { ok: true as const, amount, walletCode: wallet.code, network: wallet.network, txHash: hash };
   });
+
+export const QUEUE_NOTE = 'Queued TxID';
 
 export const createDepositIntent = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((data: { walletCode: string; amount: number }) => z.object({ walletCode: z.string().trim().min(2).max(20), amount: z.number().int().min(1).max(100000) }).parse(data))
