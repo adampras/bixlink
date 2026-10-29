@@ -29,7 +29,7 @@ export const Route = createFileRoute('/sovereign-wallet')({
 
 type Eth = { request: (a: { method: string; params?: unknown }) => Promise<any> };
 type Tab = 'wallet' | 'market' | 'discover' | 'me';
-type Screen = null | 'send' | 'receive' | 'scan' | 'book' | 'node' | 'security' | 'notify';
+type Screen = null | 'myid' | 'send' | 'receive' | 'scan' | 'book' | 'node' | 'security' | 'notify';
 const USDT = '0x55d398326f99059fF775485246999027B3197955';
 const NODES = ['https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io', 'https://bsc-dataseed1.ninicoin.io', 'https://bsc.publicnode.com'];
 const SCAN = 'https://bscscan.com';
