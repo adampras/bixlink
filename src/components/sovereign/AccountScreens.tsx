@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Copy, Eye, EyeOff, ChevronLeft, ScanLine, ShieldCheck, LogOut, Wallet, Languages, Network, Bell, Star } from 'lucide-react';
+import { Copy, Eye, EyeOff, ChevronLeft, ScanLine, ShieldCheck, LogOut, Wallet, Languages, Network, Bell, Star, KeyRound, RotateCcw, Smartphone, BadgeCheck } from 'lucide-react';
 import { Button as BaseButton, type ButtonProps } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { signInWithIdentifier } from '@/lib/login.functions';
@@ -9,7 +9,7 @@ import { lookupBixPay, sendBixPay, getBixPay, getMyWallet } from '@/lib/bixlink.
 import { getSovereignVirtual, sendSovereignVirtual } from '@/lib/sovereign-account.functions';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { FLAG_CODE, LANGUAGES, useI18n } from '@/lib/i18n';
-import { hasPin, checkPin } from '@/components/TxFeedback';
+import { hasPin, checkPin, savePin, clearPin } from '@/components/TxFeedback';
 import { useNavigate } from '@tanstack/react-router';
 import { WalletSignIn } from '@/components/WalletSignIn';
 
@@ -99,9 +99,21 @@ export function WalletLanguage({ back }: { back: () => void }) { const { languag
 export function AccountProfile({ addr, go, disconnect }: { addr: string; go: (s: string) => void; disconnect: () => void }) {
   const member = useMember(); const qc = useQueryClient(); const navigate = useNavigate(); const { t } = useI18n(); const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
   const Item = ({ title, icon, screen }: { title: string; icon: React.ReactNode; screen: string }) => <Button className="sw-list-item w-full" onClick={() => go(screen)}>{icon}<span className="flex-1 text-left">{title}</span></Button>;
-  return <><h1 className="text-center font-display text-2xl">{t('profile')}</h1><section className="py-7 text-center"><Wallet size={48} className="sw-gold-text mx-auto" /><b className="block mt-4">BIXLINK Wallet</b><p className="sw-muted mt-2 break-all">{member.data?.referral?.code ?? 'Not signed in'}</p>{member.user && <p className="sw-muted text-sm mt-2 break-all">{member.user.email}</p>}{addr && <p className="sw-muted mt-2 text-xs break-all">BSC: {addr}</p>}</section>
+  const [pinOn, setPinOn] = useState(() => hasPin()); const [pinMode, setPinMode] = useState<'' | 'set'>(''); const [pin, setPin] = useState('');
+  const Opt = ({ title, icon, status, onClick }: { title: string; icon: React.ReactNode; status: string; onClick: () => void }) => <Button className="sw-list-item w-full" onClick={onClick}>{icon}<span className="flex-1 text-left">{title}</span><small className="rounded-full border border-border px-2 py-0.5 text-[.6rem] uppercase tracking-wider opacity-70">{status}</small></Button>;
+  const code = member.data?.referral?.code ?? 'Not signed in';
+  return <><section className="sw-panel mb-5 flex items-center gap-4 p-4"><span className="grid size-14 shrink-0 place-items-center rounded-2xl border border-border"><Wallet size={28} className="sw-gold-text" /></span><div className="min-w-0 flex-1"><small className="sw-muted block text-[.65rem] uppercase tracking-[.25em]">BIXLINK Wallet</small><b className="block font-display text-lg">{code}</b>{member.user && <p className="sw-muted truncate text-xs">{member.user.email}</p>}{addr && <p className="sw-muted truncate text-[.65rem]">BSC: {addr}</p>}</div>{member.user && <span className="rounded-full border border-border px-2 py-1 text-[.6rem] uppercase sw-gold-text">Active</span>}</section>
   {!member.user && <Button className="sw-gold-btn w-full justify-center mb-5" onClick={() => go('login')}>{t('signIn')}</Button>}
+  <small className="sw-muted mb-1 block text-[.65rem] uppercase tracking-[.25em]">Account</small>
   <div className="divide-y divide-border"><Item title="Transaction history" icon={<Copy />} screen="history" /><Item title="Security & verification" icon={<ShieldCheck />} screen="security" /><Item title={t('language')} icon={<Languages />} screen="language" /><Item title="Address book" icon={<Star />} screen="book" /><Item title="BNB Chain node" icon={<Network />} screen="node" /><Item title={t('notifications')} icon={<Bell />} screen="notify" /></div>
+  <small className="sw-muted mb-1 mt-6 block text-[.65rem] uppercase tracking-[.25em]">Security · optional</small>
+  <div className="divide-y divide-border">
+    <Opt title="Transaction PIN" icon={<KeyRound />} status={pinOn ? 'On' : 'Optional'} onClick={() => { setPinMode(pinOn ? '' : 'set'); setPin(''); }} />
+    {pinMode === 'set' && <form className="flex gap-2 py-3" onSubmit={async e => { e.preventDefault(); if (!/^\d{6}$/.test(pin)) { setMessage('PIN must be 6 digits.'); return; } await savePin(pin); setPinOn(true); setPinMode(''); setPin(''); setMessage('Transaction PIN saved on this device.'); }}><input inputMode="numeric" maxLength={6} type="password" autoComplete="off" aria-label="New 6-digit PIN" placeholder="6-digit PIN" className="sw-field min-w-0 flex-1" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} /><Button type="submit" className="sw-gold-btn">Save</Button></form>}
+    <Opt title="Reset PIN" icon={<RotateCcw />} status={pinOn ? 'Reset' : 'Optional'} onClick={() => { if (!pinOn) { setMessage('No PIN is set yet.'); return; } clearPin(); setPinOn(false); setPinMode('set'); setMessage('PIN removed. Set a new PIN below.'); }} />
+    <Opt title="Google Authenticator" icon={<Smartphone />} status="Optional · soon" onClick={() => setMessage('Google Authenticator (2FA) is optional and coming soon.')} />
+    <Opt title="KYC verification" icon={<BadgeCheck />} status="Optional · soon" onClick={() => setMessage('KYC is optional and not required to use the wallet. Coming soon.')} />
+  </div>
   {addr && <Button className="sw-action mt-6 w-full" onClick={disconnect}>Disconnect Web3</Button>}
   {member.user && <Button disabled={busy} className="sw-action mt-4 w-full !flex-row" onClick={async () => { if (busy) return; setBusy(true); try { await qc.cancelQueries(); qc.clear(); const { error } = await supabase.auth.signOut(); if (error) throw error; await navigate({ to: '/sovereign-wallet', replace: true }); go('login'); } catch (e) { setMessage(errorText(e)); } finally { setBusy(false); } }}><LogOut />{busy ? 'Please wait…' : 'Sign out'}</Button>}
   {message && <p role="status" className="sw-note">{message}</p>}<p className="sw-note">Account sign-out also signs out the main app on this browser. Disconnecting Web3 does not revoke wallet permissions.</p></>;

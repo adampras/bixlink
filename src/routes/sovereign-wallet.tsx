@@ -557,9 +557,7 @@ function DiscoverTab() {
   const list = DAPPS.filter(i => (cat === 'All' || i.cat === cat) && (i.n + i.d).toLowerCase().includes(q.toLowerCase()));
   return <>
     <section className="sw-panel sw-discover">
-      <b className="font-display text-3xl">Discover</b>
-      <p className="sw-muted mt-1 text-sm">Web3 browser · DApps · on-chain services</p>
-      <form className="sw-field mt-4 flex items-center gap-3" onSubmit={(e) => { e.preventDefault(); const u = toUrl(q); if (u) open(u); }}>
+      <form className="sw-field flex items-center gap-3" onSubmit={(e) => { e.preventDefault(); const u = toUrl(q); if (u) open(u); }}>
         <Globe size={18} className="sw-gold-text" /><input className="min-w-0 flex-1 bg-transparent outline-none" placeholder="Search or enter URL" value={q} onChange={(e) => setQ(e.target.value)} />
         <Button type="submit" aria-label="Go" className="sw-gold-dot"><ArrowUpRight size={16} /></Button>
       </form>
@@ -610,8 +608,8 @@ function LuxCardTrigger({ label, holder }: { label: string; holder: string }) {
     <div className="sw-wallet-card select-none" role="button" tabIndex={0} aria-label="Hold to reveal BIXLINK LUX card" title="Press and hold"
       onPointerDown={start} onPointerUp={stop} onPointerLeave={stop} onContextMenu={e => e.preventDefault()}
       onKeyDown={e => { if (e.key === 'Enter') setOpen(true); }}><span>BIXLINK</span><small>{label}</small></div>
-    {open && <div className="sw-lux-overlay" role="dialog" aria-modal="true" aria-label="BIXLINK LUX card" onClick={() => setOpen(false)}>
-      <div className="sw-lux-card" onClick={e => e.stopPropagation()}>
+    {open && <div className="sw-lux-overlay select-none" style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }} role="dialog" aria-modal="true" aria-label="BIXLINK LUX card" onClick={() => setOpen(false)} onContextMenu={e => e.preventDefault()} onCopy={e => e.preventDefault()}>
+      <div className="sw-lux-card [&_*]:pointer-events-none" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between"><b className="font-display tracking-[.3em]">BIXLINK LUX</b><small>APPS WALLET</small></div>
         <span className="sw-lux-chip" aria-hidden />
         <p className="font-mono tracking-[.25em]">•••• •••• •••• 2026</p>
