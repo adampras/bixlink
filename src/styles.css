@@ -4021,3 +4021,4 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 [data-presentation-theme="matcha"] .tier-bar[aria-pressed="true"] { border-color: var(--primary); }
 .stake-detail-dialog { background: var(--card); color: var(--foreground); border-color: var(--border); }
 .stake-receipt { background: color-mix(in oklab, var(--primary) 5%, transparent); }
+.stake-detail-dialog label { text-transform: none; letter-spacing: 0; font-weight: 400; }
