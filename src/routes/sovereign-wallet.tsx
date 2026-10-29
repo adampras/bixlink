@@ -492,42 +492,83 @@ function InfoScreen({ title, onBack }: { title: string; onBack: () => void }) {
   </>;
 }
 
+type DApp = { n: string; d: string; to: string; ext?: boolean; tone: string; icon: ReactNode; cat: string };
+const DAPPS: DApp[] = [
+  { n: 'BIXLINK App', d: 'Staking, network and ledger dashboard', to: '/dashboard', tone: 'gold', icon: <img src={foxMark} alt="" className="h-7 w-7 object-contain" />, cat: 'Ecosystem' },
+  { n: 'BIX Presale', d: 'Presale stages and confirmation', to: '/presale', tone: 'cyan', icon: <Star size={22} />, cat: 'Ecosystem' },
+  { n: 'BIX Stake', d: 'Packages and staking history', to: '/stake', tone: 'emerald', icon: <Shield size={22} />, cat: 'Ecosystem' },
+  { n: 'Quantum Exchange', d: 'Demo trading terminal', to: '/quantum-exchange', tone: 'blue', icon: <Zap size={22} />, cat: 'Ecosystem' },
+  { n: 'Fox Arena', d: 'Missions and promo vBIX quests', to: '/arena', tone: 'magenta', icon: <Compass size={22} />, cat: 'GameFi' },
+  { n: 'PancakeSwap', d: 'BNB Chain DEX (external)', to: 'https://pancakeswap.finance', ext: true, tone: 'gold', icon: <RefreshCw size={22} />, cat: 'DeFi' },
+  { n: 'BscScan', d: 'BNB Chain explorer', to: 'https://bscscan.com', ext: true, tone: 'gold', icon: <Search size={22} />, cat: 'Tools' },
+  { n: 'DeFiLlama', d: 'TVL, stablecoins and protocol data', to: 'https://defillama.com', ext: true, tone: 'violet', icon: <BarChart3 size={22} />, cat: 'Tools' },
+  { n: 'CoinMarketCap', d: 'Market prices and rankings', to: 'https://coinmarketcap.com', ext: true, tone: 'blue', icon: <BarChart3 size={22} />, cat: 'Tools' },
+];
+const CATS = ['All', 'Ecosystem', 'DeFi', 'GameFi', 'Tools'];
+
+function toUrl(raw: string): string | null {
+  const v = raw.trim(); if (!v) return null;
+  if (v.startsWith('/')) return v;
+  const looksUrl = /^[\w-]+(\.[\w-]+)+(\/|$)/.test(v) || v.includes('://');
+  try {
+    if (looksUrl) { const u = new URL(v.includes('://') ? v : `https://${v}`); return u.protocol === 'https:' ? u.href : null; }
+    return `https://duckduckgo.com/?q=${encodeURIComponent(v)}`;
+  } catch { return null; }
+}
+
 function DiscoverTab() {
   const [q, setQ] = useState('');
-  const groups: { title: string; items: { n: string; d: string; to: string; ext?: boolean; g: string }[] }[] = [
-    { title: 'BIXLINK Ecosystem', items: [
-      { n: 'BIXLINK App', d: 'Staking, network and ledger dashboard', to: '/dashboard', g: '🦊' },
-      { n: 'BIX Presale', d: 'Presale stages and confirmation', to: '/presale', g: '💎' },
-      { n: 'BIX Stake', d: 'Packages and staking history', to: '/stake', g: '🔒' },
-      { n: 'Quantum Exchange', d: 'Demo trading terminal', to: '/quantum-exchange', g: '⚡' },
-    ] },
-    { title: 'Game-Fi', items: [{ n: 'Fox Arena', d: 'Missions and promo vBIX quests', to: '/arena', g: '🎮' }] },
-    { title: 'Data & analytics', items: [
-      { n: 'BscScan', d: 'BNB Chain explorer', to: 'https://bscscan.com', ext: true, g: '🔎' },
-      { n: 'DeFiLlama', d: 'TVL, stablecoins and protocol data', to: 'https://defillama.com', ext: true, g: '🦙' },
-      { n: 'CoinMarketCap', d: 'Market prices and rankings', to: 'https://coinmarketcap.com', ext: true, g: '📊' },
-    ] },
-  ];
-  const go = () => { const v = q.trim(); if (!v) return; try { const url = new URL(v.includes('://') ? v : `https://${v}`); if (url.protocol !== 'https:') return; window.open(url.href, '_blank', 'noopener,noreferrer'); } catch { /* invalid URL */ } };
+  const [cat, setCat] = useState('All');
+  const [hist, setHist] = useState<string[]>([]);
+  const [idx, setIdx] = useState(-1);
+  const [nonce, setNonce] = useState(0);
+  const [marks, setMarks] = useState<string[]>([]);
+  useEffect(() => { try { setMarks(JSON.parse(localStorage.getItem('sov-bookmarks') || '[]')); } catch { /* ignore */ } }, []);
+  const cur = idx >= 0 ? hist[idx] : null;
+  const open = (url: string) => { const h = [...hist.slice(0, idx + 1), url]; setHist(h); setIdx(h.length - 1); setQ(url.startsWith('/') ? `bixlink.com${url}` : url); };
+  const toggleMark = () => { if (!cur) return; const m = marks.includes(cur) ? marks.filter(x => x !== cur) : [...marks, cur]; setMarks(m); localStorage.setItem('sov-bookmarks', JSON.stringify(m)); };
+  const host = cur ? (cur.startsWith('/') ? 'bixlink.com' : new URL(cur).host) : '';
+  const internal = !!cur?.startsWith('/');
+
+  if (cur) return <section className="sw-browser" aria-label="In-app browser">
+    <div className="sw-browser-bar">
+      <Button aria-label="Back" className="sw-round" disabled={idx <= 0} onClick={() => setIdx(idx - 1)}><ChevronLeft size={16} /></Button>
+      <Button aria-label="Forward" className="sw-round" disabled={idx >= hist.length - 1} onClick={() => setIdx(idx + 1)}><ChevronRight size={16} /></Button>
+      <form className="sw-omni" onSubmit={(e) => { e.preventDefault(); const u = toUrl(q); if (u) open(u); }}>
+        <ShieldCheck size={14} className="sw-up flex-none" /><input aria-label="Address" value={q} onChange={(e) => setQ(e.target.value)} className="min-w-0 flex-1 bg-transparent text-xs outline-none" />
+      </form>
+      <Button aria-label="Reload" className="sw-round" onClick={() => setNonce(nonce + 1)}><RefreshCw size={16} /></Button>
+    </div>
+    <div className="sw-browser-tools">
+      <span className="sw-muted truncate text-xs">🔒 {host}</span><span className="flex-1" />
+      <Button aria-label="Bookmark" className="sw-round" onClick={toggleMark}><Star size={15} className={marks.includes(cur) ? 'sw-gold-text' : ''} fill={marks.includes(cur) ? 'currentColor' : 'none'} /></Button>
+      <BaseButton variant="wallet" size="wallet" asChild className="sw-round"><a aria-label="Open in external browser" href={cur} target="_blank" rel="noreferrer"><ArrowUpRight size={15} /></a></BaseButton>
+      <Button aria-label="Close browser" className="sw-round" onClick={() => { setIdx(-1); setHist([]); setQ(''); }}><Trash2 size={15} /></Button>
+    </div>
+    <iframe key={`${cur}-${nonce}`} src={cur} title={host} className="sw-browser-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" referrerPolicy="no-referrer" />
+    {!internal && <p className="sw-note">Some websites block in-app viewing. If the page stays blank, tap ↗ to open it in your browser.</p>}
+  </section>;
+
+  const list = DAPPS.filter(i => (cat === 'All' || i.cat === cat) && (i.n + i.d).toLowerCase().includes(q.toLowerCase()));
   return <>
     <section className="sw-panel sw-discover">
       <b className="font-display text-3xl">Discover</b>
-      <p className="sw-muted mt-1 text-sm">Explore popular apps and on-chain services</p>
-      <form className="sw-field mt-4 flex items-center gap-3" onSubmit={(e) => { e.preventDefault(); go(); }}>
-        <Search size={18} className="sw-gold-text" /><input className="min-w-0 flex-1 bg-transparent outline-none" placeholder="Search DApp or enter URL" value={q} onChange={(e) => setQ(e.target.value)} />
+      <p className="sw-muted mt-1 text-sm">Web3 browser · DApps · on-chain services</p>
+      <form className="sw-field mt-4 flex items-center gap-3" onSubmit={(e) => { e.preventDefault(); const u = toUrl(q); if (u) open(u); }}>
+        <Globe size={18} className="sw-gold-text" /><input className="min-w-0 flex-1 bg-transparent outline-none" placeholder="Search or enter URL" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Button type="submit" aria-label="Go" className="sw-gold-dot"><ArrowUpRight size={16} /></Button>
       </form>
+      <div className="sw-cats mt-3">{CATS.map(c => <Button key={c} aria-pressed={cat === c} onClick={() => setCat(c)}>{c}</Button>)}</div>
     </section>
-    {groups.map((g) => {
-      const items = g.items.filter((i) => (i.n + i.d).toLowerCase().includes(q.toLowerCase()));
-      if (!items.length) return null;
-      return <section key={g.title} className="mt-6">
-        <div className="mb-3 flex items-center justify-between"><b className="sw-section-title">{g.title}</b><span className="sw-count">{items.length}</span></div>
-        <div className="space-y-3">{items.map((i) => {
-          const inner = <><span className="sw-app-icon">{i.g}</span><span className="min-w-0 flex-1"><b className="block">{i.n}</b><small className="sw-muted block truncate">{i.d}</small></span><ChevronRight size={18} className="sw-muted" /></>;
-          return i.ext ? <a key={i.n} href={i.to} target="_blank" rel="noreferrer" className="sw-row">{inner}</a> : <a key={i.n} href={i.to} target="_blank" rel="noreferrer" className="sw-row">{inner}</a>;
-        })}</div>
-      </section>;
-    })}
+    {marks.length > 0 && <section className="mt-5"><b className="sw-section-title">Bookmarks</b><div className="mt-2 flex flex-wrap gap-2">{marks.map(m => <Button key={m} className="sw-chip" onClick={() => open(m)}><Star size={12} /> {m.startsWith('/') ? m : new URL(m).host}</Button>)}</div></section>}
+    <section className="mt-6">
+      <div className="mb-3 flex items-center justify-between"><b className="sw-section-title">{cat === 'All' ? 'All DApps' : cat}</b><span className="sw-count">{list.length}</span></div>
+      <div className="space-y-3">{list.map(i => <Button key={i.n} className="sw-row w-full text-left" onClick={() => open(i.to)}>
+        <span className="sw-app-icon" data-tone={i.tone}>{i.icon}</span>
+        <span className="min-w-0 flex-1"><b className="block">{i.n}</b><small className="sw-muted block truncate">{i.d}</small></span>
+        <ChevronRight size={18} className="sw-muted" />
+      </Button>)}</div>
+    </section>
   </>;
 }
 
