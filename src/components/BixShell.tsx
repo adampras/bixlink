@@ -60,7 +60,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   const official = useQuery({ queryKey: ['bix-market-updates'], queryFn: () => getMarketUpdates(), enabled: Boolean(user) && marketEnabled, staleTime: 60_000, refetchInterval: 60_000 });
   const myWallet = useQuery({ queryKey: ['my-wallet', user?.id], queryFn: () => getMyWallet(), enabled: Boolean(user), staleTime: 15_000, refetchInterval: 30_000 });
   const txUpdates = useMemo(() => {
-    const rows = [...(myWallet.data?.transactions ?? []), ...(myWallet.data?.swaps ?? [])] as Array<Record<string, any>>;
+    const rows = [...(myWallet.data?.transactions ?? []), ...(myWallet.data?.swaps ?? [])] as Array<{ id: string; status?: string; type?: string; created_at: string; amount_usd?: number | null; bix_amount?: number | null }>;
     return rows.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 12).map(r => {
       const kind = String(r.type ?? 'swap').replace(/_/g, ' ');
       const amount = r.amount_usd != null ? `$${Number(r.amount_usd).toLocaleString('en-US', { maximumFractionDigits: 2 })}` : r.bix_amount != null ? `${Number(r.bix_amount).toLocaleString('en-US')} BIX` : '';
