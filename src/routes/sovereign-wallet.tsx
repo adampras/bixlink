@@ -8,6 +8,9 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useMember } from '@/lib/useMember';
+import { useQuery } from '@tanstack/react-query';
+import { useServerFn } from '@tanstack/react-start';
+import { getMyWallet } from '@/lib/bixlink.functions';
 import { InstallAppButton } from '@/components/InstallPrompt';
 import walletArt from '@/assets/bix-lux-wallet.png';
 import foxIcon from '@/assets/fox-icon-512.png.asset.json';
@@ -65,6 +68,8 @@ function SovereignApp() {
   const [asset, setAsset] = useState<string | null>(null);
   const [mode, setMode] = useState<'ledger' | 'web3'>('ledger');
   const member = useMember();
+  const fetchWallet = useServerFn(getMyWallet);
+  const walletQ = useQuery({ queryKey: ['my-wallet', member.user?.id], queryFn: () => fetchWallet(), enabled: !!member.user, staleTime: 15_000 });
   useEffect(() => { const s = localStorage.getItem('sov_mode'); if (s === 'web3' || s === 'ledger') setMode(s); }, []);
   const pickMode = (m: 'ledger' | 'web3') => { setMode(m); setMsg(''); localStorage.setItem('sov_mode', m); };
   const eth = () => (globalThis as unknown as { ethereum?: Eth }).ethereum;
@@ -119,8 +124,8 @@ function SovereignApp() {
   const money = (n: number) => (hide ? '••••' : `$${fmt(n, 2)}`);
   const ledger = mode === 'ledger';
   const md = member.data as { bixBalance?: number; usdtBalance?: number; referral?: { code?: string } | null } | undefined;
-  const lBix = Number(md?.bixBalance ?? 0);
-  const lUsdt = Number(md?.usdtBalance ?? 0);
+  const lBix = Number(walletQ.data?.bixBalance ?? md?.bixBalance ?? 0);
+  const lUsdt = Number(walletQ.data?.usdtBalance ?? md?.usdtBalance ?? 0);
   const bixId = md?.referral?.code;
   const ledgerTotal = lBix * bixRef + lUsdt;
 

@@ -3795,3 +3795,19 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @keyframes sw-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes sw-blink { 50% { opacity: .35; } }
 @media (prefers-reduced-motion: reduce) { .sw-fade, .sw-pill-live i { animation: none; } .sw-mode-thumb { transition: none; } }
+
+/* Sovereign Wallet identity: obsidian + royal gold, scoped so the main app theme stays untouched */
+.sw-app {
+  --primary: oklch(0.82 0.13 85);
+  --primary-foreground: oklch(0.18 0.02 70);
+  --ring: oklch(0.82 0.13 85);
+  --background: oklch(0.13 0.008 70);
+  --card: oklch(0.17 0.01 70);
+  --border: oklch(0.32 0.03 80 / .6);
+  background: radial-gradient(120% 60% at 50% -10%, oklch(0.24 0.04 80 / .55), transparent 60%), var(--background);
+}
+.sw-app .sw-main { padding-bottom: calc(8.5rem + env(safe-area-inset-bottom)); }
+.sw-app .sw-wallet-card {
+  background: linear-gradient(135deg, oklch(0.9 0.1 90) 0%, oklch(0.76 0.13 80) 45%, oklch(0.52 0.1 70) 100%);
+  color: oklch(0.16 0.02 70);
+}
