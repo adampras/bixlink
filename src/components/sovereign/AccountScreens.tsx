@@ -11,9 +11,10 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { LANGUAGES, useI18n } from '@/lib/i18n';
 import { hasPin, checkPin } from '@/components/TxFeedback';
 import { useNavigate } from '@tanstack/react-router';
+import { WalletSignIn } from '@/components/WalletSignIn';
 
 function Button(props: ButtonProps) { return <BaseButton variant="wallet" size="wallet" {...props} />; }
-function Header({ title, back }: { title: string; back: () => void }) { return <header className="relative mb-6 flex min-h-11 items-center justify-center"><Button className="sw-round absolute left-0" aria-label="Back" onClick={back}><ChevronLeft /></Button><h1 className="font-display text-xl">{title}</h1></header>; }
+function Header({ title, back }: { title: string; back: () => void }) { return <header className="relative mb-6 flex min-h-11 items-center justify-center px-12"><Button className="sw-round absolute left-0" aria-label="Back" onClick={back}><ChevronLeft /></Button><h1 className="text-center font-display text-lg">{title}</h1></header>; }
 const errorText = (e: unknown) => e instanceof Error ? e.message : 'Unable to complete this request. Please retry.';
 
 export function AccountLogin({ back, done }: { back: () => void; done: () => void }) {
@@ -22,7 +23,9 @@ export function AccountLogin({ back, done }: { back: () => void; done: () => voi
   const [identifier, setIdentifier] = useState(''); const [password, setPassword] = useState('');
   const [show, setShow] = useState(false); const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
   const [forgot, setForgot] = useState(false);
-  return <><Header title={forgot ? 'Reset password' : 'Sign in'} back={back} /><div className="flex justify-center py-5"><Wallet className="sw-gold-text" size={54} /></div><form className="space-y-5" onSubmit={async e => {
+  const [credentials, setCredentials] = useState(false);
+  if (!credentials) return <><Header title="Welcome to BIXLINK Wallet" back={back} /><div className="sw-auth-heading"><Wallet size={56} className="sw-gold-text" /><h2 className="mt-5 text-xl">Your wallet. Your choice.</h2><p className="sw-muted mt-2 text-sm">Choose how to access your BIXLINK account.</p></div><WalletSignIn sovereign onSignedIn={() => { void qc.invalidateQueries(); done(); }} /><p className="sw-note">Sign a verification message in your wallet. No gas, token approval or private key required.</p><Button className="sw-auth-choice mt-5 w-full" onClick={() => setCredentials(true)}><ShieldCheck size={20} /> Email / BIX ID / Username</Button><p className="sw-note">Your linked wallet keeps its existing account. Connecting Web3 alone does not move account balances.</p></>;
+  return <><Header title={forgot ? 'Reset password' : 'Sign in'} back={() => setCredentials(false)} /><div className="flex justify-center py-5"><Wallet className="sw-gold-text" size={54} /></div><form className="space-y-5" onSubmit={async e => {
     e.preventDefault(); if (busy) return; setBusy(true); setMessage('');
     try {
       if (forgot) { const { error } = await supabase.auth.resetPasswordForEmail(identifier.trim(), { redirectTo: `${window.location.origin}/reset-password` }); if (error) throw error; setMessage('Check your inbox for a password reset link.'); }

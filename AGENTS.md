@@ -16,6 +16,7 @@
 - Owner-only presentation writes; wallet finance motion and landing payment canvas stay scoped.
 - Share session store and layout placeholders.
 - Sovereign Wallet owns in-place account screens and reuses authenticated ledger RPCs; virtual USDT stays explicitly separate from asset USDT, preventing accidental balance substitution.
+- Sovereign market uses a dedicated read-only terminal with timestamped public-data caches and real external depth; signature login reuses WalletSignIn with an in-place completion callback so identities and authorization remain unchanged.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
 - Clone accounts (bix_clone_accounts) are funded only via bix_allocations and excluded from member stats — auditable and separate.
 - Leader virtual balances (bix_leaders) count in bix_wallet_balance but withdraw is blocked until bix_leader_status qualifies — one server gate.
