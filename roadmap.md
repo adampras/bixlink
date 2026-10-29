@@ -1,3 +1,4 @@
+- [x] Make Sovereign Wallet self-contained: in-place sign-in/out, authenticated BIX transfer review, separate virtual USDT, receive/scan/history, language and streamlined profile; signed-in phone navigation and self-recipient rejection verified, 11 tests passed, no funds moved. Physical camera, installation, credential login and real transfers remain unverified.
 - [x] Compact Profit heading and collapsible per-stake details; move Network account to top and search into Leader Bonus Hub; automatic build passed, financial logic unchanged.
 - [ ] Verify polished Profit and Network signed-in phone/desktop interactions — blocked by preview session remaining on Restoring your session, including after minting a fresh self session.
 - [ ] Require manual email/username login after email registration without storing passwords.
