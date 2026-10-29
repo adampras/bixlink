@@ -37,6 +37,7 @@ export const Route = createFileRoute('/sovereign-wallet')({
   component: SovereignApp,
 });
 
+import { CustomTokens } from '@/components/sovereign/CustomTokens';
 type Eth = { request: (a: { method: string; params?: unknown }) => Promise<any> };
 type Tab = 'wallet' | 'market' | 'discover' | 'me';
 type Screen = 'login' | 'accountsend' | 'history' | 'language' | null | 'myid' | 'send' | 'receive' | 'scan' | 'book' | 'node' | 'security' | 'notify';
@@ -89,6 +90,11 @@ function SovereignApp() {
   const pickMode = (m: 'ledger' | 'web3') => { if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) navigator.vibrate?.(8); setMode(m); setMsg(''); localStorage.setItem('sov_mode', m); };
   const eth = () => (globalThis as unknown as { ethereum?: Eth }).ethereum;
   useEffect(() => { document.querySelector('.sw-app')?.scrollTo(0, 0); }, [screen, asset, tab]);
+  useEffect(() => {
+    const onTap = (e: PointerEvent) => { if ((e.target as HTMLElement | null)?.closest('.sw-action, .sw-dock button, .sw-gold-btn') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) navigator.vibrate?.(6); };
+    document.addEventListener('pointerdown', onTap);
+    return () => document.removeEventListener('pointerdown', onTap);
+  }, []);
 
   useEffect(() => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
@@ -299,6 +305,7 @@ function SovereignApp() {
             <div className="text-right"><b className="numeric block text-lg">{hide ? '••••' : a.v === undefined ? '—' : fmt(a.v)}</b><small className="sw-muted">≈ {a.v === undefined ? '—' : money(a.v * a.p)}</small></div>
           </Button>)}
         </section>
+        {!ledger && <CustomTokens addr={addr} node={getNode()} hide={hide} />}
         {msg && <p className="sw-note">{msg}</p>}
         {ledger && walletQ.isError && <p role="alert" className="sw-note">Balance unavailable. <Button className="sw-gold-text" onClick={() => void walletQ.refetch()}>Retry</Button></p>}
         <p className="sw-note">{ledger
