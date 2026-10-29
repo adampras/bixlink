@@ -729,6 +729,13 @@
       "when": 1793252075796,
       "tag": "0103_owner1_virtual_transfer_and_buyback_minimum",
       "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "7",
+      "when": 1793252188640,
+      "tag": "0104_buyback_early_minimum_validation",
+      "breakpoints": true
     }
   ]
 }
