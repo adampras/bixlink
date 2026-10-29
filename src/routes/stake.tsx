@@ -81,7 +81,7 @@ function StakePage() {
       {notice && <p role="status" className="mt-5 text-chart-2">{notice}</p>}
       {chosen && <StakeConfirmation key={`${chosen.id}:${chosen.lock_days}`} pkg={chosen} usdt={Number(bal.data ?? 0)} bix={Number(bixBal.data ?? 0)} reference={bixRef} close={() => setChosen(null)} submit={async paymentMode => {
         const result = await submit({ data: { packageId: chosen.id, days: chosen.lock_days, mode: paymentMode } });
-        await refreshAll(); await bixBal.refetch();
+        await Promise.allSettled([refreshAll(), bixBal.refetch()]);
         setRequestsVisible(true); setHistoryJump(true);
         setNotice('Request recorded. Your wallet tracks authoritative staking status; yield remains a projection.');
         return result;
