@@ -1,3 +1,4 @@
+- [ ] Add staking detail confirmation and authoritative pending/receipt states, shared automatic wallet staking notifications, scoped matcha/orange polish and independent manifest-only wallet installation; verify without moving funds.
 - [x] Lock vUSDT sending to verified Owner 1 across both wallets, shared RPC and insert guard; non-owner RPC rejection and signed-in Owner 1 form verified without moving funds.
 - [x] Enforce 500 BIX minimum developer buyback request and approval for all authorized reviewers; 499.99 rejected, 500 passed amount validation, shared boundary tests passed; no financial records created.
 - [x] Add compact 10-page English company PDF in Marketing using dated current terms, original fox/wallet artwork and reference black/neon styling; fixed initial text-fit issue, inspected all pages and verified signed-in download, preview navigation and phone fit. Eight tests passed.
