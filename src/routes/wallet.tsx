@@ -22,7 +22,6 @@ import { pickWalletSkin } from '@/lib/wallet-skin';
 import { WalletFinanceMotion } from '@/components/WalletFinanceMotion';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, CheckCircle2, Clock, Eye, EyeOff, Send } from 'lucide-react';
 import { DepositFlightScanner } from '@/components/DepositFlightScanner';
-import { OnchainWallet } from '@/components/OnchainWallet';
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
   return <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border bg-card/60 p-8 text-center"><span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary"><Inbox size={22}/></span><p className="text-sm text-muted-foreground">{text}</p>{action && onAction && <Button size="sm" variant="outline" className="rounded-full" onClick={onAction}>{action}</Button>}</div>;
