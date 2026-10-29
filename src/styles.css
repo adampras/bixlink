@@ -3844,3 +3844,17 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sw-depth-row progress::-webkit-progress-value { background: var(--wallet-depth-bid); }
 .sw-depth-row[data-side='asks'] progress::-webkit-progress-value { background: var(--wallet-depth-ask); }
 @media (prefers-reduced-motion: reduce) { .sw-skeleton { animation: none; } }
+
+/* Sovereign wallet: compact first screen so hero, actions and assets fit on phones */
+.sw-app .sw-main { padding-top: .75rem; }
+.sw-app .sw-pill { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: .68rem; }
+.sw-app .sw-mode { margin-top: .75rem !important; }
+.sw-app .sw-mode button { padding: .5rem .3rem; font-size: .76rem; }
+.sw-app .sw-wallet { padding-top: 1.6rem; margin-top: .75rem !important; }
+.sw-app .sw-wallet-card { height: 3.6rem; padding: .5rem 1.1rem; }
+.sw-app .sw-wallet-pocket { padding: 1.3rem 1rem 1.1rem; overflow: hidden; }
+.sw-app .sw-wallet-pocket .numeric { font-size: clamp(1.35rem, 7vw, 1.9rem); line-height: 1.1; overflow-wrap: anywhere; }
+.sw-app .sw-emblem-xl { width: clamp(5.5rem, 28vw, 7.5rem); height: clamp(5.5rem, 28vw, 7.5rem); margin: -.5rem -.4rem -.5rem 0; }
+.sw-app .sw-quad { margin-top: .9rem !important; }
+.sw-app .sw-quad .sw-action { min-height: 4.6rem; }
+.sw-app .sw-quad .sw-gold-dot { width: 2.2rem; height: 2.2rem; }
