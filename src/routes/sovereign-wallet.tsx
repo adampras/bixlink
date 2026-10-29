@@ -162,7 +162,7 @@ function SovereignApp() {
   const ledgerTotal = lBix * bixRef + lUsdt;
 
   if (swCfg && swCfg.readiness.sovereignWalletEnabled === false && !member.data?.isAdmin) {
-    return <div className="sw-app"><main className="sw-main grid min-h-[70vh] place-items-center text-center">
+    return <div className="sw-app" data-wtheme={swCfg?.readiness.walletTheme ?? "gold"}><main className="sw-main grid min-h-[70vh] place-items-center text-center">
       <div><img src={walletArt} alt="BIXLINK wallet" className="sw-emblem sw-emblem-xl mx-auto" /><b className="mt-4 block font-display text-2xl">Wallet under maintenance</b><p className="sw-note">BIXLINK Wallet is temporarily closed by the owner. Your account balance is safe in the BIXLINK app.</p><a href="/wallet" className="sw-gold-btn mt-4 inline-flex px-5 py-2">Back to BIXLINK</a></div>
     </main></div>;
   }
@@ -170,7 +170,7 @@ function SovereignApp() {
   if (asset && !screen && ledger) {
     const p = asset === 'BIX' ? bixRef : 1;
     const v = member.user ? (asset === 'BIX' ? lBix : lUsdt) : undefined;
-    return <div className="sw-app"><main className="sw-main">
+    return <div className="sw-app" data-wtheme={swCfg?.readiness.walletTheme ?? "gold"}><main className="sw-main">
       <TopBar title={`${asset} · Account`} onBack={() => setAsset(null)} />
       <div className="sw-asset-hero text-center">
         <span className={`sw-coin sw-coin-lg sw-coin-${asset.toLowerCase()}`}>{asset === 'BIX' ? <img src={foxMark} alt="" /> : <b>₮</b>}</span>
@@ -191,7 +191,7 @@ function SovereignApp() {
     const p = asset === 'BIX' ? bixRef : asset === 'USDT' ? 1 : bnbP;
     const v = asset === 'BIX' ? (bix ? bal?.bix : undefined) : asset === 'USDT' ? bal?.usdt : bal?.bnb;
     const url = asset === 'BIX' ? (bix ? `${SCAN}/token/${bix}${addr ? `?a=${addr}` : ''}` : SCAN) : asset === 'USDT' ? `${SCAN}/token/${USDT}${addr ? `?a=${addr}` : ''}` : addr ? `${SCAN}/address/${addr}` : SCAN;
-    return <div className="sw-app"><main className="sw-main">
+    return <div className="sw-app" data-wtheme={swCfg?.readiness.walletTheme ?? "gold"}><main className="sw-main">
       <TopBar title={asset} onBack={() => setAsset(null)} />
       <div className="sw-asset-hero text-center">
         <span className={`sw-coin sw-coin-lg sw-coin-${asset.toLowerCase()}`}>{asset === 'BIX' ? <img src={foxMark} alt="" /> : <b>{asset === 'USDT' ? '₮' : '◆'}</b>}</span>
@@ -211,7 +211,7 @@ function SovereignApp() {
   }
 
   if (screen) {
-    return <div className="sw-app"><main className="sw-main">
+    return <div className="sw-app" data-wtheme={swCfg?.readiness.walletTheme ?? "gold"}><main className="sw-main">
       {screen === 'login' && <AccountLogin back={() => setScreen(null)} done={() => { setScreen(null); setTab('wallet'); }} />}
       {screen === 'accountsend' && <AccountTransfer initialCode={prefillTo} initialToken={sendToken} back={() => { setScreen(null); setPrefillTo(''); }} scan={() => setScreen('scan')} done={() => { setScreen('history'); setPrefillTo(''); }} />}
       {screen === 'history' && <AccountHistory back={() => setScreen(null)} />}
@@ -227,7 +227,7 @@ function SovereignApp() {
     </main></div>;
   }
 
-  return <div className="sw-app">
+  return <div className="sw-app" data-wtheme={swCfg?.readiness.walletTheme ?? "gold"}>
     <main className="sw-main pb-28">
       {tab === 'wallet' && <>
         <header className="flex items-center gap-3">
@@ -536,7 +536,8 @@ function DiscoverTab() {
 
   if (cur) return <section className="sw-browser" aria-label="In-app browser">
     <div className="sw-browser-bar">
-      <Button aria-label="Back" className="sw-round" disabled={idx <= 0} onClick={() => setIdx(idx - 1)}><ChevronLeft size={16} /></Button>
+      <Button aria-label="Back to Discover" className="sw-round sw-exit" onClick={() => { setIdx(-1); setHist([]); setQ(''); }}><ChevronLeft size={18} /></Button>
+      <Button aria-label="Back" className="sw-round" disabled={idx <= 0} onClick={() => setIdx(idx - 1)}><ChevronLeft size={14} /></Button>
       <Button aria-label="Forward" className="sw-round" disabled={idx >= hist.length - 1} onClick={() => setIdx(idx + 1)}><ChevronRight size={16} /></Button>
       <form className="sw-omni" onSubmit={(e) => { e.preventDefault(); const u = toUrl(q); if (u) open(u); }}>
         <ShieldCheck size={14} className="sw-up flex-none" /><input aria-label="Address" value={q} onChange={(e) => setQ(e.target.value)} className="min-w-0 flex-1 bg-transparent text-xs outline-none" />
@@ -550,7 +551,7 @@ function DiscoverTab() {
       <Button aria-label="Close browser" className="sw-round" onClick={() => { setIdx(-1); setHist([]); setQ(''); }}><Trash2 size={15} /></Button>
     </div>
     <iframe key={`${cur}-${nonce}`} src={cur} title={host} className="sw-browser-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" referrerPolicy="no-referrer" />
-    {!internal && <p className="sw-note">Some websites block in-app viewing. If the page stays blank, tap ↗ to open it in your browser.</p>}
+    {!internal && <p className="sw-note sw-browser-note">Some websites block in-app viewing. If the page stays blank, tap ↗ to open it in your browser.</p>}
   </section>;
 
   const list = DAPPS.filter(i => (cat === 'All' || i.cat === cat) && (i.n + i.d).toLowerCase().includes(q.toLowerCase()));
