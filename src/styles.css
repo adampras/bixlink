@@ -3937,3 +3937,17 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sw-app .sw-dock button[aria-current='page'] { color: var(--primary); }
 .sw-app .sw-dock button[aria-current='page'] .sw-dock-orb::after { content: ''; display: block; position: absolute; }
 @media (prefers-reduced-motion: reduce) { .sw-app .sw-wallet-card { animation: none; } }
+
+/* Sovereign wallet: mode divider + long-press LUX card */
+.sw-divider { height: 1px; margin: 1.25rem 0 1.25rem; background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--primary) 45%, transparent), transparent); }
+.sw-lux-overlay { position: fixed; inset: 0; z-index: 80; display: grid; place-content: center; gap: 1rem; padding: 1.5rem; background: color-mix(in oklab, var(--background) 82%, transparent); backdrop-filter: blur(14px); animation: sw-lux-fade .25s ease-out; }
+.sw-lux-card { width: min(88vw, 340px); aspect-ratio: 1.586; border-radius: 1.1rem; padding: 1.2rem 1.3rem; display: flex; flex-direction: column; justify-content: space-between; color: var(--foreground); background: linear-gradient(135deg, color-mix(in oklab, var(--background) 92%, var(--primary)), var(--background) 55%, color-mix(in oklab, var(--background) 80%, var(--primary))); border: 1px solid color-mix(in oklab, var(--primary) 55%, transparent); box-shadow: 0 30px 70px -20px color-mix(in oklab, var(--primary) 45%, transparent); position: relative; overflow: hidden; animation: sw-lux-rise .6s cubic-bezier(.2,.9,.2,1); }
+.sw-lux-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 35%, color-mix(in oklab, var(--primary) 30%, transparent) 50%, transparent 65%); transform: translateX(-120%); animation: sw-lux-shine 2.8s ease-in-out .5s infinite; pointer-events: none; }
+.sw-lux-card b:first-child, .sw-lux-card small { color: var(--primary); }
+.sw-lux-chip { width: 42px; height: 30px; border-radius: 6px; background: linear-gradient(135deg, var(--primary), color-mix(in oklab, var(--primary) 50%, var(--background))); }
+.sw-lux-rings { display: flex; } .sw-lux-rings i { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--primary); } .sw-lux-rings i + i { margin-left: -10px; opacity: .6; }
+.sw-lux-hint { text-align: center; color: var(--muted-foreground); font-size: .7rem; }
+@keyframes sw-lux-fade { from { opacity: 0 } }
+@keyframes sw-lux-rise { from { opacity: 0; transform: translateY(60px) scale(.85) rotateX(25deg); } }
+@keyframes sw-lux-shine { to { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) { .sw-lux-card, .sw-lux-card::after, .sw-lux-overlay { animation: none; } }
