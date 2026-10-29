@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
+import { buybackAmountSchema } from '@/lib/transaction-limits';
 
 async function canReview(supabase: any) {
   const [a, r] = await Promise.all([supabase.rpc('is_bix_admin'), supabase.rpc('bix_reviewer_can', { p_section: 'market' })]);
@@ -30,7 +31,7 @@ export const getBuyback = createServerFn({ method: 'GET' }).middleware([requireS
 });
 
 export const requestBuyback = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { amount: number; method: 'email' | 'telegram' | 'whatsapp'; contact: string }) => z.object({ amount: z.number().min(1).max(1000000), method: z.enum(['email', 'telegram', 'whatsapp']), contact: z.string().trim().min(3).max(120) }).parse(d))
+  .inputValidator((d: { amount: number; method: 'email' | 'telegram' | 'whatsapp'; contact: string }) => z.object({ amount: buybackAmountSchema, method: z.enum(['email', 'telegram', 'whatsapp']), contact: z.string().trim().min(3).max(120) }).parse(d))
   .handler(async ({ context, data }) => {
     const { data: id, error } = await context.supabase.rpc('bix_buyback_request', { p_amount: data.amount, p_method: data.method, p_contact: data.contact });
     if (error) throw new Error(error.message);
