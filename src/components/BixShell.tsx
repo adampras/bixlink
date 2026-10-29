@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { getMyWallet } from '@/lib/bixlink.functions';
 import { Home, Wallet, Layers, Zap, User, Network, LogIn, ShieldCheck, Lock, BadgeCheck, Bell, CheckCheck, ChevronDown, TrendingUp, ClipboardCheck, Crown } from 'lucide-react';
 import { useMember, usePublicConfig, useReviewerAccess } from '@/lib/useMember';
 import { usePresaleStatus, presaleOpen } from '@/components/PresaleEntry';
@@ -57,7 +58,17 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   const presale = usePresaleStatus(user?.id);
   const presaleOn = Boolean(user) && presaleOpen(presale.data);
   const official = useQuery({ queryKey: ['bix-market-updates'], queryFn: () => getMarketUpdates(), enabled: Boolean(user) && marketEnabled, staleTime: 60_000, refetchInterval: 60_000 });
-  const visibleUpdates = marketEnabled && official.data?.announcements.length ? official.data.announcements.map(post => ({ id: `${post.id}:${post.published_at}`, title: post.title, body: post.body })) : updates;
+  const myWallet = useQuery({ queryKey: ['my-wallet', user?.id], queryFn: () => getMyWallet(), enabled: Boolean(user), staleTime: 15_000, refetchInterval: 30_000 });
+  const txUpdates = useMemo(() => {
+    const rows = [...(myWallet.data?.transactions ?? []), ...(myWallet.data?.swaps ?? [])] as Array<Record<string, any>>;
+    return rows.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 12).map(r => {
+      const kind = String(r.type ?? 'swap').replace(/_/g, ' ');
+      const amount = r.amount_usd != null ? `$${Number(r.amount_usd).toLocaleString('en-US', { maximumFractionDigits: 2 })}` : r.bix_amount != null ? `${Number(r.bix_amount).toLocaleString('en-US')} BIX` : '';
+      return { id: `tx:${r.id}:${r.status}`, title: `${kind.toUpperCase()} · ${String(r.status ?? '').toUpperCase()}`, body: `${amount} · ${new Date(r.created_at).toLocaleString()}` };
+    });
+  }, [myWallet.data]);
+  const baseUpdates = marketEnabled && official.data?.announcements.length ? official.data.announcements.map(post => ({ id: `${post.id}:${post.published_at}`, title: post.title, body: post.body })) : updates;
+  const visibleUpdates = useMemo(() => [...txUpdates, ...baseUpdates], [txUpdates, baseUpdates]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [readIds, setReadIds] = useState<string[]>([]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
