@@ -60,7 +60,7 @@ function toWei(v: string) {
   return BigInt(i || '0') * 10n ** 18n + BigInt((f + '0'.repeat(18)).slice(0, 18) || '0');
 }
 const short = (a: string) => `${a.slice(0, 8)}••••${a.slice(-6)}`;
-const fmt = (n: number, d = 4) => n.toLocaleString('en-US', { maximumFractionDigits: d });
+const fmt = (n: number, d = 2) => n.toLocaleString('en-US', { maximumFractionDigits: d });
 const isAddr = (s: string) => /^0x[a-fA-F0-9]{40}$/.test(s);
 type Book = { name: string; address: string }[];
 const readBook = (): Book => { try { return JSON.parse(localStorage.getItem('sov_book') || '[]'); } catch { return []; } };
@@ -246,8 +246,9 @@ function SovereignApp() {
           <Button type="button" role="tab" aria-selected={!ledger} onClick={() => pickMode('web3')}><Globe size={15} /> Web3 On-Chain</Button>
         </div>
 
-        <section key={mode} className="sw-wallet sw-fade mt-4" aria-label="Wallet balance">
-          <div className="sw-wallet-card"><span>BIXLINK</span><small>{ledger ? 'ACCOUNT' : 'ON-CHAIN'}</small></div>
+        <div className="sw-divider" aria-hidden />
+        <section key={mode} className="sw-wallet sw-fade" aria-label="Wallet balance">
+          <LuxCardTrigger label={ledger ? 'ACCOUNT' : 'ON-CHAIN'} holder={ledger ? (bixId ?? 'BIXLINK MEMBER') : (addr ? short(addr) : 'WEB3 WALLET')} />
           <div className="sw-wallet-pocket">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2"><span className="sw-chip">{ledger ? <><ShieldCheck size={13} /> Gasless</> : <><Network size={13} /> BEP-20</>}</span><small className="sw-muted">Total assets</small></div>
@@ -597,4 +598,25 @@ function FiatStrip({ usd, hide, split }: { usd: number; hide: boolean; split: nu
       : Array.from({ length: 4 }, (_, k) => <span key={k} className="sw-skeleton inline-block h-6 w-20" />)}</div>
     {split !== null && <small className="sw-muted block text-[.65rem]">BIX {(split * 100).toFixed(1)}% · USDT {((1 - split) * 100).toFixed(1)}% · reference rates, display only</small>}
   </div>;
+}
+
+function LuxCardTrigger({ label, holder }: { label: string; holder: string }) {
+  const [open, setOpen] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const start = () => { timer.current = setTimeout(() => { setOpen(true); navigator.vibrate?.(30); }, 500); };
+  const stop = () => { if (timer.current) clearTimeout(timer.current); };
+  return <>
+    <div className="sw-wallet-card select-none" role="button" tabIndex={0} aria-label="Hold to reveal BIXLINK LUX card" title="Press and hold"
+      onPointerDown={start} onPointerUp={stop} onPointerLeave={stop} onContextMenu={e => e.preventDefault()}
+      onKeyDown={e => { if (e.key === 'Enter') setOpen(true); }}><span>BIXLINK</span><small>{label}</small></div>
+    {open && <div className="sw-lux-overlay" role="dialog" aria-modal="true" aria-label="BIXLINK LUX card" onClick={() => setOpen(false)}>
+      <div className="sw-lux-card" onClick={e => e.stopPropagation()}>
+        <div className="flex items-start justify-between"><b className="font-display tracking-[.3em]">BIXLINK LUX</b><small>APPS WALLET</small></div>
+        <span className="sw-lux-chip" aria-hidden />
+        <p className="font-mono tracking-[.25em]">•••• •••• •••• 2026</p>
+        <div className="flex items-end justify-between"><div><small className="block opacity-70">CARD HOLDER</small><b className="font-mono text-sm">{holder}</b></div><span className="sw-lux-rings" aria-hidden><i /><i /></span></div>
+      </div>
+      <small className="sw-lux-hint">Digital identity card · not a payment card · tap to close</small>
+    </div>}
+  </>;
 }
