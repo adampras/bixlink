@@ -21,6 +21,7 @@ import { number } from '@/lib/bixlink';
 import { hasVerifiedEmail, isWalletOnlyAccount } from '@/lib/wallet-login';
 import { WalletAccountDetails } from '@/components/WalletAccountDetails';
 import { InstallAppButton } from '@/components/InstallPrompt';
+import { SovereignWalletSwitch } from '@/components/SovereignWalletSwitch';
 
 export const Route = createFileRoute('/profile')({ head: () => ({ meta: [{ title: 'Profile — BIXLINK' }, { name: 'description', content: 'Your BIXLINK account, referral code and network.' }, { property: 'og:title', content: 'Profile — BIXLINK' }, { property: 'og:description', content: 'Manage your BIXLINK member profile.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: ProfilePage });
 
@@ -76,6 +77,7 @@ function ProfilePage() {
         <Button asChild variant="outline"><Link to="/settings"><span className="profile-action-icon"><Settings/></span><span>Settings <small>Language, notifications and security</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
         {!walletOnly && <Button variant="outline" onClick={async () => { if (!user?.email) return; const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` }); setNotice(error ? error.message : 'Password reset email sent.'); }}><span className="profile-action-icon"><KeyRound/></span><span>Change password</span><ChevronRight className="profile-action-arrow"/></Button>}
         {data?.isAdmin && <Button asChild variant="outline"><Link to="/admin"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Admin panel <small>Owner only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
+        {data?.isAdmin && <SovereignWalletSwitch/>}
         {data?.isAdmin && <Button asChild variant="outline"><Link to="/leader-control"><span className="profile-action-icon profile-action-icon--admin"><Crown/></span><span>Leader &amp; Loan control <small>3× pribadi · 5× tim · menu HUB</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
         <InstallAppButton/>
         {data?.isAdmin && <Button asChild variant="outline"><Link to="/owner-desk"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Owner Desk <small>WD & omset real</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
