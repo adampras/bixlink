@@ -90,6 +90,11 @@ function SovereignApp() {
   const pickMode = (m: 'ledger' | 'web3') => { if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) navigator.vibrate?.(8); setMode(m); setMsg(''); localStorage.setItem('sov_mode', m); };
   const eth = () => (globalThis as unknown as { ethereum?: Eth }).ethereum;
   useEffect(() => { document.querySelector('.sw-app')?.scrollTo(0, 0); }, [screen, asset, tab]);
+  useEffect(() => {
+    const onTap = (e: PointerEvent) => { if ((e.target as HTMLElement | null)?.closest('.sw-action, .sw-dock button, .sw-gold-btn') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) navigator.vibrate?.(6); };
+    document.addEventListener('pointerdown', onTap);
+    return () => document.removeEventListener('pointerdown', onTap);
+  }, []);
 
   useEffect(() => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
