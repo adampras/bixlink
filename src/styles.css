@@ -4100,3 +4100,64 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .tp-chip { padding: .1rem .45rem; border-radius: .35rem; border: 1px solid var(--border); }
 .tp-chip[aria-pressed='true'] { color: var(--primary); border-color: var(--primary); }
 .tp-trade a[aria-disabled='true'] { opacity: .5; pointer-events: none; }
+
+/* BIXTOK — full-screen vertical video + LIVE, obsidian/matcha/orange */
+.bixtok { position: fixed; inset: 0; z-index: 60; background: var(--background); color: var(--foreground); overflow: hidden; }
+.bixtok-skeleton { position: absolute; inset: 0; background: var(--muted); animation: pulse 1.6s infinite; }
+.bixtok-top { position: absolute; inset: 0 0 auto; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: max(.6rem, env(safe-area-inset-top)) .75rem .6rem; background: linear-gradient(to bottom, color-mix(in oklab, var(--background) 80%, transparent), transparent); }
+.bixtok-icon { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 999px; background: color-mix(in oklab, var(--background) 55%, transparent); border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent); }
+.bixtok-tabs { display: flex; gap: 1rem; overflow-x: auto; scrollbar-width: none; }
+.bixtok-tabs button { position: relative; display: flex; align-items: center; gap: .3rem; font-size: .9rem; font-weight: 700; color: color-mix(in oklab, var(--foreground) 60%, transparent); padding-bottom: .3rem; white-space: nowrap; }
+.bixtok-tabs button.on { color: var(--foreground); }
+.bixtok-tabs button.on::after { content: ''; position: absolute; left: 25%; right: 25%; bottom: 0; height: 2px; border-radius: 2px; background: var(--matcha-gloss, var(--primary)); }
+.bixtok-dot { width: .45rem; height: .45rem; border-radius: 999px; background: var(--orange-gloss, var(--destructive)); }
+.bixtok-feed { height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; }
+.bixtok-slide { position: relative; height: 100dvh; scroll-snap-align: start; scroll-snap-stop: always; background: var(--card); }
+.bixtok-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.bixtok-video.mirror { transform: scaleX(-1); }
+.bixtok-meta { position: absolute; left: 1rem; right: 5rem; bottom: calc(1.5rem + env(safe-area-inset-bottom)); z-index: 2; text-shadow: 0 1px 6px color-mix(in oklab, var(--background) 80%, transparent); }
+.bixtok-meta p { font-size: .85rem; margin-top: .25rem; }
+.bixtok-rail { position: absolute; right: .75rem; bottom: calc(2rem + env(safe-area-inset-bottom)); z-index: 2; display: flex; flex-direction: column; gap: 1.1rem; }
+.bixtok-rail button { display: flex; flex-direction: column; align-items: center; gap: .2rem; }
+.bixtok-rail button svg { width: 2.6rem; height: 2.6rem; padding: .6rem; border-radius: 999px; background: color-mix(in oklab, var(--background) 50%, transparent); border: 1px solid color-mix(in oklab, var(--foreground) 15%, transparent); }
+.bixtok-rail button.on svg { color: var(--orange-gloss, var(--destructive)); fill: currentColor; }
+.bixtok-rail button.gift svg { color: var(--background); background: var(--matcha-gloss, var(--primary)); border-color: transparent; }
+.bixtok-rail small { font-size: .65rem; font-weight: 700; }
+.bixtok-lobby { height: 100%; overflow-y: auto; padding: 4.5rem 1rem 2rem; }
+.bixtok-golive { border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent); border-radius: 1rem; padding: 1rem; background: var(--card); }
+.bixtok-golive h2 { display: flex; align-items: center; gap: .4rem; font-weight: 800; margin-bottom: .6rem; }
+.bixtok-golive form { display: grid; gap: .6rem; }
+.bixtok-cta { border-radius: 999px; padding: .65rem 1.2rem; font-weight: 800; font-size: .85rem; text-align: center; color: var(--background); background: var(--matcha-gloss, var(--primary)); }
+.bixtok-cta:disabled { opacity: .6; }
+.bixtok-live-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: .6rem; }
+.bixtok-live-grid button { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; text-align: left; aspect-ratio: 3/4; padding: .7rem; border-radius: .9rem; background: linear-gradient(160deg, var(--card), var(--muted)); border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent); }
+.bixtok-live-grid b { margin-top: auto; font-size: .85rem; }
+.bixtok-live-grid small { font-size: .7rem; color: var(--muted-foreground); }
+.bixtok-badge { font-size: .6rem; font-weight: 900; letter-spacing: .08em; padding: .15rem .45rem; border-radius: .3rem; color: var(--background); background: var(--orange-gloss, var(--destructive)); }
+.bixtok-room { position: fixed; inset: 0; z-index: 70; background: var(--background); }
+.bixtok-room-bg { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .5rem; color: var(--muted-foreground); background: radial-gradient(circle at 50% 35%, color-mix(in oklab, var(--primary) 18%, var(--background)), var(--background)); }
+.bixtok-room-top { position: absolute; inset: 0 0 auto; z-index: 3; display: flex; align-items: center; gap: .5rem; padding: max(.7rem, env(safe-area-inset-top)) .75rem .6rem; }
+.bixtok-room-top b { flex: 1; min-width: 0; font-size: .9rem; }
+.bixtok-end { border-radius: 999px; padding: .3rem .8rem; font-size: .75rem; font-weight: 800; background: var(--destructive); color: var(--destructive-foreground); }
+.bixtok-ended { position: absolute; top: 40%; inset-inline: 0; text-align: center; font-weight: 800; z-index: 3; }
+.bixtok-chat { position: absolute; left: .75rem; right: 4rem; bottom: calc(4.5rem + env(safe-area-inset-bottom)); z-index: 3; max-height: 40%; overflow-y: auto; display: flex; flex-direction: column; gap: .3rem; mask-image: linear-gradient(to bottom, transparent, #000 25%); }
+.bixtok-chat p { align-self: flex-start; font-size: .8rem; padding: .3rem .6rem; border-radius: .8rem; background: color-mix(in oklab, var(--background) 55%, transparent); }
+.bixtok-chat p b { color: var(--matcha-gloss, var(--primary)); margin-right: .25rem; }
+.bixtok-chat p.gift { background: color-mix(in oklab, var(--orange-gloss, var(--accent)) 30%, var(--background)); }
+.bixtok-room-bar { position: absolute; inset: auto 0 0; z-index: 3; display: flex; gap: .5rem; padding: .6rem .75rem calc(.7rem + env(safe-area-inset-bottom)); }
+.bixtok-input { display: flex; align-items: center; gap: .4rem; border-radius: 999px; padding: .45rem .8rem; background: color-mix(in oklab, var(--background) 60%, transparent); border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent); }
+.bixtok-input input { flex: 1; min-width: 0; background: transparent; outline: none; font-size: .85rem; }
+.bixtok-giftbtn { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 999px; color: var(--background); background: var(--matcha-gloss, var(--primary)); }
+.bixtok-hint { position: absolute; top: 3.6rem; inset-inline: 1rem; z-index: 3; font-size: .65rem; color: var(--muted-foreground); text-align: center; }
+.bixtok-sheet-wrap { position: fixed; inset: 0; z-index: 80; display: flex; align-items: flex-end; background: color-mix(in oklab, var(--background) 50%, transparent); }
+.bixtok-sheet { position: relative; width: 100%; max-width: 32rem; margin: 0 auto; padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom)); border-radius: 1.2rem 1.2rem 0 0; background: var(--card); border-top: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent); }
+.bixtok-gifts { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin-top: .8rem; }
+.bixtok-gifts button { display: flex; flex-direction: column; align-items: center; gap: .15rem; padding: .6rem .2rem; border-radius: .8rem; border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent); background: var(--background); }
+.bixtok-gifts button:disabled { opacity: .5; }
+.bixtok-gifts span { font-size: 1.7rem; }
+.bixtok-gifts b { font-size: .65rem; text-align: center; }
+.bixtok-gifts small { font-size: .6rem; color: var(--matcha-gloss, var(--primary)); font-weight: 700; }
+.bixtok-burst { position: absolute; left: 50%; top: -3rem; font-size: 4rem; transform: translateX(-50%); animation: bixtok-burst 1.4s ease-out forwards; pointer-events: none; }
+@keyframes bixtok-burst { 0% { opacity: 0; transform: translate(-50%, 1rem) scale(.6); } 30% { opacity: 1; transform: translate(-50%, -2rem) scale(1.3); } 100% { opacity: 0; transform: translate(-50%, -8rem) scale(1); } }
+.bixtok-toast { position: fixed; left: 50%; bottom: 6rem; z-index: 90; transform: translateX(-50%); padding: .5rem 1rem; border-radius: 999px; font-size: .8rem; font-weight: 700; background: var(--card); border: 1px solid color-mix(in oklab, var(--primary) 40%, transparent); max-width: 90vw; text-align: center; }
+@media (prefers-reduced-motion: reduce) { .bixtok-burst { animation: none; opacity: 0; } }
