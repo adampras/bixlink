@@ -4035,3 +4035,19 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 [data-presentation-theme="matcha"] :is(.mobile-nav,.mobile-dock,.bottom-nav) { background: color-mix(in oklab, var(--background) 92%, transparent) !important; border-top: 1px solid color-mix(in oklab, var(--chart-2) 22%, transparent) !important; box-shadow: none !important; }
 [data-presentation-theme="matcha"] .mobile-nav-on { color: var(--primary) !important; }
 [data-presentation-theme="matcha"] .mobile-nav-on::before { background: var(--chart-3) !important; }
+
+/* Stake: 2-row package strip, manual nav, balanced ledger */
+.tier-strip-2row{display:grid!important;grid-auto-flow:column;grid-template-rows:repeat(2,auto);grid-auto-columns:calc((100% - .6rem)/2);gap:.5rem .6rem;padding:2px 2px 4px}
+.tier-strip-2row .tier-bar{min-height:50px!important;min-width:0;padding:.5rem .75rem;justify-content:space-between;gap:.4rem}
+.tier-strip-2row .tier-bar small{font-size:.6rem}
+.tier-strip-2row .tier-bar b{font-size:1rem}
+.tier-strip-2row .tier-bar em{font-size:.66rem;padding:2px 7px}
+.tier-nav{display:flex;align-items:center;gap:.75rem;margin-top:.55rem}
+.tier-nav button{width:32px;height:32px;flex:0 0 auto;border-radius:999px;border:1px solid color-mix(in oklab,var(--foreground) 16%,transparent);background:color-mix(in oklab,var(--card) 70%,transparent);color:var(--foreground);font-size:1.15rem;line-height:1}
+.tier-nav button:active{border-color:var(--primary);color:var(--primary)}
+.tier-rail{position:relative;flex:1;height:3px;border-radius:999px;background:color-mix(in oklab,var(--foreground) 12%,transparent)}
+.tier-rail span{position:absolute;top:0;width:30%;height:100%;border-radius:999px;background:var(--primary);transition:left .15s}
+.lux-ledger .lux-ledger-daily{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:1px solid color-mix(in oklab,var(--foreground) 10%,transparent)}
+.lux-ledger .lux-ledger-daily b{margin-top:0;color:var(--primary)}
+.lux-ledger b,.lux-ledger-total b{font-size:clamp(16px,4.4vw,19px)!important;font-weight:700!important;text-shadow:none!important;letter-spacing:0}
+@media (max-width:639px){.lux-ledger .lux-ledger-daily{border-bottom:0;padding:2px 0 9px!important}.lux-ledger > div:nth-of-type(2){border-top:1px solid color-mix(in oklab,var(--chart-3) 14%,transparent)}}

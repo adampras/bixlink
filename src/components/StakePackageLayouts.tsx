@@ -1,4 +1,4 @@
-import { useState, type PointerEvent } from 'react';
+import { useRef, useState, type PointerEvent } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DurationPackageCard } from '@/components/DurationPackageCard';
