@@ -764,6 +764,13 @@
       "when": 1793327669199,
       "tag": "0108_bixtok_member_uploads",
       "breakpoints": true
+    },
+    {
+      "idx": 109,
+      "version": "7",
+      "when": 1793328861369,
+      "tag": "0109_fix_bixtok_publish_profile",
+      "breakpoints": true
     }
   ]
 }
