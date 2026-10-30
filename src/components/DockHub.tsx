@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, HandCoins, Landmark, Store, Send, UserRound, type LucideIcon } from 'lucide-react';
+import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, UserRound, type LucideIcon } from 'lucide-react';
 const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound };
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { HUB_ITEMS, hubVisible } from '@/lib/dock-hub';
