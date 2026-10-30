@@ -1652,6 +1652,24 @@ export type Database = {
         }
         Relationships: []
       }
+      bixtok_follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+        }
+        Relationships: []
+      }
       bixtok_gift_tx: {
         Row: {
           amount: number
@@ -1768,6 +1786,7 @@ export type Database = {
           host_id: string
           host_name: string
           id: string
+          kind: string
           started_at: string
           status: string
           title: string
@@ -1777,6 +1796,7 @@ export type Database = {
           host_id: string
           host_name: string
           id?: string
+          kind?: string
           started_at?: string
           status?: string
           title: string
@@ -1786,6 +1806,7 @@ export type Database = {
           host_id?: string
           host_name?: string
           id?: string
+          kind?: string
           started_at?: string
           status?: string
           title?: string
@@ -2715,6 +2736,7 @@ export type Database = {
         Returns: undefined
       }
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
+      bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_end_live: { Args: { p_id: string }; Returns: undefined }
       bixtok_like: { Args: { p_video: string }; Returns: undefined }
       bixtok_my_stake_usd: { Args: never; Returns: number }
@@ -2747,6 +2769,7 @@ export type Database = {
         Returns: string
       }
       bixtok_start_live: { Args: { p_title: string }; Returns: string }
+      bixtok_start_official_live: { Args: { p_title: string }; Returns: string }
       ensure_bix_profile: { Args: never; Returns: undefined }
       is_bix_admin: { Args: never; Returns: boolean }
       request_bix_deposit: {

@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { MemberGate } from '@/components/MemberGate';
 import { useMember } from '@/lib/useMember';
 import { BixtokStudio, filterCss, DraggableText, DEFAULT_TEXT, type TextStyle } from '@/components/BixtokStudio';
-import { resolveBixtokLinks } from '@/lib/bixtok.functions';
+import { resolveBixtokLinks, cleanTiktokVideos } from '@/lib/bixtok.functions';
 import { Button } from '@/components/ui/button';
 import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
 
@@ -25,19 +25,21 @@ export const Route = createFileRoute('/bixtok')({
 
 type Cfg = { link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[] };
 type Gift = { id: string; name: string; emoji: string; currency: string; price: number };
-type Video = { id: string; creator_name: string; creator_id: string | null; caption: string; video_url: string; likes: number; media_path: string | null; media_kind: string; filter: string; overlay: string; allow_gifts: boolean; src: string; text_style: Partial<TextStyle> | null; music_title: string | null; music_url: string | null; source_kind: string };
-type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string };
+type Video = { id: string; creator_name: string; creator_id: string | null; caption: string; video_url: string; likes: number; media_path: string | null; media_kind: string; filter: string; overlay: string; allow_gifts: boolean; src: string; text_style: Partial<TextStyle> | null; music_title: string | null; music_url: string | null; source_kind: string; clean?: string | undefined };
+type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
 type Msg = { id: string; name: string; body: string; kind: string };
 
 function BixtokPage() {
   const { user, ready } = useMember();
   const q = useQuery({ queryKey: ['bixtok', user?.id], enabled: Boolean(user), refetchInterval: 60_000, queryFn: async () => {
-    const [c, g, v, l, s] = await Promise.all([
+    const [c, g, v, l, s, f, o] = await Promise.all([
       supabase.from('bixtok_config').select('*').eq('id', 1).single(),
       supabase.from('bixtok_gifts').select('id,name,emoji,currency,price').eq('enabled', true).order('sort'),
       supabase.from('bixtok_videos').select('id,creator_name,creator_id,caption,video_url,likes,media_path,media_kind,filter,overlay,allow_gifts,text_style,music_title,music_url,source_kind').eq('enabled', true).order('created_at', { ascending: false }).limit(60),
-      supabase.from('bixtok_lives').select('id,host_id,host_name,title,started_at').eq('status', 'live').order('started_at', { ascending: false }),
+      supabase.from('bixtok_lives').select('id,host_id,host_name,title,started_at,kind').eq('status', 'live').order('started_at', { ascending: false }),
       supabase.rpc('bixtok_my_stake_usd'),
+      supabase.from('bixtok_follows').select('follower_id,followee_id').or(`follower_id.eq.${user!.id},followee_id.eq.${user!.id}`),
+      supabase.rpc('bixtok_am_owner1'),
     ]);
     if (c.error) throw c.error;
     const rows = (v.data ?? []) as Omit<Video, 'src'>[];
@@ -46,9 +48,18 @@ function BixtokPage() {
     const map = new Map(signed.map(x => [x.path, x.signedUrl]));
     const shorts = rows.filter(r => !r.media_path && r.source_kind === 'tiktok' && !/\/video\/\d+/.test(r.video_url)).map(r => r.video_url);
     const resolved = shorts.length ? await resolveBixtokLinks({ data: { urls: [...new Set(shorts)] } }).catch(() => ({} as Record<string, string>)) : {};
-    const videos = rows.map(r => ({ ...r, src: r.media_path ? map.get(r.media_path) ?? '' : resolved[r.video_url] ?? r.video_url })).filter(r => r.src);
-    return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives: (l.data ?? []) as Live[], stake: Number(s.data ?? 0) };
+    const base = rows.map(r => ({ ...r, src: r.media_path ? map.get(r.media_path) ?? '' : resolved[r.video_url] ?? r.video_url })).filter(r => r.src);
+    const full = [...new Set(base.filter(r => r.source_kind === 'tiktok' && /\/video\/\d+/.test(r.src)).map(r => r.src.split('?')[0]!))].slice(0, 12);
+    const clean = full.length ? await cleanTiktokVideos({ data: { urls: full } }).catch(() => ({} as Record<string, string>)) : {};
+    const videos = base.map(r => ({ ...r, clean: r.source_kind === 'tiktok' ? clean[r.src.split('?')[0]!] : undefined }));
+    const fr = (f.data ?? []) as { follower_id: string; followee_id: string }[];
+    const following = new Set(fr.filter(x => x.follower_id === user!.id).map(x => x.followee_id));
+    const followers = new Set(fr.filter(x => x.followee_id === user!.id).map(x => x.follower_id));
+    const lives = ((l.data ?? []) as Live[]).sort((a, b) => Number(b.kind === 'official') - Number(a.kind === 'official'));
+    return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives, stake: Number(s.data ?? 0), following, followers, owner1: o.data === true };
   } });
+  const following = q.data?.following instanceof Set ? q.data.following : new Set<string>();
+  const followers = q.data?.followers instanceof Set ? q.data.followers : new Set<string>();
   const menus = (q.data?.cfg.menus ?? []).filter(m => m.enabled);
   const [tab, setTab] = useState('foryou');
   const [giftTarget, setGiftTarget] = useState<{ video?: string; live?: string } | null>(null);
@@ -56,10 +67,18 @@ function BixtokPage() {
   const [studio, setStudio] = useState(false);
   const [note, setNote] = useState('');
   const qc = useQueryClient();
+  const toggleFollow = async (id: string) => {
+    if (!q.data || id === user?.id) return;
+    const on = following.has(id);
+    const { error } = on ? await supabase.from('bixtok_follows').delete().eq('follower_id', user!.id).eq('followee_id', id) : await supabase.from('bixtok_follows').insert({ follower_id: user!.id, followee_id: id });
+    if (error) return setNote(error.message);
+    setNote(on ? 'Unfollowed' : followers.has(id) ? 'You are now friends' : 'Following');
+    qc.invalidateQueries({ queryKey: ['bixtok'] });
+  };
   const [muted, setMuted] = useState(true);
   const [section, setSection] = useState<'home' | 'inbox' | 'profile' | 'balance'>('home');
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
-  const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
+  const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
 
   return <MemberGate ready={ready} signedIn={!!user} title="BIXTOK"><main className="bixtok">
     {q.isError ? <p className="p-8 text-sm text-destructive">Could not load BIXTOK.</p>
@@ -78,9 +97,9 @@ function BixtokPage() {
       <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div></>}
       {section === 'home' && (tab === 'live'
         ? <LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/>
-        : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>)}
-      {section === 'inbox' && <Inbox lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
-      {section === 'profile' && <ProfilePage me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
+        : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>)}
+      {section === 'inbox' && <Inbox followers={followers.size} lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
+      {section === 'profile' && <ProfilePage follow={{ following, followers }} me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
       {section === 'balance' && <BalancePage stake={q.data.stake} cfg={q.data.cfg} onBack={() => setSection('profile')} onLive={() => { setSection('home'); setTab('live'); }}/>}
       {!studio && !room && section !== 'balance' && <nav className="bxt-nav" aria-label="BIXTOK">
         <button className={section === 'home' ? 'on' : ''} onClick={() => setSection('home')}><Home/><small>Home</small></button>
@@ -97,7 +116,7 @@ function BixtokPage() {
   </main></MemberGate>;
 }
 
-function Feed({ muted, videos, cfg, me, onGift, onNote }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; onGift: (id: string) => void; onNote: (m: string) => void }) {
+function Feed({ muted, videos, cfg, me, following, followers, onFollow, onGift, onNote }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; following: Set<string>; followers: Set<string>; onFollow: (id: string) => void; onGift: (id: string) => void; onNote: (m: string) => void }) {
   const qc = useQueryClient();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   if (!videos.length) return <p className="grid h-full place-items-center text-sm text-muted-foreground">No posts yet. Tap + to create one.</p>;
@@ -106,6 +125,7 @@ function Feed({ muted, videos, cfg, me, onGift, onNote }: { muted: boolean; vide
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
     <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
     <aside className="bixtok-rail">
+      {v.creator_id && v.creator_id !== me && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={async () => { if (liked[v.id]) return; setLiked({ ...liked, [v.id]: true }); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
@@ -132,12 +152,12 @@ function Media({ v, muted }: { v: Video; muted: boolean }) {
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => setShow(!!e?.isIntersecting), { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
   useEffect(() => { if (!v.music_url) return undefined; if (show && !muted) { audio.current ??= new Audio(v.music_url); audio.current.loop = true; audio.current.play().catch(() => {}); } else audio.current?.pause(); return () => audio.current?.pause(); }, [show, muted, v.music_url]);
   return <div ref={ref} className="bixtok-media">
-    {embed ? (show ? (new URL(embed).hostname === 'www.tiktok.com'
+    {v.clean ? <AutoVideo src={v.clean} filter={v.filter} muted={muted || !!v.music_url}/> : embed ? (show ? (new URL(embed).hostname === 'www.tiktok.com'
       ? <BixtokTikTokPlayer src={embed} title={v.caption || 'BIXTOK post'} muted={muted} className="bixtok-embed" filter={filterCss(v.filter)}/>
       : <iframe src={embed} title={v.caption || 'BIXTOK post'} className="bixtok-embed" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ filter: filterCss(v.filter) }}/>) : <div className="bixtok-embed"/>)
      : v.media_kind === 'photo' ? <img src={v.src} alt={v.caption} className="bixtok-video" style={{ filter: filterCss(v.filter) }}/>
      : <AutoVideo src={v.src} filter={v.filter} muted={muted || !!v.music_url}/>}
-    {embed && <a href={v.src} target="_blank" rel="noreferrer" className="bixtok-src">{v.source_kind}</a>}
+    {embed && !v.clean && <a href={v.src} target="_blank" rel="noreferrer" className="bixtok-src">{v.source_kind}</a>}
   </div>;
 }
 
@@ -147,12 +167,26 @@ function AutoVideo({ src, filter, muted }: { src: string; filter?: string | null
   return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }}/>;
 }
 
-function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
+function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
   const qc = useQueryClient(); const [title, setTitle] = useState(''); const [busy, setBusy] = useState(false);
   const eligible = data.stake > 0 && data.stake >= Number(data.cfg.live_min_stake_usd);
+  const [otitle, setOtitle] = useState('');
+  const official = async () => { setBusy(true);
+    const { data: id, error } = await supabase.rpc('bixtok_start_official_live', { p_title: otitle });
+    setBusy(false); if (error) return onNote(error.message);
+    await qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Official LIVE started · all members notified');
+    const { data: me } = await supabase.auth.getUser();
+    onEnter({ id: id as string, host_id: me.user!.id, host_name: 'BIXLINK OFFICIAL', title: otitle || 'BIXLINK Official Presentation', started_at: new Date().toISOString(), kind: 'official' }); };
   return <div className="bixtok-lobby">
+    {data.owner1 && <div className="bixtok-golive bxt-official-card">
+      <h2><Radio size={18}/> OFFICIAL BROADCAST</h2>
+      <p className="text-xs text-muted-foreground">Presentation and promotion LIVE. Starting it sends a notification to every member.</p>
+      <form onSubmit={e => { e.preventDefault(); void official(); }}>
+        <input className="form-input" maxLength={80} placeholder="Presentation title" value={otitle} onChange={e => setOtitle(e.target.value)}/>
+        <button className="bixtok-cta" disabled={busy}>{busy ? 'Starting…' : 'Go Live Official'}</button>
+      </form></div>}
     <div className="bixtok-golive">
-      <h2><Radio size={18}/> Go LIVE</h2>
+      <h2><Radio size={18}/> Community LIVE</h2>
       {!data.cfg.live_enabled ? <p className="text-xs text-muted-foreground">Go LIVE is closed by the admin right now.</p>
        : eligible ? <form onSubmit={async e => { e.preventDefault(); setBusy(true);
           const { data: id, error } = await supabase.rpc('bixtok_start_live', { p_title: title });
@@ -166,7 +200,7 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
        : <div><p className="text-xs text-muted-foreground">Go LIVE is open to members with an active staking package{Number(data.cfg.live_min_stake_usd) > 0 ? ` of at least $${Number(data.cfg.live_min_stake_usd).toFixed(2)}` : ''}.</p><Link to="/stake" className="bixtok-cta mt-3 inline-block">Join a staking package</Link></div>}
     </div>
     <h3 className="mt-6 text-xs font-bold tracking-widest text-muted-foreground">LIVE NOW · {data.lives.length}</h3>
-    <div className="bixtok-live-grid">{data.lives.map(l => <button key={l.id} onClick={() => onEnter(l)}><span className="bixtok-badge">LIVE</span><b>{l.title}</b><small>@{l.host_name}</small></button>)}</div>
+    <div className="bixtok-live-grid">{data.lives.map(l => <button key={l.id} className={l.kind === 'official' ? 'bxt-official' : ''} onClick={() => onEnter(l)}><span className="bixtok-badge">{l.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span><b>{l.title}</b><small>@{l.host_name}</small></button>)}</div>
     {!data.lives.length && <p className="mt-3 text-sm text-muted-foreground">Nobody is live yet.</p>}
   </div>;
 }
@@ -227,22 +261,24 @@ function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; 
   </div></div>;
 }
 
-function Inbox({ lives, mine, onLive, onCreate }: { lives: Live[]; mine: Video[]; onLive: (l: Live) => void; onCreate: () => void }) {
+function Inbox({ followers, lives, mine, onLive, onCreate }: { followers: number; lives: Live[]; mine: Video[]; onLive: (l: Live) => void; onCreate: () => void }) {
   const likes = mine.reduce((a, v) => a + Number(v.likes || 0), 0);
   return <div className="bxt-page"><header className="bxt-head"><span/><h1>Inbox <i className="bxt-online"/></h1><span/></header>
     <div className="bxt-stories">
       <button onClick={onCreate}><span className="bxt-av"><Plus size={20}/></span><small>Create</small></button>
-      {lives.map(l => <button key={l.id} onClick={() => onLive(l)}><span className="bxt-av ring">{l.host_name.slice(0, 1).toUpperCase()}<em>LIVE</em></span><small>{l.host_name}</small></button>)}
+      {lives.map(l => <button key={l.id} onClick={() => onLive(l)}><span className={`bxt-av ring${l.kind === 'official' ? ' official' : ''}`}>{l.host_name.slice(0, 1).toUpperCase()}<em>{l.kind === 'official' ? 'OFFICIAL' : 'LIVE'}</em></span><small>{l.host_name}</small></button>)}
     </div>
     <ul className="bxt-list">
       <li><span className="bxt-ic pink"><Zap/></span><div><b>Activity & new likes</b><p>{likes ? `${likes} likes across ${mine.length} posts` : 'No activity yet'}</p></div>{likes > 0 && <i className="bxt-count">{Math.min(likes, 99)}</i>}</li>
-      <li><span className="bxt-ic dark"><Bell/></span><div><b>System notifications</b><p>{lives.length ? `${lives.length} member LIVE right now` : 'BIXTOK updates appear here'}</p></div></li>
+      {lives.filter(l => l.kind === 'official').map(l => <li key={l.id}><button type="button" className="contents" onClick={() => onLive(l)}><span className="bxt-ic orange"><Radio/></span><div><b>🔴 OFFICIAL LIVE</b><p>{l.title} · tap to join</p></div><ChevronRight size={16}/></button></li>)}
+      <li><span className="bxt-ic dark"><Bell/></span><div><b>System notifications</b><p>{lives.length ? `${lives.length} LIVE right now` : 'BIXTOK updates appear here'}</p></div></li>
+      <li><span className="bxt-ic matcha"><User/></span><div><b>New followers</b><p>{followers ? `${followers} people follow you` : 'No followers yet'}</p></div></li>
       <li><Link to="/nft-marketplace" className="contents"><span className="bxt-ic orange"><ShoppingBag/></span><div><b>Shop messages</b><p>Open the BIXLINK marketplace</p></div><ChevronRight size={16}/></Link></li>
       <li><span className="bxt-ic matcha"><Bot/></span><div><b>FOX AI</b><p>Ask anything about BIXLINK</p></div></li>
     </ul></div>;
 }
 
-function ProfilePage({ me, email, videos, onCreate, onBalance, onOpen, onNote }: { me: string; email: string; videos: Video[]; onCreate: () => void; onBalance: () => void; onOpen: () => void; onNote: (m: string) => void }) {
+function ProfilePage({ follow, me, email, videos, onCreate, onBalance, onOpen, onNote }: { follow: { following: Set<string>; followers: Set<string> }; me: string; email: string; videos: Video[]; onCreate: () => void; onBalance: () => void; onOpen: () => void; onNote: (m: string) => void }) {
   const p = useQuery({ queryKey: ['bixtok-profile', me], queryFn: async () => (await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle()).data });
   const [drawer, setDrawer] = useState(false); const [ptab, setPtab] = useState('grid');
   const name = p.data?.username || email.split('@')[0] || 'member';
@@ -250,7 +286,7 @@ function ProfilePage({ me, email, videos, onCreate, onBalance, onOpen, onNote }:
   const copy = async () => { try { await navigator.clipboard.writeText(`${location.origin}/bixtok`); onNote('Profile link copied'); } catch { /* ignore */ } };
   return <div className="bxt-page"><header className="bxt-head"><button aria-label="Create" onClick={onCreate}><Sparkles size={20}/></button><span/><button aria-label="Menu" onClick={() => setDrawer(true)}><Menu size={22}/></button></header>
     <section className="bxt-prof"><div><h1>{name}</h1><small>@{name.toLowerCase()}</small>
-      <div className="bxt-stats"><p><b>{videos.length}</b>Posts</p><p><b>0</b>Following</p><p><b>{likes}</b>Likes</p></div></div>
+      <div className="bxt-stats"><p><b>{follow.following.size}</b>Following</p><p><b>{follow.followers.size}</b>Followers</p><p><b>{[...follow.following].filter(x => follow.followers.has(x)).length}</b>Friends</p><p><b>{likes}</b>Likes</p></div></div>
       <button className="bxt-bigav" onClick={onCreate}>{name.slice(0, 1).toUpperCase()}<em><Plus size={14}/></em></button></section>
     <p className="bxt-bio">BIXLINK member · Web3 creator</p>
     <Link to="/nft-marketplace" className="bxt-pill"><ShoppingBag size={14}/> Your orders</Link>
