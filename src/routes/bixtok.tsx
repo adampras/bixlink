@@ -230,7 +230,7 @@ function ProfilePage({ me, email, videos, onCreate, onBalance, onOpen, onNote }:
       <button onClick={copy}><QrCode/>Your profile link<ChevronRight/></button>
       <h4>Creator & business</h4>
       <button onClick={() => { setDrawer(false); onCreate(); }}><Sparkles/>BIXTOK Studio<ChevronRight/></button>
-      <Link to="/referral" ><Flame/>Promote<ChevronRight/></Link>
+      <Link to="/network" ><Flame/>Promote<ChevronRight/></Link>
       <hr/><Link to="/settings"><Settings/>Settings and privacy<ChevronRight/></Link>
     </aside></div>}
   </div>;
@@ -246,7 +246,7 @@ function BalancePage({ stake, cfg, onBack, onLive }: { stake: number; cfg: Cfg; 
     <Link to="/stake" className="bxt-card"><div><b>Join a staking package</b><p>Unlock Go LIVE{Number(cfg.live_min_stake_usd) > 0 ? ` from $${Number(cfg.live_min_stake_usd).toFixed(0)}` : ''}</p></div><Gift className="bxt-gifticon"/></Link>
     <div className="bxt-tools">
       <button onClick={onLive}><span><Radio/></span>LIVE rewards</button>
-      <Link to="/referral"><span><BadgeDollarSign/></span>Monetize</Link>
+      <Link to="/network"><span><BadgeDollarSign/></span>Monetize</Link>
       <Link to="/arena"><span><Megaphone/></span>Campaigns</Link>
       <Link to="/stake"><span><Flame/></span>Staking</Link>
       <Link to="/market"><span><Zap/></span>Market</Link>
