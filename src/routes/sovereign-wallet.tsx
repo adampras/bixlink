@@ -40,7 +40,7 @@ export const Route = createFileRoute('/sovereign-wallet')({
 
 import { CustomTokens } from '@/components/sovereign/CustomTokens';
 type Eth = { request: (a: { method: string; params?: unknown }) => Promise<any> };
-type Tab = 'wallet' | 'market' | 'discover' | 'me';
+type Tab = 'wallet' | 'market' | 'trade' | 'discover' | 'me';
 type Screen = 'login' | 'accountsend' | 'history' | 'language' | null | 'myid' | 'send' | 'receive' | 'scan' | 'book' | 'node' | 'security' | 'notify';
 const USDT = '0x55d398326f99059fF775485246999027B3197955';
 const NODES = ['https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io', 'https://bsc-dataseed1.ninicoin.io', 'https://bsc.publicnode.com'];
@@ -315,12 +315,13 @@ function SovereignApp() {
       </>}
 
       {tab === 'market' && <MarketTerminal px={px} bixRef={bixRef} snapshot={snapshot} />}
+      {tab === 'trade' && <TradeTab px={px} />}
       {tab === 'discover' && <DiscoverTab />}
       {tab === 'me' && <><AccountProfile addr={addr} go={s => setScreen(s as Screen)} disconnect={() => { setAddr(''); setBal(null); }} /><div className="mt-6"><InstallAppButton wallet /></div></>}
     </main>
 
     <nav className="sw-dock" aria-label="Wallet navigation">
-      {([['wallet', 'Wallet', Wallet], ['market', 'Market', BarChart3], ['discover', 'Discover', Compass], ['me', 'Me', User]] as const).map(([k, l, I]) =>
+      {([['wallet', 'Assets', Wallet], ['market', 'Market', BarChart3], ['trade', 'Trade', RefreshCw], ['discover', 'Discover', Globe], ['me', 'Me', User]] as const).map(([k, l, I]) =>
         <Button key={k} type="button" data-tone={k} aria-current={tab === k ? 'page' : undefined} onClick={() => { setTab(k); window.scrollTo(0, 0); }}><span className="sw-dock-orb"><I size={20} /></span><span>{l}</span></Button>)}
     </nav>
   </div>;
