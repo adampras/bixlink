@@ -1787,6 +1787,7 @@ export type Database = {
           host_name: string
           id: string
           kind: string
+          likes: number
           started_at: string
           status: string
           title: string
@@ -1797,6 +1798,7 @@ export type Database = {
           host_name: string
           id?: string
           kind?: string
+          likes?: number
           started_at?: string
           status?: string
           title: string
@@ -1807,6 +1809,7 @@ export type Database = {
           host_name?: string
           id?: string
           kind?: string
+          likes?: number
           started_at?: string
           status?: string
           title?: string
@@ -2739,6 +2742,10 @@ export type Database = {
       bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_end_live: { Args: { p_id: string }; Returns: undefined }
       bixtok_like: { Args: { p_video: string }; Returns: undefined }
+      bixtok_live_like: {
+        Args: { p_live: string; p_n: number }
+        Returns: number
+      }
       bixtok_my_stake_usd: { Args: never; Returns: number }
       bixtok_publish: {
         Args: {

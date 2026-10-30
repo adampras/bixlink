@@ -799,6 +799,13 @@
       "when": 1793374470828,
       "tag": "0113_bixtok_follow_official_live",
       "breakpoints": true
+    },
+    {
+      "idx": 114,
+      "version": "7",
+      "when": 1793376695613,
+      "tag": "0114_bixtok_live_likes",
+      "breakpoints": true
     }
   ]
 }
