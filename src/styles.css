@@ -4289,3 +4289,22 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxt-plus-mini { position: absolute; right: -4px; bottom: -4px; width: 16px !important; height: 16px !important; border-radius: 999px; background: #000; color: #fff; padding: 2px; }
 @keyframes studio-glow { 50% { box-shadow: 0 0 28px rgba(255,138,0,.55); } }
 @media (prefers-reduced-motion: reduce) { .studio-filters i em, .studio-filters button.on i, .studio-spark, .studio-disc.spin, .studio-wave i, .bxt-plus-logo { animation: none; } }
+
+/* BIXTOK polish v2 */
+.bxt-drawer-wrap{background:color-mix(in oklab,var(--background) 70%,transparent);backdrop-filter:blur(6px)}
+.bxt-drawer{background:oklch(0.16 0.01 150);border-left:1px solid color-mix(in oklab,var(--foreground) 10%,transparent);box-shadow:-20px 0 40px oklch(0 0 0/.5)}
+.bxt-drawer h4{color:oklch(0.78 0.12 140);letter-spacing:.08em;text-transform:uppercase;font-size:.65rem}
+.bxt-drawer>button,.bxt-drawer>a{color:var(--foreground);font-weight:700;font-size:.95rem;border-bottom:1px solid color-mix(in oklab,var(--foreground) 6%,transparent)}
+.studio-preview-mini{height:22vh;border:1px solid color-mix(in oklab,var(--foreground) 10%,transparent)}
+.studio-mini-bg{background:linear-gradient(160deg,oklch(0.2 0.02 150),oklch(0.12 0 0) 65%,oklch(0.18 0.01 260))}
+.studio-overlay.drag{will-change:left,top;transition:none;user-select:none;-webkit-user-select:none}
+.studio-overlay.dragging{outline-color:oklch(0.8 0.15 140);transform:translate(-50%,-50%) scale(1.06)}
+.studio-filters i{background:linear-gradient(145deg,oklch(0.26 0.03 150),oklch(0.14 0 0));display:grid;place-items:center;color:oklch(0.9 0.05 140)}
+.studio-filters i.face::after{display:none}
+.studio-filters i em{display:none}
+.studio-filters i svg{width:1.3rem;height:1.3rem;animation:studio-face 2.4s ease-in-out infinite}
+@keyframes studio-face{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.08)}}
+.studio-zoom{position:absolute;right:.6rem;top:50%;display:flex;flex-direction:column;align-items:center;gap:.3rem;z-index:5;font-size:.65rem;font-weight:800}
+.studio-zoom input{writing-mode:vertical-lr;direction:rtl;height:9rem;accent-color:oklch(0.8 0.15 140)}
+.studio-stage video{transition:transform .15s ease-out}
+@media (prefers-reduced-motion: reduce){.studio-filters i svg{animation:none}}

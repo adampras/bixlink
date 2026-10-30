@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Camera, RefreshCw, Sparkles, Timer, Type, X, Check, Gauge, Link2, Plus, Trash2, Music2, Search, Play, Pause, Download, Bold } from 'lucide-react';
+import { Camera, RefreshCw, Sparkles, Smile, Sun, Wand2, Timer, Type, X, Check, Gauge, Link2, Plus, Trash2, Music2, Search, Play, Pause, Download, Bold } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import bixtokLogo from '@/assets/bixtok-logo.png';
@@ -37,16 +37,21 @@ const TAGS = ['#BIXLINK', '#BIXCOIN', '#Staking', '#Web3', '#FinancialFreedom'];
 type Sound = { id: string; title: string; artist: string; category: string; audio_url: string; cover?: string | undefined };
 
 export function DraggableText({ text, style, onMove, editable }: { text: string; style: TextStyle; onMove?: (x: number, y: number) => void; editable?: boolean }) {
-  const ref = useRef<HTMLSpanElement>(null);
+  const ref = useRef<HTMLSpanElement>(null); const [drag, setDrag] = useState(false);
   const down = (e: React.PointerEvent) => {
     if (!editable || !onMove) return; e.preventDefault(); e.stopPropagation();
-    const box = ref.current?.parentElement?.getBoundingClientRect(); if (!box) return;
-    (e.target as Element).setPointerCapture(e.pointerId);
-    const move = (ev: PointerEvent) => onMove(Math.min(95, Math.max(5, ((ev.clientX - box.left) / box.width) * 100)), Math.min(92, Math.max(6, ((ev.clientY - box.top) / box.height) * 100)));
-    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
-    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+    const el = ref.current; const box = el?.parentElement?.getBoundingClientRect(); if (!el || !box) return;
+    el.setPointerCapture(e.pointerId); setDrag(true);
+    const sx = e.clientX, sy = e.clientY, ox = style.x, oy = style.y; let nx = ox, ny = oy, raf = 0;
+    const move = (ev: PointerEvent) => {
+      nx = Math.min(95, Math.max(5, ox + ((ev.clientX - sx) / box.width) * 100));
+      ny = Math.min(92, Math.max(6, oy + ((ev.clientY - sy) / box.height) * 100));
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; el.style.left = `${nx}%`; el.style.top = `${ny}%`; });
+    };
+    const up = () => { cancelAnimationFrame(raf); el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up); setDrag(false); onMove(nx, ny); };
+    el.addEventListener('pointermove', move); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
   };
-  return <span ref={ref} onPointerDown={down} className={`studio-overlay${editable ? ' drag' : ''}`} style={textCss(style)}>{text}</span>;
+  return <span ref={ref} onPointerDown={down} className={`studio-overlay${editable ? ' drag' : ''}${drag ? ' dragging' : ''}`} style={textCss(style)}>{text}</span>;
 }
 
 export function BixtokStudio({ onClose, onDone, slots = 5, maxLinks = 10 }: { userId: string; onClose: () => void; onDone: (msg: string) => void; slots?: number; maxLinks?: number }) {
@@ -54,7 +59,7 @@ export function BixtokStudio({ onClose, onDone, slots = 5, maxLinks = 10 }: { us
   const [links, setLinks] = useState<string[]>(() => Array.from({ length: Math.max(1, slots) }, () => ''));
   const [filter, setFilter] = useState('none');
   const [smooth, setSmooth] = useState(0); const [glow, setGlow] = useState(0); const [bright, setBright] = useState(0);
-  const [facing, setFacing] = useState<'user' | 'environment'>('user');
+  const [facing, setFacing] = useState<'user' | 'environment'>('user'); const [zoom, setZoom] = useState(0.8);
   const [dur, setDur] = useState(15); const [speed, setSpeed] = useState(1); const [timer, setTimer] = useState(0);
   const [count, setCount] = useState(0); const [rec, setRec] = useState(false); const [elapsed, setElapsed] = useState(0);
   const [camErr, setCamErr] = useState(''); const [shot, setShot] = useState<{ url: string; ext: string } | null>(null);
@@ -140,9 +145,10 @@ export function BixtokStudio({ onClose, onDone, slots = 5, maxLinks = 10 }: { us
     {mode === 'camera' ? <>
       <div className="studio-stage">
         {shot ? (shot.ext === 'jpg' ? <img src={shot.url} alt="Captured"/> : <video src={shot.url} autoPlay loop playsInline controls/>)
-          : camErr ? <p className="studio-camerr">{camErr}</p> : <video ref={vid} muted playsInline className={facing === 'user' ? 'mirror' : ''} style={{ filter: css }}/>}
+          : camErr ? <p className="studio-camerr">{camErr}</p> : <video ref={vid} muted playsInline style={{ filter: css, objectFit: zoom < 1 ? 'contain' : 'cover', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>}
         {!shot && overlay && <DraggableText text={overlay} style={ts} editable onMove={(x, y) => setTs(s => ({ ...s, x, y }))}/>}
         {count > 0 && <span className="studio-count">{count}</span>}
+        {!shot && !camErr && <label className="studio-zoom"><span>{zoom.toFixed(1)}×</span><input type="range" aria-label="Zoom" min={0.5} max={2} step={0.05} value={zoom} onChange={e => setZoom(+e.target.value)}/></label>}
         {rec && <span className="studio-rec">● {elapsed}s / {dur}s</span>}
       </div>
       <header className="studio-top"><button aria-label="Close" onClick={onClose}><X/></button>{musicBtn}<button aria-label="Links" onClick={() => { setShot(null); setMode('link'); }}><Link2/></button></header>
@@ -197,7 +203,7 @@ function BeautySliders({ smooth, glow, bright, set }: { smooth: number; glow: nu
 
 function FilterRow({ value, onPick }: { value: string; onPick: (k: string) => void }) {
   return <div className="studio-filters">{BIXTOK_FILTERS.map(f => <button key={f.key} className={value === f.key ? 'on' : ''} onClick={() => onPick(f.key)}>
-    <i className={f.face ? 'face' : ''} style={{ filter: f.css }}><em/></i><small>{f.label}</small></button>)}</div>;
+    <i className={f.face ? 'face' : ''}>{f.face ? <Smile/> : f.key === 'none' ? <Wand2/> : f.key === 'glow' || f.key === 'bright' ? <Sun/> : <Sparkles/>}</i><small>{f.label}</small></button>)}</div>;
 }
 
 function TextEditor({ text, style, onText, onStyle, onClose }: { text: string; style: TextStyle; onText: (t: string) => void; onStyle: (s: TextStyle) => void; onClose: () => void }) {
