@@ -41,7 +41,7 @@ function BixtokPage() {
   const [giftTarget, setGiftTarget] = useState<{ video?: string; live?: string } | null>(null);
   const [room, setRoom] = useState<Live | null>(null);
   const [note, setNote] = useState('');
-  useEffect(() => { if (note) { const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); } }, [note]);
+  useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
 
   return <MemberGate ready={ready} signedIn={!!user} title="BIXTOK"><main className="bixtok">
     {q.isError ? <p className="p-8 text-sm text-destructive">Could not load BIXTOK.</p>
@@ -71,8 +71,8 @@ function Feed({ videos, cfg, onGift, onNote }: { videos: Video[]; cfg: Cfg; onGi
     <AutoVideo src={v.video_url}/>
     <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p></div>
     <aside className="bixtok-rail">
-      {cfg.features.likes !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={async () => { if (liked[v.id]) return; setLiked({ ...liked, [v.id]: true }); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
-      {cfg.features.share !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
+      {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={async () => { if (liked[v.id]) return; setLiked({ ...liked, [v.id]: true }); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
+      {cfg.features['share'] !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id ? onGift(v.id) : onNote('This official video cannot receive gifts.')}><Gift/><small>Gift</small></button>
     </aside>
   </section>)}</div>;
@@ -80,7 +80,7 @@ function Feed({ videos, cfg, onGift, onNote }: { videos: Video[]; cfg: Cfg; onGi
 
 function AutoVideo({ src }: { src: string }) {
   const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) el.play().catch(() => {}); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
+  useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) el.play().catch(() => {}); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
   return <video ref={ref} src={src} loop muted playsInline preload="metadata" className="bixtok-video" onClick={e => { const el = e.currentTarget; el.muted = !el.muted; }}/>;
 }
 
@@ -120,7 +120,7 @@ function LiveRoom({ live, me, cfg, onClose, onGift }: { live: Live; me: string; 
     return () => { supabase.removeChannel(ch); };
   }, [live.id]);
   useEffect(() => {
-    if (!host) return; let stream: MediaStream | null = null;
+    if (!host) return undefined; let stream: MediaStream | null = null;
     navigator.mediaDevices?.getUserMedia({ video: { facingMode: 'user' }, audio: false }).then(s => { stream = s; if (cam.current) cam.current.srcObject = s; }).catch(() => {});
     const limit = setTimeout(() => { void stop(); }, Number(cfg.live_max_minutes) * 60_000);
     return () => { clearTimeout(limit); stream?.getTracks().forEach(t => t.stop()); };
@@ -135,7 +135,7 @@ function LiveRoom({ live, me, cfg, onClose, onGift }: { live: Live; me: string; 
     {ended && <p className="bixtok-ended">LIVE ended</p>}
     <div className="bixtok-chat">{msgs.map(m => <p key={m.id} className={m.kind === 'gift' ? 'gift' : ''}><b>{m.name}</b> {m.body}</p>)}</div>
     <footer className="bixtok-room-bar">
-      {cfg.features.comments !== false && <form className="flex-1" onSubmit={async e => { e.preventDefault(); const body = text.trim().slice(0, 200); if (!body) return; setText('');
+      {cfg.features['comments'] !== false && <form className="flex-1" onSubmit={async e => { e.preventDefault(); const body = text.trim().slice(0, 200); if (!body) return; setText('');
         const { data: p } = await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle();
         await supabase.from('bixtok_live_messages').insert({ live_id: live.id, user_id: me, name: p?.username || 'member', body }); }}>
         <div className="bixtok-input"><MessageCircle size={16}/><input value={text} onChange={e => setText(e.target.value)} placeholder="Say something…" maxLength={200}/><button aria-label="Send"><Send size={16}/></button></div>
