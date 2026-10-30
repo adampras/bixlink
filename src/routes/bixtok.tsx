@@ -68,20 +68,24 @@ function Feed({ videos, cfg, onGift, onNote }: { videos: Video[]; cfg: Cfg; onGi
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   if (!videos.length) return <p className="grid h-full place-items-center text-sm text-muted-foreground">No videos yet.</p>;
   return <div className="bixtok-feed">{videos.map(v => <section key={v.id} className="bixtok-slide">
-    <AutoVideo src={v.video_url}/>
+    {v.media_kind === 'photo'
+      ? <img src={v.src} alt={v.caption} className="bixtok-video" style={{ filter: filterCss(v.filter) }}/>
+      : <AutoVideo src={v.src} filter={v.filter}/>}
+    {v.overlay && <span className="studio-overlay">{v.overlay}</span>}
     <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p></div>
     <aside className="bixtok-rail">
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={async () => { if (liked[v.id]) return; setLiked({ ...liked, [v.id]: true }); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
-      <button aria-label="Send gift" className="gift" onClick={() => v.creator_id ? onGift(v.id) : onNote('This official video cannot receive gifts.')}><Gift/><small>Gift</small></button>
+      <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
+      {v.creator_id === me && <button aria-label="Delete" onClick={async () => { if (!confirm('Delete this post?')) return; await supabase.from('bixtok_videos').delete().eq('id', v.id); if (v.media_path) await supabase.storage.from('bixtok-media').remove([v.media_path]); qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Post deleted'); }}><Trash2/><small>Delete</small></button>}
     </aside>
   </section>)}</div>;
 }
 
-function AutoVideo({ src }: { src: string }) {
+function AutoVideo({ src, filter }: { src: string; filter?: string | null }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) el.play().catch(() => {}); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
-  return <video ref={ref} src={src} loop muted playsInline preload="metadata" className="bixtok-video" onClick={e => { const el = e.currentTarget; el.muted = !el.muted; }}/>;
+  return <video ref={ref} src={src} loop muted playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }} onClick={e => { const el = e.currentTarget; el.muted = !el.muted; }}/>;
 }
 
 function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
