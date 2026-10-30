@@ -165,12 +165,26 @@ function AutoVideo({ src, filter, muted }: { src: string; filter?: string | null
   return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }}/>;
 }
 
-function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
+function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
   const qc = useQueryClient(); const [title, setTitle] = useState(''); const [busy, setBusy] = useState(false);
   const eligible = data.stake > 0 && data.stake >= Number(data.cfg.live_min_stake_usd);
+  const [otitle, setOtitle] = useState('');
+  const official = async () => { setBusy(true);
+    const { data: id, error } = await supabase.rpc('bixtok_start_official_live', { p_title: otitle });
+    setBusy(false); if (error) return onNote(error.message);
+    await qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Official LIVE started · all members notified');
+    const { data: me } = await supabase.auth.getUser();
+    onEnter({ id: id as string, host_id: me.user!.id, host_name: 'BIXLINK OFFICIAL', title: otitle || 'BIXLINK Official Presentation', started_at: new Date().toISOString(), kind: 'official' }); };
   return <div className="bixtok-lobby">
+    {data.owner1 && <div className="bixtok-golive bxt-official-card">
+      <h2><Radio size={18}/> OFFICIAL BROADCAST</h2>
+      <p className="text-xs text-muted-foreground">Presentation and promotion LIVE. Starting it sends a notification to every member.</p>
+      <form onSubmit={e => { e.preventDefault(); void official(); }}>
+        <input className="form-input" maxLength={80} placeholder="Presentation title" value={otitle} onChange={e => setOtitle(e.target.value)}/>
+        <button className="bixtok-cta" disabled={busy}>{busy ? 'Starting…' : 'Go Live Official'}</button>
+      </form></div>}
     <div className="bixtok-golive">
-      <h2><Radio size={18}/> Go LIVE</h2>
+      <h2><Radio size={18}/> Community LIVE</h2>
       {!data.cfg.live_enabled ? <p className="text-xs text-muted-foreground">Go LIVE is closed by the admin right now.</p>
        : eligible ? <form onSubmit={async e => { e.preventDefault(); setBusy(true);
           const { data: id, error } = await supabase.rpc('bixtok_start_live', { p_title: title });
@@ -184,7 +198,7 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
        : <div><p className="text-xs text-muted-foreground">Go LIVE is open to members with an active staking package{Number(data.cfg.live_min_stake_usd) > 0 ? ` of at least $${Number(data.cfg.live_min_stake_usd).toFixed(2)}` : ''}.</p><Link to="/stake" className="bixtok-cta mt-3 inline-block">Join a staking package</Link></div>}
     </div>
     <h3 className="mt-6 text-xs font-bold tracking-widest text-muted-foreground">LIVE NOW · {data.lives.length}</h3>
-    <div className="bixtok-live-grid">{data.lives.map(l => <button key={l.id} onClick={() => onEnter(l)}><span className="bixtok-badge">LIVE</span><b>{l.title}</b><small>@{l.host_name}</small></button>)}</div>
+    <div className="bixtok-live-grid">{data.lives.map(l => <button key={l.id} className={l.kind === 'official' ? 'bxt-official' : ''} onClick={() => onEnter(l)}><span className="bixtok-badge">{l.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span><b>{l.title}</b><small>@{l.host_name}</small></button>)}</div>
     {!data.lives.length && <p className="mt-3 text-sm text-muted-foreground">Nobody is live yet.</p>}
   </div>;
 }
