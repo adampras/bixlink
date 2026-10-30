@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Gift, Heart, Lock, MessageCircle, Radio, Send, Share2, X } from 'lucide-react';
+import { ArrowLeft, Gift, Heart, Lock, MessageCircle, Plus, Radio, Send, Share2, Trash2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { MemberGate } from '@/components/MemberGate';
 import { useMember } from '@/lib/useMember';
+import { BixtokStudio, filterCss } from '@/components/BixtokStudio';
 
 export const Route = createFileRoute('/bixtok')({
   head: () => ({ meta: [
@@ -19,29 +20,37 @@ export const Route = createFileRoute('/bixtok')({
 
 type Cfg = { enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[] };
 type Gift = { id: string; name: string; emoji: string; currency: string; price: number };
-type Video = { id: string; creator_name: string; creator_id: string | null; caption: string; video_url: string; likes: number };
+type Video = { id: string; creator_name: string; creator_id: string | null; caption: string; video_url: string; likes: number; media_path: string | null; media_kind: string; filter: string; overlay: string; allow_gifts: boolean; src: string };
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string };
 type Msg = { id: string; name: string; body: string; kind: string };
 
 function BixtokPage() {
   const { user, ready } = useMember();
-  const q = useQuery({ queryKey: ['bixtok', user?.id], enabled: Boolean(user), refetchInterval: 20_000, queryFn: async () => {
+  const q = useQuery({ queryKey: ['bixtok', user?.id], enabled: Boolean(user), refetchInterval: 60_000, queryFn: async () => {
     const [c, g, v, l, s] = await Promise.all([
       supabase.from('bixtok_config').select('*').eq('id', 1).single(),
       supabase.from('bixtok_gifts').select('id,name,emoji,currency,price').eq('enabled', true).order('sort'),
-      supabase.from('bixtok_videos').select('id,creator_name,creator_id,caption,video_url,likes').eq('enabled', true).order('sort'),
+      supabase.from('bixtok_videos').select('id,creator_name,creator_id,caption,video_url,likes,media_path,media_kind,filter,overlay,allow_gifts').eq('enabled', true).order('created_at', { ascending: false }).limit(60),
       supabase.from('bixtok_lives').select('id,host_id,host_name,title,started_at').eq('status', 'live').order('started_at', { ascending: false }),
       supabase.rpc('bixtok_my_stake_usd'),
     ]);
     if (c.error) throw c.error;
-    return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos: (v.data ?? []) as Video[], lives: (l.data ?? []) as Live[], stake: Number(s.data ?? 0) };
+    const rows = (v.data ?? []) as Omit<Video, 'src'>[];
+    const paths = rows.map(r => r.media_path).filter(Boolean) as string[];
+    const signed = paths.length ? (await supabase.storage.from('bixtok-media').createSignedUrls(paths, 3600)).data ?? [] : [];
+    const map = new Map(signed.map(x => [x.path, x.signedUrl]));
+    const videos = rows.map(r => ({ ...r, src: r.media_path ? map.get(r.media_path) ?? '' : r.video_url })).filter(r => r.src);
+    return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives: (l.data ?? []) as Live[], stake: Number(s.data ?? 0) };
   } });
   const menus = (q.data?.cfg.menus ?? []).filter(m => m.enabled);
   const [tab, setTab] = useState('foryou');
   const [giftTarget, setGiftTarget] = useState<{ video?: string; live?: string } | null>(null);
   const [room, setRoom] = useState<Live | null>(null);
+  const [studio, setStudio] = useState(false);
   const [note, setNote] = useState('');
+  const qc = useQueryClient();
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
+  const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
 
   return <MemberGate ready={ready} signedIn={!!user} title="BIXTOK"><main className="bixtok">
     {q.isError ? <p className="p-8 text-sm text-destructive">Could not load BIXTOK.</p>
@@ -50,12 +59,14 @@ function BixtokPage() {
      : <>
       <header className="bixtok-top">
         <Link to="/dashboard" aria-label="Back" className="bixtok-icon"><ArrowLeft size={20}/></Link>
-        <nav className="bixtok-tabs">{menus.map(m => <button key={m.key} className={tab === m.key ? 'on' : ''} onClick={() => setTab(m.key)}>{m.key === 'live' && <i className="bixtok-dot"/>}{m.label}</button>)}</nav>
+        <nav className="bixtok-tabs">{menus.map(m => <button key={m.key} className={tab === m.key ? 'on' : ''} onClick={() => setTab(m.key)}>{m.key === 'live' && <i className="bixtok-dot"/>}{m.label}</button>)}<button className={tab === 'mine' ? 'on' : ''} onClick={() => setTab('mine')}>Me</button></nav>
         <span className="w-9"/>
       </header>
       {tab === 'live'
         ? <LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/>
-        : <Feed videos={tab === 'following' ? q.data.videos.filter(v => v.creator_id) : q.data.videos} cfg={q.data.cfg} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>}
+        : <Feed videos={vids} cfg={q.data.cfg} me={user!.id} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>}
+      {q.data.cfg.features['upload'] !== false && !studio && !room && <button className="bixtok-create" aria-label="Create post" onClick={() => setStudio(true)}><Plus/></button>}
+      {studio && <BixtokStudio userId={user!.id} onClose={() => setStudio(false)} onDone={m => { setStudio(false); setNote(m); setTab('mine'); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}/>}
       {room && <LiveRoom live={room} me={user!.id} cfg={q.data.cfg} onClose={() => setRoom(null)} onGift={() => setGiftTarget({ live: room.id })}/>}
       {giftTarget && <GiftSheet gifts={q.data.gifts.filter(g => q.data!.cfg.features[g.currency === 'BIX' ? 'bix_gifts' : 'bixp_gifts'] !== false)} target={giftTarget} closed={!q.data.cfg.gifts_enabled} onClose={() => setGiftTarget(null)} onNote={setNote}/>}
       {note && <div className="bixtok-toast" role="status">{note}</div>}
@@ -63,25 +74,29 @@ function BixtokPage() {
   </main></MemberGate>;
 }
 
-function Feed({ videos, cfg, onGift, onNote }: { videos: Video[]; cfg: Cfg; onGift: (id: string) => void; onNote: (m: string) => void }) {
+function Feed({ videos, cfg, me, onGift, onNote }: { videos: Video[]; cfg: Cfg; me: string; onGift: (id: string) => void; onNote: (m: string) => void }) {
   const qc = useQueryClient();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
-  if (!videos.length) return <p className="grid h-full place-items-center text-sm text-muted-foreground">No videos yet.</p>;
+  if (!videos.length) return <p className="grid h-full place-items-center text-sm text-muted-foreground">No posts yet. Tap + to create one.</p>;
   return <div className="bixtok-feed">{videos.map(v => <section key={v.id} className="bixtok-slide">
-    <AutoVideo src={v.video_url}/>
+    {v.media_kind === 'photo'
+      ? <img src={v.src} alt={v.caption} className="bixtok-video" style={{ filter: filterCss(v.filter) }}/>
+      : <AutoVideo src={v.src} filter={v.filter}/>}
+    {v.overlay && <span className="studio-overlay">{v.overlay}</span>}
     <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p></div>
     <aside className="bixtok-rail">
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={async () => { if (liked[v.id]) return; setLiked({ ...liked, [v.id]: true }); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
-      <button aria-label="Send gift" className="gift" onClick={() => v.creator_id ? onGift(v.id) : onNote('This official video cannot receive gifts.')}><Gift/><small>Gift</small></button>
+      <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
+      {v.creator_id === me && <button aria-label="Delete" onClick={async () => { if (!confirm('Delete this post?')) return; await supabase.from('bixtok_videos').delete().eq('id', v.id); if (v.media_path) await supabase.storage.from('bixtok-media').remove([v.media_path]); qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Post deleted'); }}><Trash2/><small>Delete</small></button>}
     </aside>
   </section>)}</div>;
 }
 
-function AutoVideo({ src }: { src: string }) {
+function AutoVideo({ src, filter }: { src: string; filter?: string | null }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) el.play().catch(() => {}); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
-  return <video ref={ref} src={src} loop muted playsInline preload="metadata" className="bixtok-video" onClick={e => { const el = e.currentTarget; el.muted = !el.muted; }}/>;
+  return <video ref={ref} src={src} loop muted playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }} onClick={e => { const el = e.currentTarget; el.muted = !el.muted; }}/>;
 }
 
 function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
