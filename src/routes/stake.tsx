@@ -57,14 +57,14 @@ function StakePage() {
   const perDay = activeStakes.reduce((n, s) => n + Number(s.amount_usd) * Number(s.apy) / 100 / 365, 0);
   return <BixShell><main className="stake-compact mx-auto max-w-7xl px-5 py-3 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="STAKE">
-      <div className="stake-lux-head auric-card">
-        <h1 className="section-title stake-lux-title !text-xl !tracking-normal sm:!text-4xl">STAKING PACKAGE <span>CRYPTO</span></h1>
+      <div className="stake-lux-head auric-card text-center">
+        <h1 className="section-title stake-lux-title w-full text-center !text-2xl !tracking-wide sm:!text-5xl">STAKING PACKAGE <span>CRYPTO</span></h1>
         
       </div>
-      <dl aria-label="Staking summary" className="mt-2 grid grid-cols-3 gap-2 sm:gap-3">
-        <div className="min-w-0 stake-metric rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">BIX supply</dt><dd className="mt-1 font-display text-xs font-bold text-chart-3 sm:text-lg">21M BIX</dd></div>
-        <div className="min-w-0 stake-metric rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 sm:text-lg">{money(bal.data ?? 0)}</dd></div>
-        <div className="min-w-0 stake-metric rounded-lg border border-border bg-card/50 px-2 py-3 backdrop-blur-xl sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
+      <dl aria-label="Staking summary" className="mt-3 mb-6 grid grid-cols-3 divide-x divide-border overflow-hidden rounded-xl border border-border bg-card/70 sm:mb-8">
+        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">BIX supply</dt><dd className="mt-1 font-display text-xs font-bold text-chart-3 sm:text-lg">21M BIX</dd></div>
+        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 sm:text-lg">{money(bal.data ?? 0)}</dd></div>
+        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
       </dl>
       
       {skin.data && <InstitutionalStakeHeader active={activeStakes.length} principal={activeStakes.reduce((n, s) => n + Number(s.amount_usd), 0)} live={liveTotal} perDay={perDay}/>}

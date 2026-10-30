@@ -28,6 +28,7 @@ import { NetworkLeaders } from '@/components/NetworkLeaders';
 import { AdminAppearance } from '@/components/AdminAppearance';
 import { AdminSplash } from '@/components/AdminSplash';
 import { AdminReferrals } from '@/components/AdminReferrals';
+import { AdminNetworkEditor } from '@/components/AdminNetworkEditor';
 import { AdminStakingControls } from '@/components/AdminStakingControls';
 import { AdminNavigation, AdminFold, type AdminGroup } from '@/components/AdminNavigation';
 import { AdminWorkspace } from '@/components/AdminWorkspace';
@@ -118,6 +119,7 @@ function Admin() {
     {tab === 'Market' && <AdminMiningRigs onMessage={setMessage}/>}
     {tab === 'Staking' && <AdminStakingControls onMessage={setMessage}/>}
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
+     {tab === 'Referrals' && <AdminNetworkEditor onMessage={setMessage}/>}
      {tab === 'Reports' && <AdminReports onMessage={setMessage}/>}
      {tab === 'Marketing' && <AdminMarketing initial={data?.settings.find(s=>s.key==='marketing_plan')?.value as unknown as MarketingPlan | undefined} onMessage={setMessage}/>}
      {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>}
