@@ -785,6 +785,13 @@
       "when": 1793363586473,
       "tag": "0111_bixtok_live_rls_tighten",
       "breakpoints": true
+    },
+    {
+      "idx": 112,
+      "version": "7",
+      "when": 1793371451806,
+      "tag": "0112_tighten_bixtok_config_rigs_media_reads",
+      "breakpoints": true
     }
   ]
 }
