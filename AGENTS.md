@@ -8,7 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
-
 - Keep staking requests as non-custodial, pending records with no automatic payout or fabricated wallet balance; this app does not integrate a payment rail.
 - Owner access requires server-validated identity and verified owner email; never trust client roles.
 - Public reads use RLS; private operations use authenticated server functions.
@@ -40,23 +39,20 @@
 - Fox Arena quest vBIX is paid only by the server-verified bix_quest_claim RPC, sharing mining's account cap and pool; season prizes are owner-reviewed, never auto-credited — game rewards stay in the promo budget.
 - Arena artwork uses shared bundled mission assets; owner saves read back canonical configuration and invalidate member Arena queries to keep displayed rewards synchronized without changing prior claims.
 - Arena and onboarding share bundled game artwork and reduced-motion-aware CSS depth; onboarding reads canonical welcome rewards and never hides claim errors.
-- BNB login preserves linked identities and may provision wallet-only members after an origin/purpose-bound single-use signature; atomic profile/referral/mapping provisioning prevents duplicate accounts. Reserved internal wallet emails never satisfy real-email reward checks; server-only session exchange grants no roles or funds.
+- BNB login may provision wallet-only members after an origin/purpose-bound single-use signature with atomic profile/referral/mapping (no duplicates); internal wallet emails never pass real-email checks; session exchange grants no roles or funds.
 - NFT cards: one in-app certificate per stake with immutable artwork snapshot; new artwork selection matches the contract tier through the owner-controlled reactor catalog. Completion replaces USDT refund; buybacks remain owner-reviewed and vault-funded.
-- Marketplace merchandise lives in a separate owner-controlled presentation catalog with optional external HTTPS order links, not automatic payments or certificate settlement; HOME and PROFILE provide store access without a header shop; member listings are auto-approved only by the DB guard trigger.
+- Marketplace merchandise is an owner-controlled presentation catalog with optional external HTTPS order links (no payments/settlement); store entry from HOME/PROFILE only; member listings auto-approve only via the DB guard trigger.
 - All presale entry points use one accessible confirmation before the authenticated purchase; strategies snapshot rates; dividends settle via bix_wallet_balance.
 - Presale stage edits use shared atomic helpers and validator; owner saves merge and read back stored config without resetting orders.
-
 - Owner-only marketing settings feed browser PDF exports; dated CDN video stays separate to avoid implying re-rendering.
 - Enforce virtual sender authorization in the shared RPC and insert guard, and developer buyback limits with a table trigger as well as shared input validation; direct API calls must not bypass the wallet rules.
 - Serve the English company overview as a versioned, dated PDF with page-image previews; changes to live financial settings require regeneration, not changes to the dated video.
 - Owner navigation uses one searchable category selector; shared staking controls separate daily presets from individual edits to avoid duplicate forms across consoles.
 - Shell/dialogs own phone bounds; consortium uses a centered portal stage to avoid legacy transforms. Package cards use inline durations and full-width actions.
 - All loan dialog states share a Radix body portal with isolated surface tokens; this avoids shell transforms and transparent theme overrides while retaining focus trapping.
-
 - Size heroes via landing-hero-compact/compact-market-hero; preserve catalogs. Mask vault art behind the transparent coin to blend themes without new assets.
 - Keep app-wide touch feedback and HOME return-to-top in one root-mounted presentation component; store its switch in existing owner-authorized readiness settings to avoid duplicate controls or new permissions.
 - Growth features share an authoritative singleton control and cycle-safe database scope; exclude delegated-owner ancestry on reads and withdrawal guards so client presentation cannot bypass safety. Flash events never change contract terms; public activity contains only masked verified deposit records, never inferred payouts.
-
 - Share wallet staking notifications from authenticated stake records and status-specific IDs; receipts read back the RPC result without inferring completion or settlement.
 - Select the manifest from the root matched location during SSR; keep Sovereign Wallet manifest identity and scope stable so installation launches its existing in-place screens.
 - BIXTOK: TikTok sound uses origin-scoped official player messages (React mute can't control embeds). LIVE (Official and Community share one room) streams P2P WebRTC via src/lib/bixtok-rtc.ts over realtime broadcast signalling, no media server; likes accrue on the live row via bixtok_live_like; chat uses broadcast + db stream + polling de-duplicated by id because single channels drop on phones.
