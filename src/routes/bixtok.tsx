@@ -58,6 +58,8 @@ function BixtokPage() {
     const lives = ((l.data ?? []) as Live[]).sort((a, b) => Number(b.kind === 'official') - Number(a.kind === 'official'));
     return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives, stake: Number(s.data ?? 0), following, followers, owner1: o.data === true };
   } });
+  const following = q.data?.following instanceof Set ? q.data.following : new Set<string>();
+  const followers = q.data?.followers instanceof Set ? q.data.followers : new Set<string>();
   const menus = (q.data?.cfg.menus ?? []).filter(m => m.enabled);
   const [tab, setTab] = useState('foryou');
   const [giftTarget, setGiftTarget] = useState<{ video?: string; live?: string } | null>(null);
@@ -67,16 +69,16 @@ function BixtokPage() {
   const qc = useQueryClient();
   const toggleFollow = async (id: string) => {
     if (!q.data || id === user?.id) return;
-    const on = q.data.following.has(id);
+    const on = following.has(id);
     const { error } = on ? await supabase.from('bixtok_follows').delete().eq('follower_id', user!.id).eq('followee_id', id) : await supabase.from('bixtok_follows').insert({ follower_id: user!.id, followee_id: id });
     if (error) return setNote(error.message);
-    setNote(on ? 'Unfollowed' : q.data.followers.has(id) ? 'You are now friends' : 'Following');
+    setNote(on ? 'Unfollowed' : followers.has(id) ? 'You are now friends' : 'Following');
     qc.invalidateQueries({ queryKey: ['bixtok'] });
   };
   const [muted, setMuted] = useState(true);
   const [section, setSection] = useState<'home' | 'inbox' | 'profile' | 'balance'>('home');
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
-  const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && q.data!.following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
+  const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
 
   return <MemberGate ready={ready} signedIn={!!user} title="BIXTOK"><main className="bixtok">
     {q.isError ? <p className="p-8 text-sm text-destructive">Could not load BIXTOK.</p>
@@ -95,9 +97,9 @@ function BixtokPage() {
       <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div></>}
       {section === 'home' && (tab === 'live'
         ? <LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/>
-        : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={q.data.following} followers={q.data.followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>)}
-      {section === 'inbox' && <Inbox followers={q.data.followers.size} lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
-      {section === 'profile' && <ProfilePage follow={q.data} me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
+        : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>)}
+      {section === 'inbox' && <Inbox followers={followers.size} lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
+      {section === 'profile' && <ProfilePage follow={{ following, followers }} me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
       {section === 'balance' && <BalancePage stake={q.data.stake} cfg={q.data.cfg} onBack={() => setSection('profile')} onLive={() => { setSection('home'); setTab('live'); }}/>}
       {!studio && !room && section !== 'balance' && <nav className="bxt-nav" aria-label="BIXTOK">
         <button className={section === 'home' ? 'on' : ''} onClick={() => setSection('home')}><Home/><small>Home</small></button>
