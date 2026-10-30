@@ -743,6 +743,13 @@
       "when": 1793258026065,
       "tag": "0105_deposit_pending_txid_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "7",
+      "when": 1793324259729,
+      "tag": "0106_owner1_network_editor",
+      "breakpoints": true
     }
   ]
 }
