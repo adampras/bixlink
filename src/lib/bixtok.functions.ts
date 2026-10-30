@@ -20,3 +20,20 @@ export const resolveBixtokLinks = createServerFn({ method: 'POST' })
     }));
     return out;
   });
+
+// Fetches a watermark-free MP4 for full TikTok video URLs via a public resolver.
+// Only tiktok.com URLs are accepted; on any failure the caller falls back to the official embed.
+export const cleanTiktokVideos = createServerFn({ method: 'POST' })
+  .inputValidator((d: { urls: string[] }) => ({ urls: (Array.isArray(d?.urls) ? d.urls : []).filter(u => typeof u === 'string' && /^https:\/\/(www\.)?tiktok\.com\/.+\/video\/\d+/.test(u)).slice(0, 12) }))
+  .handler(async ({ data }) => {
+    const out: Record<string, string> = {};
+    for (const u of data.urls) {
+      try {
+        const r = await fetch(`https://www.tikwm.com/api/?hd=1&url=${encodeURIComponent(u)}`, { headers: { 'user-agent': 'Mozilla/5.0' } });
+        const j = await r.json() as { code?: number; data?: { play?: string; hdplay?: string } };
+        const play = j?.data?.hdplay || j?.data?.play;
+        if (j?.code === 0 && play && /^https:\/\//.test(play)) out[u] = play;
+      } catch { /* fallback to embed */ }
+    }
+    return out;
+  });
