@@ -545,6 +545,36 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_network_moves: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          member_id: string
+          moved_by: string
+          new_sponsor: string | null
+          old_sponsor: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          member_id: string
+          moved_by: string
+          new_sponsor?: string | null
+          old_sponsor?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          member_id?: string
+          moved_by?: string
+          new_sponsor?: string | null
+          old_sponsor?: string | null
+        }
+        Relationships: []
+      }
       bix_nft_cards: {
         Row: {
           artwork_id: string | null
@@ -2190,6 +2220,19 @@ export type Database = {
       bix_network_bonus_split: {
         Args: { p_total: number }
         Returns: Record<string, unknown>
+      }
+      bix_network_insert: {
+        Args: { p_child: string; p_new: string }
+        Returns: Json
+      }
+      bix_network_is_descendant: {
+        Args: { p_root: string; p_target: string }
+        Returns: boolean
+      }
+      bix_network_lookup: { Args: { p_code: string }; Returns: Json }
+      bix_network_move: {
+        Args: { p_member: string; p_sponsor: string }
+        Returns: Json
       }
       bix_nft_review: {
         Args: { p_approve: boolean; p_card: string }
