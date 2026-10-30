@@ -108,7 +108,7 @@ export function BixtokStudio({ userId, onClose, onDone }: { userId: string; onCl
   const publish = async () => {
     if (!media) return; setBusy(true); setErr('');
     const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${media.ext}`;
-    const up = await supabase.storage.from('bixtok-media').upload(path, media.file, { contentType: media.file.type || undefined });
+    const up = await supabase.storage.from('bixtok-media').upload(path, media.file, { contentType: media.file.type || (media.kind === 'photo' ? 'image/jpeg' : 'video/mp4') });
     if (up.error) { setBusy(false); setErr(up.error.message); return; }
     const { error } = await supabase.rpc('bixtok_publish' as never, { p_path: path, p_kind: media.kind, p_caption: caption, p_filter: filter, p_overlay: overlay, p_allow_gifts: gifts } as never);
     setBusy(false);
