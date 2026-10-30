@@ -41,6 +41,7 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
       {lock.data && <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-chart-3">360 Days Mandatory Lock · Leader / Loan account</p>}
       <dl className="duration-yield"><div><dt>Daily projection</dt><dd className="numeric">{number(dailyRate(apy), { maximumFractionDigits: 3 })}% · ${number(perDay, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</dd></div><div><dt>Profit · {days} days</dt><dd className="numeric">${number(perDay * days, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</dd></div></dl>
       <div className="lux-ledger" aria-label="Projected settlement">
+        <div className="lux-ledger-daily"><span>Daily profit</span><b className="numeric">${number(perDay, { maximumFractionDigits: 2, minimumFractionDigits: 2 })} / day</b></div>
         <div><span>Principal</span><b className="numeric">${number(price, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</b></div>
         <i aria-hidden>+</i>
         <div><span>Profit</span><b className="numeric">${number(perDay * days, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}</b></div>

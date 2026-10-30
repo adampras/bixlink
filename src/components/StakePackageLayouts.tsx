@@ -22,11 +22,18 @@ function QuantumVault({ packages, onStake }: { packages: Package[]; onStake: (p:
   const [drag, setDrag] = useState(0);
   const end = () => { if (Math.abs(drag) > 40) go(drag < 0 ? 1 : -1); setStartX(null); setDrag(0); };
   void startX; void setStartX; void end; void go;
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [prog, setProg] = useState(0);
   return <section aria-label="Staking packages" className="qv mt-4">
-    <div role="tablist" aria-label="Package tier" className="tier-strip">
+    <div role="tablist" aria-label="Package tier" className="tier-strip tier-strip-2row" ref={stripRef} onScroll={e => { const el = e.currentTarget; const max = el.scrollWidth - el.clientWidth; setProg(max > 0 ? el.scrollLeft / max : 0); }}>
       {packages.map((p, n) => <button key={p.id} type="button" role="tab" aria-selected={n === i} onClick={() => setActive(n)} className="tier-bar">
         <small>STK-{String(n + 1).padStart(2, '0')}</small><b className="numeric">{short(Number(p.price_usd))}</b><em className="numeric">{p.apy}%</em>
       </button>)}
+    </div>
+    <div className="tier-nav">
+      <button type="button" aria-label="Scroll packages left" onClick={() => stripRef.current?.scrollBy({ left: -(stripRef.current.clientWidth * 0.8), behavior: 'smooth' })}>‹</button>
+      <div className="tier-rail" aria-hidden><span style={{ left: `${prog * 70}%` }} /></div>
+      <button type="button" aria-label="Scroll packages right" onClick={() => stripRef.current?.scrollBy({ left: stripRef.current.clientWidth * 0.8, behavior: 'smooth' })}>›</button>
     </div>
     <div className="qv-tilt mx-auto mt-4 max-w-md" onPointerMove={move} onPointerLeave={() => setTilt({ x: 0, y: 0 })}>
       <div className="qv-tilt-inner" style={{ transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}>
