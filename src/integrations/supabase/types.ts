@@ -1610,6 +1610,221 @@ export type Database = {
         }
         Relationships: []
       }
+      bixtok_config: {
+        Row: {
+          enabled: boolean
+          features: Json
+          gifts_enabled: boolean
+          id: number
+          live_enabled: boolean
+          live_max_minutes: number
+          live_min_stake_usd: number
+          menus: Json
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          features?: Json
+          gifts_enabled?: boolean
+          id?: number
+          live_enabled?: boolean
+          live_max_minutes?: number
+          live_min_stake_usd?: number
+          menus?: Json
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          features?: Json
+          gifts_enabled?: boolean
+          id?: number
+          live_enabled?: boolean
+          live_max_minutes?: number
+          live_min_stake_usd?: number
+          menus?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bixtok_gift_tx: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          gift_id: string
+          gift_name: string
+          id: string
+          live_id: string | null
+          recipient_id: string
+          sender_id: string
+          video_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency: string
+          gift_id: string
+          gift_name: string
+          id?: string
+          live_id?: string | null
+          recipient_id: string
+          sender_id: string
+          video_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          gift_id?: string
+          gift_name?: string
+          id?: string
+          live_id?: string | null
+          recipient_id?: string
+          sender_id?: string
+          video_id?: string | null
+        }
+        Relationships: []
+      }
+      bixtok_gifts: {
+        Row: {
+          created_at: string
+          currency: string
+          emoji: string
+          enabled: boolean
+          id: string
+          name: string
+          price: number
+          sort: number
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          emoji?: string
+          enabled?: boolean
+          id?: string
+          name: string
+          price: number
+          sort?: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          emoji?: string
+          enabled?: boolean
+          id?: string
+          name?: string
+          price?: number
+          sort?: number
+        }
+        Relationships: []
+      }
+      bixtok_live_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          live_id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          kind?: string
+          live_id: string
+          name: string
+          user_id?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          live_id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixtok_live_messages_live_id_fkey"
+            columns: ["live_id"]
+            isOneToOne: false
+            referencedRelation: "bixtok_lives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bixtok_lives: {
+        Row: {
+          ended_at: string | null
+          host_id: string
+          host_name: string
+          id: string
+          started_at: string
+          status: string
+          title: string
+        }
+        Insert: {
+          ended_at?: string | null
+          host_id: string
+          host_name: string
+          id?: string
+          started_at?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          ended_at?: string | null
+          host_id?: string
+          host_name?: string
+          id?: string
+          started_at?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      bixtok_videos: {
+        Row: {
+          caption: string
+          created_at: string
+          creator_id: string | null
+          creator_name: string
+          enabled: boolean
+          id: string
+          likes: number
+          poster_url: string | null
+          sort: number
+          video_url: string
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          creator_id?: string | null
+          creator_name?: string
+          enabled?: boolean
+          id?: string
+          likes?: number
+          poster_url?: string | null
+          sort?: number
+          video_url: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          creator_id?: string | null
+          creator_name?: string
+          enabled?: boolean
+          id?: string
+          likes?: number
+          poster_url?: string | null
+          sort?: number
+          video_url?: string
+        }
+        Relationships: []
+      }
       deposit_intents: {
         Row: {
           address: string
@@ -2434,6 +2649,14 @@ export type Database = {
         Returns: undefined
       }
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
+      bixtok_end_live: { Args: { p_id: string }; Returns: undefined }
+      bixtok_like: { Args: { p_video: string }; Returns: undefined }
+      bixtok_my_stake_usd: { Args: never; Returns: number }
+      bixtok_send_gift: {
+        Args: { p_gift: string; p_live: string; p_video: string }
+        Returns: string
+      }
+      bixtok_start_live: { Args: { p_title: string }; Returns: string }
       ensure_bix_profile: { Args: never; Returns: undefined }
       is_bix_admin: { Args: never; Returns: boolean }
       request_bix_deposit: {
