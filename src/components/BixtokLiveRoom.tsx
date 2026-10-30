@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useLiveRtc } from '@/lib/bixtok-rtc';
 
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
 type Msg = { id: string; name: string; body: string; kind: string };
@@ -41,47 +42,89 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [floaters, setFloaters] = useState<Floater[]>([]); const [banner, setBanner] = useState<Msg | null>(null);
   const [share, setShare] = useState(false); const [copied, setCopied] = useState(false);
   const [mic, setMic] = useState(true); const [facing, setFacing] = useState<'user' | 'environment'>('user');
-  const cam = useRef<HTMLVideoElement>(null); const stream = useRef<MediaStream | null>(null);
+  const cam = useRef<HTMLVideoElement>(null); const view = useRef<HTMLVideoElement>(null);
+  const stream = useRef<MediaStream | null>(null); const [local, setLocal] = useState<MediaStream | null>(null);
+  const [needsTap, setNeedsTap] = useState(false);
   const chan = useRef<ReturnType<typeof supabase.channel> | null>(null); const pending = useRef(0);
+  const seen = useRef(new Set<string>());
   const sfx = useSfx(sound); const sfxRef = useRef(sfx); sfxRef.current = sfx;
+  const { remote, state } = useLiveRtc({ liveId: live.id, me, host, stream: local });
 
   const spawn = (n = 1) => setFloaters(f => [...f.slice(-30), ...Array.from({ length: n }, () => ({
     id: Math.random(), x: 10 + Math.random() * 30, color: COLORS[Math.floor(Math.random() * COLORS.length)]!, drift: Math.random() * 60 - 30,
   }))]);
 
+  /** One entry point for chat/gift rows from any source (broadcast, database stream, polling). */
+  const ingest = useRef((rows: Msg[], quiet = false) => {
+    const fresh = rows.filter(m => m?.id && !seen.current.has(m.id));
+    if (!fresh.length) return;
+    fresh.forEach(m => seen.current.add(m.id));
+    setMsgs(x => [...x, ...fresh].slice(-40));
+    if (quiet) return;
+    const gift = fresh.find(m => m.kind === 'gift');
+    if (gift) { sfxRef.current.coin(); setBanner(gift); spawn(8); setTimeout(() => setBanner(b => (b?.id === gift.id ? null : b)), 3500); }
+    else sfxRef.current.chat();
+  });
+
   useEffect(() => {
-    supabase.from('bixtok_live_messages').select('id,name,body,kind').eq('live_id', live.id).order('created_at', { ascending: false }).limit(40)
-      .then(({ data }) => setMsgs(((data ?? []) as Msg[]).reverse()));
+    let alive = true;
+    const pull = async (quiet = false) => {
+      const [m, l] = await Promise.all([
+        supabase.from('bixtok_live_messages').select('id,name,body,kind').eq('live_id', live.id).order('created_at', { ascending: false }).limit(40),
+        supabase.from('bixtok_lives').select('likes,status').eq('id', live.id).maybeSingle(),
+      ]);
+      if (!alive) return;
+      ingest.current(((m.data ?? []) as Msg[]).reverse(), quiet);
+      if (l.data) { setLikes(Math.max(0, Number(l.data.likes ?? 0)) + pending.current); if (l.data.status !== 'live') setEnded(true); }
+    };
+    void pull(true);
+    const poll = setInterval(() => { void pull(); }, 4000);
     const db = supabase.channel(`bixtok-${live.id}-${Math.random().toString(36).slice(2)}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bixtok_live_messages', filter: `live_id=eq.${live.id}` }, p => {
-        const m = p.new as Msg; setMsgs(x => [...x.slice(-39), m]);
-        if (m.kind === 'gift') { sfxRef.current.coin(); setBanner(m); spawn(8); setTimeout(() => setBanner(b => (b?.id === m.id ? null : b)), 3500); }
-        else sfxRef.current.chat();
-      }).subscribe();
-    // Shared room for likes + viewer presence
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bixtok_live_messages', filter: `live_id=eq.${live.id}` }, p => ingest.current([p.new as Msg]))
+      .subscribe();
+    // Shared room: chat fan-out, likes, viewer presence
     const room = supabase.channel(`bixtok-room-${live.id}`, { config: { presence: { key: me } } });
     room.on('broadcast', { event: 'like' }, ({ payload }) => {
-      const n = Math.min(Number(payload?.n) || 1, 10); setLikes(l => l + n); spawn(Math.min(n, 4)); sfxRef.current.pop();
-    }).on('presence', { event: 'sync' }, () => setViewers(Math.max(1, Object.keys(room.presenceState()).length)))
+      const n = Math.min(Number(payload?.n) || 1, 50); setLikes(l => l + n); spawn(Math.min(n, 4)); sfxRef.current.pop();
+    }).on('broadcast', { event: 'chat' }, ({ payload }) => ingest.current([payload as Msg]))
+      .on('presence', { event: 'sync' }, () => setViewers(Math.max(1, Object.keys(room.presenceState()).length)))
       .on('presence', { event: 'join' }, ({ key }) => { if (key !== me) sfxRef.current.join(); })
       .subscribe(s => { if (s === 'SUBSCRIBED') void room.track({ at: Date.now() }); });
     chan.current = room;
     const flush = setInterval(() => {
-      if (pending.current > 0) { void room.send({ type: 'broadcast', event: 'like', payload: { n: pending.current } }); pending.current = 0; }
-    }, 600);
-    return () => { clearInterval(flush); supabase.removeChannel(db); supabase.removeChannel(room); };
+      const n = pending.current; if (n <= 0) return; pending.current = 0;
+      void room.send({ type: 'broadcast', event: 'like', payload: { n } });
+      void supabase.rpc('bixtok_live_like', { p_live: live.id, p_n: n }).then(({ data }) => {
+        if (alive && typeof data === 'number') setLikes(l => Math.max(l, data + pending.current));
+      });
+    }, 700);
+    return () => { alive = false; clearInterval(poll); clearInterval(flush); chan.current = null; supabase.removeChannel(db); supabase.removeChannel(room); };
   }, [live.id, me]);
 
   useEffect(() => {
     if (!host) return undefined;
-    stream.current?.getTracks().forEach(t => t.stop());
-    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing }, audio: true })
-      .then(s => { stream.current = s; s.getAudioTracks().forEach(t => { t.enabled = mic; }); if (cam.current) cam.current.srcObject = s; })
+    let cancelled = false;
+    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing, width: { ideal: 720 }, height: { ideal: 1280 } }, audio: { echoCancellation: true, noiseSuppression: true } })
+      .then(s => {
+        if (cancelled) { s.getTracks().forEach(t => t.stop()); return; }
+        const old = stream.current; stream.current = s;
+        s.getAudioTracks().forEach(t => { t.enabled = mic; });
+        if (cam.current) cam.current.srcObject = s;
+        setLocal(s);
+        old?.getTracks().forEach(t => t.stop());
+      })
       .catch(() => {});
-    return () => { stream.current?.getTracks().forEach(t => t.stop()); };
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [host, facing]);
-  useEffect(() => { stream.current?.getAudioTracks().forEach(t => { t.enabled = mic; }); }, [mic]);
+  useEffect(() => () => { stream.current?.getTracks().forEach(t => t.stop()); }, []);
+  useEffect(() => { stream.current?.getAudioTracks().forEach(t => { t.enabled = mic; }); }, [mic, local]);
+  // Viewer: play the host's camera + voice; phones may require one tap before sound.
+  useEffect(() => {
+    const v = view.current; if (!v || host) return;
+    v.srcObject = remote; v.muted = !sound;
+    if (remote) v.play().then(() => setNeedsTap(false)).catch(() => { v.muted = true; setNeedsTap(sound); void v.play().catch(() => {}); });
+  }, [remote, host, sound]);
   useEffect(() => {
     if (!host) return undefined;
     const limit = setTimeout(() => { void stop(); }, Number(cfg.live_max_minutes) * 60_000);
@@ -89,15 +132,27 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [host]);
 
-  const stop = async () => { await supabase.rpc('bixtok_end_live', { p_id: live.id }); setEnded(true); qc.invalidateQueries({ queryKey: ['bixtok'] }); };
-  const tap = () => { setLikes(l => l + 1); pending.current += 1; spawn(1); sfx.pop(); };
+  const stop = async () => { await supabase.rpc('bixtok_end_live', { p_id: live.id }); setEnded(true); stream.current?.getTracks().forEach(t => t.stop()); qc.invalidateQueries({ queryKey: ['bixtok'] }); };
+  const unlockSound = () => { const v = view.current; if (!v) return; v.muted = false; void v.play().then(() => setNeedsTap(false)).catch(() => {}); };
+  const tap = () => { if (needsTap) unlockSound(); setLikes(l => l + 1); pending.current += 1; spawn(1); sfx.pop(); };
+  const sendChat = async (body: string) => {
+    const { data: p } = await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle();
+    const { data, error } = await supabase.from('bixtok_live_messages').insert({ live_id: live.id, user_id: me, name: p?.username || 'member', body }).select('id,name,body,kind').single();
+    if (error || !data) return;
+    ingest.current([data as Msg], true);
+    void chan.current?.send({ type: 'broadcast', event: 'chat', payload: data });
+  };
   const url = typeof window !== 'undefined' ? `${window.location.origin}/bixtok` : '/bixtok';
   const shareText = `🔴 LIVE on BIXTOK: ${live.title} — @${live.host_name}`;
 
   return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
     <div className="bxl-stage" onClick={tap}>
       {host ? <video ref={cam} autoPlay muted playsInline className={`bixtok-video ${facing === 'user' ? 'mirror' : ''}`}/>
-        : <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p></div>}
+        : <>
+          <video ref={view} autoPlay playsInline className="bixtok-video"/>
+          {(!remote || state !== 'live') && <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p>
+            <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : 'Connecting to the host camera…'}</small></div>}
+        </>}
     </div>
     <header className="bixtok-room-top">
       <div className="bxl-host"><span className="bxl-avatar">{live.host_name.slice(0, 1).toUpperCase()}</span>
@@ -111,6 +166,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     </header>
     <span className="bixtok-badge bxl-livebadge">{live.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span>
     {ended && <p className="bixtok-ended">LIVE ended</p>}
+    {!host && needsTap && remote && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); unlockSound(); }}><Volume2 size={16}/> Tap for sound</button>}
     {banner && <div className="bxl-banner" key={banner.id}><Gift size={18}/><div><b>{banner.name}</b><small>{banner.body}</small></div></div>}
     <div className="bxl-floaters" aria-hidden>{floaters.map(f => <Heart key={f.id} className="bxl-heart" fill={f.color} color={f.color}
       style={{ right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}</div>
@@ -121,8 +177,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     </div>}
     <footer className="bixtok-room-bar">
       {cfg.features['comments'] !== false && <form className="min-w-0 flex-1" onSubmit={async e => { e.preventDefault(); const body = text.trim().slice(0, 200); if (!body) return; setText('');
-        const { data: p } = await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle();
-        await supabase.from('bixtok_live_messages').insert({ live_id: live.id, user_id: me, name: p?.username || 'member', body }); }}>
+        await sendChat(body); }}>
         <div className="bixtok-input"><MessageCircle size={16}/><input value={text} onChange={e => setText(e.target.value)} placeholder="Say something…" maxLength={200}/><button aria-label="Send"><Send size={16}/></button></div>
       </form>}
       <button className="bxl-act" aria-label={sound ? 'Mute room sounds' : 'Unmute room sounds'} onClick={() => setSound(s => !s)}>{sound ? <Volume2 size={18}/> : <VolumeX size={18}/>}</button>
@@ -139,6 +194,6 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         {typeof navigator !== 'undefined' && 'share' in navigator && <button onClick={() => { void navigator.share({ title: live.title, text: shareText, url }).catch(() => {}); }}>More…</button>}
       </div>
     </div></div>}
-    {host && <p className="bixtok-hint">Tap the screen to send likes. Your camera stays on your device; viewers see the room, chat, likes and gifts.</p>}
+    {host && !ended && <p className="bixtok-hint">You are broadcasting camera and voice to {Math.max(0, viewers - 1)} viewer{viewers - 1 === 1 ? '' : 's'}. Likes from everyone count for you.</p>}
   </div>;
 }

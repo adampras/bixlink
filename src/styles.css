@@ -4338,3 +4338,6 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-share { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: 1rem; }
 .bxl-share > * { display: flex; align-items: center; justify-content: center; gap: .3rem; padding: .7rem; border-radius: .8rem; font-size: .8rem; font-weight: 700; background: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .bxl-heart, .bxl-banner { animation-duration: .01s; } }
+.bixtok-room .bixtok-hint { top: calc(max(.7rem, env(safe-area-inset-top)) + 4.4rem); inset-inline: 4.5rem; }
+.bixtok-room-bg small { max-width: 16rem; text-align: center; font-size: .72rem; }
+.bxl-unmute { position: absolute; z-index: 4; top: 42%; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: .4rem; padding: .6rem 1rem; border-radius: 999px; font-size: .8rem; font-weight: 700; background: var(--primary); color: var(--primary-foreground); }
