@@ -1788,37 +1788,52 @@ export type Database = {
       }
       bixtok_videos: {
         Row: {
+          allow_gifts: boolean
           caption: string
           created_at: string
           creator_id: string | null
           creator_name: string
           enabled: boolean
+          filter: string
           id: string
           likes: number
+          media_kind: string
+          media_path: string | null
+          overlay: string
           poster_url: string | null
           sort: number
           video_url: string
         }
         Insert: {
+          allow_gifts?: boolean
           caption?: string
           created_at?: string
           creator_id?: string | null
           creator_name?: string
           enabled?: boolean
+          filter?: string
           id?: string
           likes?: number
+          media_kind?: string
+          media_path?: string | null
+          overlay?: string
           poster_url?: string | null
           sort?: number
           video_url: string
         }
         Update: {
+          allow_gifts?: boolean
           caption?: string
           created_at?: string
           creator_id?: string | null
           creator_name?: string
           enabled?: boolean
+          filter?: string
           id?: string
           likes?: number
+          media_kind?: string
+          media_path?: string | null
+          overlay?: string
           poster_url?: string | null
           sort?: number
           video_url?: string
@@ -2652,6 +2667,17 @@ export type Database = {
       bixtok_end_live: { Args: { p_id: string }; Returns: undefined }
       bixtok_like: { Args: { p_video: string }; Returns: undefined }
       bixtok_my_stake_usd: { Args: never; Returns: number }
+      bixtok_publish: {
+        Args: {
+          p_allow_gifts: boolean
+          p_caption: string
+          p_filter: string
+          p_kind: string
+          p_overlay: string
+          p_path: string
+        }
+        Returns: string
+      }
       bixtok_send_gift: {
         Args: { p_gift: string; p_live: string; p_video: string }
         Returns: string
