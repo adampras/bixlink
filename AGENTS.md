@@ -16,7 +16,7 @@
 - Owner-only presentation writes; wallet finance motion and landing payment canvas stay scoped.
 - Share session store and layout placeholders.
 - Sovereign Wallet owns in-place account screens and reuses authenticated ledger RPCs; virtual USDT stays explicitly separate from asset USDT, preventing accidental balance substitution.
-- Sovereign market uses a dedicated read-only terminal with timestamped public-data caches and real external depth; signature login reuses WalletSignIn with an in-place completion callback so identities and authorization remain unchanged.
+- Sovereign market: read-only terminal with timestamped public-data caches; signature login reuses WalletSignIn with an in-place callback so identities/authorization stay unchanged.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
 - Clone accounts (bix_clone_accounts) are funded only via bix_allocations and excluded from member stats — auditable and separate.
 - Leader virtual balances (bix_leaders) count in bix_wallet_balance but withdraw is blocked until bix_leader_status qualifies — one server gate.
@@ -44,7 +44,7 @@
 - NFT cards: one in-app certificate per stake with immutable artwork snapshot; new artwork selection matches the contract tier through the owner-controlled reactor catalog. Completion replaces USDT refund; buybacks remain owner-reviewed and vault-funded.
 - Marketplace merchandise lives in a separate owner-controlled presentation catalog with optional external HTTPS order links, not automatic payments or certificate settlement; HOME and PROFILE provide store access without a header shop; member listings are auto-approved only by the DB guard trigger.
 - All presale entry points use one accessible confirmation before the authenticated purchase; strategies snapshot rates; dividends settle via bix_wallet_balance.
-- Presale stage editing uses shared atomic helpers and a shared settings validator; owner saves merge the stored config and read it back to preserve auxiliary settings and verify persistence without resetting orders.
+- Presale stage edits use shared atomic helpers and validator; owner saves merge and read back stored config without resetting orders.
 
 - Owner-only marketing settings feed browser PDF exports; dated CDN video stays separate to avoid implying re-rendering.
 - Enforce virtual sender authorization in the shared RPC and insert guard, and developer buyback limits with a table trigger as well as shared input validation; direct API calls must not bypass the wallet rules.
@@ -59,6 +59,4 @@
 
 - Share wallet staking notifications from authenticated stake records and status-specific IDs; receipts read back the RPC result without inferring completion or settlement.
 - Select the manifest from the root matched location during SSR; keep Sovereign Wallet manifest identity and scope stable so installation launches its existing in-place screens.
-- BIXTOK TikTok audio uses origin-scoped official player messages on sound gestures and player readiness; React mute state alone cannot control cross-origin embeds.
-- BIXTOK LIVE video/voice is peer-to-peer WebRTC (src/lib/bixtok-rtc.ts) signalled over a shared realtime broadcast room, used identically by Official and Community LIVE; no media server, so large audiences or strict networks need a future TURN/SFU service.
-- BIXTOK LIVE likes accumulate on the host's live row via the bixtok_live_like RPC; chat reaches viewers through broadcast + database stream + polling with id de-duplication, because any single channel can drop on phones.
+- BIXTOK: TikTok sound uses origin-scoped official player messages (React mute can't control embeds). LIVE (Official and Community share one room) streams P2P WebRTC via src/lib/bixtok-rtc.ts over realtime broadcast signalling, no media server; likes accrue on the live row via bixtok_live_like; chat uses broadcast + db stream + polling de-duplicated by id because single channels drop on phones.
