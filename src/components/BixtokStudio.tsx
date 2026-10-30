@@ -80,7 +80,7 @@ export function BixtokStudio({ userId, onClose, onDone }: { userId: string; onCl
     const mime = ['video/webm;codecs=vp9', 'video/webm', 'video/mp4'].find(m => MediaRecorder.isTypeSupported(m)) ?? '';
     const r = new MediaRecorder(out, mime ? { mimeType: mime } : undefined); const chunks: Blob[] = [];
     r.ondataavailable = e => e.data.size && chunks.push(e.data);
-    r.onstop = () => { cancelAnimationFrame(raf); const type = r.mimeType || 'video/webm'; const b = new Blob(chunks, { type }); setMedia({ file: b, kind: 'video', url: URL.createObjectURL(b), ext: type.includes('mp4') ? 'mp4' : 'webm' }); setFilter('none'); setBeauty(0); setStep('edit'); };
+    r.onstop = () => { cancelAnimationFrame(raf); const type = r.mimeType || 'video/webm'; const b = new Blob(chunks, { type }); setMedia({ file: b, kind: 'video', url: URL.createObjectURL(b), ext: type.includes('mp4') ? 'mp4' : 'webm' }); setFilter('none'); setBeauty(0); setOverlay(''); setStep('edit'); };
     recorder.current = r; r.start(500); setElapsed(0); setRec(true);
   };
   function stopRec() { setRec(false); if (recorder.current?.state === 'recording') recorder.current.stop(); }
@@ -94,7 +94,7 @@ export function BixtokStudio({ userId, onClose, onDone }: { userId: string; onCl
     const v = vid.current; if (!v) return;
     const c = document.createElement('canvas'); c.width = v.videoWidth || 720; c.height = v.videoHeight || 1280;
     const ctx = c.getContext('2d')!; ctx.filter = css; if (facing === 'user') ctx.setTransform(-1, 0, 0, 1, c.width, 0); ctx.drawImage(v, 0, 0, c.width, c.height);
-    c.toBlob(b => { if (!b) return; setMedia({ file: b, kind: 'photo', url: URL.createObjectURL(b), ext: 'jpg' }); setFilter('none'); setBeauty(0); setStep('edit'); }, 'image/jpeg', 0.9);
+    c.toBlob(b => { if (!b) return; setMedia({ file: b, kind: 'photo', url: URL.createObjectURL(b), ext: 'jpg' }); setFilter('none'); setBeauty(0); setOverlay(''); setStep('edit'); }, 'image/jpeg', 0.9);
   };
   const pick = (f?: File) => {
     if (!f) return;
@@ -110,7 +110,7 @@ export function BixtokStudio({ userId, onClose, onDone }: { userId: string; onCl
     const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${media.ext}`;
     const up = await supabase.storage.from('bixtok-media').upload(path, media.file, { contentType: media.file.type || undefined });
     if (up.error) { setBusy(false); setErr(up.error.message); return; }
-    const { error } = await supabase.rpc('bixtok_publish' as never, { p_path: path, p_kind: media.kind, p_caption: caption, p_filter: filter, p_overlay: media.kind === 'video' && step === 'edit' ? overlay : overlay, p_allow_gifts: gifts } as never);
+    const { error } = await supabase.rpc('bixtok_publish' as never, { p_path: path, p_kind: media.kind, p_caption: caption, p_filter: filter, p_overlay: overlay, p_allow_gifts: gifts } as never);
     setBusy(false);
     if (error) { await supabase.storage.from('bixtok-media').remove([path]); setErr(error.message); return; }
     onDone('Posted to BIXTOK');
