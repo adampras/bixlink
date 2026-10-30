@@ -146,7 +146,7 @@ export function BixtokStudio({ userId, onClose, onDone }: { userId: string; onCl
     </> : media && <div className="studio-edit">
       <header className="studio-top"><button aria-label="Back" onClick={() => { setMedia(null); setStep('capture'); }}><X/></button><b>Post</b><span/></header>
       <div className="studio-preview">
-        {media.kind === 'video' ? <video src={media.url} autoPlay loop muted playsInline style={{ filter: filterCss(filter) }}/> : <img src={media.url} alt="" style={{ filter: filterCss(filter) }}/>}
+        {media.kind === 'video' ? <video src={media.url} autoPlay loop controls playsInline style={{ filter: filterCss(filter) }}/> : <img src={media.url} alt="" style={{ filter: filterCss(filter) }}/>}
         {overlay && <span className="studio-overlay">{overlay}</span>}
       </div>
       <div className="studio-filters">{BIXTOK_FILTERS.map(f => <button key={f.key} className={filter === f.key ? 'on' : ''} onClick={() => setFilter(f.key)}><i style={{ filter: f.css }}/><small>{f.label}</small></button>)}</div>

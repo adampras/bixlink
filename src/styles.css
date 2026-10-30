@@ -4200,3 +4200,9 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .studio-tags button { font-size: .7rem; padding: .2rem .6rem; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--primary) 50%, transparent); color: var(--primary); }
 .studio-switch { display: flex; gap: .5rem; align-items: center; font-size: .8rem; }
 .bixtok-slide { position: relative; }
+.bixtok-create { right: auto !important; left: 50%; transform: translateX(-50%); bottom: calc(1rem + env(safe-area-inset-bottom)) !important; width: 3.6rem !important; height: 2.4rem !important; border-radius: .8rem !important; background: var(--foreground) !important; color: var(--background) !important; box-shadow: -4px 0 0 var(--matcha-gloss, var(--primary)), 4px 0 0 var(--orange-gloss, var(--accent)) !important; }
+.bixtok-meta { bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important; }
+.bixtok-rail { bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important; }
+.bixtok-brand { position: absolute; top: calc(max(.6rem, env(safe-area-inset-top)) + 2.9rem); left: .9rem; z-index: 5; display: flex; align-items: center; gap: .35rem; pointer-events: none; }
+.bixtok-brand b { font-weight: 900; letter-spacing: .04em; font-size: .95rem; }
+.bixtok-brand b span { color: var(--orange-gloss, var(--accent)); }
