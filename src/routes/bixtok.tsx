@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { MemberGate } from '@/components/MemberGate';
 import { useMember } from '@/lib/useMember';
 import { BixtokStudio, filterCss, DraggableText, DEFAULT_TEXT, type TextStyle } from '@/components/BixtokStudio';
+import { resolveBixtokLinks } from '@/lib/bixtok.functions';
 
 export const Route = createFileRoute('/bixtok')({
   head: () => ({ meta: [
@@ -41,7 +42,9 @@ function BixtokPage() {
     const paths = rows.map(r => r.media_path).filter(Boolean) as string[];
     const signed = paths.length ? (await supabase.storage.from('bixtok-media').createSignedUrls(paths, 3600)).data ?? [] : [];
     const map = new Map(signed.map(x => [x.path, x.signedUrl]));
-    const videos = rows.map(r => ({ ...r, src: r.media_path ? map.get(r.media_path) ?? '' : r.video_url })).filter(r => r.src);
+    const shorts = rows.filter(r => !r.media_path && r.source_kind === 'tiktok' && !/\/video\/\d+/.test(r.video_url)).map(r => r.video_url);
+    const resolved = shorts.length ? await resolveBixtokLinks({ data: { urls: [...new Set(shorts)] } }).catch(() => ({} as Record<string, string>)) : {};
+    const videos = rows.map(r => ({ ...r, src: r.media_path ? map.get(r.media_path) ?? '' : resolved[r.video_url] ?? r.video_url })).filter(r => r.src);
     return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives: (l.data ?? []) as Live[], stake: Number(s.data ?? 0) };
   } });
   const menus = (q.data?.cfg.menus ?? []).filter(m => m.enabled);
