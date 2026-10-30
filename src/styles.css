@@ -4238,3 +4238,54 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxt-card{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1rem;margin-bottom:.6rem}.bxt-card p,.bxt-card span{font-size:.78rem;color:var(--muted-foreground);display:flex;align-items:center}.bxt-gifticon{width:2.6rem;height:2.6rem;color:var(--orange-gloss,var(--accent))}
 .bxt-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem .5rem;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.1rem .5rem}.bxt-tools>*{display:flex;flex-direction:column;align-items:center;gap:.4rem;font-size:.78rem;font-weight:700;text-align:center}.bxt-tools span{width:2.7rem;height:2.7rem;border-radius:.8rem;display:grid;place-items:center;background:var(--muted)}
 .bxt-disc{margin-top:1.2rem;text-align:center;font-size:.68rem;color:var(--muted-foreground)}
+
+/* BIXTOK links studio */
+.bixtok-studio { height: 100dvh; }
+.studio-stage { position: fixed; inset: 0; height: 100dvh; width: 100vw; }
+.studio-stage video, .studio-stage img { width: 100%; height: 100%; object-fit: cover; }
+.studio-overlay.drag { pointer-events: auto; cursor: grab; touch-action: none; outline: 1px dashed rgba(255,255,255,.5); outline-offset: 4px; }
+.studio-overlay { transform: translate(-50%, -50%); white-space: pre-wrap; }
+.studio-music-pill { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .8rem; border-radius: 999px; background: rgba(0,0,0,.5); font-size: .72rem; font-weight: 700; border: 1px solid rgba(255,255,255,.18); }
+.studio-links { display: grid; gap: .45rem; }
+.studio-link-row { display: flex; align-items: center; gap: .45rem; }
+.studio-link-row > span { width: 1.5rem; height: 1.5rem; flex: none; display: grid; place-items: center; border-radius: 999px; font-size: .7rem; font-weight: 800; background: color-mix(in oklab, var(--primary) 30%, transparent); }
+.studio-link-row button:disabled { opacity: .3; }
+.studio-ghost { padding: .5rem .9rem; border-radius: .7rem; border: 1px solid rgba(255,255,255,.2); font-size: .78rem; font-weight: 700; text-align: center; }
+.studio-ghost:disabled { opacity: .4; }
+.studio-preview-mini { position: relative; height: 34vh; border-radius: 1rem; overflow: hidden; }
+.studio-mini-bg { position: absolute; inset: 0; background: linear-gradient(160deg, #2b3a2f, #0b0b0b 60%, #4a2a10); }
+.studio-preview-mini > small { position: absolute; bottom: .5rem; left: 0; right: 0; text-align: center; font-size: .65rem; opacity: .6; }
+.studio-filters i { position: relative; overflow: hidden; }
+.studio-filters i.face::after { content: ''; position: absolute; inset: 20% 28%; border-radius: 50% 50% 45% 45%; background: radial-gradient(circle at 50% 40%, #ffe3cf, #e6a985); }
+.studio-filters i em { position: absolute; inset: -40%; background: conic-gradient(from 0deg, transparent, rgba(255,255,255,.55), transparent 30%); animation: studio-shine 3s linear infinite; z-index: 1; mix-blend-mode: overlay; }
+.studio-filters button.on i { box-shadow: 0 0 0 2px var(--primary), 0 0 18px color-mix(in oklab, var(--primary) 70%, transparent); animation: studio-pulse 1.6s ease-in-out infinite; }
+.studio-spark { animation: studio-pulse 1.8s ease-in-out infinite; color: var(--primary); }
+@keyframes studio-shine { to { transform: rotate(360deg); } }
+@keyframes studio-pulse { 50% { transform: scale(1.08); } }
+.studio-shot-actions { display: grid; gap: .5rem; text-align: center; }
+.studio-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 99; display: grid; gap: .65rem; padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom)); background: #0d0f0c; border-top: 1px solid rgba(255,255,255,.12); border-radius: 1.2rem 1.2rem 0 0; max-height: 70dvh; overflow-y: auto; }
+.studio-sheet.tall { max-height: 82dvh; }
+.studio-sheet-head { display: flex; justify-content: space-between; align-items: center; }
+.studio-colors { display: flex; gap: .45rem; flex-wrap: wrap; }
+.studio-colors button { width: 1.8rem; height: 1.8rem; border-radius: 999px; border: 2px solid rgba(255,255,255,.3); }
+.studio-colors button.on { border-color: var(--primary); transform: scale(1.15); }
+.studio-fonts { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; }
+.studio-fonts button, .studio-chip { flex: none; padding: .3rem .75rem; border-radius: 999px; background: rgba(255,255,255,.08); font-size: .75rem; }
+.studio-fonts button.on, .studio-chip.on { background: var(--primary); color: var(--primary-foreground); }
+.studio-sounds { display: grid; gap: .5rem; }
+.studio-sound { display: flex; align-items: center; gap: .6rem; font-size: .8rem; }
+.studio-disc { width: 2.6rem; height: 2.6rem; flex: none; display: grid; place-items: center; border-radius: 999px; background: radial-gradient(circle, #333 20%, #111 22%, #222 60%); background-size: cover; }
+.studio-disc.spin { animation: studio-shine 2.5s linear infinite; }
+.studio-wave { display: inline-flex; gap: 2px; margin-left: .4rem; }
+.studio-wave i { width: 2px; height: 10px; background: var(--primary); animation: studio-wave .8s ease-in-out infinite; }
+.studio-wave i:nth-child(2) { animation-delay: .1s } .studio-wave i:nth-child(3) { animation-delay: .2s } .studio-wave i:nth-child(4) { animation-delay: .3s } .studio-wave i:nth-child(5) { animation-delay: .4s }
+@keyframes studio-wave { 50% { transform: scaleY(.3); } }
+.bixtok-media { position: absolute; inset: 0; }
+.bixtok-embed { width: 100%; height: 100%; border: 0; background: #000; }
+.bixtok-src { position: absolute; top: 4.2rem; left: .8rem; z-index: 3; font-size: .6rem; text-transform: uppercase; letter-spacing: .1em; padding: .15rem .5rem; border-radius: 999px; background: rgba(0,0,0,.55); }
+.bixtok-music { display: block; margin-top: .25rem; font-size: .72rem; opacity: .9; }
+.bxt-plus-logo { position: relative; display: grid; place-items: center; background: linear-gradient(135deg, #9BE15D, #FF8A00) !important; box-shadow: 0 0 18px rgba(155,225,93,.45); animation: studio-glow 2.4s ease-in-out infinite; }
+.bxt-plus-logo img { border-radius: 999px; }
+.bxt-plus-mini { position: absolute; right: -4px; bottom: -4px; width: 16px !important; height: 16px !important; border-radius: 999px; background: #000; color: #fff; padding: 2px; }
+@keyframes studio-glow { 50% { box-shadow: 0 0 28px rgba(255,138,0,.55); } }
+@media (prefers-reduced-motion: reduce) { .studio-filters i em, .studio-filters button.on i, .studio-spark, .studio-disc.spin, .studio-wave i, .bxt-plus-logo { animation: none; } }

@@ -1616,9 +1616,11 @@ export type Database = {
           features: Json
           gifts_enabled: boolean
           id: number
+          link_slots: number
           live_enabled: boolean
           live_max_minutes: number
           live_min_stake_usd: number
+          max_links: number
           menus: Json
           updated_at: string
         }
@@ -1627,9 +1629,11 @@ export type Database = {
           features?: Json
           gifts_enabled?: boolean
           id?: number
+          link_slots?: number
           live_enabled?: boolean
           live_max_minutes?: number
           live_min_stake_usd?: number
+          max_links?: number
           menus?: Json
           updated_at?: string
         }
@@ -1638,9 +1642,11 @@ export type Database = {
           features?: Json
           gifts_enabled?: boolean
           id?: number
+          link_slots?: number
           live_enabled?: boolean
           live_max_minutes?: number
           live_min_stake_usd?: number
+          max_links?: number
           menus?: Json
           updated_at?: string
         }
@@ -1786,6 +1792,39 @@ export type Database = {
         }
         Relationships: []
       }
+      bixtok_sounds: {
+        Row: {
+          artist: string
+          audio_url: string
+          category: string
+          created_at: string
+          enabled: boolean
+          id: string
+          sort: number
+          title: string
+        }
+        Insert: {
+          artist?: string
+          audio_url: string
+          category?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          sort?: number
+          title: string
+        }
+        Update: {
+          artist?: string
+          audio_url?: string
+          category?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          sort?: number
+          title?: string
+        }
+        Relationships: []
+      }
       bixtok_videos: {
         Row: {
           allow_gifts: boolean
@@ -1799,9 +1838,13 @@ export type Database = {
           likes: number
           media_kind: string
           media_path: string | null
+          music_title: string | null
+          music_url: string | null
           overlay: string
           poster_url: string | null
           sort: number
+          source_kind: string
+          text_style: Json
           video_url: string
         }
         Insert: {
@@ -1816,9 +1859,13 @@ export type Database = {
           likes?: number
           media_kind?: string
           media_path?: string | null
+          music_title?: string | null
+          music_url?: string | null
           overlay?: string
           poster_url?: string | null
           sort?: number
+          source_kind?: string
+          text_style?: Json
           video_url: string
         }
         Update: {
@@ -1833,9 +1880,13 @@ export type Database = {
           likes?: number
           media_kind?: string
           media_path?: string | null
+          music_title?: string | null
+          music_url?: string | null
           overlay?: string
           poster_url?: string | null
           sort?: number
+          source_kind?: string
+          text_style?: Json
           video_url?: string
         }
         Relationships: []
@@ -2677,6 +2728,19 @@ export type Database = {
           p_path: string
         }
         Returns: string
+      }
+      bixtok_publish_links: {
+        Args: {
+          p_allow_gifts: boolean
+          p_caption: string
+          p_filter: string
+          p_music_title: string
+          p_music_url: string
+          p_overlay: string
+          p_text_style: Json
+          p_urls: string[]
+        }
+        Returns: number
       }
       bixtok_send_gift: {
         Args: { p_gift: string; p_live: string; p_video: string }

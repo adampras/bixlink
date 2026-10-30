@@ -7,7 +7,7 @@ import { ArrowLeft, Gift, Heart, Lock, MessageCircle, Plus, Radio, Send, Share2,
 import { supabase } from '@/integrations/supabase/client';
 import { MemberGate } from '@/components/MemberGate';
 import { useMember } from '@/lib/useMember';
-import { BixtokStudio, filterCss } from '@/components/BixtokStudio';
+import { BixtokStudio, filterCss, DraggableText, DEFAULT_TEXT, type TextStyle } from '@/components/BixtokStudio';
 
 export const Route = createFileRoute('/bixtok')({
   head: () => ({ meta: [
@@ -20,9 +20,9 @@ export const Route = createFileRoute('/bixtok')({
   component: BixtokPage,
 });
 
-type Cfg = { enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[] };
+type Cfg = { link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[] };
 type Gift = { id: string; name: string; emoji: string; currency: string; price: number };
-type Video = { id: string; creator_name: string; creator_id: string | null; caption: string; video_url: string; likes: number; media_path: string | null; media_kind: string; filter: string; overlay: string; allow_gifts: boolean; src: string };
+type Video = { id: string; creator_name: string; creator_id: string | null; caption: string; video_url: string; likes: number; media_path: string | null; media_kind: string; filter: string; overlay: string; allow_gifts: boolean; src: string; text_style: Partial<TextStyle> | null; music_title: string | null; music_url: string | null; source_kind: string };
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string };
 type Msg = { id: string; name: string; body: string; kind: string };
 
@@ -32,7 +32,7 @@ function BixtokPage() {
     const [c, g, v, l, s] = await Promise.all([
       supabase.from('bixtok_config').select('*').eq('id', 1).single(),
       supabase.from('bixtok_gifts').select('id,name,emoji,currency,price').eq('enabled', true).order('sort'),
-      supabase.from('bixtok_videos').select('id,creator_name,creator_id,caption,video_url,likes,media_path,media_kind,filter,overlay,allow_gifts').eq('enabled', true).order('created_at', { ascending: false }).limit(60),
+      supabase.from('bixtok_videos').select('id,creator_name,creator_id,caption,video_url,likes,media_path,media_kind,filter,overlay,allow_gifts,text_style,music_title,music_url,source_kind').eq('enabled', true).order('created_at', { ascending: false }).limit(60),
       supabase.from('bixtok_lives').select('id,host_id,host_name,title,started_at').eq('status', 'live').order('started_at', { ascending: false }),
       supabase.rpc('bixtok_my_stake_usd'),
     ]);
@@ -76,11 +76,11 @@ function BixtokPage() {
       {!studio && !room && section !== 'balance' && <nav className="bxt-nav" aria-label="BIXTOK">
         <button className={section === 'home' ? 'on' : ''} onClick={() => setSection('home')}><Home/><small>Home</small></button>
         <Link to="/nft-marketplace"><ShoppingBag/><small>Shop</small></Link>
-        {q.data.cfg.features['upload'] !== false ? <button className="bxt-plus" aria-label="Create post" onClick={() => setStudio(true)}><Plus/></button> : <span/>}
+        {q.data.cfg.features['upload'] !== false ? <button className="bxt-plus bxt-plus-logo" aria-label="Create post" onClick={() => setStudio(true)}><img src={bixtokLogo} alt="" width={30} height={30}/><Plus className="bxt-plus-mini"/></button> : <span/>}
         <button className={section === 'inbox' ? 'on' : ''} onClick={() => setSection('inbox')}><MessageSquare/><small>Inbox</small>{q.data.lives.length > 0 && <i className="bxt-badge">{q.data.lives.length}</i>}</button>
         <button className={section === 'profile' ? 'on' : ''} onClick={() => setSection('profile')}><User/><small>Profile</small></button>
       </nav>}
-      {studio && <BixtokStudio userId={user!.id} onClose={() => setStudio(false)} onDone={m => { setStudio(false); setNote(m); setTab('mine'); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}/>}
+      {studio && <BixtokStudio userId={user!.id} slots={q.data.cfg.link_slots ?? 5} maxLinks={q.data.cfg.max_links ?? 10} onClose={() => setStudio(false)} onDone={m => { setStudio(false); setNote(m); setTab('mine'); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}/>}
       {room && <LiveRoom live={room} me={user!.id} cfg={q.data.cfg} onClose={() => setRoom(null)} onGift={() => setGiftTarget({ live: room.id })}/>}
       {giftTarget && <GiftSheet gifts={q.data.gifts.filter(g => q.data!.cfg.features[g.currency === 'BIX' ? 'bix_gifts' : 'bixp_gifts'] !== false)} target={giftTarget} closed={!q.data.cfg.gifts_enabled} onClose={() => setGiftTarget(null)} onNote={setNote}/>}
       {note && <div className="bixtok-toast" role="status">{note}</div>}
@@ -93,11 +93,9 @@ function Feed({ muted, videos, cfg, me, onGift, onNote }: { muted: boolean; vide
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   if (!videos.length) return <p className="grid h-full place-items-center text-sm text-muted-foreground">No posts yet. Tap + to create one.</p>;
   return <div className="bixtok-feed">{videos.map(v => <section key={v.id} className="bixtok-slide">
-    {v.media_kind === 'photo'
-      ? <img src={v.src} alt={v.caption} className="bixtok-video" style={{ filter: filterCss(v.filter) }}/>
-      : <AutoVideo src={v.src} filter={v.filter} muted={muted}/>}
-    {v.overlay && <span className="studio-overlay">{v.overlay}</span>}
-    <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p></div>
+    <Media v={v} muted={muted}/>
+    {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
+    <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
     <aside className="bixtok-rail">
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={async () => { if (liked[v.id]) return; setLiked({ ...liked, [v.id]: true }); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
@@ -105,6 +103,31 @@ function Feed({ muted, videos, cfg, me, onGift, onNote }: { muted: boolean; vide
       {v.creator_id === me && <button aria-label="Delete" onClick={async () => { if (!confirm('Delete this post?')) return; await supabase.from('bixtok_videos').delete().eq('id', v.id); if (v.media_path) await supabase.storage.from('bixtok-media').remove([v.media_path]); qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Post deleted'); }}><Trash2/><small>Delete</small></button>}
     </aside>
   </section>)}</div>;
+}
+
+function embedUrl(u: string): string | null {
+  try {
+    const x = new URL(u); const h = x.hostname.replace(/^www\.|^m\./, '');
+    if (h.endsWith('tiktok.com')) { const id = x.pathname.match(/video\/(\d+)/)?.[1]; return id ? `https://www.tiktok.com/embed/v2/${id}` : null; }
+    if (h === 'youtu.be') return `https://www.youtube.com/embed/${x.pathname.slice(1)}?playsinline=1&loop=1`;
+    if (h.endsWith('youtube.com')) { const id = x.searchParams.get('v') ?? x.pathname.match(/(?:shorts|embed)\/([\w-]+)/)?.[1]; return id ? `https://www.youtube.com/embed/${id}?playsinline=1&loop=1` : null; }
+    if (h.endsWith('instagram.com')) { const m = x.pathname.match(/\/(p|reel|reels)\/([\w-]+)/); return m ? `https://www.instagram.com/${m[1] === 'p' ? 'p' : 'reel'}/${m[2]}/embed` : null; }
+  } catch { /* invalid */ }
+  return null;
+}
+
+function Media({ v, muted }: { v: Video; muted: boolean }) {
+  const embed = !v.media_path ? embedUrl(v.src) : null;
+  const ref = useRef<HTMLDivElement>(null); const [show, setShow] = useState(false);
+  const audio = useRef<HTMLAudioElement | null>(null);
+  useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => setShow(!!e?.isIntersecting), { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
+  useEffect(() => { if (!v.music_url) return undefined; if (show && !muted) { audio.current ??= new Audio(v.music_url); audio.current.loop = true; audio.current.play().catch(() => {}); } else audio.current?.pause(); return () => audio.current?.pause(); }, [show, muted, v.music_url]);
+  return <div ref={ref} className="bixtok-media">
+    {embed ? (show ? <iframe src={embed} title={v.caption || 'BIXTOK post'} className="bixtok-embed" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ filter: filterCss(v.filter) }}/> : <div className="bixtok-embed"/>)
+     : v.media_kind === 'photo' ? <img src={v.src} alt={v.caption} className="bixtok-video" style={{ filter: filterCss(v.filter) }}/>
+     : <AutoVideo src={v.src} filter={v.filter} muted={muted || !!v.music_url}/>}
+    {embed && <a href={v.src} target="_blank" rel="noreferrer" className="bixtok-src">{v.source_kind}</a>}
+  </div>;
 }
 
 function AutoVideo({ src, filter, muted }: { src: string; filter?: string | null; muted: boolean }) {
