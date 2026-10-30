@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { LayoutGrid } from 'lucide-react';
+import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, HandCoins, Landmark, Store, Send, UserRound, type LucideIcon } from 'lucide-react';
+const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound };
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { HUB_ITEMS, hubVisible } from '@/lib/dock-hub';
 
@@ -17,9 +18,10 @@ export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, bool
       <SheetContent side="bottom" className="max-h-[75vh] overflow-y-auto rounded-t-3xl border-primary/40 pb-8">
         <SheetHeader><SheetTitle className="font-display tracking-widest text-primary">BIX HUB</SheetTitle></SheetHeader>
         <div className="mt-4 grid grid-cols-3 gap-2">
-          {items.map(i => <Link key={i.id} to={i.to} onClick={() => setOpen(false)} className={`rounded-2xl border px-2 py-3 text-center ${path === i.to ? 'border-primary bg-primary/10' : 'border-border bg-card/70'}`}>
+          {items.map((i, n) => { const Icon = ICONS[i.id] ?? LayoutGrid; return <Link key={i.id} to={i.to} onClick={() => setOpen(false)} className={`hub-tile rounded-2xl border px-2 py-3 text-center ${path === i.to ? 'border-primary bg-primary/10' : 'border-border bg-card/70'}`}>
+            <span className="hub-emblem" style={{ animationDelay: `${(n % 4) * -0.9}s` }}><Icon size={20} strokeWidth={1.7}/></span>
             <div className="text-xs font-black">{i.label}</div><div className="mt-0.5 text-[10px] text-muted-foreground">{i.note}</div>
-          </Link>)}
+          </Link>; })}
         </div>
       </SheetContent>
     </Sheet>

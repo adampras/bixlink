@@ -4051,3 +4051,9 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .lux-ledger .lux-ledger-daily b{margin-top:0;color:var(--primary)}
 .lux-ledger b,.lux-ledger-total b{font-size:clamp(16px,4.4vw,19px)!important;font-weight:700!important;text-shadow:none!important;letter-spacing:0}
 @media (max-width:639px){.lux-ledger .lux-ledger-daily{border-bottom:0;padding:2px 0 9px!important}.lux-ledger > div:nth-of-type(2){border-top:1px solid color-mix(in oklab,var(--chart-3) 14%,transparent)}}
+
+/* BIX HUB lux emblems: flat titanium tile, matcha line icon, calm float */
+.hub-tile { display:flex; flex-direction:column; align-items:center; gap:.15rem; transition: border-color .2s; }
+.hub-emblem { display:grid; place-items:center; width:2.6rem; height:2.6rem; margin-bottom:.35rem; border-radius:.9rem; color: var(--primary); background: linear-gradient(160deg, color-mix(in oklab, var(--foreground) 9%, transparent), color-mix(in oklab, var(--background) 80%, transparent)); border:1px solid color-mix(in oklab, var(--primary) 35%, transparent); box-shadow: 0 6px 16px -10px color-mix(in oklab, var(--primary) 70%, transparent); animation: hub-float 3.6s ease-in-out infinite; }
+@keyframes hub-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .hub-emblem { animation: none; } }

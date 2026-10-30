@@ -20,7 +20,7 @@ export function InteractionComfort() {
     const pressed = (event: PointerEvent) => {
       if (!touchEffectsEnabled(config?.readiness, motion.matches)) return;
       const target = event.target instanceof Element ? event.target.closest('button, a, [role="button"]') : null;
-      if (!(target instanceof HTMLElement) || target.matches(':disabled, [aria-disabled="true"], [data-no-touch-effect]')) return;
+      if (!(target instanceof HTMLElement) || target.matches(':disabled, [aria-disabled="true"], [data-no-touch-effect], [role="switch"], [data-state][aria-checked]')) return;
       target.animate([
         { boxShadow: 'inset 0 0 0 1px var(--chart-3)', scale: '0.98' },
         { boxShadow: 'inset 0 0 0 0px transparent', scale: '1' },
