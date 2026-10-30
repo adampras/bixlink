@@ -29,6 +29,7 @@ import { AdminAppearance } from '@/components/AdminAppearance';
 import { AdminSplash } from '@/components/AdminSplash';
 import { AdminReferrals } from '@/components/AdminReferrals';
 import { AdminNetworkEditor } from '@/components/AdminNetworkEditor';
+import { AdminBixtok } from '@/components/AdminBixtok';
 import { AdminStakingControls } from '@/components/AdminStakingControls';
 import { AdminNavigation, AdminFold, type AdminGroup } from '@/components/AdminNavigation';
 import { AdminWorkspace } from '@/components/AdminWorkspace';
@@ -62,7 +63,7 @@ const ADMIN_GROUPS: AdminGroup[] = [
   { title: '3 · Staking & Yield', tone: 'emerald', hint: 'APY, paket, permintaan stake', tabs: [['Staking','apy profit yield paket durasi'],['Stakes','unstake approve permintaan riwayat']] },
   { title: '4 · Member & Jaringan', tone: 'rose', hint: 'User, audit deposit, leader, loan, kuota', tabs: [['Users','member ban owner 2 omset audit real deposit loan kuota'],['Referrals','bonus komisi sponsor'],['Kepemimpinan & Tim','tim leader vip clones buat akun loan']] },
   { title: '5 · Pasar & Presale', tone: 'violet', hint: 'Harga BIX, presale, materi', tabs: [['Presale','tahap harga strategi'],['Market','harga pasar bix'],['Marketing','pdf video materi']] },
-  { title: '6 · Tampilan & Ekosistem', tone: 'slate', hint: 'Tema, landing, game, NFT, toko, arsip', tabs: [['Desain & Tampilan','tema wallet splash popup banner booster visual pengumuman'],['Landing','konten hero sponsor sosial'],['Arena','fox game quest bixp'],['Mining','vbix'],['NFT','sertifikat kartu'],['Marketplace','shop katalog toko'],['Token','bep20 kontrak smart contract arsip'],['RWA','income source sumber arsip']] },
+  { title: '6 · Tampilan & Ekosistem', tone: 'slate', hint: 'Tema, landing, game, NFT, toko, arsip', tabs: [['Desain & Tampilan','tema wallet splash popup banner booster visual pengumuman'],['Landing','konten hero sponsor sosial'],['Arena','fox game quest bixp'],['BIXTOK','video live saweran gift'],['Mining','vbix'],['NFT','sertifikat kartu'],['Marketplace','shop katalog toko'],['Token','bep20 kontrak smart contract arsip'],['RWA','income source sumber arsip']] },
 ];
 function Admin() {
   const { user } = useMember();
@@ -129,6 +130,7 @@ function Admin() {
        { title: 'Slot & Moderasi member', content: <AdminMemberShop initial={data?.settings.find(s => s.key === 'member_shop')?.value as MemberShopConfig | undefined} onMessage={setMessage}/> },
      ]}/>}
      {tab === 'Arena' && <AdminArena onMessage={setMessage}/>}
+     {tab === 'BIXTOK' && <AdminBixtok onMessage={setMessage}/>}
      {tab === 'NFT' && <AdminNft onMessage={setMessage}/>}
      {tab === 'Mining' && <AdminMining initial={data?.settings.find(s => s.key === 'mining')?.value as MiningSettings | undefined} onMessage={setMessage} onSaved={refresh}/>}
     {tab === 'RWA' && <div className="mt-8"><form className="grid max-w-2xl gap-3 sm:grid-cols-3" onSubmit={async e => {e.preventDefault();const f=new FormData(e.currentTarget);try {await createSource({data:{category:String(f.get('category')) as 'FOREX'|'CRYPTO'|'RWA'|'ADVERTISING',name:String(f.get('name')),amount_usd:Number(f.get('amount'))}});await refresh();setMessage('Income source added.');e.currentTarget.reset();} catch {setMessage('Could not add source.');}}}><select className="form-input" name="category">{['FOREX','CRYPTO','RWA','ADVERTISING'].map(x=><option key={x}>{x}</option>)}</select><input className="form-input" name="name" placeholder="Source name" required/><input className="form-input" name="amount" type="number" min="0" step="0.01" placeholder="Amount USD" required/><Button className="rounded-full">Add source</Button></form><AdminFold title="Sumber pendapatan" badge={data?.sources.length ?? 0}><div className="mt-4 space-y-2">{data?.sources.map(s => <div key={s.id} className="flex justify-between rounded-[20px] border border-border bg-card p-4 text-sm"><span>{s.category} · {s.name}</span><span className="text-chart-3">{money(Number(s.amount_usd))}</span></div>)}</div></AdminFold></div>}

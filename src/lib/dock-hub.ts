@@ -7,6 +7,7 @@ export const HUB_ITEMS = [
   { id: 'exchange', to: '/quantum-exchange', label: 'Exchange', note: 'Coming soon' },
   { id: 'presale', to: '/presale', label: 'Presale', note: 'Genesis' },
   { id: 'arena', to: '/arena', label: 'Fox Arena', note: 'Missions' },
+  { id: 'bixtok', to: '/bixtok', label: 'BIXTOK', note: 'Video & LIVE' },
   { id: 'buyback', to: '/buyback', label: 'Dev Buyback', note: 'Sell BIX' },
   { id: 'vault', to: '/consortium-vault', label: 'Consortium', note: '5 nations' },
   { id: 'nft', to: '/nft-marketplace', label: 'NFT & Shop', note: 'Marketplace' },
