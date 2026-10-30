@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 
 type Cfg = { enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[] };
-const FEATURES: [string, string][] = [['likes', 'Like'], ['comments', 'Komentar LIVE'], ['share', 'Bagikan'], ['bixp_gifts', 'Saweran BIXP'], ['bix_gifts', 'Saweran BIXCOIN']];
+const FEATURES: [string, string][] = [['upload', 'Upload & kamera member'], ['likes', 'Like'], ['comments', 'Komentar LIVE'], ['share', 'Bagikan'], ['bixp_gifts', 'Saweran BIXP'], ['bix_gifts', 'Saweran BIXCOIN']];
 
 export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
   const qc = useQueryClient();

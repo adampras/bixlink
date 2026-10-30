@@ -4161,3 +4161,42 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @keyframes bixtok-burst { 0% { opacity: 0; transform: translate(-50%, 1rem) scale(.6); } 30% { opacity: 1; transform: translate(-50%, -2rem) scale(1.3); } 100% { opacity: 0; transform: translate(-50%, -8rem) scale(1); } }
 .bixtok-toast { position: fixed; left: 50%; bottom: 6rem; z-index: 90; transform: translateX(-50%); padding: .5rem 1rem; border-radius: 999px; font-size: .8rem; font-weight: 700; background: var(--card); border: 1px solid color-mix(in oklab, var(--primary) 40%, transparent); max-width: 90vw; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .bixtok-burst { animation: none; opacity: 0; } }
+
+/* BIXTOK Studio */
+.bixtok-create { position: fixed; right: 1rem; bottom: 6.5rem; z-index: 60; width: 3.4rem; height: 3.4rem; border-radius: 1.1rem; display: grid; place-items: center; color: var(--primary-foreground); background: linear-gradient(135deg, var(--primary), color-mix(in oklab, var(--primary) 55%, #f97316)); box-shadow: 0 8px 24px -8px var(--primary); }
+.bixtok-studio { position: fixed; inset: 0; z-index: 95; background: #000; color: #fff; display: flex; flex-direction: column; overflow-y: auto; }
+.studio-stage { position: absolute; inset: 0; }
+.studio-stage video, .studio-preview video, .studio-preview img { width: 100%; height: 100%; object-fit: cover; }
+.studio-stage video.mirror { transform: scaleX(-1); }
+.studio-camerr { display: grid; place-items: center; height: 100%; padding: 2rem; text-align: center; font-size: .85rem; opacity: .8; }
+.studio-overlay { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); z-index: 3; font-weight: 900; font-size: 1.5rem; text-align: center; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.7); pointer-events: none; max-width: 90%; }
+.studio-count { position: absolute; inset: 0; display: grid; place-items: center; font-size: 6rem; font-weight: 900; z-index: 4; }
+.studio-rec { position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 4; background: #e11d48; padding: .2rem .7rem; border-radius: 999px; font-size: .75rem; font-weight: 800; }
+.studio-top { position: relative; z-index: 5; display: flex; justify-content: space-between; align-items: center; padding: .9rem; }
+.studio-top button { width: 2.4rem; height: 2.4rem; display: grid; place-items: center; border-radius: 999px; background: rgba(0,0,0,.45); }
+.studio-tools { position: absolute; right: .7rem; top: 4rem; z-index: 5; display: flex; flex-direction: column; gap: .9rem; }
+.studio-tools button, .studio-side { display: flex; flex-direction: column; align-items: center; gap: .15rem; font-size: .62rem; text-shadow: 0 1px 4px #000; }
+.studio-bottom { position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; padding: .8rem .8rem 1.4rem; background: linear-gradient(transparent, rgba(0,0,0,.85)); display: grid; gap: .6rem; }
+.studio-beauty { display: flex; align-items: center; gap: .5rem; font-size: .72rem; font-weight: 700; }
+.studio-beauty input { flex: 1; accent-color: var(--primary); }
+.studio-filters { display: flex; gap: .55rem; overflow-x: auto; scrollbar-width: none; padding: .1rem; }
+.studio-filters button { flex: none; display: flex; flex-direction: column; align-items: center; gap: .2rem; font-size: .6rem; opacity: .75; }
+.studio-filters button.on { opacity: 1; color: var(--primary); }
+.studio-filters i { width: 2.6rem; height: 2.6rem; border-radius: .7rem; background: linear-gradient(135deg, #f3c9a8, #8a5a3c 55%, #2b3a2f); border: 2px solid transparent; }
+.studio-filters button.on i { border-color: var(--primary); }
+.studio-durs { display: flex; justify-content: center; gap: .4rem; }
+.studio-durs button { padding: .2rem .8rem; border-radius: 999px; font-size: .72rem; font-weight: 700; background: rgba(255,255,255,.12); }
+.studio-durs button.on { background: #fff; color: #000; }
+.studio-shutter { display: flex; justify-content: space-around; align-items: center; }
+.studio-rec-btn { width: 4.4rem; height: 4.4rem; border-radius: 999px; border: 5px solid #fff; background: #e11d48; transition: border-radius .2s, transform .2s; }
+.studio-rec-btn.on { border-radius: 1rem; transform: scale(.85); }
+.studio-rec-btn:disabled { opacity: .4; }
+.studio-err { color: #fda4af; font-size: .75rem; text-align: center; }
+.studio-edit { display: grid; gap: .7rem; padding: 0 1rem 2rem; }
+.studio-edit .studio-top { padding: .9rem 0; }
+.studio-preview { position: relative; height: 52vh; border-radius: 1rem; overflow: hidden; background: #111; }
+.studio-edit .form-input { width: 100%; }
+.studio-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+.studio-tags button { font-size: .7rem; padding: .2rem .6rem; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--primary) 50%, transparent); color: var(--primary); }
+.studio-switch { display: flex; gap: .5rem; align-items: center; font-size: .8rem; }
+.bixtok-slide { position: relative; }
