@@ -4318,3 +4318,23 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bixtok-live-grid .bxt-official{outline:2px solid oklch(0.8 0.14 85);box-shadow:0 0 18px oklch(0.8 0.14 85 / .35)}
 .bxt-av.official{outline:2px solid oklch(0.8 0.14 85)}
 .bxt-av.official em{background:oklch(0.8 0.14 85);color:oklch(0.15 0 0)}
+.bxl-stage { position: absolute; inset: 0; }
+.bxl-host { display: flex; align-items: center; gap: .4rem; min-width: 0; flex: 1; max-width: 55%; padding: .25rem .35rem .25rem .25rem; border-radius: 999px; background: color-mix(in oklab, var(--background) 55%, transparent); }
+.bxl-host small { font-size: .62rem; color: var(--muted-foreground); }
+.bxl-avatar { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 999px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); color: var(--primary-foreground); }
+.bxl-follow { display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 999px; background: var(--primary); color: var(--primary-foreground); }
+.bxl-follow.on { background: var(--muted); color: var(--foreground); }
+.bxl-chip { display: inline-flex; align-items: center; gap: .2rem; padding: .25rem .5rem; border-radius: 999px; font-size: .7rem; font-weight: 700; background: color-mix(in oklab, var(--background) 55%, transparent); }
+.bxl-livebadge { position: absolute; z-index: 3; top: calc(max(.7rem, env(safe-area-inset-top)) + 2.8rem); left: .75rem; }
+.bxl-banner { position: absolute; z-index: 4; left: .75rem; top: 32%; display: flex; align-items: center; gap: .5rem; padding: .45rem .9rem .45rem .5rem; border-radius: 999px; background: linear-gradient(90deg, color-mix(in oklab, var(--primary) 80%, transparent), transparent); animation: bxl-slide 3.5s ease forwards; pointer-events: none; }
+.bxl-banner b { display: block; font-size: .8rem; } .bxl-banner small { display: block; font-size: .7rem; color: var(--accent); }
+@keyframes bxl-slide { 0% { transform: translateX(-120%); opacity: 0 } 12%, 85% { transform: none; opacity: 1 } 100% { transform: translateX(-30%); opacity: 0 } }
+.bxl-floaters { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+.bxl-heart { position: absolute; bottom: 5.5rem; width: 30px; height: 30px; animation: bxl-float 1.8s ease-out forwards; }
+@keyframes bxl-float { 0% { transform: translate(0,0) scale(.4); opacity: 0 } 15% { transform: translate(0,-30px) scale(1.15); opacity: 1 } 100% { transform: translate(var(--drift), -360px) scale(.8); opacity: 0 } }
+.bxl-tools { position: absolute; z-index: 3; right: .75rem; top: 30%; display: grid; gap: .6rem; }
+.bxl-tools button, .bxl-act { display: grid; place-items: center; width: 42px; height: 42px; flex: none; border-radius: 999px; background: color-mix(in oklab, var(--background) 60%, transparent); }
+.bxl-act.like { color: var(--destructive); }
+.bxl-share { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: 1rem; }
+.bxl-share > * { display: flex; align-items: center; justify-content: center; gap: .3rem; padding: .7rem; border-radius: .8rem; font-size: .8rem; font-weight: 700; background: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .bxl-heart, .bxl-banner { animation-duration: .01s; } }

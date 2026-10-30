@@ -9,6 +9,7 @@ import { MemberGate } from '@/components/MemberGate';
 import { useMember } from '@/lib/useMember';
 import { BixtokStudio, filterCss, DraggableText, DEFAULT_TEXT, type TextStyle } from '@/components/BixtokStudio';
 import { resolveBixtokLinks, cleanTiktokVideos } from '@/lib/bixtok.functions';
+import { BixtokLiveRoom } from '@/components/BixtokLiveRoom';
 import { Button } from '@/components/ui/button';
 import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
 
@@ -109,7 +110,7 @@ function BixtokPage() {
         <button className={section === 'profile' ? 'on' : ''} onClick={() => setSection('profile')}><User/><small>Profile</small></button>
       </nav>}
       {studio && <BixtokStudio userId={user!.id} slots={q.data.cfg.link_slots ?? 5} maxLinks={q.data.cfg.max_links ?? 10} onClose={() => setStudio(false)} onDone={m => { setStudio(false); setNote(m); setTab('mine'); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}/>}
-      {room && <LiveRoom live={room} me={user!.id} cfg={q.data.cfg} onClose={() => setRoom(null)} onGift={() => setGiftTarget({ live: room.id })}/>}
+      {room && <BixtokLiveRoom live={room} me={user!.id} cfg={q.data.cfg} following={following.has(room.host_id)} onFollow={() => toggleFollow(room.host_id)} onClose={() => setRoom(null)} onGift={() => setGiftTarget({ live: room.id })}/>}
       {giftTarget && <GiftSheet gifts={q.data.gifts.filter(g => q.data!.cfg.features[g.currency === 'BIX' ? 'bix_gifts' : 'bixp_gifts'] !== false)} target={giftTarget} closed={!q.data.cfg.gifts_enabled} onClose={() => setGiftTarget(null)} onNote={setNote}/>}
       {note && <div className="bixtok-toast" role="status">{note}</div>}
     </>}
@@ -202,44 +203,6 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
     <h3 className="mt-6 text-xs font-bold tracking-widest text-muted-foreground">LIVE NOW · {data.lives.length}</h3>
     <div className="bixtok-live-grid">{data.lives.map(l => <button key={l.id} className={l.kind === 'official' ? 'bxt-official' : ''} onClick={() => onEnter(l)}><span className="bixtok-badge">{l.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span><b>{l.title}</b><small>@{l.host_name}</small></button>)}</div>
     {!data.lives.length && <p className="mt-3 text-sm text-muted-foreground">Nobody is live yet.</p>}
-  </div>;
-}
-
-function LiveRoom({ live, me, cfg, onClose, onGift }: { live: Live; me: string; cfg: Cfg; onClose: () => void; onGift: () => void }) {
-  const qc = useQueryClient(); const host = live.host_id === me;
-  const [msgs, setMsgs] = useState<Msg[]>([]); const [text, setText] = useState(''); const [ended, setEnded] = useState(false);
-  const cam = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
-    supabase.from('bixtok_live_messages').select('id,name,body,kind').eq('live_id', live.id).order('created_at', { ascending: false }).limit(40).then(({ data }) => setMsgs(((data ?? []) as Msg[]).reverse()));
-    const ch = supabase.channel(`bixtok-${live.id}-${Math.random().toString(36).slice(2)}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bixtok_live_messages', filter: `live_id=eq.${live.id}` }, p => setMsgs(m => [...m.slice(-39), p.new as Msg]))
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [live.id]);
-  useEffect(() => {
-    if (!host) return undefined; let stream: MediaStream | null = null;
-    navigator.mediaDevices?.getUserMedia({ video: { facingMode: 'user' }, audio: false }).then(s => { stream = s; if (cam.current) cam.current.srcObject = s; }).catch(() => {});
-    const limit = setTimeout(() => { void stop(); }, Number(cfg.live_max_minutes) * 60_000);
-    return () => { clearTimeout(limit); stream?.getTracks().forEach(t => t.stop()); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [host]);
-  const stop = async () => { await supabase.rpc('bixtok_end_live', { p_id: live.id }); setEnded(true); qc.invalidateQueries({ queryKey: ['bixtok'] }); };
-  return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
-    {host ? <video ref={cam} autoPlay muted playsInline className="bixtok-video mirror"/> : <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p></div>}
-    <header className="bixtok-room-top"><span className="bixtok-badge">LIVE</span><b className="truncate">{live.title}</b>
-      {host && !ended && <button className="bixtok-end" onClick={stop}>End</button>}
-      <button aria-label="Close" className="bixtok-icon" onClick={onClose}><X size={18}/></button></header>
-    {ended && <p className="bixtok-ended">LIVE ended</p>}
-    <div className="bixtok-chat">{msgs.map(m => <p key={m.id} className={m.kind === 'gift' ? 'gift' : ''}><b>{m.name}</b> {m.body}</p>)}</div>
-    <footer className="bixtok-room-bar">
-      {cfg.features['comments'] !== false && <form className="flex-1" onSubmit={async e => { e.preventDefault(); const body = text.trim().slice(0, 200); if (!body) return; setText('');
-        const { data: p } = await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle();
-        await supabase.from('bixtok_live_messages').insert({ live_id: live.id, user_id: me, name: p?.username || 'member', body }); }}>
-        <div className="bixtok-input"><MessageCircle size={16}/><input value={text} onChange={e => setText(e.target.value)} placeholder="Say something…" maxLength={200}/><button aria-label="Send"><Send size={16}/></button></div>
-      </form>}
-      {!host && <button className="bixtok-giftbtn" aria-label="Send gift" onClick={onGift}><Gift/></button>}
-    </footer>
-    {host && <p className="bixtok-hint">Your camera preview is shown on your device; viewers see the room, chat and gifts.</p>}
   </div>;
 }
 
