@@ -59,3 +59,4 @@
 
 - Share wallet staking notifications from authenticated stake records and status-specific IDs; receipts read back the RPC result without inferring completion or settlement.
 - Select the manifest from the root matched location during SSR; keep Sovereign Wallet manifest identity and scope stable so installation launches its existing in-place screens.
+- BIXTOK TikTok audio uses origin-scoped official player messages on sound gestures and player readiness; React mute state alone cannot control cross-origin embeds.

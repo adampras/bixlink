@@ -9,6 +9,8 @@ import { MemberGate } from '@/components/MemberGate';
 import { useMember } from '@/lib/useMember';
 import { BixtokStudio, filterCss, DraggableText, DEFAULT_TEXT, type TextStyle } from '@/components/BixtokStudio';
 import { resolveBixtokLinks } from '@/lib/bixtok.functions';
+import { Button } from '@/components/ui/button';
+import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
 
 export const Route = createFileRoute('/bixtok')({
   head: () => ({ meta: [
@@ -67,7 +69,11 @@ function BixtokPage() {
       {section === 'home' && <><header className="bixtok-top">
         <Link to="/dashboard" aria-label="Back" className="bixtok-icon"><ArrowLeft size={20}/></Link>
         <nav className="bixtok-tabs">{menus.map(m => <button key={m.key} className={tab === m.key ? 'on' : ''} onClick={() => setTab(m.key)}>{m.key === 'live' && <i className="bixtok-dot"/>}{m.label}</button>)}<button className={tab === 'mine' ? 'on' : ''} onClick={() => setTab('mine')}>Me</button></nav>
-        <button aria-label={muted ? "Turn sound on" : "Turn sound off"} className="bixtok-icon" onClick={() => setMuted(m => !m)}>{muted ? <VolumeX size={18}/> : <Volume2 size={18}/>}</button>
+        <Button variant="wallet" size="wallet" aria-label={muted ? "Turn sound on" : "Turn sound off"} title={muted ? "Turn sound on" : "Turn sound off"} aria-pressed={!muted} className="bixtok-icon" onClick={() => {
+          const next = !muted;
+          window.dispatchEvent(new CustomEvent(BIXTOK_SOUND_EVENT, { detail: next }));
+          setMuted(next);
+        }}>{muted ? <VolumeX size={18}/> : <Volume2 size={18}/>}</Button>
       </header>
       <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div></>}
       {section === 'home' && (tab === 'live'
@@ -126,7 +132,9 @@ function Media({ v, muted }: { v: Video; muted: boolean }) {
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => setShow(!!e?.isIntersecting), { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
   useEffect(() => { if (!v.music_url) return undefined; if (show && !muted) { audio.current ??= new Audio(v.music_url); audio.current.loop = true; audio.current.play().catch(() => {}); } else audio.current?.pause(); return () => audio.current?.pause(); }, [show, muted, v.music_url]);
   return <div ref={ref} className="bixtok-media">
-    {embed ? (show ? <iframe src={embed} title={v.caption || 'BIXTOK post'} className="bixtok-embed" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ filter: filterCss(v.filter) }}/> : <div className="bixtok-embed"/>)
+    {embed ? (show ? (new URL(embed).hostname === 'www.tiktok.com'
+      ? <BixtokTikTokPlayer src={embed} title={v.caption || 'BIXTOK post'} muted={muted} className="bixtok-embed" filter={filterCss(v.filter)}/>
+      : <iframe src={embed} title={v.caption || 'BIXTOK post'} className="bixtok-embed" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ filter: filterCss(v.filter) }}/>) : <div className="bixtok-embed"/>)
      : v.media_kind === 'photo' ? <img src={v.src} alt={v.caption} className="bixtok-video" style={{ filter: filterCss(v.filter) }}/>
      : <AutoVideo src={v.src} filter={v.filter} muted={muted || !!v.music_url}/>}
     {embed && <a href={v.src} target="_blank" rel="noreferrer" className="bixtok-src">{v.source_kind}</a>}
