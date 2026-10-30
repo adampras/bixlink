@@ -60,3 +60,5 @@
 - Share wallet staking notifications from authenticated stake records and status-specific IDs; receipts read back the RPC result without inferring completion or settlement.
 - Select the manifest from the root matched location during SSR; keep Sovereign Wallet manifest identity and scope stable so installation launches its existing in-place screens.
 - BIXTOK TikTok audio uses origin-scoped official player messages on sound gestures and player readiness; React mute state alone cannot control cross-origin embeds.
+- BIXTOK LIVE video/voice is peer-to-peer WebRTC (src/lib/bixtok-rtc.ts) signalled over a shared realtime broadcast room, used identically by Official and Community LIVE; no media server, so large audiences or strict networks need a future TURN/SFU service.
+- BIXTOK LIVE likes accumulate on the host's live row via the bixtok_live_like RPC; chat reaches viewers through broadcast + database stream + polling with id de-duplication, because any single channel can drop on phones.
