@@ -1,5 +1,5 @@
 import bixtokLogo from '@/assets/bixtok-logo.png';
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, Home, ShoppingBag, MessageSquare, User, Menu, Wallet, Clock, QrCode, Sparkles, Flame, Settings, ChevronRight, Bell, Zap, Bot, Grid3x3, Bookmark, Repeat2, Eye, ShieldCheck, Coins, Megaphone, BadgeDollarSign } from 'lucide-react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
@@ -52,6 +52,7 @@ function BixtokPage() {
   const [note, setNote] = useState('');
   const qc = useQueryClient();
   const [muted, setMuted] = useState(true);
+  const [section, setSection] = useState<'home' | 'inbox' | 'profile' | 'balance'>('home');
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
   const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
 
@@ -60,16 +61,25 @@ function BixtokPage() {
      : !q.data ? <div className="bixtok-skeleton"/>
      : !q.data.cfg.enabled ? <div className="grid h-full place-items-center p-8 text-center"><div><Lock className="mx-auto"/><p className="mt-3 font-bold">BIXTOK is closed right now.</p><Link to="/dashboard" className="mt-4 inline-block text-sm underline">Back</Link></div></div>
      : <>
-      <header className="bixtok-top">
+      {section === 'home' && <><header className="bixtok-top">
         <Link to="/dashboard" aria-label="Back" className="bixtok-icon"><ArrowLeft size={20}/></Link>
         <nav className="bixtok-tabs">{menus.map(m => <button key={m.key} className={tab === m.key ? 'on' : ''} onClick={() => setTab(m.key)}>{m.key === 'live' && <i className="bixtok-dot"/>}{m.label}</button>)}<button className={tab === 'mine' ? 'on' : ''} onClick={() => setTab('mine')}>Me</button></nav>
         <button aria-label={muted ? "Turn sound on" : "Turn sound off"} className="bixtok-icon" onClick={() => setMuted(m => !m)}>{muted ? <VolumeX size={18}/> : <Volume2 size={18}/>}</button>
       </header>
-      <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div>
-      {tab === 'live'
+      <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div></>}
+      {section === 'home' && (tab === 'live'
         ? <LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/>
-        : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>}
-      {q.data.cfg.features['upload'] !== false && !studio && !room && <button className="bixtok-create" aria-label="Create post" onClick={() => setStudio(true)}><Plus/></button>}
+        : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>)}
+      {section === 'inbox' && <Inbox lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
+      {section === 'profile' && <ProfilePage me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
+      {section === 'balance' && <BalancePage stake={q.data.stake} cfg={q.data.cfg} onBack={() => setSection('profile')} onLive={() => { setSection('home'); setTab('live'); }}/>}
+      {!studio && !room && section !== 'balance' && <nav className="bxt-nav" aria-label="BIXTOK">
+        <button className={section === 'home' ? 'on' : ''} onClick={() => setSection('home')}><Home/><small>Home</small></button>
+        <Link to="/nft-marketplace"><ShoppingBag/><small>Shop</small></Link>
+        {q.data.cfg.features['upload'] !== false ? <button className="bxt-plus" aria-label="Create post" onClick={() => setStudio(true)}><Plus/></button> : <span/>}
+        <button className={section === 'inbox' ? 'on' : ''} onClick={() => setSection('inbox')}><MessageSquare/><small>Inbox</small>{q.data.lives.length > 0 && <i className="bxt-badge">{q.data.lives.length}</i>}</button>
+        <button className={section === 'profile' ? 'on' : ''} onClick={() => setSection('profile')}><User/><small>Profile</small></button>
+      </nav>}
       {studio && <BixtokStudio userId={user!.id} onClose={() => setStudio(false)} onDone={m => { setStudio(false); setNote(m); setTab('mine'); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}/>}
       {room && <LiveRoom live={room} me={user!.id} cfg={q.data.cfg} onClose={() => setRoom(null)} onGift={() => setGiftTarget({ live: room.id })}/>}
       {giftTarget && <GiftSheet gifts={q.data.gifts.filter(g => q.data!.cfg.features[g.currency === 'BIX' ? 'bix_gifts' : 'bixp_gifts'] !== false)} target={giftTarget} closed={!q.data.cfg.gifts_enabled} onClose={() => setGiftTarget(null)} onNote={setNote}/>}
@@ -181,4 +191,66 @@ function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; 
     <p className="mt-3 text-[10px] text-muted-foreground">BIXP are promotional points moved to the creator; BIX gifts are internal ledger transfers to the creator. Gifts are final and are not investment returns.</p>
     {burst && <div className="bixtok-burst" aria-hidden>{burst}</div>}
   </div></div>;
+}
+
+function Inbox({ lives, mine, onLive, onCreate }: { lives: Live[]; mine: Video[]; onLive: (l: Live) => void; onCreate: () => void }) {
+  const likes = mine.reduce((a, v) => a + Number(v.likes || 0), 0);
+  return <div className="bxt-page"><header className="bxt-head"><span/><h1>Inbox <i className="bxt-online"/></h1><span/></header>
+    <div className="bxt-stories">
+      <button onClick={onCreate}><span className="bxt-av"><Plus size={20}/></span><small>Create</small></button>
+      {lives.map(l => <button key={l.id} onClick={() => onLive(l)}><span className="bxt-av ring">{l.host_name.slice(0, 1).toUpperCase()}<em>LIVE</em></span><small>{l.host_name}</small></button>)}
+    </div>
+    <ul className="bxt-list">
+      <li><span className="bxt-ic pink"><Zap/></span><div><b>Activity & new likes</b><p>{likes ? `${likes} likes across ${mine.length} posts` : 'No activity yet'}</p></div>{likes > 0 && <i className="bxt-count">{Math.min(likes, 99)}</i>}</li>
+      <li><span className="bxt-ic dark"><Bell/></span><div><b>System notifications</b><p>{lives.length ? `${lives.length} member LIVE right now` : 'BIXTOK updates appear here'}</p></div></li>
+      <li><Link to="/nft-marketplace" className="contents"><span className="bxt-ic orange"><ShoppingBag/></span><div><b>Shop messages</b><p>Open the BIXLINK marketplace</p></div><ChevronRight size={16}/></Link></li>
+      <li><span className="bxt-ic matcha"><Bot/></span><div><b>FOX AI</b><p>Ask anything about BIXLINK</p></div></li>
+    </ul></div>;
+}
+
+function ProfilePage({ me, email, videos, onCreate, onBalance, onOpen, onNote }: { me: string; email: string; videos: Video[]; onCreate: () => void; onBalance: () => void; onOpen: () => void; onNote: (m: string) => void }) {
+  const p = useQuery({ queryKey: ['bixtok-profile', me], queryFn: async () => (await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle()).data });
+  const [drawer, setDrawer] = useState(false); const [ptab, setPtab] = useState('grid');
+  const name = p.data?.username || email.split('@')[0] || 'member';
+  const likes = videos.reduce((a, v) => a + Number(v.likes || 0), 0);
+  const copy = async () => { try { await navigator.clipboard.writeText(`${location.origin}/bixtok`); onNote('Profile link copied'); } catch { /* ignore */ } };
+  return <div className="bxt-page"><header className="bxt-head"><button aria-label="Create" onClick={onCreate}><Sparkles size={20}/></button><span/><button aria-label="Menu" onClick={() => setDrawer(true)}><Menu size={22}/></button></header>
+    <section className="bxt-prof"><div><h1>{name}</h1><small>@{name.toLowerCase()}</small>
+      <div className="bxt-stats"><p><b>{videos.length}</b>Posts</p><p><b>0</b>Following</p><p><b>{likes}</b>Likes</p></div></div>
+      <button className="bxt-bigav" onClick={onCreate}>{name.slice(0, 1).toUpperCase()}<em><Plus size={14}/></em></button></section>
+    <p className="bxt-bio">BIXLINK member · Web3 creator</p>
+    <Link to="/nft-marketplace" className="bxt-pill"><ShoppingBag size={14}/> Your orders</Link>
+    <div className="bxt-ptabs">{[['grid', Grid3x3], ['private', Lock], ['repost', Repeat2], ['saved', Bookmark], ['liked', Heart]].map(([k, I]) => { const Ic = I as typeof Heart; return <button key={k as string} className={ptab === k ? 'on' : ''} onClick={() => setPtab(k as string)} aria-label={k as string}><Ic size={20}/></button>; })}</div>
+    {ptab === 'grid' && videos.length ? <div className="bxt-grid">{videos.map(v => <button key={v.id} onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={v.src} muted preload="metadata"/>}<small><Eye size={12}/> {v.likes}</small></button>)}</div>
+      : <p className="p-10 text-center text-sm text-muted-foreground">{ptab === 'grid' ? 'No posts yet. Tap + to create.' : 'Nothing here yet.'}</p>}
+    {drawer && <div className="bxt-drawer-wrap" onClick={() => setDrawer(false)}><aside className="bxt-drawer" onClick={e => e.stopPropagation()}>
+      <h4>Assets</h4><button onClick={() => { setDrawer(false); onBalance(); }}><Wallet/>Balance<ChevronRight/></button>
+      <h4>Personal tools</h4>
+      <Link to="/wallet"><Clock/>Activity center<ChevronRight/></Link>
+      <button onClick={copy}><QrCode/>Your profile link<ChevronRight/></button>
+      <h4>Creator & business</h4>
+      <button onClick={() => { setDrawer(false); onCreate(); }}><Sparkles/>BIXTOK Studio<ChevronRight/></button>
+      <Link to="/referral" ><Flame/>Promote<ChevronRight/></Link>
+      <hr/><Link to="/settings"><Settings/>Settings and privacy<ChevronRight/></Link>
+    </aside></div>}
+  </div>;
+}
+
+function BalancePage({ stake, cfg, onBack, onLive }: { stake: number; cfg: Cfg; onBack: () => void; onLive: () => void }) {
+  const [hide, setHide] = useState(false);
+  return <div className="bxt-page bxt-bal"><header className="bxt-head"><button aria-label="Back" onClick={onBack}><ArrowLeft size={20}/></button><div className="text-center"><h1>Balance</h1><small className="bxt-safe"><ShieldCheck size={12}/> Secure</small></div><Link to="/settings" aria-label="Settings"><Settings size={20}/></Link></header>
+    <p className="bxt-est">Active staking (USD) <button onClick={() => setHide(h => !h)} aria-label="Toggle"><Eye size={14}/></button></p>
+    <p className="bxt-amt">{hide ? '••••' : stake.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+    <div className="bxt-coins"><Link to="/wallet"><span><Coins size={14}/> BIXP</span><b>Wallet</b><em>Get BIXP →</em></Link><Link to="/wallet"><span><Coins size={14}/> BIXCOIN</span><b>Wallet</b></Link></div>
+    <Link to="/wallet" className="bxt-card"><b>Transactions</b><span>Gift history <ChevronRight size={14}/></span></Link>
+    <Link to="/stake" className="bxt-card"><div><b>Join a staking package</b><p>Unlock Go LIVE{Number(cfg.live_min_stake_usd) > 0 ? ` from $${Number(cfg.live_min_stake_usd).toFixed(0)}` : ''}</p></div><Gift className="bxt-gifticon"/></Link>
+    <div className="bxt-tools">
+      <button onClick={onLive}><span><Radio/></span>LIVE rewards</button>
+      <Link to="/referral"><span><BadgeDollarSign/></span>Monetize</Link>
+      <Link to="/arena"><span><Megaphone/></span>Campaigns</Link>
+      <Link to="/stake"><span><Flame/></span>Staking</Link>
+      <Link to="/market"><span><Zap/></span>Market</Link>
+    </div>
+    <p className="bxt-disc">Gifts are final and are not investment returns. Balances shown are internal ledger references.</p>
+  </div>;
 }
