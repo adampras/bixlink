@@ -23,7 +23,7 @@ export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: s
   const pcs = useRef(new Map<string, RTCPeerConnection>());
   const queued = useRef(new Map<string, RTCIceCandidateInit[]>());
   const chanRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const ready = useRef(false);
+  const ready = useRef(false); const offeredAt = useRef(0);
 
   useEffect(() => {
     if (typeof RTCPeerConnection === 'undefined') { setState('failed'); return undefined; }
@@ -57,7 +57,7 @@ export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: s
     let retry: ReturnType<typeof setInterval> | undefined;
     const hello = () => send('hello', { from: me });
     const answer = async (p: Sig) => {
-      const pc = makePc(p.from); setState('connecting');
+      const pc = makePc(p.from); setState('connecting'); offeredAt.current = Date.now();
       pc.ontrack = e => { setRemote(e.streams[0] ?? new MediaStream([e.track])); };
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === 'connected') setState('live');
@@ -94,9 +94,12 @@ export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: s
         if (host) { if (streamRef.current) send('host-ready', { from: me }); return; }
         hello();
         retry = setInterval(() => {
-          const live = [...pcs.current.values()].some(pc => pc.connectionState === 'connected');
-          if (!live) hello();
-        }, 5000);
+          // Re-ask only when there is no usable connection (none yet, or it failed/closed).
+          const pc = [...pcs.current.values()][0];
+          const st = pc?.connectionState;
+          const stalled = pc && st !== 'connected' && Date.now() - (offeredAt.current || 0) > 12000;
+          if (!pc || st === 'failed' || st === 'closed' || stalled) hello();
+        }, 6000);
       });
 
     return () => {
