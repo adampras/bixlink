@@ -29,7 +29,7 @@ export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: s
     if (typeof RTCPeerConnection === 'undefined') { setState('failed'); return undefined; }
     const ch = supabase.channel(`bixtok-rtc-${liveId}`, { config: { broadcast: { self: false } } });
     chanRef.current = ch;
-    const send = (event: string, payload: Sig) => { if (import.meta.env.DEV) console.debug('[bixtok-rtc] send', event, host); void ch.send({ type: 'broadcast', event, payload }).then(r => { if (import.meta.env.DEV) console.debug('[bixtok-rtc] sent', event, r); }); };
+    const send = (event: string, payload: Sig) => { void ch.send({ type: 'broadcast', event, payload }); };
     const drop = (peer: string) => { pcs.current.get(peer)?.close(); pcs.current.delete(peer); queued.current.delete(peer); };
     const flushIce = async (peer: string, pc: RTCPeerConnection) => {
       for (const c of queued.current.get(peer) ?? []) await pc.addIceCandidate(c).catch(() => {});
@@ -60,7 +60,6 @@ export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: s
       const pc = makePc(p.from); setState('connecting'); offeredAt.current = Date.now();
       pc.ontrack = e => { setRemote(e.streams[0] ?? new MediaStream([e.track])); };
       pc.onconnectionstatechange = () => {
-        if (import.meta.env.DEV) console.debug('[bixtok-rtc]', pc.connectionState);
         if (pc.connectionState === 'connected') setState('live');
         if (pc.connectionState === 'failed') { setState('failed'); drop(p.from); }
         if (pc.connectionState === 'disconnected') setState('connecting');
