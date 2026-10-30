@@ -551,25 +551,90 @@ function DiscoverTab() {
     {!internal && <p className="sw-note sw-browser-note">Some websites block in-app viewing. If the page stays blank, tap ↗ to open it in your browser.</p>}
   </section>;
 
+  return <DiscoverHome q={q} setQ={setQ} cat={cat} setCat={setCat} marks={marks} open={open} />;
+}
+
+const BANNERS = [
+  { t: 'Sovereign Web3, powered by BIXLINK', s: 'Browse BNB Chain DApps in one secure wallet', to: '/dashboard' },
+  { t: 'BIX Presale is live', s: 'Review stages and confirm in-app', to: '/presale' },
+  { t: 'Fox Arena missions', s: 'Play quests for promo vBIX rewards', to: '/arena' },
+  { t: 'Stake with projections', s: 'Choose a package and duration', to: '/stake' },
+];
+
+function DiscoverHome({ q, setQ, cat, setCat, marks, open }: { q: string; setQ: (v: string) => void; cat: string; setCat: (v: string) => void; marks: string[]; open: (u: string) => void }) {
+  const [b, setB] = useState(0);
+  const [view, setView] = useState<'Trend' | 'Explorer' | 'Favorites'>('Trend');
+  useEffect(() => { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; const t = setInterval(() => setB(x => (x + 1) % BANNERS.length), 4500); return () => clearInterval(t); }, []);
   const list = DAPPS.filter(i => (cat === 'All' || i.cat === cat) && (i.n + i.d).toLowerCase().includes(q.toLowerCase()));
-  return <>
-    <section className="sw-panel sw-discover">
-      <form className="sw-field flex items-center gap-3" onSubmit={(e) => { e.preventDefault(); const u = toUrl(q); if (u) open(u); }}>
-        <Globe size={18} className="sw-gold-text" /><input className="min-w-0 flex-1 bg-transparent outline-none" placeholder="Search or enter URL" value={q} onChange={(e) => setQ(e.target.value)} />
-        <Button type="submit" aria-label="Go" className="sw-gold-dot"><ArrowUpRight size={16} /></Button>
-      </form>
-      <div className="sw-cats mt-3">{CATS.map(c => <Button key={c} aria-pressed={cat === c} onClick={() => setCat(c)}>{c}</Button>)}</div>
-    </section>
-    {marks.length > 0 && <section className="mt-5"><b className="sw-section-title">Bookmarks</b><div className="mt-2 flex flex-wrap gap-2">{marks.map(m => <Button key={m} className="sw-chip" onClick={() => open(m)}><Star size={12} /> {m.startsWith('/') ? m : new URL(m).host}</Button>)}</div></section>}
-    <section className="mt-6">
-      <div className="mb-3 flex items-center justify-between"><b className="sw-section-title">{cat === 'All' ? 'All DApps' : cat}</b><span className="sw-count">{list.length}</span></div>
-      <div className="space-y-3">{list.map(i => <Button key={i.n} className="sw-row w-full text-left" onClick={() => open(i.to)}>
+  const fav = DAPPS.filter(d => marks.includes(d.to));
+  const banner = BANNERS[b]!;
+  const go = (e: React.FormEvent) => { e.preventDefault(); const u = toUrl(q); if (u) open(u); };
+  return <div className="tp-discover">
+    <form className="tp-search" onSubmit={go}>
+      <Search size={18} className="sw-muted" /><input aria-label="Search DApps or URL" placeholder="Search Tokens, DApps, or URL" value={q} onChange={(e) => setQ(e.target.value)} />
+      <span className="tp-tabs-count" aria-label="Bookmarks">{marks.length}</span>
+    </form>
+    <button type="button" className="tp-banner" onClick={() => open(banner.to)}>
+      <b>{banner.t}</b><small>{banner.s}</small>
+      <img src={foxMark} alt="" className="tp-banner-mark" />
+      <span className="tp-dots">{BANNERS.map((_, k) => <i key={k} data-on={k === b} />)}</span>
+    </button>
+    <div className="tp-seg">{(['Trend', 'Explorer', 'Favorites'] as const).map(v => <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>{v}</button>)}</div>
+    {view === 'Trend' && <div className="tp-grid">{DAPPS.filter(d => d.n.toLowerCase().includes(q.toLowerCase())).map(i => <button key={i.n} type="button" onClick={() => open(i.to)}><span className="sw-app-icon" data-tone={i.tone}>{i.icon}</span><small>{i.n}</small></button>)}</div>}
+    {view === 'Explorer' && <>
+      <div className="sw-cats">{CATS.map(c => <Button key={c} aria-pressed={cat === c} onClick={() => setCat(c)}>{c}</Button>)}</div>
+      <div className="mt-3 space-y-2">{list.map(i => <button type="button" key={i.n} className="tp-row" onClick={() => open(i.to)}>
         <span className="sw-app-icon" data-tone={i.tone}>{i.icon}</span>
-        <span className="min-w-0 flex-1"><b className="block">{i.n}</b><small className="sw-muted block truncate">{i.d}</small></span>
-        <ChevronRight size={18} className="sw-muted" />
-      </Button>)}</div>
+        <span className="min-w-0 flex-1 text-left"><b className="block">{i.n}</b><small className="sw-muted block truncate">{i.d}</small></span>
+        {i.ext && <em className="tp-tag">WEB3</em>}<ChevronRight size={16} className="sw-muted" />
+      </button>)}</div>
+    </>}
+    {view === 'Favorites' && (marks.length ? <div className="space-y-2">{marks.map(m => <button type="button" key={m} className="tp-row" onClick={() => open(m)}><Star size={16} className="sw-gold-text" /><span className="flex-1 truncate text-left">{fav.find(f => f.to === m)?.n ?? (m.startsWith('/') ? `bixlink.com${m}` : new URL(m).host)}</span><ChevronRight size={16} className="sw-muted" /></button>)}</div>
+      : <p className="sw-note">Tap ★ inside the browser to save favorites.</p>)}
+    <div className="tp-promos">
+      <button type="button" onClick={() => open('/stake')}><b>Stake BIX</b><small>Projected yield packages</small></button>
+      <button type="button" onClick={() => open('https://bscscan.com')}><b>Verify on-chain</b><small>BscScan explorer</small></button>
+    </div>
+    <div className="tp-earn">
+      <div className="flex items-center justify-between"><b>Earn</b><button type="button" className="sw-muted text-xs" onClick={() => setView('Explorer')}>More ›</button></div>
+      {DAPPS.filter(d => ['BIX Stake', 'PancakeSwap', 'DeFiLlama'].includes(d.n)).map(i => <button type="button" key={i.n} className="tp-row" onClick={() => open(i.to)}><span className="sw-app-icon" data-tone={i.tone}>{i.icon}</span><span className="min-w-0 flex-1 text-left"><b className="block">{i.n}</b><small className="sw-muted block truncate">{i.d}</small></span><em className="tp-tag">HOT</em></button>)}
+      <p className="sw-note">External DApps are third-party. Yields shown anywhere are projections; always verify contracts.</p>
+    </div>
+  </div>;
+}
+
+const SWAP_TOKENS: Record<string, string> = { BNB: 'BNB', USDT: USDT, BTC: '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c', ETH: '0x2170Ed0880ac9A755fd29B2688956BD959F933F8' };
+function TradeTab({ px }: { px: Record<string, { p: number; c: number }> }) {
+  const [from, setFrom] = useState('USDT');
+  const [to, setTo] = useState('BNB');
+  const [amt, setAmt] = useState('');
+  const [slip, setSlip] = useState(2);
+  const price = (s: string) => (s === 'USDT' ? 1 : px[s]?.p ?? 0);
+  const n = Number(amt) || 0;
+  const est = price(to) ? (n * price(from)) / price(to) : 0;
+  const ready = n > 0 && from !== to && est > 0;
+  const url = `https://pancakeswap.finance/swap?chain=bsc&inputCurrency=${SWAP_TOKENS[from]}&outputCurrency=${SWAP_TOKENS[to]}${n ? `&exactAmount=${n}&exactField=input` : ''}`;
+  const sel = (v: string, set: (s: string) => void) => <select aria-label="Token" value={v} onChange={(e) => set(e.target.value)} className="tp-token">{Object.keys(SWAP_TOKENS).map(k => <option key={k}>{k}</option>)}</select>;
+  return <div className="tp-trade">
+    <div className="tp-seg"><button type="button" aria-pressed>Swap & Bridge</button></div>
+    <section className="sw-panel space-y-3">
+      <small className="sw-muted">From</small>
+      <div className="tp-swap-box">{sel(from, setFrom)}<input inputMode="decimal" aria-label="Amount" placeholder="0.00" value={amt} onChange={(e) => setAmt(e.target.value.replace(/[^\d.]/g, ''))} /></div>
+      <button type="button" className="tp-flip" aria-label="Flip tokens" onClick={() => { setFrom(to); setTo(from); }}><RefreshCw size={16} /></button>
+      <small className="sw-muted">To (estimated)</small>
+      <div className="tp-swap-box">{sel(to, setTo)}<b className="numeric">{est ? fmt(est, 6) : '—'}</b></div>
+      <dl className="tp-quote">
+        <div><dt>Swap rate</dt><dd>{ready ? `1 ${from} ≈ ${fmt(price(from) / price(to), 6)} ${to}` : '—'}</dd></div>
+        <div><dt>Min receive</dt><dd>{ready ? `${fmt(est * (1 - slip / 100), 6)} ${to}` : '—'}</dd></div>
+        <div><dt>Slippage</dt><dd className="flex gap-1">{[0.5, 1, 2].map(s => <button type="button" key={s} aria-pressed={slip === s} className="tp-chip" onClick={() => setSlip(s)}>{s}%</button>)}</dd></div>
+        <div><dt>Route</dt><dd>PancakeSwap · BNB Chain</dd></div>
+      </dl>
+      <BaseButton variant="wallet" size="wallet" asChild className="sw-gold-btn w-full justify-center !py-3" aria-disabled={!ready}>
+        <a href={ready ? url : undefined} target="_blank" rel="noreferrer">{ready ? 'Continue in your wallet ↗' : 'Enter an amount'}</a>
+      </BaseButton>
+      <p className="sw-note">Estimate uses live public prices. The swap is signed in your own Web3 wallet on PancakeSwap; BIXLINK never holds your keys. BIX is not listed on a DEX — use BIX PAY for BIX.</p>
     </section>
-  </>;
+  </div>;
 }
 
 function MyIdScreen({ code, onBack }: { code: string; onBack: () => void }) {
