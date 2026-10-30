@@ -37,16 +37,21 @@ const TAGS = ['#BIXLINK', '#BIXCOIN', '#Staking', '#Web3', '#FinancialFreedom'];
 type Sound = { id: string; title: string; artist: string; category: string; audio_url: string; cover?: string | undefined };
 
 export function DraggableText({ text, style, onMove, editable }: { text: string; style: TextStyle; onMove?: (x: number, y: number) => void; editable?: boolean }) {
-  const ref = useRef<HTMLSpanElement>(null);
+  const ref = useRef<HTMLSpanElement>(null); const [drag, setDrag] = useState(false);
   const down = (e: React.PointerEvent) => {
     if (!editable || !onMove) return; e.preventDefault(); e.stopPropagation();
-    const box = ref.current?.parentElement?.getBoundingClientRect(); if (!box) return;
-    (e.target as Element).setPointerCapture(e.pointerId);
-    const move = (ev: PointerEvent) => onMove(Math.min(95, Math.max(5, ((ev.clientX - box.left) / box.width) * 100)), Math.min(92, Math.max(6, ((ev.clientY - box.top) / box.height) * 100)));
-    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
-    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+    const el = ref.current; const box = el?.parentElement?.getBoundingClientRect(); if (!el || !box) return;
+    el.setPointerCapture(e.pointerId); setDrag(true);
+    const sx = e.clientX, sy = e.clientY, ox = style.x, oy = style.y; let nx = ox, ny = oy, raf = 0;
+    const move = (ev: PointerEvent) => {
+      nx = Math.min(95, Math.max(5, ox + ((ev.clientX - sx) / box.width) * 100));
+      ny = Math.min(92, Math.max(6, oy + ((ev.clientY - sy) / box.height) * 100));
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; el.style.left = `${nx}%`; el.style.top = `${ny}%`; });
+    };
+    const up = () => { cancelAnimationFrame(raf); el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up); setDrag(false); onMove(nx, ny); };
+    el.addEventListener('pointermove', move); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
   };
-  return <span ref={ref} onPointerDown={down} className={`studio-overlay${editable ? ' drag' : ''}`} style={textCss(style)}>{text}</span>;
+  return <span ref={ref} onPointerDown={down} className={`studio-overlay${editable ? ' drag' : ''}${drag ? ' dragging' : ''}`} style={textCss(style)}>{text}</span>;
 }
 
 export function BixtokStudio({ onClose, onDone, slots = 5, maxLinks = 10 }: { userId: string; onClose: () => void; onDone: (msg: string) => void; slots?: number; maxLinks?: number }) {

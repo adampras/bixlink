@@ -108,7 +108,7 @@ function Feed({ muted, videos, cfg, me, onGift, onNote }: { muted: boolean; vide
 function embedUrl(u: string): string | null {
   try {
     const x = new URL(u); const h = x.hostname.replace(/^www\.|^m\./, '');
-    if (h.endsWith('tiktok.com')) { const id = x.pathname.match(/video\/(\d+)/)?.[1]; return id ? `https://www.tiktok.com/embed/v2/${id}` : null; }
+    if (h.endsWith('tiktok.com')) { const id = x.pathname.match(/(?:video|photo|v)\/(\d+)/)?.[1] ?? x.searchParams.get('item_id') ?? u.match(/(\d{15,})/)?.[1]; return id ? `https://www.tiktok.com/player/v1/${id}?autoplay=1&loop=1&music_info=1&description=1&rel=0` : null; }
     if (h === 'youtu.be') return `https://www.youtube.com/embed/${x.pathname.slice(1)}?playsinline=1&loop=1`;
     if (h.endsWith('youtube.com')) { const id = x.searchParams.get('v') ?? x.pathname.match(/(?:shorts|embed)\/([\w-]+)/)?.[1]; return id ? `https://www.youtube.com/embed/${id}?playsinline=1&loop=1` : null; }
     if (h.endsWith('instagram.com')) { const m = x.pathname.match(/\/(p|reel|reels)\/([\w-]+)/); return m ? `https://www.instagram.com/${m[1] === 'p' ? 'p' : 'reel'}/${m[2]}/embed` : null; }
