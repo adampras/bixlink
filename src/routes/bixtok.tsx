@@ -1,3 +1,5 @@
+import bixtokLogo from '@/assets/bixtok-logo.png';
+import { Volume2, VolumeX } from 'lucide-react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
@@ -49,6 +51,7 @@ function BixtokPage() {
   const [studio, setStudio] = useState(false);
   const [note, setNote] = useState('');
   const qc = useQueryClient();
+  const [muted, setMuted] = useState(true);
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
   const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
 
@@ -60,11 +63,12 @@ function BixtokPage() {
       <header className="bixtok-top">
         <Link to="/dashboard" aria-label="Back" className="bixtok-icon"><ArrowLeft size={20}/></Link>
         <nav className="bixtok-tabs">{menus.map(m => <button key={m.key} className={tab === m.key ? 'on' : ''} onClick={() => setTab(m.key)}>{m.key === 'live' && <i className="bixtok-dot"/>}{m.label}</button>)}<button className={tab === 'mine' ? 'on' : ''} onClick={() => setTab('mine')}>Me</button></nav>
-        <span className="w-9"/>
+        <button aria-label={muted ? "Turn sound on" : "Turn sound off"} className="bixtok-icon" onClick={() => setMuted(m => !m)}>{muted ? <VolumeX size={18}/> : <Volume2 size={18}/>}</button>
       </header>
+      <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div>
       {tab === 'live'
         ? <LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/>
-        : <Feed videos={vids} cfg={q.data.cfg} me={user!.id} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>}
+        : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>}
       {q.data.cfg.features['upload'] !== false && !studio && !room && <button className="bixtok-create" aria-label="Create post" onClick={() => setStudio(true)}><Plus/></button>}
       {studio && <BixtokStudio userId={user!.id} onClose={() => setStudio(false)} onDone={m => { setStudio(false); setNote(m); setTab('mine'); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}/>}
       {room && <LiveRoom live={room} me={user!.id} cfg={q.data.cfg} onClose={() => setRoom(null)} onGift={() => setGiftTarget({ live: room.id })}/>}
@@ -74,14 +78,14 @@ function BixtokPage() {
   </main></MemberGate>;
 }
 
-function Feed({ videos, cfg, me, onGift, onNote }: { videos: Video[]; cfg: Cfg; me: string; onGift: (id: string) => void; onNote: (m: string) => void }) {
+function Feed({ muted, videos, cfg, me, onGift, onNote }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; onGift: (id: string) => void; onNote: (m: string) => void }) {
   const qc = useQueryClient();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   if (!videos.length) return <p className="grid h-full place-items-center text-sm text-muted-foreground">No posts yet. Tap + to create one.</p>;
   return <div className="bixtok-feed">{videos.map(v => <section key={v.id} className="bixtok-slide">
     {v.media_kind === 'photo'
       ? <img src={v.src} alt={v.caption} className="bixtok-video" style={{ filter: filterCss(v.filter) }}/>
-      : <AutoVideo src={v.src} filter={v.filter}/>}
+      : <AutoVideo src={v.src} filter={v.filter} muted={muted}/>}
     {v.overlay && <span className="studio-overlay">{v.overlay}</span>}
     <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p></div>
     <aside className="bixtok-rail">
@@ -93,10 +97,10 @@ function Feed({ videos, cfg, me, onGift, onNote }: { videos: Video[]; cfg: Cfg; 
   </section>)}</div>;
 }
 
-function AutoVideo({ src, filter }: { src: string; filter?: string | null }) {
+function AutoVideo({ src, filter, muted }: { src: string; filter?: string | null; muted: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) el.play().catch(() => {}); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
-  return <video ref={ref} src={src} loop muted playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }} onClick={e => { const el = e.currentTarget; el.muted = !el.muted; }}/>;
+  return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }}/>;
 }
 
 function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
