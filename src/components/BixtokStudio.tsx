@@ -34,7 +34,7 @@ export function textCss(s?: Partial<TextStyle> | null): React.CSSProperties {
 const DURATIONS = [15, 60, 180];
 const SPEEDS = [0.5, 1, 2];
 const TAGS = ['#BIXLINK', '#BIXCOIN', '#Staking', '#Web3', '#FinancialFreedom'];
-type Sound = { id: string; title: string; artist: string; category: string; audio_url: string; cover?: string };
+type Sound = { id: string; title: string; artist: string; category: string; audio_url: string; cover?: string | undefined };
 
 export function DraggableText({ text, style, onMove, editable }: { text: string; style: TextStyle; onMove?: (x: number, y: number) => void; editable?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
