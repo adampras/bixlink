@@ -862,6 +862,13 @@
       "when": 1793448014509,
       "tag": "0122_bixtrade_live_quotes_source",
       "breakpoints": true
+    },
+    {
+      "idx": 123,
+      "version": "7",
+      "when": 1793455527071,
+      "tag": "0123_bixtrade_marketing_plan",
+      "breakpoints": true
     }
   ]
 }

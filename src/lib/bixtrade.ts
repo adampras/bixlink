@@ -22,13 +22,42 @@ export const bixtradeSettingsSchema = z.object({
   minWithdraw: z.number().min(1).max(1_000_000),
   withdrawFeePct: z.number().min(0).max(20),
   lockDays: z.number().int().min(0).max(365),
+  planEnabled: z.boolean(),
+  memberSharePct: z.number().min(0).max(100),
+  companySharePct: z.number().min(0).max(100),
+  affiliateSharePct: z.number().min(0).max(100),
+  matchingEnabled: z.boolean(),
+  matchL1: z.number().min(0).max(30),
+  matchL2: z.number().min(0).max(30),
+  matchL3: z.number().min(0).max(30),
+  sponsorBonusEnabled: z.boolean(),
+  sponsorBonusPct: z.number().min(0).max(20),
+  earlyExitEnabled: z.boolean(),
+  earlyExitPct: z.number().min(0).max(50),
+  cycleDays: z.array(z.number().int().min(1).max(365)).min(1).max(6),
+  compoundEnabled: z.boolean(),
+  compoundBonusPct: z.number().min(0).max(20),
+  leaderPoolEnabled: z.boolean(),
+  leaderPoolPct: z.number().min(0).max(20),
+  leaderPoolMinTeamUsd: z.number().min(0).max(10_000_000),
+  milestoneEnabled: z.boolean(),
+  milestoneTargetUsd: z.number().min(0).max(10_000_000),
+  milestoneRewardUsd: z.number().min(0).max(1_000_000),
 }).strict()
   .refine(v => v.maxDailyPct >= v.minDailyPct, 'Max daily % must be ≥ min daily %')
-  .refine(v => v.maxAlloc >= v.minAlloc, 'Max allocation must be ≥ min allocation');
+  .refine(v => v.maxAlloc >= v.minAlloc, 'Max allocation must be ≥ min allocation')
+  .refine(v => Math.abs(v.memberSharePct + v.companySharePct + v.affiliateSharePct - 100) < 0.01, 'Profit split must total 100%');
 
 export type BixtradeSettings = z.infer<typeof bixtradeSettingsSchema>;
 
-export const BIXTRADE_DEFAULTS: BixtradeSettings = { enabled: false, minDailyPct: 0.3, maxDailyPct: 0.8, winRate: 92, minAlloc: 100, maxAlloc: 50_000, notice: '', depositOpen: true, withdrawOpen: true, minWithdraw: 20, withdrawFeePct: 2, lockDays: 7 };
+export const BIXTRADE_DEFAULTS: BixtradeSettings = { enabled: false, minDailyPct: 0.3, maxDailyPct: 0.8, winRate: 92, minAlloc: 100, maxAlloc: 50_000, notice: '', depositOpen: true, withdrawOpen: true, minWithdraw: 20, withdrawFeePct: 2, lockDays: 7,
+  planEnabled: true, memberSharePct: 70, companySharePct: 20, affiliateSharePct: 10,
+  matchingEnabled: true, matchL1: 5, matchL2: 3, matchL3: 2,
+  sponsorBonusEnabled: false, sponsorBonusPct: 2,
+  earlyExitEnabled: true, earlyExitPct: 5, cycleDays: [1, 7, 14, 30],
+  compoundEnabled: false, compoundBonusPct: 1,
+  leaderPoolEnabled: false, leaderPoolPct: 2, leaderPoolMinTeamUsd: 10_000,
+  milestoneEnabled: false, milestoneTargetUsd: 5_000, milestoneRewardUsd: 50 };
 
 export function readBixtrade(v: unknown): BixtradeSettings {
   const r = bixtradeSettingsSchema.safeParse({ ...BIXTRADE_DEFAULTS, ...(v && typeof v === 'object' ? v : {}) });
@@ -55,7 +84,16 @@ export function checkBixtradeRequest(s: BixtradeSettings, kind: 'deposit' | 'wit
   return null;
 }
 
-export const withdrawNet = (s: BixtradeSettings, amount: number) => +(amount * (1 - s.withdrawFeePct / 100)).toFixed(2);
+export const withdrawNet = (s: BixtradeSettings, amount: number, early = false) => +(amount * (1 - (s.withdrawFeePct + (early && s.earlyExitEnabled ? s.earlyExitPct : 0)) / 100)).toFixed(2);
+
+/** Display-only split of a gross bot profit by the owner's ratios; nothing here settles to balances. */
+export function profitSplit(s: BixtradeSettings, gross: number) {
+  const r = (p: number) => +(gross * p / 100).toFixed(2);
+  return { member: r(s.memberSharePct), company: r(s.companySharePct), affiliate: r(s.affiliateSharePct),
+    l1: s.matchingEnabled ? r(s.memberSharePct * s.matchL1 / 100) : 0,
+    l2: s.matchingEnabled ? r(s.memberSharePct * s.matchL2 / 100) : 0,
+    l3: s.matchingEnabled ? r(s.memberSharePct * s.matchL3 / 100) : 0 };
+}
 
 type CapRow = { kind: string; amount_usd: number | string; settled_at?: string | null };
 /** Bot capital = settled deposits − settled withdrawals (gross). Unsettled/legacy rows never count. */

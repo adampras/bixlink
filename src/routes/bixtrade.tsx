@@ -3,6 +3,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { BixtradePlan } from '@/components/BixtradePlan';
 import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, bixtradeBotMood, checkBixtradeRequest, dailySeries, projectBixtrade, readBixtrade, withdrawNet, type BixtradeSettings, type BixtradeStrategy } from '@/lib/bixtrade';
 import { BixtradeBot3D } from '@/components/BixtradeBot3D';
 import { useServerFn } from '@tanstack/react-start';
@@ -194,13 +195,14 @@ function BixtradePage() {
           <input className="form-input mt-1" type="number" inputMode="decimal" value={reqAmt} onChange={e => setReqAmt(e.target.value)} placeholder="0.00"/></label>
         <div className="arb-chips">{[100, 500, 1000, 5000].map(v => <button key={v} type="button" onClick={() => setReqAmt(String(v))}>${v.toLocaleString()}</button>)}
           <button type="button" onClick={() => { const max = mode === 'withdraw' ? capital : funding === 'real' ? Math.min(mainUsdt ?? 0, cfg.maxAlloc) : cfg.maxAlloc; setReqAmt(String(Math.floor(max * 100) / 100)); }}>MAX</button></div>
-        {mode === 'withdraw' && n > 0 && <p className="text-xs">You receive ≈ <b className="text-chart-2">{withdrawNet(cfg, n).toFixed(2)} USDT</b> after fee</p>}
+        {mode === 'withdraw' && n > 0 && <p className="text-xs">You receive ≈ <b className="text-chart-2">{withdrawNet(cfg, n).toFixed(2)} USDT</b> after fee{cfg.earlyExitEnabled && cfg.lockDays > 0 ? <> · before lock ends ≈ <b>{withdrawNet(cfg, n, true).toFixed(2)}</b></> : null}</p>}
         <Button disabled={busy || (mode === 'deposit' ? !cfg.depositOpen : !cfg.withdrawOpen)} onClick={submit}>{busy ? 'Sending…' : mode === 'deposit' ? 'Request deposit' : 'Request withdrawal'}</Button>
         {isAdmin && funding === 'virtual' && mode === 'deposit' && <Button variant="outline" disabled={busy} onClick={instantVirtual}><Zap size={15}/> Admin instant virtual deposit</Button>}
         {msg && <p className="text-xs text-chart-3">{msg}</p>}
         <p className="text-[10px] text-muted-foreground">Every request is reviewed by the owner. When a deposit is approved, the amount moves from your main wallet USDT into the bot; an approved withdrawal returns the amount after fee to your main wallet. Projected profit is never added automatically.</p>
       </div>
     </section>
+    <BixtradePlan cfg={cfg}/>
 
     </>}
 

@@ -2066,6 +2066,56 @@ export type Database = {
         }
         Relationships: []
       }
+      bixtrade_bonuses: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          id: string
+          kind: string
+          level: number
+          member_id: string
+          rate_pct: number
+          request_id: string
+          reviewed_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          id?: string
+          kind?: string
+          level?: number
+          member_id: string
+          rate_pct: number
+          request_id: string
+          reviewed_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          level?: number
+          member_id?: string
+          rate_pct?: number
+          request_id?: string
+          reviewed_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixtrade_bonuses_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "bixtrade_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bixtrade_executions: {
         Row: {
           buy_price: number
@@ -3102,6 +3152,10 @@ export type Database = {
       bixtrade_admin_virtual_deposit: {
         Args: { p_amount: number; p_strategy?: string }
         Returns: Json
+      }
+      bixtrade_bonus_review: {
+        Args: { p_approve: boolean; p_id: string }
+        Returns: undefined
       }
       bixtrade_review: {
         Args: { p_id: string; p_note?: string; p_status: string }
