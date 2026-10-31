@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, checkBixtradeRequest, dailySeries, projectBixtrade, readBixtrade, withdrawNet, type BixtradeSettings, type BixtradeStrategy } from '@/lib/bixtrade';
 import robotImg from '@/assets/bixtrade-ai-robot.png';
 import { useServerFn } from '@tanstack/react-start';
-import { runBixtradeCycle } from '@/lib/bixtrade.functions';
+import { runBixtradeCycle, runBixtradeLive } from '@/lib/bixtrade.functions';
 import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Network, Radar, Send, Share2, Volume2, VolumeX, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/bixtrade')({
@@ -22,7 +22,8 @@ export const Route = createFileRoute('/bixtrade')({
 
 type Row = { pair: string; buy: string; sell: string; bid: number; ask: number; spread: number; net: number; ms: number };
 type Req = { id: string; kind: string; amount_usd: number; strategy: string; status: string; created_at: string; admin_note: string | null; settled_usd: number | null; settled_at: string | null; funding: string };
-type Exec = { id: string; ref: string; funding: string; pair: string; buy_venue: string; sell_venue: string; buy_price: number; sell_price: number; qty: number; notional_usd: number; fee_usd: number; net_usd: number; latency_ms: number; executed_at: string };
+type Exec = { id: string; ref: string; funding: string; pair: string; buy_venue: string; sell_venue: string; buy_price: number; sell_price: number; qty: number; notional_usd: number; fee_usd: number; net_usd: number; latency_ms: number; executed_at: string; source?: string };
+type LiveScan = { pair: string; quotes: { venue: string; bid: number; ask: number }[]; buy: { venue: string; ask: number } | null; sell: { venue: string; bid: number } | null; spreadPct: number; netPct: number };
 const FEE = 0.1;
 
 function BixtradePage() {
@@ -57,15 +58,22 @@ function BixtradePage() {
     setReqs((data ?? []) as Req[]);
     const b = await supabase.rpc('bix_asset_balances', { p_user: uid }).single();
     setMainUsdt(Number((b.data as { usdt_balance?: number } | null)?.usdt_balance ?? 0));
-    const e = await supabase.from('bixtrade_executions').select('id,ref,funding,pair,buy_venue,sell_venue,buy_price,sell_price,qty,notional_usd,fee_usd,net_usd,latency_ms,executed_at').eq('user_id', uid).order('executed_at', { ascending: false }).limit(50);
+    const e = await supabase.from('bixtrade_executions').select('id,ref,funding,pair,buy_venue,sell_venue,buy_price,sell_price,qty,notional_usd,fee_usd,net_usd,latency_ms,executed_at,source').eq('user_id', uid).order('executed_at', { ascending: false }).limit(50);
     setExecs((e.data ?? []) as Exec[]);
   }, [uid]);
   useEffect(() => {
     if (!uid || !cfg?.enabled) return;
-    const go = () => Promise.all((['real', 'virtual'] as const).map(f => runCycle({ data: { funding: f } }).catch(() => null))).then(r => { if (r.some(x => x && x.added > 0)) void loadReqs(); });
+    const go = () => Promise.all((['real'] as const).map(f => runCycle({ data: { funding: f } }).catch(() => null))).then(r => { if (r.some(x => x && x.added > 0)) void loadReqs(); });
     void go(); const t = setInterval(go, 5 * 60000); return () => clearInterval(t);
   }, [uid, cfg?.enabled]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { void loadReqs(); }, [loadReqs]);
+  const runLive = useServerFn(runBixtradeLive);
+  const [live, setLive] = useState<{ scan: LiveScan[]; reason: string; at: number } | null>(null);
+  useEffect(() => {
+    if (!uid || !cfg?.enabled) return;
+    const go = () => runLive().then(r => { setLive({ scan: r.scan as LiveScan[], reason: r.reason, at: Date.now() }); if (r.added > 0) void loadReqs(); }).catch(() => {});
+    void go(); const t = setInterval(go, 20000); return () => clearInterval(t);
+  }, [uid, cfg?.enabled]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!cfg?.enabled) return;
     const load = () => fetch(`https://api.binance.com/api/v3/ticker/price?symbols=${encodeURIComponent(JSON.stringify(BIXTRADE_PAIRS))}`)
@@ -185,6 +193,7 @@ function BixtradePage() {
     </>}
 
     {tab === 'radar' && <>
+    <LivePanel live={live}/>
     <section className="arb-card mt-4 overflow-x-auto">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Radar size={18} className="text-chart-3"/> Live spread scanner</h2>
       <table className="mt-3 w-full min-w-[560px] text-left text-xs">
@@ -222,7 +231,7 @@ function BixtradePage() {
       <summary className="cursor-pointer font-display text-lg font-bold">Execution history ({fundExecs.length}) · {funding === 'real' ? 'Real' : 'Virtual'}</summary>
       <p className="mt-1 text-[11px] text-muted-foreground">Recorded by the server every {5} minutes on your settled capital. Total recorded: <b className={realized >= 0 ? 'text-chart-2' : 'text-destructive'}>{realized.toFixed(4)} USDT</b> — a performance record, not added to your wallet.</p>
       <div className="mt-3 grid gap-2">{fundExecs.length ? fundExecs.map(x => <div key={x.id} className="border-t border-border pt-2 text-[11px]">
-        <div className="flex justify-between"><b>{x.pair}</b><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)} USDT</b></div>
+        <div className="flex justify-between"><b>{x.pair}{x.source === 'live_quotes' && <span className="arb-badge is-approved ml-1">LIVE QUOTES</span>}</b><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)} USDT</b></div>
         <div className="text-muted-foreground">Buy {x.buy_venue} @ {Number(x.buy_price).toFixed(2)} → Sell {x.sell_venue} @ {Number(x.sell_price).toFixed(2)} · Qty {Number(x.qty).toFixed(6)}</div>
         <div className="text-muted-foreground">Size {Number(x.notional_usd).toFixed(2)} · Fee {Number(x.fee_usd).toFixed(4)} · {x.latency_ms}ms · {new Date(x.executed_at).toLocaleString()} · <span className="font-mono">{x.ref}</span></div>
       </div>) : <p className="text-xs text-muted-foreground">No executions yet. They start within 5 minutes after a deposit is approved.</p>}</div>
@@ -281,5 +290,21 @@ function ShareCard({ text }: { text: string }) {
       <Button asChild variant="outline" size="sm"><a href={`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><Send size={14}/> Telegram</a></Button>
       <Button variant="outline" size="sm" onClick={typeof navigator !== 'undefined' && 'share' in navigator ? native : copy}><Copy size={14}/> {copied ? 'Copied' : 'Share'}</Button>
     </div>
+  </section>;
+}
+
+const REASON: Record<string, string> = { ok: 'Executed: spread beat both taker fees.', below_fees: 'No trade: every real spread is below the 0.2% round-trip fee — a real bot waits.', no_capital: 'Add Virtual USDT bot capital to start live paper execution.', wait: 'Cooling down — next check in under a minute.', closed: 'BIXTrade is closed.' };
+function LivePanel({ live }: { live: { scan: LiveScan[]; reason: string; at: number } | null }) {
+  return <section className="arb-card mt-4">
+    <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-3"/> Real exchange quotes · Virtual USDT</h2>
+    <p className="text-[11px] text-muted-foreground">Best bid/ask pulled every 20 s from public order books. Virtual USDT trades are paper-executed at these exact prices; no exchange order is placed.</p>
+    {!live ? <p className="py-4 text-center text-xs text-muted-foreground">Connecting to exchanges…</p> : <>
+      <div className="mt-3 grid gap-2">{live.scan.map(s => <div key={s.pair} className="border-t border-border pt-2 text-[11px]">
+        <div className="flex justify-between"><b>{s.pair}</b><b className={s.netPct > 0 ? 'text-chart-2' : 'text-muted-foreground'}>{s.buy ? `${s.spreadPct.toFixed(3)}% · net ${s.netPct.toFixed(3)}%` : 'feed unavailable'}</b></div>
+        {s.buy && s.sell && <div className="text-muted-foreground">Buy {s.buy.venue} @ {s.buy.ask} → Sell {s.sell.venue} @ {s.sell.bid}</div>}
+        <div className="font-mono text-[10px] text-muted-foreground">{s.quotes.map(q => `${q.venue} ${q.bid}/${q.ask}`).join(' · ')}</div>
+      </div>)}</div>
+      <p className="mt-2 text-[11px] text-chart-3">{REASON[live.reason] ?? live.reason} · {new Date(live.at).toLocaleTimeString()}</p>
+    </>}
   </section>;
 }
