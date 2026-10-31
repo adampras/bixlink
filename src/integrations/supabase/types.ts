@@ -2066,11 +2066,72 @@ export type Database = {
         }
         Relationships: []
       }
+      bixtrade_executions: {
+        Row: {
+          buy_price: number
+          buy_venue: string
+          executed_at: string
+          fee_usd: number
+          funding: string
+          gross_usd: number
+          id: string
+          latency_ms: number
+          net_usd: number
+          notional_usd: number
+          pair: string
+          qty: number
+          ref: string
+          sell_price: number
+          sell_venue: string
+          strategy: string
+          user_id: string
+        }
+        Insert: {
+          buy_price: number
+          buy_venue: string
+          executed_at?: string
+          fee_usd: number
+          funding: string
+          gross_usd: number
+          id?: string
+          latency_ms: number
+          net_usd: number
+          notional_usd: number
+          pair: string
+          qty: number
+          ref: string
+          sell_price: number
+          sell_venue: string
+          strategy: string
+          user_id: string
+        }
+        Update: {
+          buy_price?: number
+          buy_venue?: string
+          executed_at?: string
+          fee_usd?: number
+          funding?: string
+          gross_usd?: number
+          id?: string
+          latency_ms?: number
+          net_usd?: number
+          notional_usd?: number
+          pair?: string
+          qty?: number
+          ref?: string
+          sell_price?: number
+          sell_venue?: string
+          strategy?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bixtrade_requests: {
         Row: {
           admin_note: string | null
           amount_usd: number
           created_at: string
+          funding: string
           id: string
           kind: string
           note: string | null
@@ -2085,6 +2146,7 @@ export type Database = {
           admin_note?: string | null
           amount_usd: number
           created_at?: string
+          funding?: string
           id?: string
           kind: string
           note?: string | null
@@ -2099,6 +2161,7 @@ export type Database = {
           admin_note?: string | null
           amount_usd?: number
           created_at?: string
+          funding?: string
           id?: string
           kind?: string
           note?: string | null

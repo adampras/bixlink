@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { AdminFold } from '@/components/AdminNavigation';
 
-type Req = { id: string; user_id: string; kind: string; amount_usd: number; strategy: string; status: string; created_at: string };
+type Req = { id: string; user_id: string; funding?: string; kind: string; amount_usd: number; strategy: string; status: string; created_at: string };
 
 export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unknown; onMessage: (m: string) => void; onSaved?: () => void }) {
   const [s, setS] = useState<BixtradeSettings>(() => readBixtrade(initial));
@@ -17,7 +17,7 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
   const save = useServerFn(updateSetting);
   useEffect(() => { setS(readBixtrade(initial)); }, [initial]);
   const load = useCallback(async () => {
-    let q = supabase.from('bixtrade_requests').select('id,user_id,kind,amount_usd,strategy,status,created_at').order('created_at', { ascending: false }).limit(50);
+    let q = supabase.from('bixtrade_requests').select('id,user_id,funding,kind,amount_usd,strategy,status,created_at').order('created_at', { ascending: false }).limit(50);
     if (filter === 'pending') q = q.eq('status', 'pending');
     const { data } = await q; setReqs((data ?? []) as Req[]);
   }, [filter]);
@@ -58,7 +58,7 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
         <div className="flex items-center justify-between"><b>Permintaan deposit / withdraw bot</b>
           <select className="form-input w-auto" value={filter} onChange={e => setFilter(e.target.value as 'pending' | 'all')}><option value="pending">Pending</option><option value="all">Semua</option></select></div>
         <div className="mt-2 grid gap-2">{reqs.length ? reqs.map(r => <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-2">
-          <span><b className="uppercase">{r.kind}</b> {Number(r.amount_usd).toFixed(2)} USDT{r.kind === 'withdraw' ? ` (bersih ${withdrawNet(s, Number(r.amount_usd)).toFixed(2)})` : ''} · {r.strategy}<br/><span className="text-muted-foreground">{r.user_id.slice(0, 8)} · {new Date(r.created_at).toLocaleString()}</span></span>
+          <span><b className="uppercase">{r.kind}</b>{r.funding === 'virtual' ? ' · VIRTUAL (demo)' : ''} {Number(r.amount_usd).toFixed(2)} USDT{r.kind === 'withdraw' ? ` (bersih ${withdrawNet(s, Number(r.amount_usd)).toFixed(2)})` : ''} · {r.strategy}<br/><span className="text-muted-foreground">{r.user_id.slice(0, 8)} · {new Date(r.created_at).toLocaleString()}</span></span>
           {r.status === 'pending' ? <span className="flex gap-1"><Button size="sm" onClick={() => decide(r.id, 'approved')}>Setujui</Button><Button size="sm" variant="outline" onClick={() => decide(r.id, 'rejected')}>Tolak</Button></span> : <span className={`arb-badge is-${r.status}`}>{r.status}</span>}
         </div>) : <p className="text-muted-foreground">Tidak ada permintaan.</p>}</div>
       </div>

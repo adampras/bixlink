@@ -4,6 +4,8 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, checkBixtradeRequest, dailySeries, projectBixtrade, readBixtrade, withdrawNet, type BixtradeSettings, type BixtradeStrategy } from '@/lib/bixtrade';
+import { useServerFn } from '@tanstack/react-start';
+import { runBixtradeCycle } from '@/lib/bixtrade.functions';
 import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Gauge, Network, Radar, Send, Share2, Volume2, VolumeX, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/bixtrade')({
@@ -18,7 +20,8 @@ export const Route = createFileRoute('/bixtrade')({
 });
 
 type Row = { pair: string; buy: string; sell: string; bid: number; ask: number; spread: number; net: number; ms: number };
-type Req = { id: string; kind: string; amount_usd: number; strategy: string; status: string; created_at: string; admin_note: string | null; settled_usd: number | null; settled_at: string | null };
+type Req = { id: string; kind: string; amount_usd: number; strategy: string; status: string; created_at: string; admin_note: string | null; settled_usd: number | null; settled_at: string | null; funding: string };
+type Exec = { id: string; ref: string; funding: string; pair: string; buy_venue: string; sell_venue: string; buy_price: number; sell_price: number; qty: number; notional_usd: number; fee_usd: number; net_usd: number; latency_ms: number; executed_at: string };
 const FEE = 0.1;
 
 function BixtradePage() {
@@ -36,6 +39,9 @@ function BixtradePage() {
   const [uid, setUid] = useState<string | null>(null);
   const [mainUsdt, setMainUsdt] = useState<number | null>(null);
   const [sound, setSound] = useState(false);
+  const [funding, setFunding] = useState<'real' | 'virtual'>('real');
+  const [execs, setExecs] = useState<Exec[]>([]);
+  const runCycle = useServerFn(runBixtradeCycle);
   const audio = useRef<AudioContext | null>(null);
   useEffect(() => { setSound(localStorage.getItem('bixtrade-sound') === '1'); }, []);
   const toggleSound = () => setSound(v => { const n = !v; localStorage.setItem('bixtrade-sound', n ? '1' : '0'); if (n) { audio.current ??= new AudioContext(); void audio.current.resume(); } return n; });
@@ -43,11 +49,18 @@ function BixtradePage() {
   useEffect(() => { void supabase.from('app_settings').select('value').eq('key', 'bixtrade').maybeSingle().then(({ data }) => setCfg(readBixtrade(data?.value))); void supabase.auth.getUser().then(({ data }) => setUid(data.user?.id ?? null)); }, []);
   const loadReqs = useCallback(async () => {
     if (!uid) return;
-    const { data } = await supabase.from('bixtrade_requests').select('id,kind,amount_usd,strategy,status,created_at,admin_note,settled_usd,settled_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(30);
+    const { data } = await supabase.from('bixtrade_requests').select('id,kind,amount_usd,strategy,status,created_at,admin_note,settled_usd,settled_at,funding').eq('user_id', uid).order('created_at', { ascending: false }).limit(30);
     setReqs((data ?? []) as Req[]);
     const b = await supabase.rpc('bix_asset_balances', { p_user: uid }).single();
     setMainUsdt(Number((b.data as { usdt_balance?: number } | null)?.usdt_balance ?? 0));
+    const e = await supabase.from('bixtrade_executions').select('id,ref,funding,pair,buy_venue,sell_venue,buy_price,sell_price,qty,notional_usd,fee_usd,net_usd,latency_ms,executed_at').eq('user_id', uid).order('executed_at', { ascending: false }).limit(50);
+    setExecs((e.data ?? []) as Exec[]);
   }, [uid]);
+  useEffect(() => {
+    if (!uid || !cfg?.enabled) return;
+    const go = () => Promise.all((['real', 'virtual'] as const).map(f => runCycle({ data: { funding: f } }).catch(() => null))).then(r => { if (r.some(x => x && x.added > 0)) void loadReqs(); });
+    void go(); const t = setInterval(go, 5 * 60000); return () => clearInterval(t);
+  }, [uid, cfg?.enabled]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { void loadReqs(); }, [loadReqs]);
   useEffect(() => {
     if (!cfg?.enabled) return;
@@ -66,7 +79,10 @@ function BixtradePage() {
   }).filter(Boolean) as Row[], [prices, tick]);
   const stream = useMemo(() => rows.filter(r => r.net > 0).map(r => `${r.pair} ${r.buy} → ${r.sell} +${r.net.toFixed(2)}%`), [rows]);
 
-  const capital = botCapital(reqs);
+  const fundReqs = reqs.filter(r => (r.funding ?? 'real') === funding);
+  const capital = botCapital(fundReqs);
+  const fundExecs = execs.filter(x => x.funding === funding);
+  const realized = fundExecs.reduce((a, x) => a + Number(x.net_usd), 0);
   const profitable = rows.filter(r => r.net > 0);
   useEffect(() => {
     if (!sound || !profitable.length || !audio.current) return;
@@ -81,10 +97,10 @@ function BixtradePage() {
     if (!cfg) return;
     if (!uid) { setMsg('Please sign in first.'); return; }
     const n = Number(reqAmt);
-    const err = checkBixtradeRequest(cfg, mode, n) ?? (mode === 'withdraw' && n > capital ? 'Amount exceeds your approved bot capital.' : mode === 'deposit' && mainUsdt !== null && n > mainUsdt ? 'Amount exceeds your main wallet USDT balance.' : null);
+    const err = checkBixtradeRequest(cfg, mode, n) ?? (mode === 'withdraw' && n > capital ? 'Amount exceeds your approved bot capital.' : mode === 'deposit' && funding === 'real' && mainUsdt !== null && n > mainUsdt ? 'Amount exceeds your main wallet USDT balance.' : null);
     if (err) { setMsg(err); return; }
     setBusy(true);
-    const { error } = await supabase.from('bixtrade_requests').insert({ user_id: uid, kind: mode, amount_usd: n, strategy });
+    const { error } = await supabase.from('bixtrade_requests').insert({ user_id: uid, kind: mode, amount_usd: n, strategy, funding });
     setBusy(false);
     if (error) { setMsg(error.message); return; }
     setReqAmt(''); setMsg(`${mode === 'deposit' ? 'Deposit' : 'Withdrawal'} request sent — waiting for owner review.`); void loadReqs();
@@ -113,6 +129,8 @@ function BixtradePage() {
     </div>
     <p className="mt-1 mb-4 text-sm text-muted-foreground">Cross-exchange spread scanner on the world's most liquid USDT pairs across {BIXTRADE_VENUES.length} venues.</p>
 
+    <BotCore active={profitable.length}/>
+
     {stream.length > 0 && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ {s}</span>)}</div></div>}
 
     <section className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -122,12 +140,17 @@ function BixtradePage() {
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><ArrowDownToLine size={18} className="text-chart-3"/> Bot wallet</h2>
       <div className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
-        <div className="arb-stat"><p>Main wallet</p><b>{mainUsdt === null ? '—' : mainUsdt.toFixed(2)}</b><small>USDT available</small></div>
+        <div className="arb-stat"><p>{funding === 'real' ? 'Main wallet' : 'Recorded P/L'}</p><b>{funding === 'real' ? (mainUsdt === null ? '—' : mainUsdt.toFixed(2)) : realized.toFixed(2)}</b><small>{funding === 'real' ? 'USDT available' : 'virtual USDT'}</small></div>
         <div className="arb-stat"><p>Bot capital</p><b>{capital.toFixed(2)}</b><small>USDT · settled</small></div>
         <div className="arb-stat"><p>Pending</p><b>{pending}</b><small>requests</small></div>
         <div className="arb-stat"><p>Lock period</p><b>{cfg.lockDays}</b><small>days</small></div>
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <Button size="sm" variant={funding === 'real' ? 'default' : 'outline'} onClick={() => setFunding('real')}>Real USDT</Button>
+        <Button size="sm" variant={funding === 'virtual' ? 'default' : 'outline'} onClick={() => setFunding('virtual')}>Virtual USDT · demo</Button>
+      </div>
+      {funding === 'virtual' && <p className="mt-2 text-[11px] text-chart-3">Demo mode: virtual USDT runs the bot exactly like real USDT, but it never leaves or returns to your main wallet.</p>}
+      <div className="mt-3 grid grid-cols-2 gap-2">
         <Button variant={mode === 'deposit' ? 'default' : 'outline'} onClick={() => setMode('deposit')} disabled={!cfg.depositOpen}><ArrowDownToLine size={15}/> Deposit</Button>
         <Button variant={mode === 'withdraw' ? 'default' : 'outline'} onClick={() => setMode('withdraw')} disabled={!cfg.withdrawOpen}><ArrowUpFromLine size={15}/> Withdraw</Button>
       </div>
@@ -172,15 +195,33 @@ function BixtradePage() {
 
     <ShareCard text={`BIXTrade Arbitrage Bot · ${BIXTRADE_STRATEGIES.find(x => x.key === strategy)?.name}\nProjection ${days}d on ${proj.amount} USDT: ${proj.low.toFixed(2)}–${proj.high.toFixed(2)} USDT (not guaranteed)\nWin rate ${cfg.winRate}% · ${BIXTRADE_VENUES.length} venues`}/>
 
+    <details className="arb-card mt-4" open>
+      <summary className="cursor-pointer font-display text-lg font-bold">Execution history ({fundExecs.length}) · {funding === 'real' ? 'Real' : 'Virtual'}</summary>
+      <p className="mt-1 text-[11px] text-muted-foreground">Recorded by the server every {5} minutes on your settled capital. Total recorded: <b className={realized >= 0 ? 'text-chart-2' : 'text-destructive'}>{realized.toFixed(4)} USDT</b> — a performance record, not added to your wallet.</p>
+      <div className="mt-3 grid gap-2">{fundExecs.length ? fundExecs.map(x => <div key={x.id} className="border-t border-border pt-2 text-[11px]">
+        <div className="flex justify-between"><b>{x.pair}</b><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)} USDT</b></div>
+        <div className="text-muted-foreground">Buy {x.buy_venue} @ {Number(x.buy_price).toFixed(2)} → Sell {x.sell_venue} @ {Number(x.sell_price).toFixed(2)} · Qty {Number(x.qty).toFixed(6)}</div>
+        <div className="text-muted-foreground">Size {Number(x.notional_usd).toFixed(2)} · Fee {Number(x.fee_usd).toFixed(4)} · {x.latency_ms}ms · {new Date(x.executed_at).toLocaleString()} · <span className="font-mono">{x.ref}</span></div>
+      </div>) : <p className="text-xs text-muted-foreground">No executions yet. They start within 5 minutes after a deposit is approved.</p>}</div>
+    </details>
+
     <details className="arb-card mt-4">
       <summary className="cursor-pointer font-display text-lg font-bold">My bot requests ({reqs.length})</summary>
       <div className="mt-3 grid gap-2">{reqs.length ? reqs.map(r => <div key={r.id} className="flex items-center justify-between border-t border-border pt-2 text-xs">
-        <span><b className="uppercase">{r.kind}</b> · {Number(r.amount_usd).toFixed(2)} USDT<br/><span className="text-muted-foreground">{new Date(r.created_at).toLocaleString()}{r.admin_note ? ` · ${r.admin_note}` : ''}</span></span>
+        <span><b className="uppercase">{r.kind}</b>{r.funding === 'virtual' ? ' · VIRTUAL' : ''} · {Number(r.amount_usd).toFixed(2)} USDT<br/><span className="text-muted-foreground">{new Date(r.created_at).toLocaleString()}{r.admin_note ? ` · ${r.admin_note}` : ''}</span></span>
         <span className={`arb-badge is-${r.status}`}>{r.status}</span></div>) : <p className="text-xs text-muted-foreground">No requests yet.</p>}</div>
     </details>
 
     <p className="mt-6 text-[11px] leading-5 text-muted-foreground">Risk disclosure: scanner routes and spreads are a display simulation built on live reference prices; BIXTrade does not place orders on external exchanges. Projection ranges are set by the owner, are not guaranteed, and nothing is added to your balance automatically — all deposits and withdrawals are owner-reviewed internal records.</p>
   </main></BixShell>;
+}
+
+function BotCore({ active }: { active: number }) {
+  return <div className="arb-core" data-hot={active > 0 ? '1' : '0'} aria-hidden>
+    <div className="arb-core-ring r1"/><div className="arb-core-ring r2"/><div className="arb-core-ring r3"/>
+    <div className="arb-core-orb"><Cpu size={30}/></div>
+    <span className="arb-core-label">{active ? `${active} profitable routes` : 'Scanning venues'}</span>
+  </div>;
 }
 
 const NODE = BIXTRADE_VENUES.map((v, i) => { const a = (i / BIXTRADE_VENUES.length) * Math.PI * 2 - Math.PI / 2; return { v, x: 150 + Math.cos(a) * 105, y: 105 + Math.sin(a) * 78 }; });
