@@ -7,6 +7,8 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { BIXGO_SERVICES, bixgoFare, readBixgo, type BixgoService, type BixgoSettings } from '@/lib/bixgo';
 import { ArrowLeft, Bike, Car, CheckCircle2, Construction, History, MapPin, Minus, Navigation, Package, Plus, ShoppingBasket, Star, UtensilsCrossed } from 'lucide-react';
 import { toast } from 'sonner';
+import { BixgoRideBooking } from '@/components/BixgoRideBooking';
+import { BixgoBills } from '@/components/BixgoBills';
 import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
 
 export const Route = createFileRoute('/bixgo')({
@@ -69,6 +71,7 @@ function BixgoPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [tab, setTab] = useState<'order' | 'history'>('order');
   const [view, setView] = useState<BixgoView>('home');
+  const [sub, setSub] = useState<null | 'ride' | 'car' | 'bills'>(null);
   const { user } = useMember();
 
   useEffect(() => { void supabase.from('app_settings').select('value').eq('key', 'bixgo').maybeSingle().then(({ data }) => setCfg(readBixgo(data?.value))); }, []);
@@ -107,13 +110,16 @@ function BixgoPage() {
   const pos = step === 'track' ? 10 + stage * 27 : 9;
 
   const enabledSet = new Set(list.map(s => s.key));
-  const soon = (l: string) => toast(`${l} — segera hadir di BIXGO`);
-  const pick = (s: BixgoService) => { setSvc(s); setTier(0); setCart({}); setStep('form'); setView('order'); setTab('order'); };
+  const soon = (l: string) => l === 'Pulsa & bills' ? setSub('bills') : toast(`${l} — segera hadir di BIXGO`);
+  const pick = (s: BixgoService) => { if (s === 'ride' || s === 'car') { setSub(s); return; } setSvc(s); setTier(0); setCart({}); setStep('form'); setView('order'); setTab('order'); };
   const go = (v: BixgoView) => { setView(v); if (v === 'activity') setTab('history'); if (v === 'order') setTab('order'); };
   const memberName = user?.email?.split('@')[0] || 'Member BIXLINK';
 
   return <div className="bixgo-grab fixed inset-0 z-[60] overflow-y-auto"><div className="mx-auto min-h-full max-w-xl">
     {!cfg.enabled && isAdmin && <p className="border-b border-accent/40 bg-accent/20 px-3 py-2 text-[11px]">Admin 1 preview · Under Reconstruction (only visible to you)</p>}
+    {sub === 'bills' && <BixgoBills onBack={() => setSub(null)}/>}
+    {(sub === 'ride' || sub === 'car') && <BixgoRideBooking cfg={cfg} start={sub} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
+    {!sub && <>
     {view === 'home' && <BixgoHome enabled={enabledSet} balance="Buka Wallet" onPick={pick} onSoon={soon}/>}
     {view === 'inbox' && <BixgoInbox/>}
     {view === 'account' && <BixgoAccount name={memberName} balance="Lihat saldo" onBack={() => go('home')} onSoon={soon}/>}
@@ -189,5 +195,6 @@ function BixgoPage() {
     <p className="mt-4 text-center text-[10px] text-muted-foreground">BIXGO is in preview. Fares are estimates; no booking, payment or dispatch is performed.</p>
     </main>}
     <BixgoBottomNav view={view} setView={go} inbox={3}/>
+    </>}
   </div></div>;
 }
