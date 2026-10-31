@@ -24,7 +24,8 @@ export const Route = createFileRoute('/bixtok')({
   component: BixtokPage,
 });
 
-type Cfg = { link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max?: number; live_cta?: boolean; host_gifts?: boolean };
+type Cfg = { link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean };
+type Sched = { id: string; title: string; host_name: string; starts_at: string; reminded: boolean; count: number };
 type Gift = { id: string; name: string; emoji: string; currency: string; price: number };
 type Video = { id: string; creator_name: string; creator_id: string | null; caption: string; video_url: string; likes: number; media_path: string | null; media_kind: string; filter: string; overlay: string; allow_gifts: boolean; src: string; text_style: Partial<TextStyle> | null; music_title: string | null; music_url: string | null; source_kind: string; clean?: string | undefined };
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
@@ -33,14 +34,17 @@ type Msg = { id: string; name: string; body: string; kind: string };
 function BixtokPage() {
   const { user, ready } = useMember();
   const q = useQuery({ queryKey: ['bixtok', user?.id], enabled: Boolean(user), refetchInterval: 60_000, queryFn: async () => {
-    const [c, g, v, l, s, f, o] = await Promise.all([
+    const [c, g, v, l, s, f, o, sc, rm, rc] = await Promise.all([
       supabase.from('bixtok_config').select('*').eq('id', 1).single(),
       supabase.from('bixtok_gifts').select('id,name,emoji,currency,price').eq('enabled', true).order('sort'),
       supabase.from('bixtok_videos').select('id,creator_name,creator_id,caption,video_url,likes,media_path,media_kind,filter,overlay,allow_gifts,text_style,music_title,music_url,source_kind').eq('enabled', true).order('created_at', { ascending: false }).limit(60),
       supabase.from('bixtok_lives').select('id,host_id,host_name,title,started_at,kind').eq('status', 'live').order('started_at', { ascending: false }),
       supabase.rpc('bixtok_my_stake_usd'),
       supabase.from('bixtok_follows').select('follower_id,followee_id').or(`follower_id.eq.${user!.id},followee_id.eq.${user!.id}`),
-      supabase.rpc('bixtok_am_owner1'),
+      supabase.rpc('bixtok_am_official'),
+      supabase.from('bixtok_live_schedules').select('id,title,host_name,starts_at').eq('status', 'scheduled').gte('starts_at', new Date(Date.now() - 3 * 3600_000).toISOString()).order('starts_at').limit(10),
+      supabase.from('bixtok_live_reminders').select('schedule_id').eq('user_id', user!.id),
+      supabase.rpc('bixtok_reminder_counts'),
     ]);
     if (c.error) throw c.error;
     const rows = (v.data ?? []) as Omit<Video, 'src'>[];
@@ -57,7 +61,10 @@ function BixtokPage() {
     const following = new Set(fr.filter(x => x.follower_id === user!.id).map(x => x.followee_id));
     const followers = new Set(fr.filter(x => x.followee_id === user!.id).map(x => x.follower_id));
     const lives = ((l.data ?? []) as Live[]).sort((a, b) => Number(b.kind === 'official') - Number(a.kind === 'official'));
-    return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives, stake: Number(s.data ?? 0), following, followers, owner1: o.data === true };
+    const mineR = new Set(((rm.data ?? []) as { schedule_id: string }[]).map(r => r.schedule_id));
+    const counts = new Map(((rc.data ?? []) as { schedule_id: string; n: number }[]).map(r => [r.schedule_id, Number(r.n)]));
+    const schedules: Sched[] = ((sc.data ?? []) as Omit<Sched, 'reminded' | 'count'>[]).map(x => ({ ...x, reminded: mineR.has(x.id), count: counts.get(x.id) ?? 0 }));
+    return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives, stake: Number(s.data ?? 0), following, followers, owner1: o.data === true, schedules };
   } });
   const following = q.data?.following instanceof Set ? q.data.following : new Set<string>();
   const followers = q.data?.followers instanceof Set ? q.data.followers : new Set<string>();
@@ -73,6 +80,18 @@ function BixtokPage() {
     const l = q.data.lives.find(x => x.id === id);
     if (l) setRoom(l); else setNote('This LIVE has ended.');
   }, [q.data]);
+  // "Remind me": when a reminded official LIVE starts while BIXTOK is open, alert once with a chime.
+  const alerted = useRef(new Set<string>());
+  useEffect(() => {
+    if (!q.data || room) return;
+    const off = q.data.lives.find(l => l.kind === 'official' && !alerted.current.has(l.id));
+    if (!off || !q.data.schedules.some(s => s.reminded && Math.abs(new Date(s.starts_at).getTime() - Date.now()) < 3 * 3600_000) && !q.data.schedules.length) return;
+    if (!q.data.schedules.some(s => s.reminded)) return;
+    alerted.current.add(off.id);
+    setNote(`🔴 OFFICIAL LIVE started: ${off.title}`);
+    try { const c = new AudioContext(); [660, 880, 1175].forEach((f, i) => { const o = c.createOscillator(); const g = c.createGain(); o.frequency.value = f; g.gain.setValueAtTime(0.1, c.currentTime + i * 0.15); g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + i * 0.15 + 0.3); o.connect(g).connect(c.destination); o.start(c.currentTime + i * 0.15); o.stop(c.currentTime + i * 0.15 + 0.32); }); } catch { /* no audio */ }
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') { try { new Notification('BIXTOK OFFICIAL LIVE', { body: off.title }); } catch { /* unsupported */ } }
+  }, [q.data, room]);
   const [studio, setStudio] = useState(false);
   const [note, setNote] = useState('');
   const qc = useQueryClient();
@@ -176,7 +195,7 @@ function AutoVideo({ src, filter, muted }: { src: string; filter?: string | null
   return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }}/>;
 }
 
-function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
+function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean; schedules: Sched[] }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
   const qc = useQueryClient(); const [title, setTitle] = useState(''); const [busy, setBusy] = useState(false);
   const eligible = data.stake > 0 && data.stake >= Number(data.cfg.live_min_stake_usd);
   const [otitle, setOtitle] = useState('');
@@ -185,7 +204,25 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
     setBusy(false); if (error) return onNote(error.message);
     await qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Official LIVE started · all members notified');
     const { data: me } = await supabase.auth.getUser();
-    onEnter({ id: id as string, host_id: me.user!.id, host_name: 'BIXLINK OFFICIAL', title: otitle || 'BIXLINK Official Presentation', started_at: new Date().toISOString(), kind: 'official' }); };
+    const { data: row } = await supabase.from('bixtok_lives').select('host_name').eq('id', id as string).maybeSingle();
+    onEnter({ id: id as string, host_id: me.user!.id, host_name: row?.host_name ?? 'BIXLINK OFFICIAL', title: otitle || 'BIXLINK Official Presentation', started_at: new Date().toISOString(), kind: 'official' }); };
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const [sched, setSched] = useState({ title: '', at: '' });
+  const remind = async (s: Sched) => {
+    const { data: me } = await supabase.auth.getUser(); if (!me.user) return;
+    const { error } = s.reminded ? await supabase.from('bixtok_live_reminders').delete().eq('schedule_id', s.id).eq('user_id', me.user.id) : await supabase.from('bixtok_live_reminders').insert({ schedule_id: s.id, user_id: me.user.id });
+    if (error) return onNote(error.message);
+    if (!s.reminded && typeof Notification !== 'undefined' && Notification.permission === 'default') void Notification.requestPermission().catch(() => {});
+    onNote(s.reminded ? 'Reminder removed' : 'We will remind you while BIXTOK is open'); qc.invalidateQueries({ queryKey: ['bixtok'] });
+  };
+  const addSched = async () => {
+    const at = new Date(sched.at); if (!sched.title.trim() || Number.isNaN(at.getTime()) || at.getTime() < Date.now()) return onNote('Enter a title and a future date/time.');
+    const { data: me } = await supabase.auth.getUser();
+    const { error } = await supabase.from('bixtok_live_schedules').insert({ title: sched.title.trim().slice(0, 80), starts_at: at.toISOString(), created_by: me.user!.id });
+    if (error) return onNote(error.message);
+    setSched({ title: '', at: '' }); onNote('Official LIVE scheduled'); qc.invalidateQueries({ queryKey: ['bixtok'] });
+  };
   return <div className="bixtok-lobby">
     {data.owner1 && <div className="bixtok-golive bxt-official-card">
       <h2><Radio size={18}/> OFFICIAL BROADCAST</h2>
@@ -193,7 +230,19 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
       <form onSubmit={e => { e.preventDefault(); void official(); }}>
         <input className="form-input" maxLength={80} placeholder="Presentation title" value={otitle} onChange={e => setOtitle(e.target.value)}/>
         <button className="bixtok-cta" disabled={busy}>{busy ? 'Starting…' : 'Go Live Official'}</button>
+      </form>
+      <form className="mt-3" onSubmit={e => { e.preventDefault(); void addSched(); }}>
+        <p className="text-xs font-bold">Schedule an official LIVE</p>
+        <input className="form-input mt-1" maxLength={80} placeholder="e.g. BIXLINK Webinar" value={sched.title} onChange={e => setSched({ ...sched, title: e.target.value })}/>
+        <input className="form-input mt-1" type="datetime-local" aria-label="Start time" value={sched.at} onChange={e => setSched({ ...sched, at: e.target.value })}/>
+        <button className="bixtok-cta mt-1">Add to schedule</button>
       </form></div>}
+    {data.schedules.length > 0 && <ul className="bxt-sched" aria-label="Upcoming official LIVE">{data.schedules.map(s => <li key={s.id}>
+      <b>📅 {s.title}</b><time>{countdown(new Date(s.starts_at).getTime() - now)}</time>
+      <small>@{s.host_name} · {new Date(s.starts_at).toLocaleString()} · {s.count} reminded</small>
+      <button className={s.reminded ? 'on' : ''} onClick={() => remind(s)}>{s.reminded ? '✓ Reminder on' : '🔔 Remind me'}</button>
+      <a href={calendarUrl(s)} target="_blank" rel="noreferrer">Add to calendar</a>
+    </li>)}</ul>}
     <div className="bixtok-golive">
       <h2><Radio size={18}/> Community LIVE</h2>
       {!data.cfg.live_enabled ? <p className="text-xs text-muted-foreground">Go LIVE is closed by the admin right now.</p>
@@ -212,6 +261,17 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
     <div className="bixtok-live-grid">{data.lives.map(l => <button key={l.id} className={l.kind === 'official' ? 'bxt-official' : ''} onClick={() => onEnter(l)}><span className="bixtok-badge">{l.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span><b>{l.title}</b><small>@{l.host_name}</small></button>)}</div>
     {!data.lives.length && <p className="mt-3 text-sm text-muted-foreground">Nobody is live yet.</p>}
   </div>;
+}
+
+export function countdown(ms: number): string {
+  if (ms <= 0) return 'Starting now';
+  const t = Math.floor(ms / 1000); const d = Math.floor(t / 86400); const h = Math.floor((t % 86400) / 3600); const m = Math.floor((t % 3600) / 60); const s = t % 60;
+  return d > 0 ? `${d}d ${h}h ${m}m` : `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+function calendarUrl(s: { title: string; starts_at: string }): string {
+  const f = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, '');
+  const a = new Date(s.starts_at); const b = new Date(a.getTime() + 3600_000);
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`BIXTOK OFFICIAL LIVE: ${s.title}`)}&dates=${f(a)}/${f(b)}&details=${encodeURIComponent('Join on BIXTOK → LIVE: https://bixlink.com/bixtok')}`;
 }
 
 type GiftTarget = { video?: string; live?: string; recipients?: { id: string; name: string }[] };
