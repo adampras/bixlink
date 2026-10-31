@@ -4,21 +4,23 @@ import { Clapperboard, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 
-type Cfg = { link_slots: number; max_links: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max: number; live_cta: boolean; host_gifts: boolean };
+type Cfg = { link_slots: number; max_links: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max: number; live_cta: boolean; host_gifts: boolean; auto_follow_back: boolean; replay_enabled: boolean; soundboard: boolean; pk_enabled: boolean; showcase_enabled: boolean; pk_bix_weight: number };
 const FEATURES: [string, string][] = [['upload', 'Posting link & kamera member'], ['music', 'Pencarian musik'], ['filters', 'Filter wajah'], ['text', 'Teks bebas geser'], ['likes', 'Like'], ['comments', 'Komentar LIVE'], ['share', 'Bagikan'], ['bixp_gifts', 'Saweran BIXP'], ['bix_gifts', 'Saweran BIXCOIN']];
 
 export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ['admin-bixtok'], queryFn: async () => {
-    const [c, g, v, l, so] = await Promise.all([
+    const [c, g, v, l, so, oh, sc] = await Promise.all([
       supabase.from('bixtok_config').select('*').eq('id', 1).single(),
       supabase.from('bixtok_gifts').select('*').order('sort'),
       supabase.from('bixtok_videos').select('*').order('sort'),
       supabase.from('bixtok_lives').select('*').eq('status', 'live').order('started_at', { ascending: false }),
       supabase.from('bixtok_sounds').select('*').order('sort'),
+      supabase.from('bixtok_official_hosts').select('user_id,display_name,created_at').order('created_at'),
+      supabase.from('bixtok_live_schedules').select('id,title,host_name,starts_at,status').eq('status', 'scheduled').order('starts_at'),
     ]);
     if (c.error) throw c.error;
-    return { cfg: c.data as unknown as Cfg, gifts: g.data ?? [], videos: v.data ?? [], lives: l.data ?? [], sounds: so.data ?? [] };
+    return { cfg: c.data as unknown as Cfg, gifts: g.data ?? [], videos: v.data ?? [], lives: l.data ?? [], sounds: so.data ?? [], officials: oh.data ?? [], schedules: sc.data ?? [] };
   } });
   const [draft, setDraft] = useState<Cfg | null>(null);
   const cfg = draft ?? q.data?.cfg ?? null;
@@ -28,6 +30,8 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
   const [gift, setGift] = useState({ name: '', emoji: '🎁', currency: 'BIXP', price: '1' });
   const [vid, setVid] = useState({ caption: '', video_url: '', creator_name: 'BIXLINK', creator_code: '' });
   const [links, setLinks] = useState<string[]>(['', '', '', '', '']);
+  const [off, setOff] = useState({ code: '', name: '' });
+  const [sched, setSched] = useState({ title: '', at: '', host: 'BIXLINK OFFICIAL' });
   const [snd, setSnd] = useState({ title: '', artist: '', category: 'Trending', audio_url: '' });
 
   if (q.isLoading || !cfg) return <p className="mt-8 text-sm text-muted-foreground">Memuat BIXTOK…</p>;
@@ -43,11 +47,17 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
         <Toggle on={cfg.gifts_enabled} label="Saweran dibuka" onChange={v => set({ gifts_enabled: v })}/>
         <Toggle on={cfg.host_gifts !== false} label="Host bisa sawer tamu panggung" onChange={v => set({ host_gifts: v })}/>
         <Toggle on={cfg.live_cta !== false} label="Tombol Staking/Presale/Shop di LIVE" onChange={v => set({ live_cta: v })}/>
+        <Toggle on={cfg.auto_follow_back !== false} label="Akun OFFICIAL otomatis follow balik member" onChange={v => set({ auto_follow_back: v })}/>
+        <Toggle on={cfg.replay_enabled !== false} label="Rekam & arsip LIVE (Replay)" onChange={v => set({ replay_enabled: v })}/>
+        <Toggle on={cfg.soundboard !== false} label="Soundboard host" onChange={v => set({ soundboard: v })}/>
+        <Toggle on={cfg.showcase_enabled !== false} label="Etalase promo di LIVE" onChange={v => set({ showcase_enabled: v })}/>
+        <Toggle on={cfg.pk_enabled !== false} label="PK Battle" onChange={v => set({ pk_enabled: v })}/>
         {FEATURES.map(([k, l]) => <Toggle key={k} on={cfg.features[k] !== false} label={l} onChange={v => set({ features: { ...cfg.features, [k]: v } })}/>)}
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="text-xs text-muted-foreground">Syarat LIVE: minimal total staking aktif (USD)<input className="form-input mt-1" type="number" min={0} step="1" value={cfg.live_min_stake_usd} onChange={e => set({ live_min_stake_usd: Number(e.target.value) })}/></label>
         <label className="text-xs text-muted-foreground">Durasi LIVE maksimal (menit)<input className="form-input mt-1" type="number" min={5} max={720} value={cfg.live_max_minutes} onChange={e => set({ live_max_minutes: Number(e.target.value) })}/></label>
+        <label className="text-xs text-muted-foreground">Skor PK: 1 BIX = berapa poin (1 BIXP = 1 poin)<input className="form-input mt-1" type="number" min={1} max={10000} value={cfg.pk_bix_weight ?? 100} onChange={e => set({ pk_bix_weight: Number(e.target.value) })}/></label>
         <label className="text-xs text-muted-foreground">Maksimal tamu naik panggung (1–5)<input className="form-input mt-1" type="number" min={1} max={5} value={cfg.stage_max ?? 5} onChange={e => set({ stage_max: Number(e.target.value) })}/></label>
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -60,7 +70,40 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
         <Button variant="outline" size="sm" onClick={() => set({ menus: [...cfg.menus, { key: `custom${Date.now()}`, label: 'New tab', enabled: true }] })}><Plus/>Tambah menu</Button>
         <p className="text-[11px] text-muted-foreground">Tab kustom menampilkan feed video utama.</p>
       </div>
-      <Button className="mt-5" disabled={!draft} onClick={() => run(supabase.from('bixtok_config').update({ enabled: cfg.enabled, live_enabled: cfg.live_enabled, gifts_enabled: cfg.gifts_enabled, live_min_stake_usd: Math.max(0, cfg.live_min_stake_usd), live_max_minutes: Math.min(720, Math.max(5, cfg.live_max_minutes)), features: cfg.features, menus: cfg.menus, stage_max: Math.min(5, Math.max(1, Math.round(cfg.stage_max ?? 5))), live_cta: cfg.live_cta !== false, host_gifts: cfg.host_gifts !== false, link_slots: Math.min(20, Math.max(1, cfg.link_slots)), max_links: Math.min(20, Math.max(1, cfg.max_links, cfg.link_slots)), updated_at: new Date().toISOString() }).eq('id', 1), 'Pengaturan BIXTOK tersimpan.')}>Simpan pengaturan</Button>
+      <Button className="mt-5" disabled={!draft} onClick={() => run(supabase.from('bixtok_config').update({ enabled: cfg.enabled, live_enabled: cfg.live_enabled, gifts_enabled: cfg.gifts_enabled, live_min_stake_usd: Math.max(0, cfg.live_min_stake_usd), live_max_minutes: Math.min(720, Math.max(5, cfg.live_max_minutes)), features: cfg.features, menus: cfg.menus, stage_max: Math.min(5, Math.max(1, Math.round(cfg.stage_max ?? 5))), live_cta: cfg.live_cta !== false, host_gifts: cfg.host_gifts !== false, auto_follow_back: cfg.auto_follow_back !== false, replay_enabled: cfg.replay_enabled !== false, soundboard: cfg.soundboard !== false, showcase_enabled: cfg.showcase_enabled !== false, pk_enabled: cfg.pk_enabled !== false, pk_bix_weight: Math.min(10000, Math.max(1, Number(cfg.pk_bix_weight) || 100)), link_slots: Math.min(20, Math.max(1, cfg.link_slots)), max_links: Math.min(20, Math.max(1, cfg.max_links, cfg.link_slots)), updated_at: new Date().toISOString() }).eq('id', 1), 'Pengaturan BIXTOK tersimpan.')}>Simpan pengaturan</Button>
+    </div>
+
+    <div className="rounded-xl border border-border bg-card p-5">
+      <h3 className="font-bold">Akun penyiar OFFICIAL LIVE</h3>
+      <p className="mt-1 text-[11px] text-muted-foreground">Akun di daftar ini mendapat tombol OFFICIAL BROADCAST, lencana OFFICIAL LIVE, dan siarannya mengirim notifikasi ke semua member. Admin 1 selalu termasuk.</p>
+      <div className="mt-3 space-y-2">{q.data!.officials.map(o => <div key={o.user_id} className="flex items-center gap-2 rounded-lg border border-border p-2 text-sm">
+        <span className="flex-1">📡 <b>{o.display_name}</b></span>
+        <Button size="sm" variant="destructive" onClick={() => { if (confirm(`Cabut akses OFFICIAL LIVE ${o.display_name}?`)) void run(supabase.rpc('bixtok_official_remove', { p_user: o.user_id }), 'Akses OFFICIAL LIVE dicabut.'); }}>Hapus</Button>
+      </div>)}{!q.data!.officials.length && <p className="text-xs text-muted-foreground">Belum ada akun tambahan.</p>}</div>
+      <form className="mt-3 grid gap-2 sm:grid-cols-3" onSubmit={e => { e.preventDefault(); if (!off.code.trim()) return; void run(supabase.rpc('bixtok_official_add', { p_code: off.code, p_name: off.name }), 'Akun OFFICIAL LIVE ditambahkan.'); setOff({ code: '', name: '' }); }}>
+        <input className="form-input" required placeholder="BIX ID / username member" value={off.code} onChange={e => setOff({ ...off, code: e.target.value })}/>
+        <input className="form-input" placeholder="Nama tampil (mis. BIXLINK INDONESIA)" maxLength={40} value={off.name} onChange={e => setOff({ ...off, name: e.target.value })}/>
+        <Button type="submit"><Plus/>Tambah akun</Button>
+      </form>
+    </div>
+
+    <div className="rounded-xl border border-border bg-card p-5">
+      <h3 className="font-bold">Jadwal OFFICIAL LIVE</h3>
+      <p className="mt-1 text-[11px] text-muted-foreground">Member melihat hitung mundur dan bisa menekan "Remind me".</p>
+      <div className="mt-3 space-y-2">{q.data!.schedules.map(s => <div key={s.id} className="flex items-center gap-2 rounded-lg border border-border p-2 text-sm">
+        <span className="flex-1">📅 <b>{s.title}</b> · @{s.host_name} · {new Date(s.starts_at).toLocaleString('id-ID')}</span>
+        <Button size="sm" variant="ghost" onClick={() => run(supabase.from('bixtok_live_schedules').update({ status: 'cancelled' }).eq('id', s.id), 'Jadwal dibatalkan.')}>Batalkan</Button>
+      </div>)}{!q.data!.schedules.length && <p className="text-xs text-muted-foreground">Belum ada jadwal.</p>}</div>
+      <form className="mt-3 grid gap-2 sm:grid-cols-4" onSubmit={async e => { e.preventDefault();
+        const at = new Date(sched.at); if (!sched.title.trim() || Number.isNaN(at.getTime()) || at.getTime() < Date.now()) return onMessage('Isi judul dan waktu yang akan datang.');
+        const { data: me } = await supabase.auth.getUser();
+        await run(supabase.from('bixtok_live_schedules').insert({ title: sched.title.trim().slice(0, 80), host_name: sched.host.trim().slice(0, 40) || 'BIXLINK OFFICIAL', starts_at: at.toISOString(), created_by: me.user!.id }), 'Jadwal OFFICIAL LIVE ditambahkan.');
+        setSched({ title: '', at: '', host: 'BIXLINK OFFICIAL' }); }}>
+        <input className="form-input" required placeholder="Judul (mis. Webinar BIXLINK)" value={sched.title} onChange={e => setSched({ ...sched, title: e.target.value })}/>
+        <input className="form-input" placeholder="Nama host" value={sched.host} onChange={e => setSched({ ...sched, host: e.target.value })}/>
+        <input className="form-input" required type="datetime-local" aria-label="Waktu mulai" value={sched.at} onChange={e => setSched({ ...sched, at: e.target.value })}/>
+        <Button type="submit"><Plus/>Jadwalkan</Button>
+      </form>
     </div>
 
     <div className="rounded-xl border border-border bg-card p-5">
