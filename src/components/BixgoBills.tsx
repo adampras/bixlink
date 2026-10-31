@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useServerFn } from '@tanstack/react-start';
+import { ppobPriceList } from '@/lib/ppob.functions';
 import { ArrowLeft, BookOpen, CheckCircle2, Droplets, Gamepad2, Gift, GraduationCap, Heart, Home, ListChecks, Phone, ReceiptText, Search, Smartphone, Sparkles, Tv, Wallet, Wifi, X, Zap } from 'lucide-react';
 
 const idr = (n: number) => 'Rp' + n.toLocaleString('id-ID');
@@ -20,6 +22,7 @@ const BILLS: Item[] = [
   { label: 'Asuransi', icon: BookOpen, tone: 'text-red-400' }, { label: 'Voucher', icon: Gift, tone: 'text-yellow-400' },
 ];
 const QUICK = [['Top Up', 'Pulsa/Paket'], ['Tagihan', 'PDAM'], ['Top Up', 'Token Listrik'], ['Tagihan', 'Tagihan Listrik']];
+const CAT: Record<string, 'Pulsa' | 'Data' | 'PLN' | 'E-Money' | 'Games'> = { 'Pulsa': 'Pulsa', 'Pulsa/Paket': 'Pulsa', 'Paket Data': 'Data', 'Token Listrik': 'PLN', 'E-Money': 'E-Money', 'Game Top-Up': 'Games' };
 const AMOUNTS = [10_000, 20_000, 50_000, 100_000, 200_000, 500_000];
 
 /** Demo bills & top-up hub modeled on the reference. No purchase, provider call or charge happens. */
@@ -30,6 +33,11 @@ export function BixgoBills({ onBack }: { onBack: () => void }) {
   const [amt, setAmt] = useState(AMOUNTS[1]!);
   const [done, setDone] = useState(false);
   const [log, setLog] = useState<{ label: string; num: string; amt: number; at: string }[]>([]);
+  const priceList = useServerFn(ppobPriceList);
+  const [real, setReal] = useState<{ sku: string; name: string; brand: string; price: number; active: boolean }[] | null>(null);
+  const [sku, setSku] = useState('');
+  useEffect(() => { setReal(null); setSku(''); const c = open ? CAT[open] : undefined; if (!c) return; let live = true;
+    priceList({ data: { category: c } }).then(r => { if (live && r.available) setReal(r.items); }).catch(() => {}); return () => { live = false; }; }, [open]);
   const f = (l: Item[]) => l.filter(i => !q || i.label.toLowerCase().includes(q.toLowerCase()));
   const pick = (l: string) => { setOpen(l); setNum(''); setDone(false); };
 
@@ -62,10 +70,11 @@ export function BixgoBills({ onBack }: { onBack: () => void }) {
     {open && <div className="fixed inset-0 z-[70] flex items-end bg-background/70 backdrop-blur-sm" onClick={() => setOpen(null)}>
       <div className="mx-auto w-full max-w-xl rounded-t-3xl border-t border-border bg-background p-4" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between"><b className="text-lg">{open}</b><button aria-label="Tutup" onClick={() => setOpen(null)}><X className="h-5 w-5"/></button></div>
-        {done ? <div className="py-6 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><p className="mt-2 font-bold">Transaksi demo tercatat</p><p className="text-xs text-muted-foreground">Pratinjau saja — tidak ada saldo terpotong dan tidak ada pengisian ke operator.</p></div> : <>
+        {done ? <div className="py-6 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><p className="mt-2 font-bold">Transaksi demo tercatat</p><p className="text-xs text-muted-foreground">Pratinjau saja — tidak ada saldo terpotong dan tidak ada pengisian ke operator. Pembayaran member segera hadir.</p></div> : <>
           <input value={num} onChange={e => setNum(e.target.value.replace(/[^0-9]/g, '').slice(0, 20))} inputMode="numeric" placeholder="Nomor HP / ID pelanggan" className="mt-3 w-full rounded-xl border border-border bg-card px-3 py-3 text-sm outline-none focus:border-primary"/>
-          <div className="mt-3 grid grid-cols-3 gap-2">{AMOUNTS.map(a => <button key={a} onClick={() => setAmt(a)} className={`rounded-xl border py-2.5 text-sm font-bold ${amt === a ? 'border-primary bg-primary/15' : 'border-border'}`}>{idr(a)}</button>)}</div>
-          <button disabled={num.length < 6} onClick={() => { setLog(l => [{ label: open, num, amt, at: new Date().toISOString() }, ...l]); setDone(true); }} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-40">Bayar {idr(amt)}</button>
+          {real ? <><p className="mt-3 text-[11px] font-bold text-primary">Harga asli provider</p><div className="mt-1 max-h-64 space-y-1 overflow-y-auto">{real.filter(r => r.active).map(r => <button key={r.sku} onClick={() => { setSku(r.sku); setAmt(r.price); }} className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-xs ${sku === r.sku ? 'border-primary bg-primary/15' : 'border-border'}`}><span><b className="block">{r.name}</b><span className="text-muted-foreground">{r.brand}</span></span><b>{idr(r.price)}</b></button>)}</div></>
+          : <div className="mt-3 grid grid-cols-3 gap-2">{AMOUNTS.map(a => <button key={a} onClick={() => setAmt(a)} className={`rounded-xl border py-2.5 text-sm font-bold ${amt === a ? 'border-primary bg-primary/15' : 'border-border'}`}>{idr(a)}</button>)}</div>}
+          <button disabled={num.length < 6 || (!!real && !sku)} onClick={() => { setLog(l => [{ label: open, num, amt, at: new Date().toISOString() }, ...l]); setDone(true); }} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-40">Bayar {idr(amt)}</button>
         </>}
       </div></div>}
   </div>;
