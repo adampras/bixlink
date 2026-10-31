@@ -107,6 +107,14 @@ export const creditRecoveryTx = createServerFn({ method: 'POST' }).middleware([r
     const row = { amount_usd: amount, fee_usd: 0, net_usd: amount, status: 'approved', tx_hash: hash, wallet_code: wallet.code, network: wallet.network, address: wallet.address, verified_at: now, reviewed_at: now,
       note: `Manual on-chain approval · ${caller.owner1 ? 'Owner 1' : 'Owner 2'} ${approver} · ${wallet.asset} ${wallet.code}${data.note ? ` · ${data.note}` : ''}` };
 
+    // A manual credit without TxID already paid this member: attach the TxID to it instead of crediting again.
+    const { data: manual } = await admin.from('wallet_transactions').select('id,amount_usd,note').eq('user_id', memberId).eq('type', 'deposit').eq('status', 'approved').is('tx_hash', null).ilike('note', 'Manual owner credit%').order('created_at').limit(1).maybeSingle();
+    if (manual) {
+      const { error } = await admin.from('wallet_transactions').update({ tx_hash: hash, note: `${manual.note} · TxID linked ${now}` }).eq('id', manual.id).is('tx_hash', null);
+      if (error) throw new Error(error.code === '23505' ? 'TxID ini sudah dikreditkan.' : error.message);
+      return { ok: true, amount: 0, member: names.get(memberId)?.code ?? '—', txId: manual.id, linked: true, previous: Number(manual.amount_usd) };
+    }
+
     // Reuse the member's own pending row (queued TxID or reported transfer) so nothing is approved twice later.
     let targetId = st.queued?.id ?? null;
     if (!targetId) {
