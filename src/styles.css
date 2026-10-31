@@ -4456,3 +4456,6 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
   .settings-section, .settings-section:first-child, .settings-section:last-child { padding:14px 16px; border-radius:16px; }
   .settings-language-grid { margin-top:12px; }
 }
+.settings-page .settings-language { flex-direction:row; justify-content:flex-start; gap:10px; height:46px; }
+.settings-page .settings-language > svg { margin-left:auto; }
+.settings-heading p .flag-symbol { width:16px; height:11px; font-size:11px; transform:none; }
