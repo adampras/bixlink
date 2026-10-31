@@ -2083,6 +2083,7 @@ export type Database = {
           ref: string
           sell_price: number
           sell_venue: string
+          source: string
           strategy: string
           user_id: string
         }
@@ -2102,6 +2103,7 @@ export type Database = {
           ref: string
           sell_price: number
           sell_venue: string
+          source?: string
           strategy: string
           user_id: string
         }
@@ -2121,6 +2123,7 @@ export type Database = {
           ref?: string
           sell_price?: number
           sell_venue?: string
+          source?: string
           strategy?: string
           user_id?: string
         }

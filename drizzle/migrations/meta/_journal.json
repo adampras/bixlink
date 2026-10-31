@@ -855,6 +855,13 @@
       "when": 1793447404554,
       "tag": "0121_bixtrade_admin_virtual_instant",
       "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1793448014509,
+      "tag": "0122_bixtrade_live_quotes_source",
+      "breakpoints": true
     }
   ]
 }
