@@ -1,0 +1,3 @@
+ALTER TABLE public.bixtrade_executions ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'sim';
+ALTER TABLE public.bixtrade_executions ADD CONSTRAINT bixtrade_executions_source_chk CHECK (source IN ('sim','live_quotes'));
+COMMENT ON COLUMN public.bixtrade_executions.source IS 'sim = owner-range simulation; live_quotes = paper execution priced from real public exchange order-book quotes (no orders placed).';
