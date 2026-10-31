@@ -3,7 +3,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { usePublicConfig } from '@/lib/useMember';
+import { useMember, usePublicConfig } from '@/lib/useMember';
 import { BIXGO_SERVICES, bixgoFare, readBixgo, type BixgoService, type BixgoSettings } from '@/lib/bixgo';
 import { ArrowLeft, Bike, Car, CheckCircle2, Construction, History, MapPin, Minus, Navigation, Package, Plus, ShoppingBasket, Star, UtensilsCrossed } from 'lucide-react';
 import { toast } from 'sonner';
@@ -69,7 +69,7 @@ function BixgoPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [tab, setTab] = useState<'order' | 'history'>('order');
   const [view, setView] = useState<BixgoView>('home');
-  const { user } = useSession();
+  const { user } = useMember();
 
   useEffect(() => { void supabase.from('app_settings').select('value').eq('key', 'bixgo').maybeSingle().then(({ data }) => setCfg(readBixgo(data?.value))); }, []);
   useEffect(() => { try { setOrders(JSON.parse(localStorage.getItem(HKEY) || '[]')); } catch { /* ignore */ } }, []);
