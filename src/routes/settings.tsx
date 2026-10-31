@@ -39,7 +39,7 @@ function SettingsPage() {
     <div className="settings-console mt-7">
       <aside className="settings-rail" aria-label="Settings categories">
         <div className="settings-member"><span><UserRound/></span><div className="min-w-0"><b className="break-all">{walletOnly ? 'BNB wallet' : user?.email?.split('@')[0]}</b><small>{walletOnly ? 'Verified wallet' : 'Member account'}</small></div></div>
-        <nav><a href="#account"><ShieldCheck/>Account</a><a href="#language" className="active"><Languages/>{t('language')}</a><a href="#currency"><Coins/>Currency</a><a href="#pin"><LockKeyhole/>Transaction PIN</a><a href="#notifications"><Bell/>{t('notifications')}</a></nav>
+        <nav><a href="#account"><ShieldCheck/>Account</a><a href="#language"><Languages/>{t('language')}</a><a href="#currency"><Coins/>Currency</a><a href="#pin"><LockKeyhole/>Transaction PIN</a><a href="#notifications"><Bell/>{t('notifications')}</a></nav>
       </aside>
       <div className="settings-content">
         <details id="account" className="settings-section settings-fold"><summary><div className="settings-heading"><span className="is-secure"><ShieldCheck/></span><div><h2>Account &amp; security</h2><p>{walletOnly ? 'Wallet sign-in · identity verification' : 'Password · identity verification'}</p></div></div><ChevronRight className="settings-fold-arrow"/></summary><Button asChild variant="ghost" className="settings-account-row"><Link to={walletOnly ? '/profile' : '/reset-password'}><span><KeyRound/>{walletOnly ? 'Account details' : 'Change password'}</span><ChevronRight/></Link></Button><div className="mt-3"><KycCard userId={user?.id}/></div></details>
