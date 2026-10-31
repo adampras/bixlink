@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, checkBixtradeRequest, dailySeries, projectBixtrade, readBixtrade, withdrawNet, type BixtradeSettings, type BixtradeStrategy } from '@/lib/bixtrade';
 import robotImg from '@/assets/bixtrade-ai-robot.png';
 import { useServerFn } from '@tanstack/react-start';
-import { runBixtradeCycle, runBixtradeLive } from '@/lib/bixtrade.functions';
+import { getBixtradePrices, runBixtradeCycle, runBixtradeLive } from '@/lib/bixtrade.functions';
 import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Network, Radar, Send, Share2, Volume2, VolumeX, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/bixtrade')({
@@ -44,6 +44,7 @@ function BixtradePage() {
   const [funding, setFunding] = useState<'real' | 'virtual'>('real');
   const [execs, setExecs] = useState<Exec[]>([]);
   const runCycle = useServerFn(runBixtradeCycle);
+  const getPrices = useServerFn(getBixtradePrices);
   const [tab, setTab] = useState<'cockpit' | 'radar' | 'ai' | 'logs'>('cockpit');
   const [isAdmin, setIsAdmin] = useState(false);
   const [pairFilter, setPairFilter] = useState('ALL');
@@ -79,8 +80,7 @@ function BixtradePage() {
   }, [uid, cfg?.enabled]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!cfg?.enabled) return;
-    const load = () => fetch(`https://api.binance.com/api/v3/ticker/price?symbols=${encodeURIComponent(JSON.stringify(BIXTRADE_PAIRS))}`)
-      .then(r => r.json()).then((list: { symbol: string; price: string }[]) => Array.isArray(list) && setPrices(Object.fromEntries(list.map(x => [x.symbol, Number(x.price)])))).catch(() => {});
+    const load = () => getPrices().then(p => { if (p && Object.keys(p).length) setPrices(p); }).catch(() => {});
     load(); const a = setInterval(load, 8000); const b = setInterval(() => setTick(t => t + 1), 1500);
     return () => { clearInterval(a); clearInterval(b); };
   }, [cfg?.enabled]);
@@ -153,7 +153,8 @@ function BixtradePage() {
         <p className="arb-ai-status"><i/> Neural scanner online · {profitable.length ? `${profitable.length} routes` : 'scanning'}</p>
         <span className="mt-2 flex items-center gap-2"><button type="button" onClick={toggleSound} aria-label={sound ? 'Mute execution sound' : 'Enable execution sound'} className="arb-icon-btn">{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</button><span className="arb-live"><i/> LIVE</span></span>
       </div>
-      <img src={robotImg} alt="BIXTrade AI robot" width={1024} height={1024} className="arb-ai-robot" data-hot={profitable.length ? '1' : '0'}/>
+      <div className="arb-ai-stage"><span className="arb-ai-ring"/><span className="arb-ai-ring r2"/>
+        <img src={robotImg} alt="BIXTrade AI robot" width={1024} height={1024} className="arb-ai-robot" data-hot={profitable.length ? '1' : '0'}/><span className="arb-ai-scan"/></div>
     </section>
     <section className="mt-3 grid grid-cols-4 gap-2">
       {([['Bot', capital.toFixed(0)], ['P/L', realized.toFixed(2)], ['Win', `${cfg.winRate}%`], ['Ping', `${rows.length ? Math.round(rows.reduce((s, r) => s + r.ms, 0) / rows.length) : '—'}ms`]] as const).map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
@@ -168,6 +169,12 @@ function BixtradePage() {
     {stream.length > 0 && tab === 'radar' && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ {s}</span>)}</div></div>}
 
     {tab === 'cockpit' && <>
+    <section className="arb-card mt-4">
+      <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-2"/> Live execution pulse</h2>
+      <div className="mt-3 grid gap-2">{fundExecs.slice(0, 3).map(x => <button type="button" key={x.id} onClick={() => setReceipt(x)} className="arb-pulse-row text-left"><i/><span><b>{x.pair}</b> {x.buy_venue} → {x.sell_venue}<br/><span className="text-muted-foreground">{Number(x.notional_usd).toFixed(2)} USDT · {new Date(x.executed_at).toLocaleTimeString()}</span></span><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)}</b></button>)}
+        {!fundExecs.length && <p className="text-xs text-muted-foreground">{capital > 0 ? 'Bot is scanning — the first executions appear within a few minutes.' : funding === 'virtual' ? 'Add Virtual USDT bot capital to start executions. Trade size follows your capital (15–50% per ticket).' : 'Executions start after your deposit is approved. Trade size follows your capital (15–50% per ticket).'}</p>}</div>
+    </section>
+
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><ArrowDownToLine size={18} className="text-chart-3"/> Bot wallet</h2>
       <div className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
@@ -211,7 +218,7 @@ function BixtradePage() {
           <td className="pr-2 text-chart-3">{r.spread.toFixed(2)}%</td><td className={`pr-2 ${r.net > 0 ? 'text-chart-2' : 'text-destructive'}`}>{r.net.toFixed(2)}%</td><td>{r.ms}ms</td>
         </tr>)}</tbody>
       </table>
-      {!rows.length && <p className="py-6 text-center text-muted-foreground">Connecting to market feed…</p>}
+      {!rows.length && <p className="py-6 text-center text-muted-foreground">Syncing exchange prices…</p>}
     </section>
 
     <div className="mt-4"><RouteMap routes={profitable}/></div>
