@@ -55,11 +55,11 @@ export function DepositRecovery({ onMessage }: { onMessage: (m: string) => void 
     <h2 className="flex items-center gap-2 font-display text-lg font-bold"><LifeBuoy size={18} className="text-chart-2"/> Pemulihan deposit on-chain</h2>
     <p className="mt-1 text-xs text-muted-foreground">Untuk member yang sudah transfer asli ke wallet Owner tetapi saldonya belum masuk (nominal terpotong biaya exchange, lupa kirim TxID, atau waktu habis). Sistem selalu cek ulang ke blockchain; jumlah yang dikreditkan = jumlah yang benar-benar masuk. Satu TxID hanya bisa dikreditkan satu kali.{!w.data?.owner1 && ' Anda hanya dapat mengkreditkan ke member di jaringan Anda.'}</p>
     {!wallets.length ? <p className="mt-4 text-sm text-muted-foreground">Belum ada wallet deposit yang aktif.</p> : <>
-      <form id="recovery-form" className="mt-5 grid gap-3 rounded-2xl border border-border p-4 sm:grid-cols-[180px_1fr_auto]" onSubmit={e => { e.preventDefault(); void check(); }}>
-        <label className="grid gap-1 text-xs font-bold">Wallet tujuan
-          <select value={code} onChange={e => { setWalletCode(e.target.value); setFound(null); }} className="h-10 rounded-md border border-input bg-background px-2 text-sm">
+      <form id="recovery-form" className="mt-5 grid gap-3 rounded-2xl border border-border p-4 sm:grid-cols-[minmax(0,240px)_minmax(0,1fr)_auto]" onSubmit={e => { e.preventDefault(); void check(); }}>
+        <label className="grid min-w-0 gap-1 text-xs font-bold">Wallet tujuan
+          <select value={code} onChange={e => { setWalletCode(e.target.value); setFound(null); }} className="h-10 w-full min-w-0 truncate rounded-md border border-input bg-background px-2 text-sm">
             {wallets.map(x => <option key={x.code} value={x.code}>{x.code} · {x.asset} {x.network}{w.data?.owner1 ? ` · ${x.owner}` : ''}</option>)}</select></label>
-        <label className="grid gap-1 text-xs font-bold">TxID / Hash transaksi
+        <label className="grid min-w-0 gap-1 text-xs font-bold">TxID / Hash transaksi
           <Input value={hash} onChange={e => { setHash(e.target.value); setFound(null); }} placeholder="0x… (lihat di riwayat wallet Owner / BscScan)" className="font-mono" autoComplete="off"/></label>
         <Button type="submit" className="self-end gap-2" disabled={busy === 'check' || !hash.trim()}><Search size={16}/>{busy === 'check' ? 'Mengecek…' : 'Cek on-chain'}</Button>
         {current && <p className="text-[11px] text-muted-foreground sm:col-span-3">Alamat: <span className="break-all font-mono">{current.address}</span></p>}
