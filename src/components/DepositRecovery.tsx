@@ -37,7 +37,7 @@ export function DepositRecovery({ onMessage }: { onMessage: (m: string) => void 
     if (!window.confirm(`Kreditkan ${money(found.credit)} ke member ${member.trim()}?\nTxID: ${found.hash.slice(0, 18)}…`)) return;
     setBusy('credit');
     try {
-      const r = await credit({ data: { walletCode: code, txHash: found.hash, member: member.trim(), note: note.trim() || undefined } });
+      const r = await credit({ data: { walletCode: code, txHash: found.hash, member: member.trim(), ...(note.trim() ? { note: note.trim() } : {}) } });
       onMessage(`Berhasil: ${money(r.amount)} masuk ke wallet ${r.member}.`);
       setFound(null); setHash(''); setMember(''); setNote(''); setScanData(null);
       await Promise.all([qc.invalidateQueries({ queryKey: ['admin-wallet'] }), qc.invalidateQueries({ queryKey: ['deposit-audit'] }), qc.invalidateQueries({ queryKey: ['owner-revenue'] })]);
