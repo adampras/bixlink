@@ -125,8 +125,8 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const flash = (m: string) => { setNote(m); setTimeout(() => setNote(''), 2600); };
   const replay = useReplayRecorder({ stream: host ? local : null, liveId: live.id, me, on: host && recording && cfg.replay_enabled !== false, onNote: flash });
   useEffect(() => { if (!pk) return undefined; const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, [pk]);
-  /** Portrait camera fills the phone; a landscape camera is shown whole instead of cropped. */
-  const onMeta = (e: SyntheticEvent<HTMLVideoElement>) => { const v = e.currentTarget; if (v.videoWidth) setFit(v.videoHeight >= v.videoWidth ? 'cover' : 'contain'); };
+  /** LIVE is always a full-height portrait frame for host and viewers; a landscape camera is centre-cropped, never letterboxed. */
+  const onMeta = (e: SyntheticEvent<HTMLVideoElement>) => { if (e.currentTarget.videoWidth) setFit('cover'); };
 
   const spawn = (n = 1) => setFloaters(f => [...f.slice(-30), ...Array.from({ length: n }, () => ({
     id: Math.random(), x: 10 + Math.random() * 30, color: COLORS[Math.floor(Math.random() * COLORS.length)]!, drift: Math.random() * 60 - 30,

@@ -49,7 +49,14 @@ function useP2pRtc({ liveId, me, host, stream, enabled }: { liveId: string; me: 
     const offerTo = async (peer: string) => {
       const s = streamRef.current; if (!s) return;
       const pc = makePc(peer);
-      s.getTracks().forEach(t => pc.addTrack(t, s));
+      s.getTracks().forEach(t => {
+        const sender = pc.addTrack(t, s);
+        if (t.kind !== 'video') return;
+        // Keep the backup connection sharp too: hold resolution, allow up to 2.5 Mbps.
+        const p = sender.getParameters(); p.degradationPreference = 'maintain-resolution';
+        p.encodings = (p.encodings?.length ? p.encodings : [{}]).map(e => ({ ...e, maxBitrate: 2_500_000, maxFramerate: 30 }));
+        void sender.setParameters(p).catch(() => {});
+      });
       pc.onconnectionstatechange = () => { if (pc.connectionState === 'failed' || pc.connectionState === 'closed') drop(peer); };
       await pc.setLocalDescription(await pc.createOffer());
       send('offer', { to: peer, from: me, sdp: pc.localDescription!.toJSON() });
@@ -151,7 +158,8 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream }: { li
     for (const t of s.getTracks()) {
       const old = published.current.get(t.kind);
       if (old?.track) { if (old.track.mediaStreamTrack !== t) await old.track.replaceTrack(t).catch(() => {}); continue; }
-      const pub = await room.localParticipant.publishTrack(t, t.kind === 'video' ? { source: lk.Track.Source.Camera, simulcast: true, videoCodec: 'vp8', videoEncoding: { maxBitrate: 2_000_000, maxFramerate: 30 } } : { source: lk.Track.Source.Microphone, dtx: true, red: true })
+      if (t.kind === 'video' && 'contentHint' in t) t.contentHint = 'detail';
+      const pub = await room.localParticipant.publishTrack(t, t.kind === 'video' ? { source: lk.Track.Source.Camera, simulcast: true, videoCodec: 'vp8', degradationPreference: 'maintain-resolution', videoEncoding: { maxBitrate: 2_500_000, maxFramerate: 30 } } : { source: lk.Track.Source.Microphone, dtx: true, red: true })
         .catch(() => room.localParticipant.publishTrack(t, { source: t.kind === 'video' ? lk.Track.Source.Camera : lk.Track.Source.Microphone }).catch(() => null));
       if (pub) published.current.set(t.kind, pub);
     }
@@ -179,8 +187,9 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream }: { li
           setFeeds(out);
           if (!host) setState(out.length ? 'live' : 'waiting');
         };
-        room.on(lk.RoomEvent.TrackSubscribed, (track) => {
+        room.on(lk.RoomEvent.TrackSubscribed, (track, pub) => {
           if (track.kind === lk.Track.Kind.Audio) { const el = track.attach(); el.setAttribute('playsinline', ''); box.appendChild(el); }
+          else pub.setVideoQuality(lk.VideoQuality.HIGH); // always the sharpest simulcast layer for viewers
           rebuild();
         }).on(lk.RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach(el => el.remove()); rebuild(); })
           .on(lk.RoomEvent.ParticipantDisconnected, rebuild)
