@@ -126,7 +126,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const sfx = useSfx(sound); const sfxRef = useRef(sfx); sfxRef.current = sfx;
   const mine = stage.find(s => s.user_id === me);
   const guest = !host && mine?.status === 'approved';
-  const { mode, feeds, state, audioBlocked, unlockAudio, setVolume } = useLiveRtc({ liveId: live.id, me, host, hostId: live.host_id, publisher: host || guest, stream: local, saver });
+  const { mode, feeds, state, audioBlocked, voiceOnly, unlockAudio, setVolume } = useLiveRtc({ liveId: live.id, me, host, hostId: live.host_id, publisher: host || guest, stream: local, saver });
   const names = new Map(stage.map(s => [s.user_id, s.name])); names.set(live.host_id, live.host_name);
   const main = host ? null : feeds.find(f => f.id === live.host_id) ?? feeds[0] ?? null;
   const tiles = feeds.filter(f => f !== main);
@@ -337,7 +337,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         : <>
           <video ref={view} autoPlay playsInline muted className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${zoom})` }}/>
           {(!main || state !== 'live') && <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p>
-            <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : 'Connecting to the host camera…'}</small></div>}
+            <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : voiceOnly ? 'The host is on voice only right now — turn your sound on to listen.' : 'Connecting to the host camera…'}</small></div>}
         </>}
     </div>
     {(tiles.length > 0 || (guest && local)) && <div className="bxl-tiles">
