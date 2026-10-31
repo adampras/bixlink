@@ -84,6 +84,15 @@ function Tile({ stream, label, mirror }: { stream: MediaStream; label: string; m
   return <div className="bxl-tile"><video ref={ref} autoPlay muted playsInline style={mirror ? { transform: 'scaleX(-1)' } : undefined}/><small>@{label}</small></div>;
 }
 
+function PkSide({ stream, label, score, win, mirror }: { stream: MediaStream | null; label: string; score: number; win: boolean; mirror?: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => { const v = ref.current; if (v) { v.srcObject = stream; if (stream) void v.play().catch(() => {}); } }, [stream]);
+  return <div className={`bxl-pk-side${win ? ' win' : ''}`}>
+    {stream ? <video ref={ref} autoPlay muted playsInline style={mirror ? { transform: 'scaleX(-1)' } : undefined}/> : <div className="bxl-pk-empty">{label.slice(0, 1).toUpperCase()}</div>}
+    <small>@{label}</small><b>{Math.round(score)}</b>{win && <em>WIN</em>}
+  </div>;
+}
+
 export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, onGift }: {
   live: Live; me: string; cfg: Cfg; following: boolean; onFollow: () => void; onClose: () => void; onGift: (recipients: { id: string; name: string }[]) => void;
 }) {
@@ -313,6 +322,18 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       {guest && local && <Tile stream={local} label="you" mirror={facing === 'user'}/>}
       {tiles.map(t => <Tile key={t.id} stream={t.stream} label={names.get(t.id) ?? 'guest'}/>)}
     </div>}
+    {pk && (() => {
+      const streamOf = (id: string) => (id === me ? local : feeds.find(f => f.id === id)?.stream ?? null);
+      const over = now >= new Date(pk.ends_at).getTime(); const left = Math.max(0, Math.round((new Date(pk.ends_at).getTime() - now) / 1000));
+      const total = pkScore[0] + pkScore[1]; const pct = total ? Math.round((pkScore[0] / total) * 100) : 50; const w = over ? pkWinner(pkScore[0], pkScore[1]) : null;
+      return <div className="bxl-pk" onClick={tap}>
+        <div className="bxl-pk-bar"><i style={{ width: `${pct}%` }}/><span>{Math.round(pkScore[0])}</span><b><Swords size={12}/> {over ? (w ? 'PK END' : 'DRAW') : `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`}</b><span>{Math.round(pkScore[1])}</span></div>
+        <div className="bxl-pk-grid">
+          <PkSide stream={streamOf(pk.a)} label={names.get(pk.a) ?? 'player'} score={pkScore[0]} win={w === 'a'} mirror={pk.a === me && facing === 'user'}/>
+          <PkSide stream={streamOf(pk.b)} label={names.get(pk.b) ?? 'player'} score={pkScore[1]} win={w === 'b'} mirror={pk.b === me && facing === 'user'}/>
+        </div>
+      </div>;
+    })()}
     <header className="bixtok-room-top">
       <div className="bxl-host"><span className="bxl-avatar">{live.host_name.slice(0, 1).toUpperCase()}</span>
         <div className="min-w-0"><b className="block truncate text-xs">@{live.host_name}</b><small className="block truncate">{live.title}</small></div>
@@ -333,6 +354,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <Link to="/presale">Presale</Link>
       <Link to="/nft-marketplace">Shop</Link>
     </div>}
+    {showcase && cfg.showcase_enabled !== false && SHOWCASE[showcase] && <Link to={SHOWCASE[showcase].to} className="bxl-showcase" onClick={e => { if (host) e.preventDefault(); }}>
+      <span>{SHOWCASE[showcase].emoji}</span><div><b>{SHOWCASE[showcase].title}</b><small>{SHOWCASE[showcase].sub}</small></div><em>{host ? 'Pinned' : 'Open'}</em>
+    </Link>}
+    {burst && <div className="bxl-sfx-burst" key={burst.id} aria-hidden onAnimationEnd={() => setBurst(null)}>{burst.e}</div>}
+    {host && recording && <span className="bxl-rec"><Circle size={9} fill="currentColor"/> REC</span>}
     {ended && <p className="bixtok-ended">LIVE ended</p>}
     {!host && entered && audioBlocked && sound && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Tap for sound</button>}
     {banner && <div className="bxl-banner" key={banner.id}><Gift size={18}/><div><b>{banner.name}</b><small>{banner.body}</small></div></div>}
@@ -347,6 +373,10 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
       </>}
       {host && <button aria-label="Pin message" onClick={() => setPinEdit(pinned ?? '')}><Pin size={20}/></button>}
+      {host && cfg.soundboard !== false && <button aria-label="Soundboard" onClick={() => setSheet('board')}><Music2 size={20}/></button>}
+      {host && cfg.showcase_enabled !== false && <button aria-label="Showcase card" className={showcase ? 'on' : ''} onClick={() => setSheet('showcase')}><ShoppingBag size={20}/></button>}
+      {host && cfg.pk_enabled !== false && <button aria-label="PK battle" className={pk ? 'on' : ''} onClick={() => setSheet('pk')}><Swords size={20}/></button>}
+      {host && cfg.replay_enabled !== false && !ended && <button aria-label={recording ? 'Stop recording replay' : 'Record replay'} className={recording ? 'rec' : ''} onClick={() => { setRecording(r => !r); flash(recording ? 'Recording stopped — saving replay…' : 'Recording replay to your BIXTOK feed'); }}><Circle size={20} fill={recording ? 'currentColor' : 'none'}/></button>}
       {host && <button aria-label="Stage guests" className="relative" onClick={() => setStagePanel(true)}><Users size={20}/>{pendingReq.length > 0 && <i className="bxl-dot">{pendingReq.length}</i>}</button>}
       {!host && !ended && (guest
         ? <button aria-label="Leave stage" onClick={() => mine && decide(mine.id, 'left')}><LogOut size={20}/></button>
@@ -385,6 +415,13 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <textarea className="bxl-pin-input" value={pinEdit} maxLength={160} onChange={e => setPinEdit(e.target.value)} placeholder="e.g. Presale closes in 3 days — tap Presale to join"/>
       <div className="mt-2 flex gap-2"><button type="submit" className="bxl-btn">Pin</button>{pinned && <button type="button" className="bxl-btn ghost" onClick={() => savePin('')}>Unpin</button>}</div>
     </form></div>}
+    {sheet && <div className="bixtok-sheet-wrap" onClick={() => setSheet(null)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
+      <div className="flex items-center justify-between"><h3 className="font-bold">{sheet === 'board' ? 'Soundboard' : sheet === 'showcase' ? 'Showcase card' : 'PK battle'}</h3><button aria-label="Close" onClick={() => setSheet(null)}><X size={18}/></button></div>
+      {sheet === 'board' && <div className="bxl-board">{SOUNDBOARD.map(([k, e, l]) => <button key={k} onClick={() => sendSfx(k)}><span>{e}</span>{l}</button>)}<p>Everyone in the room hears it.</p></div>}
+      {sheet === 'showcase' && <div className="bxl-board">{(Object.keys(SHOWCASE) as ShowcaseKey[]).map(k => <button key={k} className={showcase === k ? 'on' : ''} onClick={() => saveShowcase(k)}><span>{SHOWCASE[k].emoji}</span>{SHOWCASE[k].title}</button>)}
+        {showcase && <button className="ghost" onClick={() => saveShowcase(null)}>Remove card</button>}</div>}
+      {sheet === 'pk' && <PkSetup players={[{ id: live.host_id, name: live.host_name }, ...onStage.map(s => ({ id: s.user_id, name: s.name }))]} active={!!pk} onStart={startPk} onEnd={() => { void endPk(); setSheet(null); }}/>}
+    </div></div>}
     {modMsg && <div className="bixtok-sheet-wrap" onClick={() => setModMsg(null)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
       <h3 className="font-bold">Moderate @{modMsg.name}</h3><p className="mt-1 text-xs text-muted-foreground">{modMsg.body}</p>
       <div className="mt-3 flex gap-2">{modMsg.kind !== 'gift' && <button className="bxl-btn" onClick={() => moderate(modMsg, false)}>Delete message</button>}<button className="bxl-btn ghost" onClick={() => moderate(modMsg, true)}>Mute in this LIVE</button></div>
@@ -395,4 +432,17 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     {note && <div className="bixtok-toast" role="status">{note}</div>}
     {host && !ended && <p className="bixtok-hint">You are broadcasting camera and voice to {Math.max(0, viewers - 1)} viewer{viewers - 1 === 1 ? '' : 's'}. Tap a chat message to moderate it.</p>}
   </div>;
+}
+
+function PkSetup({ players, active, onStart, onEnd }: { players: { id: string; name: string }[]; active: boolean; onStart: (a: string, b: string, m: number) => void; onEnd: () => void }) {
+  const [a, setA] = useState(players[0]?.id ?? ''); const [b, setB] = useState(players[1]?.id ?? ''); const [m, setM] = useState(5);
+  if (active) return <div className="mt-3"><p className="text-sm text-muted-foreground">A PK battle is running. Gifts sent to each player count toward their score.</p><button className="bxl-btn mt-3" onClick={onEnd}>End PK</button></div>;
+  if (players.length < 2) return <p className="mt-3 text-sm text-muted-foreground">Accept at least one stage guest first, then start a PK battle.</p>;
+  return <form className="mt-3 grid gap-2" onSubmit={e => { e.preventDefault(); if (a && b && a !== b) onStart(a, b, m); }}>
+    <label className="text-xs text-muted-foreground">Left player<select className="form-input mt-1" value={a} onChange={e => setA(e.target.value)}>{players.map(p => <option key={p.id} value={p.id}>@{p.name}</option>)}</select></label>
+    <label className="text-xs text-muted-foreground">Right player<select className="form-input mt-1" value={b} onChange={e => setB(e.target.value)}>{players.map(p => <option key={p.id} value={p.id}>@{p.name}</option>)}</select></label>
+    <label className="text-xs text-muted-foreground">Duration (minutes)<input className="form-input mt-1" type="number" min={1} max={30} value={m} onChange={e => setM(Number(e.target.value))}/></label>
+    <button type="submit" className="bxl-btn" disabled={!a || !b || a === b}>Start PK</button>
+    <p className="text-[10px] text-muted-foreground">Score is display-only from gifts sent during the battle.</p>
+  </form>;
 }
