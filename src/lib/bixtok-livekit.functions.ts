@@ -16,8 +16,13 @@ export const getBixtokLiveToken = createServerFn({ method: 'POST' })
     const { data: live } = await context.supabase.from('bixtok_lives').select('id, host_id, status').eq('id', data.liveId).maybeSingle();
     if (!live || live.status !== 'live') throw new Error('LIVE not active');
     const isHost = live.host_id === context.userId;
+    let guest = false;
+    if (!isHost) {
+      const { data: req } = await context.supabase.from('bixtok_stage_requests').select('status').eq('live_id', live.id).eq('user_id', context.userId).maybeSingle();
+      guest = req?.status === 'approved';
+    }
     const { AccessToken } = await import('livekit-server-sdk');
     const at = new AccessToken(key, secret, { identity: context.userId, ttl: '4h' });
-    at.addGrant({ room: `bixtok-${live.id}`, roomJoin: true, canPublish: isHost, canSubscribe: true, canPublishData: false });
-    return { ok: true as const, url, token: await at.toJwt(), host: isHost };
+    at.addGrant({ room: `bixtok-${live.id}`, roomJoin: true, canPublish: isHost || guest, canSubscribe: true, canPublishData: false });
+    return { ok: true as const, url, token: await at.toJwt(), host: isHost, guest };
   });
