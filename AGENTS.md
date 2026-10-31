@@ -57,3 +57,4 @@
 - Select the manifest from the root matched location during SSR; keep Sovereign Wallet manifest identity and scope stable so installation launches its existing in-place screens.
 - BIXTOK LIVE: LiveKit VP8 (adaptiveStream off: video is bound manually) with P2P fallback in src/lib/bixtok-rtc.ts; chat broadcast+db+polling de-duped by id. Official hosts via bixtok_is_official (Owner 1 + bixtok_official_hosts). PK score is display-only from gift rows; replays are host-recorded parts under the media limit.
 - BIXTrade requests settle only via the bixtrade_review RPC (server checks; settled_usd feeds bix_wallet_balance) — atomic, owner-reviewed; profit never settles.
+- BIXGO uses real OSM map/GPS/OSRM distance in the browser (Leaflet lazy-loaded); city franchises live in the bixgo setting as commission-split references; PPOB goes through Digiflazz server functions with owner-only transactions until a member payment rule exists.

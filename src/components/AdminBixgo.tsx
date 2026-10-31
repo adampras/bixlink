@@ -5,6 +5,7 @@ import { BIXGO_SERVICES, readBixgo, type BixgoService, type BixgoSettings } from
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { AdminFold } from '@/components/AdminNavigation';
+import { AdminFranchise, AdminPpob } from '@/components/AdminBixgoExtras';
 
 export function AdminBixgo({ initial, onMessage, onSaved }: { initial?: unknown; onMessage: (m: string) => void; onSaved?: () => void }) {
   const [s, setS] = useState<BixgoSettings>(() => readBixgo(initial));
@@ -23,6 +24,8 @@ export function AdminBixgo({ initial, onMessage, onSaved }: { initial?: unknown;
         <label className="flex items-center justify-between"><b>{x.name}</b><Switch checked={s.services[x.key].enabled} disabled={busy} onCheckedChange={v => submit({ ...s, services: { ...s.services, [x.key]: { ...s.services[x.key], enabled: v } } })}/></label>
         <div className="mt-1 grid grid-cols-2 gap-2 text-xs"><label>Tarif dasar (Rp)<input className="form-input mt-1" type="number" value={s.services[x.key].baseIdr} onChange={e => svc(x.key, 'baseIdr', Number(e.target.value))}/></label><label>Per km (Rp)<input className="form-input mt-1" type="number" value={s.services[x.key].perKmIdr} onChange={e => svc(x.key, 'perKmIdr', Number(e.target.value))}/></label></div>
       </div>)}
+      <AdminFranchise s={s} setS={setS}/>
+      <AdminPpob s={s} setS={setS}/>
       <Button className="w-full" disabled={busy} onClick={() => submit(s)}>Simpan BIXGO</Button>
     </div>
   </AdminFold>;
