@@ -16,6 +16,7 @@ import { ReviewerDepositWallet } from '@/components/ReviewerDepositWallet';
 import { AdminCreateAccount } from '@/components/AdminCreateAccount';
 import { AdminChangeEmail } from '@/components/AdminChangeEmail';
 import { DepositAudit } from '@/components/DepositAudit';
+import { DepositRecovery } from '@/components/DepositRecovery';
 
 export const Route = createFileRoute('/review')({
   head: () => ({ meta: [{ title: 'ADMIN PANEL BIX — BIXLINK' }, { name: 'description', content: 'Limited BIXLINK review console.' }, { property: 'og:title', content: 'ADMIN PANEL BIX — BIXLINK' }, { property: 'og:description', content: 'Limited review console.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }),
