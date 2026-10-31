@@ -44,7 +44,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [mic, setMic] = useState(true); const [facing, setFacing] = useState<'user' | 'environment'>('user');
   const cam = useRef<HTMLVideoElement>(null); const view = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null); const [local, setLocal] = useState<MediaStream | null>(null);
-  const [needsTap, setNeedsTap] = useState(false);
+  const [needsTap, setNeedsTap] = useState(false); const [zoom, setZoom] = useState(1);
   const chan = useRef<ReturnType<typeof supabase.channel> | null>(null); const pending = useRef(0);
   const seen = useRef(new Set<string>());
   const sfx = useSfx(sound); const sfxRef = useRef(sfx); sfxRef.current = sfx;
@@ -104,7 +104,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   useEffect(() => {
     if (!host) return undefined;
     let cancelled = false;
-    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing, width: { ideal: 720 }, height: { ideal: 1280 } }, audio: { echoCancellation: true, noiseSuppression: true } })
+    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: { echoCancellation: true, noiseSuppression: true } })
       .then(s => {
         if (cancelled) { s.getTracks().forEach(t => t.stop()); return; }
         const old = stream.current; stream.current = s;
@@ -142,14 +142,14 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     ingest.current([data as Msg], true);
     void chan.current?.send({ type: 'broadcast', event: 'chat', payload: data });
   };
-  const url = typeof window !== 'undefined' ? `${window.location.origin}/bixtok` : '/bixtok';
+  const url = typeof window !== 'undefined' ? `${window.location.origin}/bixtok?live=${live.id}` : '/bixtok';
   const shareText = `🔴 LIVE on BIXTOK: ${live.title} — @${live.host_name}`;
 
   return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
     <div className="bxl-stage" onClick={tap}>
-      {host ? <video ref={cam} autoPlay muted playsInline className={`bixtok-video ${facing === 'user' ? 'mirror' : ''}`}/>
+      {host ? <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: zoom < 1.05 ? 'contain' : 'cover', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
         : <>
-          <video ref={view} autoPlay playsInline className="bixtok-video"/>
+          <video ref={view} autoPlay playsInline className="bixtok-video" style={{ objectFit: 'contain' }}/>
           {(!remote || state !== 'live') && <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p>
             <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : 'Connecting to the host camera…'}</small></div>}
         </>}
@@ -173,6 +173,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     <div className="bixtok-chat">{msgs.map(m => <p key={m.id} className={m.kind === 'gift' ? 'gift' : ''}><b>{m.name}</b> {m.body}</p>)}</div>
     {host && <div className="bxl-tools">
       <button aria-label="Flip camera" onClick={() => setFacing(f => (f === 'user' ? 'environment' : 'user'))}><SwitchCamera size={20}/></button>
+      <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={0.6} max={2} step={0.05} value={zoom} onChange={e => setZoom(+e.target.value)}/></label>
       <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
     </div>}
     <footer className="bixtok-room-bar">

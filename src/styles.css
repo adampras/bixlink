@@ -4341,3 +4341,6 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bixtok-room .bixtok-hint { top: calc(max(.7rem, env(safe-area-inset-top)) + 4.4rem); inset-inline: 4.5rem; }
 .bixtok-room-bg small { max-width: 16rem; text-align: center; font-size: .72rem; }
 .bxl-unmute { position: absolute; z-index: 4; top: 42%; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: .4rem; padding: .6rem 1rem; border-radius: 999px; font-size: .8rem; font-weight: 700; background: var(--primary); color: var(--primary-foreground); }
+.bxl-zoom { display: grid; justify-items: center; gap: .2rem; padding: .4rem .2rem; border-radius: 999px; background: color-mix(in oklab, var(--background) 60%, transparent); }
+.bxl-zoom input { writing-mode: vertical-lr; direction: rtl; width: 1.4rem; height: 6rem; accent-color: var(--primary); }
+.bxl-zoom small { font-size: .6rem; }
