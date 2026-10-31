@@ -115,6 +115,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [now, setNow] = useState(() => Date.now());
   const chan = useRef<ReturnType<typeof supabase.channel> | null>(null); const pending = useRef(0);
   const seen = useRef(new Set<string>());
+  const zoomRef = useRef(zoom); zoomRef.current = zoom;
   const sfx = useSfx(sound); const sfxRef = useRef(sfx); sfxRef.current = sfx;
   const mine = stage.find(s => s.user_id === me);
   const guest = !host && mine?.status === 'approved';
@@ -184,8 +185,10 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       .on('broadcast', { event: 'sfx' }, ({ payload }) => playSfx.current(String(payload?.k ?? '')))
       .on('broadcast', { event: 'del' }, ({ payload }) => setMsgs(x => x.filter(y => y.id !== payload?.id)))
       .on('broadcast', { event: 'stage' }, () => { void pull(true); })
+      // Host camera zoom is mirrored on every viewer so they see the same framing.
+      .on('broadcast', { event: 'zoom' }, ({ payload }) => { if (!host) setZoom(clampZoom(Number(payload?.z))); })
       .on('presence', { event: 'sync' }, () => setViewers(Math.max(1, Object.keys(room.presenceState()).length)))
-      .on('presence', { event: 'join' }, ({ key }) => { if (key !== me) sfxRef.current.join(); })
+      .on('presence', { event: 'join' }, ({ key }) => { if (key !== me) { sfxRef.current.join(); if (host) void room.send({ type: 'broadcast', event: 'zoom', payload: { z: zoomRef.current } }); } })
       .subscribe(s => { if (s === 'SUBSCRIBED') void room.track({ at: Date.now() }); });
     chan.current = room;
     const flush = setInterval(() => {
@@ -209,7 +212,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   useEffect(() => {
     if (!publishing) { stream.current?.getTracks().forEach(t => t.stop()); stream.current = null; setLocal(null); return undefined; }
     let cancelled = false;
-    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing, width: { ideal: 1080 }, height: { ideal: 1920 }, aspectRatio: { ideal: 9 / 16 }, frameRate: { ideal: 30 } }, audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
+    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, resizeMode: 'none' } as MediaTrackConstraints, audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
       .then(s => {
         if (cancelled) { s.getTracks().forEach(t => t.stop()); return; }
         const old = stream.current; stream.current = s;
@@ -225,6 +228,12 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   useEffect(() => () => { stream.current?.getTracks().forEach(t => t.stop()); }, []);
   useEffect(() => { stream.current?.getAudioTracks().forEach(t => { t.enabled = mic; }); }, [mic, local]);
   useEffect(() => { if (host && cam.current && local) cam.current.srcObject = local; }, [host, local]);
+  // Share the host's zoom with viewers (debounced while the slider moves).
+  useEffect(() => {
+    if (!host) return undefined;
+    const t = setTimeout(() => { void chan.current?.send({ type: 'broadcast', event: 'zoom', payload: { z: zoom } }); }, 120);
+    return () => clearTimeout(t);
+  }, [zoom, host]);
   // Viewer video. LiveKit audio plays through separate audio elements; P2P carries voice inside the video stream.
   useEffect(() => {
     const v = view.current; if (!v || host) return;
@@ -311,9 +320,13 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
 
   return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
     <div className="bxl-stage" onClick={tap}>
-      {host ? <video ref={cam} autoPlay muted playsInline className="bixtok-video" onLoadedMetadata={onMeta} onResize={onMeta} style={{ objectFit: fit, transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
+      {host ? <>
+          <Backdrop stream={local} mirror={facing === 'user'}/>
+          <video ref={cam} autoPlay muted playsInline className="bixtok-video" onLoadedMetadata={onMeta} onResize={onMeta} style={{ objectFit: 'contain', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
+        </>
         : <>
-          <video ref={view} autoPlay playsInline muted className="bixtok-video" onLoadedMetadata={onMeta} onResize={onMeta} style={{ objectFit: fit }}/>
+          <Backdrop stream={main?.stream ?? null}/>
+          <video ref={view} autoPlay playsInline muted className="bixtok-video" onLoadedMetadata={onMeta} onResize={onMeta} style={{ objectFit: 'contain', transform: `scale(${zoom})` }}/>
           {(!main || state !== 'live') && <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p>
             <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : 'Connecting to the host camera…'}</small></div>}
         </>}
@@ -369,7 +382,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     <div className="bxl-tools">
       {publishing && <>
         <button aria-label="Flip camera" onClick={() => setFacing(f => (f === 'user' ? 'environment' : 'user'))}><SwitchCamera size={20}/></button>
-        {host && <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={1} max={2} step={0.05} value={zoom} onChange={e => setZoom(+e.target.value)}/></label>}
+        {host && <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={ZOOM_MIN} max={ZOOM_MAX} step={0.05} value={zoom} onChange={e => setZoom(clampZoom(+e.target.value))}/></label>}
         <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
       </>}
       {host && <button aria-label="Pin message" onClick={() => setPinEdit(pinned ?? '')}><Pin size={20}/></button>}
