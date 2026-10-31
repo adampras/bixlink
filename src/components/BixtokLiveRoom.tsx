@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy } from 'lucide-react';
+import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { useLiveRtc } from '@/lib/bixtok-rtc';
 
@@ -108,8 +109,6 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       ]);
       if (!alive) return [];
       const rows = ((m.data ?? []) as Msg[]).reverse();
-      const ids = new Set(rows.map(r => r.id));
-      setMsgs(x => x.filter(y => ids.has(y.id) || !seen.current.has(y.id) || x.indexOf(y) >= x.length - 3));
       ingest.current(rows, quiet);
       if (l.data) { setLikes(Math.max(0, Number(l.data.likes ?? 0)) + pending.current); setPinned(l.data.pinned ?? null); if (l.data.status !== 'live') setEnded(true); }
       if (s.data) setStage(s.data as Stage[]);
