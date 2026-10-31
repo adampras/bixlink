@@ -106,7 +106,7 @@ export function planExecutions(s: BixtradeSettings, capital: number, prices: Rec
 
 export type BixtradeBotMood = 'sleep' | 'scan' | 'hunt' | 'trade';
 /** Visual state of the AI robot: no capital → sleep; trade within 90s → trade; profitable route → hunt; else scan. */
-export function bixtradeBotMood(o: { capital: number; routes: number; lastExecAt?: string | number | null; now: number }): BixtradeBotMood {
+export function bixtradeBotMood(o: { capital: number; routes: number; lastExecAt?: string | number | null | undefined; now: number }): BixtradeBotMood {
   if (!(o.capital > 0)) return 'sleep';
   const t = o.lastExecAt ? new Date(o.lastExecAt).getTime() : NaN;
   if (Number.isFinite(t) && o.now - t >= 0 && o.now - t < 90_000) return 'trade';
