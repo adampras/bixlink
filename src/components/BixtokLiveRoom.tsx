@@ -107,6 +107,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [mega, setMega] = useState<Msg | null>(null);
   const [share, setShare] = useState(false); const [copied, setCopied] = useState(false);
   const [mic, setMic] = useState(true); const [facing, setFacing] = useState<'user' | 'environment'>('user');
+  const [camErr, setCamErr] = useState<MediaIssue | null>(null); const [camTry, setCamTry] = useState(0);
   const cam = useRef<HTMLVideoElement>(null); const view = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null); const [local, setLocal] = useState<MediaStream | null>(null);
   const [entered, setEntered] = useState(host); const [zoom, setZoom] = useState(1);
@@ -326,6 +327,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     <div className="bxl-stage" onClick={tap}>
       {host ? <>
           <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
+          {camErr && <div className="bxl-camerr" role="alert" onClick={e => e.stopPropagation()}>
+            <strong>{MEDIA_HELP[camErr].title}</strong>
+            <p>{MEDIA_HELP[camErr].body}</p>
+            <button type="button" onClick={() => setCamTry(n => n + 1)}>Try again</button>
+          </div>}
         </>
         : <>
           <video ref={view} autoPlay playsInline muted className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${zoom})` }}/>
