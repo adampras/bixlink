@@ -4352,3 +4352,34 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 [role="switch"][aria-checked="false"] > span.absolute, [role="switch"][data-state="unchecked"] > span.absolute { left: 2px !important; }
 [role="switch"][data-state="checked"] > span:not(.absolute) { transform: translateX(20px) !important; }
 [role="switch"][data-state="unchecked"] > span:not(.absolute) { transform: translateX(1px) !important; }
+
+/* BIXTOK LIVE: stage guests, pin, CTA, gate, mega gift */
+.bxl-tiles { position: absolute; z-index: 3; right: .75rem; top: 4.25rem; display: grid; gap: .4rem; }
+.bxl-tile { position: relative; width: 92px; height: 128px; border-radius: .8rem; overflow: hidden; background: var(--card); border: 1px solid color-mix(in oklab, var(--accent) 50%, transparent); }
+.bxl-tile video { width: 100%; height: 100%; object-fit: cover; }
+.bxl-tile small { position: absolute; left: .3rem; bottom: .2rem; font-size: .6rem; background: color-mix(in oklab, var(--background) 60%, transparent); padding: 0 .3rem; border-radius: .4rem; }
+.bxl-sub { position: absolute; z-index: 3; left: .75rem; right: 7rem; top: 3.9rem; display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
+.bxl-sub .bixtok-badge { position: static; }
+.bxl-top { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; font-size: .6rem; color: var(--accent); }
+.bxl-top em { font-style: normal; padding: .1rem .4rem; border-radius: 999px; background: color-mix(in oklab, var(--background) 60%, transparent); color: var(--foreground); }
+.bxl-pin { position: absolute; z-index: 3; left: .75rem; right: 4.5rem; top: 5.6rem; display: flex; gap: .4rem; align-items: flex-start; padding: .4rem .6rem; border-radius: .7rem; font-size: .72rem; background: color-mix(in oklab, var(--accent) 22%, var(--background)); border: 1px solid color-mix(in oklab, var(--accent) 50%, transparent); }
+.bxl-cta { position: absolute; z-index: 3; left: .75rem; bottom: calc(4.5rem + 40% + env(safe-area-inset-bottom)); display: flex; gap: .35rem; }
+.bxl-cta a { font-size: .65rem; font-weight: 700; padding: .3rem .6rem; border-radius: 999px; background: var(--accent); color: var(--accent-foreground); }
+.bxl-cta a + a { background: color-mix(in oklab, var(--background) 65%, transparent); color: var(--foreground); }
+.bxl-dot { position: absolute; top: -2px; right: -2px; min-width: 16px; height: 16px; border-radius: 999px; font-size: .55rem; font-style: normal; display: grid; place-items: center; background: var(--destructive); color: var(--destructive-foreground); }
+.bxl-tools button { position: relative; }
+.bxl-gate { position: absolute; inset: 0; z-index: 20; display: grid; place-content: center; justify-items: center; gap: .5rem; text-align: center; background: color-mix(in oklab, var(--background) 72%, transparent); backdrop-filter: blur(6px); }
+.bxl-gate svg { padding: 1rem; width: 72px; height: 72px; border-radius: 999px; background: var(--primary); color: var(--primary-foreground); }
+.bxl-gate small { color: var(--muted-foreground); font-size: .75rem; }
+.bxl-mega { position: absolute; inset: 0; z-index: 6; display: grid; place-content: center; justify-items: center; pointer-events: none; text-align: center; animation: bxl-mega 3.2s ease forwards; background: radial-gradient(circle, color-mix(in oklab, var(--accent) 35%, transparent), transparent 65%); }
+.bxl-mega span { font-size: 6.5rem; line-height: 1; filter: drop-shadow(0 0 24px var(--accent)); animation: bxl-mega-pop 3.2s ease forwards; }
+.bxl-mega b { font-size: 1.1rem; } .bxl-mega small { color: var(--accent); font-size: .8rem; }
+@keyframes bxl-mega { 0% { opacity: 0; } 10%, 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes bxl-mega-pop { 0% { transform: scale(.2) rotate(-20deg); } 20% { transform: scale(1.2) rotate(6deg); } 35%, 85% { transform: scale(1) rotate(0); } 100% { transform: scale(1.6) translateY(-40px); } }
+.bxl-stage-list { margin-top: .75rem; display: grid; gap: .5rem; }
+.bxl-stage-list li { display: flex; align-items: center; gap: .5rem; font-size: .8rem; }
+.bxl-stage-list span { flex: 1; color: var(--muted-foreground); font-size: .7rem; }
+.bxl-stage-list button, .bxl-btn { padding: .35rem .75rem; border-radius: 999px; font-size: .75rem; font-weight: 700; background: var(--primary); color: var(--primary-foreground); }
+.bxl-stage-list button.ghost, .bxl-btn.ghost { background: var(--secondary); color: var(--secondary-foreground); }
+.bxl-pin-input { margin-top: .5rem; width: 100%; min-height: 72px; padding: .5rem; border-radius: .6rem; background: var(--input); color: var(--foreground); font-size: .85rem; }
+@media (prefers-reduced-motion: reduce) { .bxl-mega, .bxl-mega span { animation-duration: .01s; } }

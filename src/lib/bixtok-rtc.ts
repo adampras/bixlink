@@ -128,30 +128,37 @@ function useP2pRtc({ liveId, me, host, stream, enabled }: { liveId: string; me: 
   return { remote, state };
 }
 
+export type RemoteFeed = { id: string; stream: MediaStream };
+
 /**
- * LIVE media: LiveKit Cloud relays host video/audio to every viewer (works on mobile networks, scales).
- * Falls back to direct peer-to-peer when LiveKit is not configured or unreachable.
+ * LIVE media: LiveKit Cloud relays host + approved guest video/audio to every viewer (mobile-friendly, scales).
+ * Audio plays through dedicated <audio> elements (reliable on iPhone/Android); video streams are returned per participant.
+ * Falls back to direct peer-to-peer (host only) when LiveKit is not configured or unreachable.
  */
-export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: string; host: boolean; stream: MediaStream | null }) {
+export function useLiveRtc({ liveId, me, host, hostId, publisher, stream }: { liveId: string; me: string; host: boolean; hostId: string; publisher: boolean; stream: MediaStream | null }) {
   const [mode, setMode] = useState<'pending' | 'lk' | 'p2p'>('pending');
-  const [remote, setRemote] = useState<MediaStream | null>(null);
+  const [feeds, setFeeds] = useState<RemoteFeed[]>([]);
   const [state, setState] = useState<RtcState>(host ? 'live' : 'waiting');
+  const [audioBlocked, setAudioBlocked] = useState(false);
   const roomRef = useRef<import('livekit-client').Room | null>(null);
   const streamRef = useRef(stream); streamRef.current = stream;
   const published = useRef(new Map<string, import('livekit-client').LocalTrackPublication>());
+  const audioBox = useRef<HTMLDivElement | null>(null);
 
   const publish = async () => {
-    const room = roomRef.current; const s = streamRef.current; if (!room || !host || !s) return;
+    const room = roomRef.current; const s = streamRef.current; if (!room || !publisher || !s) return;
+    const lk = await import('livekit-client');
     for (const t of s.getTracks()) {
       const old = published.current.get(t.kind);
       if (old?.track) { if (old.track.mediaStreamTrack !== t) await old.track.replaceTrack(t).catch(() => {}); continue; }
-      const pub = await room.localParticipant.publishTrack(t, { source: t.kind === 'video' ? (await import('livekit-client')).Track.Source.Camera : (await import('livekit-client')).Track.Source.Microphone }).catch(() => null);
+      const pub = await room.localParticipant.publishTrack(t, { source: t.kind === 'video' ? lk.Track.Source.Camera : lk.Track.Source.Microphone }).catch(() => null);
       if (pub) published.current.set(t.kind, pub);
     }
   };
 
   useEffect(() => {
     let dead = false; let room: import('livekit-client').Room | null = null;
+    const box = document.createElement('div'); box.style.display = 'none'; document.body.appendChild(box); audioBox.current = box;
     (async () => {
       try {
         const res = await getBixtokLiveToken({ data: { liveId } });
@@ -161,29 +168,50 @@ export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: s
         room = new lk.Room({ adaptiveStream: true, dynacast: true });
         roomRef.current = room;
         const rebuild = () => {
-          const tracks: MediaStreamTrack[] = [];
-          room!.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { if (pub.track) tracks.push(pub.track.mediaStreamTrack); }));
-          setRemote(tracks.length ? new MediaStream(tracks) : null);
-          setState(tracks.length ? 'live' : 'waiting');
+          const out: RemoteFeed[] = [];
+          room!.remoteParticipants.forEach(p => {
+            const vids: MediaStreamTrack[] = [];
+            p.trackPublications.forEach(pub => { if (pub.track && pub.kind === lk.Track.Kind.Video) vids.push(pub.track.mediaStreamTrack); });
+            if (vids.length) out.push({ id: p.identity, stream: new MediaStream(vids) });
+          });
+          out.sort((a, b) => (a.id === hostId ? -1 : b.id === hostId ? 1 : 0));
+          setFeeds(out);
+          if (!host) setState(out.length ? 'live' : 'waiting');
         };
-        room.on(lk.RoomEvent.TrackSubscribed, rebuild).on(lk.RoomEvent.TrackUnsubscribed, rebuild)
+        room.on(lk.RoomEvent.TrackSubscribed, (track) => {
+          if (track.kind === lk.Track.Kind.Audio) { const el = track.attach(); el.setAttribute('playsinline', ''); box.appendChild(el); }
+          rebuild();
+        }).on(lk.RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach(el => el.remove()); rebuild(); })
           .on(lk.RoomEvent.ParticipantDisconnected, rebuild)
+          .on(lk.RoomEvent.AudioPlaybackStatusChanged, () => setAudioBlocked(!room!.canPlaybackAudio))
           .on(lk.RoomEvent.Reconnecting, () => { if (!host) setState('connecting'); })
           .on(lk.RoomEvent.Reconnected, rebuild);
         if (!host) setState('connecting');
         await room.connect(res.url, res.token);
         if (dead) { void room.disconnect(); return; }
         setMode('lk');
-        if (host) await publish(); else rebuild();
+        setAudioBlocked(!room.canPlaybackAudio);
+        if (publisher) await publish();
+        rebuild();
       } catch {
         if (!dead) { void room?.disconnect(); roomRef.current = null; setMode('p2p'); }
       }
     })();
-    return () => { dead = true; published.current.clear(); void room?.disconnect(); roomRef.current = null; };
-  }, [liveId, host]);
+    return () => { dead = true; published.current.clear(); void room?.disconnect(); roomRef.current = null; box.remove(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveId, host, publisher]);
 
-  useEffect(() => { if (mode === 'lk' && host && stream) void publish(); }, [mode, host, stream]);
+  useEffect(() => { if (mode === 'lk' && publisher && stream) void publish(); }, [mode, publisher, stream]);
+
+  /** Must run inside a tap: unlocks LiveKit audio + every attached <audio>. */
+  const unlockAudio = async () => {
+    await roomRef.current?.startAudio().catch(() => {});
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; void a.play().catch(() => {}); });
+    if (roomRef.current) setAudioBlocked(!roomRef.current.canPlaybackAudio);
+  };
+  const setVolume = (on: boolean) => { audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = !on; }); };
 
   const p2p = useP2pRtc({ liveId, me, host, stream, enabled: mode === 'p2p' });
-  return mode === 'p2p' ? p2p : { remote, state };
+  if (mode === 'p2p') return { mode, feeds: p2p.remote ? [{ id: hostId, stream: p2p.remote }] : [], state: p2p.state, audioBlocked: false, unlockAudio, setVolume };
+  return { mode, feeds, state, audioBlocked, unlockAudio, setVolume };
 }

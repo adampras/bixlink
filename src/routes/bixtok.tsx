@@ -220,7 +220,11 @@ function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; 
     setBusy(g.id);
     const { error } = await supabase.rpc('bixtok_send_gift', { p_gift: g.id, p_live: target.live ?? null, p_video: target.video ?? null } as never);
     setBusy(null);
-    if (error) return onNote(error.message);
+    if (error) {
+      const m = error.message;
+      return onNote(m.includes('yourself') ? 'You cannot gift your own post or LIVE — use a different member account.' : m.includes('Insufficient BIXP') ? `Not enough BIXP for ${g.name} (${g.price} BIXP).` : m.includes('Insufficient BIX') ? `Not enough BIX balance for ${g.name} (${g.price} BIX).` : m.toLowerCase().includes('lock') ? 'Your BIX is still locked and cannot be gifted yet.' : m);
+    }
+    if (target.live) window.dispatchEvent(new CustomEvent('bixtok:gift-sent', { detail: { live: target.live } }));
     setBurst(g.emoji); setTimeout(() => setBurst(null), 1400);
     onNote(`${g.emoji} ${g.name} sent · ${g.price} ${g.currency}`); qc.invalidateQueries();
   };

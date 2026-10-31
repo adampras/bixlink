@@ -806,6 +806,13 @@
       "when": 1793376695613,
       "tag": "0114_bixtok_live_likes",
       "breakpoints": true
+    },
+    {
+      "idx": 115,
+      "version": "7",
+      "when": 1793429528562,
+      "tag": "0115_bixtok_live_stage_pin_mod",
+      "breakpoints": true
     }
   ]
 }

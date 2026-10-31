@@ -1788,6 +1788,8 @@ export type Database = {
           id: string
           kind: string
           likes: number
+          muted: string[]
+          pinned: string | null
           started_at: string
           status: string
           title: string
@@ -1799,6 +1801,8 @@ export type Database = {
           id?: string
           kind?: string
           likes?: number
+          muted?: string[]
+          pinned?: string | null
           started_at?: string
           status?: string
           title: string
@@ -1810,6 +1814,8 @@ export type Database = {
           id?: string
           kind?: string
           likes?: number
+          muted?: string[]
+          pinned?: string | null
           started_at?: string
           status?: string
           title?: string
@@ -1848,6 +1854,41 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      bixtok_stage_requests: {
+        Row: {
+          created_at: string
+          id: string
+          live_id: string
+          name: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          live_id: string
+          name?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          live_id?: string
+          name?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixtok_stage_requests_live_id_fkey"
+            columns: ["live_id"]
+            isOneToOne: false
+            referencedRelation: "bixtok_lives"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bixtok_videos: {
         Row: {
@@ -2746,6 +2787,22 @@ export type Database = {
         Args: { p_live: string; p_n: number }
         Returns: number
       }
+      bixtok_live_moderate: {
+        Args: { p_msg: string; p_mute: boolean }
+        Returns: undefined
+      }
+      bixtok_live_pin: {
+        Args: { p_live: string; p_text: string }
+        Returns: undefined
+      }
+      bixtok_live_top: {
+        Args: { p_live: string }
+        Returns: {
+          currency: string
+          name: string
+          total: number
+        }[]
+      }
       bixtok_my_stake_usd: { Args: never; Returns: number }
       bixtok_publish: {
         Args: {
@@ -2775,6 +2832,11 @@ export type Database = {
         Args: { p_gift: string; p_live: string; p_video: string }
         Returns: string
       }
+      bixtok_stage_decide: {
+        Args: { p_req: string; p_status: string }
+        Returns: undefined
+      }
+      bixtok_stage_request: { Args: { p_live: string }; Returns: string }
       bixtok_start_live: { Args: { p_title: string }; Returns: string }
       bixtok_start_official_live: { Args: { p_title: string }; Returns: string }
       ensure_bix_profile: { Args: never; Returns: undefined }
