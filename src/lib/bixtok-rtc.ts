@@ -151,7 +151,7 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream }: { li
     for (const t of s.getTracks()) {
       const old = published.current.get(t.kind);
       if (old?.track) { if (old.track.mediaStreamTrack !== t) await old.track.replaceTrack(t).catch(() => {}); continue; }
-      const pub = await room.localParticipant.publishTrack(t, t.kind === 'video' ? { source: lk.Track.Source.Camera, simulcast: true, videoCodec: 'h264', videoEncoding: { maxBitrate: 2_500_000, maxFramerate: 30 }, degradationPreference: 'maintain-resolution' } : { source: lk.Track.Source.Microphone, dtx: true, red: true }).catch(() => null);
+      const pub = await room.localParticipant.publishTrack(t, t.kind === 'video' ? { source: lk.Track.Source.Camera, simulcast: true, videoCodec: 'vp8', videoEncoding: { maxBitrate: 2_000_000, maxFramerate: 30 } } : { source: lk.Track.Source.Microphone, dtx: true, red: true }).catch(() => null);
       if (pub) published.current.set(t.kind, pub);
     }
   };
@@ -165,7 +165,7 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream }: { li
         if (dead) return;
         if (!res.ok) { setMode('p2p'); return; }
         const lk = await import('livekit-client');
-        room = new lk.Room({ adaptiveStream: true, dynacast: true });
+        room = new lk.Room({ adaptiveStream: false, dynacast: true });
         roomRef.current = room;
         const rebuild = () => {
           const out: RemoteFeed[] = [];
@@ -183,6 +183,7 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream }: { li
           rebuild();
         }).on(lk.RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach(el => el.remove()); rebuild(); })
           .on(lk.RoomEvent.ParticipantDisconnected, rebuild)
+          .on(lk.RoomEvent.TrackMuted, rebuild).on(lk.RoomEvent.TrackUnmuted, rebuild)
           .on(lk.RoomEvent.AudioPlaybackStatusChanged, () => setAudioBlocked(!room!.canPlaybackAudio))
           .on(lk.RoomEvent.Reconnecting, () => { if (!host) setState('connecting'); })
           .on(lk.RoomEvent.Reconnected, rebuild);
