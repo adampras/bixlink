@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { useLiveRtc } from '@/lib/bixtok-rtc';
 import { useReplayRecorder } from '@/lib/bixtok-replay';
+import { MEDIA_HELP, openLiveMedia, type MediaIssue } from '@/lib/bixtok-media';
 
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
 type Msg = { id: string; name: string; body: string; kind: string };
@@ -107,6 +108,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [mega, setMega] = useState<Msg | null>(null);
   const [share, setShare] = useState(false); const [copied, setCopied] = useState(false);
   const [mic, setMic] = useState(true); const [facing, setFacing] = useState<'user' | 'environment'>('user');
+  const [camErr, setCamErr] = useState<MediaIssue | null>(null); const [camTry, setCamTry] = useState(0);
   const cam = useRef<HTMLVideoElement>(null); const view = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null); const [local, setLocal] = useState<MediaStream | null>(null);
   const [entered, setEntered] = useState(host); const [zoom, setZoom] = useState(1);
@@ -124,7 +126,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const sfx = useSfx(sound); const sfxRef = useRef(sfx); sfxRef.current = sfx;
   const mine = stage.find(s => s.user_id === me);
   const guest = !host && mine?.status === 'approved';
-  const { mode, feeds, state, audioBlocked, unlockAudio, setVolume } = useLiveRtc({ liveId: live.id, me, host, hostId: live.host_id, publisher: host || guest, stream: local, saver });
+  const { mode, feeds, state, audioBlocked, voiceOnly, unlockAudio, setVolume } = useLiveRtc({ liveId: live.id, me, host, hostId: live.host_id, publisher: host || guest, stream: local, saver });
   const names = new Map(stage.map(s => [s.user_id, s.name])); names.set(live.host_id, live.host_name);
   const main = host ? null : feeds.find(f => f.id === live.host_id) ?? feeds[0] ?? null;
   const tiles = feeds.filter(f => f !== main);
@@ -213,32 +215,25 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   // Camera + mic for the host and approved stage guests.
   const publishing = host || guest;
   useEffect(() => {
-    if (!publishing) { stream.current?.getTracks().forEach(t => t.stop()); stream.current = null; setLocal(null); return undefined; }
+    if (!publishing) { stream.current?.getTracks().forEach(t => t.stop()); stream.current = null; setLocal(null); setCamErr(null); return undefined; }
     let cancelled = false;
-    const audio = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
-    // Phones reject some constraints; step down until a camera opens.
-    const tries: MediaStreamConstraints[] = [
-      { video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } }, audio },
-      { video: { facingMode: facing }, audio },
-      { video: true, audio },
-    ];
-    const open = async () => { let err: unknown; for (const c of tries) { try { return await navigator.mediaDevices.getUserMedia(c); } catch (e) { err = e; } } throw err; };
-    open()
-      .then(s => {
-        if (cancelled) { s.getTracks().forEach(t => t.stop()); return; }
-        const old = stream.current; stream.current = s;
-        s.getAudioTracks().forEach(t => { t.enabled = mic; });
-        if (cam.current) cam.current.srcObject = s;
-        setLocal(s);
-        old?.getTracks().forEach(t => t.stop());
-      })
-      .catch(() => flash('Camera or microphone permission was blocked.'));
+    // Release the previous camera first: most Android phones cannot open two cameras at once (flip / retry).
+    stream.current?.getTracks().forEach(t => t.stop()); stream.current = null;
+    if (cam.current) cam.current.srcObject = null;
+    void openLiveMedia(facing).then(r => {
+      if (cancelled) { r.stream?.getTracks().forEach(t => t.stop()); return; }
+      if (!r.stream) { setLocal(null); setCamErr(r.error); return; }
+      stream.current = r.stream;
+      r.stream.getAudioTracks().forEach(t => { t.enabled = mic; });
+      if (cam.current) { cam.current.srcObject = r.stream; void cam.current.play().catch(() => {}); }
+      setLocal(r.stream); setCamErr(r.error);
+    });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [publishing, facing]);
+  }, [publishing, facing, camTry]);
   useEffect(() => () => { stream.current?.getTracks().forEach(t => t.stop()); }, []);
   useEffect(() => { stream.current?.getAudioTracks().forEach(t => { t.enabled = mic; }); }, [mic, local]);
-  useEffect(() => { if (host && cam.current && local) cam.current.srcObject = local; }, [host, local]);
+  useEffect(() => { if (host && cam.current && local) { cam.current.srcObject = local; void cam.current.play().catch(() => {}); } }, [host, local]);
   // Share the host's zoom with viewers (debounced while the slider moves).
   useEffect(() => {
     if (!host) return undefined;
@@ -333,11 +328,16 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     <div className="bxl-stage" onClick={tap}>
       {host ? <>
           <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
+          {camErr && <div className="bxl-camerr" role="alert" onClick={e => e.stopPropagation()}>
+            <strong>{MEDIA_HELP[camErr].title}</strong>
+            <p>{MEDIA_HELP[camErr].body}</p>
+            <button type="button" onClick={() => setCamTry(n => n + 1)}>Try again</button>
+          </div>}
         </>
         : <>
           <video ref={view} autoPlay playsInline muted className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${zoom})` }}/>
           {(!main || state !== 'live') && <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p>
-            <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : 'Connecting to the host camera…'}</small></div>}
+            <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : voiceOnly ? 'The host is on voice only right now — turn your sound on to listen.' : 'Connecting to the host camera…'}</small></div>}
         </>}
     </div>
     {(tiles.length > 0 || (guest && local)) && <div className="bxl-tiles">
@@ -453,7 +453,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <Volume2 size={34}/><b>Tap to join with sound</b><small>@{live.host_name} · {live.title}</small>
     </button>}
     {note && <div className="bixtok-toast" role="status">{note}</div>}
-    {host && !ended && <p className="bixtok-hint">You are broadcasting camera and voice to {Math.max(0, viewers - 1)} viewer{viewers - 1 === 1 ? '' : 's'}. Tap a chat message to moderate it.</p>}
+    {host && !ended && <p className="bixtok-hint">{!local ? 'Camera and microphone are off — viewers cannot see or hear you yet.' : `You are broadcasting ${local.getVideoTracks().length ? 'camera' : ''}${local.getVideoTracks().length && local.getAudioTracks().length ? ' and ' : ''}${local.getAudioTracks().length ? 'voice' : ''} to ${Math.max(0, viewers - 1)} viewer${viewers - 1 === 1 ? '' : 's'}${mode === 'lk' ? '' : ' (backup connection)'}. Tap a chat message to moderate it.`}</p>}
   </div>;
 }
 
