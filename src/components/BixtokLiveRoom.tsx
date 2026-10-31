@@ -82,13 +82,6 @@ export function isMegaGift(body: string): boolean {
 export const ZOOM_MIN = 1; export const ZOOM_MAX = 3;
 export function clampZoom(z: number): number { return Number.isFinite(z) ? Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z)) : 1; }
 
-/** Soft blurred copy of the camera behind the real frame, so the portrait screen is always filled without cropping the host. */
-function Backdrop({ stream, mirror }: { stream: MediaStream | null; mirror?: boolean }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => { const v = ref.current; if (v) { v.srcObject = stream; if (stream) void v.play().catch(() => {}); } }, [stream]);
-  return <video ref={ref} autoPlay muted playsInline aria-hidden className="bxl-backdrop" style={mirror ? { transform: 'scaleX(-1) scale(1.15)' } : undefined}/>;
-}
-
 function Tile({ stream, label, mirror }: { stream: MediaStream; label: string; mirror?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => { const v = ref.current; if (v) { v.srcObject = stream; void v.play().catch(() => {}); } }, [stream]);
@@ -131,7 +124,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const sfx = useSfx(sound); const sfxRef = useRef(sfx); sfxRef.current = sfx;
   const mine = stage.find(s => s.user_id === me);
   const guest = !host && mine?.status === 'approved';
-  const { mode, feeds, state, audioBlocked, unlockAudio, setVolume } = useLiveRtc({ liveId: live.id, me, host, hostId: live.host_id, publisher: host || guest, stream: local });
+  const { mode, feeds, state, audioBlocked, unlockAudio, setVolume } = useLiveRtc({ liveId: live.id, me, host, hostId: live.host_id, publisher: host || guest, stream: local, saver });
   const names = new Map(stage.map(s => [s.user_id, s.name])); names.set(live.host_id, live.host_name);
   const main = host ? null : feeds.find(f => f.id === live.host_id) ?? feeds[0] ?? null;
   const tiles = feeds.filter(f => f !== main);

@@ -142,7 +142,8 @@ export type RemoteFeed = { id: string; stream: MediaStream };
  * Audio plays through dedicated <audio> elements (reliable on iPhone/Android); video streams are returned per participant.
  * Falls back to direct peer-to-peer (host only) when LiveKit is not configured or unreachable.
  */
-export function useLiveRtc({ liveId, me, host, hostId, publisher, stream }: { liveId: string; me: string; host: boolean; hostId: string; publisher: boolean; stream: MediaStream | null }) {
+export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver = false }: { liveId: string; me: string; host: boolean; hostId: string; publisher: boolean; stream: MediaStream | null; saver?: boolean }) {
+  const saverRef = useRef(saver); saverRef.current = saver;
   const [mode, setMode] = useState<'pending' | 'lk' | 'p2p'>('pending');
   const [feeds, setFeeds] = useState<RemoteFeed[]>([]);
   const [state, setState] = useState<RtcState>(host ? 'live' : 'waiting');
@@ -189,7 +190,7 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream }: { li
         };
         room.on(lk.RoomEvent.TrackSubscribed, (track, pub) => {
           if (track.kind === lk.Track.Kind.Audio) { const el = track.attach(); el.setAttribute('playsinline', ''); box.appendChild(el); }
-          else pub.setVideoQuality(lk.VideoQuality.HIGH); // always the sharpest simulcast layer for viewers
+          else pub.setVideoQuality(saverRef.current ? lk.VideoQuality.LOW : lk.VideoQuality.HIGH); // data saver picks the light layer
           rebuild();
         }).on(lk.RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach(el => el.remove()); rebuild(); })
           .on(lk.RoomEvent.ParticipantDisconnected, rebuild)
@@ -223,6 +224,12 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream }: { li
   const setVolume = (on: boolean) => { audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = !on; }); };
 
   const p2p = useP2pRtc({ liveId, me, host, stream, enabled: mode === 'p2p' });
+  useEffect(() => {
+    const room = roomRef.current; if (!room || host) return;
+    void import('livekit-client').then(lk => room.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => {
+      if (pub.kind === lk.Track.Kind.Video && 'setVideoQuality' in pub) (pub as import('livekit-client').RemoteTrackPublication).setVideoQuality(saver ? lk.VideoQuality.LOW : lk.VideoQuality.HIGH);
+    })));
+  }, [saver, host, feeds.length]);
   if (mode === 'p2p') return { mode, feeds: p2p.remote ? [{ id: hostId, stream: p2p.remote }] : [], state: p2p.state, audioBlocked: false, unlockAudio, setVolume };
   return { mode, feeds, state, audioBlocked, unlockAudio, setVolume };
 }
