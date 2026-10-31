@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getBixtokLiveToken } from '@/lib/bixtok-livekit.functions';
 
 /**
  * Peer-to-peer LIVE video/audio for BIXTOK.
@@ -16,7 +17,7 @@ const ICE: RTCConfiguration = {
 export type RtcState = 'waiting' | 'connecting' | 'live' | 'failed';
 type Sig = { to?: string; from: string; sdp?: RTCSessionDescriptionInit; c?: RTCIceCandidateInit };
 
-export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: string; host: boolean; stream: MediaStream | null }) {
+function useP2pRtc({ liveId, me, host, stream, enabled }: { liveId: string; me: string; host: boolean; stream: MediaStream | null; enabled: boolean }) {
   const [remote, setRemote] = useState<MediaStream | null>(null);
   const [state, setState] = useState<RtcState>(host ? 'live' : 'waiting');
   const streamRef = useRef(stream); streamRef.current = stream;
@@ -26,6 +27,7 @@ export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: s
   const ready = useRef(false); const offeredAt = useRef(0);
 
   useEffect(() => {
+    if (!enabled) return undefined;
     if (typeof RTCPeerConnection === 'undefined') { setState('failed'); return undefined; }
     const ch = supabase.channel(`bixtok-rtc-${liveId}`, { config: { broadcast: { self: false } } });
     chanRef.current = ch;
@@ -109,11 +111,11 @@ export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: s
       ready.current = false; chanRef.current = null;
       supabase.removeChannel(ch);
     };
-  }, [liveId, me, host]);
+  }, [liveId, me, host, enabled]);
 
   // Host camera changed (first start or flip): swap tracks for connected viewers, announce readiness.
   useEffect(() => {
-    if (!host || !stream) return;
+    if (!enabled || !host || !stream) return;
     pcs.current.forEach(pc => {
       pc.getSenders().forEach(sender => {
         const next = stream.getTracks().find(t => t.kind === sender.track?.kind);
@@ -121,7 +123,67 @@ export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: s
       });
     });
     if (ready.current) void chanRef.current?.send({ type: 'broadcast', event: 'host-ready', payload: { from: me } });
-  }, [host, stream, me]);
+  }, [host, stream, me, enabled]);
 
   return { remote, state };
+}
+
+/**
+ * LIVE media: LiveKit Cloud relays host video/audio to every viewer (works on mobile networks, scales).
+ * Falls back to direct peer-to-peer when LiveKit is not configured or unreachable.
+ */
+export function useLiveRtc({ liveId, me, host, stream }: { liveId: string; me: string; host: boolean; stream: MediaStream | null }) {
+  const [mode, setMode] = useState<'pending' | 'lk' | 'p2p'>('pending');
+  const [remote, setRemote] = useState<MediaStream | null>(null);
+  const [state, setState] = useState<RtcState>(host ? 'live' : 'waiting');
+  const roomRef = useRef<import('livekit-client').Room | null>(null);
+  const streamRef = useRef(stream); streamRef.current = stream;
+  const published = useRef(new Map<string, import('livekit-client').LocalTrackPublication>());
+
+  const publish = async () => {
+    const room = roomRef.current; const s = streamRef.current; if (!room || !host || !s) return;
+    for (const t of s.getTracks()) {
+      const old = published.current.get(t.kind);
+      if (old?.track) { if (old.track.mediaStreamTrack !== t) await old.track.replaceTrack(t).catch(() => {}); continue; }
+      const pub = await room.localParticipant.publishTrack(t, { source: t.kind === 'video' ? (await import('livekit-client')).Track.Source.Camera : (await import('livekit-client')).Track.Source.Microphone }).catch(() => null);
+      if (pub) published.current.set(t.kind, pub);
+    }
+  };
+
+  useEffect(() => {
+    let dead = false; let room: import('livekit-client').Room | null = null;
+    (async () => {
+      try {
+        const res = await getBixtokLiveToken({ data: { liveId } });
+        if (dead) return;
+        if (!res.ok) { setMode('p2p'); return; }
+        const lk = await import('livekit-client');
+        room = new lk.Room({ adaptiveStream: true, dynacast: true });
+        roomRef.current = room;
+        const rebuild = () => {
+          const tracks: MediaStreamTrack[] = [];
+          room!.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { if (pub.track) tracks.push(pub.track.mediaStreamTrack); }));
+          setRemote(tracks.length ? new MediaStream(tracks) : null);
+          setState(tracks.length ? 'live' : 'waiting');
+        };
+        room.on(lk.RoomEvent.TrackSubscribed, rebuild).on(lk.RoomEvent.TrackUnsubscribed, rebuild)
+          .on(lk.RoomEvent.ParticipantDisconnected, rebuild)
+          .on(lk.RoomEvent.Reconnecting, () => { if (!host) setState('connecting'); })
+          .on(lk.RoomEvent.Reconnected, rebuild);
+        if (!host) setState('connecting');
+        await room.connect(res.url, res.token);
+        if (dead) { void room.disconnect(); return; }
+        setMode('lk');
+        if (host) await publish(); else rebuild();
+      } catch {
+        if (!dead) { void room?.disconnect(); roomRef.current = null; setMode('p2p'); }
+      }
+    })();
+    return () => { dead = true; published.current.clear(); void room?.disconnect(); roomRef.current = null; };
+  }, [liveId, host]);
+
+  useEffect(() => { if (mode === 'lk' && host && stream) void publish(); }, [mode, host, stream]);
+
+  const p2p = useP2pRtc({ liveId, me, host, stream, enabled: mode === 'p2p' });
+  return mode === 'p2p' ? p2p : { remote, state };
 }
