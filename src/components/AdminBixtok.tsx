@@ -4,7 +4,7 @@ import { Clapperboard, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 
-type Cfg = { link_slots: number; max_links: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[] };
+type Cfg = { link_slots: number; max_links: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max: number; live_cta: boolean; host_gifts: boolean };
 const FEATURES: [string, string][] = [['upload', 'Posting link & kamera member'], ['music', 'Pencarian musik'], ['filters', 'Filter wajah'], ['text', 'Teks bebas geser'], ['likes', 'Like'], ['comments', 'Komentar LIVE'], ['share', 'Bagikan'], ['bixp_gifts', 'Saweran BIXP'], ['bix_gifts', 'Saweran BIXCOIN']];
 
 export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
@@ -41,11 +41,14 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
         <Toggle on={cfg.enabled} label="BIXTOK aktif" onChange={v => set({ enabled: v })}/>
         <Toggle on={cfg.live_enabled} label="Go LIVE dibuka" onChange={v => set({ live_enabled: v })}/>
         <Toggle on={cfg.gifts_enabled} label="Saweran dibuka" onChange={v => set({ gifts_enabled: v })}/>
+        <Toggle on={cfg.host_gifts !== false} label="Host bisa sawer tamu panggung" onChange={v => set({ host_gifts: v })}/>
+        <Toggle on={cfg.live_cta !== false} label="Tombol Staking/Presale/Shop di LIVE" onChange={v => set({ live_cta: v })}/>
         {FEATURES.map(([k, l]) => <Toggle key={k} on={cfg.features[k] !== false} label={l} onChange={v => set({ features: { ...cfg.features, [k]: v } })}/>)}
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="text-xs text-muted-foreground">Syarat LIVE: minimal total staking aktif (USD)<input className="form-input mt-1" type="number" min={0} step="1" value={cfg.live_min_stake_usd} onChange={e => set({ live_min_stake_usd: Number(e.target.value) })}/></label>
         <label className="text-xs text-muted-foreground">Durasi LIVE maksimal (menit)<input className="form-input mt-1" type="number" min={5} max={720} value={cfg.live_max_minutes} onChange={e => set({ live_max_minutes: Number(e.target.value) })}/></label>
+        <label className="text-xs text-muted-foreground">Maksimal tamu naik panggung (1–5)<input className="form-input mt-1" type="number" min={1} max={5} value={cfg.stage_max ?? 5} onChange={e => set({ stage_max: Number(e.target.value) })}/></label>
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="text-xs text-muted-foreground">Slot link awal di form posting<input className="form-input mt-1" type="number" min={1} max={20} value={cfg.link_slots} onChange={e => set({ link_slots: Number(e.target.value) })}/></label>
@@ -57,7 +60,7 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
         <Button variant="outline" size="sm" onClick={() => set({ menus: [...cfg.menus, { key: `custom${Date.now()}`, label: 'New tab', enabled: true }] })}><Plus/>Tambah menu</Button>
         <p className="text-[11px] text-muted-foreground">Tab kustom menampilkan feed video utama.</p>
       </div>
-      <Button className="mt-5" disabled={!draft} onClick={() => run(supabase.from('bixtok_config').update({ enabled: cfg.enabled, live_enabled: cfg.live_enabled, gifts_enabled: cfg.gifts_enabled, live_min_stake_usd: Math.max(0, cfg.live_min_stake_usd), live_max_minutes: Math.min(720, Math.max(5, cfg.live_max_minutes)), features: cfg.features, menus: cfg.menus, link_slots: Math.min(20, Math.max(1, cfg.link_slots)), max_links: Math.min(20, Math.max(1, cfg.max_links, cfg.link_slots)), updated_at: new Date().toISOString() }).eq('id', 1), 'Pengaturan BIXTOK tersimpan.')}>Simpan pengaturan</Button>
+      <Button className="mt-5" disabled={!draft} onClick={() => run(supabase.from('bixtok_config').update({ enabled: cfg.enabled, live_enabled: cfg.live_enabled, gifts_enabled: cfg.gifts_enabled, live_min_stake_usd: Math.max(0, cfg.live_min_stake_usd), live_max_minutes: Math.min(720, Math.max(5, cfg.live_max_minutes)), features: cfg.features, menus: cfg.menus, stage_max: Math.min(5, Math.max(1, Math.round(cfg.stage_max ?? 5))), live_cta: cfg.live_cta !== false, host_gifts: cfg.host_gifts !== false, link_slots: Math.min(20, Math.max(1, cfg.link_slots)), max_links: Math.min(20, Math.max(1, cfg.max_links, cfg.link_slots)), updated_at: new Date().toISOString() }).eq('id', 1), 'Pengaturan BIXTOK tersimpan.')}>Simpan pengaturan</Button>
     </div>
 
     <div className="rounded-xl border border-border bg-card p-5">
