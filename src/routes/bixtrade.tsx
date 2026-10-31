@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, checkBixtradeRequest, projectBixtrade, readBixtrade, withdrawNet, type BixtradeSettings, type BixtradeStrategy } from '@/lib/bixtrade';
-import { Activity, ArrowDownToLine, ArrowUpFromLine, Construction, Cpu, Gauge, Radar, Zap } from 'lucide-react';
+import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, checkBixtradeRequest, dailySeries, projectBixtrade, readBixtrade, withdrawNet, type BixtradeSettings, type BixtradeStrategy } from '@/lib/bixtrade';
+import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Gauge, Network, Radar, Send, Share2, Volume2, VolumeX, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/bixtrade')({
   head: () => ({ meta: [
@@ -18,7 +18,7 @@ export const Route = createFileRoute('/bixtrade')({
 });
 
 type Row = { pair: string; buy: string; sell: string; bid: number; ask: number; spread: number; net: number; ms: number };
-type Req = { id: string; kind: string; amount_usd: number; strategy: string; status: string; created_at: string; admin_note: string | null };
+type Req = { id: string; kind: string; amount_usd: number; strategy: string; status: string; created_at: string; admin_note: string | null; settled_usd: number | null; settled_at: string | null };
 const FEE = 0.1;
 
 function BixtradePage() {
@@ -34,12 +34,19 @@ function BixtradePage() {
   const [busy, setBusy] = useState(false);
   const [reqs, setReqs] = useState<Req[]>([]);
   const [uid, setUid] = useState<string | null>(null);
+  const [mainUsdt, setMainUsdt] = useState<number | null>(null);
+  const [sound, setSound] = useState(false);
+  const audio = useRef<AudioContext | null>(null);
+  useEffect(() => { setSound(localStorage.getItem('bixtrade-sound') === '1'); }, []);
+  const toggleSound = () => setSound(v => { const n = !v; localStorage.setItem('bixtrade-sound', n ? '1' : '0'); if (n) { audio.current ??= new AudioContext(); void audio.current.resume(); } return n; });
 
   useEffect(() => { void supabase.from('app_settings').select('value').eq('key', 'bixtrade').maybeSingle().then(({ data }) => setCfg(readBixtrade(data?.value))); void supabase.auth.getUser().then(({ data }) => setUid(data.user?.id ?? null)); }, []);
   const loadReqs = useCallback(async () => {
     if (!uid) return;
-    const { data } = await supabase.from('bixtrade_requests').select('id,kind,amount_usd,strategy,status,created_at,admin_note').eq('user_id', uid).order('created_at', { ascending: false }).limit(30);
+    const { data } = await supabase.from('bixtrade_requests').select('id,kind,amount_usd,strategy,status,created_at,admin_note,settled_usd,settled_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(30);
     setReqs((data ?? []) as Req[]);
+    const b = await supabase.rpc('bix_asset_balances', { p_user: uid }).single();
+    setMainUsdt(Number((b.data as { usdt_balance?: number } | null)?.usdt_balance ?? 0));
   }, [uid]);
   useEffect(() => { void loadReqs(); }, [loadReqs]);
   useEffect(() => {
@@ -59,15 +66,22 @@ function BixtradePage() {
   }).filter(Boolean) as Row[], [prices, tick]);
   const stream = useMemo(() => rows.filter(r => r.net > 0).map(r => `${r.pair} ${r.buy} → ${r.sell} +${r.net.toFixed(2)}%`), [rows]);
 
-  const approved = reqs.filter(r => r.status === 'approved');
-  const capital = approved.reduce((s, r) => s + (r.kind === 'deposit' ? 1 : -1) * Number(r.amount_usd), 0);
+  const capital = botCapital(reqs);
+  const profitable = rows.filter(r => r.net > 0);
+  useEffect(() => {
+    if (!sound || !profitable.length || !audio.current) return;
+    const ctx = audio.current, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = 880 + profitable.length * 60;
+    g.gain.setValueAtTime(0.04, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+    o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.2);
+  }, [tick]); // eslint-disable-line react-hooks/exhaustive-deps
   const pending = reqs.filter(r => r.status === 'pending').length;
 
   const submit = async () => {
     if (!cfg) return;
     if (!uid) { setMsg('Please sign in first.'); return; }
     const n = Number(reqAmt);
-    const err = checkBixtradeRequest(cfg, mode, n) ?? (mode === 'withdraw' && n > capital ? 'Amount exceeds your approved bot capital.' : null);
+    const err = checkBixtradeRequest(cfg, mode, n) ?? (mode === 'withdraw' && n > capital ? 'Amount exceeds your approved bot capital.' : mode === 'deposit' && mainUsdt !== null && n > mainUsdt ? 'Amount exceeds your main wallet USDT balance.' : null);
     if (err) { setMsg(err); return; }
     setBusy(true);
     const { error } = await supabase.from('bixtrade_requests').insert({ user_id: uid, kind: mode, amount_usd: n, strategy });
@@ -95,7 +109,7 @@ function BixtradePage() {
         <p className="shop-eyebrow">QUANT ARBITRAGE ENGINE</p>
         <h1 className="mt-1 font-display text-3xl font-bold">BIX<span className="text-chart-3">Trade</span> Bot</h1>
       </div>
-      <span className="arb-live"><i/> LIVE</span>
+      <span className="flex items-center gap-2"><button type="button" onClick={toggleSound} aria-label={sound ? 'Mute execution sound' : 'Enable execution sound'} className="arb-icon-btn">{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</button><span className="arb-live"><i/> LIVE</span></span>
     </div>
     <p className="mt-1 mb-4 text-sm text-muted-foreground">Cross-exchange spread scanner on the world's most liquid USDT pairs across {BIXTRADE_VENUES.length} venues.</p>
 
@@ -107,8 +121,9 @@ function BixtradePage() {
 
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><ArrowDownToLine size={18} className="text-chart-3"/> Bot wallet</h2>
-      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-        <div className="arb-stat"><p>Bot capital</p><b>{capital.toFixed(2)}</b><small>USDT · approved</small></div>
+      <div className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
+        <div className="arb-stat"><p>Main wallet</p><b>{mainUsdt === null ? '—' : mainUsdt.toFixed(2)}</b><small>USDT available</small></div>
+        <div className="arb-stat"><p>Bot capital</p><b>{capital.toFixed(2)}</b><small>USDT · settled</small></div>
         <div className="arb-stat"><p>Pending</p><b>{pending}</b><small>requests</small></div>
         <div className="arb-stat"><p>Lock period</p><b>{cfg.lockDays}</b><small>days</small></div>
       </div>
@@ -124,7 +139,7 @@ function BixtradePage() {
         {mode === 'withdraw' && n > 0 && <p className="text-xs">You receive ≈ <b className="text-chart-2">{withdrawNet(cfg, n).toFixed(2)} USDT</b> after fee</p>}
         <Button disabled={busy || (mode === 'deposit' ? !cfg.depositOpen : !cfg.withdrawOpen)} onClick={submit}>{busy ? 'Sending…' : mode === 'deposit' ? 'Request deposit' : 'Request withdrawal'}</Button>
         {msg && <p className="text-xs text-chart-3">{msg}</p>}
-        <p className="text-[10px] text-muted-foreground">Every request is reviewed by the owner before it is recorded. Deposit funding follows the owner's instructions from your Wallet page.</p>
+        <p className="text-[10px] text-muted-foreground">Every request is reviewed by the owner. When a deposit is approved, the amount moves from your main wallet USDT into the bot; an approved withdrawal returns the amount after fee to your main wallet. Projected profit is never added automatically.</p>
       </div>
     </section>
 
@@ -141,6 +156,11 @@ function BixtradePage() {
       {!rows.length && <p className="py-6 text-center text-muted-foreground">Connecting to market feed…</p>}
     </section>
 
+    <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <RouteMap routes={profitable}/>
+      <PerfChart cfg={cfg}/>
+    </div>
+
     <section className="arb-card mt-4">
       <h2 className="font-display text-lg font-bold">Projection calculator</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -149,6 +169,8 @@ function BixtradePage() {
       </div>
       <p className="mt-4 text-sm">Projected result: <b className="text-chart-2">{proj.low.toFixed(2)} – {proj.high.toFixed(2)} USDT</b> on {proj.amount} USDT</p>
     </section>
+
+    <ShareCard text={`BIXTrade Arbitrage Bot · ${BIXTRADE_STRATEGIES.find(x => x.key === strategy)?.name}\nProjection ${days}d on ${proj.amount} USDT: ${proj.low.toFixed(2)}–${proj.high.toFixed(2)} USDT (not guaranteed)\nWin rate ${cfg.winRate}% · ${BIXTRADE_VENUES.length} venues`}/>
 
     <details className="arb-card mt-4">
       <summary className="cursor-pointer font-display text-lg font-bold">My bot requests ({reqs.length})</summary>
@@ -159,4 +181,47 @@ function BixtradePage() {
 
     <p className="mt-6 text-[11px] leading-5 text-muted-foreground">Risk disclosure: scanner routes and spreads are a display simulation built on live reference prices; BIXTrade does not place orders on external exchanges. Projection ranges are set by the owner, are not guaranteed, and nothing is added to your balance automatically — all deposits and withdrawals are owner-reviewed internal records.</p>
   </main></BixShell>;
+}
+
+const NODE = BIXTRADE_VENUES.map((v, i) => { const a = (i / BIXTRADE_VENUES.length) * Math.PI * 2 - Math.PI / 2; return { v, x: 150 + Math.cos(a) * 105, y: 105 + Math.sin(a) * 78 }; });
+function RouteMap({ routes }: { routes: Row[] }) {
+  const at = (v: string) => NODE.find(n => n.v === v)!;
+  return <section className="arb-card">
+    <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Network size={18} className="text-chart-3"/> Route map</h2>
+    <svg viewBox="0 0 300 210" className="mt-2 w-full" role="img" aria-label="Active cross-exchange routes">
+      {NODE.flatMap((a, i) => NODE.slice(i + 1).map(b => <line key={a.v + b.v} x1={a.x} y1={a.y} x2={b.x} y2={b.y} className="arb-edge"/>))}
+      {routes.map(r => { const a = at(r.buy), b = at(r.sell); return <line key={r.pair} x1={a.x} y1={a.y} x2={b.x} y2={b.y} className="arb-route"/>; })}
+      {NODE.map(n => { const on = routes.some(r => r.buy === n.v || r.sell === n.v); return <g key={n.v}><circle cx={n.x} cy={n.y} r={on ? 7 : 5} className={on ? 'arb-node is-on' : 'arb-node'}/><text x={n.x} y={n.y + (n.y < 105 ? -12 : 20)} textAnchor="middle" className="arb-node-label">{n.v}</text></g>; })}
+    </svg>
+    <div className="mt-1 grid gap-1 text-[11px]">{routes.length ? routes.map(r => <p key={r.pair}><b>{r.pair}</b> <span className="text-muted-foreground">{r.buy} → {r.sell}</span> <span className="text-chart-2">+{r.net.toFixed(2)}%</span></p>) : <p className="text-muted-foreground">Waiting for a profitable spread…</p>}</div>
+  </section>;
+}
+
+function PerfChart({ cfg }: { cfg: BixtradeSettings }) {
+  const data = useMemo(() => dailySeries(cfg, 14), [cfg]);
+  const max = Math.max(cfg.maxDailyPct, 0.01);
+  const avg = data.reduce((s, d) => s + d.pct, 0) / data.length;
+  return <section className="arb-card">
+    <h2 className="flex items-center gap-2 font-display text-lg font-bold"><BarChart3 size={18} className="text-chart-3"/> Daily performance</h2>
+    <p className="text-[11px] text-muted-foreground">Last 14 days · avg {avg.toFixed(2)}% / day</p>
+    <div className="arb-bars mt-3" role="img" aria-label="Daily performance bars">{data.map(d => <div key={d.date} title={`${d.date}: ${d.pct.toFixed(2)}%`}><i style={{ height: `${Math.max(6, (d.pct / max) * 100)}%` }}/><small>{d.date.slice(8)}</small></div>)}</div>
+    <p className="mt-2 text-[10px] text-muted-foreground">Illustrative series inside the owner-set range ({cfg.minDailyPct}–{cfg.maxDailyPct}%). Not a record of real trades or a guarantee.</p>
+  </section>;
+}
+
+function ShareCard({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = typeof window === 'undefined' ? '' : `${window.location.origin}/bixtrade`;
+  const full = `${text}\n${url}`;
+  const native = async () => { try { await navigator.share({ title: 'BIXTrade Bot', text, url }); } catch { /* cancelled */ } };
+  const copy = async () => { await navigator.clipboard.writeText(full); setCopied(true); setTimeout(() => setCopied(false), 1500); };
+  return <section className="arb-card arb-share mt-4">
+    <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Share2 size={18} className="text-chart-3"/> Share card</h2>
+    <pre className="arb-share-card mt-3">{text}</pre>
+    <div className="mt-3 grid grid-cols-3 gap-2">
+      <Button asChild variant="outline" size="sm"><a href={`https://wa.me/?text=${encodeURIComponent(full)}`} target="_blank" rel="noreferrer">WhatsApp</a></Button>
+      <Button asChild variant="outline" size="sm"><a href={`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><Send size={14}/> Telegram</a></Button>
+      <Button variant="outline" size="sm" onClick={typeof navigator !== 'undefined' && 'share' in navigator ? native : copy}><Copy size={14}/> {copied ? 'Copied' : 'Share'}</Button>
+    </div>
+  </section>;
 }
