@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeft, Bell, Briefcase, ChevronRight, ClipboardList, Home, MessageSquare, Plus, ScanLine, Search, Star, User, UtensilsCrossed, ShoppingBasket, Utensils } from 'lucide-react';
+import { ArrowLeft, Bell, Briefcase, ChevronRight, ClipboardList, Home, MessageSquare, Plus, ScanLine, Search, Star, User, ShoppingBasket, Utensils } from 'lucide-react';
 import type { BixgoService } from '@/lib/bixgo';
 import icRide from '@/assets/bixgo/ic-ride.png';
 import icFood from '@/assets/bixgo/ic-food.png';
@@ -135,4 +135,3 @@ export function BixgoBottomNav({ view, setView, inbox }: { view: BixgoView; setV
   </nav>;
 }
 
-export { UtensilsCrossed };
