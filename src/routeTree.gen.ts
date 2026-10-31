@@ -16,6 +16,7 @@ import { Route as ArbitrageRouteImport } from './routes/arbitrage'
 import { Route as ArenaRouteImport } from './routes/arena'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BixtokRouteImport } from './routes/bixtok'
+import { Route as BixtradeRouteImport } from './routes/bixtrade'
 import { Route as BoostRouteImport } from './routes/boost'
 import { Route as BoostTiersRouteImport } from './routes/boost-tiers'
 import { Route as BuybackRouteImport } from './routes/buyback'
@@ -88,6 +89,11 @@ const AuthRoute = AuthRouteImport.update({
 const BixtokRoute = BixtokRouteImport.update({
   id: '/bixtok',
   path: '/bixtok',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BixtradeRoute = BixtradeRouteImport.update({
+  id: '/bixtrade',
+  path: '/bixtrade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BoostRoute = BoostRouteImport.update({
@@ -291,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
   '/bixtok': typeof BixtokRoute
+  '/bixtrade': typeof BixtradeRoute
   '/boost': typeof BoostRoute
   '/boost-tiers': typeof BoostTiersRoute
   '/buyback': typeof BuybackRoute
@@ -338,6 +345,7 @@ export interface FileRoutesByTo {
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
   '/bixtok': typeof BixtokRoute
+  '/bixtrade': typeof BixtradeRoute
   '/boost': typeof BoostRoute
   '/boost-tiers': typeof BoostTiersRoute
   '/buyback': typeof BuybackRoute
@@ -386,6 +394,7 @@ export interface FileRoutesById {
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
   '/bixtok': typeof BixtokRoute
+  '/bixtrade': typeof BixtradeRoute
   '/boost': typeof BoostRoute
   '/boost-tiers': typeof BoostTiersRoute
   '/buyback': typeof BuybackRoute
@@ -435,6 +444,7 @@ export interface FileRouteTypes {
     | '/arena'
     | '/auth'
     | '/bixtok'
+    | '/bixtrade'
     | '/boost'
     | '/boost-tiers'
     | '/buyback'
@@ -482,6 +492,7 @@ export interface FileRouteTypes {
     | '/arena'
     | '/auth'
     | '/bixtok'
+    | '/bixtrade'
     | '/boost'
     | '/boost-tiers'
     | '/buyback'
@@ -529,6 +540,7 @@ export interface FileRouteTypes {
     | '/arena'
     | '/auth'
     | '/bixtok'
+    | '/bixtrade'
     | '/boost'
     | '/boost-tiers'
     | '/buyback'
@@ -577,6 +589,7 @@ export interface RootRouteChildren {
   ArenaRoute: typeof ArenaRoute
   AuthRoute: typeof AuthRoute
   BixtokRoute: typeof BixtokRoute
+  BixtradeRoute: typeof BixtradeRoute
   BoostRoute: typeof BoostRoute
   BoostTiersRoute: typeof BoostTiersRoute
   BuybackRoute: typeof BuybackRoute
@@ -666,6 +679,13 @@ declare module '@tanstack/react-router' {
       path: '/bixtok'
       fullPath: '/bixtok'
       preLoaderRoute: typeof BixtokRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bixtrade': {
+      id: '/bixtrade'
+      path: '/bixtrade'
+      fullPath: '/bixtrade'
+      preLoaderRoute: typeof BixtradeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/boost': {
@@ -945,6 +965,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArenaRoute: ArenaRoute,
   AuthRoute: AuthRoute,
   BixtokRoute: BixtokRoute,
+  BixtradeRoute: BixtradeRoute,
   BoostRoute: BoostRoute,
   BoostTiersRoute: BoostTiersRoute,
   BuybackRoute: BuybackRoute,
