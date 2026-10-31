@@ -102,15 +102,24 @@ function BixgoPage() {
   const rate = (r: number) => { const [first, ...rest] = orders; if (first) persist([{ ...first, rating: r }, ...rest]); };
   const pos = step === 'track' ? 10 + stage * 27 : 9;
 
-  return <BixShell><main className="mx-auto max-w-xl px-4 pb-24 pt-5">
-    {!cfg.enabled && isAdmin && <p className="mb-3 rounded-xl border border-accent/40 bg-accent/10 px-3 py-2 text-[11px]">Admin 1 preview · Under Reconstruction (only visible to you)</p>}
-    <section className="relative overflow-hidden rounded-3xl border border-primary/30 bg-card/80 p-5">
-      <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl"/>
-      <p className="text-[10px] uppercase tracking-[0.35em] text-primary">BIXLINK super-app</p>
-      <h1 className="font-display text-3xl font-black">BIX<span className="text-primary">GO</span></h1>
-      <p className="mt-1 text-xs text-muted-foreground">Rides, food, courier and groceries — pay in IDR, USDT or BIX.</p>
-      <div className="mt-3 flex gap-2">{(['order', 'history'] as const).map(t => <button key={t} onClick={() => setTab(t)} className={`rounded-full border px-3 py-1 text-[11px] ${tab === t ? 'border-primary bg-primary/15' : 'border-border'}`}>{t === 'order' ? 'Order' : `History (${orders.length})`}</button>)}</div>
+  const enabledSet = new Set(list.map(s => s.key));
+  const soon = (l: string) => toast(`${l} — segera hadir di BIXGO`);
+  const pick = (s: BixgoService) => { setSvc(s); setTier(0); setCart({}); setStep('form'); setView('order'); setTab('order'); };
+  const go = (v: BixgoView) => { setView(v); if (v === 'activity') setTab('history'); if (v === 'order') setTab('order'); };
+  const memberName = user?.email?.split('@')[0] || 'Member BIXLINK';
+
+  return <BixShell><div className="bixgo-grab mx-auto min-h-screen max-w-xl">
+    {!cfg.enabled && isAdmin && <p className="border-b border-accent/40 bg-accent/20 px-3 py-2 text-[11px]">Admin 1 preview · Under Reconstruction (only visible to you)</p>}
+    {view === 'home' && <BixgoHome enabled={enabledSet} balance="Buka Wallet" onPick={pick} onSoon={soon}/>}
+    {view === 'inbox' && <BixgoInbox/>}
+    {view === 'account' && <BixgoAccount name={memberName} balance="Lihat saldo" onBack={() => go('home')} onSoon={soon}/>}
+    {(view === 'order' || view === 'activity') && <main className="px-4 pb-6 pt-4">
+    <section className="flex items-center gap-3">
+      <button aria-label="Kembali" onClick={() => go('home')}><ArrowLeft className="h-6 w-6"/></button>
+      <h1 className="flex-1 text-xl font-black">{view === 'activity' ? 'Aktivitas' : meta.name}</h1>
+      <div className="flex gap-2">{(['order', 'history'] as const).map(t => <button key={t} onClick={() => go(t === 'order' ? 'order' : 'activity')} className={`rounded-full border px-3 py-1 text-[11px] ${tab === t ? 'border-primary bg-primary/15' : 'border-border'}`}>{t === 'order' ? 'Pesan' : `Riwayat (${orders.length})`}</button>)}</div>
     </section>
+
 
     {tab === 'history' ? <section className="mt-4 space-y-2">
       {!orders.length && <p className="rounded-2xl border border-border p-4 text-center text-xs text-muted-foreground">No demo orders yet.</p>}
