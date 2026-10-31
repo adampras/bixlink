@@ -46,6 +46,9 @@ function BixtradePage() {
   const runCycle = useServerFn(runBixtradeCycle);
   const [tab, setTab] = useState<'cockpit' | 'radar' | 'ai' | 'logs'>('cockpit');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pairFilter, setPairFilter] = useState('ALL');
+  const [logFilter, setLogFilter] = useState<'all' | 'win' | 'scratch'>('all');
+  const [receipt, setReceipt] = useState<Exec | null>(null);
   useEffect(() => { void supabase.rpc('is_bix_admin').then(({ data }) => setIsAdmin(data === true)); }, [uid]);
   const audio = useRef<AudioContext | null>(null);
   useEffect(() => { setSound(localStorage.getItem('bixtrade-sound') === '1'); }, []);
@@ -154,9 +157,9 @@ function BixtradePage() {
     <section className="mt-3 grid grid-cols-4 gap-2">
       {([['Bot', capital.toFixed(0)], ['P/L', realized.toFixed(2)], ['Win', `${cfg.winRate}%`], ['Ping', `${rows.length ? Math.round(rows.reduce((s, r) => s + r.ms, 0) / rows.length) : '—'}ms`]] as const).map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
     </section>
-    <div className="mt-2 grid grid-cols-2 gap-2">
-      <Button size="sm" variant={funding === 'real' ? 'default' : 'outline'} onClick={() => setFunding('real')}>Real USDT</Button>
-      <Button size="sm" variant={funding === 'virtual' ? 'default' : 'outline'} onClick={() => setFunding('virtual')}>Virtual USDT · demo</Button>
+    <div className="arb-switch mt-2" role="tablist" aria-label="Funding mode">
+      <button type="button" className={funding === 'real' ? 'is-on' : ''} onClick={() => setFunding('real')}><i/> Real USDT<small>Settled</small></button>
+      <button type="button" className={funding === 'virtual' ? 'is-on' : ''} onClick={() => setFunding('virtual')}><i/> Virtual USDT<small>Sandbox demo</small></button>
     </div>
     <nav className="arb-tabs mt-3" aria-label="BIXTrade sections">
       {([['cockpit', Cpu, 'Cockpit'], ['radar', Radar, 'Radar'], ['ai', BarChart3, 'AI'], ['logs', Activity, 'Logs']] as const).map(([k, Icon, l]) => <button key={k} type="button" onClick={() => setTab(k)} className={tab === k ? 'is-on' : ''}><Icon size={15}/>{l}</button>)}
@@ -182,6 +185,8 @@ function BixtradePage() {
         <div className="grid gap-2 sm:grid-cols-3">{BIXTRADE_STRATEGIES.map(s => <button key={s.key} type="button" onClick={() => setStrategy(s.key)} className={`arb-strat ${strategy === s.key ? 'is-on' : ''}`}><b>{s.name}</b><span>{s.pairs}</span><em>Risk: {s.risk}</em></button>)}</div>
         <label className="mt-1 text-[11px] text-muted-foreground">Amount (USDT) {mode === 'deposit' ? `· ${cfg.minAlloc}–${cfg.maxAlloc}` : `· min ${cfg.minWithdraw} · fee ${cfg.withdrawFeePct}%`}
           <input className="form-input mt-1" type="number" inputMode="decimal" value={reqAmt} onChange={e => setReqAmt(e.target.value)} placeholder="0.00"/></label>
+        <div className="arb-chips">{[100, 500, 1000, 5000].map(v => <button key={v} type="button" onClick={() => setReqAmt(String(v))}>${v.toLocaleString()}</button>)}
+          <button type="button" onClick={() => { const max = mode === 'withdraw' ? capital : funding === 'real' ? Math.min(mainUsdt ?? 0, cfg.maxAlloc) : cfg.maxAlloc; setReqAmt(String(Math.floor(max * 100) / 100)); }}>MAX</button></div>
         {mode === 'withdraw' && n > 0 && <p className="text-xs">You receive ≈ <b className="text-chart-2">{withdrawNet(cfg, n).toFixed(2)} USDT</b> after fee</p>}
         <Button disabled={busy || (mode === 'deposit' ? !cfg.depositOpen : !cfg.withdrawOpen)} onClick={submit}>{busy ? 'Sending…' : mode === 'deposit' ? 'Request deposit' : 'Request withdrawal'}</Button>
         {isAdmin && funding === 'virtual' && mode === 'deposit' && <Button variant="outline" disabled={busy} onClick={instantVirtual}><Zap size={15}/> Admin instant virtual deposit</Button>}
@@ -193,12 +198,13 @@ function BixtradePage() {
     </>}
 
     {tab === 'radar' && <>
-    <LivePanel live={live}/>
+    <div className="arb-chips mt-4">{['ALL', 'BTC', 'ETH', 'SOL', 'BNB'].map(k => <button key={k} type="button" className={pairFilter === k ? 'is-on' : ''} onClick={() => setPairFilter(k)}>{k}</button>)}</div>
+    <LivePanel live={live && { ...live, scan: live.scan.filter(s => pairFilter === 'ALL' || s.pair.startsWith(pairFilter)) }}/>
     <section className="arb-card mt-4 overflow-x-auto">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Radar size={18} className="text-chart-3"/> Live spread scanner</h2>
       <table className="mt-3 w-full min-w-[560px] text-left text-xs">
         <thead className="text-muted-foreground"><tr>{['Pair', 'Buy @', 'Sell @', 'Ask', 'Bid', 'Spread', 'Net after fees', 'Latency'].map(h => <th key={h} className="py-2 pr-2">{h}</th>)}</tr></thead>
-        <tbody>{rows.map(r => <tr key={r.pair} className="border-t border-border">
+        <tbody>{rows.filter(r => pairFilter === 'ALL' || r.pair.startsWith(pairFilter)).map(r => <tr key={r.pair} className="border-t border-border">
           <td className="py-2 pr-2 font-bold">{r.pair}</td><td className="pr-2">{r.buy}</td><td className="pr-2">{r.sell}</td>
           <td className="pr-2 font-mono">{r.ask.toFixed(2)}</td><td className="pr-2 font-mono">{r.bid.toFixed(2)}</td>
           <td className="pr-2 text-chart-3">{r.spread.toFixed(2)}%</td><td className={`pr-2 ${r.net > 0 ? 'text-chart-2' : 'text-destructive'}`}>{r.net.toFixed(2)}%</td><td>{r.ms}ms</td>
@@ -227,14 +233,17 @@ function BixtradePage() {
     </>}
 
     {tab === 'logs' && <>
-    <details className="arb-card mt-4" open>
-      <summary className="cursor-pointer font-display text-lg font-bold">Execution history ({fundExecs.length}) · {funding === 'real' ? 'Real' : 'Virtual'}</summary>
-      <p className="mt-1 text-[11px] text-muted-foreground">Recorded by the server every {5} minutes on your settled capital. Total recorded: <b className={realized >= 0 ? 'text-chart-2' : 'text-destructive'}>{realized.toFixed(4)} USDT</b> — a performance record, not added to your wallet.</p>
-      <div className="mt-3 grid gap-2">{fundExecs.length ? fundExecs.map(x => <div key={x.id} className="border-t border-border pt-2 text-[11px]">
-        <div className="flex justify-between"><b>{x.pair}{x.source === 'live_quotes' && <span className="arb-badge is-approved ml-1">LIVE QUOTES</span>}</b><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)} USDT</b></div>
-        <div className="text-muted-foreground">Buy {x.buy_venue} @ {Number(x.buy_price).toFixed(2)} → Sell {x.sell_venue} @ {Number(x.sell_price).toFixed(2)} · Qty {Number(x.qty).toFixed(6)}</div>
-        <div className="text-muted-foreground">Size {Number(x.notional_usd).toFixed(2)} · Fee {Number(x.fee_usd).toFixed(4)} · {x.latency_ms}ms · {new Date(x.executed_at).toLocaleString()} · <span className="font-mono">{x.ref}</span></div>
-      </div>) : <p className="text-xs text-muted-foreground">No executions yet. They start within 5 minutes after a deposit is approved.</p>}</div>
+    <section className="mt-4 grid grid-cols-3 gap-2">
+      {([['Trades', fundExecs.length], ['Win', `${fundExecs.length ? Math.round(fundExecs.filter(x => Number(x.net_usd) > 0).length / fundExecs.length * 100) : 0}%`], ['Avg', `${fundExecs.length ? Math.round(fundExecs.reduce((s, x) => s + x.latency_ms, 0) / fundExecs.length) : 0}ms`]] as const).map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
+    </section>
+    <details className="arb-card mt-3" open>
+      <summary className="cursor-pointer font-display text-lg font-bold">Execution history ({logExecs.length}) · {funding === 'real' ? 'Real' : 'Virtual'}</summary>
+      <div className="arb-chips mt-2">{(['all', 'win', 'scratch'] as const).map(k => <button key={k} type="button" className={logFilter === k ? 'is-on' : ''} onClick={() => setLogFilter(k)}>{k === 'all' ? 'All' : k === 'win' ? 'Profit' : 'Scratch / loss'}</button>)}</div>
+      <p className="mt-2 text-[11px] text-muted-foreground">Total recorded: <b className={realized >= 0 ? 'text-chart-2' : 'text-destructive'}>{realized.toFixed(4)} USDT</b> — a performance record, not added to your wallet. Tap a trade for its receipt.</p>
+      <div className="mt-3 grid gap-2">{logExecs.length ? logExecs.map(x => <button type="button" key={x.id} onClick={() => setReceipt(x)} className="arb-log-row">
+        <div className="flex justify-between"><b>{x.pair}{x.source === 'live_quotes' && <span className="arb-badge is-approved ml-1">LIVE</span>}</b><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)} USDT</b></div>
+        <div className="text-muted-foreground">{x.buy_venue} → {x.sell_venue} · {new Date(x.executed_at).toLocaleTimeString()}</div>
+      </button>) : <p className="text-xs text-muted-foreground">No executions yet. They start within 5 minutes after a deposit is approved.</p>}</div>
     </details>
 
     <details className="arb-card mt-4">
