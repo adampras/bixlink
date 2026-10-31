@@ -4,6 +4,7 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, checkBixtradeRequest, dailySeries, projectBixtrade, readBixtrade, withdrawNet, type BixtradeSettings, type BixtradeStrategy } from '@/lib/bixtrade';
+import robotImg from '@/assets/bixtrade-ai-robot.png';
 import { useServerFn } from '@tanstack/react-start';
 import { runBixtradeCycle } from '@/lib/bixtrade.functions';
 import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Gauge, Network, Radar, Send, Share2, Volume2, VolumeX, Zap } from 'lucide-react';
@@ -42,6 +43,9 @@ function BixtradePage() {
   const [funding, setFunding] = useState<'real' | 'virtual'>('real');
   const [execs, setExecs] = useState<Exec[]>([]);
   const runCycle = useServerFn(runBixtradeCycle);
+  const [tab, setTab] = useState<'cockpit' | 'radar' | 'ai' | 'logs'>('cockpit');
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => { void supabase.rpc('is_bix_admin').then(({ data }) => setIsAdmin(data === true)); }, [uid]);
   const audio = useRef<AudioContext | null>(null);
   useEffect(() => { setSound(localStorage.getItem('bixtrade-sound') === '1'); }, []);
   const toggleSound = () => setSound(v => { const n = !v; localStorage.setItem('bixtrade-sound', n ? '1' : '0'); if (n) { audio.current ??= new AudioContext(); void audio.current.resume(); } return n; });
@@ -106,6 +110,16 @@ function BixtradePage() {
     setReqAmt(''); setMsg(`${mode === 'deposit' ? 'Deposit' : 'Withdrawal'} request sent — waiting for owner review.`); void loadReqs();
   };
 
+  const instantVirtual = async () => {
+    const v = Number(reqAmt);
+    if (!(v > 0)) { setMsg('Enter an amount first.'); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc('bixtrade_admin_virtual_deposit', { p_amount: v, p_strategy: strategy });
+    setBusy(false);
+    if (error) { setMsg(error.message); return; }
+    setReqAmt(''); setMsg('Virtual USDT is now active as bot capital.'); void loadReqs();
+  };
+
   if (!cfg) return <BixShell><main className="mx-auto max-w-5xl px-5 py-16 text-center text-sm text-muted-foreground">Loading BIXTrade…</main></BixShell>;
   if (!cfg.enabled) return <BixShell><main className="mx-auto max-w-xl px-5 py-16">
     <section className="arb-card text-center">
@@ -120,23 +134,28 @@ function BixtradePage() {
   const proj = projectBixtrade(cfg, amount, days);
   const n = Number(reqAmt) || 0;
   return <BixShell><main className="mx-auto max-w-6xl px-4 py-6 md:px-8">
-    <div className="flex items-start justify-between gap-3">
-      <div>
-        <p className="shop-eyebrow">QUANT ARBITRAGE ENGINE</p>
-        <h1 className="mt-1 font-display text-3xl font-bold">BIX<span className="text-chart-3">Trade</span> Bot</h1>
+    <section className="arb-ai-hero">
+      <div className="arb-ai-copy">
+        <p className="shop-eyebrow">AI QUANT ENGINE</p>
+        <h1 className="font-display text-2xl font-bold">BIX<span className="text-chart-3">Trade</span> AI</h1>
+        <p className="arb-ai-status"><i/> Neural scanner online · {profitable.length ? `${profitable.length} routes` : 'scanning'}</p>
+        <span className="mt-2 flex items-center gap-2"><button type="button" onClick={toggleSound} aria-label={sound ? 'Mute execution sound' : 'Enable execution sound'} className="arb-icon-btn">{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</button><span className="arb-live"><i/> LIVE</span></span>
       </div>
-      <span className="flex items-center gap-2"><button type="button" onClick={toggleSound} aria-label={sound ? 'Mute execution sound' : 'Enable execution sound'} className="arb-icon-btn">{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</button><span className="arb-live"><i/> LIVE</span></span>
-    </div>
-    <p className="mt-1 mb-4 text-sm text-muted-foreground">Cross-exchange spread scanner on the world's most liquid USDT pairs across {BIXTRADE_VENUES.length} venues.</p>
-
-    <BotCore active={profitable.length}/>
-
-    {stream.length > 0 && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ {s}</span>)}</div></div>}
-
-    <section className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {([[Cpu, 'Engine', 'Online'], [Activity, 'Win rate', `${cfg.winRate}%`], [Zap, 'Daily range', `${cfg.minDailyPct}–${cfg.maxDailyPct}%`], [Gauge, 'Avg latency', `${rows.length ? Math.round(rows.reduce((s, r) => s + r.ms, 0) / rows.length) : '—'}ms`]] as const).map(([Icon, l, v]) => <div key={l} className="arb-card"><Icon size={16} className="text-chart-3"/><p className="mt-1 text-[10px] text-muted-foreground">{l}</p><b className="text-sm">{v}</b></div>)}
+      <img src={robotImg} alt="BIXTrade AI robot" width={1024} height={1024} className="arb-ai-robot" data-hot={profitable.length ? '1' : '0'}/>
     </section>
+    <section className="mt-3 grid grid-cols-4 gap-2">
+      {([['Bot', capital.toFixed(0)], ['P/L', realized.toFixed(2)], ['Win', `${cfg.winRate}%`], ['Ping', `${rows.length ? Math.round(rows.reduce((s, r) => s + r.ms, 0) / rows.length) : '—'}ms`]] as const).map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
+    </section>
+    <div className="mt-2 grid grid-cols-2 gap-2">
+      <Button size="sm" variant={funding === 'real' ? 'default' : 'outline'} onClick={() => setFunding('real')}>Real USDT</Button>
+      <Button size="sm" variant={funding === 'virtual' ? 'default' : 'outline'} onClick={() => setFunding('virtual')}>Virtual USDT · demo</Button>
+    </div>
+    <nav className="arb-tabs mt-3" aria-label="BIXTrade sections">
+      {([['cockpit', Cpu, 'Cockpit'], ['radar', Radar, 'Radar'], ['ai', BarChart3, 'AI'], ['logs', Activity, 'Logs']] as const).map(([k, Icon, l]) => <button key={k} type="button" onClick={() => setTab(k)} className={tab === k ? 'is-on' : ''}><Icon size={15}/>{l}</button>)}
+    </nav>
+    {stream.length > 0 && tab === 'radar' && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ {s}</span>)}</div></div>}
 
+    {tab === 'cockpit' && <>
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><ArrowDownToLine size={18} className="text-chart-3"/> Bot wallet</h2>
       <div className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
@@ -144,10 +163,6 @@ function BixtradePage() {
         <div className="arb-stat"><p>Bot capital</p><b>{capital.toFixed(2)}</b><small>USDT · settled</small></div>
         <div className="arb-stat"><p>Pending</p><b>{pending}</b><small>requests</small></div>
         <div className="arb-stat"><p>Lock period</p><b>{cfg.lockDays}</b><small>days</small></div>
-      </div>
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <Button size="sm" variant={funding === 'real' ? 'default' : 'outline'} onClick={() => setFunding('real')}>Real USDT</Button>
-        <Button size="sm" variant={funding === 'virtual' ? 'default' : 'outline'} onClick={() => setFunding('virtual')}>Virtual USDT · demo</Button>
       </div>
       {funding === 'virtual' && <p className="mt-2 text-[11px] text-chart-3">Demo mode: virtual USDT runs the bot exactly like real USDT, but it never leaves or returns to your main wallet.</p>}
       <div className="mt-3 grid grid-cols-2 gap-2">
@@ -161,11 +176,15 @@ function BixtradePage() {
           <input className="form-input mt-1" type="number" inputMode="decimal" value={reqAmt} onChange={e => setReqAmt(e.target.value)} placeholder="0.00"/></label>
         {mode === 'withdraw' && n > 0 && <p className="text-xs">You receive ≈ <b className="text-chart-2">{withdrawNet(cfg, n).toFixed(2)} USDT</b> after fee</p>}
         <Button disabled={busy || (mode === 'deposit' ? !cfg.depositOpen : !cfg.withdrawOpen)} onClick={submit}>{busy ? 'Sending…' : mode === 'deposit' ? 'Request deposit' : 'Request withdrawal'}</Button>
+        {isAdmin && funding === 'virtual' && mode === 'deposit' && <Button variant="outline" disabled={busy} onClick={instantVirtual}><Zap size={15}/> Admin instant virtual deposit</Button>}
         {msg && <p className="text-xs text-chart-3">{msg}</p>}
         <p className="text-[10px] text-muted-foreground">Every request is reviewed by the owner. When a deposit is approved, the amount moves from your main wallet USDT into the bot; an approved withdrawal returns the amount after fee to your main wallet. Projected profit is never added automatically.</p>
       </div>
     </section>
 
+    </>}
+
+    {tab === 'radar' && <>
     <section className="arb-card mt-4 overflow-x-auto">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Radar size={18} className="text-chart-3"/> Live spread scanner</h2>
       <table className="mt-3 w-full min-w-[560px] text-left text-xs">
@@ -179,10 +198,11 @@ function BixtradePage() {
       {!rows.length && <p className="py-6 text-center text-muted-foreground">Connecting to market feed…</p>}
     </section>
 
-    <div className="mt-4 grid gap-4 md:grid-cols-2">
-      <RouteMap routes={profitable}/>
-      <PerfChart cfg={cfg}/>
-    </div>
+    <div className="mt-4"><RouteMap routes={profitable}/></div>
+    </>}
+
+    {tab === 'ai' && <>
+    <div className="mt-4"><PerfChart cfg={cfg}/></div>
 
     <section className="arb-card mt-4">
       <h2 className="font-display text-lg font-bold">Projection calculator</h2>
@@ -195,6 +215,9 @@ function BixtradePage() {
 
     <ShareCard text={`BIXTrade Arbitrage Bot · ${BIXTRADE_STRATEGIES.find(x => x.key === strategy)?.name}\nProjection ${days}d on ${proj.amount} USDT: ${proj.low.toFixed(2)}–${proj.high.toFixed(2)} USDT (not guaranteed)\nWin rate ${cfg.winRate}% · ${BIXTRADE_VENUES.length} venues`}/>
 
+    </>}
+
+    {tab === 'logs' && <>
     <details className="arb-card mt-4" open>
       <summary className="cursor-pointer font-display text-lg font-bold">Execution history ({fundExecs.length}) · {funding === 'real' ? 'Real' : 'Virtual'}</summary>
       <p className="mt-1 text-[11px] text-muted-foreground">Recorded by the server every {5} minutes on your settled capital. Total recorded: <b className={realized >= 0 ? 'text-chart-2' : 'text-destructive'}>{realized.toFixed(4)} USDT</b> — a performance record, not added to your wallet.</p>
@@ -211,6 +234,8 @@ function BixtradePage() {
         <span><b className="uppercase">{r.kind}</b>{r.funding === 'virtual' ? ' · VIRTUAL' : ''} · {Number(r.amount_usd).toFixed(2)} USDT<br/><span className="text-muted-foreground">{new Date(r.created_at).toLocaleString()}{r.admin_note ? ` · ${r.admin_note}` : ''}</span></span>
         <span className={`arb-badge is-${r.status}`}>{r.status}</span></div>) : <p className="text-xs text-muted-foreground">No requests yet.</p>}</div>
     </details>
+
+    </>}
 
     <p className="mt-6 text-[11px] leading-5 text-muted-foreground">Risk disclosure: scanner routes and spreads are a display simulation built on live reference prices; BIXTrade does not place orders on external exchanges. Projection ranges are set by the owner, are not guaranteed, and nothing is added to your balance automatically — all deposits and withdrawals are owner-reviewed internal records.</p>
   </main></BixShell>;

@@ -4498,3 +4498,19 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @keyframes arb-orbit3 { from { transform:rotateX(30deg) rotateY(30deg) rotateZ(0) } to { transform:rotateX(30deg) rotateY(30deg) rotateZ(360deg) } }
 @keyframes arb-float { 50% { transform:translateY(-8px) } }
 @media (prefers-reduced-motion: reduce) { .arb-core-ring, .arb-core-orb { animation:none; } }
+
+/* BIXTrade AI cockpit */
+.arb-ai-hero { position:relative; display:grid; grid-template-columns:1fr 46%; align-items:center; gap:6px; padding:14px; border-radius:18px; overflow:hidden; border:1px solid color-mix(in oklab, var(--chart-3) 40%, transparent); background:radial-gradient(circle at 78% 40%, color-mix(in oklab, var(--chart-3) 28%, transparent), transparent 60%), linear-gradient(160deg, var(--card), var(--background)); clip-path:polygon(0 12px,12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%); }
+.arb-ai-hero::after { content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in oklab, var(--chart-3) 6%, transparent) 3px 4px); pointer-events:none; }
+.arb-ai-robot { width:100%; height:auto; filter:drop-shadow(0 0 18px color-mix(in oklab, var(--chart-3) 45%, transparent)); animation:arb-float 4s ease-in-out infinite; }
+.arb-ai-robot[data-hot="1"] { filter:drop-shadow(0 0 28px var(--chart-2)); }
+.arb-ai-status { margin-top:6px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--chart-2); display:flex; align-items:center; gap:6px; }
+.arb-ai-status i { width:7px; height:7px; border-radius:50%; background:var(--chart-2); box-shadow:0 0 10px var(--chart-2); animation:arb-blink 1.2s infinite; }
+@keyframes arb-blink { 50% { opacity:.3; } }
+.arb-hud { padding:8px 4px; text-align:center; border-radius:10px; border:1px solid color-mix(in oklab, var(--chart-3) 30%, transparent); background:color-mix(in oklab, var(--card) 80%, transparent); }
+.arb-hud small { display:block; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted-foreground); }
+.arb-hud b { font-family:ui-monospace,monospace; font-size:12px; }
+.arb-tabs { position:sticky; top:4px; z-index:5; display:grid; grid-template-columns:repeat(4,1fr); gap:4px; padding:4px; border-radius:12px; background:color-mix(in oklab, var(--background) 85%, transparent); backdrop-filter:blur(8px); border:1px solid var(--border); }
+.arb-tabs button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 0; border-radius:9px; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-foreground); }
+.arb-tabs button.is-on { color:var(--primary-foreground); background:linear-gradient(135deg, var(--chart-3), var(--primary)); box-shadow:0 0 14px color-mix(in oklab, var(--chart-3) 45%, transparent); }
+@media (prefers-reduced-motion: reduce) { .arb-ai-robot, .arb-ai-status i { animation:none; } }
