@@ -1,13 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera } from 'lucide-react';
+import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { useLiveRtc } from '@/lib/bixtok-rtc';
+import { useReplayRecorder } from '@/lib/bixtok-replay';
 
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
 type Msg = { id: string; name: string; body: string; kind: string };
-type Cfg = { live_max_minutes: number; features: Record<string, boolean>; stage_max?: number; live_cta?: boolean; host_gifts?: boolean };
+type Cfg = { live_max_minutes: number; features: Record<string, boolean>; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean };
+type Pk = { a: string; b: string; started_at: string; ends_at: string };
+
+export const SHOWCASE = {
+  staking: { title: 'Staking Booster', sub: 'Join a staking package', to: '/stake', emoji: '💎' },
+  booster: { title: 'BOOST APY', sub: 'See the yield engine', to: '/boost', emoji: '🚀' },
+  presale: { title: 'BIX Presale', sub: 'Reserve BIXCOIN now', to: '/presale', emoji: '🪙' },
+  nft: { title: 'NFT Collection', sub: 'Staking certificates', to: '/nft-marketplace', emoji: '🖼️' },
+  shop: { title: 'BIXLINK Shop', sub: 'Official merchandise', to: '/nft-marketplace', emoji: '🛍️' },
+} as const;
+export type ShowcaseKey = keyof typeof SHOWCASE;
+export const SOUNDBOARD = [['applause', '👏', 'Applause'], ['trumpet', '🎺', 'Fanfare'], ['coin', '🪙', 'Coins'], ['cheer', '🎉', 'Cheer']] as const;
+export type SfxKey = typeof SOUNDBOARD[number][0];
+
+/** PK winner from display scores; null while tied. */
+export function pkWinner(a: number, b: number): 'a' | 'b' | null { return a === b ? null : a > b ? 'a' : 'b'; }
 type Floater = { id: number; x: number; color: string; drift: number };
 
 const COLORS = ['#FFD700', '#A855F7', '#FF3B6B', '#22D3EE', '#FF8A00'];
@@ -26,7 +42,22 @@ function useSfx(enabled: boolean) {
       o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + 0.02);
     } catch { /* audio unavailable */ }
   };
+  const noise = (dur: number, delay = 0, vol = 0.08) => {
+    if (!enabled) return;
+    try {
+      ctx.current ??= new AudioContext();
+      const c = ctx.current; if (c.state === 'suspended') void c.resume();
+      const buf = c.createBuffer(1, Math.floor(c.sampleRate * dur), c.sampleRate); const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+      const src = c.createBufferSource(); const g = c.createGain(); const f = c.createBiquadFilter();
+      f.type = 'bandpass'; f.frequency.value = 1800; src.buffer = buf; g.gain.value = vol;
+      src.connect(f).connect(g).connect(c.destination); src.start(c.currentTime + delay);
+    } catch { /* audio unavailable */ }
+  };
   return {
+    applause: () => { for (let i = 0; i < 14; i++) noise(0.06, i * 0.07 + Math.random() * 0.03, 0.1); },
+    trumpet: () => { [523, 659, 784, 1047].forEach((f, i) => tone(f, i === 3 ? 0.45 : 0.16, 'sawtooth', i * 0.15, 0.06)); },
+    cheer: () => { noise(0.5, 0, 0.06); [784, 988, 1175].forEach((f, i) => tone(f, 0.2, 'triangle', 0.1 + i * 0.08)); },
     pop: () => tone(520 + Math.random() * 300, 0.12, 'sine', 0, 0.08),
     coin: () => { [988, 1319, 1568, 2093].forEach((f, i) => tone(f, 0.18, 'triangle', i * 0.07)); },
     join: () => { tone(660, 0.15, 'sine'); tone(880, 0.2, 'sine', 0.1); },
@@ -69,6 +100,10 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [pinned, setPinned] = useState<string | null>(null); const [pinEdit, setPinEdit] = useState<string | null>(null);
   const [stage, setStage] = useState<Stage[]>([]); const [stagePanel, setStagePanel] = useState(false);
   const [top, setTop] = useState<Top[]>([]); const [modMsg, setModMsg] = useState<Msg | null>(null); const [note, setNote] = useState('');
+  const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
+  const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | null>(null); const [recording, setRecording] = useState(false);
+  const [fit, setFit] = useState<'cover' | 'contain'>('cover'); const [burst, setBurst] = useState<{ id: number; e: string } | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const chan = useRef<ReturnType<typeof supabase.channel> | null>(null); const pending = useRef(0);
   const seen = useRef(new Set<string>());
   const sfx = useSfx(sound); const sfxRef = useRef(sfx); sfxRef.current = sfx;
@@ -98,20 +133,25 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     } else sfxRef.current.chat();
   });
   const pullRef = useRef<(quiet?: boolean) => Promise<Msg[]>>(async () => []);
+  const playSfx = useRef((k: string) => {
+    const item = SOUNDBOARD.find(x => x[0] === k); if (!item) return;
+    sfxRef.current[item[0]](); setBurst({ id: Math.random(), e: item[1] }); spawn(4);
+  });
 
   useEffect(() => {
     let alive = true; let tick = 0;
     const pull = async (quiet = false) => {
       const [m, l, s] = await Promise.all([
         supabase.from('bixtok_live_messages').select('id,name,body,kind').eq('live_id', live.id).order('created_at', { ascending: false }).limit(40),
-        supabase.from('bixtok_lives').select('likes,status,pinned').eq('id', live.id).maybeSingle(),
+        supabase.from('bixtok_lives').select('likes,status,pinned,showcase,pk').eq('id', live.id).maybeSingle(),
         supabase.from('bixtok_stage_requests').select('id,user_id,name,status').eq('live_id', live.id),
       ]);
       if (!alive) return [];
       const rows = ((m.data ?? []) as Msg[]).reverse();
       ingest.current(rows, quiet);
-      if (l.data) { setLikes(Math.max(0, Number(l.data.likes ?? 0)) + pending.current); setPinned(l.data.pinned ?? null); if (l.data.status !== 'live') setEnded(true); }
+      if (l.data) { setLikes(Math.max(0, Number(l.data.likes ?? 0)) + pending.current); setPinned(l.data.pinned ?? null); setShowcase((l.data.showcase as ShowcaseKey | null) ?? null); setPk((l.data.pk as Pk | null) ?? null); if (l.data.status !== 'live') setEnded(true); }
       if (s.data) setStage(s.data as Stage[]);
+      if (l.data?.pk) { const sc = await supabase.rpc('bixtok_pk_score', { p_live: live.id }); const r = (sc.data as { a_score: number; b_score: number }[] | null)?.[0]; if (alive && r) setPkScore([Number(r.a_score), Number(r.b_score)]); }
       if (tick++ % 3 === 0) { const t = await supabase.rpc('bixtok_live_top', { p_live: live.id }); if (alive && t.data) setTop(t.data as Top[]); }
       return rows;
     };
@@ -127,6 +167,8 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       const n = Math.min(Number(payload?.n) || 1, 50); setLikes(l => l + n); spawn(Math.min(n, 4)); sfxRef.current.pop();
     }).on('broadcast', { event: 'chat' }, ({ payload }) => ingest.current([payload as Msg]))
       .on('broadcast', { event: 'pin' }, ({ payload }) => setPinned((payload?.text as string) || null))
+      .on('broadcast', { event: 'showcase' }, ({ payload }) => setShowcase((payload?.key as ShowcaseKey) || null))
+      .on('broadcast', { event: 'sfx' }, ({ payload }) => playSfx.current(String(payload?.k ?? '')))
       .on('broadcast', { event: 'del' }, ({ payload }) => setMsgs(x => x.filter(y => y.id !== payload?.id)))
       .on('broadcast', { event: 'stage' }, () => { void pull(true); })
       .on('presence', { event: 'sync' }, () => setViewers(Math.max(1, Object.keys(room.presenceState()).length)))
