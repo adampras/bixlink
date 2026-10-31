@@ -78,6 +78,17 @@ export function isMegaGift(body: string): boolean {
   return (g.currency === 'BIX' && g.amount >= 10) || (g.currency === 'BIXP' && g.amount >= 100);
 }
 
+/** Zoom 1.0 = the camera's full, natural frame; host slider and every viewer share this value. */
+export const ZOOM_MIN = 1; export const ZOOM_MAX = 3;
+export function clampZoom(z: number): number { return Number.isFinite(z) ? Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z)) : 1; }
+
+/** Soft blurred copy of the camera behind the real frame, so the portrait screen is always filled without cropping the host. */
+function Backdrop({ stream, mirror }: { stream: MediaStream | null; mirror?: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => { const v = ref.current; if (v) { v.srcObject = stream; if (stream) void v.play().catch(() => {}); } }, [stream]);
+  return <video ref={ref} autoPlay muted playsInline aria-hidden className="bxl-backdrop" style={mirror ? { transform: 'scaleX(-1) scale(1.15)' } : undefined}/>;
+}
+
 function Tile({ stream, label, mirror }: { stream: MediaStream; label: string; mirror?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => { const v = ref.current; if (v) { v.srcObject = stream; void v.play().catch(() => {}); } }, [stream]);
@@ -111,7 +122,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [top, setTop] = useState<Top[]>([]); const [modMsg, setModMsg] = useState<Msg | null>(null); const [note, setNote] = useState('');
   const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
   const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | null>(null); const [recording, setRecording] = useState(false);
-  const [fit, setFit] = useState<'cover' | 'contain'>('cover'); const [burst, setBurst] = useState<{ id: number; e: string } | null>(null);
+  const [burst, setBurst] = useState<{ id: number; e: string } | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const chan = useRef<ReturnType<typeof supabase.channel> | null>(null); const pending = useRef(0);
   const seen = useRef(new Set<string>());
@@ -126,8 +137,6 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const flash = (m: string) => { setNote(m); setTimeout(() => setNote(''), 2600); };
   const replay = useReplayRecorder({ stream: host ? local : null, liveId: live.id, me, on: host && recording && cfg.replay_enabled !== false, onNote: flash });
   useEffect(() => { if (!pk) return undefined; const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, [pk]);
-  /** LIVE is always a full-height portrait frame for host and viewers; a landscape camera is centre-cropped, never letterboxed. */
-  const onMeta = (e: SyntheticEvent<HTMLVideoElement>) => { if (e.currentTarget.videoWidth) setFit('cover'); };
 
   const spawn = (n = 1) => setFloaters(f => [...f.slice(-30), ...Array.from({ length: n }, () => ({
     id: Math.random(), x: 10 + Math.random() * 30, color: COLORS[Math.floor(Math.random() * COLORS.length)]!, drift: Math.random() * 60 - 30,
@@ -322,11 +331,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     <div className="bxl-stage" onClick={tap}>
       {host ? <>
           <Backdrop stream={local} mirror={facing === 'user'}/>
-          <video ref={cam} autoPlay muted playsInline className="bixtok-video" onLoadedMetadata={onMeta} onResize={onMeta} style={{ objectFit: 'contain', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
+          <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
         </>
         : <>
           <Backdrop stream={main?.stream ?? null}/>
-          <video ref={view} autoPlay playsInline muted className="bixtok-video" onLoadedMetadata={onMeta} onResize={onMeta} style={{ objectFit: 'contain', transform: `scale(${zoom})` }}/>
+          <video ref={view} autoPlay playsInline muted className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${zoom})` }}/>
           {(!main || state !== 'live') && <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p>
             <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : 'Connecting to the host camera…'}</small></div>}
         </>}
