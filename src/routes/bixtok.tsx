@@ -65,6 +65,14 @@ function BixtokPage() {
   const [tab, setTab] = useState('foryou');
   const [giftTarget, setGiftTarget] = useState<{ video?: string; live?: string } | null>(null);
   const [room, setRoom] = useState<Live | null>(null);
+  const opened = useRef(false);
+  useEffect(() => {
+    if (opened.current || !q.data) return;
+    const id = new URLSearchParams(window.location.search).get('live'); if (!id) return;
+    opened.current = true;
+    const l = q.data.lives.find(x => x.id === id);
+    if (l) setRoom(l); else setNote('This LIVE has ended.');
+  }, [q.data]);
   const [studio, setStudio] = useState(false);
   const [note, setNote] = useState('');
   const qc = useQueryClient();
