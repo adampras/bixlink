@@ -114,6 +114,10 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const main = host ? null : feeds.find(f => f.id === live.host_id) ?? feeds[0] ?? null;
   const tiles = feeds.filter(f => f !== main);
   const flash = (m: string) => { setNote(m); setTimeout(() => setNote(''), 2600); };
+  const replay = useReplayRecorder({ stream: host ? local : null, liveId: live.id, me, on: host && recording && cfg.replay_enabled !== false, onNote: flash });
+  useEffect(() => { if (!pk) return undefined; const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, [pk]);
+  /** Portrait camera fills the phone; a landscape camera is shown whole instead of cropped. */
+  const onMeta = (e: React.SyntheticEvent<HTMLVideoElement>) => { const v = e.currentTarget; if (v.videoWidth) setFit(v.videoHeight >= v.videoWidth ? 'cover' : 'contain'); };
 
   const spawn = (n = 1) => setFloaters(f => [...f.slice(-30), ...Array.from({ length: n }, () => ({
     id: Math.random(), x: 10 + Math.random() * 30, color: COLORS[Math.floor(Math.random() * COLORS.length)]!, drift: Math.random() * 60 - 30,
@@ -226,7 +230,23 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [host]);
 
-  const stop = async () => { await supabase.rpc('bixtok_end_live', { p_id: live.id }); setEnded(true); stream.current?.getTracks().forEach(t => t.stop()); qc.invalidateQueries({ queryKey: ['bixtok'] }); };
+  const stop = async () => {
+    await supabase.rpc('bixtok_end_live', { p_id: live.id }); setEnded(true);
+    if (recording) { flash('Saving replay…'); setRecording(false); await new Promise(r => setTimeout(r, 80)); await replay.finish(); }
+    stream.current?.getTracks().forEach(t => t.stop()); qc.invalidateQueries({ queryKey: ['bixtok'] });
+  };
+  const sendSfx = (k: SfxKey) => { playSfx.current(k); void chan.current?.send({ type: 'broadcast', event: 'sfx', payload: { k } }); };
+  const saveShowcase = async (key: ShowcaseKey | null) => {
+    const { error } = await supabase.rpc('bixtok_live_showcase', { p_live: live.id, p_key: key as string });
+    if (error) return flash(error.message);
+    setShowcase(key); setSheet(null); void chan.current?.send({ type: 'broadcast', event: 'showcase', payload: { key } });
+  };
+  const startPk = async (a: string, b: string, minutes: number) => {
+    const { data, error } = await supabase.rpc('bixtok_pk_start', { p_live: live.id, p_a: a, p_b: b, p_minutes: minutes });
+    if (error) return flash(error.message);
+    setPk(data as unknown as Pk); setPkScore([0, 0]); setSheet(null); sendSfx('trumpet'); ping();
+  };
+  const endPk = async () => { await supabase.rpc('bixtok_pk_end', { p_live: live.id }); setPk(null); ping(); };
   const enter = async () => {
     setEntered(true); sfxRef.current.join();
     await unlockAudio();
@@ -282,9 +302,9 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
 
   return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
     <div className="bxl-stage" onClick={tap}>
-      {host ? <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: zoom < 1.05 ? 'contain' : 'cover', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
+      {host ? <video ref={cam} autoPlay muted playsInline className="bixtok-video" onLoadedMetadata={onMeta} onResize={onMeta} style={{ objectFit: fit, transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
         : <>
-          <video ref={view} autoPlay playsInline muted className="bixtok-video" style={{ objectFit: 'contain' }}/>
+          <video ref={view} autoPlay playsInline muted className="bixtok-video" onLoadedMetadata={onMeta} onResize={onMeta} style={{ objectFit: fit }}/>
           {(!main || state !== 'live') && <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p>
             <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : 'Connecting to the host camera…'}</small></div>}
         </>}
@@ -323,7 +343,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     <div className="bxl-tools">
       {publishing && <>
         <button aria-label="Flip camera" onClick={() => setFacing(f => (f === 'user' ? 'environment' : 'user'))}><SwitchCamera size={20}/></button>
-        {host && <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={0.6} max={2} step={0.05} value={zoom} onChange={e => setZoom(+e.target.value)}/></label>}
+        {host && <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={1} max={2} step={0.05} value={zoom} onChange={e => setZoom(+e.target.value)}/></label>}
         <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
       </>}
       {host && <button aria-label="Pin message" onClick={() => setPinEdit(pinned ?? '')}><Pin size={20}/></button>}
