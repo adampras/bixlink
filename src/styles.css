@@ -4387,3 +4387,43 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-recips { margin-top: .6rem; display: flex; flex-wrap: wrap; gap: .35rem; }
 .bxl-recips button { font-size: .72rem; padding: .3rem .7rem; border-radius: 999px; border: 1px solid var(--border); }
 .bxl-recips button.on { background: var(--accent); color: var(--accent-foreground); border-color: var(--accent); }
+
+/* BIXTOK LIVE: compact host tools, PK battle, showcase card, soundboard, replay */
+.bxl-tools { top: 22%; max-height: calc(78% - 9.5rem); overflow-y: auto; gap: .45rem; scrollbar-width: none; }
+.bxl-tools::-webkit-scrollbar { display: none; }
+.bxl-tools button { width: 38px; height: 38px; }
+.bxl-tools button.on { background: var(--primary); color: var(--primary-foreground); }
+.bxl-tools button.rec { background: var(--destructive); color: var(--destructive-foreground); }
+.bxl-pk { position: absolute; z-index: 2; left: 0; right: 0; top: 6.4rem; height: 44%; display: flex; flex-direction: column; gap: .3rem; padding: 0 .4rem; }
+.bxl-pk-bar { position: relative; display: flex; align-items: center; justify-content: space-between; height: 1.5rem; border-radius: 999px; overflow: hidden; font-size: .7rem; font-weight: 800; padding: 0 .6rem; background: color-mix(in oklab, var(--accent) 70%, var(--background)); color: var(--accent-foreground); }
+.bxl-pk-bar i { position: absolute; inset: 0 auto 0 0; background: var(--primary); transition: width .6s ease; }
+.bxl-pk-bar span, .bxl-pk-bar b { position: relative; display: inline-flex; align-items: center; gap: .25rem; color: var(--foreground); }
+.bxl-pk-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: .3rem; min-height: 0; }
+.bxl-pk-side { position: relative; overflow: hidden; border-radius: .8rem; background: var(--card); border: 2px solid transparent; }
+.bxl-pk-side.win { border-color: var(--accent); box-shadow: 0 0 18px color-mix(in oklab, var(--accent) 60%, transparent); }
+.bxl-pk-side video { width: 100%; height: 100%; object-fit: cover; }
+.bxl-pk-empty { display: grid; place-items: center; height: 100%; font-size: 2rem; font-weight: 800; color: var(--muted-foreground); }
+.bxl-pk-side small { position: absolute; left: .4rem; bottom: .35rem; font-size: .65rem; font-weight: 700; }
+.bxl-pk-side b { position: absolute; right: .4rem; bottom: .3rem; font-size: .8rem; color: var(--accent); }
+.bxl-pk-side em { position: absolute; top: .4rem; left: 50%; transform: translateX(-50%); font-style: normal; font-weight: 900; font-size: .8rem; padding: .1rem .5rem; border-radius: 999px; background: var(--accent); color: var(--accent-foreground); }
+.bixtok-chat.with-card { bottom: calc(8.6rem + env(safe-area-inset-bottom)); max-height: 32%; }
+.bxl-showcase { position: absolute; z-index: 3; left: .75rem; bottom: calc(4.6rem + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: .5rem; max-width: 15rem; padding: .45rem .6rem; border-radius: .8rem; background: color-mix(in oklab, var(--card) 88%, transparent); border: 1px solid color-mix(in oklab, var(--accent) 55%, transparent); }
+.bxl-showcase span { font-size: 1.5rem; line-height: 1; }
+.bxl-showcase b { display: block; font-size: .75rem; } .bxl-showcase small { display: block; font-size: .62rem; color: var(--muted-foreground); }
+.bxl-showcase em { margin-left: auto; font-style: normal; font-size: .62rem; font-weight: 800; padding: .25rem .55rem; border-radius: 999px; background: var(--accent); color: var(--accent-foreground); }
+.bxl-board { margin-top: .75rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+.bxl-board button { display: flex; align-items: center; gap: .45rem; padding: .6rem .7rem; border-radius: .8rem; font-size: .78rem; font-weight: 700; background: var(--secondary); color: var(--secondary-foreground); }
+.bxl-board button.on { background: var(--primary); color: var(--primary-foreground); }
+.bxl-board button span { font-size: 1.3rem; }
+.bxl-board p { grid-column: 1 / -1; font-size: .65rem; color: var(--muted-foreground); }
+.bxl-sfx-burst { position: absolute; z-index: 5; left: 50%; top: 40%; font-size: 4.5rem; pointer-events: none; animation: bxl-sfx 1.4s ease forwards; }
+@keyframes bxl-sfx { 0% { transform: translate(-50%, 0) scale(.4); opacity: 0; } 25% { transform: translate(-50%, -10px) scale(1.15); opacity: 1; } 100% { transform: translate(-50%, -80px) scale(1); opacity: 0; } }
+.bxl-rec { position: absolute; z-index: 3; right: .75rem; top: 6.4rem; display: inline-flex; align-items: center; gap: .25rem; padding: .15rem .5rem; border-radius: 999px; font-size: .6rem; font-weight: 800; background: var(--destructive); color: var(--destructive-foreground); }
+.bxt-sched { margin-top: 1rem; display: grid; gap: .5rem; }
+.bxt-sched li { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; padding: .65rem .75rem; border-radius: .9rem; background: var(--card); border: 1px solid color-mix(in oklab, var(--accent) 35%, var(--border)); }
+.bxt-sched li b { flex: 1 1 60%; min-width: 0; font-size: .8rem; }
+.bxt-sched li time { font-variant-numeric: tabular-nums; font-size: .75rem; font-weight: 800; color: var(--accent); }
+.bxt-sched li small { width: 100%; font-size: .65rem; color: var(--muted-foreground); }
+.bxt-sched li button, .bxt-sched li a { font-size: .68rem; font-weight: 700; padding: .3rem .6rem; border-radius: 999px; background: var(--secondary); color: var(--secondary-foreground); }
+.bxt-sched li button.on { background: var(--primary); color: var(--primary-foreground); }
+@media (prefers-reduced-motion: reduce) { .bxl-sfx-burst { animation-duration: .01s; } .bxl-pk-bar i { transition: none; } }
