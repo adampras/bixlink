@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { usePublicConfig } from '@/lib/useMember';
 import { BIXGO_SERVICES, bixgoFare, readBixgo, type BixgoService, type BixgoSettings } from '@/lib/bixgo';
-import { Bike, Car, CheckCircle2, Construction, History, MapPin, Minus, Navigation, Package, Plus, ShoppingBasket, Star, UtensilsCrossed } from 'lucide-react';
+import { ArrowLeft, Bike, Car, CheckCircle2, Construction, History, MapPin, Minus, Navigation, Package, Plus, ShoppingBasket, Star, UtensilsCrossed } from 'lucide-react';
+import { toast } from 'sonner';
+import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
 
 export const Route = createFileRoute('/bixgo')({
   head: () => ({ meta: [
@@ -66,6 +68,8 @@ function BixgoPage() {
   const [partner, setPartner] = useState('');
   const [orders, setOrders] = useState<Order[]>([]);
   const [tab, setTab] = useState<'order' | 'history'>('order');
+  const [view, setView] = useState<BixgoView>('home');
+  const { user } = useSession();
 
   useEffect(() => { void supabase.from('app_settings').select('value').eq('key', 'bixgo').maybeSingle().then(({ data }) => setCfg(readBixgo(data?.value))); }, []);
   useEffect(() => { try { setOrders(JSON.parse(localStorage.getItem(HKEY) || '[]')); } catch { /* ignore */ } }, []);
@@ -183,5 +187,7 @@ function BixgoPage() {
         <Button variant="outline" className="mt-2 w-full" onClick={reset}>New order</Button></div>}
     </section></>}
     <p className="mt-4 text-center text-[10px] text-muted-foreground">BIXGO is in preview. Fares are estimates; no booking, payment or dispatch is performed.</p>
-  </main></BixShell>;
+    </main>}
+    <BixgoBottomNav view={view} setView={go} inbox={3}/>
+  </div></BixShell>;
 }
