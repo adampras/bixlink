@@ -49,7 +49,14 @@ function useP2pRtc({ liveId, me, host, stream, enabled }: { liveId: string; me: 
     const offerTo = async (peer: string) => {
       const s = streamRef.current; if (!s) return;
       const pc = makePc(peer);
-      s.getTracks().forEach(t => pc.addTrack(t, s));
+      s.getTracks().forEach(t => {
+        const sender = pc.addTrack(t, s);
+        if (t.kind !== 'video') return;
+        // Keep the backup connection sharp too: hold resolution, allow up to 2.5 Mbps.
+        const p = sender.getParameters(); p.degradationPreference = 'maintain-resolution';
+        p.encodings = (p.encodings?.length ? p.encodings : [{}]).map(e => ({ ...e, maxBitrate: 2_500_000, maxFramerate: 30 }));
+        void sender.setParameters(p).catch(() => {});
+      });
       pc.onconnectionstatechange = () => { if (pc.connectionState === 'failed' || pc.connectionState === 'closed') drop(peer); };
       await pc.setLocalDescription(await pc.createOffer());
       send('offer', { to: peer, from: me, sdp: pc.localDescription!.toJSON() });
