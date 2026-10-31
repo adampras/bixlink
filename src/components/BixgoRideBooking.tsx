@@ -63,7 +63,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoS
     <div className={`relative overflow-hidden bg-card ${stage === 'pickup' ? 'h-[55dvh]' : 'h-[36dvh]'} transition-all`}>
       <ClientOnly fallback={<div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Memuat peta…</div>}>
         <Suspense fallback={<div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Memuat peta…</div>}>
-          <BixgoLiveMap from={from} to={to} active={active} path={route?.path} onPick={p => void tapMap(p)}/>
+          <BixgoLiveMap from={from} to={to} active={active} path={route?.path ?? null} onPick={p => void tapMap(p)}/>
         </Suspense>
       </ClientOnly>
       <header className="absolute inset-x-3 top-3 z-[500] flex items-center gap-2">

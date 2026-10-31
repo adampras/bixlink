@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { z } from 'zod';
-import md5 from 'js-md5';
+import { md5 } from 'js-md5';
 import { readBixgo } from '@/lib/bixgo';
 
 /** Digiflazz PPOB bridge. Credentials stay server-side. Member checkout is NOT wired to any balance yet; only the owner can send transactions. */
