@@ -59,7 +59,7 @@ export const Route = createFileRoute('/admin')({ head: () => ({ meta: [{ title: 
 type AdminData = Awaited<ReturnType<typeof getAdminData>>;
 const ADMIN_GROUPS: AdminGroup[] = [
   { title: '1 · Pusat Kontrol', tone: 'gold', hint: 'Saklar sentral, vault, maintenance', tabs: [['Overview','saklar sentral maintenance vault brankas ringkasan p2p arena register'],['Growth & Safety','radar aktivitas flash event circuit breaker freeze withdraw telegram']] },
-  { title: '2 · Kas & Dompet', tone: 'cyan', hint: 'Deposit, withdraw, BIX PAY, laporan', tabs: [['Wallet','dompet deposit ikat wallet bix pay transfer swap telegram notifikasi'],['Reports','laporan transfer']] },
+  { title: '2 · Kas & Dompet', tone: 'cyan', hint: 'Deposit, withdraw, BIX PAY, laporan', tabs: [['Wallet','dompet deposit ikat wallet bix pay transfer swap telegram notifikasi pemulihan deposit onchain approve txid'],['Reports','laporan transfer']] },
   { title: '3 · Staking & Yield', tone: 'emerald', hint: 'APY, paket, permintaan stake', tabs: [['Staking','apy profit yield paket durasi'],['Stakes','unstake approve permintaan riwayat']] },
   { title: '4 · Member & Jaringan', tone: 'rose', hint: 'User, audit deposit, leader, loan, kuota', tabs: [['Users','member ban owner 2 omset audit real deposit loan kuota'],['Referrals','bonus komisi sponsor'],['Kepemimpinan & Tim','tim leader vip clones buat akun loan']] },
   { title: '5 · Pasar & Presale', tone: 'violet', hint: 'Harga BIX, presale, materi', tabs: [['Presale','tahap harga strategi'],['Market','harga pasar bix'],['Marketing','pdf video materi']] },
