@@ -31,7 +31,7 @@ function BixgoPage() {
   const [step, setStep] = useState<Step>('form');
   useEffect(() => { void supabase.from('app_settings').select('value').eq('key', 'bixgo').maybeSingle().then(({ data }) => setCfg(readBixgo(data?.value))); }, []);
   const list = useMemo(() => cfg ? BIXGO_SERVICES.filter(s => cfg.services[s.key].enabled) : [], [cfg]);
-  useEffect(() => { if (list.length && !list.some(s => s.key === svc)) setSvc(list[0].key); }, [list, svc]);
+  useEffect(() => { if (list.length && !list.some(s => s.key === svc)) setSvc(list[0]!.key); }, [list, svc]);
   useEffect(() => { if (step !== 'search') return; const t = setTimeout(() => setStep('found'), 2200); return () => clearTimeout(t); }, [step]);
 
   if (!cfg) return <BixShell><main className="px-5 py-16 text-center text-sm text-muted-foreground">Loading BIXGO…</main></BixShell>;
