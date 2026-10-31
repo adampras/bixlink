@@ -4485,3 +4485,16 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .arb-bars small { font-size:8px; color:var(--muted-foreground); }
 .arb-share-card { white-space:pre-wrap; font-family:ui-monospace,monospace; font-size:11px; line-height:1.6; padding:12px; border-radius:12px; border:1px solid color-mix(in oklab, var(--chart-3) 40%, var(--border)); background:color-mix(in oklab, var(--chart-3) 8%, var(--card)); }
 @media (prefers-reduced-motion: reduce) { .arb-route { animation:none; } }
+.arb-core { position:relative; height:190px; margin:8px 0 4px; perspective:700px; display:grid; place-items:center; }
+.arb-core-ring { position:absolute; width:150px; height:150px; border-radius:50%; border:2px solid color-mix(in oklab, var(--chart-3) 70%, transparent); box-shadow:0 0 18px color-mix(in oklab, var(--chart-3) 35%, transparent); transform-style:preserve-3d; }
+.arb-core-ring.r1 { animation:arb-orbit1 7s linear infinite; }
+.arb-core-ring.r2 { width:126px; height:126px; border-color:color-mix(in oklab, var(--chart-2) 70%, transparent); animation:arb-orbit2 9s linear infinite; }
+.arb-core-ring.r3 { width:170px; height:170px; border-style:dashed; border-color:color-mix(in oklab, var(--primary) 50%, transparent); animation:arb-orbit3 13s linear infinite; }
+.arb-core-orb { width:74px; height:74px; border-radius:50%; display:grid; place-items:center; color:var(--primary-foreground); background:radial-gradient(circle at 35% 30%, var(--chart-3), var(--primary) 60%, var(--background)); box-shadow:0 10px 30px color-mix(in oklab, var(--chart-3) 45%, transparent), inset 0 -8px 16px color-mix(in oklab, var(--background) 60%, transparent); animation:arb-float 3.2s ease-in-out infinite; }
+.arb-core[data-hot="1"] .arb-core-orb { box-shadow:0 0 44px var(--chart-2), inset 0 -8px 16px color-mix(in oklab, var(--background) 60%, transparent); }
+.arb-core-label { position:absolute; bottom:0; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted-foreground); }
+@keyframes arb-orbit1 { from { transform:rotateX(68deg) rotateZ(0) } to { transform:rotateX(68deg) rotateZ(360deg) } }
+@keyframes arb-orbit2 { from { transform:rotateY(64deg) rotateZ(0) } to { transform:rotateY(64deg) rotateZ(-360deg) } }
+@keyframes arb-orbit3 { from { transform:rotateX(30deg) rotateY(30deg) rotateZ(0) } to { transform:rotateX(30deg) rotateY(30deg) rotateZ(360deg) } }
+@keyframes arb-float { 50% { transform:translateY(-8px) } }
+@media (prefers-reduced-motion: reduce) { .arb-core-ring, .arb-core-orb { animation:none; } }
