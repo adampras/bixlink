@@ -3,6 +3,7 @@ export const HUB_ITEMS = [
   { id: 'home', to: '/', label: 'Home', note: 'Overview' },
   { id: 'trade', to: '/trade', label: 'Trade', note: 'Buy / sell BIX' },
   { id: 'bixtrade', to: '/bixtrade', label: 'BIXTRADE', note: 'Arbitrage bot' },
+  { id: 'bixgo', to: '/bixgo', label: 'BIXGO', note: 'Ride · Food · Send' },
   { id: 'boost', to: '/boost', label: 'Boost APY', note: 'Engine' },
   { id: 'mining', to: '/mining', label: 'Mining', note: 'Rig pre-order' },
   { id: 'exchange', to: '/quantum-exchange', label: 'Exchange', note: 'Coming soon' },
