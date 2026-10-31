@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
@@ -78,6 +78,17 @@ export function isMegaGift(body: string): boolean {
   return (g.currency === 'BIX' && g.amount >= 10) || (g.currency === 'BIXP' && g.amount >= 100);
 }
 
+/** Zoom 1.0 = the camera's full, natural frame; host slider and every viewer share this value. */
+export const ZOOM_MIN = 1; export const ZOOM_MAX = 3;
+export function clampZoom(z: number): number { return Number.isFinite(z) ? Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z)) : 1; }
+
+/** Soft blurred copy of the camera behind the real frame, so the portrait screen is always filled without cropping the host. */
+function Backdrop({ stream, mirror }: { stream: MediaStream | null; mirror?: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => { const v = ref.current; if (v) { v.srcObject = stream; if (stream) void v.play().catch(() => {}); } }, [stream]);
+  return <video ref={ref} autoPlay muted playsInline aria-hidden className="bxl-backdrop" style={mirror ? { transform: 'scaleX(-1) scale(1.15)' } : undefined}/>;
+}
+
 function Tile({ stream, label, mirror }: { stream: MediaStream; label: string; mirror?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => { const v = ref.current; if (v) { v.srcObject = stream; void v.play().catch(() => {}); } }, [stream]);
@@ -111,10 +122,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [top, setTop] = useState<Top[]>([]); const [modMsg, setModMsg] = useState<Msg | null>(null); const [note, setNote] = useState('');
   const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
   const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | null>(null); const [recording, setRecording] = useState(false);
-  const [fit, setFit] = useState<'cover' | 'contain'>('cover'); const [burst, setBurst] = useState<{ id: number; e: string } | null>(null);
+  const [burst, setBurst] = useState<{ id: number; e: string } | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const chan = useRef<ReturnType<typeof supabase.channel> | null>(null); const pending = useRef(0);
   const seen = useRef(new Set<string>());
+  const zoomRef = useRef(zoom); zoomRef.current = zoom;
   const sfx = useSfx(sound); const sfxRef = useRef(sfx); sfxRef.current = sfx;
   const mine = stage.find(s => s.user_id === me);
   const guest = !host && mine?.status === 'approved';
@@ -125,8 +137,6 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const flash = (m: string) => { setNote(m); setTimeout(() => setNote(''), 2600); };
   const replay = useReplayRecorder({ stream: host ? local : null, liveId: live.id, me, on: host && recording && cfg.replay_enabled !== false, onNote: flash });
   useEffect(() => { if (!pk) return undefined; const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, [pk]);
-  /** LIVE is always a full-height portrait frame for host and viewers; a landscape camera is centre-cropped, never letterboxed. */
-  const onMeta = (e: SyntheticEvent<HTMLVideoElement>) => { if (e.currentTarget.videoWidth) setFit('cover'); };
 
   const spawn = (n = 1) => setFloaters(f => [...f.slice(-30), ...Array.from({ length: n }, () => ({
     id: Math.random(), x: 10 + Math.random() * 30, color: COLORS[Math.floor(Math.random() * COLORS.length)]!, drift: Math.random() * 60 - 30,
@@ -184,8 +194,10 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       .on('broadcast', { event: 'sfx' }, ({ payload }) => playSfx.current(String(payload?.k ?? '')))
       .on('broadcast', { event: 'del' }, ({ payload }) => setMsgs(x => x.filter(y => y.id !== payload?.id)))
       .on('broadcast', { event: 'stage' }, () => { void pull(true); })
+      // Host camera zoom is mirrored on every viewer so they see the same framing.
+      .on('broadcast', { event: 'zoom' }, ({ payload }) => { if (!host) setZoom(clampZoom(Number(payload?.z))); })
       .on('presence', { event: 'sync' }, () => setViewers(Math.max(1, Object.keys(room.presenceState()).length)))
-      .on('presence', { event: 'join' }, ({ key }) => { if (key !== me) sfxRef.current.join(); })
+      .on('presence', { event: 'join' }, ({ key }) => { if (key !== me) { sfxRef.current.join(); if (host) void room.send({ type: 'broadcast', event: 'zoom', payload: { z: zoomRef.current } }); } })
       .subscribe(s => { if (s === 'SUBSCRIBED') void room.track({ at: Date.now() }); });
     chan.current = room;
     const flush = setInterval(() => {
@@ -209,7 +221,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   useEffect(() => {
     if (!publishing) { stream.current?.getTracks().forEach(t => t.stop()); stream.current = null; setLocal(null); return undefined; }
     let cancelled = false;
-    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing, width: { ideal: 1080 }, height: { ideal: 1920 }, aspectRatio: { ideal: 9 / 16 }, frameRate: { ideal: 30 } }, audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
+    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, resizeMode: 'none' } as MediaTrackConstraints, audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
       .then(s => {
         if (cancelled) { s.getTracks().forEach(t => t.stop()); return; }
         const old = stream.current; stream.current = s;
@@ -225,6 +237,12 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   useEffect(() => () => { stream.current?.getTracks().forEach(t => t.stop()); }, []);
   useEffect(() => { stream.current?.getAudioTracks().forEach(t => { t.enabled = mic; }); }, [mic, local]);
   useEffect(() => { if (host && cam.current && local) cam.current.srcObject = local; }, [host, local]);
+  // Share the host's zoom with viewers (debounced while the slider moves).
+  useEffect(() => {
+    if (!host) return undefined;
+    const t = setTimeout(() => { void chan.current?.send({ type: 'broadcast', event: 'zoom', payload: { z: zoom } }); }, 120);
+    return () => clearTimeout(t);
+  }, [zoom, host]);
   // Viewer video. LiveKit audio plays through separate audio elements; P2P carries voice inside the video stream.
   useEffect(() => {
     const v = view.current; if (!v || host) return;
@@ -311,9 +329,13 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
 
   return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
     <div className="bxl-stage" onClick={tap}>
-      {host ? <video ref={cam} autoPlay muted playsInline className="bixtok-video" onLoadedMetadata={onMeta} onResize={onMeta} style={{ objectFit: fit, transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
+      {host ? <>
+          <Backdrop stream={local} mirror={facing === 'user'}/>
+          <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
+        </>
         : <>
-          <video ref={view} autoPlay playsInline muted className="bixtok-video" onLoadedMetadata={onMeta} onResize={onMeta} style={{ objectFit: fit }}/>
+          <Backdrop stream={main?.stream ?? null}/>
+          <video ref={view} autoPlay playsInline muted className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${zoom})` }}/>
           {(!main || state !== 'live') && <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p>
             <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : 'Connecting to the host camera…'}</small></div>}
         </>}
@@ -369,7 +391,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     <div className="bxl-tools">
       {publishing && <>
         <button aria-label="Flip camera" onClick={() => setFacing(f => (f === 'user' ? 'environment' : 'user'))}><SwitchCamera size={20}/></button>
-        {host && <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={1} max={2} step={0.05} value={zoom} onChange={e => setZoom(+e.target.value)}/></label>}
+        {host && <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={ZOOM_MIN} max={ZOOM_MAX} step={0.05} value={zoom} onChange={e => setZoom(clampZoom(+e.target.value))}/></label>}
         <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
       </>}
       {host && <button aria-label="Pin message" onClick={() => setPinEdit(pinned ?? '')}><Pin size={20}/></button>}
