@@ -95,6 +95,7 @@ export function DepositRecovery({ onMessage }: { onMessage: (m: string) => void 
               : <Button size="sm" onClick={() => pick(s.wallet, t.hash)} className="gap-1"><AlertTriangle size={14}/> Belum masuk · proses</Button>}
           </div>)}</div>}
       </div>)}</div>}
+      {w.data?.owner1 && <ManualCredit wallet={code} onMessage={onMessage}/>}
     </>}
   </section>;
 }
