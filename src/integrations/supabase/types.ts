@@ -2066,6 +2066,45 @@ export type Database = {
         }
         Relationships: []
       }
+      bixtrade_requests: {
+        Row: {
+          admin_note: string | null
+          amount_usd: number
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          reviewed_at: string | null
+          status: string
+          strategy: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount_usd: number
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          reviewed_at?: string | null
+          status?: string
+          strategy?: string
+          user_id?: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount_usd?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          reviewed_at?: string | null
+          status?: string
+          strategy?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       deposit_intents: {
         Row: {
           address: string
