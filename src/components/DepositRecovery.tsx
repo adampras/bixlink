@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { listRecoveryWallets, scanRecoveryTransfers, lookupRecoveryTx, creditRecoveryTx } from '@/lib/deposit-recovery.functions';
+import { listRecoveryWallets, scanRecoveryTransfers, lookupRecoveryTx, creditRecoveryTx, manualCreditNoHash } from '@/lib/deposit-recovery.functions';
 import { dateTime, money } from '@/lib/bixlink';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,7 +38,7 @@ export function DepositRecovery({ onMessage }: { onMessage: (m: string) => void 
     setBusy('credit');
     try {
       const r = await credit({ data: { walletCode: code, txHash: found.hash, member: member.trim(), ...(note.trim() ? { note: note.trim() } : {}) } });
-      onMessage(`Berhasil: ${money(r.amount)} masuk ke wallet ${r.member}.`);
+      onMessage('linked' in r && r.linked ? `TxID disambungkan ke kredit manual ${money(r.previous)} milik ${r.member}. Tidak ada saldo tambahan (anti-ganda).` : `Berhasil: ${money(r.amount)} masuk ke wallet ${r.member}.`);
       setFound(null); setHash(''); setMember(''); setNote(''); setScanData(null);
       await Promise.all([qc.invalidateQueries({ queryKey: ['admin-wallet'] }), qc.invalidateQueries({ queryKey: ['deposit-audit'] }), qc.invalidateQueries({ queryKey: ['owner-revenue'] })]);
     } catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal mengkreditkan.'); } finally { setBusy(''); }
@@ -95,6 +95,32 @@ export function DepositRecovery({ onMessage }: { onMessage: (m: string) => void 
               : <Button size="sm" onClick={() => pick(s.wallet, t.hash)} className="gap-1"><AlertTriangle size={14}/> Belum masuk · proses</Button>}
           </div>)}</div>}
       </div>)}</div>}
+      {w.data?.owner1 && <ManualCredit wallet={code} onMessage={onMessage}/>}
     </>}
   </section>;
+}
+
+/** Owner 1 fallback when the blockchain check is busy: credit now, link the TxID later (the same member cannot receive a second credit until then). */
+function ManualCredit({ wallet, onMessage }: { wallet: string; onMessage: (m: string) => void }) {
+  const fn = useServerFn(manualCreditNoHash); const qc = useQueryClient();
+  const [member, setMember] = useState(''); const [amount, setAmount] = useState(''); const [note, setNote] = useState(''); const [busy, setBusy] = useState(false);
+  const submit = async () => {
+    const a = Number(amount);
+    if (!member.trim() || !(a >= 1) || note.trim().length < 5) return onMessage('Isi member, nominal (min $1) dan catatan bukti (min 5 huruf).');
+    if (!window.confirm(`Kreditkan ${money(a)} ke ${member.trim()} TANPA cek blockchain?\nPastikan Anda sudah melihat dana ini masuk di wallet Owner.`)) return;
+    setBusy(true);
+    try { const r = await fn({ data: { walletCode: wallet, member: member.trim(), amount: a, note: note.trim() } }); onMessage(`Berhasil: ${money(r.amount)} masuk ke ${r.member}. Sambungkan TxID nanti lewat Cek on-chain.`); setMember(''); setAmount(''); setNote('');
+      await qc.invalidateQueries({ queryKey: ['admin-wallet'] }); }
+    catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal.'); } finally { setBusy(false); }
+  };
+  return <div className="mt-6 rounded-2xl border border-chart-3/60 bg-chart-3/5 p-4">
+    <h3 className="flex items-center gap-2 font-display text-base font-bold"><AlertTriangle size={16} className="text-chart-3"/> Kredit manual (blockchain sibuk) · Owner 1</h3>
+    <p className="mt-1 text-[11px] text-muted-foreground">Gunakan hanya bila Anda sudah melihat dana masuk di wallet Owner. Satu member hanya boleh punya satu kredit manual yang belum ada TxID. Saat nanti TxID-nya di-approve lewat Cek on-chain, TxID hanya disambungkan ke kredit ini — saldo tidak bertambah lagi.</p>
+    <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_120px_1fr_auto]">
+      <Input value={member} onChange={e => setMember(e.target.value)} placeholder="Kode referral / username" aria-label="Member"/>
+      <Input value={amount} onChange={e => setAmount(e.target.value)} placeholder="USD" inputMode="decimal" aria-label="Nominal"/>
+      <Input value={note} onChange={e => setNote(e.target.value)} placeholder="Bukti: jam, wallet asal, dll" maxLength={120} aria-label="Catatan bukti"/>
+      <Button type="button" variant="outline" onClick={submit} disabled={busy}>{busy ? 'Menyimpan…' : 'Kreditkan'}</Button>
+    </div>
+  </div>;
 }
