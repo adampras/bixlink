@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ArbitrageRouteImport } from './routes/arbitrage'
 import { Route as ArenaRouteImport } from './routes/arena'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BixgoRouteImport } from './routes/bixgo'
 import { Route as BixtokRouteImport } from './routes/bixtok'
 import { Route as BixtradeRouteImport } from './routes/bixtrade'
 import { Route as BoostRouteImport } from './routes/boost'
@@ -84,6 +85,11 @@ const ArenaRoute = ArenaRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BixgoRoute = BixgoRouteImport.update({
+  id: '/bixgo',
+  path: '/bixgo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BixtokRoute = BixtokRouteImport.update({
@@ -296,6 +302,7 @@ export interface FileRoutesByFullPath {
   '/arbitrage': typeof ArbitrageRoute
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
+  '/bixgo': typeof BixgoRoute
   '/bixtok': typeof BixtokRoute
   '/bixtrade': typeof BixtradeRoute
   '/boost': typeof BoostRoute
@@ -344,6 +351,7 @@ export interface FileRoutesByTo {
   '/arbitrage': typeof ArbitrageRoute
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
+  '/bixgo': typeof BixgoRoute
   '/bixtok': typeof BixtokRoute
   '/bixtrade': typeof BixtradeRoute
   '/boost': typeof BoostRoute
@@ -393,6 +401,7 @@ export interface FileRoutesById {
   '/arbitrage': typeof ArbitrageRoute
   '/arena': typeof ArenaRoute
   '/auth': typeof AuthRoute
+  '/bixgo': typeof BixgoRoute
   '/bixtok': typeof BixtokRoute
   '/bixtrade': typeof BixtradeRoute
   '/boost': typeof BoostRoute
@@ -443,6 +452,7 @@ export interface FileRouteTypes {
     | '/arbitrage'
     | '/arena'
     | '/auth'
+    | '/bixgo'
     | '/bixtok'
     | '/bixtrade'
     | '/boost'
@@ -491,6 +501,7 @@ export interface FileRouteTypes {
     | '/arbitrage'
     | '/arena'
     | '/auth'
+    | '/bixgo'
     | '/bixtok'
     | '/bixtrade'
     | '/boost'
@@ -539,6 +550,7 @@ export interface FileRouteTypes {
     | '/arbitrage'
     | '/arena'
     | '/auth'
+    | '/bixgo'
     | '/bixtok'
     | '/bixtrade'
     | '/boost'
@@ -588,6 +600,7 @@ export interface RootRouteChildren {
   ArbitrageRoute: typeof ArbitrageRoute
   ArenaRoute: typeof ArenaRoute
   AuthRoute: typeof AuthRoute
+  BixgoRoute: typeof BixgoRoute
   BixtokRoute: typeof BixtokRoute
   BixtradeRoute: typeof BixtradeRoute
   BoostRoute: typeof BoostRoute
@@ -672,6 +685,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bixgo': {
+      id: '/bixgo'
+      path: '/bixgo'
+      fullPath: '/bixgo'
+      preLoaderRoute: typeof BixgoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bixtok': {
@@ -964,6 +984,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArbitrageRoute: ArbitrageRoute,
   ArenaRoute: ArenaRoute,
   AuthRoute: AuthRoute,
+  BixgoRoute: BixgoRoute,
   BixtokRoute: BixtokRoute,
   BixtradeRoute: BixtradeRoute,
   BoostRoute: BoostRoute,
