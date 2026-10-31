@@ -7,7 +7,7 @@ import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, check
 import robotImg from '@/assets/bixtrade-ai-robot.png';
 import { useServerFn } from '@tanstack/react-start';
 import { runBixtradeCycle } from '@/lib/bixtrade.functions';
-import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Gauge, Network, Radar, Send, Share2, Volume2, VolumeX, Zap } from 'lucide-react';
+import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Network, Radar, Send, Share2, Volume2, VolumeX, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/bixtrade')({
   head: () => ({ meta: [
@@ -239,14 +239,6 @@ function BixtradePage() {
 
     <p className="mt-6 text-[11px] leading-5 text-muted-foreground">Risk disclosure: scanner routes and spreads are a display simulation built on live reference prices; BIXTrade does not place orders on external exchanges. Projection ranges are set by the owner, are not guaranteed, and nothing is added to your balance automatically — all deposits and withdrawals are owner-reviewed internal records.</p>
   </main></BixShell>;
-}
-
-function BotCore({ active }: { active: number }) {
-  return <div className="arb-core" data-hot={active > 0 ? '1' : '0'} aria-hidden>
-    <div className="arb-core-ring r1"/><div className="arb-core-ring r2"/><div className="arb-core-ring r3"/>
-    <div className="arb-core-orb"><Cpu size={30}/></div>
-    <span className="arb-core-label">{active ? `${active} profitable routes` : 'Scanning venues'}</span>
-  </div>;
 }
 
 const NODE = BIXTRADE_VENUES.map((v, i) => { const a = (i / BIXTRADE_VENUES.length) * Math.PI * 2 - Math.PI / 2; return { v, x: 150 + Math.cos(a) * 105, y: 105 + Math.sin(a) * 78 }; });
