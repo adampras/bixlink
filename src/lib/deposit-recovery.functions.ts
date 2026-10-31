@@ -127,3 +127,34 @@ export const creditRecoveryTx = createServerFn({ method: 'POST' }).middleware([r
     }
     return { ok: true, amount, member: names.get(memberId)?.code ?? '—', txId };
   });
+
+/** Owner 1 only: credit a member when the blockchain check is unavailable. Recorded as "TxID pending"; refuses a second pending credit for the same member until the first gets its TxID. */
+export const manualCreditNoHash = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { walletCode: string; member: string; amount: number; note: string }) => z.object({
+    walletCode: z.string().trim().min(2).max(20), member: z.string().trim().min(2).max(60), amount: z.number().min(1).max(5000), note: z.string().trim().min(5).max(120),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin: admin } = await import('@/integrations/supabase/client.server');
+    const { recoveryCaller, memberNames } = await import('./deposit-recovery.server');
+    const caller = await recoveryCaller(context, admin);
+    if (!caller.owner1) throw new Error('Kredit tanpa TxID hanya untuk Owner 1.');
+    const wallet = caller.wallets.find(w => w.code === data.walletCode);
+    if (!wallet) throw new Error('Wallet tidak ditemukan.');
+    const key = data.member.replace(/^@/, '');
+    const { data: byCode } = await admin.from('referral_codes').select('user_id').ilike('code', key).limit(2);
+    let memberId = byCode?.length === 1 ? byCode[0]!.user_id : null;
+    if (!memberId) { const { data: byName } = await admin.from('profiles').select('user_id').ilike('username', key).limit(2); if (byName?.length === 1) memberId = byName[0]!.user_id; }
+    if (!memberId) throw new Error('Member tidak ditemukan.');
+    if (memberId === caller.userId) throw new Error('Tidak bisa mengkreditkan ke akun sendiri.');
+    const { data: clone } = await admin.from('bix_clone_accounts').select('user_id').eq('user_id', memberId).maybeSingle();
+    if (clone) throw new Error('Akun clone tidak boleh menerima deposit.');
+    const { data: open } = await admin.from('wallet_transactions').select('id,amount_usd,created_at').eq('user_id', memberId).eq('type', 'deposit').eq('status', 'approved').is('tx_hash', null).ilike('note', 'Manual owner credit%').limit(1);
+    if (open?.length) throw new Error(`Member ini masih punya kredit manual ${open[0]!.amount_usd} USD tanpa TxID. Lengkapi TxID-nya dulu lewat Cek on-chain agar tidak ganda.`);
+    const amount = manualCreditAmount(data.amount);
+    const names = await memberNames(admin);
+    const now = new Date().toISOString();
+    const { data: ins, error } = await admin.from('wallet_transactions').insert({ user_id: memberId, type: 'deposit', amount_usd: amount, fee_usd: 0, net_usd: amount, status: 'approved', wallet_code: wallet.code, network: wallet.network, address: wallet.address, verified_at: now, reviewed_at: now,
+      note: `Manual owner credit · TxID pending · Owner 1 ${names.get(caller.userId)?.code ?? ''} · ${data.note}` }).select('id').single();
+    if (error) throw new Error(error.message);
+    return { ok: true, amount, member: names.get(memberId)?.code ?? '—', txId: ins.id };
+  });
