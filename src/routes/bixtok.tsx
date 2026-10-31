@@ -24,7 +24,7 @@ export const Route = createFileRoute('/bixtok')({
   component: BixtokPage,
 });
 
-type Cfg = { link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[] };
+type Cfg = { link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max?: number; live_cta?: boolean; host_gifts?: boolean };
 type Gift = { id: string; name: string; emoji: string; currency: string; price: number };
 type Video = { id: string; creator_name: string; creator_id: string | null; caption: string; video_url: string; likes: number; media_path: string | null; media_kind: string; filter: string; overlay: string; allow_gifts: boolean; src: string; text_style: Partial<TextStyle> | null; music_title: string | null; music_url: string | null; source_kind: string; clean?: string | undefined };
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
@@ -63,7 +63,7 @@ function BixtokPage() {
   const followers = q.data?.followers instanceof Set ? q.data.followers : new Set<string>();
   const menus = (q.data?.cfg.menus ?? []).filter(m => m.enabled);
   const [tab, setTab] = useState('foryou');
-  const [giftTarget, setGiftTarget] = useState<{ video?: string; live?: string } | null>(null);
+  const [giftTarget, setGiftTarget] = useState<GiftTarget | null>(null);
   const [room, setRoom] = useState<Live | null>(null);
   const opened = useRef(false);
   useEffect(() => {
@@ -118,7 +118,7 @@ function BixtokPage() {
         <button className={section === 'profile' ? 'on' : ''} onClick={() => setSection('profile')}><User/><small>Profile</small></button>
       </nav>}
       {studio && <BixtokStudio userId={user!.id} slots={q.data.cfg.link_slots ?? 5} maxLinks={q.data.cfg.max_links ?? 10} onClose={() => setStudio(false)} onDone={m => { setStudio(false); setNote(m); setTab('mine'); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}/>}
-      {room && <BixtokLiveRoom live={room} me={user!.id} cfg={q.data.cfg} following={following.has(room.host_id)} onFollow={() => toggleFollow(room.host_id)} onClose={() => setRoom(null)} onGift={() => setGiftTarget({ live: room.id })}/>}
+      {room && <BixtokLiveRoom live={room} me={user!.id} cfg={q.data.cfg} following={following.has(room.host_id)} onFollow={() => toggleFollow(room.host_id)} onClose={() => setRoom(null)} onGift={(recipients) => setGiftTarget({ live: room.id, recipients })}/>}
       {giftTarget && <GiftSheet gifts={q.data.gifts.filter(g => q.data!.cfg.features[g.currency === 'BIX' ? 'bix_gifts' : 'bixp_gifts'] !== false)} target={giftTarget} closed={!q.data.cfg.gifts_enabled} onClose={() => setGiftTarget(null)} onNote={setNote}/>}
       {note && <div className="bixtok-toast" role="status">{note}</div>}
     </>}
@@ -214,11 +214,13 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
   </div>;
 }
 
-function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; target: { video?: string; live?: string }; closed: boolean; onClose: () => void; onNote: (m: string) => void }) {
+type GiftTarget = { video?: string; live?: string; recipients?: { id: string; name: string }[] };
+function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; target: GiftTarget; closed: boolean; onClose: () => void; onNote: (m: string) => void }) {
   const qc = useQueryClient(); const [busy, setBusy] = useState<string | null>(null); const [burst, setBurst] = useState<string | null>(null);
+  const recips = target.recipients ?? []; const [to, setTo] = useState<string | null>(recips[0]?.id ?? null);
   const send = async (g: Gift) => {
     setBusy(g.id);
-    const { error } = await supabase.rpc('bixtok_send_gift', { p_gift: g.id, p_live: target.live ?? null, p_video: target.video ?? null } as never);
+    const { error } = await supabase.rpc('bixtok_send_gift_to', { p_gift: g.id, p_live: target.live ?? null, p_video: target.video ?? null, p_to: to } as never);
     setBusy(null);
     if (error) {
       const m = error.message;
@@ -230,6 +232,7 @@ function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; 
   };
   return <div className="bixtok-sheet-wrap" onClick={onClose}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
     <div className="flex items-center justify-between"><h3 className="font-bold">Send a gift</h3><button aria-label="Close" onClick={onClose}><X size={18}/></button></div>
+    {recips.length > 1 && <div className="bxl-recips" role="radiogroup" aria-label="Gift to">{recips.map(r => <button key={r.id} role="radio" aria-checked={to === r.id} className={to === r.id ? 'on' : ''} onClick={() => setTo(r.id)}>@{r.name}</button>)}</div>}
     {closed ? <p className="mt-4 text-sm text-muted-foreground">Gifts are closed right now.</p> : <div className="bixtok-gifts">{gifts.map(g => <button key={g.id} disabled={!!busy} onClick={() => send(g)}><span>{g.emoji}</span><b>{g.name}</b><small>{Number(g.price)} {g.currency}</small></button>)}</div>}
     <p className="mt-3 text-[10px] text-muted-foreground">BIXP are promotional points moved to the creator; BIX gifts are internal ledger transfers to the creator. Gifts are final and are not investment returns.</p>
     {burst && <div className="bixtok-burst" aria-hidden>{burst}</div>}

@@ -151,7 +151,7 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream }: { li
     for (const t of s.getTracks()) {
       const old = published.current.get(t.kind);
       if (old?.track) { if (old.track.mediaStreamTrack !== t) await old.track.replaceTrack(t).catch(() => {}); continue; }
-      const pub = await room.localParticipant.publishTrack(t, { source: t.kind === 'video' ? lk.Track.Source.Camera : lk.Track.Source.Microphone }).catch(() => null);
+      const pub = await room.localParticipant.publishTrack(t, t.kind === 'video' ? { source: lk.Track.Source.Camera, simulcast: true, videoCodec: 'h264', videoEncoding: { maxBitrate: 2_500_000, maxFramerate: 30 }, degradationPreference: 'maintain-resolution' } : { source: lk.Track.Source.Microphone, dtx: true, red: true }).catch(() => null);
       if (pub) published.current.set(t.kind, pub);
     }
   };

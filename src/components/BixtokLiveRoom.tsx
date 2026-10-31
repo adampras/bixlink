@@ -7,7 +7,7 @@ import { useLiveRtc } from '@/lib/bixtok-rtc';
 
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
 type Msg = { id: string; name: string; body: string; kind: string };
-type Cfg = { live_max_minutes: number; features: Record<string, boolean> };
+type Cfg = { live_max_minutes: number; features: Record<string, boolean>; stage_max?: number; live_cta?: boolean; host_gifts?: boolean };
 type Floater = { id: number; x: number; color: string; drift: number };
 
 const COLORS = ['#FFD700', '#A855F7', '#FF3B6B', '#22D3EE', '#FF8A00'];
@@ -54,7 +54,7 @@ function Tile({ stream, label, mirror }: { stream: MediaStream; label: string; m
 }
 
 export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, onGift }: {
-  live: Live; me: string; cfg: Cfg; following: boolean; onFollow: () => void; onClose: () => void; onGift: () => void;
+  live: Live; me: string; cfg: Cfg; following: boolean; onFollow: () => void; onClose: () => void; onGift: (recipients: { id: string; name: string }[]) => void;
 }) {
   const qc = useQueryClient(); const host = live.host_id === me;
   const [msgs, setMsgs] = useState<Msg[]>([]); const [text, setText] = useState(''); const [ended, setEnded] = useState(false);
@@ -154,7 +154,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   useEffect(() => {
     if (!publishing) { stream.current?.getTracks().forEach(t => t.stop()); stream.current = null; setLocal(null); return undefined; }
     let cancelled = false;
-    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
+    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing, width: { ideal: 1080 }, height: { ideal: 1920 }, aspectRatio: { ideal: 9 / 16 }, frameRate: { ideal: 30 } }, audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
       .then(s => {
         if (cancelled) { s.getTracks().forEach(t => t.stop()); return; }
         const old = stream.current; stream.current = s;
@@ -236,6 +236,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const shareText = `🔴 LIVE on BIXTOK: ${live.title} — @${live.host_name}`;
   const pendingReq = stage.filter(s => s.status === 'pending');
   const onStage = stage.filter(s => s.status === 'approved');
+  const stageMax = Math.min(5, Math.max(1, Number(cfg.stage_max ?? 5)));
 
   return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
     <div className="bxl-stage" onClick={tap}>
@@ -265,13 +266,13 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       {top.length > 0 && <span className="bxl-top" aria-label="Top gifters"><Crown size={12}/>{top.map((t, i) => <em key={i}>{['🥇', '🥈', '🥉'][i]} {t.name} · {Number(t.total)} {t.currency}</em>)}</span>}
     </div>
     {pinned && <div className="bxl-pin"><Pin size={13}/><span>{pinned}</span></div>}
-    <div className="bxl-cta">
+    {!host && cfg.live_cta !== false && <div className="bxl-cta">
       <Link to="/stake">Join Staking</Link>
       <Link to="/presale">Presale</Link>
       <Link to="/nft-marketplace">Shop</Link>
-    </div>
+    </div>}
     {ended && <p className="bixtok-ended">LIVE ended</p>}
-    {!host && entered && audioBlocked && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Tap for sound</button>}
+    {!host && entered && audioBlocked && sound && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Tap for sound</button>}
     {banner && <div className="bxl-banner" key={banner.id}><Gift size={18}/><div><b>{banner.name}</b><small>{banner.body}</small></div></div>}
     {mega && <div className="bxl-mega" key={mega.id} aria-hidden><span>{giftInfo(mega.body).emoji}</span><b>{mega.name}</b><small>{mega.body}</small></div>}
     <div className="bxl-floaters" aria-hidden>{floaters.map(f => <Heart key={f.id} className="bxl-heart" fill={f.color} color={f.color}
@@ -294,9 +295,9 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         await sendChat(body); }}>
         <div className="bixtok-input"><MessageCircle size={16}/><input value={text} onChange={e => setText(e.target.value)} placeholder="Say something…" maxLength={200}/><button aria-label="Send"><Send size={16}/></button></div>
       </form>}
-      <button className="bxl-act" aria-label={sound ? 'Mute room sounds' : 'Unmute room sounds'} onClick={() => { setSound(s => !s); if (!sound) void unlockAudio(); }}>{sound ? <Volume2 size={18}/> : <VolumeX size={18}/>}</button>
+      {!host && <button className="bxl-act" aria-label={sound ? 'Mute room sounds' : 'Unmute room sounds'} onClick={() => { setSound(s => !s); if (!sound) void unlockAudio(); }}>{sound ? <Volume2 size={18}/> : <VolumeX size={18}/>}</button>}
       <button className="bxl-act" aria-label="Share" onClick={() => setShare(true)}><Share2 size={18}/></button>
-      {!host && <button className="bixtok-giftbtn" aria-label="Send gift" onClick={onGift}><Gift/></button>}
+      {(!host || (cfg.host_gifts !== false && onStage.length > 0)) && <button className="bixtok-giftbtn" aria-label="Send gift" onClick={() => onGift([...(host ? [] : [{ id: live.host_id, name: live.host_name }]), ...onStage.filter(s => s.user_id !== me).map(s => ({ id: s.user_id, name: s.name }))])}><Gift/></button>}
       <button className="bxl-act like" aria-label="Like" onClick={tap}><Heart size={18} fill="currentColor"/></button>
     </footer>
     {share && <div className="bixtok-sheet-wrap" onClick={() => setShare(false)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
@@ -310,11 +311,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       </div>
     </div></div>}
     {stagePanel && <div className="bixtok-sheet-wrap" onClick={() => setStagePanel(false)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
-      <div className="flex items-center justify-between"><h3 className="font-bold">Stage guests (max 3)</h3><button aria-label="Close" onClick={() => setStagePanel(false)}><X size={18}/></button></div>
+      <div className="flex items-center justify-between"><h3 className="font-bold">Stage guests (max {stageMax})</h3><button aria-label="Close" onClick={() => setStagePanel(false)}><X size={18}/></button></div>
       {!pendingReq.length && !onStage.length && <p className="mt-3 text-sm text-muted-foreground">No requests yet. Viewers tap the people icon to ask to join.</p>}
       <ul className="bxl-stage-list">
         {pendingReq.map(s => <li key={s.id}><b>@{s.name}</b><span>wants to join</span><button onClick={() => decide(s.id, 'approved')}>Accept</button><button className="ghost" onClick={() => decide(s.id, 'rejected')}>Decline</button></li>)}
-        {onStage.map(s => <li key={s.id}><b>@{s.name}</b><span>on stage</span><button className="ghost" onClick={() => decide(s.id, 'left')}>Remove</button></li>)}
+        {onStage.map(s => <li key={s.id}><b>@{s.name}</b><span>on stage</span>{cfg.host_gifts !== false && <button onClick={() => onGift([{ id: s.user_id, name: s.name }])}><Gift size={13}/> Gift</button>}<button className="ghost" onClick={() => decide(s.id, 'left')}>Remove</button></li>)}
       </ul>
     </div></div>}
     {pinEdit !== null && <div className="bixtok-sheet-wrap" onClick={() => setPinEdit(null)}><form className="bixtok-sheet" onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); void savePin(pinEdit); }}>

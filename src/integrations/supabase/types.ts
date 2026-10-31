@@ -1615,39 +1615,48 @@ export type Database = {
           enabled: boolean
           features: Json
           gifts_enabled: boolean
+          host_gifts: boolean
           id: number
           link_slots: number
+          live_cta: boolean
           live_enabled: boolean
           live_max_minutes: number
           live_min_stake_usd: number
           max_links: number
           menus: Json
+          stage_max: number
           updated_at: string
         }
         Insert: {
           enabled?: boolean
           features?: Json
           gifts_enabled?: boolean
+          host_gifts?: boolean
           id?: number
           link_slots?: number
+          live_cta?: boolean
           live_enabled?: boolean
           live_max_minutes?: number
           live_min_stake_usd?: number
           max_links?: number
           menus?: Json
+          stage_max?: number
           updated_at?: string
         }
         Update: {
           enabled?: boolean
           features?: Json
           gifts_enabled?: boolean
+          host_gifts?: boolean
           id?: number
           link_slots?: number
+          live_cta?: boolean
           live_enabled?: boolean
           live_max_minutes?: number
           live_min_stake_usd?: number
           max_links?: number
           menus?: Json
+          stage_max?: number
           updated_at?: string
         }
         Relationships: []
@@ -2830,6 +2839,10 @@ export type Database = {
       }
       bixtok_send_gift: {
         Args: { p_gift: string; p_live: string; p_video: string }
+        Returns: string
+      }
+      bixtok_send_gift_to: {
+        Args: { p_gift: string; p_live: string; p_to: string; p_video: string }
         Returns: string
       }
       bixtok_stage_decide: {

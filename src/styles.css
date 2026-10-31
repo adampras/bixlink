@@ -4354,8 +4354,8 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 [role="switch"][data-state="unchecked"] > span:not(.absolute) { transform: translateX(1px) !important; }
 
 /* BIXTOK LIVE: stage guests, pin, CTA, gate, mega gift */
-.bxl-tiles { position: absolute; z-index: 3; right: .75rem; top: 4.25rem; display: grid; gap: .4rem; }
-.bxl-tile { position: relative; width: 92px; height: 128px; border-radius: .8rem; overflow: hidden; background: var(--card); border: 1px solid color-mix(in oklab, var(--accent) 50%, transparent); }
+.bxl-tiles { position: absolute; z-index: 3; right: .75rem; top: 4.25rem; display: grid; gap: .3rem; max-height: calc(100% - 13rem); overflow-y: auto; }
+.bxl-tile { position: relative; width: 76px; height: 104px; border-radius: .8rem; overflow: hidden; background: var(--card); border: 1px solid color-mix(in oklab, var(--accent) 50%, transparent); }
 .bxl-tile video { width: 100%; height: 100%; object-fit: cover; }
 .bxl-tile small { position: absolute; left: .3rem; bottom: .2rem; font-size: .6rem; background: color-mix(in oklab, var(--background) 60%, transparent); padding: 0 .3rem; border-radius: .4rem; }
 .bxl-sub { position: absolute; z-index: 3; left: .75rem; right: 7rem; top: 3.9rem; display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
@@ -4363,7 +4363,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-top { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; font-size: .6rem; color: var(--accent); }
 .bxl-top em { font-style: normal; padding: .1rem .4rem; border-radius: 999px; background: color-mix(in oklab, var(--background) 60%, transparent); color: var(--foreground); }
 .bxl-pin { position: absolute; z-index: 3; left: .75rem; right: 4.5rem; top: 5.6rem; display: flex; gap: .4rem; align-items: flex-start; padding: .4rem .6rem; border-radius: .7rem; font-size: .72rem; background: color-mix(in oklab, var(--accent) 22%, var(--background)); border: 1px solid color-mix(in oklab, var(--accent) 50%, transparent); }
-.bxl-cta { position: absolute; z-index: 3; left: .75rem; bottom: calc(4.5rem + 40% + env(safe-area-inset-bottom)); display: flex; gap: .35rem; }
+.bxl-cta { position: absolute; z-index: 3; left: .75rem; top: 6.4rem; display: flex; flex-wrap: wrap; gap: .3rem; max-width: calc(100% - 8rem); }
 .bxl-cta a { font-size: .65rem; font-weight: 700; padding: .3rem .6rem; border-radius: 999px; background: var(--accent); color: var(--accent-foreground); }
 .bxl-cta a + a { background: color-mix(in oklab, var(--background) 65%, transparent); color: var(--foreground); }
 .bxl-dot { position: absolute; top: -2px; right: -2px; min-width: 16px; height: 16px; border-radius: 999px; font-size: .55rem; font-style: normal; display: grid; place-items: center; background: var(--destructive); color: var(--destructive-foreground); }
@@ -4383,3 +4383,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-stage-list button.ghost, .bxl-btn.ghost { background: var(--secondary); color: var(--secondary-foreground); }
 .bxl-pin-input { margin-top: .5rem; width: 100%; min-height: 72px; padding: .5rem; border-radius: .6rem; background: var(--input); color: var(--foreground); font-size: .85rem; }
 @media (prefers-reduced-motion: reduce) { .bxl-mega, .bxl-mega span { animation-duration: .01s; } }
+
+.bxl-recips { margin-top: .6rem; display: flex; flex-wrap: wrap; gap: .35rem; }
+.bxl-recips button { font-size: .72rem; padding: .3rem .7rem; border-radius: 999px; border: 1px solid var(--border); }
+.bxl-recips button.on { background: var(--accent); color: var(--accent-foreground); border-color: var(--accent); }
