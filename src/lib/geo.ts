@@ -32,3 +32,14 @@ export async function searchPlaces(q: string, near?: { lat: number; lng: number 
   if (!r.ok) throw new Error('Pencarian alamat sedang sibuk, coba lagi.');
   return ((await r.json()) as any[]).map(toPlace);
 }
+
+/** Road route via the public OSRM router; falls back to straight line × 1.3 when unavailable. */
+export async function roadRoute(a: { lat: number; lng: number }, b: { lat: number; lng: number }, straightKm: number): Promise<{ km: number; min: number | null; path: [number, number][] | null; road: boolean }> {
+  try {
+    const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=simplified&geometries=geojson`);
+    const j = await r.json();
+    const rt = j?.routes?.[0];
+    if (rt) return { km: rt.distance / 1000, min: Math.round(rt.duration / 60), path: rt.geometry.coordinates.map(([x, y]: [number, number]) => [y, x]), road: true };
+  } catch { /* fallback */ }
+  return { km: straightKm * 1.3, min: null, path: null, road: false };
+}
