@@ -153,7 +153,8 @@ function BixtradePage() {
         <p className="arb-ai-status"><i/> Neural scanner online · {profitable.length ? `${profitable.length} routes` : 'scanning'}</p>
         <span className="mt-2 flex items-center gap-2"><button type="button" onClick={toggleSound} aria-label={sound ? 'Mute execution sound' : 'Enable execution sound'} className="arb-icon-btn">{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</button><span className="arb-live"><i/> LIVE</span></span>
       </div>
-      <img src={robotImg} alt="BIXTrade AI robot" width={1024} height={1024} className="arb-ai-robot" data-hot={profitable.length ? '1' : '0'}/>
+      <div className="arb-ai-stage"><span className="arb-ai-ring"/><span className="arb-ai-ring r2"/>
+        <img src={robotImg} alt="BIXTrade AI robot" width={1024} height={1024} className="arb-ai-robot" data-hot={profitable.length ? '1' : '0'}/><span className="arb-ai-scan"/></div>
     </section>
     <section className="mt-3 grid grid-cols-4 gap-2">
       {([['Bot', capital.toFixed(0)], ['P/L', realized.toFixed(2)], ['Win', `${cfg.winRate}%`], ['Ping', `${rows.length ? Math.round(rows.reduce((s, r) => s + r.ms, 0) / rows.length) : '—'}ms`]] as const).map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
