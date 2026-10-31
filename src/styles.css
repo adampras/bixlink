@@ -4560,7 +4560,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bot3d-orbit.o2 { inset:20% 14%; border-style:dashed; animation-duration:10s; animation-direction:reverse; }
 .bot3d[data-mood="sleep"] .bot3d-orbit { animation-duration:18s; opacity:.4; }
 .bot3d[data-mood="trade"] .bot3d-orbit { animation-duration:1.6s; }
-.bot3d-rig { position:absolute; inset:0; transform-style:preserve-3d; transform:rotateX(var(--rx)) rotateY(var(--ry)); transition:transform .25s ease-out; }
+.bot3d-rig { position:absolute; inset:5% 0 -5% 0; transform-style:preserve-3d; transform:rotateX(var(--rx)) rotateY(var(--ry)); transition:transform .25s ease-out; }
 .bot3d-body { position:absolute; inset:0; transform-style:preserve-3d; animation:bot3d-hover 3.6s ease-in-out infinite; transition:transform .7s cubic-bezier(.3,1.4,.5,1); }
 .bot3d[data-mood="sleep"] .bot3d-body { animation:bot3d-hover 7s ease-in-out infinite; transform:translateY(8%) scale(.9); }
 .bot3d[data-mood="trade"] .bot3d-body { animation:bot3d-hover 1.1s ease-in-out infinite; }
