@@ -67,24 +67,24 @@ function BixtradePage() {
     setExecs((e.data ?? []) as Exec[]);
   }, [uid]);
   useEffect(() => {
-    if (!uid || !cfg?.enabled) return;
+    if (!uid || !(cfg?.enabled || isAdmin)) return;
     const go = () => Promise.all((['real'] as const).map(f => runCycle({ data: { funding: f } }).catch(() => null))).then(r => { if (r.some(x => x && x.added > 0)) void loadReqs(); });
     void go(); const t = setInterval(go, 5 * 60000); return () => clearInterval(t);
-  }, [uid, cfg?.enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [uid, cfg?.enabled, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { void loadReqs(); }, [loadReqs]);
   const runLive = useServerFn(runBixtradeLive);
   const [live, setLive] = useState<{ scan: LiveScan[]; reason: string; at: number } | null>(null);
   useEffect(() => {
-    if (!uid || !cfg?.enabled) return;
+    if (!uid || !(cfg?.enabled || isAdmin)) return;
     const go = () => runLive().then(r => { setLive({ scan: r.scan as LiveScan[], reason: r.reason, at: Date.now() }); if (r.added > 0) void loadReqs(); }).catch(() => {});
     void go(); const t = setInterval(go, 20000); return () => clearInterval(t);
-  }, [uid, cfg?.enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [uid, cfg?.enabled, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (!cfg?.enabled) return;
+    if (!(cfg?.enabled || isAdmin)) return;
     const load = () => getPrices().then(p => { if (p && Object.keys(p).length) setPrices(p); }).catch(() => {});
     load(); const a = setInterval(load, 8000); const b = setInterval(() => setTick(t => t + 1), 1500);
     return () => { clearInterval(a); clearInterval(b); };
-  }, [cfg?.enabled]);
+  }, [cfg?.enabled, isAdmin]);
 
   const rows = useMemo<Row[]>(() => BIXTRADE_PAIRS.map((pair, i) => {
     const p = prices[pair]; if (!p) return null;
