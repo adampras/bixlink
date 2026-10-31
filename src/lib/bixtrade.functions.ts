@@ -19,7 +19,7 @@ export const runBixtradeCycle = createServerFn({ method: 'POST' })
     const { data: last } = await supabase.from('bixtrade_executions').select('executed_at').eq('user_id', userId).eq('funding', data.funding).order('executed_at', { ascending: false }).limit(1).maybeSingle();
     const firstDeposit = rows.filter(r => r.settled_at && r.kind === 'deposit').map(r => r.settled_at as string).sort()[0];
     const now = new Date();
-    const fromMs = Math.max(new Date(last?.executed_at ?? firstDeposit).getTime(), now.getTime() - 86400000);
+    const fromMs = Math.max(new Date(last?.executed_at ?? firstDeposit ?? now.toISOString()).getTime(), now.getTime() - 86400000);
     if (now.getTime() - fromMs < BIXTRADE_CYCLE_MIN * 60000) return { added: 0, reason: 'wait' };
     let prices: Record<string, number> = {};
     try {

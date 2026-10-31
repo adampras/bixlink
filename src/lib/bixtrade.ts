@@ -83,7 +83,7 @@ export type ExecDraft = { pair: string; buy_venue: string; sell_venue: string; b
 export function planExecutions(s: BixtradeSettings, capital: number, prices: Record<string, number>, from: Date, to: Date, rnd: () => number = Math.random): ExecDraft[] {
   const mins = (to.getTime() - from.getTime()) / 60000;
   const count = Math.min(BIXTRADE_MAX_TRADES, Math.floor(mins / BIXTRADE_CYCLE_MIN));
-  const pairs = BIXTRADE_PAIRS.filter(p => prices[p] > 0);
+  const pairs: string[] = BIXTRADE_PAIRS.filter(p => (prices[p] ?? 0) > 0);
   if (capital <= 0 || count < 1 || !pairs.length) return [];
   const dailyPct = s.minDailyPct + rnd() * (s.maxDailyPct - s.minDailyPct);
   const windowNet = capital * dailyPct / 100 * Math.min(mins, 1440) / 1440;
@@ -91,15 +91,15 @@ export function planExecutions(s: BixtradeSettings, capital: number, prices: Rec
   const nWins = wins.filter(Boolean).length || 1;
   const step = (to.getTime() - from.getTime()) / count;
   return wins.map((win, i) => {
-    const pair = pairs[Math.floor(rnd() * pairs.length)];
+    const pair = pairs[Math.floor(rnd() * pairs.length)] ?? pairs[0]!;
     const v = Math.floor(rnd() * BIXTRADE_VENUES.length);
     const notional = +(capital * (0.15 + rnd() * 0.35)).toFixed(2);
     const fee = notional * BIXTRADE_TAKER_PCT / 100 * 2;
     const net = win ? windowNet / nWins : -fee * (0.05 + rnd() * 0.25);
     const gross = net + fee;
-    const buy = prices[pair];
+    const buy = prices[pair] ?? 1;
     const qty = notional / buy;
     const sell = buy * (1 + gross / notional);
-    return { pair: pair.replace('USDT', '/USDT'), buy_venue: BIXTRADE_VENUES[v], sell_venue: BIXTRADE_VENUES[(v + 1 + Math.floor(rnd() * 4)) % BIXTRADE_VENUES.length], buy_price: +buy.toFixed(8), sell_price: +sell.toFixed(8), qty: +qty.toFixed(8), notional_usd: notional, gross_usd: +gross.toFixed(4), fee_usd: +fee.toFixed(4), net_usd: +net.toFixed(4), latency_ms: 9 + Math.floor(rnd() * 30), executed_at: new Date(from.getTime() + step * (i + 1)).toISOString() };
+    return { pair: pair.replace('USDT', '/USDT'), buy_venue: BIXTRADE_VENUES[v] ?? 'Binance', sell_venue: BIXTRADE_VENUES[(v + 1 + Math.floor(rnd() * 4)) % BIXTRADE_VENUES.length] ?? 'Bybit', buy_price: +buy.toFixed(8), sell_price: +sell.toFixed(8), qty: +qty.toFixed(8), notional_usd: notional, gross_usd: +gross.toFixed(4), fee_usd: +fee.toFixed(4), net_usd: +net.toFixed(4), latency_ms: 9 + Math.floor(rnd() * 30), executed_at: new Date(from.getTime() + step * (i + 1)).toISOString() };
   });
 }
