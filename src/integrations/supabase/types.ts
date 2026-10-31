@@ -1612,6 +1612,7 @@ export type Database = {
       }
       bixtok_config: {
         Row: {
+          auto_follow_back: boolean
           enabled: boolean
           features: Json
           gifts_enabled: boolean
@@ -1624,10 +1625,16 @@ export type Database = {
           live_min_stake_usd: number
           max_links: number
           menus: Json
+          pk_bix_weight: number
+          pk_enabled: boolean
+          replay_enabled: boolean
+          showcase_enabled: boolean
+          soundboard: boolean
           stage_max: number
           updated_at: string
         }
         Insert: {
+          auto_follow_back?: boolean
           enabled?: boolean
           features?: Json
           gifts_enabled?: boolean
@@ -1640,10 +1647,16 @@ export type Database = {
           live_min_stake_usd?: number
           max_links?: number
           menus?: Json
+          pk_bix_weight?: number
+          pk_enabled?: boolean
+          replay_enabled?: boolean
+          showcase_enabled?: boolean
+          soundboard?: boolean
           stage_max?: number
           updated_at?: string
         }
         Update: {
+          auto_follow_back?: boolean
           enabled?: boolean
           features?: Json
           gifts_enabled?: boolean
@@ -1656,6 +1669,11 @@ export type Database = {
           live_min_stake_usd?: number
           max_links?: number
           menus?: Json
+          pk_bix_weight?: number
+          pk_enabled?: boolean
+          replay_enabled?: boolean
+          showcase_enabled?: boolean
+          soundboard?: boolean
           stage_max?: number
           updated_at?: string
         }
@@ -1789,6 +1807,62 @@ export type Database = {
           },
         ]
       }
+      bixtok_live_reminders: {
+        Row: {
+          created_at: string
+          schedule_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          schedule_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          schedule_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixtok_live_reminders_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "bixtok_live_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bixtok_live_schedules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          host_name: string
+          id: string
+          starts_at: string
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          host_name?: string
+          id?: string
+          starts_at: string
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          host_name?: string
+          id?: string
+          starts_at?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       bixtok_lives: {
         Row: {
           ended_at: string | null
@@ -1799,6 +1873,8 @@ export type Database = {
           likes: number
           muted: string[]
           pinned: string | null
+          pk: Json | null
+          showcase: string | null
           started_at: string
           status: string
           title: string
@@ -1812,6 +1888,8 @@ export type Database = {
           likes?: number
           muted?: string[]
           pinned?: string | null
+          pk?: Json | null
+          showcase?: string | null
           started_at?: string
           status?: string
           title: string
@@ -1825,9 +1903,32 @@ export type Database = {
           likes?: number
           muted?: string[]
           pinned?: string | null
+          pk?: Json | null
+          showcase?: string | null
           started_at?: string
           status?: string
           title?: string
+        }
+        Relationships: []
+      }
+      bixtok_official_hosts: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          display_name: string
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          display_name: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          display_name?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2789,8 +2890,10 @@ export type Database = {
         Returns: undefined
       }
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
+      bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_end_live: { Args: { p_id: string }; Returns: undefined }
+      bixtok_is_official: { Args: { p_uid: string }; Returns: boolean }
       bixtok_like: { Args: { p_video: string }; Returns: undefined }
       bixtok_live_like: {
         Args: { p_live: string; p_n: number }
@@ -2804,6 +2907,10 @@ export type Database = {
         Args: { p_live: string; p_text: string }
         Returns: undefined
       }
+      bixtok_live_showcase: {
+        Args: { p_key: string; p_live: string }
+        Returns: undefined
+      }
       bixtok_live_top: {
         Args: { p_live: string }
         Returns: {
@@ -2813,6 +2920,23 @@ export type Database = {
         }[]
       }
       bixtok_my_stake_usd: { Args: never; Returns: number }
+      bixtok_official_add: {
+        Args: { p_code: string; p_name: string }
+        Returns: string
+      }
+      bixtok_official_remove: { Args: { p_user: string }; Returns: undefined }
+      bixtok_pk_end: { Args: { p_live: string }; Returns: undefined }
+      bixtok_pk_score: {
+        Args: { p_live: string }
+        Returns: {
+          a_score: number
+          b_score: number
+        }[]
+      }
+      bixtok_pk_start: {
+        Args: { p_a: string; p_b: string; p_live: string; p_minutes: number }
+        Returns: Json
+      }
       bixtok_publish: {
         Args: {
           p_allow_gifts: boolean
@@ -2836,6 +2960,17 @@ export type Database = {
           p_urls: string[]
         }
         Returns: number
+      }
+      bixtok_publish_replay: {
+        Args: { p_live: string; p_part: number; p_path: string }
+        Returns: string
+      }
+      bixtok_reminder_counts: {
+        Args: never
+        Returns: {
+          n: number
+          schedule_id: string
+        }[]
       }
       bixtok_send_gift: {
         Args: { p_gift: string; p_live: string; p_video: string }
