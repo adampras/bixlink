@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { useLiveRtc } from '@/lib/bixtok-rtc';
 import { useReplayRecorder } from '@/lib/bixtok-replay';
+import { MEDIA_HELP, openLiveMedia, type MediaIssue } from '@/lib/bixtok-media';
 
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
 type Msg = { id: string; name: string; body: string; kind: string };
@@ -452,7 +453,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <Volume2 size={34}/><b>Tap to join with sound</b><small>@{live.host_name} · {live.title}</small>
     </button>}
     {note && <div className="bixtok-toast" role="status">{note}</div>}
-    {host && !ended && <p className="bixtok-hint">You are broadcasting camera and voice to {Math.max(0, viewers - 1)} viewer{viewers - 1 === 1 ? '' : 's'}. Tap a chat message to moderate it.</p>}
+    {host && !ended && <p className="bixtok-hint">{!local ? 'Camera and microphone are off — viewers cannot see or hear you yet.' : `You are broadcasting ${local.getVideoTracks().length ? 'camera' : ''}${local.getVideoTracks().length && local.getAudioTracks().length ? ' and ' : ''}${local.getAudioTracks().length ? 'voice' : ''} to ${Math.max(0, viewers - 1)} viewer${viewers - 1 === 1 ? '' : 's'}${mode === 'lk' ? '' : ' (backup connection)'}. Tap a chat message to moderate it.`}</p>}
   </div>;
 }
 
