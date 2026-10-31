@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
@@ -126,7 +126,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const replay = useReplayRecorder({ stream: host ? local : null, liveId: live.id, me, on: host && recording && cfg.replay_enabled !== false, onNote: flash });
   useEffect(() => { if (!pk) return undefined; const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, [pk]);
   /** Portrait camera fills the phone; a landscape camera is shown whole instead of cropped. */
-  const onMeta = (e: React.SyntheticEvent<HTMLVideoElement>) => { const v = e.currentTarget; if (v.videoWidth) setFit(v.videoHeight >= v.videoWidth ? 'cover' : 'contain'); };
+  const onMeta = (e: SyntheticEvent<HTMLVideoElement>) => { const v = e.currentTarget; if (v.videoWidth) setFit(v.videoHeight >= v.videoWidth ? 'cover' : 'contain'); };
 
   const spawn = (n = 1) => setFloaters(f => [...f.slice(-30), ...Array.from({ length: n }, () => ({
     id: Math.random(), x: 10 + Math.random() * 30, color: COLORS[Math.floor(Math.random() * COLORS.length)]!, drift: Math.random() * 60 - 30,
