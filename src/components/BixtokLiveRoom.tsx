@@ -122,6 +122,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [top, setTop] = useState<Top[]>([]); const [modMsg, setModMsg] = useState<Msg | null>(null); const [note, setNote] = useState('');
   const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
   const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | null>(null); const [recording, setRecording] = useState(false);
+  const [saver, setSaver] = useState(false);
   const [burst, setBurst] = useState<{ id: number; e: string } | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const chan = useRef<ReturnType<typeof supabase.channel> | null>(null); const pending = useRef(0);
@@ -221,7 +222,15 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   useEffect(() => {
     if (!publishing) { stream.current?.getTracks().forEach(t => t.stop()); stream.current = null; setLocal(null); return undefined; }
     let cancelled = false;
-    navigator.mediaDevices?.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, resizeMode: 'none' } as MediaTrackConstraints, audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
+    const audio = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+    // Phones reject some constraints; step down until a camera opens.
+    const tries: MediaStreamConstraints[] = [
+      { video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } }, audio },
+      { video: { facingMode: facing }, audio },
+      { video: true, audio },
+    ];
+    const open = async () => { let err: unknown; for (const c of tries) { try { return await navigator.mediaDevices.getUserMedia(c); } catch (e) { err = e; } } throw err; };
+    open()
       .then(s => {
         if (cancelled) { s.getTracks().forEach(t => t.stop()); return; }
         const old = stream.current; stream.current = s;
@@ -330,11 +339,9 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
     <div className="bxl-stage" onClick={tap}>
       {host ? <>
-          <Backdrop stream={local} mirror={facing === 'user'}/>
           <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
         </>
         : <>
-          <Backdrop stream={main?.stream ?? null}/>
           <video ref={view} autoPlay playsInline muted className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${zoom})` }}/>
           {(!main || state !== 'live') && <div className="bixtok-room-bg"><Radio size={42}/><p>@{live.host_name}</p>
             <small>{ended ? 'LIVE ended' : state === 'failed' ? 'Video could not connect on this network — chat, likes and gifts still work.' : 'Connecting to the host camera…'}</small></div>}
@@ -409,6 +416,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         await sendChat(body); }}>
         <div className="bixtok-input"><MessageCircle size={16}/><input value={text} onChange={e => setText(e.target.value)} placeholder="Say something…" maxLength={200}/><button aria-label="Send"><Send size={16}/></button></div>
       </form>}
+      {!host && <button className="bxl-act" aria-label={saver ? 'Data saver on' : 'Data saver off'} onClick={() => setSaver(v => !v)} style={{ fontSize: '.6rem', fontWeight: 800 }}>{saver ? 'SD' : 'HD'}</button>}
       {!host && <button className="bxl-act" aria-label={sound ? 'Mute room sounds' : 'Unmute room sounds'} onClick={() => { setSound(s => !s); if (!sound) void unlockAudio(); }}>{sound ? <Volume2 size={18}/> : <VolumeX size={18}/>}</button>}
       <button className="bxl-act" aria-label="Share" onClick={() => setShare(true)}><Share2 size={18}/></button>
       {(!host || (cfg.host_gifts !== false && onStage.length > 0)) && <button className="bixtok-giftbtn" aria-label="Send gift" onClick={() => onGift([...(host ? [] : [{ id: live.host_id, name: live.host_name }]), ...onStage.filter(s => s.user_id !== me).map(s => ({ id: s.user_id, name: s.name }))])}><Gift/></button>}
