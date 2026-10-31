@@ -43,7 +43,7 @@ function BixtokPage() {
       supabase.from('bixtok_follows').select('follower_id,followee_id').or(`follower_id.eq.${user!.id},followee_id.eq.${user!.id}`),
       supabase.rpc('bixtok_am_official'),
       supabase.from('bixtok_live_schedules').select('id,title,host_name,starts_at').eq('status', 'scheduled').gte('starts_at', new Date(Date.now() - 3 * 3600_000).toISOString()).order('starts_at').limit(10),
-      supabase.from('bixtok_live_reminders').select('schedule_id').eq('user_id', user!.id),
+      supabase.from('bixtok_live_reminders').select('schedule_id, bixtok_live_schedules(starts_at)').eq('user_id', user!.id),
       supabase.rpc('bixtok_reminder_counts'),
     ]);
     if (c.error) throw c.error;
@@ -61,9 +61,10 @@ function BixtokPage() {
     const following = new Set(fr.filter(x => x.follower_id === user!.id).map(x => x.followee_id));
     const followers = new Set(fr.filter(x => x.followee_id === user!.id).map(x => x.follower_id));
     const lives = ((l.data ?? []) as Live[]).sort((a, b) => Number(b.kind === 'official') - Number(a.kind === 'official'));
-    const mineR = new Set(((rm.data ?? []) as { schedule_id: string }[]).map(r => r.schedule_id));
+    const remRows = (rm.data ?? []) as { schedule_id: string; bixtok_live_schedules: { starts_at: string } | null }[];
+    const mineR = new Set(remRows.map(r => r.schedule_id));
     const counts = new Map(((rc.data ?? []) as { schedule_id: string; n: number }[]).map(r => [r.schedule_id, Number(r.n)]));
-    const remindedAny = mineR.size > 0;
+    const remindedAny = remRows.some(r => r.bixtok_live_schedules && Math.abs(new Date(r.bixtok_live_schedules.starts_at).getTime() - Date.now()) < 6 * 3600_000);
     const schedules: Sched[] = ((sc.data ?? []) as Omit<Sched, 'reminded' | 'count'>[]).map(x => ({ ...x, reminded: mineR.has(x.id), count: counts.get(x.id) ?? 0 }));
     return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives, stake: Number(s.data ?? 0), following, followers, owner1: o.data === true, schedules, remindedAny };
   } });
