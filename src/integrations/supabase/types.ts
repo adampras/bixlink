@@ -2075,6 +2075,8 @@ export type Database = {
           kind: string
           note: string | null
           reviewed_at: string | null
+          settled_at: string | null
+          settled_usd: number | null
           status: string
           strategy: string
           user_id: string
@@ -2087,6 +2089,8 @@ export type Database = {
           kind: string
           note?: string | null
           reviewed_at?: string | null
+          settled_at?: string | null
+          settled_usd?: number | null
           status?: string
           strategy?: string
           user_id?: string
@@ -2099,6 +2103,8 @@ export type Database = {
           kind?: string
           note?: string | null
           reviewed_at?: string | null
+          settled_at?: string | null
+          settled_usd?: number | null
           status?: string
           strategy?: string
           user_id?: string
@@ -2575,6 +2581,7 @@ export type Database = {
           usdt_balance: number
         }[]
       }
+      bix_bixtrade_usdt_delta: { Args: { p_user: string }; Returns: number }
       bix_booster_withdraw_config: { Args: never; Returns: Json }
       bix_buyback_request: {
         Args: { p_amount: number; p_contact: string; p_method: string }
@@ -3026,6 +3033,10 @@ export type Database = {
       bixtok_stage_request: { Args: { p_live: string }; Returns: string }
       bixtok_start_live: { Args: { p_title: string }; Returns: string }
       bixtok_start_official_live: { Args: { p_title: string }; Returns: string }
+      bixtrade_review: {
+        Args: { p_id: string; p_note?: string; p_status: string }
+        Returns: Json
+      }
       ensure_bix_profile: { Args: never; Returns: undefined }
       is_bix_admin: { Args: never; Returns: boolean }
       request_bix_deposit: {

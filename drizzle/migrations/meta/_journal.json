@@ -834,6 +834,13 @@
       "when": 1793444637513,
       "tag": "0118_bixtrade_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 119,
+      "version": "7",
+      "when": 1793445316771,
+      "tag": "0119_bixtrade_settlement",
+      "breakpoints": true
     }
   ]
 }

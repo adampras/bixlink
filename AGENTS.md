@@ -49,10 +49,11 @@
 - Serve the English company overview as a versioned, dated PDF with page-image previews; changes to live financial settings require regeneration, not changes to the dated video.
 - Owner navigation uses one searchable category selector; shared staking controls separate daily presets from individual edits to avoid duplicate forms across consoles.
 - Shell/dialogs own phone bounds; consortium uses a centered portal stage to avoid legacy transforms. Package cards use inline durations and full-width actions.
-- All loan dialog states share a Radix body portal with isolated surface tokens; this avoids shell transforms and transparent theme overrides while retaining focus trapping.
+- Loan dialogs share a Radix body portal with isolated surface tokens — avoids shell transforms/transparent themes, keeps focus trap.
 - Size heroes via landing-hero-compact/compact-market-hero; preserve catalogs. Mask vault art behind the transparent coin to blend themes without new assets.
-- Keep app-wide touch feedback and HOME return-to-top in one root-mounted presentation component; store its switch in existing owner-authorized readiness settings to avoid duplicate controls or new permissions.
+- App-wide touch feedback and HOME return-to-top live in one root-mounted component, switched via existing readiness settings — no duplicate controls/permissions.
 - Growth features share an authoritative singleton control and cycle-safe database scope; exclude delegated-owner ancestry on reads and withdrawal guards so client presentation cannot bypass safety. Flash events never change contract terms; public activity contains only masked verified deposit records, never inferred payouts.
 - Share wallet staking notifications from authenticated stake records and status-specific IDs; receipts read back the RPC result without inferring completion or settlement.
 - Select the manifest from the root matched location during SSR; keep Sovereign Wallet manifest identity and scope stable so installation launches its existing in-place screens.
 - BIXTOK LIVE: LiveKit VP8 (adaptiveStream off: video is bound manually) with P2P fallback in src/lib/bixtok-rtc.ts; chat broadcast+db+polling de-duped by id. Official hosts via bixtok_is_official (Owner 1 + bixtok_official_hosts). PK score is display-only from gift rows; replays are host-recorded parts under the media limit.
+- BIXTrade requests settle only via the bixtrade_review RPC (server checks; settled_usd feeds bix_wallet_balance) — atomic, owner-reviewed; profit never settles.

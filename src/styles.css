@@ -4473,3 +4473,15 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .arb-strat.is-on { border-color:var(--chart-3); box-shadow:0 0 0 1px var(--chart-3) inset; }
 .arb-badge { font-size:10px; text-transform:uppercase; border-radius:999px; padding:2px 8px; border:1px solid var(--border); }
 .arb-badge.is-approved { color:var(--chart-2); } .arb-badge.is-rejected { color:var(--destructive); } .arb-badge.is-pending { color:var(--chart-3); }
+.arb-icon-btn { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:999px; border:1px solid var(--border); color:var(--chart-3); background:var(--card); }
+.arb-edge { stroke:var(--border); stroke-width:.6; }
+.arb-route { stroke:var(--chart-2); stroke-width:2.2; stroke-dasharray:6 5; animation:arb-dash 1s linear infinite; filter:drop-shadow(0 0 4px var(--chart-2)); }
+@keyframes arb-dash { to { stroke-dashoffset:-22; } }
+.arb-node { fill:var(--card); stroke:var(--chart-3); stroke-width:1.5; } .arb-node.is-on { fill:var(--chart-2); stroke:var(--chart-2); }
+.arb-node-label { font-size:9px; fill:var(--muted-foreground); font-weight:600; }
+.arb-bars { display:grid; grid-template-columns:repeat(14,1fr); gap:4px; height:120px; align-items:end; }
+.arb-bars > div { display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%; gap:3px; }
+.arb-bars i { width:100%; border-radius:4px 4px 0 0; background:linear-gradient(to top, color-mix(in oklab, var(--chart-3) 45%, transparent), var(--chart-2)); }
+.arb-bars small { font-size:8px; color:var(--muted-foreground); }
+.arb-share-card { white-space:pre-wrap; font-family:ui-monospace,monospace; font-size:11px; line-height:1.6; padding:12px; border-radius:12px; border:1px solid color-mix(in oklab, var(--chart-3) 40%, var(--border)); background:color-mix(in oklab, var(--chart-3) 8%, var(--card)); }
+@media (prefers-reduced-motion: reduce) { .arb-route { animation:none; } }

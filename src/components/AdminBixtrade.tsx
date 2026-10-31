@@ -29,8 +29,9 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
     catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal menyimpan BIXTrade.'); } finally { setBusy(false); }
   };
   const decide = async (id: string, status: 'approved' | 'rejected') => {
-    const { error } = await supabase.from('bixtrade_requests').update({ status, reviewed_at: new Date().toISOString() }).eq('id', id).eq('status', 'pending');
-    onMessage(error ? error.message : `Permintaan ${status === 'approved' ? 'disetujui' : 'ditolak'}.`); void load();
+    const { data, error } = await supabase.rpc('bixtrade_review', { p_id: id, p_status: status });
+    const d = data as { kind?: string; settled_usd?: number } | null;
+    onMessage(error ? error.message : status === 'rejected' ? 'Permintaan ditolak.' : d?.kind === 'deposit' ? `Disetujui · ${Number(d.settled_usd).toFixed(2)} USDT dipindah dari wallet utama ke bot.` : `Disetujui · ${Number(d?.settled_usd).toFixed(2)} USDT (bersih) dikembalikan ke wallet utama.`); void load();
   };
   const sw = (k: 'depositOpen' | 'withdrawOpen', label: string) => <label className="flex items-center justify-between gap-3"><b>{label}</b><Switch checked={s[k]} disabled={busy} onCheckedChange={v => submit({ ...s, [k]: v })}/></label>;
   return <AdminFold title="BIXTrade Bot Arbitrase" tone="gold" badge={s.enabled ? 'AKTIF' : 'UNDER RECONSTRUCTION'}>
@@ -50,7 +51,7 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
         <label>Masa kunci (hari)<input className="form-input mt-1" type="number" min={0} max={365} value={s.lockDays} onChange={num('lockDays')}/></label>
         <label className="sm:col-span-2">Pesan saat ditutup<input className="form-input mt-1" maxLength={200} value={s.notice ?? ''} onChange={e => setS(v => ({ ...v, notice: e.target.value }))}/></label>
       </div>
-      <p className="text-muted-foreground">Angka profit hanya proyeksi tampilan; tidak menambah saldo member.</p>
+      <p className="text-muted-foreground">Setujui deposit = USDT wallet utama member dipindah ke modal bot (dicek saldo cukup). Setujui withdraw = jumlah bersih setelah biaya kembali ke wallet utama (dicek modal & masa kunci). Profit hanya proyeksi, tidak pernah ditambahkan.</p>
       <Button disabled={busy} onClick={() => submit()}>{busy ? 'Menyimpan…' : 'Simpan pengaturan'}</Button>
 
       <div className="border-t border-border pt-3">

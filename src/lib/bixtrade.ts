@@ -56,3 +56,18 @@ export function checkBixtradeRequest(s: BixtradeSettings, kind: 'deposit' | 'wit
 }
 
 export const withdrawNet = (s: BixtradeSettings, amount: number) => +(amount * (1 - s.withdrawFeePct / 100)).toFixed(2);
+
+type CapRow = { kind: string; amount_usd: number | string; settled_at?: string | null };
+/** Bot capital = settled deposits − settled withdrawals (gross). Unsettled/legacy rows never count. */
+export const botCapital = (rows: CapRow[]) => +rows.filter(r => r.settled_at).reduce((s, r) => s + (r.kind === 'deposit' ? 1 : -1) * Number(r.amount_usd), 0).toFixed(2);
+
+/** Display-only daily performance inside the owner's range, deterministic per calendar day. */
+export function dailySeries(s: BixtradeSettings, n = 14, end = new Date()) {
+  return Array.from({ length: n }, (_, i) => {
+    const d = new Date(end); d.setUTCDate(d.getUTCDate() - (n - 1 - i));
+    const key = d.toISOString().slice(0, 10);
+    let h = 2166136261; for (const c of key) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+    const f = ((h >>> 0) % 1000) / 1000;
+    return { date: key, pct: +(s.minDailyPct + f * (s.maxDailyPct - s.minDailyPct)).toFixed(3) };
+  });
+}
