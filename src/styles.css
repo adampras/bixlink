@@ -4436,3 +4436,26 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(28px) brightness(.55) saturate(1.1); transform: scale(1.15); pointer-events: none; }
 .bxl-stage { overflow: hidden; }
 .bxl-stage .bixtok-video { transition: transform .15s ease-out; }
+
+/* SETTINGS — luxury accordion polish */
+.settings-fold > summary { display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; list-style:none; }
+.settings-fold > summary::-webkit-details-marker { display:none; }
+.settings-fold-arrow { width:16px; flex-shrink:0; color:var(--muted-foreground); transition:transform 220ms var(--ease); }
+.settings-fold[open] .settings-fold-arrow { transform:rotate(90deg); color:var(--primary); }
+.settings-fold[open] > summary { margin-bottom:4px; }
+.settings-heading p .flag-symbol { display:inline-block; vertical-align:-2px; margin-right:4px; }
+.settings-language { padding:0 12px; }
+.settings-language small { display:block; color:inherit; font-weight:600; }
+.settings-section { border-color:color-mix(in oklab, var(--foreground) 8%, transparent); background:linear-gradient(160deg, color-mix(in oklab, var(--foreground) 4%, transparent), transparent 60%); }
+@media (max-width:700px) {
+  .settings-rail { padding:6px; border-radius:999px; }
+  .settings-rail nav { display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; }
+  .settings-rail nav::-webkit-scrollbar { display:none; }
+  .settings-rail nav a, .settings-rail nav a.active { flex:0 0 auto; border-radius:999px; padding:8px 12px; font-size:10px; white-space:nowrap; background:transparent; }
+  .settings-rail nav a:hover { background:color-mix(in oklab, var(--primary) 14%, transparent); }
+  .settings-section, .settings-section:first-child, .settings-section:last-child { padding:14px 16px; border-radius:16px; }
+  .settings-language-grid { margin-top:12px; }
+}
+.settings-page .settings-language { flex-direction:row; justify-content:flex-start; gap:10px; height:46px; }
+.settings-page .settings-language > svg { margin-left:auto; }
+.settings-heading p .flag-symbol { width:16px; height:11px; font-size:11px; transform:none; }
