@@ -94,3 +94,16 @@ export const runBixtradeLive = createServerFn({ method: 'POST' })
     if (error) { console.error(error); throw new Error('Could not record live executions'); }
     return { scan, added: plan.length, reason: 'ok' };
   });
+
+/** Public spot prices for the scanner, fetched server-side so mobile networks that block exchange domains still load. */
+export const getBixtradePrices = createServerFn({ method: 'GET' }).handler(async () => {
+  const out: Record<string, number> = {};
+  const list = await j(`https://api.binance.com/api/v3/ticker/price?symbols=${encodeURIComponent(JSON.stringify(BIXTRADE_PAIRS))}`);
+  if (Array.isArray(list)) for (const x of list) { const n = num(x?.price); if (n) out[x.symbol] = n; }
+  await Promise.all(BIXTRADE_PAIRS.filter(s => !out[s]).map(async s => {
+    const d = await j(`https://www.okx.com/api/v5/market/ticker?instId=${s.replace('USDT', '')}-USDT`);
+    const n = num(d?.data?.[0]?.last) || num((await j(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${s}`))?.result?.list?.[0]?.lastPrice);
+    if (n) out[s] = n;
+  }));
+  return out;
+});
