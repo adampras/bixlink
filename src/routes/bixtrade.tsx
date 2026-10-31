@@ -97,6 +97,7 @@ function BixtradePage() {
   const fundReqs = reqs.filter(r => (r.funding ?? 'real') === funding);
   const capital = botCapital(fundReqs);
   const fundExecs = execs.filter(x => x.funding === funding);
+  const logExecs = fundExecs.filter(x => logFilter === 'all' || (logFilter === 'win' ? Number(x.net_usd) > 0 : Number(x.net_usd) <= 0));
   const realized = fundExecs.reduce((a, x) => a + Number(x.net_usd), 0);
   const profitable = rows.filter(r => r.net > 0);
   useEffect(() => {
@@ -255,6 +256,14 @@ function BixtradePage() {
 
     </>}
 
+    {receipt && <div className="zoom-center" role="dialog" aria-modal="true" aria-label="Execution receipt" onClick={() => setReceipt(null)}><div className="zoom-panel arb-receipt" onClick={e => e.stopPropagation()}>
+      <p className="shop-eyebrow">EXECUTION RECEIPT</p>
+      <h3 className="font-display text-xl font-bold">{receipt.pair}</h3>
+      <p className="font-mono text-[10px] text-muted-foreground">{receipt.ref}</p>
+      <dl>{([['Leg 1 · Buy', `${receipt.buy_venue} @ ${Number(receipt.buy_price).toFixed(4)}`], ['Leg 2 · Sell', `${receipt.sell_venue} @ ${Number(receipt.sell_price).toFixed(4)}`], ['Quantity', Number(receipt.qty).toFixed(6)], ['Size', `${Number(receipt.notional_usd).toFixed(2)} USDT`], ['Taker fees (2 legs)', `${Number(receipt.fee_usd).toFixed(4)} USDT`], ['Net result', `${Number(receipt.net_usd).toFixed(4)} USDT`], ['Latency', `${receipt.latency_ms} ms`], ['Time', new Date(receipt.executed_at).toLocaleString()], ['Funding', receipt.funding === 'virtual' ? 'Virtual USDT (paper)' : 'Real USDT record'], ['Price source', receipt.source === 'live_quotes' ? 'Live exchange quotes' : 'Engine record']] as const).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+      <p className="mt-2 text-[10px] text-muted-foreground">Recorded performance entry; no external exchange order and no automatic wallet credit.</p>
+      <Button className="mt-3 w-full" onClick={() => setReceipt(null)}>Close</Button>
+    </div></div>}
     <p className="mt-6 text-[11px] leading-5 text-muted-foreground">Risk disclosure: scanner routes and spreads are a display simulation built on live reference prices; BIXTrade does not place orders on external exchanges. Projection ranges are set by the owner, are not guaranteed, and nothing is added to your balance automatically — all deposits and withdrawals are owner-reviewed internal records.</p>
   </main></BixShell>;
 }

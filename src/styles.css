@@ -4514,3 +4514,22 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .arb-tabs button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 0; border-radius:9px; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-foreground); }
 .arb-tabs button.is-on { color:var(--primary-foreground); background:linear-gradient(135deg, var(--chart-3), var(--primary)); box-shadow:0 0 14px color-mix(in oklab, var(--chart-3) 45%, transparent); }
 @media (prefers-reduced-motion: reduce) { .arb-ai-robot, .arb-ai-status i { animation:none; } }
+
+/* BIXTrade luxury polish */
+.arb-switch { display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; border-radius:14px; border:1px solid color-mix(in oklab, var(--chart-3) 30%, var(--border)); background:color-mix(in oklab, var(--card) 85%, transparent); }
+.arb-switch button { display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; padding:8px 4px; border-radius:10px; font-size:12px; font-weight:700; color:var(--muted-foreground); transition:all .2s; }
+.arb-switch button small { width:100%; font-size:9px; letter-spacing:.12em; text-transform:uppercase; font-weight:500; text-align:center; }
+.arb-switch button i { width:7px; height:7px; border-radius:50%; background:var(--border); }
+.arb-switch button.is-on { color:var(--foreground); background:linear-gradient(160deg, color-mix(in oklab, var(--chart-3) 22%, var(--card)), var(--card)); box-shadow:inset 0 1px 0 color-mix(in oklab, var(--chart-3) 40%, transparent), 0 0 14px color-mix(in oklab, var(--chart-3) 25%, transparent); }
+.arb-switch button.is-on i { background:var(--chart-2); box-shadow:0 0 8px var(--chart-2); }
+.arb-chips { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; }
+.arb-chips button { flex:none; padding:5px 12px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.06em; border:1px solid color-mix(in oklab, var(--chart-3) 30%, var(--border)); background:var(--card); color:var(--muted-foreground); transition:all .2s; }
+.arb-chips button:active { transform:scale(.96); }
+.arb-chips button.is-on { color:var(--primary-foreground); border-color:transparent; background:linear-gradient(135deg, var(--chart-3), var(--primary)); }
+.arb-card { background:linear-gradient(165deg, color-mix(in oklab, var(--card) 94%, var(--chart-3)), var(--card)); box-shadow:inset 0 1px 0 color-mix(in oklab, var(--chart-3) 18%, transparent); }
+.arb-log-row { text-align:left; font-size:11px; padding:8px 10px; border-radius:10px; border:1px solid var(--border); background:color-mix(in oklab, var(--card) 90%, transparent); transition:border-color .2s; }
+.arb-log-row:hover, .arb-log-row:focus-visible { border-color:var(--chart-3); }
+.arb-receipt { padding:20px; }
+.arb-receipt dl { margin-top:12px; display:grid; gap:6px; font-size:12px; }
+.arb-receipt dl div { display:flex; justify-content:space-between; gap:12px; border-bottom:1px dashed var(--border); padding-bottom:5px; }
+.arb-receipt dt { color:var(--muted-foreground); } .arb-receipt dd { font-family:ui-monospace,monospace; text-align:right; }
