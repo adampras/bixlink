@@ -24,7 +24,7 @@
 - Keep the 1,000,000 BIX reserve in an owner-only singleton vault initialized idempotently; never expose it in member balances or allow repeated generation.
 - Gate optional readiness in app settings; enforce identity and announcement access with RLS; always show essential risk disclosures.
 - Hydrate per-request QueryClient through the router for matching SSR/browser market snapshots.
-- Deposits use one on-chain matcher (polling and cron), chain amounts and one credit per TxID; transfer reports stay pending for review.
+- Deposits: one on-chain matcher (polling/cron), one credit per TxID; manual owner recovery re-verifies on-chain and credits the chain amount, Owner 2 scoped to its wallets/downline.
 - Share HOME/landing content and narratives (bundled fallbacks) through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
 - Owner 2 uses scoped RPCs (packages, Market, Referral, WLT-01), each gated by reviewer_permissions in DB and server; clones excluded; everything else stays Owner 1.
 - Share category/roadmap carousels and CDN videos; contain media; owner times splash; manifest icons uncached.
