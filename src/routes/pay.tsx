@@ -57,7 +57,7 @@ function Scanner({ onResult, onClose }: { onResult: (v: string) => void; onClose
 function PayPage() {
   const { user, ready } = useMember();
   const { data: cfg } = usePublicConfig();
-  const enabled = cfg?.bixPay.enabled ?? false;
+  const enabled = (cfg?.bixPay.enabled ?? false) || cfg?.isAdmin === true;
   const fetchPay = useServerFn(getBixPay); const lookup = useServerFn(lookupBixPay); const send = useServerFn(sendBixPay);
   const qc = useQueryClient();
   const { data } = useQuery({ queryKey: ['bix-pay', user?.id], queryFn: () => fetchPay(), enabled: !!user });
