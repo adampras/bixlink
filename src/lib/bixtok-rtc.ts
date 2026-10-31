@@ -148,6 +148,8 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
   const [feeds, setFeeds] = useState<RemoteFeed[]>([]);
   const [state, setState] = useState<RtcState>(host ? 'live' : 'waiting');
   const [audioBlocked, setAudioBlocked] = useState(false);
+  const [voiceOnly, setVoiceOnly] = useState(false);
+  const soundOn = useRef(true);
   const roomRef = useRef<import('livekit-client').Room | null>(null);
   const streamRef = useRef(stream); streamRef.current = stream;
   const published = useRef(new Map<string, import('livekit-client').LocalTrackPublication>());
@@ -178,18 +180,20 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
         room = new lk.Room({ adaptiveStream: false, dynacast: true });
         roomRef.current = room;
         const rebuild = () => {
-          const out: RemoteFeed[] = [];
+          const out: RemoteFeed[] = []; let heard = false;
           room!.remoteParticipants.forEach(p => {
             const vids: MediaStreamTrack[] = [];
             p.trackPublications.forEach(pub => { if (pub.track && pub.kind === lk.Track.Kind.Video) vids.push(pub.track.mediaStreamTrack); });
             if (vids.length) out.push({ id: p.identity, stream: new MediaStream(vids) });
+            p.trackPublications.forEach(pub => { if (pub.track && pub.kind === lk.Track.Kind.Audio) heard = true; });
           });
           out.sort((a, b) => (a.id === hostId ? -1 : b.id === hostId ? 1 : 0));
           setFeeds(out);
-          if (!host) setState(out.length ? 'live' : 'waiting');
+          if (!host) setState(out.length || heard ? 'live' : 'waiting');
+          setVoiceOnly(!out.length && heard);
         };
         room.on(lk.RoomEvent.TrackSubscribed, (track, pub) => {
-          if (track.kind === lk.Track.Kind.Audio) { const el = track.attach(); el.setAttribute('playsinline', ''); box.appendChild(el); }
+          if (track.kind === lk.Track.Kind.Audio) { const el = track.attach(); el.setAttribute('playsinline', ''); el.muted = !soundOn.current; box.appendChild(el); if (room!.canPlaybackAudio) void el.play().catch(() => setAudioBlocked(true)); }
           else pub.setVideoQuality(saverRef.current ? lk.VideoQuality.LOW : lk.VideoQuality.HIGH); // data saver picks the light layer
           rebuild();
         }).on(lk.RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach(el => el.remove()); rebuild(); })
@@ -221,7 +225,7 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
     audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; void a.play().catch(() => {}); });
     if (roomRef.current) setAudioBlocked(!roomRef.current.canPlaybackAudio);
   };
-  const setVolume = (on: boolean) => { audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = !on; }); };
+  const setVolume = (on: boolean) => { soundOn.current = on; audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = !on; }); };
 
   const p2p = useP2pRtc({ liveId, me, host, stream, enabled: mode === 'p2p' });
   useEffect(() => {
@@ -230,6 +234,6 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
       if (pub.kind === lk.Track.Kind.Video && 'setVideoQuality' in pub) (pub as import('livekit-client').RemoteTrackPublication).setVideoQuality(saver ? lk.VideoQuality.LOW : lk.VideoQuality.HIGH);
     })));
   }, [saver, host, feeds.length]);
-  if (mode === 'p2p') return { mode, feeds: p2p.remote ? [{ id: hostId, stream: p2p.remote }] : [], state: p2p.state, audioBlocked: false, unlockAudio, setVolume };
-  return { mode, feeds, state, audioBlocked, unlockAudio, setVolume };
+  if (mode === 'p2p') return { mode, feeds: p2p.remote ? [{ id: hostId, stream: p2p.remote }] : [], state: p2p.state, audioBlocked: false, voiceOnly: false, unlockAudio, setVolume };
+  return { mode, feeds, state, audioBlocked, voiceOnly, unlockAudio, setVolume };
 }
