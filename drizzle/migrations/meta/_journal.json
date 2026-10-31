@@ -848,6 +848,13 @@
       "when": 1793446323027,
       "tag": "0120_bixtrade_executions_virtual",
       "breakpoints": true
+    },
+    {
+      "idx": 121,
+      "version": "7",
+      "when": 1793447404554,
+      "tag": "0121_bixtrade_admin_virtual_instant",
+      "breakpoints": true
     }
   ]
 }

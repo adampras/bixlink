@@ -3096,6 +3096,10 @@ export type Database = {
       bixtok_stage_request: { Args: { p_live: string }; Returns: string }
       bixtok_start_live: { Args: { p_title: string }; Returns: string }
       bixtok_start_official_live: { Args: { p_title: string }; Returns: string }
+      bixtrade_admin_virtual_deposit: {
+        Args: { p_amount: number; p_strategy?: string }
+        Returns: Json
+      }
       bixtrade_review: {
         Args: { p_id: string; p_note?: string; p_status: string }
         Returns: Json
