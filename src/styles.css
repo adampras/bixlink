@@ -4631,14 +4631,14 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 
 /* BIXGO — Grab-style scoped light theme */
 .bixgo-grab {
-  --background: oklch(0.955 0.004 150); --foreground: oklch(0.2 0.01 150);
-  --card: oklch(0.985 0.002 150); --card-foreground: oklch(0.2 0.01 150);
-  --primary: oklch(0.62 0.17 150); --primary-foreground: oklch(0.99 0 0);
-  --muted: oklch(0.93 0.005 150); --muted-foreground: oklch(0.48 0.01 150);
-  --accent: oklch(0.82 0.16 85); --accent-foreground: oklch(0.2 0.01 150);
-  --border: oklch(0.88 0.006 150); --input: oklch(0.88 0.006 150); --ring: oklch(0.62 0.17 150);
-  --bixgo-header: linear-gradient(180deg, oklch(0.5 0.14 152), oklch(0.42 0.11 160));
+  --background: oklch(0.12 0.005 160); --foreground: oklch(0.97 0.004 150);
+  --card: oklch(0.18 0.008 160); --card-foreground: oklch(0.97 0.004 150);
+  --primary: oklch(0.68 0.18 150); --primary-foreground: oklch(0.99 0 0);
+  --muted: oklch(0.23 0.008 160); --muted-foreground: oklch(0.7 0.01 150);
+  --accent: oklch(0.82 0.16 85); --accent-foreground: oklch(0.15 0.01 150);
+  --border: oklch(0.28 0.01 160); --input: oklch(0.28 0.01 160); --ring: oklch(0.68 0.18 150);
+  --bixgo-header: linear-gradient(140deg, oklch(0.58 0.17 150), oklch(0.38 0.12 165));
   --bixgo-promo: oklch(0.68 0.18 50); --bixgo-promo-fg: oklch(0.99 0 0);
-  --bixgo-wallet: oklch(0.45 0.22 290); --bixgo-alert: oklch(0.55 0.21 25);
+  --bixgo-wallet: oklch(0.65 0.2 290); --bixgo-alert: oklch(0.65 0.21 25);
   background: var(--background); color: var(--foreground);
 }
