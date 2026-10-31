@@ -134,7 +134,7 @@ function BixtradePage() {
   };
 
   if (!cfg) return <BixShell><main className="mx-auto max-w-5xl px-5 py-16 text-center text-sm text-muted-foreground">Loading BIXTrade…</main></BixShell>;
-  if (!cfg.enabled) return <BixShell><main className="mx-auto max-w-xl px-5 py-16">
+  if (!cfg.enabled && !isAdmin) return <BixShell><main className="mx-auto max-w-xl px-5 py-16">
     <section className="arb-card text-center">
       <Construction className="mx-auto text-chart-3" size={42}/>
       <p className="shop-eyebrow mt-4">BIXTRADE ARBITRAGE BOT</p>

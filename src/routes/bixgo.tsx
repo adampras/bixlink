@@ -3,6 +3,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { usePublicConfig } from '@/lib/useMember';
 import { BIXGO_SERVICES, bixgoFare, readBixgo, type BixgoService, type BixgoSettings } from '@/lib/bixgo';
 import { Bike, Car, CheckCircle2, Construction, MapPin, Navigation, Package, ShoppingBasket, UtensilsCrossed } from 'lucide-react';
 
@@ -23,6 +24,7 @@ type Step = 'form' | 'search' | 'found' | 'done';
 
 function BixgoPage() {
   const [cfg, setCfg] = useState<BixgoSettings | null>(null);
+  const isAdmin = usePublicConfig().data?.isAdmin === true;
   const [svc, setSvc] = useState<BixgoService>('ride');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -35,7 +37,7 @@ function BixgoPage() {
   useEffect(() => { if (step !== 'search') return; const t = setTimeout(() => setStep('found'), 2200); return () => clearTimeout(t); }, [step]);
 
   if (!cfg) return <BixShell><main className="px-5 py-16 text-center text-sm text-muted-foreground">Loading BIXGO…</main></BixShell>;
-  if (!cfg.enabled) return <BixShell><main className="mx-auto max-w-xl px-5 py-16"><section className="rounded-3xl border border-primary/30 bg-card/80 p-6 text-center">
+  if (!cfg.enabled && !isAdmin) return <BixShell><main className="mx-auto max-w-xl px-5 py-16"><section className="rounded-3xl border border-primary/30 bg-card/80 p-6 text-center">
     <Construction className="mx-auto h-10 w-10 text-primary"/><p className="mt-3 text-xs uppercase tracking-[0.3em] text-primary">BIXGO</p>
     <h1 className="mt-1 font-display text-2xl font-bold">Under Reconstruction</h1>
     <p className="mt-2 text-sm text-muted-foreground">{cfg.notice || 'BIXGO rides, food and courier services are being prepared. Please check back soon.'}</p>
