@@ -63,8 +63,9 @@ function BixtokPage() {
     const lives = ((l.data ?? []) as Live[]).sort((a, b) => Number(b.kind === 'official') - Number(a.kind === 'official'));
     const mineR = new Set(((rm.data ?? []) as { schedule_id: string }[]).map(r => r.schedule_id));
     const counts = new Map(((rc.data ?? []) as { schedule_id: string; n: number }[]).map(r => [r.schedule_id, Number(r.n)]));
+    const remindedAny = mineR.size > 0;
     const schedules: Sched[] = ((sc.data ?? []) as Omit<Sched, 'reminded' | 'count'>[]).map(x => ({ ...x, reminded: mineR.has(x.id), count: counts.get(x.id) ?? 0 }));
-    return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives, stake: Number(s.data ?? 0), following, followers, owner1: o.data === true, schedules };
+    return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives, stake: Number(s.data ?? 0), following, followers, owner1: o.data === true, schedules, remindedAny };
   } });
   const following = q.data?.following instanceof Set ? q.data.following : new Set<string>();
   const followers = q.data?.followers instanceof Set ? q.data.followers : new Set<string>();
@@ -85,8 +86,7 @@ function BixtokPage() {
   useEffect(() => {
     if (!q.data || room) return;
     const off = q.data.lives.find(l => l.kind === 'official' && !alerted.current.has(l.id));
-    if (!off || !q.data.schedules.some(s => s.reminded && Math.abs(new Date(s.starts_at).getTime() - Date.now()) < 3 * 3600_000) && !q.data.schedules.length) return;
-    if (!q.data.schedules.some(s => s.reminded)) return;
+    if (!off || !q.data.remindedAny) return;
     alerted.current.add(off.id);
     setNote(`🔴 OFFICIAL LIVE started: ${off.title}`);
     try { const c = new AudioContext(); [660, 880, 1175].forEach((f, i) => { const o = c.createOscillator(); const g = c.createGain(); o.frequency.value = f; g.gain.setValueAtTime(0.1, c.currentTime + i * 0.15); g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + i * 0.15 + 0.3); o.connect(g).connect(c.destination); o.start(c.currentTime + i * 0.15); o.stop(c.currentTime + i * 0.15 + 0.32); }); } catch { /* no audio */ }
