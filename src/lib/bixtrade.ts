@@ -103,3 +103,12 @@ export function planExecutions(s: BixtradeSettings, capital: number, prices: Rec
     return { pair: pair.replace('USDT', '/USDT'), buy_venue: BIXTRADE_VENUES[v] ?? 'Binance', sell_venue: BIXTRADE_VENUES[(v + 1 + Math.floor(rnd() * 4)) % BIXTRADE_VENUES.length] ?? 'Bybit', buy_price: +buy.toFixed(8), sell_price: +sell.toFixed(8), qty: +qty.toFixed(8), notional_usd: notional, gross_usd: +gross.toFixed(4), fee_usd: +fee.toFixed(4), net_usd: +net.toFixed(4), latency_ms: 9 + Math.floor(rnd() * 30), executed_at: new Date(from.getTime() + step * (i + 1)).toISOString() };
   });
 }
+
+export type BixtradeBotMood = 'sleep' | 'scan' | 'hunt' | 'trade';
+/** Visual state of the AI robot: no capital → sleep; trade within 90s → trade; profitable route → hunt; else scan. */
+export function bixtradeBotMood(o: { capital: number; routes: number; lastExecAt?: string | number | null; now: number }): BixtradeBotMood {
+  if (!(o.capital > 0)) return 'sleep';
+  const t = o.lastExecAt ? new Date(o.lastExecAt).getTime() : NaN;
+  if (Number.isFinite(t) && o.now - t >= 0 && o.now - t < 90_000) return 'trade';
+  return o.routes > 0 ? 'hunt' : 'scan';
+}
