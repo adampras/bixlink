@@ -4459,3 +4459,17 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .settings-page .settings-language { flex-direction:row; justify-content:flex-start; gap:10px; height:46px; }
 .settings-page .settings-language > svg { margin-left:auto; }
 .settings-heading p .flag-symbol { width:16px; height:11px; font-size:11px; transform:none; }
+.arb-live { display:inline-flex; align-items:center; gap:6px; font-size:10px; font-weight:700; letter-spacing:.12em; color:var(--chart-2); border:1px solid color-mix(in oklab, var(--chart-2) 40%, transparent); border-radius:999px; padding:4px 10px; }
+.arb-live i { width:7px; height:7px; border-radius:50%; background:var(--chart-2); animation:arb-pulse 1.4s infinite; }
+@keyframes arb-pulse { 50% { opacity:.25; } }
+.arb-ticker { overflow:hidden; border:1px solid var(--border); border-radius:12px; background:var(--card); font-size:11px; }
+.arb-ticker > div { display:flex; gap:28px; width:max-content; padding:8px 12px; animation:arb-scroll 28s linear infinite; color:var(--chart-2); font-family:ui-monospace,monospace; }
+@keyframes arb-scroll { to { transform:translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .arb-ticker > div, .arb-live i { animation:none; } }
+.arb-stat { border:1px solid var(--border); border-radius:12px; padding:10px 6px; background:color-mix(in oklab, var(--chart-3) 6%, transparent); }
+.arb-stat p { font-size:10px; color:var(--muted-foreground); } .arb-stat b { display:block; font-size:1.1rem; } .arb-stat small { font-size:9px; color:var(--muted-foreground); }
+.arb-strat { text-align:left; border:1px solid var(--border); border-radius:12px; padding:10px; display:grid; gap:2px; font-size:11px; background:var(--card); }
+.arb-strat span { color:var(--muted-foreground); } .arb-strat em { font-style:normal; font-size:10px; color:var(--chart-3); }
+.arb-strat.is-on { border-color:var(--chart-3); box-shadow:0 0 0 1px var(--chart-3) inset; }
+.arb-badge { font-size:10px; text-transform:uppercase; border-radius:999px; padding:2px 8px; border:1px solid var(--border); }
+.arb-badge.is-approved { color:var(--chart-2); } .arb-badge.is-rejected { color:var(--destructive); } .arb-badge.is-pending { color:var(--chart-3); }
