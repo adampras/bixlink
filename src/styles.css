@@ -4344,3 +4344,11 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-zoom { display: grid; justify-items: center; gap: .2rem; padding: .4rem .2rem; border-radius: 999px; background: color-mix(in oklab, var(--background) 60%, transparent); }
 .bxl-zoom input { writing-mode: vertical-lr; direction: rtl; width: 1.4rem; height: 6rem; accent-color: var(--primary); }
 .bxl-zoom small { font-size: .6rem; }
+
+/* Toggle switches: plain flat look everywhere (no stretched "bubble" from mobile tap-size rules) */
+[role="switch"] { min-height: 0 !important; height: 24px !important; width: 44px !important; padding: 0 !important; box-shadow: none !important; animation: none !important; transform: none !important; flex: 0 0 auto; }
+[role="switch"] > span { width: 18px !important; height: 18px !important; box-shadow: none !important; top: 2px; }
+[role="switch"][aria-checked="true"] > span.absolute, [role="switch"][data-state="checked"] > span.absolute { left: 22px !important; }
+[role="switch"][aria-checked="false"] > span.absolute, [role="switch"][data-state="unchecked"] > span.absolute { left: 2px !important; }
+[role="switch"][data-state="checked"] > span:not(.absolute) { transform: translateX(20px) !important; }
+[role="switch"][data-state="unchecked"] > span:not(.absolute) { transform: translateX(1px) !important; }
