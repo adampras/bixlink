@@ -47,13 +47,20 @@ export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<B
   const [q, setQ] = useState('');
   const feed = FEED.filter(c => !q || c.name.toLowerCase().includes(q.toLowerCase()));
   return <>
-    <header className="px-4 pb-5 pt-4" style={{ background: 'var(--bixgo-header)' }}>
-      <div className="flex items-center gap-3">
-        <label className="flex flex-1 items-center gap-2 rounded-full bg-card px-4 py-2.5 shadow-sm">
-          <Search className="h-4 w-4 text-muted-foreground"/>
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari makanan" className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"/>
-        </label>
+    <header className="px-3 pt-3">
+      <div className="relative overflow-hidden rounded-3xl p-4 text-primary-foreground shadow-lg" style={{ background: 'var(--bixgo-header)' }}>
+        <div className="flex items-center gap-3">
+          <Link to="/" aria-label="Kembali" className="grid h-9 w-9 place-items-center rounded-full bg-background/25 backdrop-blur"><ArrowLeft className="h-5 w-5"/></Link>
+          <span className="rounded-full bg-background/25 px-3 py-1 text-[11px] font-bold tracking-widest">BIXGO</span>
+        </div>
+        <h1 className="mt-4 text-2xl font-black leading-tight">Mau ke mana hari ini?</h1>
+        <p className="text-xs opacity-90">Ride · Food · Send · Mart dalam satu aplikasi</p>
+        <span className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-background/10"/>
       </div>
+      <label className="mt-3 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5">
+        <Search className="h-4 w-4 text-muted-foreground"/>
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari makanan, belanja, atau layanan" className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"/>
+      </label>
     </header>
     <section className="no-scrollbar overflow-x-auto px-2 pt-4">
       <div className="grid w-max grid-flow-col grid-rows-2 gap-x-1 gap-y-3">

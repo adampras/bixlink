@@ -112,7 +112,7 @@ function BixgoPage() {
   const go = (v: BixgoView) => { setView(v); if (v === 'activity') setTab('history'); if (v === 'order') setTab('order'); };
   const memberName = user?.email?.split('@')[0] || 'Member BIXLINK';
 
-  return <BixShell><div className="bixgo-grab mx-auto min-h-screen max-w-xl">
+  return <div className="bixgo-grab fixed inset-0 z-[60] overflow-y-auto"><div className="mx-auto min-h-full max-w-xl">
     {!cfg.enabled && isAdmin && <p className="border-b border-accent/40 bg-accent/20 px-3 py-2 text-[11px]">Admin 1 preview · Under Reconstruction (only visible to you)</p>}
     {view === 'home' && <BixgoHome enabled={enabledSet} balance="Buka Wallet" onPick={pick} onSoon={soon}/>}
     {view === 'inbox' && <BixgoInbox/>}
@@ -189,5 +189,5 @@ function BixgoPage() {
     <p className="mt-4 text-center text-[10px] text-muted-foreground">BIXGO is in preview. Fares are estimates; no booking, payment or dispatch is performed.</p>
     </main>}
     <BixgoBottomNav view={view} setView={go} inbox={3}/>
-  </div></BixShell>;
+  </div></div>;
 }
