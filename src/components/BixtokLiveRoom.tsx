@@ -388,11 +388,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     {burst && <div className="bxl-sfx-burst" key={burst.id} aria-hidden onAnimationEnd={() => setBurst(null)}>{burst.e}</div>}
     {host && recording && <span className="bxl-rec"><Circle size={9} fill="currentColor"/> REC</span>}
     {ended && <p className="bixtok-ended">LIVE ended</p>}
-    {!host && entered && audioBlocked && sound && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Tap for sound</button>}
+    {!host && entered && audioBlocked && sound && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Ketuk untuk mengaktifkan suara</button>}
     {banner && <div className="bxl-banner" key={banner.id}><Gift size={18}/><div><b>{banner.name}</b><small>{banner.body}</small></div></div>}
     {mega && <div className="bxl-mega" key={mega.id} aria-hidden><span>{giftInfo(mega.body).emoji}</span><b>{mega.name}</b><small>{mega.body}</small></div>}
     <div className="bxl-floaters" aria-hidden>{floaters.map(f => <Heart key={f.id} className="bxl-heart" fill={f.color} color={f.color}
-      style={{ right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}</div>
+      style={f.px != null ? { position: 'fixed', left: `${f.px - 15}px`, top: `${(f.py ?? 0) - 15}px`, bottom: 'auto', ['--drift' as string]: `${f.drift}px` } : { right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}</div>
     <div className={`bixtok-chat${showcase && cfg.showcase_enabled !== false ? ' with-card' : ''}`}>{msgs.map(m => <p key={m.id} className={m.kind === 'gift' ? 'gift' : ''} onClick={host ? () => setModMsg(m) : undefined}><b>{m.name}</b> {m.body}</p>)}</div>
     <div className="bxl-tools">
       {publishing && <>
