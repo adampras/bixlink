@@ -398,7 +398,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
 
   const bgCss = backdropCss(backdrop, cfg.live_backdrops);
   const setBg = async (off: boolean, id: string | null) => {
-    const { error } = await supabase.rpc('bixtok_live_backdrop', { p_live: live.id, p_cam_off: off, p_backdrop: id ?? undefined });
+    const { error } = await supabase.rpc('bixtok_live_backdrop', { p_live: live.id, p_cam_off: off, p_backdrop: id ?? '' });
     if (error) return flash(error.message);
     setCamOff(off); setBackdrop(id);
     void chan.current?.send({ type: 'broadcast', event: 'bg', payload: { off, id } });
