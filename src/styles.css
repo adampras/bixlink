@@ -4916,3 +4916,10 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxt-board b{flex:none;color:#FFD700}
 .bxt-board span{flex:none;display:flex;gap:.25rem;align-items:center;padding:.15rem .5rem;border-radius:999px;background:color-mix(in oklab,var(--foreground) 8%,transparent)}
 .bxt-board small{opacity:.7}
+
+/* BIXTOK LIVE quick reactions */
+.bxl-emoji-float { position: absolute; bottom: 7rem; font-size: 28px; line-height: 1; animation: bxl-float 2s ease-out forwards; filter: drop-shadow(0 2px 6px oklch(0 0 0 / .5)); }
+.bxl-react-bar { position: absolute; right: .5rem; bottom: 4.6rem; z-index: 6; display: flex; gap: .25rem; padding: .25rem .35rem; border-radius: 999px; background: oklch(0.12 0.01 260 / .55); backdrop-filter: blur(10px); border: 1px solid oklch(0.85 0.15 90 / .35); }
+.bxl-react-bar button { width: 30px; height: 30px; font-size: 18px; border-radius: 999px; background: transparent; transition: transform .15s; }
+.bxl-react-bar button:active { transform: scale(1.35); }
+@media (prefers-reduced-motion: reduce) { .bxl-emoji-float { animation-duration: .8s; } }

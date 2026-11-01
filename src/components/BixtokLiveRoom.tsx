@@ -29,6 +29,7 @@ export type SfxKey = typeof SOUNDBOARD[number][0];
 /** PK winner from display scores; null while tied. */
 export function pkWinner(a: number, b: number): 'a' | 'b' | null { return a === b ? null : a > b ? 'a' : 'b'; }
 type Floater = { id: number; x: number; color: string; drift: number; px?: number; py?: number };
+const QUICK_REACTIONS = ['🔥', '👏', '💎', '❤️', '🚀', '😂'];
 
 const COLORS = ['#FFD700', '#A855F7', '#FF3B6B', '#22D3EE', '#FF8A00'];
 
@@ -112,6 +113,9 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [toolsOpen, setToolsOpen] = useState(false); const [msgs, setMsgs] = useState<Msg[]>([]); const [text, setText] = useState(''); const [ended, setEnded] = useState(false);
   const [sound, setSound] = useState(true); const [likes, setLikes] = useState(0); const [viewers, setViewers] = useState(1);
   const [floaters, setFloaters] = useState<Floater[]>([]); const [banner, setBanner] = useState<Msg | null>(null);
+  const [emojis, setEmojis] = useState<{ id: number; e: string; x: number; drift: number }[]>([]);
+  const floatEmoji = (e: string) => setEmojis(f => [...f.slice(-20), { id: Math.random(), e, x: 18 + Math.random() * 40, drift: Math.random() * 70 - 35 }]);
+  const floatRef = useRef(floatEmoji); floatRef.current = floatEmoji;
   const [mega, setMega] = useState<Msg | null>(null);
   const [share, setShare] = useState(false); const [copied, setCopied] = useState(false);
   const [mic, setMic] = useState(true); const [facing, setFacing] = useState<'user' | 'environment'>('user');
@@ -203,7 +207,8 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     const room = supabase.channel(`bixtok-room-${live.id}`, { config: { presence: { key: me } } });
     room.on('broadcast', { event: 'like' }, ({ payload }) => {
       const n = Math.min(Number(payload?.n) || 1, 50); setLikes(l => l + n); spawn(Math.min(n, 4)); sfxRef.current.pop();
-    }).on('broadcast', { event: 'chat' }, ({ payload }) => ingest.current([payload as Msg]))
+    }).on('broadcast', { event: 'react' }, ({ payload }) => { const e = String(payload?.e ?? ''); if (QUICK_REACTIONS.includes(e)) floatRef.current(e); })
+      .on('broadcast', { event: 'chat' }, ({ payload }) => ingest.current([payload as Msg]))
       .on('broadcast', { event: 'pin' }, ({ payload }) => setPinned((payload?.text as string) || null))
       .on('broadcast', { event: 'bg' }, ({ payload }) => { setCamOff(!!payload?.off); setBackdrop((payload?.id as string) || null); })
       .on('broadcast', { event: 'showcase' }, ({ payload }) => setShowcase((payload?.key as ShowcaseKey) || null))
@@ -368,6 +373,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     await unlockAudio();
     const v = view.current; if (v && mode === 'p2p') { v.muted = !sound; void v.play().catch(() => {}); }
   };
+  const react = (e: string) => {
+    if (!QUICK_REACTIONS.includes(e)) return;
+    floatEmoji(e); try { navigator.vibrate?.(8); } catch { /* unsupported */ }
+    void chan.current?.send({ type: 'broadcast', event: 'react', payload: { e } });
+  };
   const tap = (e?: { clientX: number; clientY: number }) => {
     if (audioBlocked) void unlockAudio();
     setLikes(l => l + 1); pending.current += 1; sfx.pop();
@@ -503,7 +513,9 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     {banner && <div className="bxl-banner" key={banner.id}><Gift size={18}/><div><b>{banner.name}</b><small>{banner.body}</small></div></div>}
     {mega && <div className="bxl-mega" key={mega.id} aria-hidden><span>{giftInfo(mega.body).emoji}</span><b>{mega.name}</b><small>{mega.body}</small></div>}
     <div className="bxl-floaters" aria-hidden>{floaters.map(f => <Heart key={f.id} className="bxl-heart" fill={f.color} color={f.color}
-      style={f.px != null ? { position: 'fixed', left: `${f.px - 15}px`, top: `${(f.py ?? 0) - 15}px`, bottom: 'auto', ['--drift' as string]: `${f.drift}px` } : { right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}</div>
+      style={f.px != null ? { position: 'fixed', left: `${f.px - 15}px`, top: `${(f.py ?? 0) - 15}px`, bottom: 'auto', ['--drift' as string]: `${f.drift}px` } : { right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}
+      {emojis.map(f => <span key={f.id} className="bxl-emoji-float" style={{ right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setEmojis(x => x.filter(y => y.id !== f.id))}>{f.e}</span>)}</div>
+    {!ended && <div className="bxl-react-bar" role="group" aria-label="Quick reactions" onClick={e => e.stopPropagation()}>{QUICK_REACTIONS.map(e => <button key={e} type="button" aria-label={`React ${e}`} onClick={() => react(e)}>{e}</button>)}</div>}
     <button type="button" className={`bxl-qa-toggle${qaOnly ? ' on' : ''}`} aria-pressed={qaOnly} onClick={() => setQaOnly(v => !v)}>Q&amp;A{qaCount ? ` · ${qaCount}` : ''}</button>
     <div className={`bixtok-chat${showcase && cfg.showcase_enabled !== false ? ' with-card' : ''}`}>{(qaOnly ? msgs.filter(isQuestion) : msgs).map(m => <p key={m.id} className={`${m.kind === 'gift' ? 'gift' : ''}${isQuestion(m) ? ' q' : ''}`} onClick={host ? () => setModMsg(m) : undefined}><b>{m.name}</b> {m.body}</p>)}{qaOnly && !qaCount && <p className="q">No questions yet — viewers can end a message with “?”</p>}</div>
     <div className={`bxl-tools${host && !toolsOpen ? ' compact' : ''}`}>
