@@ -168,15 +168,24 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
       if (n++ < 30) t = window.setTimeout(go, 60); };
     go(); return () => clearTimeout(t); }, [resume, videos.length > 0]);
   if (!videos.length) return <p className="grid h-full place-items-center text-sm text-muted-foreground">No posts yet. Tap + to create one.</p>;
-  return <div className="bixtok-feed">{videos.map(v => <section key={v.id} data-vid={v.id} className="bixtok-slide">
+  const like = async (v: Video) => { if (liked[v.id] || cfg.features['likes'] === false) return; setLiked(l => ({ ...l, [v.id]: true })); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); };
+  const tapRef = useRef<{ t: number; id: string }>({ t: 0, id: '' });
+  const [bursts, setBursts] = useState<{ k: number; x: number; y: number }[]>([]);
+  const onTap = (e: React.PointerEvent, v: Video) => {
+    if ((e.target as HTMLElement).closest('button,a,aside,iframe')) return;
+    const now = Date.now(); const prev = tapRef.current; tapRef.current = { t: now, id: v.id };
+    if (prev.id === v.id && now - prev.t < 320) { const r = e.currentTarget.getBoundingClientRect(); const k = now; setBursts(b => [...b, { k, x: e.clientX - r.left, y: e.clientY - r.top }]); setTimeout(() => setBursts(b => b.filter(x => x.k !== k)), 900); try { navigator.vibrate?.(15); } catch { /* unsupported */ } void like(v); }
+  };
+  return <div className="bixtok-feed">{videos.map(v => <section key={v.id} data-vid={v.id} className="bixtok-slide" onPointerUp={e => onTap(e, v)}>
     <Media v={v} muted={muted}/>
+    {tapRef.current.id === v.id && bursts.map(b => <Heart key={b.k} className="bxt-dbl-heart" style={{ left: b.x, top: b.y }} fill="currentColor" aria-hidden/>)}
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
     <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
     <aside className={`bixtok-rail bxt-rail-shield${railOpen ? '' : ' closed'}`}>
       {railOpen && <>
       {v.creator_id === me && <div className="bxt-follow me"><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><small>You</small></div>}
       {v.creator_id && v.creator_id !== me && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
-      {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={async () => { if (liked[v.id]) return; setLiked({ ...liked, [v.id]: true }); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
+      {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={() => void like(v)}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
       <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
@@ -237,8 +246,10 @@ function AutoVideo({ src, filter, muted, paused = false }: { src: string; filter
   const pausedRef = useRef(paused); pausedRef.current = paused;
   useEffect(() => { const el = ref.current; if (el && paused) { el.muted = true; el.pause(); } }, [paused]);
   useEffect(() => { const el = ref.current; if (!el) return; el.volume = 1; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting && !pausedRef.current) el.play().catch(() => { el.muted = true; void el.play().catch(() => {}); const on = () => { if (!mutedRef.current && !pausedRef.current && el.getBoundingClientRect().top < innerHeight / 2 && el.getBoundingClientRect().bottom > innerHeight / 2) { el.muted = false; void el.play().catch(() => {}); } }; window.addEventListener('pointerdown', on, { once: true }); }); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
+  const [pre, setPre] = useState<'metadata' | 'auto'>('metadata');
+  useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setPre('auto'); io.disconnect(); } }, { rootMargin: '120% 0px' }); io.observe(el); return () => io.disconnect(); }, []);
   const mutedRef = useRef(muted); useEffect(() => { mutedRef.current = muted; const el = ref.current; if (el) { el.muted = muted; if (!muted) el.volume = 1; } }, [muted]);
-  return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }} onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>;
+  return <video ref={ref} src={src} loop muted={muted} playsInline preload={pre} className="bixtok-video" style={{ filter: filterCss(filter) }} onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>;
 }
 
 function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean; bypass: boolean; uid: string; schedules: Sched[] }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {

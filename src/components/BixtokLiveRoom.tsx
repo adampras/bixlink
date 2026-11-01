@@ -77,6 +77,10 @@ export function giftInfo(body: string): { emoji: string; amount: number; currenc
   const m = body.match(/·\s*([\d.]+)\s*(BIXP|BIX)/);
   return { emoji: [...body.trim()][0] ?? '🎁', amount: m ? Number(m[1]) : 0, currency: m?.[2] ?? '' };
 }
+/** A chat line counts as a question for the host Q&A filter when it ends with "?" (gifts never count). */
+export function isQuestion(m: { kind?: string; body: string }): boolean {
+  return m.kind !== 'gift' && /\?\s*$/.test(m.body.trim());
+}
 export function isMegaGift(body: string): boolean {
   const g = giftInfo(body);
   return (g.currency === 'BIX' && g.amount >= 10) || (g.currency === 'BIXP' && g.amount >= 100);
@@ -116,6 +120,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const stream = useRef<MediaStream | null>(null); const [local, setLocal] = useState<MediaStream | null>(null);
   const [entered, setEntered] = useState(host); const [zoom, setZoom] = useState(1);
   const [pinned, setPinned] = useState<string | null>(null); const [pinEdit, setPinEdit] = useState<string | null>(null);
+  const [qaOnly, setQaOnly] = useState(false); const qaCount = msgs.filter(isQuestion).length;
   const [stage, setStage] = useState<Stage[]>([]); const [stagePanel, setStagePanel] = useState(false);
   const [top, setTop] = useState<Top[]>([]); const [modMsg, setModMsg] = useState<Msg | null>(null); const [note, setNote] = useState('');
   const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
@@ -499,7 +504,8 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     {mega && <div className="bxl-mega" key={mega.id} aria-hidden><span>{giftInfo(mega.body).emoji}</span><b>{mega.name}</b><small>{mega.body}</small></div>}
     <div className="bxl-floaters" aria-hidden>{floaters.map(f => <Heart key={f.id} className="bxl-heart" fill={f.color} color={f.color}
       style={f.px != null ? { position: 'fixed', left: `${f.px - 15}px`, top: `${(f.py ?? 0) - 15}px`, bottom: 'auto', ['--drift' as string]: `${f.drift}px` } : { right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}</div>
-    <div className={`bixtok-chat${showcase && cfg.showcase_enabled !== false ? ' with-card' : ''}`}>{msgs.map(m => <p key={m.id} className={m.kind === 'gift' ? 'gift' : ''} onClick={host ? () => setModMsg(m) : undefined}><b>{m.name}</b> {m.body}</p>)}</div>
+    <button type="button" className={`bxl-qa-toggle${qaOnly ? ' on' : ''}`} aria-pressed={qaOnly} onClick={() => setQaOnly(v => !v)}>Q&amp;A{qaCount ? ` · ${qaCount}` : ''}</button>
+    <div className={`bixtok-chat${showcase && cfg.showcase_enabled !== false ? ' with-card' : ''}`}>{(qaOnly ? msgs.filter(isQuestion) : msgs).map(m => <p key={m.id} className={`${m.kind === 'gift' ? 'gift' : ''}${isQuestion(m) ? ' q' : ''}`} onClick={host ? () => setModMsg(m) : undefined}><b>{m.name}</b> {m.body}</p>)}{qaOnly && !qaCount && <p className="q">No questions yet — viewers can end a message with “?”</p>}</div>
     <div className="bxl-tools">
       {publishing && <>
         <button aria-label="Flip camera" onClick={() => setFacing(f => (f === 'user' ? 'environment' : 'user'))}><SwitchCamera size={20}/></button>
