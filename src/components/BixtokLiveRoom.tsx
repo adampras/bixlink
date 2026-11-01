@@ -25,7 +25,7 @@ export type SfxKey = typeof SOUNDBOARD[number][0];
 
 /** PK winner from display scores; null while tied. */
 export function pkWinner(a: number, b: number): 'a' | 'b' | null { return a === b ? null : a > b ? 'a' : 'b'; }
-type Floater = { id: number; x: number; color: string; drift: number };
+type Floater = { id: number; x: number; color: string; drift: number; px?: number; py?: number };
 
 const COLORS = ['#FFD700', '#A855F7', '#FF3B6B', '#22D3EE', '#FF8A00'];
 
@@ -276,7 +276,13 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     await unlockAudio();
     const v = view.current; if (v && mode === 'p2p') { v.muted = !sound; void v.play().catch(() => {}); }
   };
-  const tap = () => { if (audioBlocked) void unlockAudio(); setLikes(l => l + 1); pending.current += 1; spawn(1); sfx.pop(); };
+  const tap = (e?: { clientX: number; clientY: number }) => {
+    if (audioBlocked) void unlockAudio();
+    setLikes(l => l + 1); pending.current += 1; sfx.pop();
+    try { navigator.vibrate?.(10); } catch { /* unsupported */ }
+    if (e && e.clientX) setFloaters(f => [...f.slice(-30), { id: Math.random(), x: 0, px: e.clientX, py: e.clientY, color: COLORS[Math.floor(Math.random() * COLORS.length)]!, drift: Math.random() * 60 - 30 }]);
+    else spawn(1);
+  };
   const sendChat = async (body: string) => {
     const { data: p } = await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle();
     const { data, error } = await supabase.from('bixtok_live_messages').insert({ live_id: live.id, user_id: me, name: p?.username || 'member', body }).select('id,name,body,kind').single();
