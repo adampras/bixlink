@@ -197,8 +197,9 @@ function AutoVideo({ src, filter, muted }: { src: string; filter?: string | null
   return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }}/>;
 }
 
-function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean; schedules: Sched[] }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
+function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean; bypass: boolean; uid: string; schedules: Sched[] }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
   const qc = useQueryClient(); const [title, setTitle] = useState(''); const [busy, setBusy] = useState(false);
+  const [hidden, setHidden] = useState<string[]>([]); const shown = data.lives.filter(l => !hidden.includes(l.id));
   const eligible = data.stake > 0 && data.stake >= Number(data.cfg.live_min_stake_usd);
   const [otitle, setOtitle] = useState('');
   const official = async () => { setBusy(true);
