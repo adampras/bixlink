@@ -1,5 +1,5 @@
 import bixtokLogo from '@/assets/bixtok-logo.png';
-import { Volume2, VolumeX, Home, ShoppingBag, MessageSquare, User, Menu, Wallet, Clock, QrCode, Sparkles, Flame, Settings, ChevronRight, Bell, Zap, Bot, Grid3x3, Bookmark, Repeat2, Eye, ShieldCheck, Coins, Megaphone, BadgeDollarSign } from 'lucide-react';
+import { Volume2, VolumeX, Home, ShoppingBag, MessageSquare, User, Menu, Wallet, Clock, QrCode, Sparkles, Flame, Settings, ChevronRight, Bell, Zap, Bot, Grid3x3, Bookmark, Repeat2, Eye, ShieldCheck, Coins, Megaphone, BadgeDollarSign, Minimize2 } from 'lucide-react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
@@ -127,6 +127,10 @@ function BixtokPage() {
           window.dispatchEvent(new CustomEvent(BIXTOK_SOUND_EVENT, { detail: next }));
           setMuted(next);
         }}>{muted ? <VolumeX size={18}/> : <Volume2 size={18}/>}</Button>
+        <button type="button" aria-label="Mini mode" title="Mini mode" className="bixtok-icon" onClick={() => {
+          const v = vids[0]; if (v) { const e = !v.media_path ? embedUrl(v.src) : null; bixtokMini.setFeed(e ? { src: e, kind: 'iframe', title: v.caption } : { src: v.clean ?? v.src, kind: v.media_kind === 'photo' ? 'img' : 'video', title: v.caption }); }
+          if (window.history.length > 1) window.history.back(); else void navigate({ to: '/dashboard' });
+        }}><Minimize2 size={18}/></button>
       </header>
       <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div></>}
       {section === 'home' && (tab === 'live'
@@ -137,7 +141,7 @@ function BixtokPage() {
       {section === 'balance' && <BalancePage stake={q.data.stake} cfg={q.data.cfg} onBack={() => setSection('profile')} onLive={() => { setSection('home'); setTab('live'); }}/>}
       {!studio && !room && section !== 'balance' && <nav className="bxt-nav" aria-label="BIXTOK">
         <button className={section === 'home' ? 'on' : ''} onClick={() => setSection('home')}><Home/><small>Home</small></button>
-        <Link to="/nft-marketplace"><ShoppingBag/><small>Shop</small></Link>
+        <button className={`bxt-live-tab${section === 'home' && tab === 'live' ? ' on' : ''}`} aria-label="LIVE" onClick={() => { setSection('home'); setTab('live'); }}><span className="bxt-live-ic"><Radio size={16}/><em>LIVE</em></span><small>LIVE{q.data.lives.length > 0 ? ` · ${q.data.lives.length}` : ''}</small></button>
         {q.data.cfg.features['upload'] !== false ? <button className="bxt-plus bxt-plus-logo" aria-label="Create post" onClick={() => setStudio(true)}><img src={bixtokLogo} alt="" width={30} height={30}/><Plus className="bxt-plus-mini"/></button> : <span/>}
         <button className={section === 'inbox' ? 'on' : ''} onClick={() => setSection('inbox')}><MessageSquare/><small>Inbox</small>{q.data.lives.length > 0 && <i className="bxt-badge">{q.data.lives.length}</i>}</button>
         <button className={section === 'profile' ? 'on' : ''} onClick={() => setSection('profile')}><User/><small>Profile</small></button>
