@@ -116,7 +116,11 @@ function BixtokPage() {
   const [muted, setMuted] = useState(false);
   const [section, setSection] = useState<'home' | 'inbox' | 'profile' | 'balance'>('home');
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
-  const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
+  const [tag, setTag] = useState('');
+  const baseVids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
+  const tags = [...new Set(baseVids.flatMap(v => (v.caption.match(/#[\p{L}\d_]+/gu) ?? []).map(t => t.toLowerCase())))].slice(0, 12);
+  const vids = tag ? baseVids.filter(v => v.caption.toLowerCase().includes(tag)) : baseVids;
+  const top = q.data ? [...q.data.videos.reduce((m, v) => { if (!v.creator_id) return m; const c = m.get(v.creator_id) ?? { name: v.creator_name, likes: 0, posts: 0 }; c.likes += Number(v.likes || 0); c.posts++; m.set(v.creator_id, c); return m; }, new Map<string, { name: string; likes: number; posts: number }>()).values()].sort((a, b) => b.likes - a.likes).slice(0, 5) : [];
 
   return <MemberGate ready={ready} signedIn={!!user} title="BIXTOK"><main className="bixtok">
     {q.isError ? <p className="p-8 text-sm text-destructive">Could not load BIXTOK.</p>
