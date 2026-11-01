@@ -24,11 +24,14 @@ import { InternalMarket } from '@/components/InternalMarket';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { RecordedActivity } from '@/components/GrowthExperience';
 import { HighlightsHub } from '@/components/HighlightsHub';
+import { isLandingClosedFor } from '@/lib/site-control';
+import { LandingClosed } from '@/components/LandingClosed';
 import { EcosystemRail } from '@/components/EcosystemRail';
 
 const homeQuery = queryOptions({ queryKey: ['bix-home-market'], queryFn: () => getHomeMarketData(), staleTime: 60_000, refetchInterval: 60_000 });
 
 export const Route = createFileRoute('/')({
+  validateSearch: (s: Record<string, unknown>): { landing?: number } => (s.landing ? { landing: 1 } : {}),
   loader: ({ context }) => context.queryClient.ensureQueryData(homeQuery),
   errorComponent: HomeError,
   notFoundComponent: () => <div className="p-10">Market overview unavailable.</div>,
@@ -53,7 +56,10 @@ function Home() {
   const presaleVisible = Boolean(user) && presaleOpen(presale.data);
 
   const rd = cfg?.readiness;
-  if (!user) return <BixShell>{rd?.liveActivityEnabled !== false && <RecordedActivity/>}<div className="mx-auto max-w-7xl px-5 pt-4 md:px-8"><HighlightsHub/></div><div className="hub-divider" aria-hidden/><div className="relative"><LandingExperience {...(cfg ? { packages: cfg.packages, booster: cfg.booster.enabled, bixPrice: cfg.bixMarket.priceUsd, content: cfg.landingContent } : {})}/></div></BixShell>;
+  const { landing } = Route.useSearch();
+  const landingView = !user || (landing === 1 && !!cfg?.isAdmin);
+  if (!user && cfg && isLandingClosedFor(cfg.siteControl, cfg.isAdmin, false)) return <BixShell><LandingClosed message={cfg.siteControl.landingMessage}/></BixShell>;
+  if (landingView) return <BixShell>{cfg?.siteControl.landingClosed && <div className="bg-primary px-4 py-2 text-center text-xs font-semibold text-primary-foreground">Pratinjau admin — landing sedang ditutup untuk publik</div>}{rd?.liveActivityEnabled !== false && <RecordedActivity/>}<div className="mx-auto max-w-7xl px-5 pt-4 md:px-8"><HighlightsHub/></div><div className="hub-divider" aria-hidden/><div className="relative"><LandingExperience {...(cfg ? { packages: cfg.packages, booster: cfg.booster.enabled, bixPrice: cfg.bixMarket.priceUsd, content: cfg.landingContent } : {})}/></div></BixShell>;
   return <BixShell><MarketTicker/><MemberGate ready={ready} signedIn={!!user} title="HOME"><main>
     <div className="mx-auto max-w-7xl px-5 pt-4 md:px-8"><HighlightsHub/></div>
     <section className="mx-auto grid max-w-7xl gap-6 px-5 pt-6 pb-6 md:px-8 lg:grid-cols-[1.05fr_1fr]"><InternalMarket reference={bixPrice} movement={data.movement} serverNow={data.serverNow}/>

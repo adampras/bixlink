@@ -6,7 +6,7 @@ import { SNAPSHOT_KEYS, PUBLIC_SNAPSHOT_KEYS } from '@/lib/site-control';
 // Owner-only switch. When staging turns ON the current public settings are
 // frozen into a snapshot that non-admins keep seeing; turning it OFF publishes.
 export const saveSiteControl = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((d: { maintenance: boolean; staging: boolean; message?: string }) => z.object({ maintenance: z.boolean(), staging: z.boolean(), message: z.string().trim().max(240).optional() }).strict().parse(d))
+  .inputValidator((d: { maintenance: boolean; staging: boolean; message?: string; landingClosed?: boolean; landingMessage?: string }) => z.object({ maintenance: z.boolean(), staging: z.boolean(), message: z.string().trim().max(240).optional(), landingClosed: z.boolean().optional(), landingMessage: z.string().trim().max(240).optional() }).strict().parse(d))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as any;
     const { data: admin, error } = await sb.rpc('is_bix_admin');
@@ -22,7 +22,7 @@ export const saveSiteControl = createServerFn({ method: 'POST' }).middleware([re
       const s = await sb.from('app_settings').upsert({ key: 'site_snapshot', value: snap });
       if (s.error) throw s.error;
     }
-    const value = { maintenance: data.maintenance, staging: data.staging, message: data.message ?? '', publicSnapshot: data.staging ? publicSnapshot : {} };
+    const value = { maintenance: data.maintenance, staging: data.staging, message: data.message ?? '', landingClosed: data.landingClosed ?? false, landingMessage: data.landingMessage ?? '', publicSnapshot: data.staging ? publicSnapshot : {} };
     const r = await sb.from('app_settings').upsert({ key: 'site_control', value });
     if (r.error) throw r.error;
     return { ok: true };

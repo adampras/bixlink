@@ -1,4 +1,4 @@
-export type SiteControl = { maintenance: boolean; staging: boolean; message?: string; publicSnapshot?: Record<string, unknown> };
+export type SiteControl = { maintenance: boolean; staging: boolean; landingClosed?: boolean; landingMessage?: string; message?: string; publicSnapshot?: Record<string, unknown> };
 export const defaultSiteControl: SiteControl = { maintenance: false, staging: false };
 
 export const SNAPSHOT_KEYS = ['booster', 'booster_visual', 'referrals', 'swap', 'bix_market', 'bix_pay', 'landing_content', 'wallet', 'readiness', 'deposit_wallets', 'usdt_transfer', 'unstake', 'mining_visibility', 'mining_conversion', 'splash'] as const;
@@ -14,4 +14,10 @@ export function effectiveSettings(live: Record<string, any>, control: SiteContro
 export function isBlockedByMaintenance(control: SiteControl, isAdmin: boolean, path: string) {
   if (!control.maintenance || isAdmin) return false;
   return !['/auth', '/admin', '/review', '/reset-password'].some(p => path === p || path.startsWith(p + '/'));
+}
+
+/** Closed landing: signed-out visitors get the reconstruction screen; admins can preview with ?landing=1. */
+export function isLandingClosedFor(control: SiteControl, isAdmin: boolean, adminPreview: boolean) {
+  if (!control.landingClosed) return false;
+  return !(isAdmin && adminPreview);
 }
