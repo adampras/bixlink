@@ -31,7 +31,7 @@ import { EcosystemRail } from '@/components/EcosystemRail';
 const homeQuery = queryOptions({ queryKey: ['bix-home-market'], queryFn: () => getHomeMarketData(), staleTime: 60_000, refetchInterval: 60_000 });
 
 export const Route = createFileRoute('/')({
-  validateSearch: (s: Record<string, unknown>): { landing?: number } => (s.landing ? { landing: 1 } : {}),
+  validateSearch: (s: Record<string, unknown>): { landing?: number } => (s['landing'] ? { landing: 1 } : {}),
   loader: ({ context }) => context.queryClient.ensureQueryData(homeQuery),
   errorComponent: HomeError,
   notFoundComponent: () => <div className="p-10">Market overview unavailable.</div>,
