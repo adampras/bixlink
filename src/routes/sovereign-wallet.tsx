@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { ChevronLeft } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
