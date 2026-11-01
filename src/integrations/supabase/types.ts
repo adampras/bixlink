@@ -2926,6 +2926,7 @@ export type Database = {
           created_at: string
           dial: string
           kind: string
+          member: string
         }[]
       }
       bix_public_home_stats: { Args: never; Returns: Json }
