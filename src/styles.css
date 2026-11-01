@@ -4889,3 +4889,20 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxt-peek-av.live{border-color:oklch(0.62 0.24 25);animation:bxtRing 1.4s infinite}
 .bxt-peek-act{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 @media (prefers-reduced-motion:reduce){.bxt-vinyl,.bxt-vinyl>i,.bxt-live-ring>span{animation:none}}
+
+/* BIXTOK luxury navigation + host dock polish */
+.bixtok-tabs { background: color-mix(in oklab, var(--background) 62%, transparent); border: 1px solid color-mix(in oklab, #FFD700 26%, transparent); border-radius: 999px; padding: 3px; backdrop-filter: blur(14px); box-shadow: 0 6px 20px -10px color-mix(in oklab, #FFD700 40%, transparent); }
+.bixtok-tabs button { border-radius: 999px; padding: .3rem .6rem; transition: background .2s, color .2s, transform .15s; }
+.bixtok-tabs button.on { background: linear-gradient(135deg, #FFD700, #c9a227); color: #0b0b0f; }
+.bixtok-tabs button:active { transform: scale(.94); }
+.bxt-nav { background: color-mix(in oklab, #07070a 88%, transparent); backdrop-filter: blur(18px); border-top: 1px solid color-mix(in oklab, #FFD700 22%, transparent); }
+.bxt-nav button.on small { color: #FFD700; }
+.bxt-nav button.on svg { filter: drop-shadow(0 0 6px color-mix(in oklab, #FFD700 60%, transparent)); color: #FFD700; }
+.bxt-badge { animation: bxtBreath 2.2s ease-in-out infinite; }
+@keyframes bxtBreath { 50% { transform: scale(1.15); box-shadow: 0 0 0 4px color-mix(in oklab, #ef4444 25%, transparent); } }
+.bixtok-rail button:active { transform: scale(.88); }
+.bxl-tools.compact > :nth-child(n+6):not(.bxl-tools-more) { display: none; }
+.bxl-tools-more { border: 1px solid color-mix(in oklab, #FFD700 45%, transparent) !important; color: #FFD700 !important; }
+.bixtok-giftbtn { animation: bxtGiftGlow 2.6s ease-in-out infinite; }
+@keyframes bxtGiftGlow { 50% { box-shadow: 0 0 16px 2px color-mix(in oklab, #FFD700 55%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .bxt-badge, .bixtok-giftbtn { animation: none; } }

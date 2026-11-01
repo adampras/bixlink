@@ -197,7 +197,7 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
       {v.creator_id === me && <div className="bxt-follow me"><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><small>You</small></div>}
       {v.creator_id && v.creator_id !== me && liveHosts.has(v.creator_id) && <button aria-label="Watch LIVE" className="bxt-follow bxt-live-ring" onClick={() => onEnterLive?.(liveHosts.get(v.creator_id!)!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>LIVE</em><small>Watch</small></button>}
       {v.creator_id && v.creator_id !== me && !liveHosts.has(v.creator_id) && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
-      {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={() => void like(v)}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
+      {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={() => void like(v)}><Heart/><small>{fmtCount(v.likes + (liked[v.id] ? 1 : 0))}</small></button>}
       <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
       <button aria-label="Save" className={saved.ids.includes(v.id) ? 'on' : ''} onClick={() => onNote(saved.toggle(v.id) ? 'Saved to your profile' : 'Removed from saved')}><Bookmark/><small>Save</small></button>
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={() => setShare(v)}><Share2/><small>Share</small></button>}
@@ -506,3 +506,5 @@ function CreatorEarnings() {
     {open && <ul className="mt-2 space-y-1 text-xs">{(e?.recent ?? []).length === 0 ? <li className="text-muted-foreground">Belum ada hadiah.</li> : e!.recent.map((r, i) => <li key={i} className="flex justify-between gap-2"><span>@{r.sender} · {r.gift_name}</span><span>{Number(r.amount)} {r.currency} {r.claimed_at ? '✓' : '•'}</span></li>)}</ul>}
   </div>;
 }
+
+function fmtCount(n: number) { return n >= 1e6 ? `${(n / 1e6).toFixed(1).replace(/\.0$/, '')}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1).replace(/\.0$/, '')}K` : String(n); }
