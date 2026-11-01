@@ -246,8 +246,10 @@ function AutoVideo({ src, filter, muted, paused = false }: { src: string; filter
   const pausedRef = useRef(paused); pausedRef.current = paused;
   useEffect(() => { const el = ref.current; if (el && paused) { el.muted = true; el.pause(); } }, [paused]);
   useEffect(() => { const el = ref.current; if (!el) return; el.volume = 1; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting && !pausedRef.current) el.play().catch(() => { el.muted = true; void el.play().catch(() => {}); const on = () => { if (!mutedRef.current && !pausedRef.current && el.getBoundingClientRect().top < innerHeight / 2 && el.getBoundingClientRect().bottom > innerHeight / 2) { el.muted = false; void el.play().catch(() => {}); } }; window.addEventListener('pointerdown', on, { once: true }); }); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
+  const [pre, setPre] = useState<'metadata' | 'auto'>('metadata');
+  useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setPre('auto'); io.disconnect(); } }, { rootMargin: '120% 0px' }); io.observe(el); return () => io.disconnect(); }, []);
   const mutedRef = useRef(muted); useEffect(() => { mutedRef.current = muted; const el = ref.current; if (el) { el.muted = muted; if (!muted) el.volume = 1; } }, [muted]);
-  return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }} onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>;
+  return <video ref={ref} src={src} loop muted={muted} playsInline preload={pre} className="bixtok-video" style={{ filter: filterCss(filter) }} onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>;
 }
 
 function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean; bypass: boolean; uid: string; schedules: Sched[] }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
