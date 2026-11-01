@@ -215,26 +215,30 @@ function embedUrl(u: string): string | null {
 let currentVid: Video | null = null;
 function Media({ v, muted }: { v: Video; muted: boolean }) {
   const embed = !v.media_path ? embedUrl(v.src) : null;
-  const ref = useRef<HTMLDivElement>(null); const [show, setShow] = useState(false);
+  const mini = useBixtokMini(); const silent = !!mini.feed || !!mini.room;
+  const ref = useRef<HTMLDivElement>(null); const [showRaw, setShow] = useState(false); const show = showRaw && !silent;
+  muted = muted || silent;
   const audio = useRef<HTMLAudioElement | null>(null);
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => setShow(!!e?.isIntersecting), { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
   useEffect(() => { if (!v.music_url) return undefined; if (show && !muted) { audio.current ??= new Audio(v.music_url); audio.current.loop = true; audio.current.volume = 1; audio.current.play().catch(() => {}); } else audio.current?.pause(); return () => audio.current?.pause(); }, [show, muted, v.music_url]);
   useEffect(() => { if (show) { currentVid = v; bixtokMini.rememberId(v.id); } }, [show, v]);
   return <div ref={ref} className="bixtok-media">
-    {v.clean ? <AutoVideo src={v.clean} filter={v.filter} muted={muted || !!v.music_url}/> : embed ? (show ? (new URL(embed).hostname === 'www.tiktok.com'
+    {v.clean ? <AutoVideo src={v.clean} filter={v.filter} muted={muted || !!v.music_url} paused={silent}/> : embed ? (show ? (new URL(embed).hostname === 'www.tiktok.com'
       ? <BixtokTikTokPlayer src={embed} title={v.caption || 'BIXTOK post'} muted={muted} className="bixtok-embed" filter={filterCss(v.filter)}/>
       : <iframe src={muted ? embed : embed.replace('mute=1', 'mute=0')} title={v.caption || 'BIXTOK post'} className="bixtok-embed" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ filter: filterCss(v.filter) }}/>) : <div className="bixtok-embed"/>)
      : v.media_kind === 'photo' ? <img src={v.src} alt={v.caption} className="bixtok-video" style={{ filter: filterCss(v.filter) }}/>
-     : <AutoVideo src={v.src} filter={v.filter} muted={muted || !!v.music_url}/>}
+     : <AutoVideo src={v.src} filter={v.filter} muted={muted || !!v.music_url} paused={silent}/>}
     {embed && !v.clean && <a href={v.src} target="_blank" rel="noreferrer" className="bixtok-src">{v.source_kind}</a>}
   </div>;
 }
 
-function AutoVideo({ src, filter, muted }: { src: string; filter?: string | null; muted: boolean }) {
+function AutoVideo({ src, filter, muted, paused = false }: { src: string; filter?: string | null; muted: boolean; paused?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => { const el = ref.current; if (!el) return; el.volume = 1; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) el.play().catch(() => { el.muted = true; void el.play().catch(() => {}); const on = () => { if (!mutedRef.current) { el.muted = false; void el.play().catch(() => {}); } }; window.addEventListener('pointerdown', on, { once: true }); }); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
+  const pausedRef = useRef(paused); pausedRef.current = paused;
+  useEffect(() => { const el = ref.current; if (el && paused) { el.muted = true; el.pause(); } }, [paused]);
+  useEffect(() => { const el = ref.current; if (!el) return; el.volume = 1; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting && !pausedRef.current) el.play().catch(() => { el.muted = true; void el.play().catch(() => {}); const on = () => { if (!mutedRef.current && !pausedRef.current && el.getBoundingClientRect().top < innerHeight / 2 && el.getBoundingClientRect().bottom > innerHeight / 2) { el.muted = false; void el.play().catch(() => {}); } }; window.addEventListener('pointerdown', on, { once: true }); }); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
   const mutedRef = useRef(muted); useEffect(() => { mutedRef.current = muted; const el = ref.current; if (el) { el.muted = muted; if (!muted) el.volume = 1; } }, [muted]);
-  return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }}/>;
+  return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }} onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>;
 }
 
 function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean; bypass: boolean; uid: string; schedules: Sched[] }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
