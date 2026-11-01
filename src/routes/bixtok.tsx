@@ -111,7 +111,7 @@ function BixtokPage() {
   };
   toggleFollowRef.current = (id: string) => { void toggleFollow(id); };
   useEffect(() => { if (room) bixtokMini.update({ following: following.has(room.host_id) }); }, [room?.host_id, following.has(room?.host_id ?? '')]);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [section, setSection] = useState<'home' | 'inbox' | 'profile' | 'balance'>('home');
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
   const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
@@ -130,7 +130,7 @@ function BixtokPage() {
           setMuted(next);
         }}>{muted ? <VolumeX size={18}/> : <Volume2 size={18}/>}</Button>
         <button type="button" aria-label="Mini mode" title="Mini mode" className="bixtok-icon" onClick={() => {
-          const v = vids[0]; if (v) { const e = !v.media_path ? embedUrl(v.src) : null; bixtokMini.setFeed(e ? { src: e, kind: 'iframe', title: v.caption } : { src: v.clean ?? v.src, kind: v.media_kind === 'photo' ? 'img' : 'video', title: v.caption }); }
+          const v = (currentVid && vids.find(x => x.id === currentVid!.id)) || vids[0]; if (v) { const e = !v.media_path ? embedUrl(v.src) : null; bixtokMini.setFeed(e ? { src: e, kind: 'iframe', title: v.caption } : { src: v.clean ?? v.src, kind: v.media_kind === 'photo' ? 'img' : 'video', title: v.caption }); }
           if (window.history.length > 1) window.history.back(); else void navigate({ to: '/dashboard' });
         }}><Minimize2 size={18}/></button>
       </header>
@@ -184,12 +184,14 @@ function embedUrl(u: string): string | null {
   return null;
 }
 
+let currentVid: Video | null = null;
 function Media({ v, muted }: { v: Video; muted: boolean }) {
   const embed = !v.media_path ? embedUrl(v.src) : null;
   const ref = useRef<HTMLDivElement>(null); const [show, setShow] = useState(false);
   const audio = useRef<HTMLAudioElement | null>(null);
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => setShow(!!e?.isIntersecting), { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
   useEffect(() => { if (!v.music_url) return undefined; if (show && !muted) { audio.current ??= new Audio(v.music_url); audio.current.loop = true; audio.current.volume = 1; audio.current.play().catch(() => {}); } else audio.current?.pause(); return () => audio.current?.pause(); }, [show, muted, v.music_url]);
+  useEffect(() => { if (show) currentVid = v; }, [show, v]);
   return <div ref={ref} className="bixtok-media">
     {v.clean ? <AutoVideo src={v.clean} filter={v.filter} muted={muted || !!v.music_url}/> : embed ? (show ? (new URL(embed).hostname === 'www.tiktok.com'
       ? <BixtokTikTokPlayer src={embed} title={v.caption || 'BIXTOK post'} muted={muted} className="bixtok-embed" filter={filterCss(v.filter)}/>
