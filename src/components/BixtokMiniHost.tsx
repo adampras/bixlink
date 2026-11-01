@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent as RPE } from 'react';
-import { Maximize2, X } from 'lucide-react';
+import { Maximize2, Volume2, X } from 'lucide-react';
 import { useRouter } from '@tanstack/react-router';
 import { bixtokMini, useBixtokMini } from '@/lib/bixtok-mini';
 
@@ -103,12 +103,14 @@ export function BixtokMiniHost() {
   const { room, mini, feed } = useBixtokMini();
   const router = useRouter();
   const drag = useDrag();
-  if (!room && feed && router.state.location.pathname !== '/bixtok') return <div className={`bxl-mini bxl-mini-feed${drag.tucked ? ' bxl-tucked' : ''}`} {...drag.bind}>
-    {feed.kind === 'iframe' ? <iframe src={feed.src.replace('mute=1', 'mute=0')} title={feed.title} allow="autoplay; encrypted-media" className="h-full w-full border-0"/> : feed.kind === 'video' ? <SoundVideo src={feed.src}/> : <img src={feed.src} alt={feed.title} className="h-full w-full object-contain"/>}
+  const [nonce, setNonce] = useState(0);
+  if (!room && feed) return <div className={`bxl-mini bxl-mini-feed${drag.tucked ? ' bxl-tucked' : ''}`} {...drag.bind}>
+    {feed.kind === 'iframe' ? <iframe key={`${feed.src}-${nonce}`} src={feed.src.replace('mute=1', 'mute=0')} title={feed.title} allow="autoplay; encrypted-media" className="h-full w-full border-0"/> : feed.kind === 'video' ? <SoundVideo key={nonce} src={feed.src}/> : <img src={feed.src} alt={feed.title} className="h-full w-full object-contain"/>}
     {feed.title && <p className="bxl-mini-cap">{feed.title}</p>}
     {drag.handles}
     <div className="bxl-mini-ctl"><span className="bxl-mini-badge feed">BIXTOK</span>
-      <button type="button" aria-label="Open BIXTOK" onClick={() => { bixtokMini.setFeed(null); void router.navigate({ to: '/bixtok' }); }}><Maximize2 size={14}/></button>
+      {feed.kind !== 'img' && <button type="button" aria-label="Sound on" onClick={() => setNonce(n => n + 1)}><Volume2 size={14}/></button>}
+      <button type="button" aria-label="Open BIXTOK" onClick={() => { if (feed.id) bixtokMini.rememberId(feed.id); bixtokMini.setFeed(null); void router.navigate({ to: '/bixtok' }); }}><Maximize2 size={14}/></button>
       <button type="button" aria-label="Close BIXTOK mini" onClick={() => bixtokMini.setFeed(null)}><X size={14}/></button></div>
   </div>;
   if (!room) return null;
