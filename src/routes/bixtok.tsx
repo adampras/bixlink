@@ -116,7 +116,11 @@ function BixtokPage() {
   const [muted, setMuted] = useState(false);
   const [section, setSection] = useState<'home' | 'inbox' | 'profile' | 'balance'>('home');
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
-  const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
+  const [tag, setTag] = useState('');
+  const baseVids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
+  const tags = [...new Set(baseVids.flatMap(v => (v.caption.match(/#[\p{L}\d_]+/gu) ?? []).map(t => t.toLowerCase())))].slice(0, 12);
+  const vids = tag ? baseVids.filter(v => v.caption.toLowerCase().includes(tag)) : baseVids;
+  const top = q.data ? [...q.data.videos.reduce((m, v) => { if (!v.creator_id) return m; const c = m.get(v.creator_id) ?? { name: v.creator_name, likes: 0, posts: 0 }; c.likes += Number(v.likes || 0); c.posts++; m.set(v.creator_id, c); return m; }, new Map<string, { name: string; likes: number; posts: number }>()).values()].sort((a, b) => b.likes - a.likes).slice(0, 5) : [];
 
   return <MemberGate ready={ready} signedIn={!!user} title="BIXTOK"><main className="bixtok">
     {q.isError ? <p className="p-8 text-sm text-destructive">Could not load BIXTOK.</p>
@@ -137,8 +141,9 @@ function BixtokPage() {
         }}><Minimize2 size={18}/></button>
       </header>
       <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div></>}
+      {section === 'home' && tab !== 'live' && tags.length > 0 && <div className="bxt-tags" role="tablist" aria-label="Topics"><button className={!tag ? 'on' : ''} onClick={() => setTag('')}>All</button>{tags.map(t => <button key={t} className={tag === t ? 'on' : ''} onClick={() => setTag(tag === t ? '' : t)}>{t}</button>)}</div>}
       {section === 'home' && (tab === 'live'
-        ? <LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/>
+        ? <>{top.length > 0 && <div className="bxt-board" aria-label="Top creators"><b>🏆 Top creators</b>{top.map((c, i) => <span key={c.name + i}><i>{['👑','🥈','🥉','4','5'][i]}</i>@{c.name}<small>{fmtCount(c.likes)} ♥</small></span>)}</div>}<LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/></>
         : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote} liveHosts={new Map(q.data.lives.map(l => [l.host_id, l]))} onEnterLive={setRoom}/>)}
       {section === 'inbox' && <Inbox followers={followers.size} lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
       {section === 'profile' && <ProfilePage follow={{ following, followers }} me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} all={q.data.videos} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
