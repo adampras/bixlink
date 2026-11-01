@@ -130,7 +130,7 @@ function BixtokPage() {
           setMuted(next);
         }}>{muted ? <VolumeX size={18}/> : <Volume2 size={18}/>}</Button>
         <button type="button" aria-label="Mini mode" title="Mini mode" className="bixtok-icon" onClick={() => {
-          const v = (currentVid && vids.find(x => x.id === currentVid!.id)) || vids[0]; if (v) { const e = !v.media_path ? embedUrl(v.src) : null; bixtokMini.setFeed(e ? { src: e, kind: 'iframe', title: v.caption } : { src: v.clean ?? v.src, kind: v.media_kind === 'photo' ? 'img' : 'video', title: v.caption }); }
+          const v = (currentVid && vids.find(x => x.id === currentVid!.id)) || vids[0]; if (v) { const e = !v.media_path ? embedUrl(v.src) : null; bixtokMini.setFeed(e ? { src: e, kind: 'iframe', title: v.caption, id: v.id } : { src: v.clean ?? v.src, kind: v.media_kind === 'photo' ? 'img' : 'video', title: v.caption, id: v.id }); }
           if (window.history.length > 1) window.history.back(); else void navigate({ to: '/dashboard' });
         }}><Minimize2 size={18}/></button>
       </header>
@@ -158,8 +158,10 @@ function BixtokPage() {
 function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers = new Set<string>(), onFollow, onGift, onNote }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; following?: Set<string>; followers?: Set<string>; onFollow: (id: string) => void; onGift: (id: string) => void; onNote: (m: string) => void }) {
   const qc = useQueryClient();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
+  const [resume] = useState(() => bixtokMini.takeLastId());
+  useEffect(() => { if (!resume) return; requestAnimationFrame(() => document.querySelector(`[data-vid="${resume}"]`)?.scrollIntoView({ block: 'start' })); }, [resume, videos.length > 0]);
   if (!videos.length) return <p className="grid h-full place-items-center text-sm text-muted-foreground">No posts yet. Tap + to create one.</p>;
-  return <div className="bixtok-feed">{videos.map(v => <section key={v.id} className="bixtok-slide">
+  return <div className="bixtok-feed">{videos.map(v => <section key={v.id} data-vid={v.id} className="bixtok-slide">
     <Media v={v} muted={muted}/>
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
     <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
@@ -195,7 +197,7 @@ function Media({ v, muted }: { v: Video; muted: boolean }) {
   return <div ref={ref} className="bixtok-media">
     {v.clean ? <AutoVideo src={v.clean} filter={v.filter} muted={muted || !!v.music_url}/> : embed ? (show ? (new URL(embed).hostname === 'www.tiktok.com'
       ? <BixtokTikTokPlayer src={embed} title={v.caption || 'BIXTOK post'} muted={muted} className="bixtok-embed" filter={filterCss(v.filter)}/>
-      : <iframe src={embed} title={v.caption || 'BIXTOK post'} className="bixtok-embed" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ filter: filterCss(v.filter) }}/>) : <div className="bixtok-embed"/>)
+      : <iframe src={muted ? embed : embed.replace('mute=1', 'mute=0')} title={v.caption || 'BIXTOK post'} className="bixtok-embed" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ filter: filterCss(v.filter) }}/>) : <div className="bixtok-embed"/>)
      : v.media_kind === 'photo' ? <img src={v.src} alt={v.caption} className="bixtok-video" style={{ filter: filterCss(v.filter) }}/>
      : <AutoVideo src={v.src} filter={v.filter} muted={muted || !!v.music_url}/>}
     {embed && !v.clean && <a href={v.src} target="_blank" rel="noreferrer" className="bixtok-src">{v.source_kind}</a>}
@@ -204,7 +206,8 @@ function Media({ v, muted }: { v: Video; muted: boolean }) {
 
 function AutoVideo({ src, filter, muted }: { src: string; filter?: string | null; muted: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => { const el = ref.current; if (!el) return; el.volume = 1; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) el.play().catch(() => {}); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
+  useEffect(() => { const el = ref.current; if (!el) return; el.volume = 1; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) el.play().catch(() => { el.muted = true; void el.play().catch(() => {}); const on = () => { if (!mutedRef.current) { el.muted = false; void el.play().catch(() => {}); } }; window.addEventListener('pointerdown', on, { once: true }); }); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
+  const mutedRef = useRef(muted); useEffect(() => { mutedRef.current = muted; const el = ref.current; if (el) { el.muted = muted; if (!muted) el.volume = 1; } }, [muted]);
   return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }}/>;
 }
 
