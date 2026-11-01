@@ -4863,3 +4863,29 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-qa-toggle.on { color: var(--background); background: var(--accent); }
 .bixtok-chat p.q { border-left: 2px solid var(--accent); padding-left: .4rem; }
 @media (prefers-reduced-motion: reduce) { .bxt-dbl-heart, .bixtok-rail button.on svg { animation-duration: .01s; } }
+
+/* BIXTOK polish: LIVE ring, vinyl, progress, share, creator peek */
+.bxt-live-ring>span{border-color:oklch(0.65 0.24 25);box-shadow:0 0 0 3px oklch(0.85 0.15 85 / .7);animation:bxtRing 1.4s ease-in-out infinite}
+.bxt-live-ring>em{width:auto;padding:0 5px;border-radius:6px;font-size:8px;letter-spacing:.06em;background:oklch(0.6 0.24 25);color:oklch(0.98 0 0)}
+@keyframes bxtRing{50%{box-shadow:0 0 0 7px oklch(0.85 0.15 85 / 0)}}
+.bxt-name{background:none;border:0;padding:0;color:inherit;text-align:left}
+.bxt-vinyl{position:absolute;right:14px;bottom:92px;z-index:4;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,oklch(0.8 0.14 85) 0 28%,oklch(0.12 0 0) 30% 100%);border:2px solid oklch(0.3 0 0);animation:bxtSpin 4s linear infinite;pointer-events:none}
+.bxt-vinyl.still{animation-play-state:paused}
+.bxt-vinyl>span{font-size:10px;font-weight:900;color:oklch(0.15 0 0)}
+.bxt-vinyl>i{position:absolute;left:-6px;top:-4px;font-style:normal;color:oklch(0.85 0.15 85);animation:bxtNote 2.4s ease-out infinite}
+.bxt-vinyl>i+i{animation-delay:1.2s}
+@keyframes bxtSpin{to{transform:rotate(360deg)}}
+@keyframes bxtNote{from{opacity:1;transform:translate(0,0) rotate(0)}to{opacity:0;transform:translate(-18px,-34px) rotate(-30deg)}}
+.bxt-progress{position:absolute;left:0;right:0;bottom:0;height:3px;z-index:5;background:oklch(1 0 0 / .15);pointer-events:none}
+.bxt-progress>span{display:block;height:100%;background:linear-gradient(90deg,oklch(0.8 0.14 85),oklch(0.9 0.12 95));transform-origin:left;transform:scaleX(0);transition:transform .25s linear}
+.bxt-playicon{position:absolute;inset:0;margin:auto;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;z-index:5;font-size:22px;color:oklch(0.9 0.12 90);background:oklch(0.1 0 0 / .55);pointer-events:none;animation:bxtPop .6s ease-out forwards}
+@keyframes bxtPop{from{transform:scale(.6);opacity:0}30%{transform:scale(1);opacity:1}to{opacity:0}}
+.bxt-share-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px}
+.bxt-share-grid>*{display:grid;justify-items:center;gap:6px;font-size:11px;background:none;border:0;color:inherit}
+.bxt-share-grid span{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:22px;background:oklch(0.18 0.01 85);border:1px solid oklch(0.8 0.14 85 / .4)}
+.bxt-share-note,.bxt-peek-body>p{padding:0 14px 14px;font-size:11px;opacity:.7;text-align:center}
+.bxt-peek-body{display:grid;justify-items:center;gap:6px;padding:14px}
+.bxt-peek-av{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:28px;font-weight:900;background:oklch(0.15 0.01 85);border:2px solid oklch(0.8 0.14 85)}
+.bxt-peek-av.live{border-color:oklch(0.62 0.24 25);animation:bxtRing 1.4s infinite}
+.bxt-peek-act{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+@media (prefers-reduced-motion:reduce){.bxt-vinyl,.bxt-vinyl>i,.bxt-live-ring>span{animation:none}}

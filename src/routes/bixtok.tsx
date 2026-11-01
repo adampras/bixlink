@@ -12,6 +12,7 @@ import { resolveBixtokLinks, cleanTiktokVideos } from '@/lib/bixtok.functions';
 import { bixtokMini, useBixtokMini } from '@/lib/bixtok-mini';
 import { Button } from '@/components/ui/button';
 import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
+import { copyText } from '@/lib/copy-text';
 
 export const Route = createFileRoute('/bixtok')({
   head: () => ({ meta: [
@@ -138,7 +139,7 @@ function BixtokPage() {
       <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div></>}
       {section === 'home' && (tab === 'live'
         ? <LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/>
-        : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote}/>)}
+        : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote} liveHosts={new Map(q.data.lives.map(l => [l.host_id, l]))} onEnterLive={setRoom}/>)}
       {section === 'inbox' && <Inbox followers={followers.size} lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
       {section === 'profile' && <ProfilePage follow={{ following, followers }} me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
       {section === 'balance' && <BalancePage stake={q.data.stake} cfg={q.data.cfg} onBack={() => setSection('profile')} onLive={() => { setSection('home'); setTab('live'); }}/>}
@@ -156,12 +157,15 @@ function BixtokPage() {
   </main></MemberGate>;
 }
 
-function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers = new Set<string>(), onFollow, onGift, onNote }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; following?: Set<string>; followers?: Set<string>; onFollow: (id: string) => void; onGift: (id: string) => void; onNote: (m: string) => void }) {
+function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers = new Set<string>(), onFollow, onGift, onNote, liveHosts = new Map<string, Live>(), onEnterLive }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; following?: Set<string>; followers?: Set<string>; onFollow: (id: string) => void; onGift: (id: string) => void; onNote: (m: string) => void; liveHosts?: Map<string, Live>; onEnterLive?: (l: Live) => void }) {
   const qc = useQueryClient();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [resume] = useState(() => bixtokMini.peekLastId());
   const [railOpen, setRailOpen] = useState(true);
   const [comments, setComments] = useState<Video | null>(null);
+  const [share, setShare] = useState<Video | null>(null);
+  const [peek, setPeek] = useState<Video | null>(null);
+  const ref = useQuery({ queryKey: ['bixtok-refcode', me], staleTime: 600_000, queryFn: async () => (await supabase.from('referral_codes').select('code').eq('user_id', me).maybeSingle()).data?.code ?? null });
   useEffect(() => { if (!resume || !videos.length) return; let n = 0; let t = 0;
     const go = () => { const el = document.querySelector(`[data-vid="${resume}"]`) as HTMLElement | null; const feed = el?.closest('.bixtok-feed') as HTMLElement | null;
       if (el && feed) { feed.style.scrollSnapType = 'none'; feed.scrollTop = el.offsetTop; requestAnimationFrame(() => { feed.style.scrollSnapType = ''; }); if (Math.abs(feed.scrollTop - el.offsetTop) < 4 || n > 20) return; }
@@ -180,19 +184,51 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
     <Media v={v} muted={muted}/>
     {tapRef.current.id === v.id && bursts.map(b => <Heart key={b.k} className="bxt-dbl-heart" style={{ left: b.x, top: b.y }} fill="currentColor" aria-hidden/>)}
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
-    <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
+    <div className="bixtok-meta"><button type="button" className="bxt-name" onClick={() => setPeek(v)}><b>@{v.creator_name}</b></button><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
+    <div className={`bxt-vinyl${muted ? ' still' : ''}`} aria-hidden><span>{v.creator_name.slice(0, 1).toUpperCase()}</span>{!muted && <><i>♪</i><i>♫</i></>}</div>
     <aside className={`bixtok-rail bxt-rail-shield${railOpen ? '' : ' closed'}`}>
       {railOpen && <>
       {v.creator_id === me && <div className="bxt-follow me"><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><small>You</small></div>}
-      {v.creator_id && v.creator_id !== me && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
+      {v.creator_id && v.creator_id !== me && liveHosts.has(v.creator_id) && <button aria-label="Watch LIVE" className="bxt-follow bxt-live-ring" onClick={() => onEnterLive?.(liveHosts.get(v.creator_id!)!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>LIVE</em><small>Watch</small></button>}
+      {v.creator_id && v.creator_id !== me && !liveHosts.has(v.creator_id) && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={() => void like(v)}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
       <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
-      {cfg.features['share'] !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
+      {cfg.features['share'] !== false && <button aria-label="Share" onClick={() => setShare(v)}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
       </>}
       <button type="button" className="bxt-rail-toggle" aria-label={railOpen ? 'Collapse menu' : 'Expand menu'} onClick={() => setRailOpen(o => !o)}>{railOpen ? '›' : '‹'}</button>
     </aside>
-  </section>)}{comments && <CommentsSheet video={comments} me={me} onClose={() => setComments(null)} onNote={onNote}/>}</div>;
+  </section>)}{comments && <CommentsSheet video={comments} me={me} onClose={() => setComments(null)} onNote={onNote}/>}
+  {share && <ShareSheet video={share} code={ref.data ?? null} onClose={() => setShare(null)} onNote={onNote}/>}
+  {peek && <div className="bxt-cmt-wrap" onClick={() => setPeek(null)}><div className="bxt-cmt bxt-peek" role="dialog" aria-label="Creator" onClick={e => e.stopPropagation()}>
+    <header><b>Creator</b><button aria-label="Close" onClick={() => setPeek(null)}><X size={18}/></button></header>
+    <div className="bxt-peek-body"><span className={`bxt-peek-av${peek.creator_id && liveHosts.has(peek.creator_id) ? ' live' : ''}`}>{peek.creator_name.slice(0, 1).toUpperCase()}</span><h3>@{peek.creator_name}</h3>
+      <p>{videos.filter(x => x.creator_id === peek.creator_id).length} posts · {videos.filter(x => x.creator_id === peek.creator_id).reduce((a, x) => a + Number(x.likes || 0), 0)} likes</p>
+      {peek.creator_id && peek.creator_id !== me && <div className="bxt-peek-act">
+        {liveHosts.has(peek.creator_id) && <button className="bixtok-cta" onClick={() => { const l = liveHosts.get(peek.creator_id!)!; setPeek(null); onEnterLive?.(l); }}>🔴 Watch LIVE</button>}
+        <button className="bixtok-cta" onClick={() => onFollow(peek.creator_id!)}>{following.has(peek.creator_id) ? 'Unfollow' : 'Follow'}</button>
+        {peek.allow_gifts !== false && <button className="bixtok-cta" onClick={() => { const id = peek.id; setPeek(null); onGift(id); }}>🎁 Gift</button>}
+      </div>}</div>
+  </div></div>}</div>;
+}
+
+/** Share link carries the sharer's referral code so new sign-ups join their network. */
+export function shareLink(origin: string, code: string | null, vid: string): string {
+  return code ? `${origin}/register?ref=${encodeURIComponent(code)}&vid=${vid}` : `${origin}/bixtok?vid=${vid}`;
+}
+function ShareSheet({ video, code, onClose, onNote }: { video: Video; code: string | null; onClose: () => void; onNote: (m: string) => void }) {
+  const url = shareLink(location.origin, code, video.id); const text = `${video.caption || 'Watch this on BIXTOK'} — ${url}`;
+  const copy = async () => { onNote(await copyText(url) ? 'Link copied' : 'Copy failed'); };
+  return <div className="bxt-cmt-wrap" onClick={onClose}><div className="bxt-cmt bxt-share" role="dialog" aria-label="Share" onClick={e => e.stopPropagation()}>
+    <header><b>Share video</b><button aria-label="Close" onClick={onClose}><X size={18}/></button></header>
+    <div className="bxt-share-grid">
+      <a href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><span>💬</span>WhatsApp</a>
+      <a href={`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(video.caption || 'BIXTOK')}`} target="_blank" rel="noreferrer"><span>✈️</span>Telegram</a>
+      <button onClick={copy}><span>🔗</span>Copy link</button>
+      {typeof navigator !== 'undefined' && 'share' in navigator && <button onClick={() => { void navigator.share({ title: 'BIXTOK', text: video.caption, url }).catch(() => {}); }}><span>📤</span>More</button>}
+    </div>
+    <p className="bxt-share-note">{code ? `Your referral code ${code} is included — new members who sign up join your network.` : 'Referral code not found; a plain BIXTOK link is shared.'}</p>
+  </div></div>;
 }
 
 type Cmt = { id: string; user_id: string; author_name: string; body: string; created_at: string };
@@ -249,7 +285,14 @@ function AutoVideo({ src, filter, muted, paused = false }: { src: string; filter
   const [pre, setPre] = useState<'metadata' | 'auto'>('metadata');
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setPre('auto'); io.disconnect(); } }, { rootMargin: '120% 0px' }); io.observe(el); return () => io.disconnect(); }, []);
   const mutedRef = useRef(muted); useEffect(() => { mutedRef.current = muted; const el = ref.current; if (el) { el.muted = muted; if (!muted) el.volume = 1; } }, [muted]);
-  return <video ref={ref} src={src} loop muted={muted} playsInline preload={pre} className="bixtok-video" style={{ filter: filterCss(filter) }} onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>;
+  const bar = useRef<HTMLSpanElement>(null); const tapT = useRef(0); const [icon, setIcon] = useState<'play' | 'pause' | null>(null);
+  const onClick = (e: React.MouseEvent<HTMLVideoElement>) => { const el = e.currentTarget; clearTimeout(tapT.current); if (e.detail > 1) return;
+    tapT.current = window.setTimeout(() => { if (el.paused) { void el.play().catch(() => {}); setIcon('play'); } else { el.pause(); setIcon('pause'); } window.setTimeout(() => setIcon(null), 600); }, 300); };
+  return <><video ref={ref} src={src} loop muted={muted} playsInline preload={pre} className="bixtok-video" style={{ filter: filterCss(filter) }} onClick={onClick}
+    onTimeUpdate={e => { const el = e.currentTarget; if (bar.current && el.duration) bar.current.style.transform = `scaleX(${el.currentTime / el.duration})`; }}
+    onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>
+    <span className="bxt-progress" aria-hidden><span ref={bar}/></span>
+    {icon && <span className="bxt-playicon" aria-hidden>{icon === 'pause' ? '❚❚' : '▶'}</span>}</>;
 }
 
 function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean; bypass: boolean; uid: string; schedules: Sched[] }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
