@@ -596,10 +596,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       {sheet === 'fx' && <div>
         <p className="mt-1 text-xs opacity-70">Effects run on your phone — viewers see and hear them with no extra data.</p>
         <div className="bxl-board">{FACE_FILTERS.map(f => <button key={f.id} className={faceFx === f.id ? 'on' : ''} onClick={() => { setFaceFx(f.id); setLevels(f.levels); }}><span>{f.id === 'none' ? '🙂' : '✨'}</span>{f.name}</button>)}</div>
-        <div className="bxl-sliders">{FX_SLIDERS.map(s => <label key={s.key}><span>{s.label}<b>{levels[s.key]}</b></span>
-          <input type="range" min={0} max={100} step={1} value={levels[s.key]} aria-label={s.label} onChange={e => { const n = +e.target.value; setLevels(l => ({ ...l, [s.key]: n })); }}/></label>)}
-          <button type="button" className="bxl-btn ghost" onClick={() => { setFaceFx('none'); setLevels(FACE_FILTERS[0]!.levels); }}>Reset to original</button>
-        </div>
+        <button type="button" className="bxl-btn ghost mt-2 w-full" onClick={() => { setFaceFx('none'); setLevels(FACE_FILTERS[0]!.levels); }}>Reset to original</button>
         <h4 className="mt-3 text-xs font-bold opacity-80">Voice changer</h4>
         <div className="bxl-board">{VOICE_FX.map(v => <button key={v.id} className={voiceFx === v.id ? 'on' : ''} onClick={() => setVoiceFx(v.id)}><span>{v.id === 'robot' ? '🤖' : v.id === 'deep' ? '🎙️' : v.id === 'echo' ? '🔊' : v.id === 'studio' ? '🎧' : '🗣️'}</span>{v.name}</button>)}</div>
         <button type="button" className="bxl-fx-done" onClick={() => setSheet(null)}><Check size={16}/> Done · close filters</button>
