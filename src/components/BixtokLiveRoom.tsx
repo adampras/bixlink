@@ -530,8 +530,13 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <div className="mt-2 flex gap-2"><button type="submit" className="bxl-btn">Pin</button>{pinned && <button type="button" className="bxl-btn ghost" onClick={() => savePin('')}>Unpin</button>}</div>
     </form></div>}
     {sheet && <div className="bixtok-sheet-wrap" onClick={() => setSheet(null)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
-      <div className="flex items-center justify-between"><h3 className="font-bold">{sheet === 'board' ? 'Soundboard' : sheet === 'showcase' ? 'Showcase card' : 'PK battle'}</h3><button aria-label="Close" onClick={() => setSheet(null)}><X size={18}/></button></div>
+      <div className="flex items-center justify-between"><h3 className="font-bold">{sheet === 'board' ? 'Soundboard' : sheet === 'showcase' ? 'Showcase card' : sheet === 'bg' ? 'Camera off · background' : 'PK battle'}</h3><button aria-label="Close" onClick={() => setSheet(null)}><X size={18}/></button></div>
       {sheet === 'board' && <div className="bxl-board">{SOUNDBOARD.map(([k, e, l]) => <button key={k} onClick={() => sendSfx(k)}><span>{e}</span>{l}</button>)}<p>Everyone in the room hears it.</p></div>}
+      {sheet === 'bg' && <div>
+        <p className="mt-1 text-xs opacity-70">Hide your camera and show a background — your voice stays live. Saves data too.</p>
+        <div className="bxl-bg-grid">{allBackdrops(cfg.live_backdrops).map(b => <button key={b.id} type="button" className={camOff && (backdrop ?? 'obsidian-gold') === b.id ? 'on' : ''} onClick={() => { void setBg(true, b.id); }}><i style={{ background: b.css }}/><small>{b.name}</small></button>)}</div>
+        {camOff && <button type="button" className="bxl-btn mt-3 w-full" onClick={() => { void setBg(false, backdrop); setSheet(null); }}><Camera size={14}/> Turn camera back on</button>}
+      </div>}
       {sheet === 'showcase' && <div className="bxl-board">{(Object.keys(SHOWCASE) as ShowcaseKey[]).map(k => <button key={k} className={showcase === k ? 'on' : ''} onClick={() => saveShowcase(k)}><span>{SHOWCASE[k].emoji}</span>{SHOWCASE[k].title}</button>)}
         {showcase && <button className="ghost" onClick={() => saveShowcase(null)}>Remove card</button>}</div>}
       {sheet === 'pk' && <PkSetup players={[{ id: live.host_id, name: live.host_name }, ...onStage.map(s => ({ id: s.user_id, name: s.name }))]} active={!!pk} onStart={startPk} onEnd={() => { void endPk(); setSheet(null); }}/>}

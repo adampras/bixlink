@@ -1,3 +1,4 @@
+import { copyText } from '@/lib/copy-text';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
@@ -49,8 +50,8 @@ function ProfilePage() {
   ].filter(Boolean) as { Icon: typeof BadgeCheck; label: string; cls: string }[];
   const referralUrl = data?.referral?.code ? `https://bixlink.com/register?ref=${data.referral.code}` : '';
   const signOut = async () => { await qc.cancelQueries(); qc.clear(); await supabase.auth.signOut(); navigate({ to: '/auth', replace: true }); };
-  const copyReferral = async () => { if (!referralUrl) return; await navigator.clipboard.writeText(referralUrl); setNotice('Referral link copied.'); };
-  const copyCode = async () => { if (!data?.referral?.code) return; await navigator.clipboard.writeText(data.referral.code); setNotice('Referral code copied.'); };
+  const copyReferral = async () => { if (!referralUrl) return; setNotice(await copyText(referralUrl) ? 'Referral link copied.' : 'Copy blocked — press and hold the link to copy.'); };
+  const copyCode = async () => { if (!data?.referral?.code) return; setNotice(await copyText(data.referral.code) ? 'Referral code copied.' : 'Copy blocked — press and hold the code to copy.'); };
   return <BixShell><main className="profile-page mx-auto max-w-3xl px-5 py-8 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="PROFILE">
       <header className="profile-identity"><div className="profile-avatar"><img src={headerMark.url} alt="BIXLINK member emblem"/></div><div className="min-w-0"><div className="eyebrow">{walletOnly ? 'WALLET MEMBER' : 'MEMBER ACCOUNT'}</div><h1 className="break-all">{accountLabel}</h1><p>Active since {user && formatDate(user.created_at)}</p>{badges.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{badges.map(({ Icon, label, cls }) => <span key={label} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${cls}`}><Icon size={11}/>{label}</span>)}</div>}</div></header>
