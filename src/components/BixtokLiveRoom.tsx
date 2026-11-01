@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff, UserRoundPlus } from 'lucide-react';
+import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff, UserRoundPlus, VideoOff, Image as ImageIcon } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { useLiveRtc } from '@/lib/bixtok-rtc';
 import { useReplayRecorder } from '@/lib/bixtok-replay';
 import { MEDIA_HELP, openLiveMedia, type MediaIssue } from '@/lib/bixtok-media';
+import { allBackdrops, backdropCss } from '@/lib/bixtok-backdrops';
+import { copyText } from '@/lib/copy-text';
 
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
 type Msg = { id: string; name: string; body: string; kind: string };
-type Cfg = { live_max_minutes: number; features: Record<string, boolean>; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean };
+type Cfg = { live_max_minutes: number; features: Record<string, boolean>; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean; backdrops_enabled?: boolean; live_backdrops?: unknown };
 type Pk = { a: string; b: string; started_at: string; ends_at: string };
 
 export const SHOWCASE = {
@@ -116,8 +118,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [stage, setStage] = useState<Stage[]>([]); const [stagePanel, setStagePanel] = useState(false);
   const [top, setTop] = useState<Top[]>([]); const [modMsg, setModMsg] = useState<Msg | null>(null); const [note, setNote] = useState('');
   const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
-  const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | null>(null); const [recording, setRecording] = useState(false);
+  const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | 'bg' | null>(null); const [recording, setRecording] = useState(false);
   const [saver, setSaver] = useState(false);
+  const [camOff, setCamOff] = useState(false); const [backdrop, setBackdrop] = useState<string | null>(null);
+  // Camera-off mode: stop sending camera frames (saves the host's data) while the mic keeps working.
+  useEffect(() => { local?.getVideoTracks().forEach(t => { t.enabled = !camOff; }); }, [camOff, local]);
   const [burst, setBurst] = useState<{ id: number; e: string } | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const chan = useRef<ReturnType<typeof supabase.channel> | null>(null); const pending = useRef(0);
@@ -162,13 +167,13 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     const pull = async (quiet = false) => {
       const [m, l, s] = await Promise.all([
         supabase.from('bixtok_live_messages').select('id,name,body,kind').eq('live_id', live.id).order('created_at', { ascending: false }).limit(40),
-        supabase.from('bixtok_lives').select('likes,status,pinned,showcase,pk').eq('id', live.id).maybeSingle(),
+        supabase.from('bixtok_lives').select('likes,status,pinned,showcase,pk,cam_off,backdrop').eq('id', live.id).maybeSingle(),
         supabase.from('bixtok_stage_requests').select('id,user_id,name,status').eq('live_id', live.id),
       ]);
       if (!alive) return [];
       const rows = ((m.data ?? []) as Msg[]).reverse();
       ingest.current(rows, quiet);
-      if (l.data) { setLikes(Math.max(0, Number(l.data.likes ?? 0)) + pending.current); setPinned(l.data.pinned ?? null); setShowcase((l.data.showcase as ShowcaseKey | null) ?? null); setPk((l.data.pk as Pk | null) ?? null); if (l.data.status !== 'live') setEnded(true); }
+      if (l.data) { setLikes(Math.max(0, Number(l.data.likes ?? 0)) + pending.current); setPinned(l.data.pinned ?? null); setShowcase((l.data.showcase as ShowcaseKey | null) ?? null); setPk((l.data.pk as Pk | null) ?? null); setCamOff(!!l.data.cam_off); setBackdrop(l.data.backdrop ?? null); if (l.data.status !== 'live') setEnded(true); }
       if (s.data) setStage(s.data as Stage[]);
       if (l.data?.pk) { const sc = await supabase.rpc('bixtok_pk_score', { p_live: live.id }); const r = (sc.data as { a_score: number; b_score: number }[] | null)?.[0]; if (alive && r) setPkScore([Number(r.a_score), Number(r.b_score)]); }
       if (tick++ % 3 === 0) { const t = await supabase.rpc('bixtok_live_top', { p_live: live.id }); if (alive && t.data) setTop(t.data as Top[]); }
@@ -186,6 +191,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       const n = Math.min(Number(payload?.n) || 1, 50); setLikes(l => l + n); spawn(Math.min(n, 4)); sfxRef.current.pop();
     }).on('broadcast', { event: 'chat' }, ({ payload }) => ingest.current([payload as Msg]))
       .on('broadcast', { event: 'pin' }, ({ payload }) => setPinned((payload?.text as string) || null))
+      .on('broadcast', { event: 'bg' }, ({ payload }) => { setCamOff(!!payload?.off); setBackdrop((payload?.id as string) || null); })
       .on('broadcast', { event: 'showcase' }, ({ payload }) => setShowcase((payload?.key as ShowcaseKey) || null))
       .on('broadcast', { event: 'sfx' }, ({ payload }) => playSfx.current(String(payload?.k ?? '')))
       .on('broadcast', { event: 'del' }, ({ payload }) => setMsgs(x => x.filter(y => y.id !== payload?.id)))
@@ -390,8 +396,16 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const onStage = stage.filter(s => s.status === 'approved');
   const stageMax = Math.min(5, Math.max(1, Number(cfg.stage_max ?? 5)));
 
+  const bgCss = backdropCss(backdrop, cfg.live_backdrops);
+  const setBg = async (off: boolean, id: string | null) => {
+    const { error } = await supabase.rpc('bixtok_live_backdrop', { p_live: live.id, p_cam_off: off, p_backdrop: id ?? '' });
+    if (error) return flash(error.message);
+    setCamOff(off); setBackdrop(id);
+    void chan.current?.send({ type: 'broadcast', event: 'bg', payload: { off, id } });
+  };
   return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
     <div className="bxl-stage" onClick={tap}>
+      {camOff && <div className="bxl-backdrop" style={{ background: bgCss }} aria-hidden><span className="bxl-backdrop-host"><Mic size={14}/> @{live.host_name} · Voice LIVE</span></div>}
       {host ? <>
           <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: 'contain', transform: sharing ? undefined : `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
           {camErr && <div className="bxl-camerr" role="alert" onClick={e => e.stopPropagation()}>
@@ -437,7 +451,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       {top.length > 0 && <span className="bxl-top" aria-label="Top gifters"><Crown size={12}/>{top.map((t, i) => <em key={i}>{['🥇', '🥈', '🥉'][i]} {t.name} · {Number(t.total)} {t.currency}</em>)}</span>}
     </div>
     {pinned && (/^REF:BIX-\d{6}$/.test(pinned) ? <div className="bxl-pin bxl-refcard"><UserRoundPlus size={14}/><span><b>Join @{live.host_name}'s team</b><small> · {pinned.slice(4)}</small></span>
-      {!host && <><button onClick={() => { void navigator.clipboard?.writeText(`${window.location.origin}/register?ref=${pinned.slice(4)}`).catch(() => {}); flash('Referral link copied'); }}><Copy size={12}/></button>
+      {!host && <><button onClick={() => { void copyText(`${window.location.origin}/register?ref=${pinned.slice(4)}`).then(ok => flash(ok ? 'Referral link copied' : `Copy failed — code: ${pinned.slice(4)}`)); }}><Copy size={12}/></button>
       <Link to="/register" search={{ ref: pinned.slice(4) }} target="_blank" onClick={() => window.localStorage.setItem('bixlink-ref', pinned.slice(4))}>Join</Link></>}</div>
       : <div className="bxl-pin"><Pin size={13}/><span>{pinned}</span></div>)}
     {!host && cfg.live_cta !== false && <div className="bxl-cta">
@@ -469,6 +483,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         {host && <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={ZOOM_MIN} max={ZOOM_MAX} step={0.05} value={zoom} onChange={e => setZoom(clampZoom(+e.target.value))}/></label>}
         <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
       </>}
+      {host && cfg.backdrops_enabled !== false && <button aria-label={camOff ? 'Turn camera on' : 'Camera off — show background'} className={camOff ? 'on' : ''} onClick={() => setSheet('bg')}>{camOff ? <VideoOff size={20}/> : <ImageIcon size={20}/>}</button>}
       {host && <button aria-label="Pin message" onClick={() => setPinEdit(pinned ?? '')}><Pin size={20}/></button>}
       {host && <button aria-label="Pin my referral card" onClick={() => { void pinReferral(); }}><UserRoundPlus size={20}/></button>}
       {host && cfg.soundboard !== false && <button aria-label="Soundboard" onClick={() => setSheet('board')}><Music2 size={20}/></button>}
@@ -515,8 +530,13 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <div className="mt-2 flex gap-2"><button type="submit" className="bxl-btn">Pin</button>{pinned && <button type="button" className="bxl-btn ghost" onClick={() => savePin('')}>Unpin</button>}</div>
     </form></div>}
     {sheet && <div className="bixtok-sheet-wrap" onClick={() => setSheet(null)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
-      <div className="flex items-center justify-between"><h3 className="font-bold">{sheet === 'board' ? 'Soundboard' : sheet === 'showcase' ? 'Showcase card' : 'PK battle'}</h3><button aria-label="Close" onClick={() => setSheet(null)}><X size={18}/></button></div>
+      <div className="flex items-center justify-between"><h3 className="font-bold">{sheet === 'board' ? 'Soundboard' : sheet === 'showcase' ? 'Showcase card' : sheet === 'bg' ? 'Camera off · background' : 'PK battle'}</h3><button aria-label="Close" onClick={() => setSheet(null)}><X size={18}/></button></div>
       {sheet === 'board' && <div className="bxl-board">{SOUNDBOARD.map(([k, e, l]) => <button key={k} onClick={() => sendSfx(k)}><span>{e}</span>{l}</button>)}<p>Everyone in the room hears it.</p></div>}
+      {sheet === 'bg' && <div>
+        <p className="mt-1 text-xs opacity-70">Hide your camera and show a background — your voice stays live. Saves data too.</p>
+        <div className="bxl-bg-grid">{allBackdrops(cfg.live_backdrops).map(b => <button key={b.id} type="button" className={camOff && (backdrop ?? 'obsidian-gold') === b.id ? 'on' : ''} onClick={() => { void setBg(true, b.id); }}><i style={{ background: b.css }}/><small>{b.name}</small></button>)}</div>
+        {camOff && <button type="button" className="bxl-btn mt-3 w-full" onClick={() => { void setBg(false, backdrop); setSheet(null); }}><Camera size={14}/> Turn camera back on</button>}
+      </div>}
       {sheet === 'showcase' && <div className="bxl-board">{(Object.keys(SHOWCASE) as ShowcaseKey[]).map(k => <button key={k} className={showcase === k ? 'on' : ''} onClick={() => saveShowcase(k)}><span>{SHOWCASE[k].emoji}</span>{SHOWCASE[k].title}</button>)}
         {showcase && <button className="ghost" onClick={() => saveShowcase(null)}>Remove card</button>}</div>}
       {sheet === 'pk' && <PkSetup players={[{ id: live.host_id, name: live.host_name }, ...onStage.map(s => ({ id: s.user_id, name: s.name }))]} active={!!pk} onStart={startPk} onEnd={() => { void endPk(); setSheet(null); }}/>}

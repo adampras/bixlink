@@ -1,10 +1,11 @@
+import { BACKDROPS, allBackdrops } from '@/lib/bixtok-backdrops';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Clapperboard, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 
-type Cfg = { link_slots: number; max_links: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max: number; live_cta: boolean; host_gifts: boolean; auto_follow_back: boolean; replay_enabled: boolean; soundboard: boolean; pk_enabled: boolean; showcase_enabled: boolean; pk_bix_weight: number; creator_share_pct?: number };
+type Cfg = { link_slots: number; max_links: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max: number; live_cta: boolean; host_gifts: boolean; auto_follow_back: boolean; replay_enabled: boolean; soundboard: boolean; pk_enabled: boolean; showcase_enabled: boolean; pk_bix_weight: number; creator_share_pct?: number; backdrops_enabled?: boolean; live_backdrops?: { id: string; name: string; url?: string; css?: string }[] };
 const FEATURES: [string, string][] = [['upload', 'Posting link & kamera member'], ['music', 'Pencarian musik'], ['filters', 'Filter wajah'], ['text', 'Teks bebas geser'], ['likes', 'Like'], ['comments', 'Komentar LIVE'], ['share', 'Bagikan'], ['bixp_gifts', 'Saweran BIXP'], ['bix_gifts', 'Saweran BIXCOIN']];
 
 export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
@@ -32,6 +33,7 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
   const [links, setLinks] = useState<string[]>(['', '', '', '', '']);
   const [off, setOff] = useState({ code: '', name: '' });
   const [sched, setSched] = useState({ title: '', at: '', host: 'BIXLINK OFFICIAL' });
+  const [bg, setBg] = useState({ name: '', value: '' });
   const [snd, setSnd] = useState({ title: '', artist: '', category: 'Trending', audio_url: '' });
 
   if (q.isLoading || !cfg) return <p className="mt-8 text-sm text-muted-foreground">Memuat BIXTOK…</p>;
@@ -51,6 +53,7 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
         <Toggle on={cfg.replay_enabled !== false} label="Rekam & arsip LIVE (Replay)" onChange={v => set({ replay_enabled: v })}/>
         <Toggle on={cfg.soundboard !== false} label="Soundboard host" onChange={v => set({ soundboard: v })}/>
         <Toggle on={cfg.showcase_enabled !== false} label="Etalase promo di LIVE" onChange={v => set({ showcase_enabled: v })}/>
+        <Toggle on={cfg.backdrops_enabled !== false} label="Mode kamera mati + background LIVE" onChange={v => set({ backdrops_enabled: v })}/>
         <Toggle on={cfg.pk_enabled !== false} label="PK Battle" onChange={v => set({ pk_enabled: v })}/>
         {FEATURES.map(([k, l]) => <Toggle key={k} on={cfg.features[k] !== false} label={l} onChange={v => set({ features: { ...cfg.features, [k]: v } })}/>)}
       </div>
@@ -71,7 +74,14 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
         <Button variant="outline" size="sm" onClick={() => set({ menus: [...cfg.menus, { key: `custom${Date.now()}`, label: 'New tab', enabled: true }] })}><Plus/>Tambah menu</Button>
         <p className="text-[11px] text-muted-foreground">Tab kustom menampilkan feed video utama.</p>
       </div>
-      <Button className="mt-5" disabled={!draft} onClick={() => run(supabase.from('bixtok_config').update({ enabled: cfg.enabled, live_enabled: cfg.live_enabled, gifts_enabled: cfg.gifts_enabled, live_min_stake_usd: Math.max(0, cfg.live_min_stake_usd), live_max_minutes: Math.min(720, Math.max(5, cfg.live_max_minutes)), features: cfg.features, menus: cfg.menus, stage_max: Math.min(5, Math.max(1, Math.round(cfg.stage_max ?? 5))), live_cta: cfg.live_cta !== false, host_gifts: cfg.host_gifts !== false, auto_follow_back: cfg.auto_follow_back !== false, replay_enabled: cfg.replay_enabled !== false, soundboard: cfg.soundboard !== false, showcase_enabled: cfg.showcase_enabled !== false, pk_enabled: cfg.pk_enabled !== false, creator_share_pct: Math.min(100, Math.max(50, Number(cfg.creator_share_pct) || 90)), pk_bix_weight: Math.min(10000, Math.max(1, Number(cfg.pk_bix_weight) || 100)), link_slots: Math.min(20, Math.max(1, cfg.link_slots)), max_links: Math.min(20, Math.max(1, cfg.max_links, cfg.link_slots)), updated_at: new Date().toISOString() }).eq('id', 1), 'Pengaturan BIXTOK tersimpan.')}>Simpan pengaturan</Button>
+      <div className="mt-5 rounded-lg border border-border p-3">
+        <b className="text-sm">Background LIVE ({BACKDROPS.length} bawaan + {(cfg.live_backdrops ?? []).length} tambahan)</b>
+        <p className="text-xs text-muted-foreground">Dipakai host saat kamera dimatikan. Tambahkan URL gambar https atau kode warna CSS (mis. linear-gradient(...)). Klik Simpan pengaturan setelah menambah.</p>
+        <div className="mt-2 grid grid-cols-6 gap-1.5 sm:grid-cols-10">{allBackdrops(cfg.live_backdrops).map(b => <div key={b.id} className="relative" title={b.name}><i className="block aspect-[9/14] rounded" style={{ background: b.css }}/>{b.id.startsWith('c:') && <button type="button" className="absolute -right-1 -top-1 rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground" onClick={() => set({ live_backdrops: (cfg.live_backdrops ?? []).filter(x => `c:${x.id}` !== b.id) })}>×</button>}</div>)}</div>
+        <div className="mt-2 flex flex-wrap gap-2"><input className="form-input flex-1" placeholder="Nama background" value={bg.name} onChange={e => setBg({ ...bg, name: e.target.value })}/><input className="form-input flex-[2]" placeholder="https://gambar.jpg atau linear-gradient(...)" value={bg.value} onChange={e => setBg({ ...bg, value: e.target.value })}/>
+          <Button type="button" variant="outline" disabled={!bg.value.trim()} onClick={() => { const v = bg.value.trim().slice(0, 280); const isUrl = /^https:\/\//.test(v); if (!isUrl && !/gradient\(|^#[0-9a-f]{3,8}$/i.test(v)) return onMessage('Gunakan URL https atau gradient/warna CSS.'); set({ live_backdrops: [...(cfg.live_backdrops ?? []), { id: Math.random().toString(36).slice(2, 9), name: bg.name.trim() || 'Custom', ...(isUrl ? { url: v } : { css: v }) }] }); setBg({ name: '', value: '' }); }}>Tambah</Button></div>
+      </div>
+      <Button className="mt-5" disabled={!draft} onClick={() => run(supabase.from('bixtok_config').update({ enabled: cfg.enabled, live_enabled: cfg.live_enabled, gifts_enabled: cfg.gifts_enabled, live_min_stake_usd: Math.max(0, cfg.live_min_stake_usd), live_max_minutes: Math.min(720, Math.max(5, cfg.live_max_minutes)), features: cfg.features, menus: cfg.menus, stage_max: Math.min(5, Math.max(1, Math.round(cfg.stage_max ?? 5))), live_cta: cfg.live_cta !== false, host_gifts: cfg.host_gifts !== false, auto_follow_back: cfg.auto_follow_back !== false, replay_enabled: cfg.replay_enabled !== false, soundboard: cfg.soundboard !== false, showcase_enabled: cfg.showcase_enabled !== false, backdrops_enabled: cfg.backdrops_enabled !== false, live_backdrops: (cfg.live_backdrops ?? []).slice(0, 60), pk_enabled: cfg.pk_enabled !== false, creator_share_pct: Math.min(100, Math.max(50, Number(cfg.creator_share_pct) || 90)), pk_bix_weight: Math.min(10000, Math.max(1, Number(cfg.pk_bix_weight) || 100)), link_slots: Math.min(20, Math.max(1, cfg.link_slots)), max_links: Math.min(20, Math.max(1, cfg.max_links, cfg.link_slots)), updated_at: new Date().toISOString() }).eq('id', 1), 'Pengaturan BIXTOK tersimpan.')}>Simpan pengaturan</Button>
     </div>
 
     <div className="rounded-xl border border-border bg-card p-5">

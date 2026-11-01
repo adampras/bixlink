@@ -1613,6 +1613,7 @@ export type Database = {
       bixtok_config: {
         Row: {
           auto_follow_back: boolean
+          backdrops_enabled: boolean
           creator_share_pct: number
           enabled: boolean
           features: Json
@@ -1620,6 +1621,7 @@ export type Database = {
           host_gifts: boolean
           id: number
           link_slots: number
+          live_backdrops: Json
           live_cta: boolean
           live_enabled: boolean
           live_max_minutes: number
@@ -1636,6 +1638,7 @@ export type Database = {
         }
         Insert: {
           auto_follow_back?: boolean
+          backdrops_enabled?: boolean
           creator_share_pct?: number
           enabled?: boolean
           features?: Json
@@ -1643,6 +1646,7 @@ export type Database = {
           host_gifts?: boolean
           id?: number
           link_slots?: number
+          live_backdrops?: Json
           live_cta?: boolean
           live_enabled?: boolean
           live_max_minutes?: number
@@ -1659,6 +1663,7 @@ export type Database = {
         }
         Update: {
           auto_follow_back?: boolean
+          backdrops_enabled?: boolean
           creator_share_pct?: number
           enabled?: boolean
           features?: Json
@@ -1666,6 +1671,7 @@ export type Database = {
           host_gifts?: boolean
           id?: number
           link_slots?: number
+          live_backdrops?: Json
           live_cta?: boolean
           live_enabled?: boolean
           live_max_minutes?: number
@@ -1874,6 +1880,8 @@ export type Database = {
       }
       bixtok_lives: {
         Row: {
+          backdrop: string | null
+          cam_off: boolean
           ended_at: string | null
           host_id: string
           host_name: string
@@ -1889,6 +1897,8 @@ export type Database = {
           title: string
         }
         Insert: {
+          backdrop?: string | null
+          cam_off?: boolean
           ended_at?: string | null
           host_id: string
           host_name: string
@@ -1904,6 +1914,8 @@ export type Database = {
           title: string
         }
         Update: {
+          backdrop?: string | null
+          cam_off?: boolean
           ended_at?: string | null
           host_id?: string
           host_name?: string
@@ -3068,6 +3080,10 @@ export type Database = {
       bixtok_end_live: { Args: { p_id: string }; Returns: undefined }
       bixtok_is_official: { Args: { p_uid: string }; Returns: boolean }
       bixtok_like: { Args: { p_video: string }; Returns: undefined }
+      bixtok_live_backdrop: {
+        Args: { p_backdrop: string; p_cam_off: boolean; p_live: string }
+        Returns: undefined
+      }
       bixtok_live_like: {
         Args: { p_live: string; p_n: number }
         Returns: number

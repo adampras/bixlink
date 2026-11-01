@@ -4719,3 +4719,14 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .sw-app .sw-topline .sw-mode-slim { margin-top: 0 !important; }
 .sw-app .sw-mode-slim button { padding: .35rem .3rem !important; font-size: .72rem !important; }
 .sw-app .sw-round-sm { width: 2.25rem; height: 2.25rem; flex: none; }
+
+/* BIXTOK LIVE camera-off backgrounds */
+.bxl-backdrop { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; }
+.bxl-backdrop-host { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .9rem; border-radius: 999px; background: color-mix(in oklab, black 45%, transparent); color: white; font-weight: 700; font-size: .8rem; backdrop-filter: blur(6px); animation: bxl-bg-pulse 2.4s ease-in-out infinite; }
+@keyframes bxl-bg-pulse { 50% { transform: scale(1.05); } }
+@media (prefers-reduced-motion: reduce) { .bxl-backdrop-host { animation: none; } }
+.bxl-bg-grid { margin-top: .75rem; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; max-height: 46vh; overflow-y: auto; }
+.bxl-bg-grid button { display: flex; flex-direction: column; gap: .25rem; align-items: center; padding: .25rem; border-radius: .75rem; border: 1px solid transparent; }
+.bxl-bg-grid button.on { border-color: #ffd700; }
+.bxl-bg-grid i { display: block; width: 100%; aspect-ratio: 9 / 14; border-radius: .55rem; }
+.bxl-bg-grid small { font-size: .6rem; line-height: 1.1; text-align: center; opacity: .85; }
