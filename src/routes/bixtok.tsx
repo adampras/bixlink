@@ -157,6 +157,12 @@ function BixtokPage() {
   </main></MemberGate>;
 }
 
+const SAVED_KEY='bixtok-saved';
+function readSaved(): string[] { try { return JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'); } catch { return []; } }
+function useSaved() { const [ids, setIds] = useState<string[]>([]); useEffect(() => setIds(readSaved()), []);
+  const toggle = (id: string) => { const cur = readSaved(); const next = cur.includes(id) ? cur.filter(x => x !== id) : [id, ...cur].slice(0, 200); localStorage.setItem(SAVED_KEY, JSON.stringify(next)); setIds(next); return next.includes(id); };
+  return { ids, toggle }; }
+
 function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers = new Set<string>(), onFollow, onGift, onNote, liveHosts = new Map<string, Live>(), onEnterLive }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; following?: Set<string>; followers?: Set<string>; onFollow: (id: string) => void; onGift: (id: string) => void; onNote: (m: string) => void; liveHosts?: Map<string, Live>; onEnterLive?: (l: Live) => void }) {
   const qc = useQueryClient();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
@@ -193,6 +199,7 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
       {v.creator_id && v.creator_id !== me && !liveHosts.has(v.creator_id) && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={() => void like(v)}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
       <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
+      <button aria-label="Save" className={saved.ids.includes(v.id) ? 'on' : ''} onClick={() => onNote(saved.toggle(v.id) ? 'Saved to your profile' : 'Removed from saved')}><Bookmark/><small>Save</small></button>
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={() => setShare(v)}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
       </>}
