@@ -109,7 +109,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   live: Live; me: string; cfg: Cfg; following: boolean; onFollow: () => void; onClose: () => void; onMinimize?: () => void; onGift: (recipients: { id: string; name: string }[]) => void;
 }) {
   const qc = useQueryClient(); const host = live.host_id === me;
-  const [msgs, setMsgs] = useState<Msg[]>([]); const [text, setText] = useState(''); const [ended, setEnded] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false); const [msgs, setMsgs] = useState<Msg[]>([]); const [text, setText] = useState(''); const [ended, setEnded] = useState(false);
   const [sound, setSound] = useState(true); const [likes, setLikes] = useState(0); const [viewers, setViewers] = useState(1);
   const [floaters, setFloaters] = useState<Floater[]>([]); const [banner, setBanner] = useState<Msg | null>(null);
   const [mega, setMega] = useState<Msg | null>(null);
@@ -506,7 +506,8 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       style={f.px != null ? { position: 'fixed', left: `${f.px - 15}px`, top: `${(f.py ?? 0) - 15}px`, bottom: 'auto', ['--drift' as string]: `${f.drift}px` } : { right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}</div>
     <button type="button" className={`bxl-qa-toggle${qaOnly ? ' on' : ''}`} aria-pressed={qaOnly} onClick={() => setQaOnly(v => !v)}>Q&amp;A{qaCount ? ` · ${qaCount}` : ''}</button>
     <div className={`bixtok-chat${showcase && cfg.showcase_enabled !== false ? ' with-card' : ''}`}>{(qaOnly ? msgs.filter(isQuestion) : msgs).map(m => <p key={m.id} className={`${m.kind === 'gift' ? 'gift' : ''}${isQuestion(m) ? ' q' : ''}`} onClick={host ? () => setModMsg(m) : undefined}><b>{m.name}</b> {m.body}</p>)}{qaOnly && !qaCount && <p className="q">No questions yet — viewers can end a message with “?”</p>}</div>
-    <div className="bxl-tools">
+    <div className={`bxl-tools${host && !toolsOpen ? ' compact' : ''}`}>
+      {host && <button type="button" className="bxl-tools-more" aria-label={toolsOpen ? 'Hide host tools' : 'Show all host tools'} aria-expanded={toolsOpen} onClick={() => setToolsOpen(o => !o)}>{toolsOpen ? <X size={18}/> : <span style={{ fontSize: '1.1rem', fontWeight: 900 }}>⋯</span>}</button>}
       {publishing && <>
         <button aria-label="Flip camera" onClick={() => setFacing(f => (f === 'user' ? 'environment' : 'user'))}><SwitchCamera size={20}/></button>
         {host && <button aria-label={sharing ? 'Stop sharing screen' : 'Share screen or slides'} title={sharing ? 'Stop sharing' : 'Share screen / slides'} className={sharing ? 'bxl-share-on' : ''} onClick={() => { void toggleShare(); }}>{sharing ? <MonitorOff size={20}/> : <MonitorUp size={20}/>}</button>}
