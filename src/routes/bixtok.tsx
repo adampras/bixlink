@@ -3,7 +3,7 @@ import { Volume2, VolumeX, Home, ShoppingBag, MessageSquare, User, Menu, Wallet,
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Gift, Heart, Lock, MessageCircle, Plus, Radio, Send, Share2, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Gift, Heart, Lock, MessageCircle, Plus, Radio, Send, Share2, Trash2, X, Star, Users, UserCheck, Compass, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { MemberGate } from '@/components/MemberGate';
 import { useMember } from '@/lib/useMember';
@@ -123,7 +123,7 @@ function BixtokPage() {
      : <>
       {section === 'home' && <><header className="bixtok-top">
         <Link to="/dashboard" aria-label="Back" className="bixtok-icon"><ArrowLeft size={20}/></Link>
-        <nav className="bixtok-tabs">{menus.map(m => <button key={m.key} className={tab === m.key ? 'on' : ''} onClick={() => setTab(m.key)}>{m.key === 'live' && <i className="bixtok-dot"/>}{m.label}</button>)}<button className={tab === 'mine' ? 'on' : ''} onClick={() => setTab('mine')}>Me</button></nav>
+        <nav className="bixtok-tabs">{menus.map(m => { const Ic = TAB_ICONS[m.key] ?? Sparkles; return <button key={m.key} className={`${tab === m.key ? 'on' : ''}${m.key === 'live' ? ' is-live' : ''}`} onClick={() => setTab(m.key)}><Ic size={13} strokeWidth={2.4}/>{m.label}</button>; })}<button className={tab === 'mine' ? 'on' : ''} onClick={() => setTab('mine')}><User size={13} strokeWidth={2.4}/>Me</button></nav>
         <Button variant="wallet" size="wallet" aria-label={muted ? "Turn sound on" : "Turn sound off"} title={muted ? "Turn sound on" : "Turn sound off"} aria-pressed={!muted} className="bixtok-icon" onClick={() => {
           const next = !muted;
           window.dispatchEvent(new CustomEvent(BIXTOK_SOUND_EVENT, { detail: next }));
