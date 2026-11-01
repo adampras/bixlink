@@ -146,7 +146,7 @@ function BixtradePage() {
 
   const proj = projectBixtrade(cfg, amount, days);
   const n = Number(reqAmt) || 0;
-  return <BixShell><main className="mx-auto max-w-6xl px-4 py-6 md:px-8">
+  return <BixShell><main className="arb-lux mx-auto max-w-6xl px-4 py-6 md:px-8">
     <section className="arb-ai-hero">
       <div className="arb-ai-copy">
         <p className="shop-eyebrow">AI QUANT ENGINE</p>
