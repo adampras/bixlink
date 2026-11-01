@@ -1,6 +1,6 @@
 import bixtokLogo from '@/assets/bixtok-logo.png';
 import { Volume2, VolumeX, Home, ShoppingBag, MessageSquare, User, Menu, Wallet, Clock, QrCode, Sparkles, Flame, Settings, ChevronRight, Bell, Zap, Bot, Grid3x3, Bookmark, Repeat2, Eye, ShieldCheck, Coins, Megaphone, BadgeDollarSign, Minimize2 } from 'lucide-react';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Gift, Heart, Lock, MessageCircle, Plus, Radio, Send, Share2, Trash2, X } from 'lucide-react';
