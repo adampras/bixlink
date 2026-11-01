@@ -422,6 +422,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const stageMax = Math.min(5, Math.max(1, Number(cfg.stage_max ?? 5)));
 
   const bgCss = backdropCss(backdrop, cfg.live_backdrops);
+  const bgAvatar = allBackdrops(cfg.live_backdrops).find(b => b.id === backdrop)?.avatar;
   const setBg = async (off: boolean, id: string | null) => {
     const { error } = await supabase.rpc('bixtok_live_backdrop', { p_live: live.id, p_cam_off: off, p_backdrop: id ?? '' });
     if (error) return flash(error.message);
@@ -430,7 +431,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   };
   return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
     <div className="bxl-stage" onClick={tap}>
-      {camOff && <div className="bxl-backdrop" style={{ background: bgCss }} aria-hidden><span className="bxl-backdrop-host"><Mic size={14}/> @{live.host_name} · Voice LIVE</span></div>}
+      {camOff && <div className="bxl-voicebg" style={{ background: bgCss }} aria-hidden>{bgAvatar && <b className="bxl-voicebg-av">{bgAvatar}</b>}<span className="bxl-backdrop-host"><Mic size={14}/> @{live.host_name} · Voice LIVE</span></div>}
       {host ? <>
           <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: 'contain', transform: sharing ? undefined : `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
           {camErr && <div className="bxl-camerr" role="alert" onClick={e => e.stopPropagation()}>
@@ -469,7 +470,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <span className="bxl-chip"><Eye size={13}/>{viewers}</span>
       <span className="bxl-chip"><Heart size={13}/>{likes}</span>
       {host && !ended && <button className="bixtok-end" onClick={stop}>End</button>}
-      <button aria-label="Close" className="bixtok-icon" onClick={onClose}><X size={18}/></button>
+      <button aria-label="Close" className="bixtok-icon" onClick={() => { if (host && !ended) { if (!window.confirm('Leave and end this LIVE?')) return; void stop(); } onClose(); }}><X size={18}/></button>
     </header>
     <div className="bxl-sub">
       <span className="bixtok-badge">{live.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span>
@@ -489,7 +490,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     </Link>}
     {burst && <div className="bxl-sfx-burst" key={burst.id} aria-hidden onAnimationEnd={() => setBurst(null)}>{burst.e}</div>}
     {host && recording && <span className="bxl-rec"><Circle size={9} fill="currentColor"/> REC</span>}
-    {ended && <p className="bixtok-ended">LIVE ended</p>}
+    {ended && <div className="bxl-endcard" role="dialog" aria-label="LIVE ended"><b>LIVE ended</b><small>Thanks for watching @{live.host_name}</small><button type="button" className="bxl-btn" onClick={onClose}>Exit LIVE</button></div>}
     {!host && entered && audioBlocked && sound && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Ketuk untuk mengaktifkan suara</button>}
     {banner && <div className="bxl-banner" key={banner.id}><Gift size={18}/><div><b>{banner.name}</b><small>{banner.body}</small></div></div>}
     {mega && <div className="bxl-mega" key={mega.id} aria-hidden><span>{giftInfo(mega.body).emoji}</span><b>{mega.name}</b><small>{mega.body}</small></div>}
@@ -557,6 +558,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     </form></div>}
     {sheet && <div className="bixtok-sheet-wrap" onClick={() => setSheet(null)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
       <div className="flex items-center justify-between"><h3 className="font-bold">{sheet === 'board' ? 'Soundboard' : sheet === 'showcase' ? 'Showcase card' : sheet === 'bg' ? 'Camera off · background' : sheet === 'fx' ? 'Filters & voice' : 'PK battle'}</h3><button aria-label="Close" onClick={() => setSheet(null)}><X size={18}/></button></div>
+      <button type="button" className="bxl-back" onClick={() => setSheet(null)}>‹ Back to LIVE</button>
       {sheet === 'board' && <div className="bxl-board">{SOUNDBOARD.map(([k, e, l]) => <button key={k} onClick={() => sendSfx(k)}><span>{e}</span>{l}</button>)}<p>Everyone in the room hears it.</p></div>}
       {sheet === 'fx' && <div>
         <p className="mt-1 text-xs opacity-70">Effects run on your phone — viewers see and hear them with no extra data.</p>
@@ -566,7 +568,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       </div>}
       {sheet === 'bg' && <div>
         <p className="mt-1 text-xs opacity-70">Hide your camera and show a background — your voice stays live. Saves data too.</p>
-        <div className="bxl-bg-grid">{allBackdrops(cfg.live_backdrops).map(b => <button key={b.id} type="button" className={camOff && (backdrop ?? 'obsidian-gold') === b.id ? 'on' : ''} onClick={() => { void setBg(true, b.id); }}><i style={{ background: b.css }}/><small>{b.name}</small></button>)}</div>
+        <div className="bxl-bg-grid">{allBackdrops(cfg.live_backdrops).map(b => <button key={b.id} type="button" className={camOff && (backdrop ?? 'obsidian-gold') === b.id ? 'on' : ''} onClick={() => { void setBg(true, b.id); }}><i style={{ background: b.css }}>{b.avatar}</i><small>{b.name}</small></button>)}</div>
         {camOff && <button type="button" className="bxl-btn mt-3 w-full" onClick={() => { void setBg(false, backdrop); setSheet(null); }}><Camera size={14}/> Turn camera back on</button>}
       </div>}
       {sheet === 'showcase' && <div className="bxl-board">{(Object.keys(SHOWCASE) as ShowcaseKey[]).map(k => <button key={k} className={showcase === k ? 'on' : ''} onClick={() => saveShowcase(k)}><span>{SHOWCASE[k].emoji}</span>{SHOWCASE[k].title}</button>)}
