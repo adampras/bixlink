@@ -156,12 +156,15 @@ function BixtokPage() {
   </main></MemberGate>;
 }
 
-function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers = new Set<string>(), onFollow, onGift, onNote }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; following?: Set<string>; followers?: Set<string>; onFollow: (id: string) => void; onGift: (id: string) => void; onNote: (m: string) => void }) {
+function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers = new Set<string>(), onFollow, onGift, onNote, liveHosts = new Map<string, Live>(), onEnterLive }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; following?: Set<string>; followers?: Set<string>; onFollow: (id: string) => void; onGift: (id: string) => void; onNote: (m: string) => void; liveHosts?: Map<string, Live>; onEnterLive?: (l: Live) => void }) {
   const qc = useQueryClient();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [resume] = useState(() => bixtokMini.peekLastId());
   const [railOpen, setRailOpen] = useState(true);
   const [comments, setComments] = useState<Video | null>(null);
+  const [share, setShare] = useState<Video | null>(null);
+  const [peek, setPeek] = useState<Video | null>(null);
+  const ref = useQuery({ queryKey: ['bixtok-refcode', me], staleTime: 600_000, queryFn: async () => (await supabase.from('referral_codes').select('code').eq('user_id', me).maybeSingle()).data?.code ?? null });
   useEffect(() => { if (!resume || !videos.length) return; let n = 0; let t = 0;
     const go = () => { const el = document.querySelector(`[data-vid="${resume}"]`) as HTMLElement | null; const feed = el?.closest('.bixtok-feed') as HTMLElement | null;
       if (el && feed) { feed.style.scrollSnapType = 'none'; feed.scrollTop = el.offsetTop; requestAnimationFrame(() => { feed.style.scrollSnapType = ''; }); if (Math.abs(feed.scrollTop - el.offsetTop) < 4 || n > 20) return; }
