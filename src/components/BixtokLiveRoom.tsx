@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff } from 'lucide-react';
+import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff, UserRoundPlus } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { useLiveRtc } from '@/lib/bixtok-rtc';
@@ -355,6 +355,12 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     if (error) return flash(error.message);
     ping(); void pullRef.current(true);
   };
+  const pinReferral = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data } = await supabase.from('referral_codes').select('code').eq('user_id', user?.id ?? '').maybeSingle();
+    if (!data?.code) return flash('Your referral code is not ready yet.');
+    await savePin(`REF:${data.code}`);
+  };
   const savePin = async (t: string) => {
     const { error } = await supabase.rpc('bixtok_live_pin', { p_live: live.id, p_text: t });
     if (error) return flash(error.message);
@@ -430,7 +436,10 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <span className="bixtok-badge">{live.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span>
       {top.length > 0 && <span className="bxl-top" aria-label="Top gifters"><Crown size={12}/>{top.map((t, i) => <em key={i}>{['🥇', '🥈', '🥉'][i]} {t.name} · {Number(t.total)} {t.currency}</em>)}</span>}
     </div>
-    {pinned && <div className="bxl-pin"><Pin size={13}/><span>{pinned}</span></div>}
+    {pinned && (/^REF:BIX-\d{6}$/.test(pinned) ? <div className="bxl-pin bxl-refcard"><UserRoundPlus size={14}/><span><b>Join @{live.host_name}'s team</b><small> · {pinned.slice(4)}</small></span>
+      {!host && <><button onClick={() => { void navigator.clipboard?.writeText(`${window.location.origin}/register?ref=${pinned.slice(4)}`).catch(() => {}); flash('Referral link copied'); }}><Copy size={12}/></button>
+      <Link to="/register" search={{ ref: pinned.slice(4) }} target="_blank" onClick={() => window.localStorage.setItem('bixlink-ref', pinned.slice(4))}>Join</Link></>}</div>
+      : <div className="bxl-pin"><Pin size={13}/><span>{pinned}</span></div>)}
     {!host && cfg.live_cta !== false && <div className="bxl-cta">
       <Link to="/stake">Join Staking</Link>
       <Link to="/presale">Presale</Link>
@@ -461,6 +470,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
       </>}
       {host && <button aria-label="Pin message" onClick={() => setPinEdit(pinned ?? '')}><Pin size={20}/></button>}
+      {host && <button aria-label="Pin my referral card" onClick={() => { void pinReferral(); }}><UserRoundPlus size={20}/></button>}
       {host && cfg.soundboard !== false && <button aria-label="Soundboard" onClick={() => setSheet('board')}><Music2 size={20}/></button>}
       {host && cfg.showcase_enabled !== false && <button aria-label="Showcase card" className={showcase ? 'on' : ''} onClick={() => setSheet('showcase')}><ShoppingBag size={20}/></button>}
       {host && cfg.pk_enabled !== false && <button aria-label="PK battle" className={pk ? 'on' : ''} onClick={() => setSheet('pk')}><Swords size={20}/></button>}
