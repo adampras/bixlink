@@ -24,6 +24,7 @@ export const Route = createFileRoute('/bixtok')({
   component: BixtokPage,
 });
 
+const TAB_ICONS: Record<string, typeof Heart> = { foryou: Sparkles, live: Radio, following: UserCheck, favorite: Star, friends: Users, explore: Compass, nearby: MapPin, mine: User };
 type Cfg = { link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean };
 type Sched = { id: string; title: string; host_name: string; starts_at: string; reminded: boolean; count: number };
 type Gift = { id: string; name: string; emoji: string; currency: string; price: number };
