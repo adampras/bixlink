@@ -235,17 +235,45 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   // Screen sharing (host): swap the outgoing video track for the screen, keep the microphone.
   const [sharing, setSharing] = useState(false);
   const camTrack = useRef<MediaStreamTrack | null>(null);
+  const slideInput = useRef<HTMLInputElement>(null);
+  const slideCanvas = useRef<HTMLCanvasElement | null>(null);
+  const [slides, setSlides] = useState<HTMLImageElement[]>([]); const [slideIdx, setSlideIdx] = useState(0);
   const stopShare = () => {
     const s = stream.current; if (!s) { setSharing(false); return; }
     const scr = s.getVideoTracks()[0]; const back = camTrack.current;
     const next = new MediaStream([...(back && back.readyState === 'live' ? [back] : []), ...s.getAudioTracks()]);
     if (scr && scr !== back) scr.stop();
-    camTrack.current = null; stream.current = next; setLocal(next); setSharing(false);
+    camTrack.current = null; stream.current = next; setLocal(next); setSharing(false); setSlides([]);
+  };
+  const drawSlide = (img: HTMLImageElement | undefined) => {
+    const c = slideCanvas.current; const ctx = c?.getContext('2d'); if (!c || !ctx || !img) return;
+    ctx.fillStyle = '#05070a'; ctx.fillRect(0, 0, c.width, c.height);
+    const r = Math.min(c.width / img.width, c.height / img.height); const w = img.width * r, h = img.height * r;
+    ctx.drawImage(img, (c.width - w) / 2, (c.height - h) / 2, w, h);
+  };
+  useEffect(() => { if (slides.length) drawSlide(slides[slideIdx]); }, [slides, slideIdx]);
+  // Keep the canvas stream ticking so viewers receive frames even when the slide does not change.
+  useEffect(() => { if (!slides.length) return undefined; const t = setInterval(() => drawSlide(slides[slideIdx]), 500); return () => clearInterval(t); }, [slides, slideIdx]);
+  /** Phone-friendly presentation: broadcast chosen images (slides, PDF screenshots) as the LIVE video. */
+  const startSlides = async (files: FileList | null) => {
+    const list = [...(files ?? [])].filter(f => f.type.startsWith('image/')).slice(0, 30);
+    if (!list.length) { flash('Pilih gambar slide (JPG/PNG). Untuk PDF, simpan halamannya sebagai gambar dulu.'); return; }
+    const imgs = await Promise.all(list.map(f => new Promise<HTMLImageElement>((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = URL.createObjectURL(f); }))).catch(() => []);
+    if (!imgs.length) { flash('Gambar tidak bisa dibuka'); return; }
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; slideCanvas.current = c;
+    drawSlide(imgs[0]);
+    const track = (c as HTMLCanvasElement & { captureStream: (fps?: number) => MediaStream }).captureStream(10).getVideoTracks()[0];
+    if (!track) { flash('Perangkat ini belum mendukung mode presentasi'); return; }
+    const s = stream.current;
+    camTrack.current = s?.getVideoTracks()[0] ?? null;
+    const next = new MediaStream([track, ...(s?.getAudioTracks() ?? [])]);
+    stream.current = next; setLocal(next); setSlides(imgs); setSlideIdx(0); setSharing(true);
+    flash(`Presentasi ${imgs.length} slide sedang tayang`);
   };
   const toggleShare = async () => {
     if (sharing) { stopShare(); return; }
     const md = navigator.mediaDevices as MediaDevices & { getDisplayMedia?: MediaDevices['getDisplayMedia'] };
-    if (!md?.getDisplayMedia) { flash('Screen sharing is not supported on this device — try Chrome on a computer.'); return; }
+    if (!md?.getDisplayMedia) { slideInput.current?.click(); return; }
     try {
       const d = await md.getDisplayMedia({ video: { frameRate: 15, width: { ideal: 1920 } }, audio: false });
       const scr = d.getVideoTracks()[0]; if (!scr) return;
@@ -256,7 +284,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       stream.current = next; setLocal(next); setSharing(true);
       scr.addEventListener('ended', () => stopShare());
       flash('Sharing your screen with viewers');
-    } catch { flash('Screen sharing was cancelled'); }
+    } catch { slideInput.current?.click(); }
   };
   useEffect(() => { stream.current?.getAudioTracks().forEach(t => { t.enabled = mic; }); }, [mic, local]);
   useEffect(() => { if (host && cam.current && local) { cam.current.srcObject = local; void cam.current.play().catch(() => {}); } }, [host, local]);
