@@ -1700,6 +1700,7 @@ export type Database = {
       bixtok_gift_tx: {
         Row: {
           amount: number
+          claimed_at: string | null
           created_at: string
           currency: string
           gift_id: string
@@ -1712,6 +1713,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          claimed_at?: string | null
           created_at?: string
           currency: string
           gift_id: string
@@ -1724,6 +1726,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          claimed_at?: string | null
           created_at?: string
           currency?: string
           gift_id?: string
@@ -3054,6 +3057,7 @@ export type Database = {
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
       bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
+      bixtok_claim_earnings: { Args: never; Returns: Json }
       bixtok_end_live: { Args: { p_id: string }; Returns: undefined }
       bixtok_is_official: { Args: { p_uid: string }; Returns: boolean }
       bixtok_like: { Args: { p_video: string }; Returns: undefined }
@@ -3081,6 +3085,7 @@ export type Database = {
           total: number
         }[]
       }
+      bixtok_my_earnings: { Args: never; Returns: Json }
       bixtok_my_stake_usd: { Args: never; Returns: number }
       bixtok_official_add: {
         Args: { p_code: string; p_name: string }
