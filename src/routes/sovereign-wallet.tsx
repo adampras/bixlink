@@ -226,22 +226,23 @@ function SovereignApp() {
   return <div className="sw-app" data-wtheme={swCfg?.readiness.walletTheme ?? "gold"}>
     <main className="sw-main pb-28">
       {tab === 'wallet' && <>
-        <header className="flex items-center gap-3">
-          <Button type="button" className="sw-round" aria-label="Back" onClick={() => { if (window.history.length > 1 && document.referrer.startsWith(window.location.origin)) window.history.back(); else window.location.assign('/wallet'); }}><ChevronLeft size={20} /></Button>
+        <div className="sw-topline flex items-center gap-2">
+          <Button type="button" className="sw-round sw-round-sm" aria-label="Back" onClick={() => { if (window.history.length > 1 && document.referrer.startsWith(window.location.origin)) window.history.back(); else window.location.assign('/wallet'); }}><ChevronLeft size={18} /></Button>
+          <div className="sw-mode sw-mode-slim min-w-0 flex-1" role="tablist" aria-label="Wallet mode">
+            <span className="sw-mode-thumb" data-pos={ledger ? 'l' : 'r'} aria-hidden />
+            <Button type="button" role="tab" aria-selected={ledger} onClick={() => pickMode('ledger')}><Zap size={13} /> Ledger</Button>
+            <Button type="button" role="tab" aria-selected={!ledger} onClick={() => pickMode('web3')}><Globe size={13} /> On-Chain</Button>
+          </div>
+        </div>
+
+        <header className="mt-4 flex items-center gap-3">
           <span className="sw-avatar"><img src={foxMark} alt="" width={44} height={44} /></span>
           <div className="min-w-0 flex-1">
             <b className="block truncate font-display text-lg">{ledger ? (bixId ?? 'BIXLINK Account') : addr ? short(addr) : 'BIXLINK Wallet'}</b>
             <span className={`sw-pill ${ledger ? 'sw-pill-live' : ''}`}><i aria-hidden /> {ledger ? 'Ledger · Gasless · Zero fee' : `BSC · Gas ${gas === null ? '—' : fmt(gas, 3) + ' Gwei'}`}</span>
           </div>
           <Button type="button" className="sw-round" aria-label="Notifications" onClick={() => setScreen('notify')}><Bell size={18} /></Button>
-          <Button type="button" className="sw-lang-pill" aria-label="Language" onClick={() => setScreen('language')}><span className={`flag-symbol flag-${curLang.flag}`} aria-hidden /><b>{FLAG_CODE[curLang.flag]}</b></Button>
         </header>
-
-        <div className="sw-mode mt-5" role="tablist" aria-label="Wallet mode">
-          <span className="sw-mode-thumb" data-pos={ledger ? 'l' : 'r'} aria-hidden />
-          <Button type="button" role="tab" aria-selected={ledger} onClick={() => pickMode('ledger')}><Zap size={15} /> BIXLINK Account</Button>
-          <Button type="button" role="tab" aria-selected={!ledger} onClick={() => pickMode('web3')}><Globe size={15} /> Web3 On-Chain</Button>
-        </div>
 
         <div className="sw-divider" aria-hidden />
         <section key={mode} className="sw-wallet sw-fade" aria-label="Wallet balance">

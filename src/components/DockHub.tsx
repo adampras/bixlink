@@ -15,7 +15,7 @@ export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, bool
       <LayoutGrid size={19} className="shrink-0"/><span>HUB</span>
     </button>
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="bottom" className="max-h-[75vh] overflow-y-auto rounded-t-3xl border-primary/40 pb-8">
+      <SheetContent side="bottom" className="hub-midnight max-h-[75vh] overflow-y-auto rounded-t-3xl pb-8">
         <SheetHeader><SheetTitle className="font-display tracking-widest text-primary">BIX HUB</SheetTitle></SheetHeader>
         {HUB_GROUPS.map(g => { const list = items.filter(i => i.group === g); if (!list.length) return null; return <section key={g} className="mt-4">
           <h3 className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{g}</h3>
