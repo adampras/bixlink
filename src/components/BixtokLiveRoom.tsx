@@ -615,7 +615,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     </div></div>}
     {modMsg && <div className="bixtok-sheet-wrap" onClick={() => setModMsg(null)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
       <h3 className="font-bold">Moderate @{modMsg.name}</h3><p className="mt-1 text-xs text-muted-foreground">{modMsg.body}</p>
-      <div className="mt-3 flex gap-2">{modMsg.kind !== 'gift' && <button className="bxl-btn" onClick={() => moderate(modMsg, false)}>Delete message</button>}<button className="bxl-btn ghost" onClick={() => moderate(modMsg, true)}>Mute in this LIVE</button></div>
+      <div className="mt-3 flex flex-wrap gap-2">{isQuestion(modMsg) && <button className="bxl-btn" onClick={() => { void savePin(`❓ @${modMsg.name}: ${modMsg.body}`.slice(0, 140)); setModMsg(null); }}>Spotlight question</button>}{modMsg.kind !== 'gift' && <button className="bxl-btn ghost" onClick={() => moderate(modMsg, false)}>Delete message</button>}<button className="bxl-btn ghost" onClick={() => moderate(modMsg, true)}>Mute in this LIVE</button></div>
     </div></div>}
     {!host && !entered && !ended && <button className="bxl-gate" onClick={() => { void enter(); }}>
       <Volume2 size={34}/><b>Tap to join with sound</b><small>@{live.host_name} · {live.title}</small>
