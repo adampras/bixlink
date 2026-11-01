@@ -140,8 +140,7 @@ function BixtokPage() {
           if (window.history.length > 1) window.history.back(); else void navigate({ to: '/dashboard' });
         }}><Minimize2 size={18}/></button>
       </header>
-      <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div></>}
-      {section === 'home' && tab !== 'live' && tags.length > 0 && <div className="bxt-tags" role="tablist" aria-label="Topics"><button className={!tag ? 'on' : ''} onClick={() => setTag('')}>All</button>{tags.map(t => <button key={t} className={tag === t ? 'on' : ''} onClick={() => setTag(tag === t ? '' : t)}>{t}</button>)}</div>}
+      <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={36} height={36}/><b>BIX<span>TOK</span></b></div></>}
       {section === 'home' && (tab === 'live'
         ? <>{top.length > 0 && <div className="bxt-board" aria-label="Top creators"><b>🏆 Top creators</b>{top.map((c, i) => <span key={c.name + i}><i>{['👑','🥈','🥉','4','5'][i]}</i>@{c.name}<small>{fmtCount(c.likes)} ♥</small></span>)}</div>}<LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/></>
         : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote} liveHosts={new Map(q.data.lives.map(l => [l.host_id, l]))} onEnterLive={setRoom}/>)}
@@ -343,19 +342,7 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
       <form onSubmit={e => { e.preventDefault(); void official(); }}>
         <input className="form-input" maxLength={80} placeholder="Presentation title" value={otitle} onChange={e => setOtitle(e.target.value)}/>
         <button className="bixtok-cta" disabled={busy}>{busy ? 'Starting…' : 'Go Live Official'}</button>
-      </form>
-      <form className="mt-3" onSubmit={e => { e.preventDefault(); void addSched(); }}>
-        <p className="text-xs font-bold">Schedule an official LIVE</p>
-        <input className="form-input mt-1" maxLength={80} placeholder="e.g. BIXLINK Webinar" value={sched.title} onChange={e => setSched({ ...sched, title: e.target.value })}/>
-        <input className="form-input mt-1" type="datetime-local" aria-label="Start time" value={sched.at} onChange={e => setSched({ ...sched, at: e.target.value })}/>
-        <button className="bixtok-cta mt-1">Add to schedule</button>
       </form></div>}
-    {data.schedules.length > 0 && <ul className="bxt-sched" aria-label="Upcoming official LIVE">{data.schedules.map(s => <li key={s.id}>
-      <b>📅 {s.title}</b><time>{countdown(new Date(s.starts_at).getTime() - now)}</time>
-      <small>@{s.host_name} · {new Date(s.starts_at).toLocaleString()} · {s.count} reminded</small>
-      <button className={s.reminded ? 'on' : ''} onClick={() => remind(s)}>{s.reminded ? '✓ Reminder on' : '🔔 Remind me'}</button>
-      <a href={calendarUrl(s)} target="_blank" rel="noreferrer">Add to calendar</a>
-    </li>)}</ul>}
     <div className="bixtok-golive">
       <h2><Radio size={18}/> Community LIVE</h2>
       {!data.cfg.live_enabled ? <p className="text-xs text-muted-foreground">Go LIVE is closed by the admin right now.</p>
