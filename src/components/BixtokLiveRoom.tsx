@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff, UserRoundPlus, VideoOff, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff, UserRoundPlus, VideoOff, Image as ImageIcon, Sparkles, Minimize2 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { useLiveRtc } from '@/lib/bixtok-rtc';
@@ -101,8 +101,8 @@ function PkSide({ stream, label, score, win, mirror }: { stream: MediaStream | n
   </div>;
 }
 
-export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, onGift }: {
-  live: Live; me: string; cfg: Cfg; following: boolean; onFollow: () => void; onClose: () => void; onGift: (recipients: { id: string; name: string }[]) => void;
+export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, onGift, onMinimize }: {
+  live: Live; me: string; cfg: Cfg; following: boolean; onFollow: () => void; onClose: () => void; onMinimize?: () => void; onGift: (recipients: { id: string; name: string }[]) => void;
 }) {
   const qc = useQueryClient(); const host = live.host_id === me;
   const [msgs, setMsgs] = useState<Msg[]>([]); const [text, setText] = useState(''); const [ended, setEnded] = useState(false);
@@ -470,6 +470,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <span className="bxl-chip"><Eye size={13}/>{viewers}</span>
       <span className="bxl-chip"><Heart size={13}/>{likes}</span>
       {host && !ended && <button className="bixtok-end" onClick={stop}>End</button>}
+      {onMinimize && !ended && <button aria-label="Mini mode" className="bixtok-icon" onClick={onMinimize}><Minimize2 size={17}/></button>}
       <button aria-label="Close" className="bixtok-icon" onClick={() => { if (host && !ended) { if (!window.confirm('Leave and end this LIVE?')) return; void stop(); } onClose(); }}><X size={18}/></button>
     </header>
     <div className="bxl-sub">
