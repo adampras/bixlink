@@ -4767,3 +4767,14 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxt-live-tab .bxt-live-ic em { background: linear-gradient(90deg,#ff2d55,#ff5e3a); color: #fff; box-shadow: 0 0 8px rgba(255,45,85,.7); }
 .bxt-live-tab small { color: #FFD700; font-weight: 800; letter-spacing: .04em; }
 @keyframes bxtLivePulse { 50% { box-shadow: inset 0 1px 0 rgba(255,236,160,.45), 0 0 0 1.5px #FFD700, 0 0 24px 1px #FFD700; } }
+/* Mini: corner resize grips, smoother motion, full (uncropped) media */
+.bxl-mini { will-change: left, top, width; transition: width .18s cubic-bezier(.2,.8,.2,1), box-shadow .2s; }
+.bxl-mini.bxl-resizing { transition: none; box-shadow: 0 0 0 2px #FFD700, 0 16px 36px -8px rgba(0,0,0,.85); }
+.bxl-mini-feed { aspect-ratio: 9/16; }
+.bxl-grip { position: absolute; z-index: 8; width: 22px; height: 22px; touch-action: none; }
+.bxl-grip::before { content: ''; position: absolute; width: 12px; height: 12px; border: 0 solid #FFD700; filter: drop-shadow(0 0 3px rgba(255,215,0,.8)); }
+.bxl-grip-tl { left: 0; top: 0; cursor: nwse-resize; } .bxl-grip-tl::before { left: 4px; top: 4px; border-left-width: 3px; border-top-width: 3px; border-top-left-radius: 6px; }
+.bxl-grip-tr { right: 0; top: 0; cursor: nesw-resize; } .bxl-grip-tr::before { right: 4px; top: 4px; border-right-width: 3px; border-top-width: 3px; border-top-right-radius: 6px; }
+.bxl-grip-bl { left: 0; bottom: 0; cursor: nesw-resize; } .bxl-grip-bl::before { left: 4px; bottom: 4px; border-left-width: 3px; border-bottom-width: 3px; border-bottom-left-radius: 6px; }
+.bxl-grip-br { right: 0; bottom: 0; cursor: nwse-resize; } .bxl-grip-br::before { right: 4px; bottom: 4px; border-right-width: 3px; border-bottom-width: 3px; border-bottom-right-radius: 6px; }
+.bxl-mini-ctl { padding: 6px 26px; }
