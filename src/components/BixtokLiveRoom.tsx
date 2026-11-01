@@ -451,7 +451,12 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     <div className="bxl-tools">
       {publishing && <>
         <button aria-label="Flip camera" onClick={() => setFacing(f => (f === 'user' ? 'environment' : 'user'))}><SwitchCamera size={20}/></button>
-        {host && <button aria-label={sharing ? 'Stop sharing screen' : 'Share screen'} title={sharing ? 'Stop sharing' : 'Share screen'} className={sharing ? 'bxl-share-on' : ''} onClick={() => { void toggleShare(); }}>{sharing ? <MonitorOff size={20}/> : <MonitorUp size={20}/>}</button>}
+        {host && <button aria-label={sharing ? 'Stop sharing screen' : 'Share screen or slides'} title={sharing ? 'Stop sharing' : 'Share screen / slides'} className={sharing ? 'bxl-share-on' : ''} onClick={() => { void toggleShare(); }}>{sharing ? <MonitorOff size={20}/> : <MonitorUp size={20}/>}</button>}
+        {host && <input ref={slideInput} type="file" accept="image/*" multiple hidden onChange={e => { void startSlides(e.target.files); e.target.value = ''; }}/>}
+        {host && slides.length > 1 && <>
+          <button aria-label="Slide sebelumnya" disabled={slideIdx === 0} onClick={() => setSlideIdx(i => Math.max(0, i - 1))}>‹</button>
+          <button aria-label="Slide berikutnya" style={{ fontSize: '.65rem', fontWeight: 800 }} onClick={() => setSlideIdx(i => Math.min(slides.length - 1, i + 1))}>{slideIdx + 1}/{slides.length} ›</button>
+        </>}
         {host && <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={ZOOM_MIN} max={ZOOM_MAX} step={0.05} value={zoom} onChange={e => setZoom(clampZoom(+e.target.value))}/></label>}
         <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
       </>}

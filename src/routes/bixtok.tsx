@@ -350,8 +350,8 @@ function BalancePage({ stake, cfg, onBack, onLive }: { stake: number; cfg: Cfg; 
   return <div className="bxt-page bxt-bal"><header className="bxt-head"><button aria-label="Back" onClick={onBack}><ArrowLeft size={20}/></button><div className="text-center"><h1>Balance</h1><small className="bxt-safe"><ShieldCheck size={12}/> Secure</small></div><Link to="/settings" aria-label="Settings"><Settings size={20}/></Link></header>
     <p className="bxt-est">Active staking (USD) <button onClick={() => setHide(h => !h)} aria-label="Toggle"><Eye size={14}/></button></p>
     <p className="bxt-amt">{hide ? '••••' : stake.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+    <CreatorEarnings/>
     <div className="bxt-coins"><Link to="/wallet"><span><Coins size={14}/> BIXP</span><b>Wallet</b><em>Get BIXP →</em></Link><Link to="/wallet"><span><Coins size={14}/> BIXCOIN</span><b>Wallet</b></Link></div>
-    <Link to="/wallet" className="bxt-card"><b>Transactions</b><span>Gift history <ChevronRight size={14}/></span></Link>
     <Link to="/stake" className="bxt-card"><div><b>Join a staking package</b><p>Unlock Go LIVE{Number(cfg.live_min_stake_usd) > 0 ? ` from $${Number(cfg.live_min_stake_usd).toFixed(0)}` : ''}</p></div><Gift className="bxt-gifticon"/></Link>
     <div className="bxt-tools">
       <button onClick={onLive}><span><Radio/></span>LIVE rewards</button>
