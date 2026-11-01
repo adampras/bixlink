@@ -4741,7 +4741,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 /* BIXTOK mini LIVE window */
 .bxl-full { position: fixed; inset: 0; z-index: 90; transform: translateZ(0); }
 .bxl-mini { position: fixed; right: 12px; bottom: 96px; z-index: 95; width: 34vw; max-width: 150px; aspect-ratio: 9/16; border-radius: 16px; overflow: hidden; transform: translateZ(0); border: 1.5px solid #FFD700; box-shadow: 0 12px 30px -8px rgba(0,0,0,.8), 0 0 18px -6px #FFD700; background: #000; }
-.bxl-mini-inner { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; transform: scale(var(--s, .36)); transform-origin: top left; pointer-events: none; }
+.bxl-mini-inner { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; transform: scale(var(--s, .52)); transform-origin: top left; pointer-events: none; }
 @media (min-width: 420px) { .bxl-mini-inner { --s: .3; } }
 .bxl-mini-ctl { position: absolute; inset: 0; z-index: 5; display: flex; align-items: flex-start; justify-content: flex-end; gap: 4px; padding: 6px; }
 .bxl-mini-hit { position: absolute; inset: 0; background: transparent; }
@@ -4749,8 +4749,8 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-mini-badge { position: absolute; left: 6px; bottom: 6px; font-size: 9px; font-weight: 800; letter-spacing: .1em; padding: 2px 6px; border-radius: 999px; background: #e11d48; color: #fff; }
 /* Larger mini window + BIXTOK LIVE nav tab */
 .bxl-mini { width: 52vw; max-width: 240px; bottom: 90px; }
-.bxl-mini-inner { --s: .52; }
-@media (min-width: 420px) { .bxl-mini-inner { --s: .5; } }
+
+
 .bxl-mini-badge.feed { background: linear-gradient(135deg,#A855F7,#FFD700); color: #000; }
 .bxt-live-tab .bxt-live-ic { position: relative; display: grid; place-items: center; width: 34px; height: 26px; border-radius: 9px; background: linear-gradient(135deg,#e11d48,#A855F7); color: #fff; box-shadow: 0 0 0 1.5px #FFD700, 0 0 14px -2px #e11d48; animation: bxtLivePulse 1.8s ease-in-out infinite; }
 .bxt-live-tab .bxt-live-ic em { position: absolute; bottom: -7px; font-style: normal; font-size: 7px; font-weight: 900; letter-spacing: .08em; padding: 0 4px; border-radius: 4px; background: #FFD700; color: #000; }
