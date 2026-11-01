@@ -173,7 +173,6 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
     <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
     <aside className={`bixtok-rail bxt-rail-shield${railOpen ? '' : ' closed'}`}>
-      <button type="button" className="bxt-rail-toggle" aria-label={railOpen ? 'Collapse menu' : 'Expand menu'} onClick={() => setRailOpen(o => !o)}>{railOpen ? '›' : '‹'}</button>
       {railOpen && <>
       {v.creator_id === me && <div className="bxt-follow me"><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><small>You</small></div>}
       {v.creator_id && v.creator_id !== me && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
@@ -181,8 +180,8 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
       <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
-      {v.creator_id === me && <button aria-label="Delete" onClick={async () => { if (!confirm('Delete this post?')) return; await supabase.from('bixtok_videos').delete().eq('id', v.id); if (v.media_path) await supabase.storage.from('bixtok-media').remove([v.media_path]); qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Post deleted'); }}><Trash2/><small>Delete</small></button>}
       </>}
+      <button type="button" className="bxt-rail-toggle" aria-label={railOpen ? 'Collapse menu' : 'Expand menu'} onClick={() => setRailOpen(o => !o)}>{railOpen ? '›' : '‹'}</button>
     </aside>
   </section>)}{comments && <CommentsSheet video={comments} me={me} onClose={() => setComments(null)} onNote={onNote}/>}</div>;
 }
@@ -367,6 +366,7 @@ function Inbox({ followers, lives, mine, onLive, onCreate }: { followers: number
 
 function ProfilePage({ follow, me, email, videos, onCreate, onBalance, onOpen, onNote }: { follow: { following: Set<string>; followers: Set<string> }; me: string; email: string; videos: Video[]; onCreate: () => void; onBalance: () => void; onOpen: () => void; onNote: (m: string) => void }) {
   const p = useQuery({ queryKey: ['bixtok-profile', me], queryFn: async () => (await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle()).data });
+  const qc = useQueryClient();
   const [drawer, setDrawer] = useState(false); const [ptab, setPtab] = useState('grid');
   const name = p.data?.username || email.split('@')[0] || 'member';
   const likes = videos.reduce((a, v) => a + Number(v.likes || 0), 0);
@@ -378,7 +378,7 @@ function ProfilePage({ follow, me, email, videos, onCreate, onBalance, onOpen, o
     <p className="bxt-bio">BIXLINK member · Web3 creator</p>
     <Link to="/nft-marketplace" className="bxt-pill"><ShoppingBag size={14}/> Your orders</Link>
     <div className="bxt-ptabs">{[['grid', Grid3x3], ['private', Lock], ['repost', Repeat2], ['saved', Bookmark], ['liked', Heart]].map(([k, I]) => { const Ic = I as typeof Heart; return <button key={k as string} className={ptab === k ? 'on' : ''} onClick={() => setPtab(k as string)} aria-label={k as string}><Ic size={20}/></button>; })}</div>
-    {ptab === 'grid' && videos.length ? <div className="bxt-grid">{videos.map(v => <button key={v.id} onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={v.src} muted preload="metadata"/>}<small><Eye size={12}/> {v.likes}</small></button>)}</div>
+    {ptab === 'grid' && videos.length ? <div className="bxt-grid">{videos.map(v => <div key={v.id} className="bxt-grid-item"><button onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={v.src} muted preload="metadata"/>}<small><Eye size={12}/> {v.likes}</small></button><button type="button" className="bxt-grid-del" aria-label="Delete post" onClick={async () => { if (!confirm('Delete this post?')) return; const { error } = await supabase.from('bixtok_videos').delete().eq('id', v.id); if (error) return onNote('Could not delete post.'); if (v.media_path) await supabase.storage.from('bixtok-media').remove([v.media_path]); qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Post deleted'); }}><Trash2 size={14}/></button></div>)}</div>
       : <p className="p-10 text-center text-sm text-muted-foreground">{ptab === 'grid' ? 'No posts yet. Tap + to create.' : 'Nothing here yet.'}</p>}
     {drawer && <div className="bxt-drawer-wrap" onClick={() => setDrawer(false)}><aside className="bxt-drawer" onClick={e => e.stopPropagation()}>
       <h4>Assets</h4><button onClick={() => { setDrawer(false); onBalance(); }}><Wallet/>Balance<ChevronRight/></button>
