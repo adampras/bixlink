@@ -4730,3 +4730,11 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-bg-grid button.on { border-color: #ffd700; }
 .bxl-bg-grid i { display: block; width: 100%; aspect-ratio: 9 / 14; border-radius: .55rem; }
 .bxl-bg-grid small { font-size: .6rem; line-height: 1.1; text-align: center; opacity: .85; }
+
+/* LIVE voice background: fully covers the stage above video */
+.bxl-voicebg { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; gap: 1rem; align-items: center; justify-content: center; background-size: cover !important; }
+.bxl-voicebg-av { font-size: 6.5rem; line-height: 1; filter: drop-shadow(0 0 28px color-mix(in oklab, #FFD700 55%, transparent)); animation: bxl-bg-pulse 3s ease-in-out infinite; }
+.bxl-bg-grid i { display: grid; place-items: center; font-style: normal; font-size: 1.6rem; }
+.bxl-back { margin-top: .4rem; font-size: .75rem; font-weight: 700; color: var(--accent); }
+.bxl-endcard { position: absolute; inset: 0; z-index: 60; display: flex; flex-direction: column; gap: .5rem; align-items: center; justify-content: center; background: color-mix(in oklab, black 82%, transparent); color: white; backdrop-filter: blur(8px); }
+.bxl-endcard b { font-size: 1.3rem; } .bxl-endcard .bxl-btn { margin-top: .75rem; padding: .6rem 1.6rem; font-size: .9rem; }
