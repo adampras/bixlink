@@ -159,21 +159,47 @@ function BixtokPage() {
 function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers = new Set<string>(), onFollow, onGift, onNote }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; following?: Set<string>; followers?: Set<string>; onFollow: (id: string) => void; onGift: (id: string) => void; onNote: (m: string) => void }) {
   const qc = useQueryClient();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
-  const [resume] = useState(() => bixtokMini.takeLastId());
-  useEffect(() => { if (!resume) return; requestAnimationFrame(() => document.querySelector(`[data-vid="${resume}"]`)?.scrollIntoView({ block: 'start' })); }, [resume, videos.length > 0]);
+  const [resume] = useState(() => bixtokMini.peekLastId());
+  const [railOpen, setRailOpen] = useState(true);
+  const [comments, setComments] = useState<Video | null>(null);
+  useEffect(() => { if (!resume || !videos.length) return; let n = 0; let t = 0;
+    const go = () => { const el = document.querySelector(`[data-vid="${resume}"]`) as HTMLElement | null; const feed = el?.closest('.bixtok-feed') as HTMLElement | null;
+      if (el && feed) { feed.style.scrollSnapType = 'none'; feed.scrollTop = el.offsetTop; requestAnimationFrame(() => { feed.style.scrollSnapType = ''; }); if (Math.abs(feed.scrollTop - el.offsetTop) < 4 || n > 20) return; }
+      if (n++ < 30) t = window.setTimeout(go, 60); };
+    go(); return () => clearTimeout(t); }, [resume, videos.length > 0]);
   if (!videos.length) return <p className="grid h-full place-items-center text-sm text-muted-foreground">No posts yet. Tap + to create one.</p>;
   return <div className="bixtok-feed">{videos.map(v => <section key={v.id} data-vid={v.id} className="bixtok-slide">
     <Media v={v} muted={muted}/>
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
     <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
-    <aside className="bixtok-rail">
+    <aside className={`bixtok-rail bxt-rail-shield${railOpen ? '' : ' closed'}`}>
+      <button type="button" className="bxt-rail-toggle" aria-label={railOpen ? 'Collapse menu' : 'Expand menu'} onClick={() => setRailOpen(o => !o)}>{railOpen ? '›' : '‹'}</button>
+      {railOpen && <>
+      {v.creator_id === me && <div className="bxt-follow me"><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><small>You</small></div>}
       {v.creator_id && v.creator_id !== me && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={async () => { if (liked[v.id]) return; setLiked({ ...liked, [v.id]: true }); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
+      <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
       {v.creator_id === me && <button aria-label="Delete" onClick={async () => { if (!confirm('Delete this post?')) return; await supabase.from('bixtok_videos').delete().eq('id', v.id); if (v.media_path) await supabase.storage.from('bixtok-media').remove([v.media_path]); qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Post deleted'); }}><Trash2/><small>Delete</small></button>}
+      </>}
     </aside>
-  </section>)}</div>;
+  </section>)}{comments && <CommentsSheet video={comments} me={me} onClose={() => setComments(null)} onNote={onNote}/>}</div>;
+}
+
+type Cmt = { id: string; user_id: string; author_name: string; body: string; created_at: string };
+function CommentsSheet({ video, me, onClose, onNote }: { video: Video; me: string; onClose: () => void; onNote: (m: string) => void }) {
+  const qc = useQueryClient(); const [text, setText] = useState(''); const [busy, setBusy] = useState(false);
+  const q = useQuery({ queryKey: ['bixtok-comments', video.id], queryFn: async () => { const { data, error } = await supabase.from('bixtok_comments').select('id,user_id,author_name,body,created_at').eq('video_id', video.id).order('created_at', { ascending: false }).limit(100); if (error) throw error; return (data ?? []) as Cmt[]; } });
+  const send = async () => { const body = text.trim(); if (!body) return; setBusy(true);
+    const { error } = await supabase.from('bixtok_comments').insert({ video_id: video.id, body, user_id: me });
+    setBusy(false); if (error) { onNote('Comment could not be sent.'); return; } setText(''); qc.invalidateQueries({ queryKey: ['bixtok-comments', video.id] }); };
+  return <div className="bxt-cmt-wrap" onClick={onClose}><div className="bxt-cmt" role="dialog" aria-label="Comments" onClick={e => e.stopPropagation()}>
+    <header><b>{q.data?.length ?? 0} comments</b><button aria-label="Close comments" onClick={onClose}><X size={18}/></button></header>
+    <ul>{q.isLoading ? <li className="muted">Loading…</li> : !q.data?.length ? <li className="muted">No comments yet. Be the first!</li> : q.data.map(c => <li key={c.id}><span>{c.author_name.slice(0, 1).toUpperCase()}</span><div><b>@{c.author_name}</b><p>{c.body}</p></div>
+      {c.user_id === me && <button aria-label="Delete comment" onClick={async () => { await supabase.from('bixtok_comments').delete().eq('id', c.id); qc.invalidateQueries({ queryKey: ['bixtok-comments', video.id] }); }}><Trash2 size={14}/></button>}</li>)}</ul>
+    <form onSubmit={e => { e.preventDefault(); void send(); }}><input value={text} maxLength={300} onChange={e => setText(e.target.value)} placeholder="Add a comment…"/><button disabled={busy || !text.trim()}>Send</button></form>
+  </div></div>;
 }
 
 function embedUrl(u: string): string | null {
@@ -194,7 +220,7 @@ function Media({ v, muted }: { v: Video; muted: boolean }) {
   const audio = useRef<HTMLAudioElement | null>(null);
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => setShow(!!e?.isIntersecting), { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
   useEffect(() => { if (!v.music_url) return undefined; if (show && !muted) { audio.current ??= new Audio(v.music_url); audio.current.loop = true; audio.current.volume = 1; audio.current.play().catch(() => {}); } else audio.current?.pause(); return () => audio.current?.pause(); }, [show, muted, v.music_url]);
-  useEffect(() => { if (show) currentVid = v; }, [show, v]);
+  useEffect(() => { if (show) { currentVid = v; bixtokMini.rememberId(v.id); } }, [show, v]);
   return <div ref={ref} className="bixtok-media">
     {v.clean ? <AutoVideo src={v.clean} filter={v.filter} muted={muted || !!v.music_url}/> : embed ? (show ? (new URL(embed).hostname === 'www.tiktok.com'
       ? <BixtokTikTokPlayer src={embed} title={v.caption || 'BIXTOK post'} muted={muted} className="bixtok-embed" filter={filterCss(v.filter)}/>

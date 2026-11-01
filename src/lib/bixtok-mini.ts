@@ -17,6 +17,8 @@ export const bixtokMini = {
   setMini(mini: boolean) { state = { ...state, mini }; emit(); },
   close() { state = { ...state, room: null, mini: false }; emit(); },
   setFeed(feed: MiniFeed | null) { if (feed?.id) lastId = feed.id; state = { ...state, feed }; emit(); },
+  peekLastId() { return lastId; },
+  rememberId(id: string) { lastId = id; },
   takeLastId() { const v = lastId; lastId = null; return v; },
 };
 export function useBixtokMini(): State {
