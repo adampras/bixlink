@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent as RPE } from 'react';
-import { Maximize2, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Maximize2, X } from 'lucide-react';
 import { useRouter } from '@tanstack/react-router';
 import { bixtokMini, useBixtokMini } from '@/lib/bixtok-mini';
 
@@ -35,12 +35,12 @@ function useDrag() {
   const pinch = useRef<{ d: number; s: number } | null>(null);
   const pts = useRef(new Map<number, { x: number; y: number }>());
   const [tucked, setTucked] = useState<'l' | 'r' | null>(null);
-  const st = useRef<{ sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
+  const st = useRef<{ sx: number; sy: number; ox: number; oy: number; lx: number; ly: number; moved: boolean } | null>(null);
   const onPointerDown = (e: RPE<HTMLDivElement>) => {
     pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pts.current.size === 2) { const [a, b] = [...pts.current.values()] as { x: number; y: number }[]; pinch.current = { d: Math.hypot(a!.x - b!.x, a!.y - b!.y), s: scale }; st.current = null; return; }
     const r = e.currentTarget.getBoundingClientRect();
-    st.current = { sx: e.clientX, sy: e.clientY, ox: r.left, oy: r.top, moved: false };
+    st.current = { sx: e.clientX, sy: e.clientY, ox: r.left, oy: r.top, lx: r.left, ly: r.top, moved: false };
   };
   const onPointerMove = (e: RPE<HTMLDivElement>) => {
     if (pts.current.has(e.pointerId)) pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -48,14 +48,21 @@ function useDrag() {
     const s = st.current; if (!s) return;
     const dx = e.clientX - s.sx, dy = e.clientY - s.sy;
     if (!s.moved && Math.hypot(dx, dy) < 8) return;
-    if (!s.moved) { s.moved = true; e.currentTarget.setPointerCapture(e.pointerId); setTucked(null); }
-    const w = e.currentTarget.offsetWidth, h = e.currentTarget.offsetHeight;
-    setPos({ x: Math.min(window.innerWidth - w * 0.3, Math.max(-w * 0.7, s.ox + dx)), y: Math.min(window.innerHeight - h, Math.max(0, s.oy + dy)) });
+    const el = e.currentTarget;
+    if (!s.moved) { s.moved = true; el.setPointerCapture(e.pointerId); el.classList.add('bxl-dragging'); setTucked(null); }
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const x = Math.min(window.innerWidth - w * 0.3, Math.max(-w * 0.7, s.ox + dx)), y = Math.min(window.innerHeight - h, Math.max(0, s.oy + dy));
+    s.lx = x; s.ly = y;
+    cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() => { el.style.transform = `translate3d(${x - s.ox}px, ${y - s.oy}px, 0)`; });
   };
   const onPointerUp = (e: RPE<HTMLDivElement>) => {
     pts.current.delete(e.pointerId); if (pts.current.size < 2) pinch.current = null;
     const s = st.current; st.current = null; if (!s?.moved) return;
-    const r = e.currentTarget.getBoundingClientRect();
+    const el = e.currentTarget; cancelAnimationFrame(raf.current);
+    const r = el.getBoundingClientRect();
+    el.classList.remove('bxl-dragging'); el.style.transform = '';
+    setPosRaw({ x: s.lx, y: s.ly });
     const edge = r.left < -r.width * 0.25 ? 'l' : r.right > window.innerWidth + r.width * 0.25 ? 'r' : null;
     if (edge) { setTucked(edge); try { navigator.vibrate?.([18, 40, 18]); } catch { /* unsupported */ } }
     e.preventDefault();
@@ -80,8 +87,7 @@ function useDrag() {
     tgt.addEventListener('pointermove', move); tgt.addEventListener('pointerup', up); tgt.addEventListener('pointercancel', up);
   };
   const handles = tucked ? null : (['tl', 'tr', 'bl', 'br'] as const).map(c => <span key={c} className={`bxl-grip bxl-grip-${c}`} onPointerDown={resize(c)} aria-hidden/>);
-  const zoom = (d: number) => setScale(v => Math.min(1.8, Math.max(0.6, +(v + d).toFixed(2))));
-  return { tucked, zoom, handles, bind: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp, onClickCapture, style } };
+  return { tucked, handles, bind: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp, onClickCapture, style } };
 }
 
 // Mini player keeps the speaker on; falls back to muted only if the browser blocks sound, then unmutes on first tap.
@@ -101,8 +107,6 @@ export function BixtokMiniHost() {
     {feed.kind === 'iframe' ? <iframe src={feed.src.replace('mute=1', 'mute=0')} title={feed.title} allow="autoplay; encrypted-media" className="h-full w-full border-0"/> : feed.kind === 'video' ? <SoundVideo src={feed.src}/> : <img src={feed.src} alt={feed.title} className="h-full w-full object-contain"/>}
     {drag.handles}
     <div className="bxl-mini-ctl"><span className="bxl-mini-badge feed">BIXTOK</span>
-      <button type="button" aria-label="Smaller" onClick={() => drag.zoom(-0.2)}><ZoomOut size={14}/></button>
-      <button type="button" aria-label="Bigger" onClick={() => drag.zoom(0.2)}><ZoomIn size={14}/></button>
       <button type="button" aria-label="Open BIXTOK" onClick={() => { bixtokMini.setFeed(null); void router.navigate({ to: '/bixtok' }); }}><Maximize2 size={14}/></button>
       <button type="button" aria-label="Close BIXTOK mini" onClick={() => bixtokMini.setFeed(null)}><X size={14}/></button></div>
   </div>;
@@ -121,8 +125,6 @@ export function BixtokMiniHost() {
     {mini && <div className="bxl-mini-ctl">
       <button type="button" className="bxl-mini-hit" aria-label="Expand LIVE" onClick={() => bixtokMini.setMini(false)}/>
       <span className="bxl-mini-badge">● LIVE</span>
-      <button type="button" aria-label="Smaller" onClick={() => drag.zoom(-0.2)}><ZoomOut size={14}/></button>
-      <button type="button" aria-label="Bigger" onClick={() => drag.zoom(0.2)}><ZoomIn size={14}/></button>
       <button type="button" aria-label="Expand LIVE" onClick={() => bixtokMini.setMini(false)}><Maximize2 size={14}/></button>
       <button type="button" aria-label="Close LIVE" onClick={() => { bixtokMini.setMini(false); setTimeout(() => (document.querySelector('.bxl-full [aria-label="Close"]') as HTMLButtonElement | null)?.click(), 50); }}><X size={14}/></button>
     </div>}
