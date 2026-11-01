@@ -47,19 +47,21 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
+  const chunk = /dynamically imported module|Importing a module script failed/.test(String((error as Error)?.message ?? ""));
   useEffect(() => {
-    const msg = String((error as Error)?.message ?? "");
-    if (/dynamically imported module|Importing a module script failed/.test(msg)) {
-      // Stale chunk after a restart/deploy: reload at most once per 30s.
-      const last = Number(sessionStorage.getItem("bix-chunk-reload-at") ?? 0);
-      if (Date.now() - last > 30000) {
-        sessionStorage.setItem("bix-chunk-reload-at", String(Date.now()));
+    if (chunk) {
+      // Stale page file after an update: the browser caches the failed import, so only a full reload helps.
+      // Allow up to 3 automatic reloads per minute, then leave the reload button to the member.
+      const now = Date.now();
+      const hits = JSON.parse(sessionStorage.getItem("bix-chunk-reloads") ?? "[]").filter((t: number) => now - t < 60000) as number[];
+      if (hits.length < 3) {
+        sessionStorage.setItem("bix-chunk-reloads", JSON.stringify([...hits, now]));
         window.location.reload();
         return;
       }
     }
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+  }, [error, chunk]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -73,6 +75,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
+              if (chunk) { window.location.reload(); return; }
               router.invalidate();
               reset();
             }}
