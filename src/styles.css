@@ -4695,3 +4695,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-refcard > span { flex: 1; min-width: 0; }
 .bxl-refcard button, .bxl-refcard a { flex: none; padding: .25rem .55rem; border-radius: 999px; font-size: .68rem; font-weight: 700; background: var(--primary); color: var(--primary-foreground); }
 .bxl-refcard button { background: color-mix(in oklab, var(--primary) 25%, transparent); color: var(--foreground); }
+
+.page-velvet { animation: page-velvet-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes page-velvet-in { from { opacity: 0; transform: translateY(10px) scale(0.99); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .page-velvet { animation: none; } }
