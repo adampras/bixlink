@@ -897,6 +897,13 @@
       "when": 1793525375329,
       "tag": "0127_bixtok_live_backdrops",
       "breakpoints": true
+    },
+    {
+      "idx": 128,
+      "version": "7",
+      "when": 1793530187666,
+      "tag": "0128_bixtok_owner2_isolation",
+      "breakpoints": true
     }
   ]
 }
