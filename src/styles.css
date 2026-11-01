@@ -4677,3 +4677,9 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .arb-lux .form-input { background:var(--lux-void); border-color:color-mix(in oklab, var(--lux-titan) 20%, transparent); }
 .arb-lux .form-input:focus { border-color:var(--lux-gold); box-shadow:0 0 0 3px color-mix(in oklab, var(--lux-gold) 18%, transparent); }
 .arb-lux tbody tr:has(.text-chart-2) { background:linear-gradient(90deg, color-mix(in oklab, var(--lux-emerald) 6%, transparent), transparent); }
+
+/* BIXTOK polish: pulsing sound pill, tap-point hearts */
+.bxl-unmute { animation: bxl-pulse 1.6s ease-in-out infinite; box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 60%, transparent); }
+@keyframes bxl-pulse { 50% { box-shadow: 0 0 0 10px transparent; transform: translateX(-50%) scale(1.04); } }
+.bxl-heart { will-change: transform, opacity; }
+@media (prefers-reduced-motion: reduce) { .bxl-unmute { animation: none; } }

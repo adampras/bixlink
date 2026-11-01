@@ -25,7 +25,7 @@ export type SfxKey = typeof SOUNDBOARD[number][0];
 
 /** PK winner from display scores; null while tied. */
 export function pkWinner(a: number, b: number): 'a' | 'b' | null { return a === b ? null : a > b ? 'a' : 'b'; }
-type Floater = { id: number; x: number; color: string; drift: number };
+type Floater = { id: number; x: number; color: string; drift: number; px?: number; py?: number };
 
 const COLORS = ['#FFD700', '#A855F7', '#FF3B6B', '#22D3EE', '#FF8A00'];
 
@@ -276,7 +276,13 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     await unlockAudio();
     const v = view.current; if (v && mode === 'p2p') { v.muted = !sound; void v.play().catch(() => {}); }
   };
-  const tap = () => { if (audioBlocked) void unlockAudio(); setLikes(l => l + 1); pending.current += 1; spawn(1); sfx.pop(); };
+  const tap = (e?: { clientX: number; clientY: number }) => {
+    if (audioBlocked) void unlockAudio();
+    setLikes(l => l + 1); pending.current += 1; sfx.pop();
+    try { navigator.vibrate?.(10); } catch { /* unsupported */ }
+    if (e && e.clientX) setFloaters(f => [...f.slice(-30), { id: Math.random(), x: 0, px: e.clientX, py: e.clientY, color: COLORS[Math.floor(Math.random() * COLORS.length)]!, drift: Math.random() * 60 - 30 }]);
+    else spawn(1);
+  };
   const sendChat = async (body: string) => {
     const { data: p } = await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle();
     const { data, error } = await supabase.from('bixtok_live_messages').insert({ live_id: live.id, user_id: me, name: p?.username || 'member', body }).select('id,name,body,kind').single();
@@ -382,11 +388,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     {burst && <div className="bxl-sfx-burst" key={burst.id} aria-hidden onAnimationEnd={() => setBurst(null)}>{burst.e}</div>}
     {host && recording && <span className="bxl-rec"><Circle size={9} fill="currentColor"/> REC</span>}
     {ended && <p className="bixtok-ended">LIVE ended</p>}
-    {!host && entered && audioBlocked && sound && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Tap for sound</button>}
+    {!host && entered && audioBlocked && sound && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Ketuk untuk mengaktifkan suara</button>}
     {banner && <div className="bxl-banner" key={banner.id}><Gift size={18}/><div><b>{banner.name}</b><small>{banner.body}</small></div></div>}
     {mega && <div className="bxl-mega" key={mega.id} aria-hidden><span>{giftInfo(mega.body).emoji}</span><b>{mega.name}</b><small>{mega.body}</small></div>}
     <div className="bxl-floaters" aria-hidden>{floaters.map(f => <Heart key={f.id} className="bxl-heart" fill={f.color} color={f.color}
-      style={{ right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}</div>
+      style={f.px != null ? { position: 'fixed', left: `${f.px - 15}px`, top: `${(f.py ?? 0) - 15}px`, bottom: 'auto', ['--drift' as string]: `${f.drift}px` } : { right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}</div>
     <div className={`bixtok-chat${showcase && cfg.showcase_enabled !== false ? ' with-card' : ''}`}>{msgs.map(m => <p key={m.id} className={m.kind === 'gift' ? 'gift' : ''} onClick={host ? () => setModMsg(m) : undefined}><b>{m.name}</b> {m.body}</p>)}</div>
     <div className="bxl-tools">
       {publishing && <>
