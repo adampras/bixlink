@@ -26,14 +26,15 @@ export function SovereignWalletSwitch() {
     setBusy(false);
   };
   const matcha = cfg?.readiness.walletTheme === 'matcha';
-  const toggleTheme = async () => {
+  const theme = cfg?.readiness.walletTheme ?? 'gold';
+  const toggleTheme = async (nextTheme: 'gold' | 'matcha' | 'midnight' = matcha ? 'gold' : 'matcha') => {
     if (!cfg || busy) return;
     setBusy(true); setNote('');
     try {
-      const next = { ...defaultReadiness, ...cfg.readiness, walletTheme: matcha ? 'gold' : 'matcha' };
+      const next = { ...defaultReadiness, ...cfg.readiness, walletTheme: nextTheme };
       await save({ data: { key: 'readiness', value: next as unknown as Record<string, unknown> } });
       await qc.invalidateQueries({ queryKey: ['bix-public-config'] });
-      setNote(matcha ? 'Tema wallet: Obsidian Gold.' : 'Tema wallet: Black Matcha.');
+      setNote(`Tema wallet: ${nextTheme === 'midnight' ? 'Midnight Obsidian' : nextTheme === 'matcha' ? 'Black Matcha' : 'Obsidian Gold'}.`);
     } catch (e) { setNote(e instanceof Error ? e.message : 'Gagal menyimpan.'); }
     setBusy(false);
   };
@@ -48,9 +49,16 @@ export function SovereignWalletSwitch() {
     </div>
     <div className="mt-3 flex items-center gap-3 border-t border-border pt-3">
       <div className="min-w-0 flex-1"><b className="block text-sm">Tema Black Matcha</b><small className="text-xs text-muted-foreground">{matcha ? 'AKTIF · hitam, putih & hijau matcha' : 'MATI · tema Obsidian Gold'}</small></div>
-      <button type="button" role="switch" aria-checked={matcha} aria-label="Tema Black Matcha wallet" disabled={busy || !cfg} onClick={() => void toggleTheme()}
+      <button type="button" role="switch" aria-checked={matcha} aria-label="Tema Black Matcha wallet" disabled={busy || !cfg} onClick={() => void toggleTheme(matcha ? 'gold' : 'matcha')}
         className={`relative h-7 w-12 shrink-0 rounded-full border border-border transition-colors ${matcha ? 'bg-chart-2' : 'bg-muted'}`}>
         <span className={`absolute top-0.5 size-5 rounded-full bg-foreground transition-all ${matcha ? 'left-6' : 'left-0.5'}`} />
+      </button>
+    </div>
+    <div className="mt-3 flex items-center gap-3 border-t border-border pt-3">
+      <div className="min-w-0 flex-1"><b className="block text-sm">Tema Midnight Obsidian</b><small className="text-xs text-muted-foreground">{theme === 'midnight' ? 'AKTIF · obsidian malam & emas champagne' : 'MATI'}</small></div>
+      <button type="button" role="switch" aria-checked={theme === 'midnight'} aria-label="Tema Midnight Obsidian wallet" disabled={busy || !cfg} onClick={() => void toggleTheme(theme === 'midnight' ? 'gold' : 'midnight')}
+        className={`relative h-7 w-12 shrink-0 rounded-full border border-border transition-colors ${theme === 'midnight' ? 'bg-chart-2' : 'bg-muted'}`}>
+        <span className={`absolute top-0.5 size-5 rounded-full bg-foreground transition-all ${theme === 'midnight' ? 'left-6' : 'left-0.5'}`} />
       </button>
     </div>
     {note && <p role="status" className="mt-2 text-xs text-chart-3">{note}</p>}
