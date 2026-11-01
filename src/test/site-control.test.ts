@@ -20,3 +20,12 @@ describe('site control', () => {
     expect(isBlockedByMaintenance(c, false, '/auth')).toBe(false);
   });
 });
+
+import { isLandingClosedFor } from '@/lib/site-control';
+describe('landing close', () => {
+  const c = { maintenance: false, staging: false, landingClosed: true };
+  it('visitors see the closed screen', () => expect(isLandingClosedFor(c, false, false)).toBe(true));
+  it('admin preview sees the real landing', () => expect(isLandingClosedFor(c, true, true)).toBe(false));
+  it('non-admin cannot bypass with preview flag', () => expect(isLandingClosedFor(c, false, true)).toBe(true));
+  it('open landing shows to everyone', () => expect(isLandingClosedFor({ ...c, landingClosed: false }, false, false)).toBe(false));
+});

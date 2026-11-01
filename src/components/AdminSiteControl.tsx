@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQueryClient } from '@tanstack/react-query';
-import { Wrench, Eye } from 'lucide-react';
+import { Wrench, Eye, LayoutTemplate } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { saveSiteControl } from '@/lib/site-control.functions';
 import { defaultSiteControl, type SiteControl } from '@/lib/site-control';
@@ -9,12 +9,13 @@ import { defaultSiteControl, type SiteControl } from '@/lib/site-control';
 export function AdminSiteControl({ initial, onMessage, onSaved }: { initial?: SiteControl | undefined; onMessage: (s: string) => void; onSaved: () => Promise<void> }) {
   const [ctl, setCtl] = useState<SiteControl>({ ...defaultSiteControl, ...initial });
   const [message, setMessage] = useState(initial?.message ?? '');
+  const [landingMessage, setLandingMessage] = useState(initial?.landingMessage ?? '');
   const [busy, setBusy] = useState(false);
   const save = useServerFn(saveSiteControl);
   const qc = useQueryClient();
   async function apply(next: SiteControl, note: string) {
     setBusy(true);
-    try { await save({ data: { maintenance: next.maintenance, staging: next.staging, message } }); setCtl(next); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage(note); }
+    try { await save({ data: { maintenance: next.maintenance, staging: next.staging, message, landingClosed: !!next.landingClosed, landingMessage } }); setCtl(next); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage(note); }
     catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal menyimpan.'); }
     finally { setBusy(false); }
   }
@@ -29,6 +30,10 @@ export function AdminSiteControl({ initial, onMessage, onSaved }: { initial?: Si
     {row(<Wrench size={15}/>, 'Mode maintenance', 'ON: member dan pengunjung melihat halaman pemeliharaan. Admin tetap bisa masuk.', ctl.maintenance,
       () => { if (!window.confirm(ctl.maintenance ? 'Matikan maintenance?' : 'Aktifkan maintenance untuk semua member?')) return; apply({ ...ctl, maintenance: !ctl.maintenance }, ctl.maintenance ? 'Maintenance dimatikan.' : 'Maintenance aktif.'); })}
     <label className="text-xs text-muted-foreground">Pesan maintenance<input className="form-input mt-2" maxLength={240} value={message} placeholder="Sistem BIXLINK sedang dalam pemeliharaan…" onChange={e => setMessage(e.target.value)} onBlur={() => apply(ctl, 'Pesan maintenance disimpan.')}/></label>
+    {row(<LayoutTemplate size={15}/>, 'Landing page ditutup', 'ON: pengunjung melihat layar Under Reconstruction di halaman depan (tombol login tetap ada). Admin tetap bisa melihat landing asli lewat tombol pratinjau.', !!ctl.landingClosed,
+      () => apply({ ...ctl, landingClosed: !ctl.landingClosed }, ctl.landingClosed ? 'Landing page dibuka untuk publik.' : 'Landing page ditutup — hanya admin yang bisa melihat.'))}
+    <label className="text-xs text-muted-foreground">Pesan landing ditutup<input className="form-input mt-2" maxLength={240} value={landingMessage} placeholder="Landing BIXLINK sedang diperbarui…" onChange={e => setLandingMessage(e.target.value)} onBlur={() => apply(ctl, 'Pesan landing disimpan.')}/></label>
+    <a href="/?landing=1" target="_blank" rel="noopener" className="w-fit rounded-full border border-border px-4 py-2 text-xs font-semibold hover:bg-card">Pratinjau landing (admin)</a>
     <p className="text-xs text-muted-foreground">Catatan: perubahan paket staking dan konten gambar langsung berlaku; pratinjau mencakup pengaturan tampilan, landing, market, mining, booster dan dompet.</p>
   </section>;
 }
