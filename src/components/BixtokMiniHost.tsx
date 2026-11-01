@@ -105,6 +105,7 @@ export function BixtokMiniHost() {
   const drag = useDrag();
   if (!room && feed && router.state.location.pathname !== '/bixtok') return <div className={`bxl-mini bxl-mini-feed${drag.tucked ? ' bxl-tucked' : ''}`} {...drag.bind}>
     {feed.kind === 'iframe' ? <iframe src={feed.src.replace('mute=1', 'mute=0')} title={feed.title} allow="autoplay; encrypted-media" className="h-full w-full border-0"/> : feed.kind === 'video' ? <SoundVideo src={feed.src}/> : <img src={feed.src} alt={feed.title} className="h-full w-full object-contain"/>}
+    {feed.title && <p className="bxl-mini-cap">{feed.title}</p>}
     {drag.handles}
     <div className="bxl-mini-ctl"><span className="bxl-mini-badge feed">BIXTOK</span>
       <button type="button" aria-label="Open BIXTOK" onClick={() => { bixtokMini.setFeed(null); void router.navigate({ to: '/bixtok' }); }}><Maximize2 size={14}/></button>
