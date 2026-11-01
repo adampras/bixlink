@@ -8,7 +8,7 @@ import { useReplayRecorder } from '@/lib/bixtok-replay';
 import { MEDIA_HELP, openLiveMedia, type MediaIssue } from '@/lib/bixtok-media';
 import { allBackdrops, backdropCss } from '@/lib/bixtok-backdrops';
 import { copyText } from '@/lib/copy-text';
-import { FACE_FILTERS, VOICE_FX, filterVideo, filterVoice, type VoiceFx } from '@/lib/bixtok-filters';
+import { FACE_FILTERS, FX_SLIDERS, VOICE_FX, filterVideo, filterVoice, isNeutral, type FxLevels, type VoiceFx } from '@/lib/bixtok-filters';
 
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
 type Msg = { id: string; name: string; body: string; kind: string };
@@ -250,18 +250,20 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   // Face filters + voice changer: process the raw camera/mic locally and publish the result.
   const raw = useRef<MediaStream | null>(null); const [rawVer, setRawVer] = useState(0);
   const [faceFx, setFaceFx] = useState('none'); const [voiceFx, setVoiceFx] = useState<VoiceFx>('none');
+  const [levels, setLevels] = useState<FxLevels>(FACE_FILTERS[0].levels);
+  const levelsRef = useRef(levels); levelsRef.current = levels;
+  const beautyOn = !isNeutral(levels);
   useEffect(() => {
     const r = raw.current; if (!r || !publishing || sharingRef.current) return undefined;
     const rv = r.getVideoTracks()[0]; const ra = r.getAudioTracks()[0];
-    const f = FACE_FILTERS.find(x => x.id === faceFx);
-    const pv = rv && f && f.id !== 'none' ? filterVideo(rv, f, facing === 'user') : null;
+    const pv = rv && beautyOn ? filterVideo(rv, () => levelsRef.current) : null;
     const pa = ra && voiceFx !== 'none' ? filterVoice(ra, voiceFx) : null;
     const next = new MediaStream([...(pv ? [pv.track] : rv ? [rv] : []), ...(pa ? [pa.track] : ra ? [ra] : [])]);
     next.getAudioTracks().forEach(t => { t.enabled = mic; });
     stream.current = next; setLocal(next);
     return () => { pv?.stop(); pa?.stop(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faceFx, voiceFx, rawVer, publishing]);
+  }, [beautyOn, voiceFx, rawVer, publishing]);
   // Screen sharing (host): swap the outgoing video track for the screen, keep the microphone.
   const [sharing, setSharing] = useState(false);
   const sharingRef = useRef(false); useEffect(() => { sharingRef.current = sharing; }, [sharing]);
