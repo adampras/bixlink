@@ -1610,6 +1610,41 @@ export type Database = {
         }
         Relationships: []
       }
+      bixtok_comments: {
+        Row: {
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          author_name?: string
+          body: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          video_id: string
+        }
+        Update: {
+          author_name?: string
+          body?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixtok_comments_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "bixtok_videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bixtok_config: {
         Row: {
           auto_follow_back: boolean
