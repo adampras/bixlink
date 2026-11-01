@@ -4691,3 +4691,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @keyframes bxt-gold-glow{50%{box-shadow:0 0 0 4px color-mix(in oklab,var(--background) 92%,transparent),0 8px 22px oklch(0 0 0/.55),0 0 28px oklch(0.82 0.13 85/.55)}}
 @media (prefers-reduced-motion: reduce){.bxt-nav .bxt-plus.bxt-plus-logo{animation:none}}
 .bxl-tools .bxl-share-on{background:oklch(0.82 0.13 85)!important;color:oklch(0.15 0.01 260)!important}
+.bxl-refcard { align-items: center; border-color: color-mix(in oklab, var(--primary) 60%, transparent); background: color-mix(in oklab, var(--primary) 18%, var(--background)); }
+.bxl-refcard > span { flex: 1; min-width: 0; }
+.bxl-refcard button, .bxl-refcard a { flex: none; padding: .25rem .55rem; border-radius: 999px; font-size: .68rem; font-weight: 700; background: var(--primary); color: var(--primary-foreground); }
+.bxl-refcard button { background: color-mix(in oklab, var(--primary) 25%, transparent); color: var(--foreground); }

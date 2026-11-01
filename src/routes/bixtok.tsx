@@ -295,7 +295,8 @@ function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; 
     <div className="flex items-center justify-between"><h3 className="font-bold">Send a gift</h3><button aria-label="Close" onClick={onClose}><X size={18}/></button></div>
     {recips.length > 1 && <div className="bxl-recips" role="radiogroup" aria-label="Gift to">{recips.map(r => <button key={r.id} role="radio" aria-checked={to === r.id} className={to === r.id ? 'on' : ''} onClick={() => setTo(r.id)}>@{r.name}</button>)}</div>}
     {closed ? <p className="mt-4 text-sm text-muted-foreground">Gifts are closed right now.</p> : <div className="bixtok-gifts">{gifts.map(g => <button key={g.id} disabled={!!busy} onClick={() => send(g)}><span>{g.emoji}</span><b>{g.name}</b><small>{Number(g.price)} {g.currency}</small></button>)}</div>}
-    <p className="mt-3 text-[10px] text-muted-foreground">BIXP are promotional points moved to the creator; BIX gifts are internal ledger transfers to the creator. Gifts are final and are not investment returns.</p>
+    <p className="mt-3 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-center text-[11px] font-semibold text-primary">90% net creator share · fair & direct</p>
+    <p className="mt-2 text-[10px] text-muted-foreground">The creator receives the net share set by the platform (default 90%); the rest is a platform fee. BIXP are promotional points; BIX gifts are internal ledger transfers to the creator. Gifts are final and are not investment returns.</p>
     {burst && <div className="bixtok-burst" aria-hidden>{burst}</div>}
   </div></div>;
 }

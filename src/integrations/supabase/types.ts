@@ -1613,6 +1613,7 @@ export type Database = {
       bixtok_config: {
         Row: {
           auto_follow_back: boolean
+          creator_share_pct: number
           enabled: boolean
           features: Json
           gifts_enabled: boolean
@@ -1635,6 +1636,7 @@ export type Database = {
         }
         Insert: {
           auto_follow_back?: boolean
+          creator_share_pct?: number
           enabled?: boolean
           features?: Json
           gifts_enabled?: boolean
@@ -1657,6 +1659,7 @@ export type Database = {
         }
         Update: {
           auto_follow_back?: boolean
+          creator_share_pct?: number
           enabled?: boolean
           features?: Json
           gifts_enabled?: boolean
@@ -1705,6 +1708,7 @@ export type Database = {
           currency: string
           gift_id: string
           gift_name: string
+          gross_amount: number | null
           id: string
           live_id: string | null
           recipient_id: string
@@ -1718,6 +1722,7 @@ export type Database = {
           currency: string
           gift_id: string
           gift_name: string
+          gross_amount?: number | null
           id?: string
           live_id?: string | null
           recipient_id: string
@@ -1731,6 +1736,7 @@ export type Database = {
           currency?: string
           gift_id?: string
           gift_name?: string
+          gross_amount?: number | null
           id?: string
           live_id?: string | null
           recipient_id?: string
