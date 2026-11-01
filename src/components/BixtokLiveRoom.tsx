@@ -559,12 +559,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <textarea className="bxl-pin-input" value={pinEdit} maxLength={160} onChange={e => setPinEdit(e.target.value)} placeholder="e.g. Presale closes in 3 days — tap Presale to join"/>
       <div className="mt-2 flex gap-2"><button type="submit" className="bxl-btn">Pin</button>{pinned && <button type="button" className="bxl-btn ghost" onClick={() => savePin('')}>Unpin</button>}</div>
     </form></div>}
-    {sheet && <div className="bixtok-sheet-wrap" onClick={() => setSheet(null)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
-      <div className="flex items-center justify-between"><h3 className="font-bold">{sheet === 'board' ? 'Soundboard' : sheet === 'showcase' ? 'Showcase card' : sheet === 'bg' ? 'Camera off · background' : sheet === 'fx' ? 'Filters & voice' : 'PK battle'}</h3><button aria-label="Close" onClick={() => setSheet(null)}><X size={18}/></button></div>
+    {sheet && <div className="bixtok-sheet-wrap" onClick={() => setSheet(null)}><div className={`bixtok-sheet bxl-lux-sheet${sheet === 'fx' ? ' bxl-fx-sheet' : ''}`} onClick={e => e.stopPropagation()}>
+      <div className="flex items-center justify-between"><h3 className="font-bold">{sheet === 'board' ? 'Soundboard' : sheet === 'showcase' ? 'Showcase card' : sheet === 'bg' ? 'Camera off · background' : sheet === 'fx' ? 'Filters & voice' : 'PK battle'}</h3><button aria-label="Close" className="bxl-lux-x" onClick={() => setSheet(null)}><X size={20}/></button></div>
       <button type="button" className="bxl-back" onClick={() => setSheet(null)}>‹ Back to LIVE</button>
       {sheet === 'board' && <div className="bxl-board">{SOUNDBOARD.map(([k, e, l]) => <button key={k} onClick={() => sendSfx(k)}><span>{e}</span>{l}</button>)}<p>Everyone in the room hears it.</p></div>}
       {sheet === 'fx' && <div>
-        <button type="button" aria-label="Close filters" className="bxl-fx-x" onClick={() => setSheet(null)}><X size={20}/></button>
         <p className="mt-1 text-xs opacity-70">Effects run on your phone — viewers see and hear them with no extra data.</p>
         <div className="bxl-board">{FACE_FILTERS.map(f => <button key={f.id} className={faceFx === f.id ? 'on' : ''} onClick={() => { setFaceFx(f.id); setLevels(f.levels); }}><span>{f.id === 'none' ? '🙂' : '✨'}</span>{f.name}</button>)}</div>
         <div className="bxl-sliders">{FX_SLIDERS.map(s => <label key={s.key}><span>{s.label}<b>{levels[s.key]}</b></span>
@@ -573,6 +572,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         </div>
         <h4 className="mt-3 text-xs font-bold opacity-80">Voice changer</h4>
         <div className="bxl-board">{VOICE_FX.map(v => <button key={v.id} className={voiceFx === v.id ? 'on' : ''} onClick={() => setVoiceFx(v.id)}><span>{v.id === 'robot' ? '🤖' : v.id === 'deep' ? '🎙️' : v.id === 'echo' ? '🔊' : v.id === 'studio' ? '🎧' : '🗣️'}</span>{v.name}</button>)}</div>
+        <button type="button" className="bxl-fx-done" onClick={() => setSheet(null)}><Check size={16}/> Done · close filters</button>
       </div>}
       {sheet === 'bg' && <div>
         <p className="mt-1 text-xs opacity-70">Hide your camera and show a background — your voice stays live. Saves data too.</p>
