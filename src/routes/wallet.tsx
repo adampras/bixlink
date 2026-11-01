@@ -11,7 +11,6 @@ import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
-import { InstallAppButton } from '@/components/InstallPrompt';
 import { KycCard } from '@/components/KycCard';
 import { getMyWallet, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
 import { getFiatRates } from '@/lib/market.functions';
@@ -193,6 +192,6 @@ function WalletGateway({ open }: { open: boolean }) {
   return <section className="sov-wallet mt-6" aria-label="BIXLINK Wallet app">
     <div className="flex items-center justify-between gap-2"><span className="sov-kicker"><Wallet size={12}/> BIXLINK WALLET</span><span className="sov-soon">{open ? 'OPEN' : 'MAINTENANCE'}</span></div>
     <p className="sov-note">Account ledger and Web3 on-chain wallet in one standalone app.</p>
-    <div className="mt-3 flex flex-wrap items-center gap-2"><InstallAppButton/>{open && <a href="/sovereign-wallet" className="sov-onchain-btn font-bold tracking-wider">OPEN APPS WALLET ↗</a>}</div>
+    <div className="mt-3 flex flex-wrap items-center gap-2">{open && <a href="/sovereign-wallet" className="sov-onchain-btn font-bold tracking-wider">OPEN APPS WALLET ↗</a>}</div>
   </section>;
 }

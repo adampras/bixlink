@@ -19,7 +19,6 @@ function Button(props: ButtonProps) { return <BaseButton variant="wallet" size="
 import { useServerFn } from '@tanstack/react-start';
 import { getMyWallet } from '@/lib/bixlink.functions';
 import { getFiatRates } from '@/lib/market.functions';
-import { InstallAppButton } from '@/components/InstallPrompt';
 import walletArt from '@/assets/bix-lux-wallet.png';
 import foxIcon from '@/assets/fox-icon-512.png.asset.json';
 const foxMark = foxIcon.url;
@@ -318,7 +317,7 @@ function SovereignApp() {
       {tab === 'market' && <MarketTerminal px={px} bixRef={bixRef} snapshot={snapshot} />}
       {tab === 'trade' && <TradeTab px={px} />}
       {tab === 'discover' && <DiscoverTab />}
-      {tab === 'me' && <><AccountProfile addr={addr} go={s => setScreen(s as Screen)} disconnect={() => { setAddr(''); setBal(null); }} /><div className="mt-6"><InstallAppButton wallet /></div></>}
+      {tab === 'me' && <><AccountProfile addr={addr} go={s => setScreen(s as Screen)} disconnect={() => { setAddr(''); setBal(null); }} /></>}
     </main>
 
     <nav className="sw-dock" aria-label="Wallet navigation">
