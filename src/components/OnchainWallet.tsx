@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ExternalLink, Copy, Wallet, PlusCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { InstallAppButton } from '@/components/InstallPrompt';
 
 type Eth = { request: (a: { method: string; params?: unknown }) => Promise<any> };
 type Token = { chainId?: number; address?: string };
@@ -69,7 +68,7 @@ export function OnchainWallet() {
       </div>
     </div>
     {msg && <p className="sov-note">{msg}</p>}
-    <div className="mt-3 flex flex-wrap items-center gap-2"><InstallAppButton/><a href="/sovereign-wallet" className="sov-onchain-btn font-bold tracking-wider">OPEN APPS WALLET ↗</a></div>
+    <div className="mt-3 flex flex-wrap items-center gap-2"><a href="/sovereign-wallet" className="sov-onchain-btn font-bold tracking-wider">OPEN APPS WALLET ↗</a></div>
     <p className="sov-note">On-chain balances are read directly from BNB Chain and are separate from your BIXLINK app ledger balance. {live ? 'Verify the contract address, not just the ticker.' : 'The official BIX contract address will appear here once the owner deploys it.'}</p>
   </section>;
 }

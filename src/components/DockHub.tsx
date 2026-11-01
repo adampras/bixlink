@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, UserRound, Bot, Bike, type LucideIcon } from 'lucide-react';
-const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: Bike, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound };
+import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, UserRound, Bot, Bike, WalletCards, type LucideIcon } from 'lucide-react';
+const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: Bike, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards };
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { HUB_ITEMS, hubVisible } from '@/lib/dock-hub';
+import { HUB_GROUPS, HUB_ITEMS, hubVisible } from '@/lib/dock-hub';
 
 /** Mobile dock HUB (replaces HOME): opens owner-selected shortcuts. */
 export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, boolean> | undefined }) {
@@ -17,12 +17,12 @@ export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, bool
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="bottom" className="max-h-[75vh] overflow-y-auto rounded-t-3xl border-primary/40 pb-8">
         <SheetHeader><SheetTitle className="font-display tracking-widest text-primary">BIX HUB</SheetTitle></SheetHeader>
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {items.map((i, n) => { const Icon = ICONS[i.id] ?? LayoutGrid; return <Link key={i.id} to={i.to} onClick={() => setOpen(false)} className={`hub-tile rounded-2xl border px-2 py-3 text-center ${path === i.to ? 'border-primary bg-primary/10' : 'border-border bg-card/70'}`}>
-            <span className="hub-emblem" style={{ animationDelay: `${(n % 4) * -0.9}s` }}><Icon size={20} strokeWidth={1.7}/></span>
-            <div className="text-xs font-black">{i.label}</div><div className="mt-0.5 text-[10px] text-muted-foreground">{i.note}</div>
-          </Link>; })}
-        </div>
+        {HUB_GROUPS.map(g => { const list = items.filter(i => i.group === g); if (!list.length) return null; return <section key={g} className="mt-4">
+          <h3 className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{g}</h3>
+          <div className="grid grid-cols-3 gap-2">
+          {list.map((i, n) => { const Icon = ICONS[i.id] ?? LayoutGrid; const cls = `hub-tile rounded-2xl border px-2 py-3 text-center ${path === i.to ? 'border-primary bg-primary/10' : 'border-border bg-card/70'}`; const body = <><span className="hub-emblem" style={{ animationDelay: `${(n % 4) * -0.9}s` }}><Icon size={20} strokeWidth={1.7}/></span><div className="text-xs font-black">{i.label}</div><div className="mt-0.5 text-[10px] text-muted-foreground">{i.note}</div></>;
+            return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => setOpen(false)} className={cls}>{body}</a> : <Link key={i.id} to={i.to} onClick={() => setOpen(false)} className={cls}>{body}</Link>; })}
+          </div></section>; })}
       </SheetContent>
     </Sheet>
   </>;
