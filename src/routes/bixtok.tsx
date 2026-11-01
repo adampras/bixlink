@@ -34,7 +34,7 @@ type Msg = { id: string; name: string; body: string; kind: string };
 function BixtokPage() {
   const { user, ready } = useMember();
   const q = useQuery({ queryKey: ['bixtok', user?.id], enabled: Boolean(user), refetchInterval: 60_000, queryFn: async () => {
-    const [c, g, v, l, s, f, o, sc, rm, rc] = await Promise.all([
+    const [c, g, v, l, s, f, o, sc, rm, rc, bp] = await Promise.all([
       supabase.from('bixtok_config').select('*').eq('id', 1).single(),
       supabase.from('bixtok_gifts').select('id,name,emoji,currency,price').eq('enabled', true).order('sort'),
       supabase.from('bixtok_videos').select('id,creator_name,creator_id,caption,video_url,likes,media_path,media_kind,filter,overlay,allow_gifts,text_style,music_title,music_url,source_kind').eq('enabled', true).order('created_at', { ascending: false }).limit(60),
@@ -45,6 +45,7 @@ function BixtokPage() {
       supabase.from('bixtok_live_schedules').select('id,title,host_name,starts_at').eq('status', 'scheduled').gte('starts_at', new Date(Date.now() - 3 * 3600_000).toISOString()).order('starts_at').limit(10),
       supabase.from('bixtok_live_reminders').select('schedule_id, bixtok_live_schedules(starts_at)').eq('user_id', user!.id),
       supabase.rpc('bixtok_reminder_counts'),
+      supabase.rpc('bixtok_can_bypass'),
     ]);
     if (c.error) throw c.error;
     const rows = (v.data ?? []) as Omit<Video, 'src'>[];
@@ -66,7 +67,7 @@ function BixtokPage() {
     const counts = new Map(((rc.data ?? []) as { schedule_id: string; n: number }[]).map(r => [r.schedule_id, Number(r.n)]));
     const remindedAny = remRows.some(r => r.bixtok_live_schedules && Math.abs(new Date(r.bixtok_live_schedules.starts_at).getTime() - Date.now()) < 6 * 3600_000);
     const schedules: Sched[] = ((sc.data ?? []) as Omit<Sched, 'reminded' | 'count'>[]).map(x => ({ ...x, reminded: mineR.has(x.id), count: counts.get(x.id) ?? 0 }));
-    return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives, stake: Number(s.data ?? 0), following, followers, owner1: o.data === true, schedules, remindedAny };
+    return { cfg: c.data as unknown as Cfg, gifts: (g.data ?? []) as Gift[], videos, lives, stake: Number(s.data ?? 0), following, followers, owner1: o.data === true, bypass: bp.data === true, uid: user!.id, schedules, remindedAny };
   } });
   const following = q.data?.following instanceof Set ? q.data.following : new Set<string>();
   const followers = q.data?.followers instanceof Set ? q.data.followers : new Set<string>();
@@ -112,7 +113,7 @@ function BixtokPage() {
   return <MemberGate ready={ready} signedIn={!!user} title="BIXTOK"><main className="bixtok">
     {q.isError ? <p className="p-8 text-sm text-destructive">Could not load BIXTOK.</p>
      : !q.data ? <div className="bixtok-skeleton"/>
-     : !q.data.cfg.enabled ? <div className="grid h-full place-items-center p-8 text-center"><div><Lock className="mx-auto"/><p className="mt-3 font-bold">BIXTOK is closed right now.</p><Link to="/dashboard" className="mt-4 inline-block text-sm underline">Back</Link></div></div>
+     : !q.data.cfg.enabled && !q.data.bypass ? <div className="grid h-full place-items-center p-8 text-center"><div><Lock className="mx-auto"/><p className="mt-3 text-lg font-bold">BIXTOK is under reconstruction</p><p className="mt-1 text-xs text-muted-foreground">We are upgrading BIXTOK. Please check back soon.</p><Link to="/dashboard" className="mt-4 inline-block text-sm underline">Back</Link></div></div>
      : <>
       {section === 'home' && <><header className="bixtok-top">
         <Link to="/dashboard" aria-label="Back" className="bixtok-icon"><ArrowLeft size={20}/></Link>
@@ -196,8 +197,9 @@ function AutoVideo({ src, filter, muted }: { src: string; filter?: string | null
   return <video ref={ref} src={src} loop muted={muted} playsInline preload="metadata" className="bixtok-video" style={{ filter: filterCss(filter) }}/>;
 }
 
-function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean; schedules: Sched[] }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
+function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean; bypass: boolean; uid: string; schedules: Sched[] }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
   const qc = useQueryClient(); const [title, setTitle] = useState(''); const [busy, setBusy] = useState(false);
+  const [hidden, setHidden] = useState<string[]>([]); const shown = data.lives.filter(l => !hidden.includes(l.id));
   const eligible = data.stake > 0 && data.stake >= Number(data.cfg.live_min_stake_usd);
   const [otitle, setOtitle] = useState('');
   const official = async () => { setBusy(true);
@@ -258,9 +260,13 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
         </form>
        : <div><p className="text-xs text-muted-foreground">Go LIVE is open to members with an active staking package{Number(data.cfg.live_min_stake_usd) > 0 ? ` of at least $${Number(data.cfg.live_min_stake_usd).toFixed(2)}` : ''}.</p><Link to="/stake" className="bixtok-cta mt-3 inline-block">Join a staking package</Link></div>}
     </div>
-    <h3 className="mt-6 text-xs font-bold tracking-widest text-muted-foreground">LIVE NOW · {data.lives.length}</h3>
-    <div className="bixtok-live-grid">{data.lives.map(l => <button key={l.id} className={l.kind === 'official' ? 'bxt-official' : ''} onClick={() => onEnter(l)}><span className="bixtok-badge">{l.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span><b>{l.title}</b><small>@{l.host_name}</small></button>)}</div>
-    {!data.lives.length && <p className="mt-3 text-sm text-muted-foreground">Nobody is live yet.</p>}
+    <h3 className="mt-6 text-xs font-bold tracking-widest text-muted-foreground">LIVE NOW · {shown.length}</h3>
+    <div className="bixtok-live-grid">{shown.map(l => <div key={l.id} className="relative"><button className={`w-full ${l.kind === 'official' ? 'bxt-official' : ''}`} onClick={() => onEnter(l)}><span className="bixtok-badge">{l.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span><b>{l.title}</b><small>@{l.host_name}</small></button>
+      <button type="button" aria-label={l.host_id === data.uid || data.bypass ? 'End this LIVE' : 'Hide this LIVE'} className="absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full border border-border bg-background/80 text-foreground" onClick={async () => {
+        if (l.host_id === data.uid || data.bypass) { if (!window.confirm('End this LIVE and remove it from the list?')) return; const { error } = await supabase.rpc('bixtok_end_live', { p_id: l.id }); if (error) return onNote(error.message); onNote('LIVE ended'); await qc.invalidateQueries({ queryKey: ['bixtok'] }); }
+        else setHidden(h => [...h, l.id]);
+      }}><X size={14}/></button></div>)}</div>
+    {!shown.length && <p className="mt-3 text-sm text-muted-foreground">Nobody is live yet.</p>}
   </div>;
 }
 
