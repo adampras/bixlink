@@ -4742,7 +4742,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-full { position: fixed; inset: 0; z-index: 90; transform: translateZ(0); }
 .bxl-mini { position: fixed; right: 12px; bottom: 96px; z-index: 95; width: 34vw; max-width: 150px; aspect-ratio: 9/16; border-radius: 16px; overflow: hidden; transform: translateZ(0); border: 1.5px solid #FFD700; box-shadow: 0 12px 30px -8px rgba(0,0,0,.8), 0 0 18px -6px #FFD700; background: #000; }
 .bxl-mini-inner { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; transform: scale(var(--s, .52)); transform-origin: top left; pointer-events: none; }
-@media (min-width: 420px) { .bxl-mini-inner { --s: .3; } }
+
 .bxl-mini-ctl { position: absolute; inset: 0; z-index: 5; display: flex; align-items: flex-start; justify-content: flex-end; gap: 4px; padding: 6px; }
 .bxl-mini-hit { position: absolute; inset: 0; background: transparent; }
 .bxl-mini-ctl > button:not(.bxl-mini-hit) { position: relative; display: grid; place-items: center; width: 26px; height: 26px; min-height: 0 !important; border-radius: 999px; background: rgba(0,0,0,.65); color: #FFD700; }

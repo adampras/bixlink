@@ -59,7 +59,7 @@ function useDrag() {
     e.preventDefault();
   };
   const onClickCapture = (e: React.MouseEvent) => { if (tucked) { e.stopPropagation(); e.preventDefault(); setTucked(null); setPos(p => p && { ...p, x: tucked === 'l' ? 12 : window.innerWidth - (e.currentTarget as HTMLElement).offsetWidth - 12 }); } };
-  const sz = { width: `min(${Math.round(52 * scale)}vw, ${Math.round(240 * scale)}px)`, maxWidth: 'none', ['--s' as string]: `min(${(0.52 * scale).toFixed(3)}, ${Math.round(240 * scale)}px / 100vw)` } as React.CSSProperties;
+  const sz = { width: `min(${Math.round(52 * scale)}vw, ${Math.round(240 * scale)}px)`, maxWidth: 'none', ['--s' as string]: String(Math.min(0.52 * scale, (240 * scale) / (typeof window !== 'undefined' ? window.innerWidth : 400)).toFixed(3)) } as React.CSSProperties;
   const style = tucked ? { top: pos?.y, bottom: 'auto', left: tucked === 'l' ? 0 : 'auto', right: tucked === 'r' ? 0 : 'auto', width: 28, touchAction: 'none' as const }
     : pos ? { ...sz, left: pos.x, top: pos.y, right: 'auto', bottom: 'auto', touchAction: 'none' as const } : { ...sz, touchAction: 'none' as const };
   const zoom = (d: number) => setScale(v => Math.min(1.8, Math.max(0.6, +(v + d).toFixed(2))));

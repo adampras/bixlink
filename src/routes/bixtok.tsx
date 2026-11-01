@@ -111,7 +111,7 @@ function BixtokPage() {
   };
   toggleFollowRef.current = (id: string) => { void toggleFollow(id); };
   useEffect(() => { if (room) bixtokMini.update({ following: following.has(room.host_id) }); }, [room?.host_id, following.has(room?.host_id ?? '')]);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [section, setSection] = useState<'home' | 'inbox' | 'profile' | 'balance'>('home');
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
   const vids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
