@@ -432,7 +432,7 @@ function Inbox({ followers, lives, mine, onLive, onCreate }: { followers: number
 function ProfilePage({ follow, me, email, videos, all = [], onCreate, onBalance, onOpen, onNote }: { follow: { following: Set<string>; followers: Set<string> }; me: string; email: string; videos: Video[]; all?: Video[]; onCreate: () => void; onBalance: () => void; onOpen: () => void; onNote: (m: string) => void }) {
   const p = useQuery({ queryKey: ['bixtok-profile', me], queryFn: async () => (await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle()).data });
   const qc = useQueryClient();
-  const [drawer, setDrawer] = useState(false); const [ptab, setPtab] = useState('grid');
+  const [drawer, setDrawer] = useState(false); const [ptab, setPtab] = useState('grid'); const saved = useSaved(); const savedVids = saved.ids.map(id => all.find(v => v.id === id)).filter((v): v is Video => !!v);
   const name = p.data?.username || email.split('@')[0] || 'member';
   const likes = videos.reduce((a, v) => a + Number(v.likes || 0), 0);
   const copy = async () => { try { await navigator.clipboard.writeText(`${location.origin}/bixtok`); onNote('Profile link copied'); } catch { /* ignore */ } };
@@ -442,7 +442,6 @@ function ProfilePage({ follow, me, email, videos, all = [], onCreate, onBalance,
       <button className="bxt-bigav" onClick={onCreate}>{name.slice(0, 1).toUpperCase()}<em><Plus size={14}/></em></button></section>
     <p className="bxt-bio">BIXLINK member · Web3 creator</p>
     <Link to="/nft-marketplace" className="bxt-pill"><ShoppingBag size={14}/> Your orders</Link>
-    {(() => null)()}
     <div className="bxt-ptabs">{[['grid', Grid3x3], ['private', Lock], ['repost', Repeat2], ['saved', Bookmark], ['liked', Heart]].map(([k, I]) => { const Ic = I as typeof Heart; return <button key={k as string} className={ptab === k ? 'on' : ''} onClick={() => setPtab(k as string)} aria-label={k as string}><Ic size={20}/></button>; })}</div>
     {ptab === 'grid' && videos.length ? <div className="bxt-grid">{videos.map(v => <div key={v.id} className="bxt-grid-item"><button onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={v.src} muted preload="metadata"/>}<small><Eye size={12}/> {v.likes}</small></button><button type="button" className="bxt-grid-del" aria-label="Delete post" onClick={async () => { if (!confirm('Delete this post?')) return; const { error } = await supabase.from('bixtok_videos').delete().eq('id', v.id); if (error) return onNote('Could not delete post.'); if (v.media_path) await supabase.storage.from('bixtok-media').remove([v.media_path]); qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Post deleted'); }}><Trash2 size={14}/></button></div>)}</div>
       : ptab === 'saved' && savedVids.length ? <div className="bxt-grid">{savedVids.map(v => <div key={v.id} className="bxt-grid-item"><button onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={v.src} muted preload="metadata"/>}<small><Bookmark size={12}/> {v.likes}</small></button></div>)}</div>
