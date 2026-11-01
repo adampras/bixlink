@@ -229,15 +229,30 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     void openLiveMedia(facing).then(r => {
       if (cancelled) { r.stream?.getTracks().forEach(t => t.stop()); return; }
       if (!r.stream) { setLocal(null); setCamErr(r.error); return; }
-      stream.current = r.stream;
+      stream.current = r.stream; raw.current = r.stream;
       r.stream.getAudioTracks().forEach(t => { t.enabled = mic; });
       if (cam.current) { cam.current.srcObject = r.stream; void cam.current.play().catch(() => {}); }
-      setLocal(r.stream); setCamErr(r.error);
+      setLocal(r.stream); setCamErr(r.error); setRawVer(v => v + 1);
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [publishing, facing, camTry]);
   useEffect(() => () => { stream.current?.getTracks().forEach(t => t.stop()); }, []);
+  // Face filters + voice changer: process the raw camera/mic locally and publish the result.
+  const raw = useRef<MediaStream | null>(null); const [rawVer, setRawVer] = useState(0);
+  const [faceFx, setFaceFx] = useState('none'); const [voiceFx, setVoiceFx] = useState<VoiceFx>('none');
+  useEffect(() => {
+    const r = raw.current; if (!r || !publishing || sharingRef.current) return undefined;
+    const rv = r.getVideoTracks()[0]; const ra = r.getAudioTracks()[0];
+    const f = FACE_FILTERS.find(x => x.id === faceFx);
+    const pv = rv && f && f.id !== 'none' ? filterVideo(rv, f, facing === 'user') : null;
+    const pa = ra && voiceFx !== 'none' ? filterVoice(ra, voiceFx) : null;
+    const next = new MediaStream([...(pv ? [pv.track] : rv ? [rv] : []), ...(pa ? [pa.track] : ra ? [ra] : [])]);
+    next.getAudioTracks().forEach(t => { t.enabled = mic; });
+    stream.current = next; setLocal(next);
+    return () => { pv?.stop(); pa?.stop(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [faceFx, voiceFx, rawVer, publishing]);
   // Screen sharing (host): swap the outgoing video track for the screen, keep the microphone.
   const [sharing, setSharing] = useState(false);
   const camTrack = useRef<MediaStreamTrack | null>(null);
@@ -484,6 +499,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
       </>}
       {host && cfg.backdrops_enabled !== false && <button aria-label={camOff ? 'Turn camera on' : 'Camera off — show background'} className={camOff ? 'on' : ''} onClick={() => setSheet('bg')}>{camOff ? <VideoOff size={20}/> : <ImageIcon size={20}/>}</button>}
+      {publishing && <button aria-label="Filters and voice changer" className={faceFx !== 'none' || voiceFx !== 'none' ? 'on' : ''} onClick={() => setSheet('fx')}><Sparkles size={20}/></button>}
       {host && <button aria-label="Pin message" onClick={() => setPinEdit(pinned ?? '')}><Pin size={20}/></button>}
       {host && <button aria-label="Pin my referral card" onClick={() => { void pinReferral(); }}><UserRoundPlus size={20}/></button>}
       {host && cfg.soundboard !== false && <button aria-label="Soundboard" onClick={() => setSheet('board')}><Music2 size={20}/></button>}
@@ -500,7 +516,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         await sendChat(body); }}>
         <div className="bixtok-input"><MessageCircle size={16}/><input value={text} onChange={e => setText(e.target.value)} placeholder="Say something…" maxLength={200}/><button aria-label="Send"><Send size={16}/></button></div>
       </form>}
-      {!host && <button className="bxl-act" aria-label={saver ? 'Data saver on' : 'Data saver off'} onClick={() => setSaver(v => !v)} style={{ fontSize: '.6rem', fontWeight: 800 }}>{saver ? 'SD' : 'HD'}</button>}
+      {!host && <button className="bxl-act" aria-label={`Video quality: ${saver}. Tap to change`} onClick={() => setSaver(v => { const n = v === 'hd' ? 'sd' : v === 'sd' ? 'audio' : 'hd'; flash(n === 'audio' ? 'Audio-only data saver: video paused, voice continues' : n === 'sd' ? 'SD data saver on' : 'HD video'); return n; })} style={{ fontSize: '.55rem', fontWeight: 800 }}>{saver === 'audio' ? 'AUD' : saver.toUpperCase()}</button>}
       {!host && <button className="bxl-act" aria-label={sound ? 'Mute room sounds' : 'Unmute room sounds'} onClick={() => { setSound(s => !s); if (!sound) void unlockAudio(); }}>{sound ? <Volume2 size={18}/> : <VolumeX size={18}/>}</button>}
       <button className="bxl-act" aria-label="Share" onClick={() => setShare(true)}><Share2 size={18}/></button>
       {(!host || (cfg.host_gifts !== false && onStage.length > 0)) && <button className="bixtok-giftbtn" aria-label="Send gift" onClick={() => onGift([...(host ? [] : [{ id: live.host_id, name: live.host_name }]), ...onStage.filter(s => s.user_id !== me).map(s => ({ id: s.user_id, name: s.name }))])}><Gift/></button>}
@@ -530,8 +546,14 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <div className="mt-2 flex gap-2"><button type="submit" className="bxl-btn">Pin</button>{pinned && <button type="button" className="bxl-btn ghost" onClick={() => savePin('')}>Unpin</button>}</div>
     </form></div>}
     {sheet && <div className="bixtok-sheet-wrap" onClick={() => setSheet(null)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
-      <div className="flex items-center justify-between"><h3 className="font-bold">{sheet === 'board' ? 'Soundboard' : sheet === 'showcase' ? 'Showcase card' : sheet === 'bg' ? 'Camera off · background' : 'PK battle'}</h3><button aria-label="Close" onClick={() => setSheet(null)}><X size={18}/></button></div>
+      <div className="flex items-center justify-between"><h3 className="font-bold">{sheet === 'board' ? 'Soundboard' : sheet === 'showcase' ? 'Showcase card' : sheet === 'bg' ? 'Camera off · background' : sheet === 'fx' ? 'Filters & voice' : 'PK battle'}</h3><button aria-label="Close" onClick={() => setSheet(null)}><X size={18}/></button></div>
       {sheet === 'board' && <div className="bxl-board">{SOUNDBOARD.map(([k, e, l]) => <button key={k} onClick={() => sendSfx(k)}><span>{e}</span>{l}</button>)}<p>Everyone in the room hears it.</p></div>}
+      {sheet === 'fx' && <div>
+        <p className="mt-1 text-xs opacity-70">Effects run on your phone — viewers see and hear them with no extra data.</p>
+        <div className="bxl-board">{FACE_FILTERS.map(f => <button key={f.id} className={faceFx === f.id ? 'on' : ''} onClick={() => setFaceFx(f.id)}><span>{f.overlay ?? (f.id === 'none' ? '🙂' : '✨')}</span>{f.name}</button>)}</div>
+        <h4 className="mt-3 text-xs font-bold opacity-80">Voice changer</h4>
+        <div className="bxl-board">{VOICE_FX.map(v => <button key={v.id} className={voiceFx === v.id ? 'on' : ''} onClick={() => setVoiceFx(v.id)}><span>{v.id === 'robot' ? '🤖' : v.id === 'deep' ? '🎙️' : v.id === 'echo' ? '🔊' : v.id === 'studio' ? '🎧' : '🗣️'}</span>{v.name}</button>)}</div>
+      </div>}
       {sheet === 'bg' && <div>
         <p className="mt-1 text-xs opacity-70">Hide your camera and show a background — your voice stays live. Saves data too.</p>
         <div className="bxl-bg-grid">{allBackdrops(cfg.live_backdrops).map(b => <button key={b.id} type="button" className={camOff && (backdrop ?? 'obsidian-gold') === b.id ? 'on' : ''} onClick={() => { void setBg(true, b.id); }}><i style={{ background: b.css }}/><small>{b.name}</small></button>)}</div>
