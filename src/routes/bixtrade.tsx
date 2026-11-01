@@ -171,7 +171,7 @@ function BixtradePage() {
     {tab === 'cockpit' && <>
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-2"/> Live execution pulse</h2>
-      <div className="mt-3 grid gap-2">{fundExecs.slice(0, 3).map(x => <button type="button" key={x.id} onClick={() => setReceipt(x)} className="arb-pulse-row text-left"><i/><span><b>{x.pair}</b> {x.buy_venue} → {x.sell_venue}<br/><span className="text-muted-foreground">{Number(x.notional_usd).toFixed(2)} USDT · {new Date(x.executed_at).toLocaleTimeString()}</span></span><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)}</b></button>)}
+      <div className="mt-3 grid gap-2">{fundExecs.slice(0, 3).map((x, i) => <button type="button" key={x.id} style={{ animationDelay: `${i * 60}ms` }} onClick={() => setReceipt(x)} className="arb-pulse-row text-left"><i/><span><b>{x.pair}</b> {x.buy_venue} → {x.sell_venue}<br/><span className="text-muted-foreground">{Number(x.notional_usd).toFixed(2)} USDT · {new Date(x.executed_at).toLocaleTimeString()}</span></span><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)}</b></button>)}
         {!fundExecs.length && <p className="text-xs text-muted-foreground">{capital > 0 ? 'Bot is scanning — the first executions appear within a few minutes.' : funding === 'virtual' ? 'Add Virtual USDT bot capital to start executions. Trade size follows your capital (15–50% per ticket).' : 'Executions start after your deposit is approved. Trade size follows your capital (15–50% per ticket).'}</p>}</div>
     </section>
 
@@ -190,13 +190,13 @@ function BixtradePage() {
       </div>
       <div className="mt-3 grid gap-2">
         <p className="text-[11px] text-muted-foreground">Strategy</p>
-        <div className="grid gap-2 sm:grid-cols-3">{BIXTRADE_STRATEGIES.map(s => <button key={s.key} type="button" onClick={() => setStrategy(s.key)} className={`arb-strat ${strategy === s.key ? 'is-on' : ''}`}><b>{s.name}</b><span>{s.pairs}</span><em>Risk: {s.risk}</em></button>)}</div>
+        <div className="grid grid-cols-3 gap-1.5">{BIXTRADE_STRATEGIES.map(s => <button key={s.key} type="button" onClick={() => { navigator.vibrate?.(12); setStrategy(s.key); }} className={`arb-strat ${strategy === s.key ? 'is-on' : ''}`}><b>{s.name}</b><span>{s.pairs}</span><em>Risk: {s.risk}</em></button>)}</div>
         <label className="mt-1 text-[11px] text-muted-foreground">Amount (USDT) {mode === 'deposit' ? `· ${cfg.minAlloc}–${cfg.maxAlloc}` : `· min ${cfg.minWithdraw} · fee ${cfg.withdrawFeePct}%`}
           <input className="form-input mt-1" type="number" inputMode="decimal" value={reqAmt} onChange={e => setReqAmt(e.target.value)} placeholder="0.00"/></label>
         <div className="arb-chips">{[100, 500, 1000, 5000].map(v => <button key={v} type="button" onClick={() => setReqAmt(String(v))}>${v.toLocaleString()}</button>)}
           <button type="button" onClick={() => { const max = mode === 'withdraw' ? capital : funding === 'real' ? Math.min(mainUsdt ?? 0, cfg.maxAlloc) : cfg.maxAlloc; setReqAmt(String(Math.floor(max * 100) / 100)); }}>MAX</button></div>
         {mode === 'withdraw' && n > 0 && <p className="text-xs">You receive ≈ <b className="text-chart-2">{withdrawNet(cfg, n).toFixed(2)} USDT</b> after fee{cfg.earlyExitEnabled && cfg.lockDays > 0 ? <> · before lock ends ≈ <b>{withdrawNet(cfg, n, true).toFixed(2)}</b></> : null}</p>}
-        <Button disabled={busy || (mode === 'deposit' ? !cfg.depositOpen : !cfg.withdrawOpen)} onClick={submit}>{busy ? 'Sending…' : mode === 'deposit' ? 'Request deposit' : 'Request withdrawal'}</Button>
+        <Button className="arb-go" disabled={busy || (mode === 'deposit' ? !cfg.depositOpen : !cfg.withdrawOpen)} onClick={() => { navigator.vibrate?.([18, 40, 18]); submit(); }}>{busy ? 'Sending…' : mode === 'deposit' ? 'Request deposit' : 'Request withdrawal'}</Button>
         {isAdmin && funding === 'virtual' && mode === 'deposit' && <Button variant="outline" disabled={busy} onClick={instantVirtual}><Zap size={15}/> Admin instant virtual deposit</Button>}
         {msg && <p className="text-xs text-chart-3">{msg}</p>}
         <p className="text-[10px] text-muted-foreground">Every request is reviewed by the owner. When a deposit is approved, the amount moves from your main wallet USDT into the bot; an approved withdrawal returns the amount after fee to your main wallet. Projected profit is never added automatically.</p>

@@ -4643,3 +4643,15 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
   --bixgo-wallet: oklch(0.65 0.2 290); --bixgo-alert: oklch(0.65 0.21 25);
   background: var(--background); color: var(--foreground);
 }
+
+/* BIXTrade lightweight polish */
+.arb-strat{padding:.55rem .5rem!important;font-size:11px}
+.arb-strat b{font-size:12px}
+.arb-strat span,.arb-strat em{font-size:10px;line-height:1.2}
+.arb-pulse-row{animation:arb-row-in .35s ease-out both}
+@keyframes arb-row-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.arb-go{position:relative;overflow:hidden;transition:transform .12s}
+.arb-go:active{transform:scale(.97);box-shadow:0 0 0 4px color-mix(in oklab,var(--chart-2) 35%,transparent)}
+.arb-hud{transition:transform .15s}
+.arb-hud:active{transform:scale(.96)}
+@media (prefers-reduced-motion:reduce){.arb-pulse-row{animation:none}}
