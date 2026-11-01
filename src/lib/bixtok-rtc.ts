@@ -142,7 +142,7 @@ export type RemoteFeed = { id: string; stream: MediaStream };
  * Audio plays through dedicated <audio> elements (reliable on iPhone/Android); video streams are returned per participant.
  * Falls back to direct peer-to-peer (host only) when LiveKit is not configured or unreachable.
  */
-export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver = false }: { liveId: string; me: string; host: boolean; hostId: string; publisher: boolean; stream: MediaStream | null; saver?: boolean }) {
+export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver = false, audioOnly = false }: { liveId: string; me: string; host: boolean; hostId: string; publisher: boolean; stream: MediaStream | null; saver?: boolean; audioOnly?: boolean }) {
   const saverRef = useRef(saver); saverRef.current = saver;
   const [mode, setMode] = useState<'pending' | 'lk' | 'p2p'>('pending');
   const [feeds, setFeeds] = useState<RemoteFeed[]>([]);
@@ -231,9 +231,12 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
   useEffect(() => {
     const room = roomRef.current; if (!room || host) return;
     void import('livekit-client').then(lk => room.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => {
-      if (pub.kind === lk.Track.Kind.Video && 'setVideoQuality' in pub) (pub as import('livekit-client').RemoteTrackPublication).setVideoQuality(saver ? lk.VideoQuality.LOW : lk.VideoQuality.HIGH);
+      if (pub.kind !== lk.Track.Kind.Video || !('setVideoQuality' in pub)) return;
+      const rp = pub as import('livekit-client').RemoteTrackPublication;
+      rp.setSubscribed(!audioOnly); // audio-only saver: stop downloading video entirely
+      if (!audioOnly) rp.setVideoQuality(saver ? lk.VideoQuality.LOW : lk.VideoQuality.HIGH);
     })));
-  }, [saver, host, feeds.length]);
+  }, [saver, audioOnly, host, feeds.length]);
   if (mode === 'p2p') return { mode, feeds: p2p.remote ? [{ id: hostId, stream: p2p.remote }] : [], state: p2p.state, audioBlocked: false, voiceOnly: false, unlockAudio, setVolume };
   return { mode, feeds, state, audioBlocked, voiceOnly, unlockAudio, setVolume };
 }

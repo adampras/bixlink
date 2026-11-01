@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff, UserRoundPlus, VideoOff, Image as ImageIcon } from 'lucide-react';
+import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff, UserRoundPlus, VideoOff, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { useLiveRtc } from '@/lib/bixtok-rtc';
@@ -8,6 +8,7 @@ import { useReplayRecorder } from '@/lib/bixtok-replay';
 import { MEDIA_HELP, openLiveMedia, type MediaIssue } from '@/lib/bixtok-media';
 import { allBackdrops, backdropCss } from '@/lib/bixtok-backdrops';
 import { copyText } from '@/lib/copy-text';
+import { FACE_FILTERS, VOICE_FX, filterVideo, filterVoice, type VoiceFx } from '@/lib/bixtok-filters';
 
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
 type Msg = { id: string; name: string; body: string; kind: string };
@@ -118,8 +119,16 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [stage, setStage] = useState<Stage[]>([]); const [stagePanel, setStagePanel] = useState(false);
   const [top, setTop] = useState<Top[]>([]); const [modMsg, setModMsg] = useState<Msg | null>(null); const [note, setNote] = useState('');
   const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
-  const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | 'bg' | null>(null); const [recording, setRecording] = useState(false);
-  const [saver, setSaver] = useState(false);
+  const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | 'bg' | 'fx' | null>(null); const [recording, setRecording] = useState(false);
+  const [saver, setSaver] = useState<'hd' | 'sd' | 'audio'>('hd');
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    // Mobile data: start in SD automatically. Hidden tab: pause video, keep voice.
+    const c = (navigator as Navigator & { connection?: { type?: string; saveData?: boolean; effectiveType?: string } }).connection;
+    if (c && (c.type === 'cellular' || c.saveData || /2g|3g/.test(c.effectiveType ?? ''))) setSaver('sd');
+    const on = () => setHidden(document.visibilityState === 'hidden');
+    document.addEventListener('visibilitychange', on); return () => document.removeEventListener('visibilitychange', on);
+  }, []);
   const [camOff, setCamOff] = useState(false); const [backdrop, setBackdrop] = useState<string | null>(null);
   // Camera-off mode: stop sending camera frames (saves the host's data) while the mic keeps working.
   useEffect(() => { local?.getVideoTracks().forEach(t => { t.enabled = !camOff; }); }, [camOff, local]);
@@ -131,7 +140,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const sfx = useSfx(sound); const sfxRef = useRef(sfx); sfxRef.current = sfx;
   const mine = stage.find(s => s.user_id === me);
   const guest = !host && mine?.status === 'approved';
-  const { mode, feeds, state, audioBlocked, voiceOnly, unlockAudio, setVolume } = useLiveRtc({ liveId: live.id, me, host, hostId: live.host_id, publisher: host || guest, stream: local, saver });
+  const { mode, feeds, state, audioBlocked, voiceOnly, unlockAudio, setVolume } = useLiveRtc({ liveId: live.id, me, host, hostId: live.host_id, publisher: host || guest, stream: local, saver: saver !== 'hd', audioOnly: saver === 'audio' || hidden });
   const names = new Map(stage.map(s => [s.user_id, s.name])); names.set(live.host_id, live.host_name);
   const main = host ? null : feeds.find(f => f.id === live.host_id) ?? feeds[0] ?? null;
   const tiles = feeds.filter(f => f !== main);
@@ -255,6 +264,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   }, [faceFx, voiceFx, rawVer, publishing]);
   // Screen sharing (host): swap the outgoing video track for the screen, keep the microphone.
   const [sharing, setSharing] = useState(false);
+  const sharingRef = useRef(false); useEffect(() => { sharingRef.current = sharing; }, [sharing]);
   const camTrack = useRef<MediaStreamTrack | null>(null);
   const slideInput = useRef<HTMLInputElement>(null);
   const slideCanvas = useRef<HTMLCanvasElement | null>(null);
