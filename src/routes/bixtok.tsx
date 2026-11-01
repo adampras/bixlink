@@ -141,7 +141,7 @@ function BixtokPage() {
         ? <LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/>
         : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote} liveHosts={new Map(q.data.lives.map(l => [l.host_id, l]))} onEnterLive={setRoom}/>)}
       {section === 'inbox' && <Inbox followers={followers.size} lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
-      {section === 'profile' && <ProfilePage follow={{ following, followers }} me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
+      {section === 'profile' && <ProfilePage follow={{ following, followers }} me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} all={q.data.videos} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
       {section === 'balance' && <BalancePage stake={q.data.stake} cfg={q.data.cfg} onBack={() => setSection('profile')} onLive={() => { setSection('home'); setTab('live'); }}/>}
       {!studio && !room && section !== 'balance' && <nav className="bxt-nav" aria-label="BIXTOK">
         <button className={section === 'home' ? 'on' : ''} onClick={() => setSection('home')}><Home/><small>Home</small></button>
@@ -157,11 +157,17 @@ function BixtokPage() {
   </main></MemberGate>;
 }
 
+const SAVED_KEY='bixtok-saved';
+function readSaved(): string[] { try { return JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'); } catch { return []; } }
+function useSaved() { const [ids, setIds] = useState<string[]>([]); useEffect(() => setIds(readSaved()), []);
+  const toggle = (id: string) => { const cur = readSaved(); const next = cur.includes(id) ? cur.filter(x => x !== id) : [id, ...cur].slice(0, 200); localStorage.setItem(SAVED_KEY, JSON.stringify(next)); setIds(next); return next.includes(id); };
+  return { ids, toggle }; }
+
 function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers = new Set<string>(), onFollow, onGift, onNote, liveHosts = new Map<string, Live>(), onEnterLive }: { muted: boolean; videos: Video[]; cfg: Cfg; me: string; following?: Set<string>; followers?: Set<string>; onFollow: (id: string) => void; onGift: (id: string) => void; onNote: (m: string) => void; liveHosts?: Map<string, Live>; onEnterLive?: (l: Live) => void }) {
   const qc = useQueryClient();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [resume] = useState(() => bixtokMini.peekLastId());
-  const [railOpen, setRailOpen] = useState(true);
+  const [railOpen, setRailOpen] = useState(true); const saved = useSaved();
   const [comments, setComments] = useState<Video | null>(null);
   const [share, setShare] = useState<Video | null>(null);
   const [peek, setPeek] = useState<Video | null>(null);
@@ -193,6 +199,7 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
       {v.creator_id && v.creator_id !== me && !liveHosts.has(v.creator_id) && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={() => void like(v)}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
       <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
+      <button aria-label="Save" className={saved.ids.includes(v.id) ? 'on' : ''} onClick={() => onNote(saved.toggle(v.id) ? 'Saved to your profile' : 'Removed from saved')}><Bookmark/><small>Save</small></button>
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={() => setShare(v)}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
       </>}
@@ -422,10 +429,10 @@ function Inbox({ followers, lives, mine, onLive, onCreate }: { followers: number
     </ul></div>;
 }
 
-function ProfilePage({ follow, me, email, videos, onCreate, onBalance, onOpen, onNote }: { follow: { following: Set<string>; followers: Set<string> }; me: string; email: string; videos: Video[]; onCreate: () => void; onBalance: () => void; onOpen: () => void; onNote: (m: string) => void }) {
+function ProfilePage({ follow, me, email, videos, all = [], onCreate, onBalance, onOpen, onNote }: { follow: { following: Set<string>; followers: Set<string> }; me: string; email: string; videos: Video[]; all?: Video[]; onCreate: () => void; onBalance: () => void; onOpen: () => void; onNote: (m: string) => void }) {
   const p = useQuery({ queryKey: ['bixtok-profile', me], queryFn: async () => (await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle()).data });
   const qc = useQueryClient();
-  const [drawer, setDrawer] = useState(false); const [ptab, setPtab] = useState('grid');
+  const [drawer, setDrawer] = useState(false); const [ptab, setPtab] = useState('grid'); const saved = useSaved(); const savedVids = saved.ids.map(id => all.find(v => v.id === id)).filter((v): v is Video => !!v);
   const name = p.data?.username || email.split('@')[0] || 'member';
   const likes = videos.reduce((a, v) => a + Number(v.likes || 0), 0);
   const copy = async () => { try { await navigator.clipboard.writeText(`${location.origin}/bixtok`); onNote('Profile link copied'); } catch { /* ignore */ } };
@@ -437,6 +444,7 @@ function ProfilePage({ follow, me, email, videos, onCreate, onBalance, onOpen, o
     <Link to="/nft-marketplace" className="bxt-pill"><ShoppingBag size={14}/> Your orders</Link>
     <div className="bxt-ptabs">{[['grid', Grid3x3], ['private', Lock], ['repost', Repeat2], ['saved', Bookmark], ['liked', Heart]].map(([k, I]) => { const Ic = I as typeof Heart; return <button key={k as string} className={ptab === k ? 'on' : ''} onClick={() => setPtab(k as string)} aria-label={k as string}><Ic size={20}/></button>; })}</div>
     {ptab === 'grid' && videos.length ? <div className="bxt-grid">{videos.map(v => <div key={v.id} className="bxt-grid-item"><button onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={v.src} muted preload="metadata"/>}<small><Eye size={12}/> {v.likes}</small></button><button type="button" className="bxt-grid-del" aria-label="Delete post" onClick={async () => { if (!confirm('Delete this post?')) return; const { error } = await supabase.from('bixtok_videos').delete().eq('id', v.id); if (error) return onNote('Could not delete post.'); if (v.media_path) await supabase.storage.from('bixtok-media').remove([v.media_path]); qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Post deleted'); }}><Trash2 size={14}/></button></div>)}</div>
+      : ptab === 'saved' && savedVids.length ? <div className="bxt-grid">{savedVids.map(v => <div key={v.id} className="bxt-grid-item"><button onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={v.src} muted preload="metadata"/>}<small><Bookmark size={12}/> {v.likes}</small></button></div>)}</div>
       : <p className="p-10 text-center text-sm text-muted-foreground">{ptab === 'grid' ? 'No posts yet. Tap + to create.' : 'Nothing here yet.'}</p>}
     {drawer && <div className="bxt-drawer-wrap" onClick={() => setDrawer(false)}><aside className="bxt-drawer" onClick={e => e.stopPropagation()}>
       <h4>Assets</h4><button onClick={() => { setDrawer(false); onBalance(); }}><Wallet/>Balance<ChevronRight/></button>
