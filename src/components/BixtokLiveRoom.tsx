@@ -130,6 +130,13 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
   const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | 'bg' | 'fx' | null>(null); const [recording, setRecording] = useState(false);
   const [saver, setSaver] = useState<'hd' | 'sd' | 'audio'>('hd');
+  const [clean, setClean] = useState(false);
+  const [eco, setEco] = useState(false);
+  useEffect(() => {
+    try { if (localStorage.getItem('bxl-eco') === '1') setEco(true); } catch {}
+    const nav = navigator as Navigator & { getBattery?: () => Promise<{ level: number; charging: boolean }> };
+    nav.getBattery?.().then(b => { if (b.level < 0.2 && !b.charging) setEco(true); }).catch(() => {});
+  }, []);
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
     // Mobile data: start in SD automatically. Hidden tab: pause video, keep voice.
@@ -446,7 +453,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     setCamOff(off); setBackdrop(id);
     void chan.current?.send({ type: 'broadcast', event: 'bg', payload: { off, id } });
   };
-  return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
+  return <div className={`bixtok-room${clean ? ' bxl-clean' : ''}${eco ? ' bxl-eco' : ''}`} role="dialog" aria-label="LIVE room">
+    <div className="bxl-view-toggles">
+      <button type="button" aria-label={clean ? 'Show chat and buttons' : 'Clean screen: hide chat and buttons'} aria-pressed={clean} onClick={e => { e.stopPropagation(); setClean(c => !c); }}>{clean ? '👁' : '◐'}</button>
+      <button type="button" aria-label={eco ? 'Battery saver on' : 'Battery saver off'} aria-pressed={eco} className={eco ? 'on' : ''} onClick={e => { e.stopPropagation(); setEco(v => { const n = !v; try { localStorage.setItem('bxl-eco', n ? '1' : '0'); } catch {} flash(n ? 'Battery saver on: lighter animations' : 'Battery saver off'); return n; }); }}>🔋</button>
+    </div>
     <div className="bxl-stage" onClick={tap}>
       {camOff && <div className="bxl-voicebg" style={{ background: bgCss }} aria-hidden>{bgAvatar && <b className="bxl-voicebg-av">{bgAvatar}</b>}<span className="bxl-backdrop-host"><Mic size={14}/> @{live.host_name} · Voice LIVE</span></div>}
       {host ? <>
