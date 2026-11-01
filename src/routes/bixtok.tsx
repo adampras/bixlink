@@ -350,8 +350,8 @@ function BalancePage({ stake, cfg, onBack, onLive }: { stake: number; cfg: Cfg; 
   return <div className="bxt-page bxt-bal"><header className="bxt-head"><button aria-label="Back" onClick={onBack}><ArrowLeft size={20}/></button><div className="text-center"><h1>Balance</h1><small className="bxt-safe"><ShieldCheck size={12}/> Secure</small></div><Link to="/settings" aria-label="Settings"><Settings size={20}/></Link></header>
     <p className="bxt-est">Active staking (USD) <button onClick={() => setHide(h => !h)} aria-label="Toggle"><Eye size={14}/></button></p>
     <p className="bxt-amt">{hide ? '••••' : stake.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+    <CreatorEarnings/>
     <div className="bxt-coins"><Link to="/wallet"><span><Coins size={14}/> BIXP</span><b>Wallet</b><em>Get BIXP →</em></Link><Link to="/wallet"><span><Coins size={14}/> BIXCOIN</span><b>Wallet</b></Link></div>
-    <Link to="/wallet" className="bxt-card"><b>Transactions</b><span>Gift history <ChevronRight size={14}/></span></Link>
     <Link to="/stake" className="bxt-card"><div><b>Join a staking package</b><p>Unlock Go LIVE{Number(cfg.live_min_stake_usd) > 0 ? ` from $${Number(cfg.live_min_stake_usd).toFixed(0)}` : ''}</p></div><Gift className="bxt-gifticon"/></Link>
     <div className="bxt-tools">
       <button onClick={onLive}><span><Radio/></span>LIVE rewards</button>
@@ -361,5 +361,34 @@ function BalancePage({ stake, cfg, onBack, onLive }: { stake: number; cfg: Cfg; 
       <Link to="/market"><span><Zap/></span>Market</Link>
     </div>
     <p className="bxt-disc">Gifts are final and are not investment returns. Balances shown are internal ledger references.</p>
+  </div>;
+}
+
+type Earn = { bix: number; bixp: number; claimed_bix: number; claimed_bixp: number; recent: { gift_name: string; currency: string; amount: number; created_at: string; claimed_at: string | null; sender: string }[] };
+/** Gifts received wait here; the creator moves them to the BIXLINK wallet in one atomic claim. */
+function CreatorEarnings() {
+  const qc = useQueryClient(); const [busy, setBusy] = useState(false); const [msg, setMsg] = useState(''); const [open, setOpen] = useState(false);
+  const q = useQuery({ queryKey: ['bixtok-earnings'], queryFn: async () => { const { data, error } = await supabase.rpc('bixtok_my_earnings' as never); if (error) throw error; return data as unknown as Earn; } });
+  const e = q.data; const has = !!e && (Number(e.bix) > 0 || Number(e.bixp) > 0);
+  const claim = async () => {
+    setBusy(true); setMsg('');
+    const { data, error } = await supabase.rpc('bixtok_claim_earnings' as never);
+    setBusy(false);
+    if (error) return setMsg(error.message.includes('No BIXTOK') ? 'Belum ada hadiah untuk ditarik.' : error.message);
+    const r = data as unknown as { bix: number; bixp: number };
+    setMsg(`Berhasil ditarik ke BIXLINK Wallet: ${Number(r.bix)} BIX · ${Number(r.bixp)} BIXP`);
+    qc.invalidateQueries();
+  };
+  return <div className="bxt-card" style={{ display: 'block' }}>
+    <div className="flex items-center justify-between"><b>Saldo hadiah BIXTOK</b><Gift size={16} className="bxt-gifticon"/></div>
+    <div className="mt-2 grid grid-cols-2 gap-2 text-center">
+      <div className="rounded-lg border border-border p-2"><small className="text-muted-foreground">BIXCOIN</small><p className="text-lg font-bold">{Number(e?.bix ?? 0).toLocaleString('en-US', { maximumFractionDigits: 4 })}</p></div>
+      <div className="rounded-lg border border-border p-2"><small className="text-muted-foreground">BIXP</small><p className="text-lg font-bold">{Number(e?.bixp ?? 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</p></div>
+    </div>
+    <button className="bixtok-cta mt-3 w-full" disabled={busy || !has} onClick={claim}>{busy ? 'Memproses…' : 'Tarik ke BIXLINK Wallet'}</button>
+    {msg && <p className="mt-2 text-xs">{msg}</p>}
+    <p className="mt-2 text-[10px] text-muted-foreground">Hadiah dari penonton tersimpan di sini dulu. Sudah ditarik: {Number(e?.claimed_bix ?? 0)} BIX · {Number(e?.claimed_bixp ?? 0)} BIXP.</p>
+    <button className="mt-2 flex w-full items-center justify-between text-xs" onClick={() => setOpen(o => !o)}><span>Riwayat hadiah</span><ChevronRight size={14} style={{ transform: open ? 'rotate(90deg)' : undefined }}/></button>
+    {open && <ul className="mt-2 space-y-1 text-xs">{(e?.recent ?? []).length === 0 ? <li className="text-muted-foreground">Belum ada hadiah.</li> : e!.recent.map((r, i) => <li key={i} className="flex justify-between gap-2"><span>@{r.sender} · {r.gift_name}</span><span>{Number(r.amount)} {r.currency} {r.claimed_at ? '✓' : '•'}</span></li>)}</ul>}
   </div>;
 }
