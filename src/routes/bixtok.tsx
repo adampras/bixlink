@@ -32,6 +32,8 @@ type Live = { id: string; host_id: string; host_name: string; title: string; sta
 type Msg = { id: string; name: string; body: string; kind: string };
 
 function BixtokPage() {
+  const navigate = useNavigate();
+  useEffect(() => { bixtokMini.setFeed(null); }, []);
   const { user, ready } = useMember();
   const q = useQuery({ queryKey: ['bixtok', user?.id], enabled: Boolean(user), refetchInterval: 60_000, queryFn: async () => {
     const [c, g, v, l, s, f, o, sc, rm, rc, bp] = await Promise.all([
