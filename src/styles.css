@@ -4782,19 +4782,18 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 /* BIXTOK mini — black titanium & champagne gold frame, buttery drag */
 .bxl-mini {
   --bxl-gold: #e9c46a; --bxl-gold-hi: #fff1c1;
-  border: 0; border-radius: 20px; padding: 2px;
-  background: linear-gradient(145deg, #fff1c1, #c9a24a 30%, #3a2c10 55%, #d9b45a 80%, #fff1c1) border-box;
+  border: 2px solid transparent; border-radius: 20px;
+  background: linear-gradient(#050505, #050505) padding-box, linear-gradient(145deg, #fff1c1, #c9a24a 30%, #3a2c10 55%, #d9b45a 80%, #fff1c1) border-box;
   box-shadow: 0 22px 44px -14px rgba(0,0,0,.9), 0 0 0 1px rgba(255,241,193,.12), 0 0 26px -10px rgba(233,196,106,.65);
   transition: width .22s cubic-bezier(.22,1,.36,1), left .32s cubic-bezier(.22,1,.36,1), right .32s cubic-bezier(.22,1,.36,1), box-shadow .25s;
   will-change: transform;
 }
-.bxl-mini > iframe, .bxl-mini > video, .bxl-mini > img, .bxl-mini > .bxl-mini-inner { border-radius: 18px; background: #050505; }
 .bxl-mini.bxl-dragging { transition: none; box-shadow: 0 30px 60px -12px rgba(0,0,0,.95), 0 0 34px -6px rgba(233,196,106,.85); cursor: grabbing; }
 .bxl-mini-ctl > button:not(.bxl-mini-hit) { width: 30px; height: 30px; background: linear-gradient(160deg, rgba(28,28,30,.92), rgba(6,6,8,.92)); color: var(--bxl-gold-hi); border: 1px solid rgba(233,196,106,.55); box-shadow: inset 0 1px 0 rgba(255,241,193,.25), 0 4px 10px -4px rgba(0,0,0,.8); backdrop-filter: blur(6px); }
 .bxl-mini-badge { background: linear-gradient(135deg, #b4123a, #e11d48); box-shadow: 0 0 10px -2px rgba(225,29,72,.8); }
 .bxl-mini-badge.feed { background: linear-gradient(135deg, #fff1c1, #d9b45a 55%, #a8812e); color: #120d03; letter-spacing: .16em; }
 .bxl-grip::before { border-color: var(--bxl-gold-hi); filter: drop-shadow(0 0 4px rgba(233,196,106,.9)); }
-.bxl-mini.bxl-tucked { background: linear-gradient(180deg, #fff1c1, #c9a24a 50%, #8a6a22); }
+.bxl-mini.bxl-tucked { background: linear-gradient(180deg, #fff1c1, #c9a24a 50%, #8a6a22) padding-box, linear-gradient(180deg, #fff1c1, #8a6a22) border-box; }
 .bxl-mini.bxl-tucked::after { color: #120d03; background: transparent; }
 
 /* BIXTOK top tabs — icon pills, gold glass active state */
