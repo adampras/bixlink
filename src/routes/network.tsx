@@ -64,7 +64,7 @@ function NetworkPage() {
    <div className="nx-gender" role="group" aria-label="Avatar">{(['m','f'] as const).map(g => <button key={g} type="button" aria-pressed={gender===g} onClick={() => pickGender(g)}>{g==='m' ? 'Pria' : 'Wanita'}</button>)}</div></div>
   <dl className="nx-mini">{[['Network USDT',money(totalUsdt),''],['Sponsor USDT',money(usdtDirectBonus),'text-chart-2'],['BIX credited',bix(approved),'text-chart-3'],['BIX pending',bix(pending),'']].map(([l,v,c]) => <div key={l}><dt>{l}</dt><dd className={`numeric ${c}`}>{v}</dd></div>)}</dl>
   <div className="nx-pills" aria-label={`Matching access ${unlocked}/${levels.length}`}>{levels.map((pct,i) => <span key={i} className={i<unlocked ? 'on' : ''}>L{i+1} {pct}% {i<unlocked ? <BadgeCheck size={11}/> : <Lock size={10}/>}</span>)}</div>
-  <Button size="sm" className="mt-3 w-full" onClick={() => openRegister(user?.id ?? '')}><UserPlus size={15}/> Daftarkan Member Baru</Button>
+  <Button size="sm" className="mt-3 w-full" onClick={() => openRegister(user?.id ?? '')}><UserPlus size={15}/> Register New Member</Button>
  </section>
  {user && <PlacementRegister open={regOpen} onOpenChange={setRegOpen} initial={regTarget || user.id} options={[{ id: user.id, label: `YOU · ${data?.referral?.code ?? ''} (L1)` }, ...tree.map(n => ({ id: n.user_id, label: `${n.member_code ?? ''} ${identity(n)} → member jadi L${n.depth+1}` }))]}/>}
  <DownlineRadar/>

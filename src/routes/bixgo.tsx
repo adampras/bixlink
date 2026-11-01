@@ -125,9 +125,9 @@ function BixgoPage() {
     {view === 'account' && <BixgoAccount name={memberName} balance="Lihat saldo" onBack={() => go('home')} onSoon={soon}/>}
     {(view === 'order' || view === 'activity') && <main className="px-4 pb-6 pt-4">
     <section className="flex items-center gap-3">
-      <button aria-label="Kembali" onClick={() => go('home')}><ArrowLeft className="h-6 w-6"/></button>
+      <button aria-label="Back" onClick={() => go('home')}><ArrowLeft className="h-6 w-6"/></button>
       <h1 className="flex-1 text-xl font-black">{view === 'activity' ? 'Aktivitas' : meta.name}</h1>
-      <div className="flex gap-2">{(['order', 'history'] as const).map(t => <button key={t} onClick={() => go(t === 'order' ? 'order' : 'activity')} className={`rounded-full border px-3 py-1 text-[11px] ${tab === t ? 'border-primary bg-primary/15' : 'border-border'}`}>{t === 'order' ? 'Pesan' : `Riwayat (${orders.length})`}</button>)}</div>
+      <div className="flex gap-2">{(['order', 'history'] as const).map(t => <button key={t} onClick={() => go(t === 'order' ? 'order' : 'activity')} className={`rounded-full border px-3 py-1 text-[11px] ${tab === t ? 'border-primary bg-primary/15' : 'border-border'}`}>{t === 'order' ? 'Order' : `History (${orders.length})`}</button>)}</div>
     </section>
 
 
