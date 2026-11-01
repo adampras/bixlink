@@ -4150,7 +4150,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bixtok-input input { flex: 1; min-width: 0; background: transparent; outline: none; font-size: .85rem; }
 .bixtok-giftbtn { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 999px; color: var(--background); background: var(--matcha-gloss, var(--primary)); }
 .bixtok-hint { position: absolute; top: 3.6rem; inset-inline: 1rem; z-index: 3; font-size: .65rem; color: var(--muted-foreground); text-align: center; }
-.bixtok-sheet-wrap { position: fixed; inset: 0; z-index: 80; display: flex; align-items: flex-end; background: color-mix(in oklab, var(--background) 50%, transparent); }
+.bixtok-sheet-wrap { position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; background: color-mix(in oklab, var(--background) 50%, transparent); }
 .bixtok-sheet { position: relative; width: 100%; max-width: 32rem; margin: 0 auto; padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom)); border-radius: 1.2rem 1.2rem 0 0; background: var(--card); border-top: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent); }
 .bixtok-gifts { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin-top: .8rem; }
 .bixtok-gifts button { display: flex; flex-direction: column; align-items: center; gap: .15rem; padding: .6rem .2rem; border-radius: .8rem; border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent); background: var(--background); }
