@@ -51,7 +51,7 @@ export const saveGrowth = createServerFn({ method: 'POST' }).middleware([require
 export const getPublicActivity = createServerFn({ method: 'GET' }).handler(async () => {
   const key = process.env['SUPABASE_PUBLISHABLE_KEY'];
   const url = process.env['SUPABASE_URL'];
-  if (!key || !url) return [] as Array<{ kind: string; amount_usd: number; dial: string }>;
+  if (!key || !url) return [] as Array<{ kind: string; amount_usd: number; dial: string; member: string; at: string }>;
   const client = createClient<Database>(url, key, { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: (input, init) => {
     const headers = new Headers(init?.headers);
     if (key.startsWith('sb_') && headers.get('Authorization') === `Bearer ${key}`) headers.delete('Authorization');
@@ -60,5 +60,5 @@ export const getPublicActivity = createServerFn({ method: 'GET' }).handler(async
   } } });
   const { data, error } = await client.rpc('bix_public_activity');
   if (error || !data) return [];
-  return data.map(r => ({ kind: String(r.kind), amount_usd: Number(r.amount_usd ?? 0), dial: String(r.dial ?? '') }));
+  return data.map(r => ({ kind: String(r.kind), amount_usd: Number(r.amount_usd ?? 0), dial: String(r.dial ?? ''), member: String(r.member ?? 'M***'), at: String(r.created_at ?? '') }));
 });
