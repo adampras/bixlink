@@ -34,7 +34,7 @@ type Msg = { id: string; name: string; body: string; kind: string };
 function BixtokPage() {
   const { user, ready } = useMember();
   const q = useQuery({ queryKey: ['bixtok', user?.id], enabled: Boolean(user), refetchInterval: 60_000, queryFn: async () => {
-    const [c, g, v, l, s, f, o, sc, rm, rc] = await Promise.all([
+    const [c, g, v, l, s, f, o, sc, rm, rc, bp] = await Promise.all([
       supabase.from('bixtok_config').select('*').eq('id', 1).single(),
       supabase.from('bixtok_gifts').select('id,name,emoji,currency,price').eq('enabled', true).order('sort'),
       supabase.from('bixtok_videos').select('id,creator_name,creator_id,caption,video_url,likes,media_path,media_kind,filter,overlay,allow_gifts,text_style,music_title,music_url,source_kind').eq('enabled', true).order('created_at', { ascending: false }).limit(60),
@@ -45,6 +45,7 @@ function BixtokPage() {
       supabase.from('bixtok_live_schedules').select('id,title,host_name,starts_at').eq('status', 'scheduled').gte('starts_at', new Date(Date.now() - 3 * 3600_000).toISOString()).order('starts_at').limit(10),
       supabase.from('bixtok_live_reminders').select('schedule_id, bixtok_live_schedules(starts_at)').eq('user_id', user!.id),
       supabase.rpc('bixtok_reminder_counts'),
+      supabase.rpc('bixtok_can_bypass'),
     ]);
     if (c.error) throw c.error;
     const rows = (v.data ?? []) as Omit<Video, 'src'>[];
