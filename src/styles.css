@@ -4937,5 +4937,5 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bixtok-brand{top:calc(max(.6rem, env(safe-area-inset-top)) + 2.7rem);left:.5rem;min-width:8.6rem;height:2.9rem;padding:0 .8rem 0 .4rem;gap:.4rem;border-radius:999px;background:oklch(0.12 0.01 260 / .96);border:1px solid color-mix(in oklab,#FFD700 45%,transparent);box-shadow:0 6px 18px -8px oklch(0 0 0 / .8)}
 .bixtok-brand img{width:36px;height:36px}
 .bixtok-brand b{font-size:1.15rem;color:oklch(0.98 0 0)}
-.bxt-rail-shield{bottom:calc(8.2rem + env(safe-area-inset-bottom))!important}
+.bxt-rail-shield{top:auto!important;bottom:calc(8.2rem + env(safe-area-inset-bottom))!important}
 .bxt-vinyl{bottom:calc(4.9rem + env(safe-area-inset-bottom))}
