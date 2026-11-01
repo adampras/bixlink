@@ -36,13 +36,13 @@ function useDrag() {
   const st = useRef<{ sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
   const onPointerDown = (e: RPE<HTMLDivElement>) => {
     pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pts.current.size === 2) { const [a, b] = [...pts.current.values()]; pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y), s: scale }; st.current = null; return; }
+    if (pts.current.size === 2) { const [a, b] = [...pts.current.values()] as { x: number; y: number }[]; pinch.current = { d: Math.hypot(a!.x - b!.x, a!.y - b!.y), s: scale }; st.current = null; return; }
     const r = e.currentTarget.getBoundingClientRect();
     st.current = { sx: e.clientX, sy: e.clientY, ox: r.left, oy: r.top, moved: false };
   };
   const onPointerMove = (e: RPE<HTMLDivElement>) => {
     if (pts.current.has(e.pointerId)) pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pinch.current && pts.current.size === 2) { const [a, b] = [...pts.current.values()]; setScale(Math.min(1.8, Math.max(0.6, pinch.current.s * Math.hypot(a.x - b.x, a.y - b.y) / pinch.current.d))); return; }
+    if (pinch.current && pts.current.size === 2) { const [a, b] = [...pts.current.values()] as { x: number; y: number }[]; setScale(Math.min(1.8, Math.max(0.6, pinch.current.s * Math.hypot(a!.x - b!.x, a!.y - b!.y) / pinch.current.d))); return; }
     const s = st.current; if (!s) return;
     const dx = e.clientX - s.sx, dy = e.clientY - s.sy;
     if (!s.moved && Math.hypot(dx, dy) < 8) return;
