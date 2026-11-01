@@ -376,19 +376,19 @@ function CreatorEarnings() {
     setBusy(false);
     if (error) return setMsg(error.message.includes('No BIXTOK') ? 'Belum ada hadiah untuk ditarik.' : error.message);
     const r = data as unknown as { bix: number; bixp: number };
-    setMsg(`Berhasil ditarik ke BIXLINK Wallet: ${Number(r.bix)} BIX · ${Number(r.bixp)} BIXP`);
+    setMsg(`Withdrawn to BIXLINK Wallet: ${Number(r.bix)} BIX · ${Number(r.bixp)} BIXP`);
     qc.invalidateQueries();
   };
   return <div className="bxt-card" style={{ display: 'block' }}>
-    <div className="flex items-center justify-between"><b>Saldo hadiah BIXTOK</b><Gift size={16} className="bxt-gifticon"/></div>
+    <div className="flex items-center justify-between"><b>BIXTOK gift balance</b><Gift size={16} className="bxt-gifticon"/></div>
     <div className="mt-2 grid grid-cols-2 gap-2 text-center">
       <div className="rounded-lg border border-border p-2"><small className="text-muted-foreground">BIXCOIN</small><p className="text-lg font-bold">{Number(e?.bix ?? 0).toLocaleString('en-US', { maximumFractionDigits: 4 })}</p></div>
       <div className="rounded-lg border border-border p-2"><small className="text-muted-foreground">BIXP</small><p className="text-lg font-bold">{Number(e?.bixp ?? 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</p></div>
     </div>
-    <button className="bixtok-cta mt-3 w-full" disabled={busy || !has} onClick={claim}>{busy ? 'Memproses…' : 'Tarik ke BIXLINK Wallet'}</button>
+    <button className="bixtok-cta mt-3 w-full" disabled={busy || !has} onClick={claim}>{busy ? 'Processing…' : 'Withdraw to BIXLINK Wallet'}</button>
     {msg && <p className="mt-2 text-xs">{msg}</p>}
     <p className="mt-2 text-[10px] text-muted-foreground">Hadiah dari penonton tersimpan di sini dulu. Sudah ditarik: {Number(e?.claimed_bix ?? 0)} BIX · {Number(e?.claimed_bixp ?? 0)} BIXP.</p>
-    <button className="mt-2 flex w-full items-center justify-between text-xs" onClick={() => setOpen(o => !o)}><span>Riwayat hadiah</span><ChevronRight size={14} style={{ transform: open ? 'rotate(90deg)' : undefined }}/></button>
+    <button className="mt-2 flex w-full items-center justify-between text-xs" onClick={() => setOpen(o => !o)}><span>Gift history</span><ChevronRight size={14} style={{ transform: open ? 'rotate(90deg)' : undefined }}/></button>
     {open && <ul className="mt-2 space-y-1 text-xs">{(e?.recent ?? []).length === 0 ? <li className="text-muted-foreground">Belum ada hadiah.</li> : e!.recent.map((r, i) => <li key={i} className="flex justify-between gap-2"><span>@{r.sender} · {r.gift_name}</span><span>{Number(r.amount)} {r.currency} {r.claimed_at ? '✓' : '•'}</span></li>)}</ul>}
   </div>;
 }
