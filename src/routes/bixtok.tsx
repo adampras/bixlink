@@ -12,6 +12,7 @@ import { resolveBixtokLinks, cleanTiktokVideos } from '@/lib/bixtok.functions';
 import { bixtokMini, useBixtokMini } from '@/lib/bixtok-mini';
 import { Button } from '@/components/ui/button';
 import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
+import { copyText } from '@/lib/copy-text';
 
 export const Route = createFileRoute('/bixtok')({
   head: () => ({ meta: [
@@ -211,6 +212,25 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
   </div></div>}</div>;
 }
 
+/** Share link carries the sharer's referral code so new sign-ups join their network. */
+export function shareLink(origin: string, code: string | null, vid: string): string {
+  return code ? `${origin}/register?ref=${encodeURIComponent(code)}&vid=${vid}` : `${origin}/bixtok?vid=${vid}`;
+}
+function ShareSheet({ video, code, onClose, onNote }: { video: Video; code: string | null; onClose: () => void; onNote: (m: string) => void }) {
+  const url = shareLink(location.origin, code, video.id); const text = `${video.caption || 'Watch this on BIXTOK'} — ${url}`;
+  const copy = async () => { onNote(await copyText(url) ? 'Link copied' : 'Copy failed'); };
+  return <div className="bxt-cmt-wrap" onClick={onClose}><div className="bxt-cmt bxt-share" role="dialog" aria-label="Share" onClick={e => e.stopPropagation()}>
+    <header><b>Share video</b><button aria-label="Close" onClick={onClose}><X size={18}/></button></header>
+    <div className="bxt-share-grid">
+      <a href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><span>💬</span>WhatsApp</a>
+      <a href={`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(video.caption || 'BIXTOK')}`} target="_blank" rel="noreferrer"><span>✈️</span>Telegram</a>
+      <button onClick={copy}><span>🔗</span>Copy link</button>
+      {typeof navigator !== 'undefined' && 'share' in navigator && <button onClick={() => { void navigator.share({ title: 'BIXTOK', text: video.caption, url }).catch(() => {}); }}><span>📤</span>More</button>}
+    </div>
+    <p className="bxt-share-note">{code ? `Your referral code ${code} is included — new members who sign up join your network.` : 'Referral code not found; a plain BIXTOK link is shared.'}</p>
+  </div></div>;
+}
+
 type Cmt = { id: string; user_id: string; author_name: string; body: string; created_at: string };
 function CommentsSheet({ video, me, onClose, onNote }: { video: Video; me: string; onClose: () => void; onNote: (m: string) => void }) {
   const qc = useQueryClient(); const [text, setText] = useState(''); const [busy, setBusy] = useState(false);
@@ -265,7 +285,14 @@ function AutoVideo({ src, filter, muted, paused = false }: { src: string; filter
   const [pre, setPre] = useState<'metadata' | 'auto'>('metadata');
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setPre('auto'); io.disconnect(); } }, { rootMargin: '120% 0px' }); io.observe(el); return () => io.disconnect(); }, []);
   const mutedRef = useRef(muted); useEffect(() => { mutedRef.current = muted; const el = ref.current; if (el) { el.muted = muted; if (!muted) el.volume = 1; } }, [muted]);
-  return <video ref={ref} src={src} loop muted={muted} playsInline preload={pre} className="bixtok-video" style={{ filter: filterCss(filter) }} onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>;
+  const bar = useRef<HTMLSpanElement>(null); const tapT = useRef(0); const [icon, setIcon] = useState<'play' | 'pause' | null>(null);
+  const onClick = (e: React.MouseEvent<HTMLVideoElement>) => { const el = e.currentTarget; clearTimeout(tapT.current); if (e.detail > 1) return;
+    tapT.current = window.setTimeout(() => { if (el.paused) { void el.play().catch(() => {}); setIcon('play'); } else { el.pause(); setIcon('pause'); } window.setTimeout(() => setIcon(null), 600); }, 300); };
+  return <><video ref={ref} src={src} loop muted={muted} playsInline preload={pre} className="bixtok-video" style={{ filter: filterCss(filter) }} onClick={onClick}
+    onTimeUpdate={e => { const el = e.currentTarget; if (bar.current && el.duration) bar.current.style.transform = `scaleX(${el.currentTime / el.duration})`; }}
+    onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>
+    <span className="bxt-progress" aria-hidden><span ref={bar}/></span>
+    {icon && <span className="bxt-playicon" aria-hidden>{icon === 'pause' ? '❚❚' : '▶'}</span>}</>;
 }
 
 function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[]; stake: number; owner1: boolean; bypass: boolean; uid: string; schedules: Sched[] }; onEnter: (l: Live) => void; onNote: (m: string) => void }) {
