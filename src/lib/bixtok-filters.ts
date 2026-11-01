@@ -1,46 +1,56 @@
-/** BIXTOK LIVE face filters + voice changer. Runs locally on the host phone, so viewers
+/** BIXTOK LIVE beauty filters + voice changer. Runs locally on the host phone, so viewers
  * receive the already-filtered video/audio with no extra data cost. */
-export type FaceFilter = { id: string; name: string; css: string; overlay?: string };
+export type FxLevels = { smooth: number; bright: number; clarity: number; glow: number; warm: number };
+export type FaceFilter = { id: string; name: string; levels: FxLevels };
+const L = (smooth: number, bright: number, clarity: number, glow: number, warm: number): FxLevels => ({ smooth, bright, clarity, glow, warm });
 export const FACE_FILTERS: FaceFilter[] = [
-  { id: 'none', name: 'Original', css: 'none' },
-  { id: 'youth', name: 'Youth Glow', css: 'blur(0.8px) brightness(1.12) contrast(1.04) saturate(1.18)' },
-  { id: 'beauty', name: 'Soft Beauty', css: 'blur(1.2px) brightness(1.08) saturate(1.1)' },
-  { id: 'porcelain', name: 'Porcelain', css: 'blur(1px) brightness(1.15) contrast(0.95) saturate(0.9)' },
-  { id: 'golden', name: 'Golden Hour', css: 'sepia(0.35) saturate(1.4) brightness(1.06)' },
-  { id: 'cinema', name: 'Cinema', css: 'contrast(1.2) saturate(0.85) brightness(0.95)' },
-  { id: 'noir', name: 'Noir', css: 'grayscale(1) contrast(1.25)' },
-  { id: 'neon', name: 'Neon', css: 'saturate(2) hue-rotate(250deg) contrast(1.1)' },
-  { id: 'fox', name: 'Fox Ears', css: 'brightness(1.06) saturate(1.1)', overlay: '🦊' },
-  { id: 'crown', name: 'VIP Crown', css: 'brightness(1.05) saturate(1.15)', overlay: '👑' },
-  { id: 'shades', name: 'Cool Shades', css: 'contrast(1.1)', overlay: '🕶️' },
-  { id: 'hearts', name: 'Love', css: 'brightness(1.08) saturate(1.2)', overlay: '💖' },
-  { id: 'party', name: 'Party', css: 'saturate(1.3)', overlay: '🎉' },
-  { id: 'cat', name: 'Kitty', css: 'brightness(1.08)', overlay: '🐱' },
+  { id: 'none', name: 'Original', levels: L(0, 0, 0, 0, 0) },
+  { id: 'youth', name: 'Youth Glow', levels: L(65, 35, 30, 45, 15) },
+  { id: 'porcelain', name: 'Porcelain', levels: L(80, 45, 20, 20, 0) },
+  { id: 'handsome', name: 'Clean Handsome', levels: L(40, 25, 55, 20, 5) },
+  { id: 'bright', name: 'Bright Daylight', levels: L(35, 60, 30, 30, 5) },
+  { id: 'golden', name: 'Golden Warmth', levels: L(45, 30, 30, 35, 55) },
+  { id: 'cinema', name: 'Studio Cinema', levels: L(30, 10, 70, 15, 20) },
 ];
+export const FX_SLIDERS: { key: keyof FxLevels; label: string }[] = [
+  { key: 'smooth', label: 'Smooth skin' }, { key: 'bright', label: 'Brightness' },
+  { key: 'clarity', label: 'Clarity' }, { key: 'glow', label: 'Fresh glow' }, { key: 'warm', label: 'Warmth' },
+];
+export const isNeutral = (l: FxLevels) => !l.smooth && !l.bright && !l.clarity && !l.glow && !l.warm;
 export type VoiceFx = 'none' | 'robot' | 'deep' | 'echo' | 'studio';
 export const VOICE_FX: { id: VoiceFx; name: string }[] = [
   { id: 'none', name: 'Normal' }, { id: 'studio', name: 'Studio' }, { id: 'echo', name: 'Echo' }, { id: 'deep', name: 'Deep' }, { id: 'robot', name: 'Robot' },
 ];
 
-/** Draw the camera through a canvas with the filter; returns the new track and a stop(). */
-export function filterVideo(src: MediaStreamTrack, f: FaceFilter, mirror: boolean): { track: MediaStreamTrack; stop: () => void } | null {
+/** CSS filter for the sharp base layer (0–100 levels). */
+export function baseCss(l: FxLevels): string {
+  const b = 1 + l.bright * 0.0028, c = 1 + l.clarity * 0.0022 - l.smooth * 0.0006, s = 1 + l.glow * 0.0035;
+  return `brightness(${b.toFixed(3)}) contrast(${c.toFixed(3)}) saturate(${s.toFixed(3)}) sepia(${(l.warm * 0.0035).toFixed(3)})`;
+}
+
+/** Draw the camera through a canvas: sharp layer + soft blurred skin layer blended on top.
+ * Levels are read every frame so sliders update instantly without restarting the broadcast. */
+export function filterVideo(src: MediaStreamTrack, get: () => FxLevels): { track: MediaStreamTrack; stop: () => void } | null {
   const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.srcObject = new MediaStream([src]); void v.play().catch(() => {});
   const s = src.getSettings(); const c = document.createElement('canvas'); c.width = s.width || 720; c.height = s.height || 1280;
   const ctx = c.getContext('2d'); const cap = (c as HTMLCanvasElement & { captureStream?: (fps?: number) => MediaStream }).captureStream;
   if (!ctx || !cap) return null;
-  let raf = 0; let alive = true; let t = 0;
+  let raf = 0; let alive = true;
   const draw = () => {
     if (!alive) return;
     if (v.videoWidth && (c.width !== v.videoWidth || c.height !== v.videoHeight)) { c.width = v.videoWidth; c.height = v.videoHeight; }
-    ctx.filter = f.css; ctx.drawImage(v, 0, 0, c.width, c.height); ctx.filter = 'none';
-    if (f.overlay) {
-      t += 0.05; const size = c.width * 0.22; ctx.font = `${size}px serif`; ctx.textAlign = 'center';
-      const y = c.height * 0.16 + Math.sin(t) * 6;
-      ctx.save(); if (mirror) { ctx.translate(c.width, 0); ctx.scale(-1, 1); }
-      ctx.fillText(f.overlay, c.width / 2, y); ctx.globalAlpha = 0.85;
-      ctx.font = `${size * 0.45}px serif`; ctx.fillText(f.overlay, c.width * 0.14, c.height * 0.9 + Math.cos(t) * 8); ctx.fillText(f.overlay, c.width * 0.86, c.height * 0.88 + Math.sin(t) * 8);
-      ctx.restore();
+    const l = get(); const css = baseCss(l);
+    ctx.globalAlpha = 1; ctx.filter = css; ctx.drawImage(v, 0, 0, c.width, c.height);
+    if (l.smooth > 0) {
+      const r = Math.max(1, c.width / 240) * (1 + l.smooth / 40);
+      ctx.globalAlpha = Math.min(0.6, l.smooth / 160); ctx.filter = `${css} blur(${r.toFixed(1)}px) brightness(1.04)`;
+      ctx.drawImage(v, 0, 0, c.width, c.height);
     }
+    if (l.glow > 0) {
+      ctx.globalAlpha = l.glow / 900; ctx.filter = 'none'; ctx.globalCompositeOperation = 'screen';
+      ctx.fillStyle = '#ffe8dc'; ctx.fillRect(0, 0, c.width, c.height); ctx.globalCompositeOperation = 'source-over';
+    }
+    ctx.globalAlpha = 1; ctx.filter = 'none';
     raf = requestAnimationFrame(draw);
   };
   draw();
