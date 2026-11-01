@@ -141,8 +141,9 @@ function BixtokPage() {
         }}><Minimize2 size={18}/></button>
       </header>
       <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={28} height={28}/><b>BIX<span>TOK</span></b></div></>}
+      {section === 'home' && tab !== 'live' && tags.length > 0 && <div className="bxt-tags" role="tablist" aria-label="Topics"><button className={!tag ? 'on' : ''} onClick={() => setTag('')}>All</button>{tags.map(t => <button key={t} className={tag === t ? 'on' : ''} onClick={() => setTag(tag === t ? '' : t)}>{t}</button>)}</div>}
       {section === 'home' && (tab === 'live'
-        ? <LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/>
+        ? <>{top.length > 0 && <div className="bxt-board" aria-label="Top creators"><b>🏆 Top creators</b>{top.map((c, i) => <span key={c.name + i}><i>{['👑','🥈','🥉','4','5'][i]}</i>@{c.name}<small>{fmtCount(c.likes)} ♥</small></span>)}</div>}<LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/></>
         : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote} liveHosts={new Map(q.data.lives.map(l => [l.host_id, l]))} onEnterLive={setRoom}/>)}
       {section === 'inbox' && <Inbox followers={followers.size} lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
       {section === 'profile' && <ProfilePage follow={{ following, followers }} me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} all={q.data.videos} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
