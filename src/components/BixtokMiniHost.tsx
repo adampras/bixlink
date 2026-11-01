@@ -6,8 +6,14 @@ import { bixtokMini, useBixtokMini } from '@/lib/bixtok-mini';
 const BixtokLiveRoom = lazy(() => import('@/components/BixtokLiveRoom').then(m => ({ default: m.BixtokLiveRoom })));
 
 export function BixtokMiniHost() {
-  const { room, mini } = useBixtokMini();
+  const { room, mini, feed } = useBixtokMini();
   const router = useRouter();
+  if (!room && feed && router.state.location.pathname !== '/bixtok') return <div className="bxl-mini bxl-mini-feed">
+    {feed.kind === 'iframe' ? <iframe src={feed.src} title={feed.title} allow="autoplay; encrypted-media" className="h-full w-full border-0"/> : feed.kind === 'video' ? <video src={feed.src} autoPlay loop muted playsInline className="h-full w-full object-cover"/> : <img src={feed.src} alt={feed.title} className="h-full w-full object-cover"/>}
+    <div className="bxl-mini-ctl"><span className="bxl-mini-badge feed">BIXTOK</span>
+      <button type="button" aria-label="Open BIXTOK" onClick={() => { bixtokMini.setFeed(null); void router.navigate({ to: '/bixtok' }); }}><Maximize2 size={14}/></button>
+      <button type="button" aria-label="Close BIXTOK mini" onClick={() => bixtokMini.setFeed(null)}><X size={14}/></button></div>
+  </div>;
   if (!room) return null;
   const minimize = () => {
     bixtokMini.setMini(true);

@@ -4747,3 +4747,13 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-mini-hit { position: absolute; inset: 0; background: transparent; }
 .bxl-mini-ctl > button:not(.bxl-mini-hit) { position: relative; display: grid; place-items: center; width: 26px; height: 26px; min-height: 0 !important; border-radius: 999px; background: rgba(0,0,0,.65); color: #FFD700; }
 .bxl-mini-badge { position: absolute; left: 6px; bottom: 6px; font-size: 9px; font-weight: 800; letter-spacing: .1em; padding: 2px 6px; border-radius: 999px; background: #e11d48; color: #fff; }
+/* Larger mini window + BIXTOK LIVE nav tab */
+.bxl-mini { width: 52vw; max-width: 240px; bottom: 90px; }
+.bxl-mini-inner { --s: .52; }
+@media (min-width: 420px) { .bxl-mini-inner { --s: .5; } }
+.bxl-mini-badge.feed { background: linear-gradient(135deg,#A855F7,#FFD700); color: #000; }
+.bxt-live-tab .bxt-live-ic { position: relative; display: grid; place-items: center; width: 34px; height: 26px; border-radius: 9px; background: linear-gradient(135deg,#e11d48,#A855F7); color: #fff; box-shadow: 0 0 0 1.5px #FFD700, 0 0 14px -2px #e11d48; animation: bxtLivePulse 1.8s ease-in-out infinite; }
+.bxt-live-tab .bxt-live-ic em { position: absolute; bottom: -7px; font-style: normal; font-size: 7px; font-weight: 900; letter-spacing: .08em; padding: 0 4px; border-radius: 4px; background: #FFD700; color: #000; }
+.bxt-live-tab.on small { color: #FFD700; }
+@keyframes bxtLivePulse { 50% { box-shadow: 0 0 0 1.5px #FFD700, 0 0 22px 2px #e11d48; } }
+@media (prefers-reduced-motion: reduce) { .bxt-live-tab .bxt-live-ic { animation: none; } }
