@@ -24,8 +24,9 @@ export const VOICE_FX: { id: VoiceFx; name: string }[] = [
 
 /** CSS filter for the sharp base layer (0–100 levels). */
 export function baseCss(l: FxLevels): string {
-  const b = 1 + l.bright * 0.0028, c = 1 + l.clarity * 0.0022 - l.smooth * 0.0006, s = 1 + l.glow * 0.0035;
-  return `brightness(${b.toFixed(3)}) contrast(${c.toFixed(3)}) saturate(${s.toFixed(3)}) sepia(${(l.warm * 0.0035).toFixed(3)})`;
+  // Gentle, capped ranges so presets never wash out or darken faces.
+  const b = 1 + l.bright * 0.0012 + l.glow * 0.0004, c = 1 + l.clarity * 0.0012 - l.smooth * 0.0008, s = 1 + l.glow * 0.0015;
+  return `brightness(${b.toFixed(3)}) contrast(${c.toFixed(3)}) saturate(${s.toFixed(3)}) sepia(${(l.warm * 0.0012).toFixed(3)})`;
 }
 
 /** Draw the camera through a canvas: sharp layer + soft blurred skin layer blended on top.
@@ -39,18 +40,9 @@ export function filterVideo(src: MediaStreamTrack, get: () => FxLevels): { track
   const draw = () => {
     if (!alive) return;
     if (v.videoWidth && (c.width !== v.videoWidth || c.height !== v.videoHeight)) { c.width = v.videoWidth; c.height = v.videoHeight; }
-    const l = get(); const css = baseCss(l);
-    ctx.globalAlpha = 1; ctx.filter = css; ctx.drawImage(v, 0, 0, c.width, c.height);
-    if (l.smooth > 0) {
-      const r = Math.max(1, c.width / 240) * (1 + l.smooth / 40);
-      ctx.globalAlpha = Math.min(0.6, l.smooth / 160); ctx.filter = `${css} blur(${r.toFixed(1)}px) brightness(1.04)`;
-      ctx.drawImage(v, 0, 0, c.width, c.height);
-    }
-    if (l.glow > 0) {
-      ctx.globalAlpha = l.glow / 900; ctx.filter = 'none'; ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = '#ffe8dc'; ctx.fillRect(0, 0, c.width, c.height); ctx.globalCompositeOperation = 'source-over';
-    }
-    ctx.globalAlpha = 1; ctx.filter = 'none';
+    // Single light pass only: the old blur + overlay passes overloaded phones and smeared the video.
+    const l = get(); ctx.globalAlpha = 1; ctx.filter = baseCss(l); ctx.drawImage(v, 0, 0, c.width, c.height);
+    ctx.filter = 'none';
     raf = requestAnimationFrame(draw);
   };
   draw();
