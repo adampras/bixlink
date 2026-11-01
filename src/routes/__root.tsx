@@ -152,7 +152,8 @@ function RootComponent() {
         <AppSplash />
         <InstallPrompt />
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <PageTransition><Outlet /></PageTransition>
+        <PageTransition />
+        <Outlet />
         <FoxChat />
         <InteractionComfort />
       </I18nProvider>
@@ -160,7 +161,7 @@ function RootComponent() {
   );
 }
 
-function PageTransition({ children }: { children: React.ReactNode }) {
+function PageTransition() {
   const path = useRouterState({ select: (s) => s.location.pathname });
-  return <div key={path} className="page-velvet">{children}</div>;
+  return <div key={path} className="page-top-line" aria-hidden />;
 }
