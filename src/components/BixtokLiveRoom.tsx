@@ -8,7 +8,9 @@ import { useReplayRecorder } from '@/lib/bixtok-replay';
 import { MEDIA_HELP, openLiveMedia, type MediaIssue } from '@/lib/bixtok-media';
 import { allBackdrops, backdropCss } from '@/lib/bixtok-backdrops';
 import { copyText } from '@/lib/copy-text';
-__KEEP_9_11__
+
+type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
+type Msg = { id: string; name: string; body: string; kind: string };
 type Cfg = { live_max_minutes: number; features: Record<string, boolean>; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean; backdrops_enabled?: boolean; live_backdrops?: unknown };
 type Pk = { a: string; b: string; started_at: string; ends_at: string };
 
