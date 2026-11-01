@@ -9,7 +9,7 @@ import { MemberGate } from '@/components/MemberGate';
 import { useMember } from '@/lib/useMember';
 import { BixtokStudio, filterCss, DraggableText, DEFAULT_TEXT, type TextStyle } from '@/components/BixtokStudio';
 import { resolveBixtokLinks, cleanTiktokVideos } from '@/lib/bixtok.functions';
-import { BixtokLiveRoom } from '@/components/BixtokLiveRoom';
+import { bixtokMini, useBixtokMini } from '@/lib/bixtok-mini';
 import { Button } from '@/components/ui/button';
 import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
 
@@ -74,7 +74,9 @@ function BixtokPage() {
   const menus = (q.data?.cfg.menus ?? []).filter(m => m.enabled);
   const [tab, setTab] = useState('foryou');
   const [giftTarget, setGiftTarget] = useState<GiftTarget | null>(null);
-  const [room, setRoom] = useState<Live | null>(null);
+  const room = useBixtokMini().room?.live as Live | undefined ?? null;
+  const setRoom = (l: Live | null) => { if (!l) return bixtokMini.close(); if (!q.data) return; bixtokMini.open({ live: l, me: user!.id, cfg: q.data.cfg, following: following.has(l.host_id), onFollow: () => toggleFollowRef.current(l.host_id), onGift: (recipients) => setGiftTarget({ live: l.id, recipients }) }); };
+  const toggleFollowRef = useRef<(id: string) => void>(() => {});
   const opened = useRef(false);
   useEffect(() => {
     if (opened.current || !q.data) return;
@@ -105,6 +107,8 @@ function BixtokPage() {
     setNote(on ? 'Unfollowed' : followers.has(id) ? 'You are now friends' : 'Following');
     qc.invalidateQueries({ queryKey: ['bixtok'] });
   };
+  toggleFollowRef.current = (id: string) => { void toggleFollow(id); };
+  useEffect(() => { if (room) bixtokMini.update({ following: following.has(room.host_id) }); }, [room?.host_id, following.has(room?.host_id ?? '')]);
   const [muted, setMuted] = useState(true);
   const [section, setSection] = useState<'home' | 'inbox' | 'profile' | 'balance'>('home');
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
@@ -139,7 +143,6 @@ function BixtokPage() {
         <button className={section === 'profile' ? 'on' : ''} onClick={() => setSection('profile')}><User/><small>Profile</small></button>
       </nav>}
       {studio && <BixtokStudio userId={user!.id} slots={q.data.cfg.link_slots ?? 5} maxLinks={q.data.cfg.max_links ?? 10} onClose={() => setStudio(false)} onDone={m => { setStudio(false); setNote(m); setTab('mine'); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}/>}
-      {room && <BixtokLiveRoom live={room} me={user!.id} cfg={q.data.cfg} following={following.has(room.host_id)} onFollow={() => toggleFollow(room.host_id)} onClose={() => setRoom(null)} onGift={(recipients) => setGiftTarget({ live: room.id, recipients })}/>}
       {giftTarget && <GiftSheet gifts={q.data.gifts.filter(g => q.data!.cfg.features[g.currency === 'BIX' ? 'bix_gifts' : 'bixp_gifts'] !== false)} target={giftTarget} closed={!q.data.cfg.gifts_enabled} onClose={() => setGiftTarget(null)} onNote={setNote}/>}
       {note && <div className="bixtok-toast" role="status">{note}</div>}
     </>}
@@ -168,8 +171,8 @@ function embedUrl(u: string): string | null {
   try {
     const x = new URL(u); const h = x.hostname.replace(/^www\.|^m\./, '');
     if (h.endsWith('tiktok.com')) { const id = x.pathname.match(/(?:video|photo|v)\/(\d+)/)?.[1] ?? x.searchParams.get('item_id') ?? u.match(/(\d{15,})/)?.[1]; return id ? `https://www.tiktok.com/player/v1/${id}?autoplay=1&loop=1&music_info=1&description=1&rel=0` : null; }
-    if (h === 'youtu.be') return `https://www.youtube.com/embed/${x.pathname.slice(1)}?playsinline=1&loop=1`;
-    if (h.endsWith('youtube.com')) { const id = x.searchParams.get('v') ?? x.pathname.match(/(?:shorts|embed)\/([\w-]+)/)?.[1]; return id ? `https://www.youtube.com/embed/${id}?playsinline=1&loop=1` : null; }
+    if (h === 'youtu.be') { const id = x.pathname.slice(1); return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&playsinline=1&loop=1&playlist=${id}&controls=1&rel=0`; }
+    if (h.endsWith('youtube.com')) { const id = x.searchParams.get('v') ?? x.pathname.match(/(?:shorts|embed)\/([\w-]+)/)?.[1]; return id ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&playsinline=1&loop=1&playlist=${id}&controls=1&rel=0&modestbranding=1` : null; }
     if (h.endsWith('instagram.com')) { const m = x.pathname.match(/\/(p|reel|reels)\/([\w-]+)/); return m ? `https://www.instagram.com/${m[1] === 'p' ? 'p' : 'reel'}/${m[2]}/embed` : null; }
   } catch { /* invalid */ }
   return null;
