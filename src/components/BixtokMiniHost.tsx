@@ -28,7 +28,9 @@ const BixtokLiveRoom = lazy(async () => {
 
 // Drag the mini window anywhere; drop it past a screen edge to tuck it away (a tab stays visible).
 function useDrag() {
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const [pos, setPosRaw] = useState<{ x: number; y: number } | null>(null);
+  const raf = useRef(0);
+  const setPos: typeof setPosRaw = (v) => { cancelAnimationFrame(raf.current); raf.current = requestAnimationFrame(() => setPosRaw(v)); };
   const [scale, setScale] = useState(1);
   const pinch = useRef<{ d: number; s: number } | null>(null);
   const pts = useRef(new Map<number, { x: number; y: number }>());
@@ -62,8 +64,24 @@ function useDrag() {
   const sz = { width: `min(${Math.round(52 * scale)}vw, ${Math.round(240 * scale)}px)`, maxWidth: 'none', ['--s' as string]: String(Math.min(0.52 * scale, (240 * scale) / (typeof window !== 'undefined' ? window.innerWidth : 400)).toFixed(3)) } as React.CSSProperties;
   const style = tucked ? { top: pos?.y, bottom: 'auto', left: tucked === 'l' ? 0 : 'auto', right: tucked === 'r' ? 0 : 'auto', width: 28, touchAction: 'none' as const }
     : pos ? { ...sz, left: pos.x, top: pos.y, right: 'auto', bottom: 'auto', touchAction: 'none' as const } : { ...sz, touchAction: 'none' as const };
+  const resize = (corner: 'tl' | 'tr' | 'bl' | 'br') => (e: RPE<HTMLSpanElement>) => {
+    e.stopPropagation(); e.preventDefault();
+    const box = (e.currentTarget.parentElement as HTMLElement); const r = box.getBoundingClientRect();
+    const sx = e.clientX, s0 = scale, w0 = r.width, h0 = r.height;
+    const tgt = e.currentTarget; tgt.setPointerCapture(e.pointerId); box.classList.add('bxl-resizing');
+    let raf = 0;
+    const move = (ev: PointerEvent) => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {
+      const dx = (ev.clientX - sx) * (corner === 'tl' || corner === 'bl' ? -1 : 1);
+      const ns = Math.min(1.8, Math.max(0.6, s0 * (w0 + dx) / w0)); const nw = w0 * ns / s0, nh = h0 * ns / s0;
+      setScale(ns);
+      setPos({ x: corner === 'tl' || corner === 'bl' ? r.right - nw : r.left, y: corner === 'tl' || corner === 'tr' ? r.bottom - nh : r.top });
+    }); };
+    const up = () => { box.classList.remove('bxl-resizing'); tgt.removeEventListener('pointermove', move); tgt.removeEventListener('pointerup', up); tgt.removeEventListener('pointercancel', up); try { navigator.vibrate?.(8); } catch { /* */ } };
+    tgt.addEventListener('pointermove', move); tgt.addEventListener('pointerup', up); tgt.addEventListener('pointercancel', up);
+  };
+  const handles = tucked ? null : (['tl', 'tr', 'bl', 'br'] as const).map(c => <span key={c} className={`bxl-grip bxl-grip-${c}`} onPointerDown={resize(c)} aria-hidden/>);
   const zoom = (d: number) => setScale(v => Math.min(1.8, Math.max(0.6, +(v + d).toFixed(2))));
-  return { tucked, zoom, bind: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp, onClickCapture, style } };
+  return { tucked, zoom, handles, bind: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp, onClickCapture, style } };
 }
 
 // Mini player keeps the speaker on; falls back to muted only if the browser blocks sound, then unmutes on first tap.
@@ -72,7 +90,7 @@ function SoundVideo({ src }: { src: string }) {
   useEffect(() => { const el = ref.current; if (!el) return; el.muted = false; el.volume = 1;
     el.play().catch(() => { el.muted = true; void el.play().catch(() => {}); const on = () => { el.muted = false; void el.play().catch(() => {}); }; window.addEventListener('pointerdown', on, { once: true }); });
   }, [src]);
-  return <video ref={ref} src={src} autoPlay loop playsInline className="h-full w-full object-cover"/>;
+  return <video ref={ref} src={src} autoPlay loop playsInline className="h-full w-full object-contain"/>;
 }
 
 export function BixtokMiniHost() {
@@ -80,7 +98,8 @@ export function BixtokMiniHost() {
   const router = useRouter();
   const drag = useDrag();
   if (!room && feed && router.state.location.pathname !== '/bixtok') return <div className={`bxl-mini bxl-mini-feed${drag.tucked ? ' bxl-tucked' : ''}`} {...drag.bind}>
-    {feed.kind === 'iframe' ? <iframe src={feed.src.replace('mute=1', 'mute=0')} title={feed.title} allow="autoplay; encrypted-media" className="h-full w-full border-0"/> : feed.kind === 'video' ? <SoundVideo src={feed.src}/> : <img src={feed.src} alt={feed.title} className="h-full w-full object-cover"/>}
+    {feed.kind === 'iframe' ? <iframe src={feed.src.replace('mute=1', 'mute=0')} title={feed.title} allow="autoplay; encrypted-media" className="h-full w-full border-0"/> : feed.kind === 'video' ? <SoundVideo src={feed.src}/> : <img src={feed.src} alt={feed.title} className="h-full w-full object-contain"/>}
+    {drag.handles}
     <div className="bxl-mini-ctl"><span className="bxl-mini-badge feed">BIXTOK</span>
       <button type="button" aria-label="Smaller" onClick={() => drag.zoom(-0.2)}><ZoomOut size={14}/></button>
       <button type="button" aria-label="Bigger" onClick={() => drag.zoom(0.2)}><ZoomIn size={14}/></button>
@@ -98,6 +117,7 @@ export function BixtokMiniHost() {
         <BixtokLiveRoom live={room.live} me={room.me} cfg={room.cfg} following={room.following} onFollow={room.onFollow} onGift={room.onGift} onClose={() => bixtokMini.close()} onMinimize={minimize}/>
       </Suspense>
     </div>
+    {mini && drag.handles}
     {mini && <div className="bxl-mini-ctl">
       <button type="button" className="bxl-mini-hit" aria-label="Expand LIVE" onClick={() => bixtokMini.setMini(false)}/>
       <span className="bxl-mini-badge">● LIVE</span>
