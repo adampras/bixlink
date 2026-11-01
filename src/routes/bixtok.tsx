@@ -183,19 +183,32 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
     <Media v={v} muted={muted}/>
     {tapRef.current.id === v.id && bursts.map(b => <Heart key={b.k} className="bxt-dbl-heart" style={{ left: b.x, top: b.y }} fill="currentColor" aria-hidden/>)}
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
-    <div className="bixtok-meta"><b>@{v.creator_name}</b><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
+    <div className="bixtok-meta"><button type="button" className="bxt-name" onClick={() => setPeek(v)}><b>@{v.creator_name}</b></button><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
+    <div className={`bxt-vinyl${muted ? ' still' : ''}`} aria-hidden><span>{v.creator_name.slice(0, 1).toUpperCase()}</span>{!muted && <><i>♪</i><i>♫</i></>}</div>
     <aside className={`bixtok-rail bxt-rail-shield${railOpen ? '' : ' closed'}`}>
       {railOpen && <>
       {v.creator_id === me && <div className="bxt-follow me"><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><small>You</small></div>}
-      {v.creator_id && v.creator_id !== me && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
+      {v.creator_id && v.creator_id !== me && liveHosts.has(v.creator_id) && <button aria-label="Watch LIVE" className="bxt-follow bxt-live-ring" onClick={() => onEnterLive?.(liveHosts.get(v.creator_id!)!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>LIVE</em><small>Watch</small></button>}
+      {v.creator_id && v.creator_id !== me && !liveHosts.has(v.creator_id) && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={() => void like(v)}><Heart/><small>{v.likes + (liked[v.id] ? 1 : 0)}</small></button>}
       <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
-      {cfg.features['share'] !== false && <button aria-label="Share" onClick={async () => { const url = `${location.origin}/bixtok`; try { if (navigator.share) await navigator.share({ title: 'BIXTOK', text: v.caption, url }); else { await navigator.clipboard.writeText(url); onNote('Link copied'); } } catch { /* cancelled */ } }}><Share2/><small>Share</small></button>}
+      {cfg.features['share'] !== false && <button aria-label="Share" onClick={() => setShare(v)}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
       </>}
       <button type="button" className="bxt-rail-toggle" aria-label={railOpen ? 'Collapse menu' : 'Expand menu'} onClick={() => setRailOpen(o => !o)}>{railOpen ? '›' : '‹'}</button>
     </aside>
-  </section>)}{comments && <CommentsSheet video={comments} me={me} onClose={() => setComments(null)} onNote={onNote}/>}</div>;
+  </section>)}{comments && <CommentsSheet video={comments} me={me} onClose={() => setComments(null)} onNote={onNote}/>}
+  {share && <ShareSheet video={share} code={ref.data ?? null} onClose={() => setShare(null)} onNote={onNote}/>}
+  {peek && <div className="bxt-cmt-wrap" onClick={() => setPeek(null)}><div className="bxt-cmt bxt-peek" role="dialog" aria-label="Creator" onClick={e => e.stopPropagation()}>
+    <header><b>Creator</b><button aria-label="Close" onClick={() => setPeek(null)}><X size={18}/></button></header>
+    <div className="bxt-peek-body"><span className={`bxt-peek-av${peek.creator_id && liveHosts.has(peek.creator_id) ? ' live' : ''}`}>{peek.creator_name.slice(0, 1).toUpperCase()}</span><h3>@{peek.creator_name}</h3>
+      <p>{videos.filter(x => x.creator_id === peek.creator_id).length} posts · {videos.filter(x => x.creator_id === peek.creator_id).reduce((a, x) => a + Number(x.likes || 0), 0)} likes</p>
+      {peek.creator_id && peek.creator_id !== me && <div className="bxt-peek-act">
+        {liveHosts.has(peek.creator_id) && <button className="bixtok-cta" onClick={() => { const l = liveHosts.get(peek.creator_id!)!; setPeek(null); onEnterLive?.(l); }}>🔴 Watch LIVE</button>}
+        <button className="bixtok-cta" onClick={() => onFollow(peek.creator_id!)}>{following.has(peek.creator_id) ? 'Unfollow' : 'Follow'}</button>
+        {peek.allow_gifts !== false && <button className="bixtok-cta" onClick={() => { const id = peek.id; setPeek(null); onGift(id); }}>🎁 Gift</button>}
+      </div>}</div>
+  </div></div>}</div>;
 }
 
 type Cmt = { id: string; user_id: string; author_name: string; body: string; created_at: string };
