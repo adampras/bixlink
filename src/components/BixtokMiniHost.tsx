@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useRef, useState, type PointerEvent as RPE } from 'react';
 import { Maximize2, X } from 'lucide-react';
 import { useRouter } from '@tanstack/react-router';
 import { bixtokMini, useBixtokMini } from '@/lib/bixtok-mini';
@@ -26,10 +26,40 @@ const BixtokLiveRoom = lazy(async () => {
   return { default: ((p: { onClose: () => void }) => <LiveRoomLoadFailed onClose={p.onClose}/>) as unknown as typeof import('@/components/BixtokLiveRoom').BixtokLiveRoom };
 });
 
+// Drag the mini window anywhere; drop it past a screen edge to tuck it away (a tab stays visible).
+function useDrag() {
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const [tucked, setTucked] = useState<'l' | 'r' | null>(null);
+  const st = useRef<{ sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
+  const onPointerDown = (e: RPE<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    st.current = { sx: e.clientX, sy: e.clientY, ox: r.left, oy: r.top, moved: false };
+  };
+  const onPointerMove = (e: RPE<HTMLDivElement>) => {
+    const s = st.current; if (!s) return;
+    const dx = e.clientX - s.sx, dy = e.clientY - s.sy;
+    if (!s.moved && Math.hypot(dx, dy) < 8) return;
+    if (!s.moved) { s.moved = true; e.currentTarget.setPointerCapture(e.pointerId); setTucked(null); }
+    const w = e.currentTarget.offsetWidth, h = e.currentTarget.offsetHeight;
+    setPos({ x: Math.min(window.innerWidth - w * 0.3, Math.max(-w * 0.7, s.ox + dx)), y: Math.min(window.innerHeight - h, Math.max(0, s.oy + dy)) });
+  };
+  const onPointerUp = (e: RPE<HTMLDivElement>) => {
+    const s = st.current; st.current = null; if (!s?.moved) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    if (r.left < -r.width * 0.25) setTucked('l'); else if (r.right > window.innerWidth + r.width * 0.25) setTucked('r');
+    e.preventDefault();
+  };
+  const onClickCapture = (e: React.MouseEvent) => { if (tucked) { e.stopPropagation(); e.preventDefault(); setTucked(null); setPos(p => p && { ...p, x: tucked === 'l' ? 12 : window.innerWidth - (e.currentTarget as HTMLElement).offsetWidth - 12 }); } };
+  const style = tucked ? { top: pos?.y, bottom: 'auto', left: tucked === 'l' ? 0 : 'auto', right: tucked === 'r' ? 0 : 'auto', width: 28, touchAction: 'none' as const }
+    : pos ? { left: pos.x, top: pos.y, right: 'auto', bottom: 'auto', touchAction: 'none' as const } : { touchAction: 'none' as const };
+  return { tucked, bind: { onPointerDown, onPointerMove, onPointerUp, onClickCapture, style } };
+}
+
 export function BixtokMiniHost() {
   const { room, mini, feed } = useBixtokMini();
   const router = useRouter();
-  if (!room && feed && router.state.location.pathname !== '/bixtok') return <div className="bxl-mini bxl-mini-feed">
+  const drag = useDrag();
+  if (!room && feed && router.state.location.pathname !== '/bixtok') return <div className={`bxl-mini bxl-mini-feed${drag.tucked ? ' bxl-tucked' : ''}`} {...drag.bind}>
     {feed.kind === 'iframe' ? <iframe src={feed.src} title={feed.title} allow="autoplay; encrypted-media" className="h-full w-full border-0"/> : feed.kind === 'video' ? <video src={feed.src} autoPlay loop muted playsInline className="h-full w-full object-cover"/> : <img src={feed.src} alt={feed.title} className="h-full w-full object-cover"/>}
     <div className="bxl-mini-ctl"><span className="bxl-mini-badge feed">BIXTOK</span>
       <button type="button" aria-label="Open BIXTOK" onClick={() => { bixtokMini.setFeed(null); void router.navigate({ to: '/bixtok' }); }}><Maximize2 size={14}/></button>
@@ -40,7 +70,7 @@ export function BixtokMiniHost() {
     bixtokMini.setMini(true);
     if (router.state.location.pathname === '/bixtok' && window.history.length > 1) window.history.back();
   };
-  return <div className={mini ? 'bxl-mini' : 'bxl-full'}>
+  return <div className={mini ? `bxl-mini${drag.tucked ? ' bxl-tucked' : ''}` : 'bxl-full'} {...(mini ? drag.bind : {})}>
     <div className={mini ? 'bxl-mini-inner' : undefined}>
       <Suspense fallback={null}>
         <BixtokLiveRoom live={room.live} me={room.me} cfg={room.cfg} following={room.following} onFollow={room.onFollow} onGift={room.onGift} onClose={() => bixtokMini.close()} onMinimize={minimize}/>
