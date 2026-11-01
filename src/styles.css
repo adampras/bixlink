@@ -4757,3 +4757,13 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxt-live-tab.on small { color: #FFD700; }
 @keyframes bxtLivePulse { 50% { box-shadow: 0 0 0 1.5px #FFD700, 0 0 22px 2px #e11d48; } }
 @media (prefers-reduced-motion: reduce) { .bxt-live-tab .bxt-live-ic { animation: none; } }
+/* Draggable mini + edge tuck; lux LIVE nav icon */
+.bxl-mini { user-select: none; transition: width .2s ease; }
+.bxl-mini.bxl-tucked { aspect-ratio: auto; height: 96px; border-radius: 12px; }
+.bxl-mini.bxl-tucked .bxl-mini-ctl > *:not(.bxl-mini-hit) { display: none; }
+.bxl-mini.bxl-tucked::after { content: '‹›'; position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; color: #FFD700; font-weight: 900; background: rgba(0,0,0,.55); }
+.bxt-live-tab .bxt-live-ic { width: 38px; height: 28px; border-radius: 10px; background: linear-gradient(145deg,#1a1206 0%,#000 55%,#2a1c05 100%); color: #FFD700; box-shadow: inset 0 1px 0 rgba(255,236,160,.45), 0 0 0 1.5px #FFD700, 0 0 16px -3px #FFD700; }
+.bxt-live-tab .bxt-live-ic svg { filter: drop-shadow(0 0 4px rgba(255,215,0,.7)); }
+.bxt-live-tab .bxt-live-ic em { background: linear-gradient(90deg,#ff2d55,#ff5e3a); color: #fff; box-shadow: 0 0 8px rgba(255,45,85,.7); }
+.bxt-live-tab small { color: #FFD700; font-weight: 800; letter-spacing: .04em; }
+@keyframes bxtLivePulse { 50% { box-shadow: inset 0 1px 0 rgba(255,236,160,.45), 0 0 0 1.5px #FFD700, 0 0 24px 1px #FFD700; } }
