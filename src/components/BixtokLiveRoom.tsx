@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle } from 'lucide-react';
+import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { useLiveRtc } from '@/lib/bixtok-rtc';
@@ -232,6 +232,32 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [publishing, facing, camTry]);
   useEffect(() => () => { stream.current?.getTracks().forEach(t => t.stop()); }, []);
+  // Screen sharing (host): swap the outgoing video track for the screen, keep the microphone.
+  const [sharing, setSharing] = useState(false);
+  const camTrack = useRef<MediaStreamTrack | null>(null);
+  const stopShare = () => {
+    const s = stream.current; if (!s) { setSharing(false); return; }
+    const scr = s.getVideoTracks()[0]; const back = camTrack.current;
+    const next = new MediaStream([...(back && back.readyState === 'live' ? [back] : []), ...s.getAudioTracks()]);
+    if (scr && scr !== back) scr.stop();
+    camTrack.current = null; stream.current = next; setLocal(next); setSharing(false);
+  };
+  const toggleShare = async () => {
+    if (sharing) { stopShare(); return; }
+    const md = navigator.mediaDevices as MediaDevices & { getDisplayMedia?: MediaDevices['getDisplayMedia'] };
+    if (!md?.getDisplayMedia) { flash('Screen sharing is not supported on this device — try Chrome on a computer.'); return; }
+    try {
+      const d = await md.getDisplayMedia({ video: { frameRate: 15, width: { ideal: 1920 } }, audio: false });
+      const scr = d.getVideoTracks()[0]; if (!scr) return;
+      if ('contentHint' in scr) scr.contentHint = 'text';
+      const s = stream.current;
+      camTrack.current = s?.getVideoTracks()[0] ?? null;
+      const next = new MediaStream([scr, ...(s?.getAudioTracks() ?? [])]);
+      stream.current = next; setLocal(next); setSharing(true);
+      scr.addEventListener('ended', () => stopShare());
+      flash('Sharing your screen with viewers');
+    } catch { flash('Screen sharing was cancelled'); }
+  };
   useEffect(() => { stream.current?.getAudioTracks().forEach(t => { t.enabled = mic; }); }, [mic, local]);
   useEffect(() => { if (host && cam.current && local) { cam.current.srcObject = local; void cam.current.play().catch(() => {}); } }, [host, local]);
   // Share the host's zoom with viewers (debounced while the slider moves).
@@ -333,7 +359,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   return <div className="bixtok-room" role="dialog" aria-label="LIVE room">
     <div className="bxl-stage" onClick={tap}>
       {host ? <>
-          <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: 'contain', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
+          <video ref={cam} autoPlay muted playsInline className="bixtok-video" style={{ objectFit: 'contain', transform: sharing ? undefined : `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>
           {camErr && <div className="bxl-camerr" role="alert" onClick={e => e.stopPropagation()}>
             <strong>{MEDIA_HELP[camErr].title}</strong>
             <p>{MEDIA_HELP[camErr].body}</p>
@@ -397,6 +423,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     <div className="bxl-tools">
       {publishing && <>
         <button aria-label="Flip camera" onClick={() => setFacing(f => (f === 'user' ? 'environment' : 'user'))}><SwitchCamera size={20}/></button>
+        {host && <button aria-label={sharing ? 'Stop sharing screen' : 'Share screen'} title={sharing ? 'Stop sharing' : 'Share screen'} className={sharing ? 'bxl-share-on' : ''} onClick={() => { void toggleShare(); }}>{sharing ? <MonitorOff size={20}/> : <MonitorUp size={20}/>}</button>}
         {host && <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={ZOOM_MIN} max={ZOOM_MAX} step={0.05} value={zoom} onChange={e => setZoom(clampZoom(+e.target.value))}/></label>}
         <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
       </>}
