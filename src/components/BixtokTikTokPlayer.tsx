@@ -13,7 +13,10 @@ export function BixtokTikTokPlayer({ src, title, muted, className, filter }: {
     const player = frame.current?.contentWindow;
     if (!player) return;
     player.postMessage({ 'x-tiktok-player': true, type: silent ? 'mute' : 'unMute' }, TIKTOK_ORIGIN);
-    if (!silent) player.postMessage({ 'x-tiktok-player': true, type: 'play' }, TIKTOK_ORIGIN);
+    if (!silent) {
+      player.postMessage({ 'x-tiktok-player': true, type: 'setVolume', value: 100 }, TIKTOK_ORIGIN);
+      player.postMessage({ 'x-tiktok-player': true, type: 'play' }, TIKTOK_ORIGIN);
+    }
   }, []);
 
   useEffect(() => {
