@@ -1,3 +1,4 @@
+import type * as React from 'react';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -151,10 +152,15 @@ function RootComponent() {
         <AppSplash />
         <InstallPrompt />
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        <PageTransition><Outlet /></PageTransition>
         <FoxChat />
         <InteractionComfort />
       </I18nProvider>
     </QueryClientProvider>
   );
+}
+
+function PageTransition({ children }: { children: React.ReactNode }) {
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  return <div key={path} className="page-velvet">{children}</div>;
 }

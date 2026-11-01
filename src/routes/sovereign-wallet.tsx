@@ -228,6 +228,7 @@ function SovereignApp() {
     <main className="sw-main pb-28">
       {tab === 'wallet' && <>
         <header className="flex items-center gap-3">
+          <Button type="button" className="sw-round" aria-label="Back" onClick={() => { if (window.history.length > 1 && document.referrer.startsWith(window.location.origin)) window.history.back(); else window.location.assign('/wallet'); }}><ChevronLeft size={20} /></Button>
           <span className="sw-avatar"><img src={foxMark} alt="" width={44} height={44} /></span>
           <div className="min-w-0 flex-1">
             <b className="block truncate font-display text-lg">{ledger ? (bixId ?? 'BIXLINK Account') : addr ? short(addr) : 'BIXLINK Wallet'}</b>
