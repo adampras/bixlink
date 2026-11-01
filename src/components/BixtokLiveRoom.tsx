@@ -77,6 +77,10 @@ export function giftInfo(body: string): { emoji: string; amount: number; currenc
   const m = body.match(/·\s*([\d.]+)\s*(BIXP|BIX)/);
   return { emoji: [...body.trim()][0] ?? '🎁', amount: m ? Number(m[1]) : 0, currency: m?.[2] ?? '' };
 }
+/** A chat line counts as a question for the host Q&A filter when it ends with "?" (gifts never count). */
+export function isQuestion(m: { kind?: string; body: string }): boolean {
+  return m.kind !== 'gift' && /\?\s*$/.test(m.body.trim());
+}
 export function isMegaGift(body: string): boolean {
   const g = giftInfo(body);
   return (g.currency === 'BIX' && g.amount >= 10) || (g.currency === 'BIXP' && g.amount >= 100);
@@ -116,7 +120,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const stream = useRef<MediaStream | null>(null); const [local, setLocal] = useState<MediaStream | null>(null);
   const [entered, setEntered] = useState(host); const [zoom, setZoom] = useState(1);
   const [pinned, setPinned] = useState<string | null>(null); const [pinEdit, setPinEdit] = useState<string | null>(null);
-  const [qaOnly, setQaOnly] = useState(false);
+  const [qaOnly, setQaOnly] = useState(false); const qaCount = msgs.filter(isQuestion).length;
   const [stage, setStage] = useState<Stage[]>([]); const [stagePanel, setStagePanel] = useState(false);
   const [top, setTop] = useState<Top[]>([]); const [modMsg, setModMsg] = useState<Msg | null>(null); const [note, setNote] = useState('');
   const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
