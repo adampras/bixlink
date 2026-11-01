@@ -4683,3 +4683,11 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @keyframes bxl-pulse { 50% { box-shadow: 0 0 0 10px transparent; transform: translateX(-50%) scale(1.04); } }
 .bxl-heart { will-change: transform, opacity; }
 @media (prefers-reduced-motion: reduce) { .bxl-unmute { animation: none; } }
+
+/* BIXTOK center create button — obsidian lux + gold rim */
+.bxt-nav .bxt-plus.bxt-plus-logo{width:3.6rem;height:3.6rem;margin-top:-1.4rem;border-radius:999px;padding:0;background:radial-gradient(circle at 30% 25%,oklch(0.32 0.02 260),oklch(0.12 0.01 260) 70%)!important;border:1.5px solid oklch(0.82 0.13 85);box-shadow:0 0 0 4px color-mix(in oklab,var(--background) 92%,transparent),0 8px 22px oklch(0 0 0/.55),0 0 18px oklch(0.82 0.13 85/.35);animation:bxt-gold-glow 3s ease-in-out infinite}
+.bxt-nav .bxt-plus-logo img{width:2.35rem;height:2.35rem;border-radius:999px;object-fit:contain;filter:drop-shadow(0 2px 4px oklch(0 0 0/.5))}
+.bxt-nav .bxt-plus-mini{right:-2px!important;bottom:-2px!important;width:18px!important;height:18px!important;background:linear-gradient(135deg,oklch(0.88 0.12 90),oklch(0.7 0.14 70))!important;color:oklch(0.15 0.01 260)!important;border:1.5px solid oklch(0.12 0.01 260)}
+@keyframes bxt-gold-glow{50%{box-shadow:0 0 0 4px color-mix(in oklab,var(--background) 92%,transparent),0 8px 22px oklch(0 0 0/.55),0 0 28px oklch(0.82 0.13 85/.55)}}
+@media (prefers-reduced-motion: reduce){.bxt-nav .bxt-plus.bxt-plus-logo{animation:none}}
+.bxl-tools .bxl-share-on{background:oklch(0.82 0.13 85)!important;color:oklch(0.15 0.01 260)!important}
