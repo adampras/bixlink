@@ -1635,6 +1635,7 @@ export type Database = {
           showcase_enabled: boolean
           soundboard: boolean
           stage_max: number
+          tester_code: string | null
           updated_at: string
         }
         Insert: {
@@ -1661,6 +1662,7 @@ export type Database = {
           showcase_enabled?: boolean
           soundboard?: boolean
           stage_max?: number
+          tester_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -1687,6 +1689,7 @@ export type Database = {
           showcase_enabled?: boolean
           soundboard?: boolean
           stage_max?: number
+          tester_code?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -3079,6 +3082,7 @@ export type Database = {
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
       bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
+      bixtok_can_bypass: { Args: never; Returns: boolean }
       bixtok_claim_earnings: { Args: never; Returns: Json }
       bixtok_end_live: { Args: { p_id: string }; Returns: undefined }
       bixtok_is_official: { Args: { p_uid: string }; Returns: boolean }
