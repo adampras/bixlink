@@ -55,6 +55,7 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
         <Toggle on={cfg.showcase_enabled !== false} label="Etalase promo di LIVE" onChange={v => set({ showcase_enabled: v })}/>
         <Toggle on={cfg.backdrops_enabled !== false} label="Mode kamera mati + background LIVE" onChange={v => set({ backdrops_enabled: v })}/>
         <Toggle on={cfg.pk_enabled !== false} label="PK Battle" onChange={v => set({ pk_enabled: v })}/>
+        <Toggle on={cfg.owner2_isolation === true} label="Isolasi jaringan Admin 2 (konten, LIVE & follow terpisah dari Admin 1)" onChange={v => set({ owner2_isolation: v })}/>
         {FEATURES.map(([k, l]) => <Toggle key={k} on={cfg.features[k] !== false} label={l} onChange={v => set({ features: { ...cfg.features, [k]: v } })}/>)}
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
