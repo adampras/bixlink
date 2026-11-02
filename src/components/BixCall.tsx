@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
 import foxLogo from '@/assets/bixlink-logo-gold.webp';
 import { ensureBixPush, pushNotify } from '@/lib/bix-push';
+import { startRingtone, startRingback, playConnected, playEnded } from '@/lib/bix-tones';
 
 type Kind = 'voice' | 'video';
 type Active = { id: string; peerId: string; peerName: string; kind: Kind; role: 'caller' | 'callee'; status: string; whatsapp?: string | null };
