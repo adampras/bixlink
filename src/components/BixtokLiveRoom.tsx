@@ -119,6 +119,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [mega, setMega] = useState<Msg | null>(null);
   const [share, setShare] = useState(false); const [copied, setCopied] = useState(false);
   const [mic, setMic] = useState(true); const [facing, setFacing] = useState<'user' | 'environment'>('user');
+  const [camId, setCamId] = useState<string | null>(null); const [cams, setCams] = useState<{ id: string; label: string }[]>([]);
   const [camErr, setCamErr] = useState<MediaIssue | null>(null); const [camTry, setCamTry] = useState(0);
   const cam = useRef<HTMLVideoElement>(null); const view = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null); const [local, setLocal] = useState<MediaStream | null>(null);
@@ -128,7 +129,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [stage, setStage] = useState<Stage[]>([]); const [stagePanel, setStagePanel] = useState(false);
   const [top, setTop] = useState<Top[]>([]); const [modMsg, setModMsg] = useState<Msg | null>(null); const [note, setNote] = useState('');
   const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
-  const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | 'bg' | 'fx' | null>(null); const [recording, setRecording] = useState(false);
+  const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | 'bg' | 'fx' | 'cam' | null>(null); const [recording, setRecording] = useState(false);
   const [saver, setSaver] = useState<'hd' | 'sd' | 'audio'>('hd');
   const [clean, setClean] = useState(false);
   const [eco, setEco] = useState(false);
