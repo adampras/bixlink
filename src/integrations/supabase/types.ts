@@ -1649,6 +1649,12 @@ export type Database = {
         Row: {
           auto_follow_back: boolean
           backdrops_enabled: boolean
+          challenge_enabled: boolean
+          challenge_ends_at: string | null
+          challenge_prize: string | null
+          challenge_tag: string | null
+          challenge_title: string | null
+          clips_enabled: boolean
           creator_share_pct: number
           enabled: boolean
           features: Json
@@ -1677,6 +1683,12 @@ export type Database = {
         Insert: {
           auto_follow_back?: boolean
           backdrops_enabled?: boolean
+          challenge_enabled?: boolean
+          challenge_ends_at?: string | null
+          challenge_prize?: string | null
+          challenge_tag?: string | null
+          challenge_title?: string | null
+          clips_enabled?: boolean
           creator_share_pct?: number
           enabled?: boolean
           features?: Json
@@ -1705,6 +1717,12 @@ export type Database = {
         Update: {
           auto_follow_back?: boolean
           backdrops_enabled?: boolean
+          challenge_enabled?: boolean
+          challenge_ends_at?: string | null
+          challenge_prize?: string | null
+          challenge_tag?: string | null
+          challenge_title?: string | null
+          clips_enabled?: boolean
           creator_share_pct?: number
           enabled?: boolean
           features?: Json
@@ -3182,6 +3200,10 @@ export type Database = {
           p_overlay: string
           p_path: string
         }
+        Returns: string
+      }
+      bixtok_publish_clip: {
+        Args: { p_live: string; p_path: string }
         Returns: string
       }
       bixtok_publish_links: {
