@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
-import { PhoneCall, Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins } from 'lucide-react';
+import { PhoneCall, Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import { startBixCall, enableBixNotifications } from '@/components/BixCall';
 import { useMember } from '@/lib/useMember';
@@ -149,7 +149,7 @@ function ActionButtons({ peerId, name, tier, canCall, onChat }: { peerId: string
 function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: (id: string, name: string) => void }) {
   const [threads, setThreads] = useState<Thread[] | null>(null);
   useEffect(() => {
-    const load = async () => { void supabase.rpc('bix_chat_sync' as never, {} as never); const { data } = await supabase.rpc('bix_chat_threads' as never); setThreads((data as Thread[] | null) ?? []); };
+    const load = async () => { void supabase.rpc('bix_chat_sync' as never, {} as never); void supabase.rpc('bix_chat_delivered' as never); const { data } = await supabase.rpc('bix_chat_threads' as never); setThreads((data as Thread[] | null) ?? []); };
     void load(); const t = setInterval(() => void load(), 6000); return () => clearInterval(t);
   }, []);
   return <>
@@ -374,6 +374,51 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     if (error) return fail(error.message);
     if (to.id === peer.id) added(data); else { pushNotify('chat', (data as Msg | null)?.id); toastOk(`Diteruskan ke @${to.name}`); }
   };
+  const docRef = useRef<HTMLInputElement>(null);
+  const [payMode, setPayMode] = useState<'send' | 'request'>('send');
+  const sendFile = async (f: File) => {
+    if (f.size > 10 * 1024 * 1024) return fail('File maksimal 10 MB');
+    setBusy(true);
+    const ext = (f.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5) || 'bin';
+    const path = `${me}/${peer.id}/${crypto.randomUUID()}.${ext}`;
+    const up = await supabase.storage.from('bix-chat').upload(path, f, { contentType: f.type || 'application/octet-stream' });
+    if (up.error) { setBusy(false); return fail(up.error.message); }
+    const { data, error } = await supabase.rpc('bix_chat_send_file' as never, { p_to: peer.id, p_path: path, p_name: f.name, p_size: f.size, p_mime: f.type } as never);
+    setBusy(false);
+    if (error) return fail(error.message);
+    added(data);
+  };
+  const request = async () => {
+    const a = Number(amt); if (!(a > 0)) return fail('Masukkan jumlah BIX');
+    setBusy(true);
+    const { data, error } = await supabase.rpc('bix_chat_request' as never, { p_to: peer.id, p_amount: a, p_note: note } as never);
+    setBusy(false);
+    if (error) return fail(error.message);
+    setPayOpen(false); setAmt(''); setNote(''); added(data);
+  };
+  const reqAct = async (m: Msg, a: 'pay' | 'decline' | 'cancel') => {
+    if (a === 'pay' && !window.confirm(`Bayar ${fmtBix(m.meta?.amount)} BIX ke @${name} lewat BIX PAY?`)) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc('bix_chat_request_act' as never, { p_id: m.id, p_action: a } as never);
+    setBusy(false);
+    if (error) return fail(error.message);
+    const st = a === 'pay' ? 'paid' : a === 'decline' ? 'declined' : 'cancelled';
+    setMsgs(l => l.map(x => x.id === m.id ? { ...x, meta: { ...x.meta, status: st } } : x));
+    if (a === 'pay') { try { navigator.vibrate?.(20); } catch { /* optional */ } added(data); }
+  };
+  const react = async (m: Msg, e: string) => {
+    setMenu(null);
+    const { data, error } = await supabase.rpc('bix_chat_react' as never, { p_id: m.id, p_emoji: e } as never);
+    if (error) return fail(error.message);
+    setMsgs(l => l.map(x => x.id === m.id ? { ...x, reactions: (data as Record<string, string> | null) ?? {} } : x));
+  };
+  const pin = async (m: Msg, on: boolean) => {
+    setMenu(null);
+    const { error } = await supabase.rpc('bix_chat_pin' as never, { p_id: m.id, p_pin: on } as never);
+    if (error) return fail(error.message);
+    const now = new Date().toISOString();
+    setMsgs(l => l.map(x => x.id === m.id ? { ...x, pinned_at: on ? now : null } : on ? { ...x, pinned_at: null } : x));
+  };
   const [ok, setOk] = useState('');
   const toastOk = (t: string) => { setOk(t); setTimeout(() => setOk(''), 2500); };
 
@@ -382,6 +427,8 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   const holdStart = (m: Msg) => { if (m.deleted_at) return; press.current = window.setTimeout(() => { try { navigator.vibrate?.(12); } catch { /* optional */ } setMenu(m); }, 420); };
   const holdEnd = () => { window.clearTimeout(press.current); };
   const findMsg = (id?: string | null) => msgs.find(x => x.id === id);
+  const pinned = msgs.find(x => x.pinned_at && !x.deleted_at);
+  const jump = (id: string) => document.getElementById(`msg-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
   return <main className="comm-room mx-auto max-w-xl">
     <header className="comm-room-head">
@@ -399,8 +446,9 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
           onPointerDown={() => holdStart(m)} onPointerUp={holdEnd} onPointerLeave={holdEnd} onContextMenu={e => { e.preventDefault(); if (!m.deleted_at) setMenu(m); }}>
           {m.forwarded && !m.deleted_at && <em className="comm-fwd">↪ Diteruskan</em>}
           {m.reply_to && !m.deleted_at && <span className="comm-quote"><b>{q ? (q.sender_id === me ? 'Anda' : `@${name}`) : 'Balasan'}</b>{q?.deleted_at ? 'Pesan dihapus' : q?.body ?? m.reply_body ?? 'Pesan sebelumnya'}</span>}
-          {m.deleted_at ? <span>🚫 {mine ? 'Anda menghapus pesan ini' : 'Pesan ini telah dihapus'}</span> : m.kind && m.kind !== 'text' ? <ChatMedia m={m}/> : m.body}
-          <small>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && !m.deleted_at && (m.read_at ? ' ✓✓' : ' ✓')}</small>
+          {m.deleted_at ? <span>🚫 {mine ? 'Anda menghapus pesan ini' : 'Pesan ini telah dihapus'}</span> : m.kind && m.kind !== 'text' ? <ChatMedia m={m} me={me} onAct={(x, a) => void reqAct(x, a)}/> : m.body}
+          <small>{m.pinned_at && '📌 '}{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && !m.deleted_at && <span className={`comm-tick${m.read_at ? ' is-read' : ''}`} aria-label={m.read_at ? 'Dibaca' : m.delivered_at ? 'Terkirim' : 'Terkirim ke server'}>{m.read_at || m.delivered_at ? ' ✓✓' : ' ✓'}</span>}</small>
+          {!m.deleted_at && Object.keys(m.reactions ?? {}).length > 0 && <span className="comm-reacts">{Object.entries(Object.values(m.reactions ?? {}).reduce<Record<string, number>>((a, e) => { a[e] = (a[e] ?? 0) + 1; return a; }, {})).map(([e, n]) => <button type="button" key={e} className={m.reactions?.[me] === e ? 'is-mine' : ''} onClick={ev => { ev.stopPropagation(); void react(m, e); }}>{e}{n > 1 && <i>{n}</i>}</button>)}</span>}
           {!m.deleted_at && <button type="button" className="comm-more" aria-label="Opsi pesan" onClick={() => setMenu(m)}>⋯</button>}
         </p>;
       })}
@@ -415,18 +463,21 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       <button type="button" onClick={() => { setReplyTo(menu); setMenu(null); }} disabled={locked}>↩ Balas</button>
       {menu.kind !== 'pay' && <button type="button" onClick={() => { setFwd(menu); setMenu(null); }} disabled={locked}>↪ Teruskan</button>}
       {(!menu.kind || menu.kind === 'text') && <button type="button" onClick={() => { void navigator.clipboard?.writeText(menu.body); setMenu(null); toastOk('Disalin'); }}>⧉ Salin</button>}
+      <button type="button" onClick={() => void pin(menu, !menu.pinned_at)}>📌 {menu.pinned_at ? 'Lepas sematan' : 'Sematkan'}</button>
       <button type="button" onClick={() => void remove(menu, false)}>🗑 Hapus untuk saya</button>
       {menu.sender_id === me && menu.kind !== 'pay' && <button type="button" className="danger" onClick={() => void remove(menu, true)}>🗑 Hapus untuk semua</button>}
       <button type="button" className="ghost" onClick={() => setMenu(null)}>Batal</button>
     </div></div>}
     {fwd && <ForwardSheet me={me} msg={fwd} onPick={to => void forward(fwd, to)} onClose={() => setFwd(null)}/>}
-    {payOpen && <div className="comm-payform"><b>🪙 Kirim BIX ke @{name}</b><input inputMode="decimal" value={amt} onChange={e => setAmt(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="Jumlah BIX" className="comm-input"/><input value={note} onChange={e => setNote(e.target.value)} maxLength={120} placeholder="Catatan (opsional)" className="comm-input"/><div><button type="button" onClick={() => setPayOpen(false)}>Batal</button><button type="button" className="comm-save" onClick={() => void pay()} disabled={busy}>Kirim BIX</button></div><small>Transfer instan lewat BIX PAY dari saldo BIX Wallet Anda.</small></div>}
+    {payOpen && <div className="comm-payform"><div className="comm-paytabs"><button type="button" className={payMode === 'send' ? 'is-on' : ''} onClick={() => setPayMode('send')}>🪙 Kirim BIX</button><button type="button" className={payMode === 'request' ? 'is-on' : ''} onClick={() => setPayMode('request')}>🧾 Minta BIX</button></div><input inputMode="decimal" value={amt} onChange={e => setAmt(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="Jumlah BIX" className="comm-input"/><input value={note} onChange={e => setNote(e.target.value)} maxLength={120} placeholder="Catatan (opsional)" className="comm-input"/><div><button type="button" onClick={() => setPayOpen(false)}>Batal</button><button type="button" className="comm-save" onClick={() => void (payMode === 'send' ? pay() : request())} disabled={busy}>{payMode === 'send' ? 'Kirim BIX' : 'Kirim Tagihan'}</button></div><small>{payMode === 'send' ? 'Transfer instan lewat BIX PAY dari saldo BIX Wallet Anda.' : `@${name} menerima kartu tagihan dan bisa membayar dengan satu ketukan.`}</small></div>}
     {replyTo && <div className="comm-replybar"><span><b>↩ Membalas {replyTo.sender_id === me ? 'diri sendiri' : `@${name}`}</b>{replyTo.body}</span><button type="button" aria-label="Batal balas" onClick={() => setReplyTo(null)}>✕</button></div>}
     {!locked && !recording && !replyTo && <div className="comm-quick">{QUICK.map(q => <button key={q} type="button" onClick={() => onType(text ? `${text} ${q}` : q)}>{q}</button>)}</div>}
     <form className="comm-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
       <button type="button" aria-label="Kirim BIX" className="comm-pay" onClick={() => setPayOpen(v => !v)} disabled={locked}><Coins size={16}/></button>
       <button type="button" aria-label="Kirim foto" className="comm-pay" onClick={() => fileRef.current?.click()} disabled={locked || busy}><ImagePlus size={16}/></button>
+      <button type="button" aria-label="Kirim dokumen" className="comm-pay" onClick={() => docRef.current?.click()} disabled={locked || busy}><Paperclip size={16}/></button>
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void upload(f, 'image', (f.name.split('.').pop() || 'jpg').toLowerCase().slice(0, 5)); }}/>
+      <input ref={docRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendFile(f); }}/>
       {recording ? <span className="comm-rec"><i/>Merekam… ketuk ■ untuk kirim</span> : <input value={text} onChange={e => onType(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked} aria-label="Tulis pesan"/>}
       {text.trim() ? <button type="submit" aria-label="Kirim"><Send size={16}/></button> : <button type="button" aria-label={recording ? 'Stop & kirim' : 'Rekam pesan suara'} className={recording ? 'is-rec' : ''} onClick={() => void toggleRec()} disabled={locked || busy}>{recording ? <Square size={14}/> : <Mic size={16}/>}</button>}
     </form>
