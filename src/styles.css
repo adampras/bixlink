@@ -5498,3 +5498,37 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .comm-paytabs{display:flex;gap:6px}
 .comm-paytabs button{flex:1;padding:7px;border-radius:999px;font-size:12px;border:1px solid rgb(255 215 0 / .25);background:transparent}
 .comm-paytabs button.is-on{background:rgb(255 215 0 / .18);color:#FFD700;border-color:#FFD700}
+
+/* BIX CALL floating compose pad */
+.bxpad-fab{position:fixed;right:16px;bottom:96px;z-index:45;width:48px;height:48px;border-radius:999px;display:grid;place-items:center;color:#FFD700;background:radial-gradient(circle at 30% 25%,#2a1d3d,#0b0b10);border:1px solid rgb(255 215 0 / .5);box-shadow:0 8px 24px rgb(0 0 0 / .5),0 0 18px rgb(168 85 247 / .35)}
+.bxpad-fab i{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:999px;background:#A855F7;box-shadow:0 0 8px #A855F7}
+@media (min-width:1280px){.bxpad-fab{bottom:24px}}
+.bxpad-bg{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;background:rgb(0 0 0 / .55);backdrop-filter:blur(4px)}
+.bxpad{width:100%;max-width:520px;max-height:92dvh;overflow:auto;padding:14px 14px calc(14px + env(safe-area-inset-bottom));border-radius:22px 22px 0 0;background:linear-gradient(160deg,#0d0b14,#07070a);border:1px solid rgb(255 215 0 / .3);border-bottom:0;box-shadow:0 -10px 40px rgb(168 85 247 / .2);display:flex;flex-direction:column;gap:10px;color:#f5f5f5}
+.bxpad header{display:flex;align-items:center;justify-content:space-between}
+.bxpad header b{display:flex;align-items:center;gap:6px;font-size:14px}
+.bxpad header em{font-style:normal;font-size:10px;letter-spacing:.12em;color:#FFD700;padding:2px 7px;border:1px solid rgb(255 215 0 / .4);border-radius:999px}
+.bxpad-to{display:flex;flex-direction:column;gap:6px}
+.bxpad-to>small{font-size:10px;letter-spacing:.1em;opacity:.6;text-transform:uppercase}
+.bxpad-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.bxpad-chip{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:12px;padding:5px 10px;border-radius:999px;background:rgb(255 255 255 / .05);border:1px solid rgb(168 85 247 / .35);align-self:flex-start}
+.bxpad-chip i{width:7px;height:7px;border-radius:999px;background:#555}.bxpad-chip i.is-online{background:#34d399}
+.bxpad-chip.is-on{border-color:#FFD700;color:#FFD700}
+.bxpad-chip button{opacity:.7}
+.bxpad-find{display:flex;align-items:center;gap:6px;padding:4px 4px 4px 10px;border-radius:999px;background:rgb(255 255 255 / .04);border:1px solid rgb(255 255 255 / .12)}
+.bxpad-find input{flex:1;min-width:0;background:transparent;font-size:13px;outline:none}
+.bxpad-find button{font-size:12px;padding:5px 12px;border-radius:999px;background:rgb(168 85 247 / .3)}
+.bxpad-note{font-size:11px;opacity:.6}
+.bxpad-board{position:relative;border-radius:16px;padding:2px;background:linear-gradient(135deg,rgb(255 215 0 / .55),rgb(168 85 247 / .45))}
+.bxpad-board textarea{width:100%;display:block;resize:none;border-radius:14px;padding:12px 12px 22px;background:#0a0a0f;font-size:15px;line-height:1.45;outline:none;color:#fff}
+.bxpad-count{position:absolute;right:12px;bottom:6px;font-size:10px;opacity:.55}
+.bxpad-emoji{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.bxpad-emoji button{font-size:19px;padding:5px 0;border-radius:10px;background:rgb(255 255 255 / .04)}
+.bxpad-emoji button:active{transform:scale(.9);background:rgb(255 215 0 / .15)}
+.bxpad-phrases{display:flex;gap:6px;overflow-x:auto}
+.bxpad-phrases button{white-space:nowrap;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid rgb(255 215 0 / .25);background:rgb(255 215 0 / .06)}
+.bxpad-msg{font-size:12px;text-align:center;color:#FFD700}
+.bxpad footer{display:grid;grid-template-columns:auto auto 1fr;gap:6px}
+.bxpad footer button{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:12.5px;padding:10px 12px;border-radius:999px;border:1px solid rgb(255 255 255 / .15);background:rgb(255 255 255 / .05)}
+.bxpad footer button.is-gold{font-weight:800;color:#111;background:linear-gradient(135deg,#FFD700,#f5b400);border-color:transparent}
+.bxpad footer button:disabled{opacity:.45}
