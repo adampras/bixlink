@@ -1659,6 +1659,7 @@ export type Database = {
           live_backdrops: Json
           live_cta: boolean
           live_enabled: boolean
+          live_host_min_stake_usd: number
           live_max_minutes: number
           live_min_stake_usd: number
           max_links: number
@@ -1686,6 +1687,7 @@ export type Database = {
           live_backdrops?: Json
           live_cta?: boolean
           live_enabled?: boolean
+          live_host_min_stake_usd?: number
           live_max_minutes?: number
           live_min_stake_usd?: number
           max_links?: number
@@ -1713,6 +1715,7 @@ export type Database = {
           live_backdrops?: Json
           live_cta?: boolean
           live_enabled?: boolean
+          live_host_min_stake_usd?: number
           live_max_minutes?: number
           live_min_stake_usd?: number
           max_links?: number
@@ -3121,6 +3124,7 @@ export type Database = {
       bixtok_claim_earnings: { Args: never; Returns: Json }
       bixtok_end_live: { Args: { p_id: string }; Returns: undefined }
       bixtok_is_official: { Args: { p_uid: string }; Returns: boolean }
+      bixtok_is_tier_host: { Args: { p_uid: string }; Returns: boolean }
       bixtok_like: { Args: { p_video: string }; Returns: undefined }
       bixtok_live_backdrop: {
         Args: { p_backdrop: string; p_cam_off: boolean; p_live: string }
