@@ -3223,6 +3223,7 @@ export type Database = {
       bixtok_stage_request: { Args: { p_live: string }; Returns: string }
       bixtok_start_live: { Args: { p_title: string }; Returns: string }
       bixtok_start_official_live: { Args: { p_title: string }; Returns: string }
+      bixtok_vip_hosts: { Args: { p_uids: string[] }; Returns: string[] }
       bixtok_visible_to_me: { Args: { p_other: string }; Returns: boolean }
       bixtrade_admin_virtual_deposit: {
         Args: { p_amount: number; p_strategy?: string }
