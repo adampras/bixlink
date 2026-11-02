@@ -160,6 +160,27 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_chat_presence: {
+        Row: {
+          last_seen: string
+          typing_at: string | null
+          typing_to: string | null
+          user_id: string
+        }
+        Insert: {
+          last_seen?: string
+          typing_at?: string | null
+          typing_to?: string | null
+          user_id: string
+        }
+        Update: {
+          last_seen?: string
+          typing_at?: string | null
+          typing_to?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_clone_accounts: {
         Row: {
           created_at: string
@@ -416,34 +437,49 @@ export type Database = {
         Row: {
           body: string
           created_at: string
+          deleted_at: string | null
+          forwarded: boolean
+          hidden_by: string[]
           id: string
           kind: string
           media_path: string | null
           meta: Json | null
           read_at: string | null
           recipient_id: string
+          reply_body: string | null
+          reply_to: string | null
           sender_id: string
         }
         Insert: {
           body: string
           created_at?: string
+          deleted_at?: string | null
+          forwarded?: boolean
+          hidden_by?: string[]
           id?: string
           kind?: string
           media_path?: string | null
           meta?: Json | null
           read_at?: string | null
           recipient_id: string
+          reply_body?: string | null
+          reply_to?: string | null
           sender_id: string
         }
         Update: {
           body?: string
           created_at?: string
+          deleted_at?: string | null
+          forwarded?: boolean
+          hidden_by?: string[]
           id?: string
           kind?: string
           media_path?: string | null
           meta?: Json | null
           read_at?: string | null
           recipient_id?: string
+          reply_body?: string | null
+          reply_to?: string | null
           sender_id?: string
         }
         Relationships: []
@@ -2929,6 +2965,10 @@ export type Database = {
       }
       bix_can_manage_packages: { Args: never; Returns: boolean }
       bix_challenge_verified_team: { Args: { p_user: string }; Returns: number }
+      bix_chat_delete: {
+        Args: { p_everyone?: boolean; p_id: string }
+        Returns: Json
+      }
       bix_chat_guard: {
         Args: { p_me: string; p_to: string }
         Returns: undefined
@@ -2938,9 +2978,32 @@ export type Database = {
         Returns: Json
       }
       bix_chat_read: { Args: { p_peer: string }; Returns: undefined }
-      bix_chat_send: { Args: { p_body: string; p_to: string }; Returns: Json }
+      bix_chat_reply_snip: {
+        Args: { p_me: string; p_peer: string; p_reply: string }
+        Returns: string
+      }
+      bix_chat_send: {
+        Args: {
+          p_body: string
+          p_forwarded?: boolean
+          p_reply?: string
+          p_to: string
+        }
+        Returns: Json
+      }
       bix_chat_send_media: {
-        Args: { p_body?: string; p_kind: string; p_path: string; p_to: string }
+        Args: {
+          p_body?: string
+          p_forwarded?: boolean
+          p_kind: string
+          p_path: string
+          p_reply?: string
+          p_to: string
+        }
+        Returns: Json
+      }
+      bix_chat_sync: {
+        Args: { p_peer?: string; p_typing?: boolean }
         Returns: Json
       }
       bix_chat_threads: { Args: never; Returns: Json }
