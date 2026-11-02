@@ -8,6 +8,7 @@ import { useReplayRecorder } from '@/lib/bixtok-replay';
 import { MEDIA_HELP, listCameras, openLiveMedia, type MediaIssue } from '@/lib/bixtok-media';
 import { allBackdrops, backdropCss } from '@/lib/bixtok-backdrops';
 import { copyText } from '@/lib/copy-text';
+import { getBixtokStudioIngress } from '@/lib/bixtok-livekit.functions';
 import { FACE_FILTERS, FX_SLIDERS, VOICE_FX, filterVideo, filterVoice, isNeutral, type FxLevels, type VoiceFx } from '@/lib/bixtok-filters';
 
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
@@ -611,6 +612,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
           {cams.map(c => <button key={c.id} className={camId === c.id ? 'on' : ''} onClick={() => { setCamId(c.id); setSheet(null); }}><span>🎥</span>{c.label.slice(0, 28)}</button>)}
         </div>
         <button type="button" className="bxl-btn mt-3 w-full" onClick={() => { void listCameras().then(setCams); }}>Refresh daftar kamera</button>
+        {host && <StudioIngress liveId={live.id}/>}
       </div>}
       {sheet === 'bg' && <div>
         <p className="mt-1 text-xs opacity-70">Hide your camera and show a background — your voice stays live. Saves data too.</p>
@@ -644,4 +646,24 @@ function PkSetup({ players, active, onStart, onEnd }: { players: { id: string; n
     <button type="submit" className="bxl-btn" disabled={!a || !b || a === b}>Start PK</button>
     <p className="text-[10px] text-muted-foreground">Score is display-only from gifts sent during the battle.</p>
   </form>;
+}
+
+function StudioIngress({ liveId }: { liveId: string }) {
+  const [info, setInfo] = useState<{ server: string; streamKey: string } | null>(null);
+  const [err, setErr] = useState<string | null>(null); const [busy, setBusy] = useState(false); const [show, setShow] = useState(false);
+  const load = async (reset = false) => {
+    setBusy(true); setErr(null);
+    try { const r = await getBixtokStudioIngress({ data: { liveId, reset } }); if (r.ok) setInfo({ server: r.server, streamKey: r.streamKey }); else setErr(r.error); }
+    catch { setErr('Gagal membuat Stream Key. Coba lagi.'); } finally { setBusy(false); }
+  };
+  return <div className="mt-4 rounded-xl border border-border/60 p-3">
+    <h4 className="text-sm font-bold">🎬 Studio: OBS / PRISM Live Studio</h4>
+    <p className="mt-1 text-xs opacity-70">Siaran kualitas studio dari aplikasi OBS (PC) atau PRISM (HP). Di aplikasi pilih "Custom RTMP", tempel Server dan Stream Key di bawah, lalu mulai streaming. Matikan kamera di sini agar video tidak dobel.</p>
+    {!info ? <button type="button" className="bxl-btn mt-2 w-full" disabled={busy} onClick={() => { void load(); }}>{busy ? 'Menyiapkan…' : 'Buat Stream Key'}</button> : <div className="mt-2 grid gap-2 text-xs">
+      <div><b>Server</b><div className="flex gap-2"><code className="flex-1 truncate">{info.server}</code><button type="button" aria-label="Copy server" onClick={() => { void copyText(info.server); }}><Copy size={14}/></button></div></div>
+      <div><b>Stream Key</b> <small className="opacity-60">(rahasia, jangan dibagikan)</small><div className="flex gap-2"><code className="flex-1 truncate">{show ? info.streamKey : '••••••••••••'}</code><button type="button" onClick={() => setShow(v => !v)}>{show ? 'Hide' : 'Show'}</button><button type="button" aria-label="Copy key" onClick={() => { void copyText(info.streamKey); }}><Copy size={14}/></button></div></div>
+      <button type="button" className="bxl-btn ghost" disabled={busy} onClick={() => { void load(true); }}>Ganti Stream Key</button>
+    </div>}
+    {err && <p className="mt-2 text-xs text-destructive">{err}</p>}
+  </div>;
 }
