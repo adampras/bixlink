@@ -13,6 +13,7 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { requestStake, unstakeStake } from '@/lib/bixlink.functions';
 import { date, money, number, type Package } from '@/lib/bixlink';
 import { CheckCircle2, ChevronDown, ChevronUp, Clock3, LockKeyhole, ShieldCheck, X, XCircle, Zap } from 'lucide-react';
+import { Odometer, GlowSurface } from '@/components/FuturisticCore';
 import { StakeConfirmation } from '@/components/StakeConfirmation';
 import { revealStakingHistory } from '@/lib/interaction-comfort';
 
@@ -61,11 +62,11 @@ function StakePage() {
         <h1 className="section-title stake-lux-title w-full text-center !text-2xl !tracking-wide sm:!text-5xl">STAKING PACKAGE <span>CRYPTO</span></h1>
         
       </div>
-      <dl aria-label="Staking summary" className="mt-3 mb-6 grid grid-cols-3 divide-x divide-border overflow-hidden rounded-xl border border-border bg-card/70 sm:mb-8">
-        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">BIX supply</dt><dd className="mt-1 font-display text-xs font-bold text-chart-3 sm:text-lg">21M BIX</dd></div>
-        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 sm:text-lg">{money(bal.data ?? 0)}</dd></div>
+      <GlowSurface className="mt-3 mb-6 rounded-xl sm:mb-8"><dl aria-label="Staking summary" className="hud-scan grid grid-cols-3 divide-x divide-border overflow-hidden rounded-xl border border-border bg-card/70 sm:mb-8">
+        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">BIX supply</dt><dd className="mt-1 font-display text-xs font-bold text-chart-3 sm:text-lg"><Odometer value="21M BIX"/></dd></div>
+        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 sm:text-lg"><Odometer value={money(bal.data ?? 0)}/></dd></div>
         <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
-      </dl>
+      </dl></GlowSurface>
       
       {skin.data && <InstitutionalStakeHeader active={activeStakes.length} principal={activeStakes.reduce((n, s) => n + Number(s.amount_usd), 0)} live={liveTotal} perDay={perDay}/>}
       <StakePackageLayouts packages={cfg?.packages ?? []} layout={skin.data ? 'institutional' : cfg?.boosterVisual.stakeLayout} onStake={setChosen}/>

@@ -11,6 +11,7 @@ import { boosterMaximum } from '@/lib/booster-apy';
 import { HeroFlux, HeroPresaleRibbon } from '@/components/GrowthSuite';
 import { CyberBento, CyberCtas, CyberHud } from '@/components/CyberLanding';
 
+import { HoloReactor } from '@/components/FuturisticCore';
 import { ContentImage } from '@/components/ContentImage';
 import { ContentCarousel } from '@/components/ContentCarousel';
 import { ContentLink } from '@/components/ContentLink';
@@ -35,6 +36,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
       {hero3d && <><ContentImage path={content.heroImage} alt="" fallbackSrc={heroObsidian} className="hero-3d-bg"/><div className="hero-3d-veil" aria-hidden/><div className="hero-fox-eyes" aria-hidden><i/><i/></div></>}
       {config?.readiness.heroAnimEnabled !== false && <HeroFlux/>}
       <div className={`landing-hero-content relative mx-auto flex max-w-3xl flex-col items-center justify-center px-5 text-center ${compact ? 'is-compact' : ''}`}>
+        <HoloReactor bixPrice={bixPrice} size="sm"/>
         <h1 className="hero-title mt-3 text-6xl leading-[0.9] md:text-8xl">BIXLINK</h1>
         <p className="hero-tagline mt-4">Sovereign Staking Infrastructure</p>
         <CyberHud bixPrice={bixPrice}/>
