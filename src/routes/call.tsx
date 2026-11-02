@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+const COMM_TABS: string[] = ['chat', 'call', 'community', 'setting'];
 import { useEffect, useRef, useState } from 'react';
 import { PhoneCall, Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import { startBixCall, enableBixNotifications } from '@/components/BixCall';
 import { useMember } from '@/lib/useMember';
+import { CommunityTab, NotifyCard } from '@/components/BixCommExtras';
 import { supabase } from '@/integrations/supabase/client';
 import { BixShell } from '@/components/BixShell';
 import { pushNotify } from '@/lib/bix-push';
@@ -12,8 +14,15 @@ import { playDtmf, getRingVolume, setRingVolume, startRingtone } from '@/lib/bix
 
 export const Route = createFileRoute('/call')({
   head: () => ({ meta: [{ title: 'BIX CALL & CHAT — BIXLINK' }, { name: 'description', content: 'Private chat, voice and video calls between BIXLINK members, unlocked by staking tier.' }, { property: 'og:title', content: 'BIX CALL & CHAT — BIXLINK' }, { property: 'og:description', content: 'Secure member-to-member chat and calls inside BIXLINK.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
+  validateSearch: (s: Record<string, unknown>): CallSearch => ({
+    tab: COMM_TABS.includes(s.tab as CommTab) ? s.tab as CommTab : undefined,
+    chat: typeof s.chat === 'string' ? s.chat : undefined,
+    n: typeof s.n === 'string' ? s.n : undefined,
+  }),
   component: CallPage,
 });
+type CommTab = 'chat' | 'call' | 'community' | 'setting';
+type CallSearch = { tab?: CommTab; chat?: string; n?: string };
 
 type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call: boolean };
 type Row = { id: string; caller_id: string; callee_id: string; kind: string; status: string; created_at: string };
@@ -68,7 +77,7 @@ function CallPage() {
 
 function CallInner() {
   const [me, setMe] = useState('');
-  const [tab, setTab] = useState<'chat' | 'call' | 'privacy'>('chat');
+  const tab: CommTab = Route.useSearch().tab ?? 'chat';
   const [tier, setTier] = useState<Tier | null>(null);
   const [chatWith, setChatWith] = useState<{ id: string; name: string } | null>(null);
 
@@ -78,25 +87,25 @@ function CallInner() {
     const sp = new URLSearchParams(window.location.search); const c = sp.get('chat');
     if (c) setChatWith({ id: c, name: sp.get('n') ?? 'Member' });
   })(); }, []);
+  const first = useRef(true);
+  useEffect(() => { if (first.current) { first.current = false; return; } setChatWith(null); window.scrollTo({ top: 0 }); }, [tab]);
 
   if (chatWith) return <ChatRoom me={me} peer={chatWith} tier={tier} onBack={() => setChatWith(null)}/>;
+  const open = (id: string, name: string) => setChatWith({ id, name });
+  const TITLE: Record<CommTab, string> = { chat: 'CHAT', call: 'PANGGILAN', community: 'KOMUNITAS', setting: 'PENGATURAN' };
 
   return <main className="mx-auto max-w-xl px-4 py-5">
     <header className="comm-head">
       <span className="hub-emblem"><PhoneCall size={20}/></span>
-      <div className="min-w-0 flex-1"><h1 className="hub-title font-display text-lg font-black tracking-widest">BIX CALL & CHAT</h1>
+      <div className="min-w-0 flex-1"><h1 className="hub-title font-display text-lg font-black tracking-widest">BIX CALL · {TITLE[tab]}</h1>
         <p className="comm-status"><i/>QUANTUM ENCRYPTED · LINE READY</p></div>
       {tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}
     </header>
 
-    <nav className="comm-tabs" role="tablist">
-      {([['chat', MessageCircle, 'Chat'], ['call', Phone, 'Panggilan'], ['privacy', ShieldCheck, 'Privasi']] as const).map(([k, I, l]) =>
-        <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'is-on' : ''} onClick={() => setTab(k)}><I size={15}/>{l}</button>)}
-    </nav>
-
-    {tab === 'chat' && <ChatTab me={me} tier={tier} onOpen={(id, name) => setChatWith({ id, name })}/>}
-    {tab === 'call' && <CallTab me={me} tier={tier} onChat={(id, name) => setChatWith({ id, name })}/>}
-    {tab === 'privacy' && <PrivacyTab tier={tier}/>}
+    {tab === 'chat' && <ChatTab me={me} tier={tier} onOpen={open}/>}
+    {tab === 'call' && <CallTab me={me} tier={tier} onChat={open}/>}
+    {tab === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
+    {tab === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/></>}
   </main>;
 }
 
@@ -174,7 +183,6 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
   })(); }, [me]);
   return <>
     <Dialpad me={me} tier={tier} onChat={onChat}/>
-    <TierLadder tier={tier}/>
     <section className="comm-card"><h3 className="comm-h">Riwayat panggilan</h3>
       {hist.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada panggilan.</p> : <ul className="comm-list">{hist.map(h => <li key={h.id} className="comm-row">
         <span className={`comm-dir ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : ''}`}>{h.caller_id === me ? '↗' : '↙'}</span>
