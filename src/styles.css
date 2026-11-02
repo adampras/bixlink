@@ -5500,7 +5500,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .comm-paytabs button.is-on{background:rgb(255 215 0 / .18);color:#FFD700;border-color:#FFD700}
 
 /* BIX CALL floating compose pad */
-.bxpad-fab{position:fixed;right:16px;bottom:96px;z-index:45;width:48px;height:48px;border-radius:999px;display:grid;place-items:center;color:#FFD700;background:radial-gradient(circle at 30% 25%,#2a1d3d,#0b0b10);border:1px solid rgb(255 215 0 / .5);box-shadow:0 8px 24px rgb(0 0 0 / .5),0 0 18px rgb(168 85 247 / .35)}
+.bxpad-fab{position:fixed;right:16px;bottom:160px;z-index:45;width:48px;height:48px;border-radius:999px;display:grid;place-items:center;color:#FFD700;background:radial-gradient(circle at 30% 25%,#2a1d3d,#0b0b10);border:1px solid rgb(255 215 0 / .5);box-shadow:0 8px 24px rgb(0 0 0 / .5),0 0 18px rgb(168 85 247 / .35)}
 .bxpad-fab i{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:999px;background:#A855F7;box-shadow:0 0 8px #A855F7}
 @media (min-width:1280px){.bxpad-fab{bottom:24px}}
 .bxpad-bg{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;background:rgb(0 0 0 / .55);backdrop-filter:blur(4px)}
