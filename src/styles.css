@@ -4970,3 +4970,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @keyframes bxlCoinFall{to{transform:translateY(110vh) rotate(540deg);opacity:.2}}
 .bxl-eco .bxl-coinrain,.bxl-clean .bxl-gifters{display:none}
 @media (prefers-reduced-motion: reduce){.bxl-coinrain{display:none}}
+
+/* Immersive LIVE: single tap hides every overlay, video shows full screen */
+.bxl-clean :is(.bixtok-room-head,header,.bxl-sub,.bxl-react-bar,.bxl-qa-toggle,.bxl-pin,.bixtok-giftbtn,.bxl-view-toggles){opacity:0;pointer-events:none;transition:opacity .25s}
+.bixtok-room :is(header,.bxl-sub,.bxl-react-bar,.bxl-qa-toggle,.bxl-pin,.bixtok-giftbtn,.bxl-view-toggles,.bixtok-chat,.bxl-tools){transition:opacity .25s}

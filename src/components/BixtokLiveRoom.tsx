@@ -390,8 +390,16 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     floatEmoji(e); try { navigator.vibrate?.(8); } catch { /* unsupported */ }
     void chan.current?.send({ type: 'broadcast', event: 'react', payload: { e } });
   };
+  // Immersive: one tap toggles all overlays; a quick second tap (and further rapid taps) sends likes instead.
+  const tapAt = useRef(0); const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tap = (e?: { clientX: number; clientY: number }) => {
     if (audioBlocked) void unlockAudio();
+    const t = Date.now(); const rapid = t - tapAt.current < 300; tapAt.current = t;
+    if (!rapid) { tapTimer.current = setTimeout(() => { tapTimer.current = null; setClean(c => !c); }, 300); return; }
+    if (tapTimer.current) { clearTimeout(tapTimer.current); tapTimer.current = null; }
+    like(e);
+  };
+  const like = (e?: { clientX: number; clientY: number }) => {
     setLikes(l => l + 1); pending.current += 1; sfx.pop();
     try { navigator.vibrate?.(10); } catch { /* unsupported */ }
     if (e && e.clientX) setFloaters(f => [...f.slice(-30), { id: Math.random(), x: 0, px: e.clientX, py: e.clientY, color: COLORS[Math.floor(Math.random() * COLORS.length)]!, drift: Math.random() * 60 - 30 }]);
@@ -576,7 +584,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       {!host && <button className="bxl-act" aria-label={sound ? 'Mute room sounds' : 'Unmute room sounds'} onClick={() => { setSound(s => !s); if (!sound) void unlockAudio(); }}>{sound ? <Volume2 size={18}/> : <VolumeX size={18}/>}</button>}
       <button className="bxl-act" aria-label="Share" onClick={() => setShare(true)}><Share2 size={18}/></button>
       {(!host || (cfg.host_gifts !== false && onStage.length > 0)) && <button className="bixtok-giftbtn" aria-label="Send gift" onClick={() => onGift([...(host ? [] : [{ id: live.host_id, name: live.host_name }]), ...onStage.filter(s => s.user_id !== me).map(s => ({ id: s.user_id, name: s.name }))])}><Gift/></button>}
-      <button className="bxl-act like" aria-label="Like" onClick={tap}><Heart size={18} fill="currentColor"/></button>
+      <button className="bxl-act like" aria-label="Like" onClick={e => { e.stopPropagation(); like(e); }}><Heart size={18} fill="currentColor"/></button>
     </footer>
     {share && <div className="bixtok-sheet-wrap" onClick={() => setShare(false)}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
       <div className="flex items-center justify-between"><h3 className="font-bold">Share this LIVE</h3><button aria-label="Close" onClick={() => setShare(false)}><X size={18}/></button></div>
