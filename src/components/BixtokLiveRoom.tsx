@@ -534,7 +534,8 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     <div className={`bxl-tools${host && !toolsOpen ? ' compact' : ''}`}>
       {host && <button type="button" className="bxl-tools-more" aria-label={toolsOpen ? 'Hide host tools' : 'Show all host tools'} aria-expanded={toolsOpen} onClick={() => setToolsOpen(o => !o)}>{toolsOpen ? <X size={18}/> : <span style={{ fontSize: '1.1rem', fontWeight: 900 }}>⋯</span>}</button>}
       {publishing && <>
-        <button aria-label="Flip camera" onClick={() => setFacing(f => (f === 'user' ? 'environment' : 'user'))}><SwitchCamera size={20}/></button>
+        <button aria-label="Flip camera" onClick={() => { setCamId(null); setFacing(f => (f === 'user' ? 'environment' : 'user')); }}><SwitchCamera size={20}/></button>
+        <button aria-label="Choose camera (external / pro)" className={camId ? 'on' : ''} onClick={() => { void listCameras().then(setCams); setSheet('cam'); }}><Camera size={20}/></button>
         {host && <button aria-label={sharing ? 'Stop sharing screen' : 'Share screen or slides'} title={sharing ? 'Stop sharing' : 'Share screen / slides'} className={sharing ? 'bxl-share-on' : ''} onClick={() => { void toggleShare(); }}>{sharing ? <MonitorOff size={20}/> : <MonitorUp size={20}/>}</button>}
         {host && <input ref={slideInput} type="file" accept="image/*" multiple hidden onChange={e => { void startSlides(e.target.files); e.target.value = ''; }}/>}
         {host && slides.length > 1 && <>
@@ -602,6 +603,14 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         <h4 className="mt-3 text-xs font-bold opacity-80">Voice changer</h4>
         <div className="bxl-board">{VOICE_FX.map(v => <button key={v.id} className={voiceFx === v.id ? 'on' : ''} onClick={() => setVoiceFx(v.id)}><span>{v.id === 'robot' ? '🤖' : v.id === 'deep' ? '🎙️' : v.id === 'echo' ? '🔊' : v.id === 'studio' ? '🎧' : '🗣️'}</span>{v.name}</button>)}</div>
         <button type="button" className="bxl-fx-done" onClick={() => setSheet(null)}><Check size={16}/> Done · close filters</button>
+      </div>}
+      {sheet === 'cam' && <div>
+        <p className="mt-1 text-xs opacity-70">Pilih kamera: kamera HP, webcam USB, capture card HDMI (kamera DSLR/mirrorless), OBS Virtual Camera atau DroidCam/Iriun. Sambungkan perangkatnya dulu, lalu pilih di sini.</p>
+        <div className="bxl-board">
+          <button className={!camId ? 'on' : ''} onClick={() => { setCamId(null); setSheet(null); }}><span>📱</span>Kamera bawaan</button>
+          {cams.map(c => <button key={c.id} className={camId === c.id ? 'on' : ''} onClick={() => { setCamId(c.id); setSheet(null); }}><span>🎥</span>{c.label.slice(0, 28)}</button>)}
+        </div>
+        <button type="button" className="bxl-btn mt-3 w-full" onClick={() => { void listCameras().then(setCams); }}>Refresh daftar kamera</button>
       </div>}
       {sheet === 'bg' && <div>
         <p className="mt-1 text-xs opacity-70">Hide your camera and show a background — your voice stays live. Saves data too.</p>
