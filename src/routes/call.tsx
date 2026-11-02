@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 const COMM_TABS: string[] = ['chat', 'call', 'community', 'setting'];
 import { useEffect, useRef, useState } from 'react';
-import { PhoneCall, Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip } from 'lucide-react';
+import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import { startBixCall } from '@/components/BixCall';
 import { useMember } from '@/lib/useMember';
@@ -122,7 +122,7 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
       {q && <button type="button" className="comm-clear" aria-label="Hapus" onClick={() => { setQ(''); setFound(undefined); }}>✕</button>}
       <button onClick={() => void find()} disabled={busy} aria-label="Cari">{busy ? '…' : bar ? <Search size={15}/> : 'Cari'}</button></div>
     {(!bar || q) && <div className="comm-chips"><span>BIX-ID</span><span>@Username</span><span>No. WA</span>
-      {recent.map(r => <button key={r} onClick={() => void find(r)}>↺ {r}</button>)}</div>
+      {recent.map(r => <button key={r} onClick={() => void find(r)}>↺ {r}</button>)}</div>}
     {found === null && <p className="mt-2 text-xs text-muted-foreground">Member tidak ditemukan. Nomor WA hanya bisa dilacak jika pemiliknya mengaktifkan tombol WhatsApp.</p>}
     {found && <div className="comm-peer"><span className="comm-ava">{found.name.slice(0, 1).toUpperCase()}</span>
       <span className="min-w-0 flex-1"><b className="block truncate">@{found.name}</b>
@@ -154,7 +154,6 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
   }, []);
   return <>
     {tier && !tier.chat && <p className="comm-lock"><Lock size={13}/>{tier.chat_enabled ? `BIX CHAT terbuka mulai staking $${tier.min.chat}.` : 'BIX CHAT sedang ditutup Admin.'}</p>}
-    <FindMember me={me} tier={tier} onChat={onOpen}/>
     <section className="comm-card"><h3 className="comm-h">Percakapan</h3>
       {threads === null ? <p className="text-xs text-muted-foreground">Memuat…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada chat. Cari member di atas untuk mulai mengobrol.</p> :
         <ul className="comm-list">{threads.map(t => <li key={t.peer}><button onClick={() => onOpen(t.peer, t.name)}><span className={`comm-ava${t.online ? ' is-online' : ''}`}>{t.name.slice(0, 1).toUpperCase()}</span>
@@ -337,6 +336,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     } catch { fail('Izin mikrofon ditolak'); }
   };
   const [payOpen, setPayOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [amt, setAmt] = useState('');
   const [note, setNote] = useState('');
   const pay = async () => {
@@ -474,9 +474,8 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     {replyTo && <div className="comm-replybar"><span><b>↩ Membalas {replyTo.sender_id === me ? 'diri sendiri' : `@${name}`}</b>{replyTo.body}</span><button type="button" aria-label="Batal balas" onClick={() => setReplyTo(null)}>✕</button></div>}
     {!locked && !recording && !replyTo && <div className="comm-quick">{QUICK.map(q => <button key={q} type="button" onClick={() => onType(text ? `${text} ${q}` : q)}>{q}</button>)}</div>}
     <form className="comm-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
-      <button type="button" aria-label="Kirim BIX" className="comm-pay" onClick={() => setPayOpen(v => !v)} disabled={locked}><Coins size={16}/></button>
-      <button type="button" aria-label="Kirim foto" className="comm-pay" onClick={() => fileRef.current?.click()} disabled={locked || busy}><ImagePlus size={16}/></button>
-      <button type="button" aria-label="Kirim dokumen" className="comm-pay" onClick={() => docRef.current?.click()} disabled={locked || busy}><Paperclip size={16}/></button>
+      <span className="bc-plus-wrap"><button type="button" aria-label="Lampiran" className="bc-plus" onClick={() => setMenuOpen(v => !v)} disabled={locked}>+</button>
+        {menuOpen && <span className="bc-menu" role="menu"><button type="button" onClick={() => { setMenuOpen(false); setPayOpen(true); }}><Coins size={15}/>BIX PAY</button><button type="button" disabled={busy} onClick={() => { setMenuOpen(false); fileRef.current?.click(); }}><ImagePlus size={15}/>Foto</button><button type="button" disabled={busy} onClick={() => { setMenuOpen(false); docRef.current?.click(); }}><Paperclip size={15}/>Dokumen</button></span>}</span>
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void upload(f, 'image', (f.name.split('.').pop() || 'jpg').toLowerCase().slice(0, 5)); }}/>
       <input ref={docRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendFile(f); }}/>
       {recording ? <span className="comm-rec"><i/>Merekam… ketuk ■ untuk kirim</span> : <input value={text} onChange={e => onType(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked} aria-label="Tulis pesan"/>}
