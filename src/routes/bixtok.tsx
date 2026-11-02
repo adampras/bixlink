@@ -1,4 +1,5 @@
 import bixtokLogo from '@/assets/bixtok-logo.png';
+import { useVipHosts, VipBadge } from '@/lib/bixtok-vip';
 import { Volume2, VolumeX, Home, ShoppingBag, MessageSquare, User, Menu, Wallet, Clock, QrCode, Sparkles, Flame, Settings, ChevronRight, Bell, Zap, Bot, Grid3x3, Bookmark, Repeat2, Eye, ShieldCheck, Coins, Megaphone, BadgeDollarSign, Minimize2 } from 'lucide-react';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -171,6 +172,7 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
   const qc = useQueryClient();
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [resume] = useState(() => bixtokMini.peekLastId());
+  const vip = useVipHosts(videos.map(x => x.creator_id));
   const [railOpen, setRailOpen] = useState(true); const saved = useSaved();
   const [comments, setComments] = useState<Video | null>(null);
   const [share, setShare] = useState<Video | null>(null);
@@ -194,7 +196,7 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
     <Media v={v} muted={muted}/>
     {tapRef.current.id === v.id && bursts.map(b => <Heart key={b.k} className="bxt-dbl-heart" style={{ left: b.x, top: b.y }} fill="currentColor" aria-hidden/>)}
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
-    <div className="bixtok-meta"><button type="button" className="bxt-name" onClick={() => setPeek(v)}><b>@{v.creator_name}</b></button><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
+    <div className="bixtok-meta"><button type="button" className="bxt-name" onClick={() => setPeek(v)}><b>@{v.creator_name}</b>{v.creator_id && vip.has(v.creator_id) && <VipBadge small/>}</button><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
     <div className={`bxt-vinyl${muted ? ' still' : ''}`} aria-hidden><span>{v.creator_name.slice(0, 1).toUpperCase()}</span>{!muted && <><i>♪</i><i>♫</i></>}</div>
     <aside className={`bixtok-rail bxt-rail-shield${railOpen ? '' : ' closed'}`}>
       {railOpen && <>
@@ -213,7 +215,7 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
   {share && <ShareSheet video={share} code={ref.data ?? null} onClose={() => setShare(null)} onNote={onNote}/>}
   {peek && <div className="bxt-cmt-wrap" onClick={() => setPeek(null)}><div className="bxt-cmt bxt-peek" role="dialog" aria-label="Creator" onClick={e => e.stopPropagation()}>
     <header><b>Creator</b><button aria-label="Close" onClick={() => setPeek(null)}><X size={18}/></button></header>
-    <div className="bxt-peek-body"><span className={`bxt-peek-av${peek.creator_id && liveHosts.has(peek.creator_id) ? ' live' : ''}`}>{peek.creator_name.slice(0, 1).toUpperCase()}</span><h3>@{peek.creator_name}</h3>
+    <div className="bxt-peek-body"><span className={`bxt-peek-av${peek.creator_id && liveHosts.has(peek.creator_id) ? ' live' : ''}`}>{peek.creator_name.slice(0, 1).toUpperCase()}</span><h3>@{peek.creator_name}</h3>{peek.creator_id && vip.has(peek.creator_id) && <VipBadge/>}
       <p>{videos.filter(x => x.creator_id === peek.creator_id).length} posts · {videos.filter(x => x.creator_id === peek.creator_id).reduce((a, x) => a + Number(x.likes || 0), 0)} likes</p>
       {peek.creator_id && peek.creator_id !== me && <div className="bxt-peek-act">
         {liveHosts.has(peek.creator_id) && <button className="bixtok-cta" onClick={() => { const l = liveHosts.get(peek.creator_id!)!; setPeek(null); onEnterLive?.(l); }}>🔴 Watch LIVE</button>}
@@ -362,7 +364,7 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
         : <>Community LIVE from ${Number(data.cfg.live_min_stake_usd).toFixed(0)} · VIP HOST badge from ${hostMin.toFixed(0)} staking{data.stake > 0 ? ` (you: $${data.stake.toFixed(0)})` : ''}</>}</p>
     </div>
     <h3 className="mt-6 text-xs font-bold tracking-widest text-muted-foreground">LIVE NOW · {shown.length}</h3>
-    <div className="bixtok-live-grid">{shown.map(l => <div key={l.id} className="relative"><button className={`w-full ${l.kind === 'official' ? 'bxt-official' : ''}`} onClick={() => onEnter(l)}><span className="bixtok-badge">{l.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span><b>{l.title}</b><small>@{l.host_name}</small></button>
+    <div className="bixtok-live-grid">{shown.map(l => <div key={l.id} className="relative"><button className={`w-full ${l.kind === 'official' ? 'bxt-official' : ''}`} onClick={() => onEnter(l)}><span className="bixtok-badge">{l.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span><b>{l.title}</b><small>@{l.host_name}</small>{vipL.has(l.host_id) && <VipBadge small/>}</button>
       <button type="button" aria-label={l.host_id === data.uid || data.bypass ? 'End this LIVE' : 'Hide this LIVE'} className="absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full border border-border bg-background/80 text-foreground" onClick={async () => {
         if (l.host_id === data.uid || data.bypass) { if (!window.confirm('End this LIVE and remove it from the list?')) return; const { error } = await supabase.rpc('bixtok_end_live', { p_id: l.id }); if (error) return onNote(error.message); onNote('LIVE ended'); await qc.invalidateQueries({ queryKey: ['bixtok'] }); }
         else setHidden(h => [...h, l.id]);

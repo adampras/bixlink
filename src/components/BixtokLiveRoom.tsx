@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useVipHosts, VipBadge } from '@/lib/bixtok-vip';
 import { useQueryClient } from '@tanstack/react-query';
 import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff, UserRoundPlus, VideoOff, Image as ImageIcon, Sparkles, Minimize2 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
@@ -124,6 +125,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [camErr, setCamErr] = useState<MediaIssue | null>(null); const [camTry, setCamTry] = useState(0);
   const cam = useRef<HTMLVideoElement>(null); const view = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null); const [local, setLocal] = useState<MediaStream | null>(null);
+  const vipHost = useVipHosts([live.host_id]).has(live.host_id);
   const [entered, setEntered] = useState(host); const [zoom, setZoom] = useState(1);
   const [pinned, setPinned] = useState<string | null>(null); const [pinEdit, setPinEdit] = useState<string | null>(null);
   const [qaOnly, setQaOnly] = useState(false); const qaCount = msgs.filter(isQuestion).length;
@@ -495,7 +497,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     })()}
     <header className="bixtok-room-top">
       <div className="bxl-host"><span className="bxl-avatar">{live.host_name.slice(0, 1).toUpperCase()}</span>
-        <div className="min-w-0"><b className="block truncate text-xs">@{live.host_name}</b><small className="block truncate">{live.title}</small></div>
+        <div className="min-w-0"><b className="block truncate text-xs">@{live.host_name}</b>{vipHost && <VipBadge small/>}<small className="block truncate">{live.title}</small></div>
         {!host && <button className={`bxl-follow ${following ? 'on' : ''}`} aria-label={following ? 'Following' : 'Follow'} onClick={onFollow}>{following ? <Check size={14}/> : <UserPlus size={14}/>}</button>}
       </div>
       <span className="bxl-chip"><Eye size={13}/>{viewers}</span>
