@@ -5005,3 +5005,13 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxl-clip-btn small{font-size:.45rem;font-weight:900;margin-top:-.35rem}
 .bxl-clip-btn.on{background:oklch(0.55 0.22 25);animation:bxt-live-pulse 1s infinite}
 .bxl-clean .bxl-clip-btn{display:none}
+
+/* Mini player: double-tap seek hint + live sound equalizer */
+.bxl-mini-seek{position:absolute;top:50%;z-index:4;transform:translateY(-50%);padding:.3rem .55rem;border-radius:999px;font-size:.7rem;font-weight:900;color:oklch(0.98 0 0);background:oklch(0 0 0 / .55);pointer-events:none;animation:bxlSeek .65s ease forwards}
+.bxl-mini-seek.l{left:.5rem}.bxl-mini-seek.r{right:.5rem}
+@keyframes bxlSeek{0%{opacity:0;transform:translateY(-50%) scale(.8)}25%{opacity:1;transform:translateY(-50%) scale(1)}100%{opacity:0}}
+.bxl-mini-eq{position:absolute;top:.45rem;right:.45rem;z-index:4;display:flex;align-items:flex-end;gap:2px;height:14px;padding:3px 5px;border-radius:999px;background:oklch(0 0 0 / .5);pointer-events:none}
+.bxl-mini-eq i{width:3px;height:100%;border-radius:2px;background:#FFD700;transform-origin:bottom;animation:bxlEq .9s ease-in-out infinite}
+.bxl-mini-eq i:nth-child(2){animation-delay:-.3s;background:#A855F7}.bxl-mini-eq i:nth-child(3){animation-delay:-.6s}.bxl-mini-eq i:nth-child(4){animation-delay:-.15s;background:#A855F7}
+@keyframes bxlEq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+@media (prefers-reduced-motion: reduce){.bxl-mini-eq i{animation:none;transform:scaleY(.7)}}
