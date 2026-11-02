@@ -127,6 +127,39 @@ export type Database = {
           },
         ]
       }
+      bix_calls: {
+        Row: {
+          answered_at: string | null
+          callee_id: string
+          caller_id: string
+          created_at: string
+          ended_at: string | null
+          id: string
+          kind: string
+          status: string
+        }
+        Insert: {
+          answered_at?: string | null
+          callee_id: string
+          caller_id: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          kind?: string
+          status?: string
+        }
+        Update: {
+          answered_at?: string | null
+          callee_id?: string
+          caller_id?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          kind?: string
+          status?: string
+        }
+        Relationships: []
+      }
       bix_clone_accounts: {
         Row: {
           created_at: string
@@ -2477,25 +2510,31 @@ export type Database = {
       }
       profiles: {
         Row: {
+          call_permission: string
           created_at: string
           full_name: string
           user_id: string
           username: string
           whatsapp: string | null
+          whatsapp_public: boolean
         }
         Insert: {
+          call_permission?: string
           created_at?: string
           full_name: string
           user_id: string
           username: string
           whatsapp?: string | null
+          whatsapp_public?: boolean
         }
         Update: {
+          call_permission?: string
           created_at?: string
           full_name?: string
           user_id?: string
           username?: string
           whatsapp?: string | null
+          whatsapp_public?: boolean
         }
         Relationships: []
       }
@@ -2794,6 +2833,25 @@ export type Database = {
         Returns: undefined
       }
       bix_buyback_source: { Args: { p_user: string }; Returns: Json }
+      bix_call_allowed: {
+        Args: { p_callee: string; p_caller: string }
+        Returns: boolean
+      }
+      bix_call_find: { Args: { p_query: string }; Returns: Json }
+      bix_call_peer: { Args: { p_user: string }; Returns: Json }
+      bix_call_set: {
+        Args: { p_id: string; p_status: string }
+        Returns: string
+      }
+      bix_call_settings: { Args: never; Returns: Json }
+      bix_call_settings_save: {
+        Args: { p_permission: string; p_public: boolean; p_whatsapp: string }
+        Returns: undefined
+      }
+      bix_call_start: {
+        Args: { p_callee: string; p_kind: string }
+        Returns: string
+      }
       bix_can_manage_packages: { Args: never; Returns: boolean }
       bix_challenge_verified_team: { Args: { p_user: string }; Returns: number }
       bix_claim_conditional_leader: {
