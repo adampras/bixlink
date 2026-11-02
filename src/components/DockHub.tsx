@@ -1,10 +1,10 @@
 import { useEffect, useState, type UIEvent } from 'react';
 import { Link } from '@tanstack/react-router';
-import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, UserRound, Bot, Bike, WalletCards, type LucideIcon } from 'lucide-react';
+import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, UserRound, Bot, Bike, WalletCards, PhoneCall, type LucideIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { HUB_GROUPS, HUB_ITEMS, hubVisible } from '@/lib/dock-hub';
 
-const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: Bike, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards };
+const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: Bike, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards, call: PhoneCall };
 /** Category look: swipe rows for long groups, fixed grids for short ones. */
 const GROUP_STYLE: Record<string, { tone: string; swipe: boolean }> = {
   'Trading & Finance': { tone: 'gold', swipe: true },
@@ -13,7 +13,7 @@ const GROUP_STYLE: Record<string, { tone: string; swipe: boolean }> = {
   'Account': { tone: 'silver', swipe: false },
 };
 /** Small decorative labels only; they never imply live status or rewards. */
-const BADGES: Record<string, string> = { bixtok: 'NEW', bixtrade: 'PRO', presale: 'HOT' };
+const BADGES: Record<string, string> = { bixtok: 'NEW', bixtrade: 'PRO', presale: 'HOT', call: 'NEW' };
 const RECENT_KEY = 'bix-hub-recent';
 
 function SwipeRow({ children, count }: { children: React.ReactNode; count: number }) {
