@@ -153,7 +153,7 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
   const roomRef = useRef<import('livekit-client').Room | null>(null);
   const streamRef = useRef(stream); streamRef.current = stream;
   const published = useRef(new Map<string, import('livekit-client').LocalTrackPublication>());
-  const audioBox = useRef<HTMLDivElement | null>(null);
+  const audioBox = useRef<HTMLDivElement | null>(null); const studioRef = useRef(false);
 
   const publish = async () => {
     const room = roomRef.current; const s = streamRef.current; if (!room || !publisher || !s) return;
@@ -187,6 +187,11 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
             if (vids.length) out.push({ id: p.identity, stream: new MediaStream(vids) });
             p.trackPublications.forEach(pub => { if (pub.track && pub.kind === lk.Track.Kind.Audio) heard = true; });
           });
+          // Studio (OBS/PRISM) feed replaces the host phone: hide the phone video and silence its mic so nothing doubles.
+          const studio = out.some(f => f.id === `obs-${hostId}`);
+          studioRef.current = studio;
+          if (studio) { const i = out.findIndex(f => f.id === hostId); if (i >= 0) out.splice(i, 1); }
+          box.querySelectorAll('audio').forEach(a => { a.muted = !soundOn.current || (studio && a.dataset['pid'] === hostId); });
           const isHost = (id: string) => id === hostId || id === `obs-${hostId}`;
           const rank = (id: string) => (id === `obs-${hostId}` ? 0 : isHost(id) ? 1 : 2); // studio feed shows first
           out.sort((a, b) => rank(a.id) - rank(b.id));
@@ -194,8 +199,8 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
           if (!host) setState(out.length || heard ? 'live' : 'waiting');
           setVoiceOnly(!out.length && heard);
         };
-        room.on(lk.RoomEvent.TrackSubscribed, (track, pub) => {
-          if (track.kind === lk.Track.Kind.Audio) { const el = track.attach(); el.setAttribute('playsinline', ''); el.muted = !soundOn.current; box.appendChild(el); if (room!.canPlaybackAudio) void el.play().catch(() => setAudioBlocked(true)); }
+        room.on(lk.RoomEvent.TrackSubscribed, (track, pub, part) => {
+          if (track.kind === lk.Track.Kind.Audio) { const el = track.attach(); el.setAttribute('playsinline', ''); el.dataset['pid'] = part.identity; el.muted = !soundOn.current; box.appendChild(el); if (room!.canPlaybackAudio) void el.play().catch(() => setAudioBlocked(true)); }
           else pub.setVideoQuality(saverRef.current ? lk.VideoQuality.LOW : lk.VideoQuality.HIGH); // data saver picks the light layer
           rebuild();
         }).on(lk.RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach(el => el.remove()); rebuild(); })
@@ -224,10 +229,10 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
   /** Must run inside a tap: unlocks LiveKit audio + every attached <audio>. */
   const unlockAudio = async () => {
     await roomRef.current?.startAudio().catch(() => {});
-    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; void a.play().catch(() => {}); });
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = studioRef.current && a.dataset['pid'] === hostId; void a.play().catch(() => {}); });
     if (roomRef.current) setAudioBlocked(!roomRef.current.canPlaybackAudio);
   };
-  const setVolume = (on: boolean) => { soundOn.current = on; audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = !on; }); };
+  const setVolume = (on: boolean) => { soundOn.current = on; audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = !on || (studioRef.current && a.dataset['pid'] === hostId); }); };
 
   const p2p = useP2pRtc({ liveId, me, host, stream, enabled: mode === 'p2p' });
   useEffect(() => {
