@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
-import { PhoneCall, Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown } from 'lucide-react';
+import { PhoneCall, Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import { startBixCall, enableBixNotifications } from '@/components/BixCall';
 import { useMember } from '@/lib/useMember';
@@ -17,7 +17,16 @@ type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call:
 type Row = { id: string; caller_id: string; callee_id: string; kind: string; status: string; created_at: string };
 type Tier = { stake: number; chat: boolean; voice: boolean; video: boolean; vip: boolean; tier: string; chat_enabled: boolean; min: { chat: number; voice: number; video: number; vip: number } };
 type Thread = { peer: string; name: string; body: string; at: string; mine: boolean; unread: number };
-type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null };
+type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null; kind?: string; media_path?: string | null; meta?: { amount?: number; note?: string | null } | null };
+const urlCache = new Map<string, string>();
+function ChatMedia({ m }: { m: Msg }) {
+  const [url, setUrl] = useState(m.media_path ? urlCache.get(m.media_path) ?? '' : '');
+  useEffect(() => { const p = m.media_path; if (!p || url) return; void supabase.storage.from('bix-chat').createSignedUrl(p, 3600).then(({ data }) => { if (data?.signedUrl) { urlCache.set(p, data.signedUrl); setUrl(data.signedUrl); } }); }, [m.media_path, url]);
+  if (m.kind === 'pay') return <span className="comm-paycard"><b>🪙 {Number(m.meta?.amount ?? 0).toLocaleString('en-US', { maximumFractionDigits: 4 })} BIX</b><small>BIX PAY · terkirim{m.meta?.note ? ` · ${m.meta.note}` : ''}</small></span>;
+  if (!url) return <span className="comm-media-wait">Memuat…</span>;
+  if (m.kind === 'image') return <a href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Foto chat" className="comm-img" loading="lazy"/></a>;
+  return <audio src={url} controls preload="none" className="comm-audio"/>;
+}
 const PERMS = [['all', 'Semua member'], ['friends', 'Saling follow'], ['network', 'Tim jaringan'], ['none', 'Tidak menerima']] as const;
 const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLER · Suara', video: 'PRO · Video HD', vip: '👑 VIP CALLER' };
 
@@ -197,7 +206,10 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   const [err, setErr] = useState('');
   const [canCall, setCanCall] = useState(false);
   const [name, setName] = useState(peer.name);
+  const [busy, setBusy] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const end = useRef<HTMLDivElement>(null);
+  const locked = !!tier && !tier.chat;
 
   useEffect(() => {
     void supabase.rpc('bix_call_peer' as never, { p_user: peer.id } as never).then(({ data }) => { const p = data as Peer | null; if (p) { setCanCall(p.can_call); setName(p.name); } });
@@ -218,6 +230,43 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     if (error) { setErr(error.message); setText(b); setTimeout(() => setErr(''), 4000); return; }
     setMsgs(m => [...m, data as unknown as Msg]);
   };
+  const fail = (e: string) => { setErr(e); setTimeout(() => setErr(''), 4000); };
+  const upload = async (blob: Blob, kind: 'image' | 'voice', ext: string) => {
+    if (blob.size > 10 * 1024 * 1024) return fail('File maksimal 10 MB');
+    setBusy(true);
+    const path = `${me}/${peer.id}/${crypto.randomUUID()}.${ext}`;
+    const up = await supabase.storage.from('bix-chat').upload(path, blob, { contentType: blob.type || undefined });
+    if (up.error) { setBusy(false); return fail(up.error.message); }
+    const { data, error } = await supabase.rpc('bix_chat_send_media' as never, { p_to: peer.id, p_kind: kind, p_path: path, p_body: '' } as never);
+    setBusy(false);
+    if (error) return fail(error.message);
+    setMsgs(m => [...m, data as unknown as Msg]);
+  };
+  const rec = useRef<MediaRecorder | null>(null);
+  const [recording, setRecording] = useState(false);
+  const toggleRec = async () => {
+    if (rec.current) { rec.current.stop(); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      const r = new MediaRecorder(stream); const chunks: Blob[] = []; const t0 = Date.now();
+      r.ondataavailable = e => chunks.push(e.data);
+      r.onstop = () => { stream.getTracks().forEach(t => t.stop()); rec.current = null; setRecording(false);
+        if (Date.now() - t0 < 700) return; const type = r.mimeType || 'audio/webm'; void upload(new Blob(chunks, { type }), 'voice', type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm'); };
+      r.start(); rec.current = r; setRecording(true); setTimeout(() => { if (rec.current === r) r.stop(); }, 120000);
+    } catch { fail('Izin mikrofon ditolak'); }
+  };
+  const [payOpen, setPayOpen] = useState(false);
+  const [amt, setAmt] = useState('');
+  const [note, setNote] = useState('');
+  const pay = async () => {
+    const a = Number(amt); if (!(a > 0)) return fail('Masukkan jumlah BIX');
+    setBusy(true);
+    const { data, error } = await supabase.rpc('bix_chat_pay' as never, { p_to: peer.id, p_amount: a, p_note: note } as never);
+    setBusy(false);
+    if (error) return fail(error.message);
+    setPayOpen(false); setAmt(''); setNote(''); try { navigator.vibrate?.(20); } catch { /* optional */ }
+    setMsgs(m => [...m, data as unknown as Msg]);
+  };
 
   return <main className="comm-room mx-auto max-w-xl">
     <header className="comm-room-head">
@@ -228,14 +277,18 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     </header>
     <div className="comm-msgs">
       {msgs.length === 0 && <p className="text-center text-xs text-muted-foreground">Mulai percakapan dengan @{name}</p>}
-      {msgs.map(m => <p key={m.id} className={m.sender_id === me ? 'is-me' : ''}>{m.body}<small>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{m.sender_id === me && (m.read_at ? ' ✓✓' : ' ✓')}</small></p>)}
+      {msgs.map(m => <p key={m.id} className={`${m.sender_id === me ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}`}>{m.kind && m.kind !== 'text' ? <ChatMedia m={m}/> : m.body}<small>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{m.sender_id === me && (m.read_at ? ' ✓✓' : ' ✓')}</small></p>)}
       <div ref={end}/>
     </div>
     {err && <p className="comm-err">{err}</p>}
+    {busy && <p className="comm-busy">Mengirim…</p>}
+    {payOpen && <div className="comm-payform"><b>🪙 Kirim BIX ke @{name}</b><input inputMode="decimal" value={amt} onChange={e => setAmt(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="Jumlah BIX" className="comm-input"/><input value={note} onChange={e => setNote(e.target.value)} maxLength={120} placeholder="Catatan (opsional)" className="comm-input"/><div><button type="button" onClick={() => setPayOpen(false)}>Batal</button><button type="button" className="comm-save" onClick={() => void pay()} disabled={busy}>Kirim BIX</button></div><small>Transfer instan lewat BIX PAY dari saldo BIX Wallet Anda.</small></div>}
     <form className="comm-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
-      <Link to="/pay" aria-label="Kirim BIX PAY" className="comm-pay">🪙</Link>
-      <input value={text} onChange={e => setText(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={!!tier && !tier.chat}/>
-      <button type="submit" aria-label="Kirim" disabled={!text.trim()}><Send size={16}/></button>
+      <button type="button" aria-label="Kirim BIX" className="comm-pay" onClick={() => setPayOpen(v => !v)} disabled={locked}><Coins size={16}/></button>
+      <button type="button" aria-label="Kirim foto" className="comm-pay" onClick={() => fileRef.current?.click()} disabled={locked || busy}><ImagePlus size={16}/></button>
+      <input ref={fileRef} type="file" accept="image/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void upload(f, 'image', (f.name.split('.').pop() || 'jpg').toLowerCase().slice(0, 5)); }}/>
+      {recording ? <span className="comm-rec"><i/>Merekam… ketuk ■ untuk kirim</span> : <input value={text} onChange={e => setText(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked}/>}
+      {text.trim() ? <button type="submit" aria-label="Kirim"><Send size={16}/></button> : <button type="button" aria-label={recording ? 'Stop & kirim' : 'Rekam pesan suara'} className={recording ? 'is-rec' : ''} onClick={() => void toggleRec()} disabled={locked || busy}>{recording ? <Square size={14}/> : <Mic size={16}/>}</button>}
     </form>
   </main>;
 }

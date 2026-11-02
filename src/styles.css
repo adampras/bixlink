@@ -5387,3 +5387,15 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bixcall-back:active{transform:scale(.94)}
 .bixcall-notify{display:block;margin:0 auto 12px;padding:8px 14px;border-radius:999px;font-size:11px;font-weight:700;color:#FFD700;background:rgba(8,6,14,.7);border:1px solid rgba(255,215,0,.35)}
 .site-header[hidden],footer[hidden]{display:none!important}
+.comm-msgs p.is-media{padding:6px}
+.comm-img{display:block;max-width:220px;max-height:280px;border-radius:12px;object-fit:cover}
+.comm-audio{max-width:230px;height:36px}
+.comm-media-wait{font-size:11px;opacity:.7}
+.comm-paycard{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,color-mix(in oklab,#FFD700 22%,transparent),color-mix(in oklab,#A855F7 18%,transparent));border:1px solid color-mix(in oklab,#FFD700 50%,transparent)}
+.comm-paycard b{color:#FFD700;font-size:15px}.comm-paycard small{font-size:10px;opacity:.8}
+.comm-rec{flex:1;display:flex;align-items:center;gap:8px;font-size:12px;color:#f87171}
+.comm-rec i{width:9px;height:9px;border-radius:50%;background:#ef4444;animation:pulse 1s infinite}
+.comm-compose button.is-rec{background:#ef4444!important;color:#fff}
+.comm-busy{text-align:center;font-size:11px;opacity:.7}
+.comm-payform{margin:0 12px 8px;padding:12px;border-radius:16px;display:grid;gap:8px;background:color-mix(in oklab,var(--card) 90%,transparent);border:1px solid color-mix(in oklab,#FFD700 40%,transparent)}
+.comm-payform>div{display:flex;gap:8px;justify-content:flex-end}.comm-payform small{font-size:10px;opacity:.7}
