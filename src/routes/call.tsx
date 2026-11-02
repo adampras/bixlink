@@ -14,11 +14,13 @@ import { playDtmf, getRingVolume, setRingVolume, startRingtone } from '@/lib/bix
 
 export const Route = createFileRoute('/call')({
   head: () => ({ meta: [{ title: 'BIX CALL & CHAT — BIXLINK' }, { name: 'description', content: 'Private chat, voice and video calls between BIXLINK members, unlocked by staking tier.' }, { property: 'og:title', content: 'BIX CALL & CHAT — BIXLINK' }, { property: 'og:description', content: 'Secure member-to-member chat and calls inside BIXLINK.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
-  validateSearch: (s: Record<string, unknown>): CallSearch => ({
-    tab: COMM_TABS.includes(s.tab as CommTab) ? s.tab as CommTab : undefined,
-    chat: typeof s.chat === 'string' ? s.chat : undefined,
-    n: typeof s.n === 'string' ? s.n : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): CallSearch => {
+    const out: CallSearch = {}; const t = s['tab'], c = s['chat'], n = s['n'];
+    if (typeof t === 'string' && COMM_TABS.includes(t)) out.tab = t as CommTab;
+    if (typeof c === 'string') out.chat = c;
+    if (typeof n === 'string') out.n = n;
+    return out;
+  },
   component: CallPage,
 });
 type CommTab = 'chat' | 'call' | 'community' | 'setting';
