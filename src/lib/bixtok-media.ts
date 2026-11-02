@@ -25,12 +25,20 @@ const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
  * Opens camera + mic. Steps down constraints, retries once when the camera is still being released,
  * and falls back to voice-only or video-only so the LIVE never ends up silent and black for no reason.
  */
-export async function openLiveMedia(facing: 'user' | 'environment'): Promise<{ stream: MediaStream | null; error: MediaIssue | null }> {
+/** Lists cameras (built-in, USB/HDMI capture cards, OBS Virtual Camera, DroidCam…) once permission is granted. */
+export async function listCameras(): Promise<{ id: string; label: string }[]> {
+  if (typeof navigator === 'undefined' || !navigator.mediaDevices?.enumerateDevices) return [];
+  const d = await navigator.mediaDevices.enumerateDevices().catch(() => [] as MediaDeviceInfo[]);
+  return d.filter(x => x.kind === 'videoinput' && x.deviceId).map((x, i) => ({ id: x.deviceId, label: x.label || `Camera ${i + 1}` }));
+}
+
+export async function openLiveMedia(facing: 'user' | 'environment', deviceId?: string | null): Promise<{ stream: MediaStream | null; error: MediaIssue | null }> {
   if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) return { stream: null, error: 'insecure' };
   const gum = (c: MediaStreamConstraints) => navigator.mediaDevices.getUserMedia(c);
+  const pick: MediaTrackConstraints = deviceId ? { deviceId: { exact: deviceId } } : { facingMode: facing };
   const videos: MediaTrackConstraints[] = [
-    { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
-    { facingMode: facing },
+    { ...pick, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+    pick,
     {},
   ];
   let first: MediaIssue | null = null;
