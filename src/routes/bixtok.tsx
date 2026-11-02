@@ -5,7 +5,7 @@ import { useVipHosts, VipBadge } from '@/lib/bixtok-vip';
 import { Volume2, VolumeX, Home, ShoppingBag, MessageSquare, User, Menu, Wallet, Clock, QrCode, Sparkles, Flame, Settings, ChevronRight, Bell, Zap, Bot, Grid3x3, Bookmark, Repeat2, Eye, ShieldCheck, Coins, Megaphone, BadgeDollarSign, Minimize2 } from 'lucide-react';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Gift, Heart, Lock, MessageCircle, Plus, Radio, Send, Share2, Trash2, X, Star, Users, UserCheck, Compass, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { MemberGate } from '@/components/MemberGate';
@@ -222,8 +222,8 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
       {v.creator_id && v.creator_id !== me && !liveHosts.has(v.creator_id) && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={() => void like(v)}><Heart/><small>{fmtCount(v.likes + (liked[v.id] ? 1 : 0))}</small></button>}
       <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
-      <button aria-label="Save" className={saved.ids.includes(v.id) ? 'on' : ''} onClick={() => onNote(saved.toggle(v.id) ? 'Saved to your profile' : 'Removed from saved')}><Bookmark/><small>Save</small></button>
-      {cfg.features['share'] !== false && <button aria-label="Share" onClick={() => setShare(v)}><Share2/><small>Share</small></button>}
+      <button aria-label="Save" className={saved.ids.includes(v.id) ? 'on' : ''} onClick={() => onNote(saved.toggle(v.id) ? (noteInterest(v, 4), 'Saved to your profile') : 'Removed from saved')}><Bookmark/><small>Save</small></button>
+      {cfg.features['share'] !== false && <button aria-label="Share" onClick={() => { noteInterest(v, 3); setShare(v); }}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
       </>}
       <button type="button" className="bxt-rail-toggle" aria-label={railOpen ? 'Collapse menu' : 'Expand menu'} onClick={() => setRailOpen(o => !o)}>{railOpen ? '›' : '‹'}</button>
