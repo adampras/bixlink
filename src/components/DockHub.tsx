@@ -41,7 +41,7 @@ export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, bool
   const tile = (i: typeof items[number], n: number, compact = false) => {
     const Icon = ICONS[i.id] ?? LayoutGrid;
     const cls = `hub-tile rounded-2xl border px-2 py-3 text-center ${path === i.to ? 'is-active' : ''} ${compact ? 'hub-recent-tile' : ''}`;
-    const body = <>{!compact && BADGES[i.id] && <b className={`hub-badge hub-badge-${BADGES[i.id].toLowerCase()}`}>{BADGES[i.id]}</b>}<span className="hub-emblem" style={{ animationDelay: `${(n % 4) * -0.9}s` }}><Icon size={20} strokeWidth={1.7}/></span><div className="text-xs font-black">{i.label}</div>{!compact && <div className="mt-0.5 text-[10px] text-muted-foreground">{i.note}</div>}</>;
+    const body = <>{!compact && BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<span className="hub-emblem" style={{ animationDelay: `${(n % 4) * -0.9}s` }}><Icon size={20} strokeWidth={1.7}/></span><div className="text-xs font-black">{i.label}</div>{!compact && <div className="mt-0.5 text-[10px] text-muted-foreground">{i.note}</div>}</>;
     return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => pick(i.id)} className={cls}>{body}</a> : <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={cls}>{body}</Link>;
   };
   const recentItems = recent.map(id => items.find(i => i.id === id)).filter((i): i is typeof items[number] => !!i);
