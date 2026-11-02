@@ -143,6 +143,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
   const [front, setFront] = useState(true);
   const [remoteVideo, setRemoteVideo] = useState(false);
   const [pip, setPip] = useState({ x: 0, y: 0 });
+  const [fill, setFill] = useState(true);
+  const [hideUi, setHideUi] = useState(false);
   const live = call.status === 'accepted';
   const done = ['ended', 'declined', 'missed'].includes(call.status);
   const [ringMuted, setRingMuted] = useState(false);
@@ -217,8 +219,10 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
     : call.role === 'caller' ? 'Memanggil…' : call.kind === 'video' ? 'Panggilan video masuk' : 'Panggilan suara masuk';
   const wa = call.whatsapp?.replace(/[^0-9]/g, '');
 
-  return <div className="bixcall" role="dialog" aria-label="BIX CALL">
-    <video ref={remoteV} className={`bixcall-remote${remoteVideo && call.kind === 'video' ? ' on' : ''}`} autoPlay playsInline/>
+  const showVideo = remoteVideo && call.kind === 'video';
+  return <div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}`} role="dialog" aria-label="BIX CALL">
+    <video ref={remoteV} className={`bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} autoPlay playsInline onClick={() => { if (showVideo) setHideUi(v => !v); }} onDoubleClick={() => setFill(v => !v)}/>
+    {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Tampilkan utuh' : 'Penuhi layar'}>{fill ? '⤡ Utuh' : '⤢ Penuh'}</button>}
     <div ref={audioBox} hidden/>
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>

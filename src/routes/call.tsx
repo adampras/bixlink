@@ -18,8 +18,10 @@ export const Route = createFileRoute('/call')({
 type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call: boolean };
 type Row = { id: string; caller_id: string; callee_id: string; kind: string; status: string; created_at: string };
 type Tier = { stake: number; chat: boolean; voice: boolean; video: boolean; vip: boolean; tier: string; chat_enabled: boolean; min: { chat: number; voice: number; video: number; vip: number } };
-type Thread = { peer: string; name: string; body: string; at: string; mine: boolean; unread: number };
-type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null; kind?: string; media_path?: string | null; meta?: { amount?: number; note?: string | null } | null };
+type Thread = { peer: string; name: string; body: string; at: string; mine: boolean; unread: number; online?: boolean };
+type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null; kind?: string; media_path?: string | null; meta?: { amount?: number; note?: string | null } | null; reply_to?: string | null; reply_body?: string | null; forwarded?: boolean; deleted_at?: string | null; hidden_by?: string[] };
+type PeerState = { online?: boolean; typing?: boolean; last_seen?: string | null };
+const seenText = (s: PeerState) => s.typing ? 'sedang mengetik…' : s.online ? 'online' : s.last_seen ? `terakhir dilihat ${new Date(s.last_seen).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'ENCRYPTED CHAT';
 const urlCache = new Map<string, string>();
 function ChatMedia({ m }: { m: Msg }) {
   const [url, setUrl] = useState(m.media_path ? urlCache.get(m.media_path) ?? '' : '');
@@ -128,7 +130,7 @@ function ActionButtons({ peerId, name, tier, canCall, onChat }: { peerId: string
 function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: (id: string, name: string) => void }) {
   const [threads, setThreads] = useState<Thread[] | null>(null);
   useEffect(() => {
-    const load = async () => { const { data } = await supabase.rpc('bix_chat_threads' as never); setThreads((data as Thread[] | null) ?? []); };
+    const load = async () => { void supabase.rpc('bix_chat_sync' as never, {} as never); const { data } = await supabase.rpc('bix_chat_threads' as never); setThreads((data as Thread[] | null) ?? []); };
     void load(); const t = setInterval(() => void load(), 6000); return () => clearInterval(t);
   }, []);
   return <>
@@ -136,7 +138,7 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
     <FindMember me={me} tier={tier} onChat={onOpen}/>
     <section className="comm-card"><h3 className="comm-h">Percakapan</h3>
       {threads === null ? <p className="text-xs text-muted-foreground">Memuat…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada chat. Cari member di atas untuk mulai mengobrol.</p> :
-        <ul className="comm-list">{threads.map(t => <li key={t.peer}><button onClick={() => onOpen(t.peer, t.name)}><span className="comm-ava">{t.name.slice(0, 1).toUpperCase()}</span>
+        <ul className="comm-list">{threads.map(t => <li key={t.peer}><button onClick={() => onOpen(t.peer, t.name)}><span className={`comm-ava${t.online ? ' is-online' : ''}`}>{t.name.slice(0, 1).toUpperCase()}</span>
           <span className="min-w-0 flex-1 text-left"><b className="block truncate text-sm">@{t.name}</b><small className="block truncate text-muted-foreground">{t.mine ? 'Anda: ' : ''}{t.body}</small></span>
           <span className="text-right"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></button></li>)}</ul>}
     </section>
@@ -244,40 +246,64 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   const [canCall, setCanCall] = useState(false);
   const [name, setName] = useState(peer.name);
   const [busy, setBusy] = useState(false);
+  const [state, setState] = useState<PeerState>({});
+  const [replyTo, setReplyTo] = useState<Msg | null>(null);
+  const [menu, setMenu] = useState<Msg | null>(null);
+  const [fwd, setFwd] = useState<Msg | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const end = useRef<HTMLDivElement>(null);
+  const typingAt = useRef(0);
   const locked = !!tier && !tier.chat;
 
+  const sync = async (typing: boolean) => {
+    const { data } = await supabase.rpc('bix_chat_sync' as never, { p_peer: peer.id, p_typing: typing } as never);
+    if (data) setState(data as PeerState);
+  };
   useEffect(() => {
     void supabase.rpc('bix_call_peer' as never, { p_user: peer.id } as never).then(({ data }) => { const p = data as Peer | null; if (p) { setCanCall(p.can_call); setName(p.name); } });
     const load = async () => {
       const { data } = await supabase.from('bix_messages' as never).select('*').or(`and(sender_id.eq.${me},recipient_id.eq.${peer.id}),and(sender_id.eq.${peer.id},recipient_id.eq.${me})`).order('created_at', { ascending: false }).limit(80);
-      setMsgs(((data as Msg[] | null) ?? []).reverse());
+      setMsgs(((data as Msg[] | null) ?? []).filter(m => !(m.hidden_by ?? []).includes(me)).reverse());
       void supabase.rpc('bix_chat_read' as never, { p_peer: peer.id } as never);
     };
     if (!me) return;
-    void load(); const t = setInterval(() => void load(), 3000); return () => clearInterval(t);
+    void load(); void sync(false);
+    const t = setInterval(() => void load(), 3000);
+    const s = setInterval(() => void sync(Date.now() - typingAt.current < 4000), 2500);
+    return () => { clearInterval(t); clearInterval(s); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me, peer.id]);
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [msgs.length]);
 
-  const send = async () => {
-    const b = text.trim(); if (!b) return;
-    setText('');
-    const { data, error } = await supabase.rpc('bix_chat_send' as never, { p_to: peer.id, p_body: b } as never);
-    if (error) { setErr(error.message); setText(b); setTimeout(() => setErr(''), 4000); return; }
-    setMsgs(m => [...m, data as unknown as Msg]); pushNotify('chat', (data as unknown as Msg | null)?.id);
+  const onType = (v: string) => {
+    setText(v);
+    const first = Date.now() - typingAt.current > 4000;
+    typingAt.current = v ? Date.now() : 0;
+    if (v && first) void sync(true);
   };
   const fail = (e: string) => { setErr(e); setTimeout(() => setErr(''), 4000); };
-  const upload = async (blob: Blob, kind: 'image' | 'voice', ext: string) => {
-    if (blob.size > 10 * 1024 * 1024) return fail('File maksimal 10 MB');
+  const added = (data: unknown) => { setMsgs(m => [...m, data as Msg]); pushNotify('chat', (data as Msg | null)?.id); };
+
+  const send = async () => {
+    const b = text.trim(); if (!b) return;
+    setText(''); typingAt.current = 0;
+    const r = replyTo; setReplyTo(null);
+    const { data, error } = await supabase.rpc('bix_chat_send' as never, { p_to: peer.id, p_body: b, p_reply: r?.id ?? null } as never);
+    if (error) { fail(error.message); setText(b); setReplyTo(r); return; }
+    added(data);
+  };
+  const upload = async (blob: Blob, kind: 'image' | 'voice', ext: string, to = peer.id, forwarded = false) => {
+    if (blob.size > 10 * 1024 * 1024) { fail('File maksimal 10 MB'); return false; }
     setBusy(true);
-    const path = `${me}/${peer.id}/${crypto.randomUUID()}.${ext}`;
+    const path = `${me}/${to}/${crypto.randomUUID()}.${ext}`;
     const up = await supabase.storage.from('bix-chat').upload(path, blob, { contentType: blob.type || 'application/octet-stream' });
-    if (up.error) { setBusy(false); return fail(up.error.message); }
-    const { data, error } = await supabase.rpc('bix_chat_send_media' as never, { p_to: peer.id, p_kind: kind, p_path: path, p_body: '' } as never);
+    if (up.error) { setBusy(false); fail(up.error.message); return false; }
+    const r = forwarded ? null : replyTo; if (!forwarded) setReplyTo(null);
+    const { data, error } = await supabase.rpc('bix_chat_send_media' as never, { p_to: to, p_kind: kind, p_path: path, p_body: '', p_reply: r?.id ?? null, p_forwarded: forwarded } as never);
     setBusy(false);
-    if (error) return fail(error.message);
-    setMsgs(m => [...m, data as unknown as Msg]); pushNotify('chat', (data as unknown as Msg | null)?.id);
+    if (error) { fail(error.message); return false; }
+    if (to === peer.id) added(data); else pushNotify('chat', (data as Msg | null)?.id);
+    return true;
   };
   const rec = useRef<MediaRecorder | null>(null);
   const [recording, setRecording] = useState(false);
@@ -302,31 +328,100 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     setBusy(false);
     if (error) return fail(error.message);
     setPayOpen(false); setAmt(''); setNote(''); try { navigator.vibrate?.(20); } catch { /* optional */ }
-    setMsgs(m => [...m, data as unknown as Msg]); pushNotify('chat', (data as unknown as Msg | null)?.id);
+    added(data);
   };
+
+  const remove = async (m: Msg, everyone: boolean) => {
+    setMenu(null);
+    const { data, error } = await supabase.rpc('bix_chat_delete' as never, { p_id: m.id, p_everyone: everyone } as never);
+    if (error) return fail(error.message);
+    const p = (data as { path?: string | null } | null)?.path;
+    if (p) void supabase.storage.from('bix-chat').remove([p]);
+    setMsgs(list => everyone ? list.map(x => x.id === m.id ? { ...x, deleted_at: new Date().toISOString(), body: 'Pesan dihapus', kind: 'text', media_path: null } : x) : list.filter(x => x.id !== m.id));
+  };
+  const forward = async (m: Msg, to: { id: string; name: string }) => {
+    setFwd(null);
+    if (m.kind === 'image' || m.kind === 'voice') {
+      if (!m.media_path) return fail('Lampiran tidak tersedia');
+      setBusy(true);
+      const dl = await supabase.storage.from('bix-chat').download(m.media_path);
+      setBusy(false);
+      if (dl.error || !dl.data) return fail('Gagal mengambil lampiran');
+      const ext = (m.media_path.split('.').pop() || 'bin').slice(0, 5);
+      if (await upload(dl.data, m.kind, ext, to.id, true)) toastOk(`Diteruskan ke @${to.name}`);
+      return;
+    }
+    const { data, error } = await supabase.rpc('bix_chat_send' as never, { p_to: to.id, p_body: m.body, p_forwarded: true } as never);
+    if (error) return fail(error.message);
+    if (to.id === peer.id) added(data); else { pushNotify('chat', (data as Msg | null)?.id); toastOk(`Diteruskan ke @${to.name}`); }
+  };
+  const [ok, setOk] = useState('');
+  const toastOk = (t: string) => { setOk(t); setTimeout(() => setOk(''), 2500); };
+
+  // long-press to open the message menu
+  const press = useRef<number | undefined>(undefined);
+  const holdStart = (m: Msg) => { if (m.deleted_at) return; press.current = window.setTimeout(() => { try { navigator.vibrate?.(12); } catch { /* optional */ } setMenu(m); }, 420); };
+  const holdEnd = () => { window.clearTimeout(press.current); };
+  const findMsg = (id?: string | null) => msgs.find(x => x.id === id);
 
   return <main className="comm-room mx-auto max-w-xl">
     <header className="comm-room-head">
       <button onClick={onBack} aria-label="Kembali"><ArrowLeft size={18}/></button>
-      <span className="comm-ava">{name.slice(0, 1).toUpperCase()}</span>
-      <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className="comm-status"><i/>ENCRYPTED CHAT</small></span>
+      <span className={`comm-ava${state.online ? ' is-online' : ''}`}>{name.slice(0, 1).toUpperCase()}</span>
+      <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small></span>
       <ActionButtons peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>
     </header>
     <div className="comm-msgs">
       {msgs.length === 0 && <p className="text-center text-xs text-muted-foreground">Mulai percakapan dengan @{name}</p>}
-      {msgs.map(m => <p key={m.id} className={`${m.sender_id === me ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}`}>{m.kind && m.kind !== 'text' ? <ChatMedia m={m}/> : m.body}<small>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{m.sender_id === me && (m.read_at ? ' ✓✓' : ' ✓')}</small></p>)}
+      {msgs.map(m => {
+        const mine = m.sender_id === me;
+        const q = m.reply_to ? findMsg(m.reply_to) : undefined;
+        return <p key={m.id} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
+          onPointerDown={() => holdStart(m)} onPointerUp={holdEnd} onPointerLeave={holdEnd} onContextMenu={e => { e.preventDefault(); if (!m.deleted_at) setMenu(m); }}>
+          {m.forwarded && !m.deleted_at && <em className="comm-fwd">↪ Diteruskan</em>}
+          {m.reply_to && !m.deleted_at && <span className="comm-quote"><b>{q ? (q.sender_id === me ? 'Anda' : `@${name}`) : 'Balasan'}</b>{q?.deleted_at ? 'Pesan dihapus' : q?.body ?? m.reply_body ?? 'Pesan sebelumnya'}</span>}
+          {m.deleted_at ? <span>🚫 {mine ? 'Anda menghapus pesan ini' : 'Pesan ini telah dihapus'}</span> : m.kind && m.kind !== 'text' ? <ChatMedia m={m}/> : m.body}
+          <small>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && !m.deleted_at && (m.read_at ? ' ✓✓' : ' ✓')}</small>
+          {!m.deleted_at && <button type="button" className="comm-more" aria-label="Opsi pesan" onClick={() => setMenu(m)}>⋯</button>}
+        </p>;
+      })}
+      {state.typing && <p className="comm-typing" aria-live="polite"><i/><i/><i/></p>}
       <div ref={end}/>
     </div>
     {err && <p className="comm-err">{err}</p>}
+    {ok && <p className="comm-busy">{ok}</p>}
     {busy && <p className="comm-busy">Mengirim…</p>}
+    {menu && <div className="comm-sheet-bg" onClick={() => setMenu(null)}><div className="comm-sheet" role="menu" onClick={e => e.stopPropagation()}>
+      <p className="comm-sheet-preview">{menu.body}</p>
+      <button type="button" onClick={() => { setReplyTo(menu); setMenu(null); }} disabled={locked}>↩ Balas</button>
+      {menu.kind !== 'pay' && <button type="button" onClick={() => { setFwd(menu); setMenu(null); }} disabled={locked}>↪ Teruskan</button>}
+      {(!menu.kind || menu.kind === 'text') && <button type="button" onClick={() => { void navigator.clipboard?.writeText(menu.body); setMenu(null); toastOk('Disalin'); }}>⧉ Salin</button>}
+      <button type="button" onClick={() => void remove(menu, false)}>🗑 Hapus untuk saya</button>
+      {menu.sender_id === me && menu.kind !== 'pay' && <button type="button" className="danger" onClick={() => void remove(menu, true)}>🗑 Hapus untuk semua</button>}
+      <button type="button" className="ghost" onClick={() => setMenu(null)}>Batal</button>
+    </div></div>}
+    {fwd && <ForwardSheet me={me} msg={fwd} onPick={to => void forward(fwd, to)} onClose={() => setFwd(null)}/>}
     {payOpen && <div className="comm-payform"><b>🪙 Kirim BIX ke @{name}</b><input inputMode="decimal" value={amt} onChange={e => setAmt(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="Jumlah BIX" className="comm-input"/><input value={note} onChange={e => setNote(e.target.value)} maxLength={120} placeholder="Catatan (opsional)" className="comm-input"/><div><button type="button" onClick={() => setPayOpen(false)}>Batal</button><button type="button" className="comm-save" onClick={() => void pay()} disabled={busy}>Kirim BIX</button></div><small>Transfer instan lewat BIX PAY dari saldo BIX Wallet Anda.</small></div>}
-    {!locked && !recording && <div className="comm-quick">{QUICK.map(q => <button key={q} type="button" onClick={() => setText(t => t ? `${t} ${q}` : q)}>{q}</button>)}</div>}
+    {replyTo && <div className="comm-replybar"><span><b>↩ Membalas {replyTo.sender_id === me ? 'diri sendiri' : `@${name}`}</b>{replyTo.body}</span><button type="button" aria-label="Batal balas" onClick={() => setReplyTo(null)}>✕</button></div>}
+    {!locked && !recording && !replyTo && <div className="comm-quick">{QUICK.map(q => <button key={q} type="button" onClick={() => onType(text ? `${text} ${q}` : q)}>{q}</button>)}</div>}
     <form className="comm-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
       <button type="button" aria-label="Kirim BIX" className="comm-pay" onClick={() => setPayOpen(v => !v)} disabled={locked}><Coins size={16}/></button>
       <button type="button" aria-label="Kirim foto" className="comm-pay" onClick={() => fileRef.current?.click()} disabled={locked || busy}><ImagePlus size={16}/></button>
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void upload(f, 'image', (f.name.split('.').pop() || 'jpg').toLowerCase().slice(0, 5)); }}/>
-      {recording ? <span className="comm-rec"><i/>Merekam… ketuk ■ untuk kirim</span> : <input value={text} onChange={e => setText(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked}/>}
+      {recording ? <span className="comm-rec"><i/>Merekam… ketuk ■ untuk kirim</span> : <input value={text} onChange={e => onType(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked} aria-label="Tulis pesan"/>}
       {text.trim() ? <button type="submit" aria-label="Kirim"><Send size={16}/></button> : <button type="button" aria-label={recording ? 'Stop & kirim' : 'Rekam pesan suara'} className={recording ? 'is-rec' : ''} onClick={() => void toggleRec()} disabled={locked || busy}>{recording ? <Square size={14}/> : <Mic size={16}/>}</button>}
     </form>
   </main>;
+}
+
+function ForwardSheet({ me, msg, onPick, onClose }: { me: string; msg: Msg; onPick: (to: { id: string; name: string }) => void; onClose: () => void }) {
+  const [threads, setThreads] = useState<Thread[] | null>(null);
+  useEffect(() => { void supabase.rpc('bix_chat_threads' as never).then(({ data }) => setThreads((data as Thread[] | null) ?? [])); }, []);
+  return <div className="comm-sheet-bg" onClick={onClose}><div className="comm-sheet" role="dialog" aria-label="Teruskan pesan" onClick={e => e.stopPropagation()}>
+    <b className="comm-sheet-title">↪ Teruskan ke…</b>
+    <p className="comm-sheet-preview">{msg.body}</p>
+    {threads === null ? <small>Memuat…</small> : threads.filter(t => t.peer !== me).length === 0 ? <small>Belum ada percakapan lain.</small> :
+      <ul className="comm-fwd-list">{threads.filter(t => t.peer !== me).map(t => <li key={t.peer}><button type="button" onClick={() => onPick({ id: t.peer, name: t.name })}><span className={`comm-ava${t.online ? ' is-online' : ''}`}>{t.name.slice(0, 1).toUpperCase()}</span><b>@{t.name}</b></button></li>)}</ul>}
+    <button type="button" className="ghost" onClick={onClose}>Batal</button>
+  </div></div>;
 }

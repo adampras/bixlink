@@ -5415,3 +5415,50 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .comm-quick button{flex:none;font-size:.7rem;padding:.3rem .65rem;border-radius:999px;border:1px solid color-mix(in oklab,var(--primary) 30%,transparent);background:color-mix(in oklab,var(--card) 85%,transparent)}
 .comm-ring{display:flex;align-items:center;gap:.5rem}.comm-ring input{flex:1;accent-color:var(--primary)}
 .comm-ring span{font-size:.7rem;min-width:2.6rem;text-align:right}.comm-ring button{font-size:.7rem;padding:.25rem .6rem;border-radius:999px;border:1px solid color-mix(in oklab,var(--primary) 35%,transparent)}
+
+/* BIX CHAT — presence, reply, forward, delete */
+.comm-ava.is-online{position:relative}
+.comm-ava.is-online::after{content:"";position:absolute;right:-1px;bottom:-1px;width:.6rem;height:.6rem;border-radius:50%;background:oklch(0.75 0.17 155);border:2px solid oklch(0.14 0.02 300)}
+.comm-status{letter-spacing:.04em;text-transform:none;font-size:10px}
+.comm-status.is-off i{background:oklch(0.6 0 0);box-shadow:none;animation:none}
+.comm-status.is-typing{color:oklch(0.85 0.15 85)}
+.comm-status.is-typing i{background:oklch(0.85 0.15 85);box-shadow:0 0 8px oklch(0.85 0.15 85)}
+.comm-msgs>p{position:relative;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.comm-msgs>p.is-deleted{font-style:italic;opacity:.6;background:transparent;border-style:dashed}
+.comm-more{position:absolute;top:2px;right:4px;font-size:12px;line-height:1;padding:0 4px;opacity:0;color:inherit;transition:opacity .15s}
+.comm-msgs>p:hover .comm-more,.comm-more:focus-visible{opacity:.8}
+@media (hover:none){.comm-more{display:none}}
+.comm-fwd{display:block;font-size:9px;font-style:italic;opacity:.7;margin-bottom:2px}
+.comm-quote{display:block;margin:-.1rem -.2rem .35rem;padding:.3rem .5rem;border-radius:.6rem;border-left:3px solid oklch(0.82 0.15 85);background:oklch(0.12 0.02 300 / .55);font-size:11px;line-height:1.3;max-height:3.2em;overflow:hidden;opacity:.9}
+.comm-quote b{display:block;font-size:10px;color:oklch(0.85 0.15 85)}
+.comm-typing{display:flex!important;gap:4px;align-self:flex-start;padding:.55rem .8rem!important}
+.comm-typing i{width:6px;height:6px;border-radius:50%;background:oklch(0.85 0.15 85);animation:comm-dot 1.1s infinite}
+.comm-typing i:nth-child(2){animation-delay:.15s}.comm-typing i:nth-child(3){animation-delay:.3s}
+@keyframes comm-dot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.comm-replybar{display:flex;align-items:center;gap:.5rem;margin:0 .1rem .35rem;padding:.4rem .6rem;border-radius:.8rem;border-left:3px solid oklch(0.82 0.15 85);background:oklch(0.18 0.03 300 / .85);font-size:11px}
+.comm-replybar span{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.comm-replybar b{display:block;font-size:10px;color:oklch(0.85 0.15 85)}
+.comm-replybar button{width:1.6rem;height:1.6rem;border-radius:50%;background:oklch(1 0 0 / .08)}
+.comm-sheet-bg{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center;background:oklch(0 0 0 / .55);backdrop-filter:blur(3px)}
+.comm-sheet{width:min(100%,30rem);display:flex;flex-direction:column;gap:.3rem;padding:.8rem .8rem calc(.8rem + env(safe-area-inset-bottom));border-radius:1.2rem 1.2rem 0 0;background:linear-gradient(180deg,oklch(0.18 0.04 300 / .97),oklch(0.11 0.02 300 / .98));border:1px solid oklch(0.82 0.15 85 / .35);border-bottom:0;box-shadow:0 -10px 40px oklch(0.5 0.2 300 / .3);animation:comm-up .18s ease-out}
+@keyframes comm-up{from{transform:translateY(20px);opacity:0}}
+.comm-sheet>button{text-align:left;padding:.65rem .8rem;border-radius:.8rem;font-size:13px;font-weight:600;background:oklch(1 0 0 / .04);border:1px solid oklch(1 0 0 / .06)}
+.comm-sheet>button:active{transform:scale(.98)}
+.comm-sheet>button.danger{color:oklch(0.7 0.2 25)}
+.comm-sheet>button.ghost{text-align:center;background:transparent;opacity:.7}
+.comm-sheet-title{font-size:13px;color:oklch(0.85 0.15 85);padding:0 .2rem}
+.comm-sheet-preview{font-size:11px;opacity:.65;padding:.2rem .3rem .4rem;max-height:3.2em;overflow:hidden}
+.comm-fwd-list{display:flex;flex-direction:column;gap:.3rem;max-height:45vh;overflow-y:auto}
+.comm-fwd-list button{width:100%;display:flex;align-items:center;gap:.6rem;padding:.45rem .6rem;border-radius:.8rem;background:oklch(1 0 0 / .04);font-size:13px}
+@media (prefers-reduced-motion:reduce){.comm-typing i,.comm-sheet{animation:none}}
+
+/* BIX CALL — full-screen video */
+.bixcall{height:100dvh}
+.bixcall-remote{object-fit:cover}
+.bixcall-remote.fit{object-fit:contain;background:#05040a}
+.bixcall.is-video .bixcall-head{transform:scale(.82);transform-origin:top center;transition:opacity .25s,transform .25s}
+.bixcall.is-video .bixcall-status{margin-top:6px}
+.bixcall.is-hidden .bixcall-head,.bixcall.is-hidden .bixcall-status,.bixcall.is-hidden .bixcall-ctl,.bixcall.is-hidden .bixcall-fit{opacity:0;pointer-events:none}
+.bixcall-ctl,.bixcall-status{transition:opacity .25s}
+.bixcall-fit{position:absolute;z-index:3;top:calc(max(14px,env(safe-area-inset-top)) + 60px);left:14px;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;color:#FFD700;background:rgba(8,6,14,.7);border:1px solid rgba(255,215,0,.45);backdrop-filter:blur(10px);transition:opacity .25s}
+.bixcall-pip{width:28vw;max-width:120px;height:auto;aspect-ratio:9/16}
