@@ -430,7 +430,7 @@ function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; 
 
 function Inbox({ followers, lives, mine, onLive, onCreate }: { followers: number; lives: Live[]; mine: Video[]; onLive: (l: Live) => void; onCreate: () => void }) {
   const likes = mine.reduce((a, v) => a + Number(v.likes || 0), 0);
-  return <div className="bxt-page"><header className="bxt-head"><span/><h1>Inbox <i className="bxt-online"/></h1><span/></header>
+  return <div className="bxt-page bxt-inbox"><header className="bxt-head"><span/><h1>Inbox <i className="bxt-online"/></h1><span/></header>
     <div className="bxt-stories">
       <button onClick={onCreate}><span className="bxt-av"><Plus size={20}/></span><small>Create</small></button>
       {lives.map(l => <button key={l.id} onClick={() => onLive(l)}><span className={`bxt-av ring${l.kind === 'official' ? ' official' : ''}`}>{l.host_name.slice(0, 1).toUpperCase()}<em>{l.kind === 'official' ? 'OFFICIAL' : 'LIVE'}</em></span><small>{l.host_name}</small></button>)}
@@ -452,7 +452,7 @@ function ProfilePage({ follow, me, email, videos, all = [], onCreate, onBalance,
   const name = p.data?.username || email.split('@')[0] || 'member';
   const likes = videos.reduce((a, v) => a + Number(v.likes || 0), 0);
   const copy = async () => { try { await navigator.clipboard.writeText(`${location.origin}/bixtok`); onNote('Profile link copied'); } catch { /* ignore */ } };
-  return <div className="bxt-page"><header className="bxt-head"><button aria-label="Create" onClick={onCreate}><Sparkles size={20}/></button><span/><button aria-label="Menu" onClick={() => setDrawer(true)}><Menu size={22}/></button></header>
+  return <div className="bxt-page bxt-prof"><header className="bxt-head"><button aria-label="Create" onClick={onCreate}><Sparkles size={20}/></button><span/><button aria-label="Menu" onClick={() => setDrawer(true)}><Menu size={22}/></button></header>
     <section className="bxt-prof"><div><h1>{name}</h1><small>@{name.toLowerCase()}</small>
       <div className="bxt-stats"><p><b>{follow.following.size}</b>Following</p><p><b>{follow.followers.size}</b>Followers</p><p><b>{[...follow.following].filter(x => follow.followers.has(x)).length}</b>Friends</p><p><b>{likes}</b>Likes</p></div></div>
       <button className="bxt-bigav" onClick={onCreate}>{name.slice(0, 1).toUpperCase()}<em><Plus size={14}/></em></button></section>
@@ -495,29 +495,31 @@ function BalancePage({ stake, cfg, onBack, onLive }: { stake: number; cfg: Cfg; 
 }
 
 type Earn = { bix: number; bixp: number; claimed_bix: number; claimed_bixp: number; recent: { gift_name: string; currency: string; amount: number; created_at: string; claimed_at: string | null; sender: string }[] };
-/** Gifts received wait here; the creator moves them to the BIXLINK wallet in one atomic claim. */
+/** Gifts wait here; BIX moves to the BIXLINK wallet once the server minimum is met. BIXP stays inside BIXTOK. */
 function CreatorEarnings() {
   const qc = useQueryClient(); const [busy, setBusy] = useState(false); const [msg, setMsg] = useState(''); const [open, setOpen] = useState(false);
   const q = useQuery({ queryKey: ['bixtok-earnings'], queryFn: async () => { const { data, error } = await supabase.rpc('bixtok_my_earnings' as never); if (error) throw error; return data as unknown as Earn; } });
-  const e = q.data; const has = !!e && (Number(e.bix) > 0 || Number(e.bixp) > 0);
+  const mq = useQuery({ queryKey: ['bixtok-withdraw-min'], queryFn: async () => { const { data } = await supabase.from('bixtok_config').select('withdraw_min_bix').limit(1).maybeSingle(); return Number((data as { withdraw_min_bix?: number } | null)?.withdraw_min_bix ?? 100); } });
+  const min = mq.data ?? 100; const e = q.data; const bix = Number(e?.bix ?? 0); const ok = bix >= min;
   const claim = async () => {
     setBusy(true); setMsg('');
     const { data, error } = await supabase.rpc('bixtok_claim_earnings' as never);
     setBusy(false);
-    if (error) return setMsg(error.message.includes('No BIXTOK') ? 'Belum ada hadiah untuk ditarik.' : error.message);
-    const r = data as unknown as { bix: number; bixp: number };
-    setMsg(`Withdrawn to BIXLINK Wallet: ${Number(r.bix)} BIX · ${Number(r.bixp)} BIXP`);
+    if (error) return setMsg(error.message.includes('No BIXTOK') ? 'Belum ada BIX untuk ditarik.' : error.message.includes('Minimum') ? `Minimal penarikan ${min} BIX.` : error.message);
+    const r = data as unknown as { bix: number };
+    setMsg(`Berhasil ditarik ke BIXLINK Wallet: ${Number(r.bix)} BIX`);
     qc.invalidateQueries();
   };
-  return <div className="bxt-card" style={{ display: 'block' }}>
-    <div className="flex items-center justify-between"><b>BIXTOK gift balance</b><Gift size={16} className="bxt-gifticon"/></div>
+  return <div className="bxt-card bxt-earn" style={{ display: 'block' }}>
+    <div className="flex items-center justify-between"><b>Saldo Hadiah BIXTOK</b><Gift size={16} className="bxt-gifticon"/></div>
     <div className="mt-2 grid grid-cols-2 gap-2 text-center">
-      <div className="rounded-lg border border-border p-2"><small className="text-muted-foreground">BIXCOIN</small><p className="text-lg font-bold">{Number(e?.bix ?? 0).toLocaleString('en-US', { maximumFractionDigits: 4 })}</p></div>
-      <div className="rounded-lg border border-border p-2"><small className="text-muted-foreground">BIXP</small><p className="text-lg font-bold">{Number(e?.bixp ?? 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</p></div>
+      <div className="bxt-earn-box bxt-earn-bix"><small>BIXCOIN · bisa ditarik</small><p className="text-lg font-bold">{bix.toLocaleString('en-US', { maximumFractionDigits: 4 })}</p></div>
+      <div className="bxt-earn-box bxt-earn-bixp"><small>BIXP · tertahan di BIXTOK</small><p className="text-lg font-bold">{Number(e?.bixp ?? 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</p></div>
     </div>
-    <button className="bixtok-cta mt-3 w-full" disabled={busy || !has} onClick={claim}>{busy ? 'Processing…' : 'Withdraw to BIXLINK Wallet'}</button>
+    <div className="mt-3"><div className="flex justify-between text-[11px]"><span>Menuju minimal penarikan</span><b>{Math.min(bix, min).toLocaleString('en-US', { maximumFractionDigits: 2 })} / {min} BIX</b></div><div className="bxt-earn-bar"><i style={{ width: `${Math.min(100, bix / min * 100)}%` }}/></div></div>
+    <button className="bixtok-cta mt-3 w-full" disabled={busy || !ok} onClick={claim}>{busy ? 'Memproses…' : ok ? `Tarik ${bix.toLocaleString('en-US', { maximumFractionDigits: 4 })} BIX ke Wallet` : `Kurang ${(min - bix).toLocaleString('en-US', { maximumFractionDigits: 2 })} BIX lagi`}</button>
     {msg && <p className="mt-2 text-xs">{msg}</p>}
-    <p className="mt-2 text-[10px] text-muted-foreground">Hadiah dari penonton tersimpan di sini dulu. Sudah ditarik: {Number(e?.claimed_bix ?? 0)} BIX · {Number(e?.claimed_bixp ?? 0)} BIXP.</p>
+    <ul className="mt-2 space-y-0.5 text-[10px] text-muted-foreground"><li>• Saweran & bonus masuk ke sini dulu, lalu Anda tarik manual.</li><li>• Minimal penarikan {min} BIX ke saldo utama BIXLINK Wallet.</li><li>• BIXP tetap di BIXTOK untuk dipakai menyawer kreator lain.</li><li>Sudah ditarik: {Number(e?.claimed_bix ?? 0)} BIX.</li></ul>
     <button className="mt-2 flex w-full items-center justify-between text-xs" onClick={() => setOpen(o => !o)}><span>Gift history</span><ChevronRight size={14} style={{ transform: open ? 'rotate(90deg)' : undefined }}/></button>
     {open && <ul className="mt-2 space-y-1 text-xs">{(e?.recent ?? []).length === 0 ? <li className="text-muted-foreground">Belum ada hadiah.</li> : e!.recent.map((r, i) => <li key={i} className="flex justify-between gap-2"><span>@{r.sender} · {r.gift_name}</span><span>{Number(r.amount)} {r.currency} {r.claimed_at ? '✓' : '•'}</span></li>)}</ul>}
   </div>;
