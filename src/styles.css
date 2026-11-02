@@ -5034,3 +5034,16 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .hub-midnight .hub-group .hub-tile:active { transform: scale(.96); }
 .hub-midnight .hub-group .hub-tile.is-active { border-color: var(--tone); box-shadow: 0 0 0 1px var(--tone), 0 8px 20px -10px var(--tone); }
 .hub-midnight .hub-group .hub-emblem { color: var(--tone); border-color: color-mix(in oklab, var(--tone) 45%, transparent); box-shadow: 0 0 16px -6px var(--tone); }
+
+/* BIXTOK category tones matching HUB: gold=feed/trading, emerald=wallet/earnings, violet=social/chat, silver=profile */
+.bxt-page{--bxt-tone:var(--chart-3)}
+.bxt-bal{--bxt-tone:var(--chart-2)}
+.bxt-head{border-bottom:1px solid color-mix(in oklab,var(--bxt-tone,var(--chart-3)) 35%,transparent);background:linear-gradient(180deg,color-mix(in oklab,var(--bxt-tone,var(--chart-3)) 12%,transparent),transparent)}
+.bxt-card{border:1px solid color-mix(in oklab,var(--bxt-tone,var(--chart-3)) 40%,transparent)!important;background:linear-gradient(145deg,color-mix(in oklab,var(--bxt-tone,var(--chart-3)) 14%,var(--card)),var(--card))!important;box-shadow:inset 0 1px 0 color-mix(in oklab,var(--foreground) 8%,transparent)}
+.bxt-earn-box{border-radius:.75rem;padding:.5rem;border:1px solid var(--border)}
+.bxt-earn-box small{display:block;font-size:10px;color:var(--muted-foreground)}
+.bxt-earn-bix{border-color:color-mix(in oklab,var(--chart-3) 55%,transparent);background:color-mix(in oklab,var(--chart-3) 12%,transparent)}
+.bxt-earn-bixp{border-color:color-mix(in oklab,var(--accent) 55%,transparent);background:color-mix(in oklab,var(--accent) 12%,transparent)}
+.bxt-earn-bar{margin-top:.3rem;height:6px;border-radius:9px;background:color-mix(in oklab,var(--foreground) 10%,transparent);overflow:hidden}
+.bxt-earn-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--chart-2),var(--chart-3));transition:width .4s}
+.bxt-tools a span,.bxt-tools button span{background:color-mix(in oklab,var(--bxt-tone,var(--chart-3)) 16%,transparent);color:var(--bxt-tone,var(--chart-3))}
