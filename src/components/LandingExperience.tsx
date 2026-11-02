@@ -1,3 +1,4 @@
+import { PartnershipPanel } from "@/components/PartnershipPanel";
 import { Link } from '@tanstack/react-router';
 import { Building2, CircleDollarSign, Globe2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
     {config?.readiness.presaleStageEnabled !== false && <div className="landing-presale-band"><HeroPresaleRibbon/><LiveActivityTicker/></div>}
     <CyberBento/>
     <section className="mx-auto max-w-3xl px-5 pt-5 pb-2 text-center md:py-10"><div className="eyebrow justify-center">OFFICIAL BIXCOIN</div><div className="coin-stage coin-stage--vault" aria-label="BIXCOIN official coin"><img src={vaultBg} alt="" aria-hidden className="coin-vault-art"/><div className="coin-embers" aria-hidden>{Array.from({length:14},(_,i)=><i key={i} style={{left:`${6+i*6.5}%`,animationDelay:`${(i*0.53)%7}s`,animationDuration:`${6+(i%4)}s`,['--dx' as string]:`${(i%2?1:-1)*(8+i%5*4)}px`}}/>)}</div><div className="coin-float"><img src={coinCutout} alt="BIXCOIN official gold coin" className="coin-3d" width={260} height={260}/></div><div className="coin-pedestal" aria-hidden><span/></div><div className="coin-caption"><span>21,000,000 BIX · FIXED SUPPLY</span><strong>BIX BOOSTER UP TO {maximum}% · PROJECTION</strong></div></div></section>
+    <PartnershipPanel variant="landing"/>
     <PoweredBy slim/>
     <NationAlliance/>
     <DevTeamGrid/>
