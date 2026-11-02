@@ -187,7 +187,8 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
             if (vids.length) out.push({ id: p.identity, stream: new MediaStream(vids) });
             p.trackPublications.forEach(pub => { if (pub.track && pub.kind === lk.Track.Kind.Audio) heard = true; });
           });
-          out.sort((a, b) => (a.id === hostId ? -1 : b.id === hostId ? 1 : 0));
+          const isHost = (id: string) => id === hostId || id === `obs-${hostId}`;
+          out.sort((a, b) => (isHost(a.id) ? -1 : isHost(b.id) ? 1 : 0) - (a.id.startsWith('obs-') ? 1 : 0) + (b.id.startsWith('obs-') ? 1 : 0));
           setFeeds(out);
           if (!host) setState(out.length || heard ? 'live' : 'waiting');
           setVoiceOnly(!out.length && heard);
