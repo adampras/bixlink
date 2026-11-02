@@ -5462,3 +5462,39 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bixcall-ctl,.bixcall-status{transition:opacity .25s}
 .bixcall-fit{position:absolute;z-index:3;top:calc(max(14px,env(safe-area-inset-top)) + 60px);left:14px;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;color:#FFD700;background:rgba(8,6,14,.7);border:1px solid rgba(255,215,0,.45);backdrop-filter:blur(10px);transition:opacity .25s}
 .bixcall-pip{width:28vw;max-width:120px;height:auto;aspect-ratio:9/16}
+
+/* BIX CALL chat extras: receipts, reactions, files, requests, pins */
+.comm-tick{opacity:.7}
+.comm-tick.is-read{color:#FFD700;opacity:1;text-shadow:0 0 6px rgb(255 215 0 / .6)}
+.comm-reacts{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.comm-reacts button{font-size:12px;line-height:1;padding:3px 6px;border-radius:999px;background:rgb(10 10 14 / .75);border:1px solid rgb(255 215 0 / .25)}
+.comm-reacts button.is-mine{border-color:#A855F7;background:rgb(168 85 247 / .25)}
+.comm-reacts i{font-style:normal;font-size:10px;margin-left:2px;opacity:.8}
+.comm-reactbar{display:flex;justify-content:space-around;gap:4px;padding:6px;margin-bottom:6px;border-radius:999px;background:rgb(255 255 255 / .05);border:1px solid rgb(255 215 0 / .2)}
+.comm-reactbar button{font-size:22px;padding:4px 6px!important;border:0!important;background:transparent!important;transition:transform .15s}
+.comm-reactbar button:active,.comm-reactbar button.is-mine{transform:scale(1.25)}
+.comm-filecard{display:flex;align-items:center;gap:10px;min-width:190px;padding:8px 10px;border-radius:12px;background:rgb(0 0 0 / .35);border:1px solid rgb(255 215 0 / .25);text-decoration:none;color:inherit}
+.comm-filecard i{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.05em;padding:10px 6px;border-radius:8px;background:linear-gradient(135deg,#A855F7,#6d28d9);color:#fff}
+.comm-filecard span{min-width:0;display:flex;flex-direction:column}
+.comm-filecard b{font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}
+.comm-filecard small{font-size:10.5px;opacity:.7}
+.comm-voice{display:flex;align-items:center;gap:6px}
+.comm-rate{font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px;background:rgb(255 215 0 / .15);color:#FFD700;border:1px solid rgb(255 215 0 / .35)}
+.comm-reqcard{display:flex;flex-direction:column;gap:3px;min-width:200px;padding:10px 12px;border-radius:14px;background:linear-gradient(145deg,#0b0b10,#17121f);border:1px solid rgb(255 215 0 / .45);box-shadow:inset 0 1px 0 rgb(255 255 255 / .06)}
+.comm-reqcard em{font-style:normal;font-size:10px;letter-spacing:.12em;color:#FFD700}
+.comm-reqcard b{font-size:20px;color:#fff}
+.comm-reqcard small{font-size:11px;opacity:.75}
+.comm-req-act{display:flex;align-items:center;gap:6px;margin-top:4px}
+.comm-req-act i{font-size:11px;opacity:.7;flex:1}
+.comm-req-act button{font-size:11.5px;padding:6px 10px;border-radius:999px;border:1px solid rgb(255 255 255 / .2);background:rgb(255 255 255 / .05)}
+.comm-req-act button.is-pay{flex:1;font-weight:800;color:#111;background:linear-gradient(135deg,#FFD700,#f5b400);border-color:transparent}
+.comm-req-st{font-style:normal;font-size:11.5px;margin-top:4px;color:#FFD700}
+.comm-reqcard.is-declined,.comm-reqcard.is-cancelled{opacity:.6;border-color:rgb(255 255 255 / .15)}
+.comm-reqcard.is-paid{border-color:rgb(52 211 153 / .6)}
+.comm-reqcard.is-paid .comm-req-st{color:#34d399}
+.comm-pinbar{display:flex;align-items:center;gap:8px;width:100%;padding:7px 12px;font-size:12px;text-align:left;background:rgb(10 10 14 / .85);border-bottom:1px solid rgb(255 215 0 / .3)}
+.comm-pinbar b{color:#FFD700;white-space:nowrap}
+.comm-pinbar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.85}
+.comm-paytabs{display:flex;gap:6px}
+.comm-paytabs button{flex:1;padding:7px;border-radius:999px;font-size:12px;border:1px solid rgb(255 215 0 / .25);background:transparent}
+.comm-paytabs button.is-on{background:rgb(255 215 0 / .18);color:#FFD700;border-color:#FFD700}
