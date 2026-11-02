@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck } from 'lucide-react';
+import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
 import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
 import foxLogo from '@/assets/bixlink-logo-gold.webp';
@@ -148,6 +149,9 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
   const live = call.status === 'accepted';
   const done = ['ended', 'declined', 'missed'].includes(call.status);
   const [ringMuted, setRingMuted] = useState(false);
+  const voiceRef = useRef<VoiceShield | null>(null);
+  const [shield, setShield] = useState(true);
+  const shieldRef = useRef(true);
   const ringing = !live && !done;
   useEffect(() => {
     if (!ringing || ringMuted) return;
@@ -199,7 +203,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
 
   useEffect(() => { if (!live) return; const t = setInterval(() => setSecs(s => s + 1), 1000); return () => clearInterval(t); }, [live]);
 
-  const toggleMic = async () => { const n = !mic; setMic(n); await roomRef.current?.localParticipant.setMicrophoneEnabled(n); };
+  const toggleMic = async () => {
+    const n = !mic; setMic(n);
+    const pub = roomRef.current?.localParticipant.getTrackPublication(Track.Source.Microphone);
+    if (voiceRef.current && pub?.track) { if (n) await pub.track.unmute(); else await pub.track.mute(); return; }
+    await roomRef.current?.localParticipant.setMicrophoneEnabled(n);
+  };
   const toggleCam = async () => {
     const n = !cam; setCam(n);
     const lp = roomRef.current?.localParticipant; if (!lp) return;
@@ -213,7 +222,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
     const nf = !front; setFront(nf);
     await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment' }).catch(() => {});
   };
-  const speaker = () => { audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = 1; void a.play().catch(() => {}); }); };
+  const speaker = () => { audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = shieldRef.current ? 0.85 : 1; void a.play().catch(() => {}); }); };
+  const toggleShield = () => {
+    const n = !shield; setShield(n); shieldRef.current = n; voiceRef.current?.setShield(n);
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = n ? 0.7 : 0.9; });
+  };
 
   const dragPip = (e: React.PointerEvent) => {
     const sx = e.clientX - pip.x, sy = e.clientY - pip.y;
@@ -257,6 +270,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
         {call.kind === 'video' && <button aria-label="Kamera" className={cam ? '' : 'off'} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button>}
         {call.kind === 'video' && <button aria-label="Balik kamera" onClick={() => void flip()}><SwitchCamera/></button>}
         <button aria-label="Speaker" onClick={speaker}><Volume2/></button>
+        <button aria-label={shield ? 'Perisai anti-storing aktif' : 'Aktifkan perisai anti-storing'} className={shield ? 'shield' : ''} onClick={toggleShield}><ShieldCheck/></button>
         <button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button>
       </>}
       {done && wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
