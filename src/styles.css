@@ -4952,3 +4952,8 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxt-rail-shield{background:linear-gradient(180deg,oklch(0.14 0.01 260 / .72),oklch(0.08 0.01 260 / .82))!important;backdrop-filter:blur(14px) saturate(130%);border:1px solid color-mix(in oklab,#FFD700 38%,transparent)!important}
 .bxt-rail-shield.closed{background:oklch(0.1 0.01 260 / .75)!important}
 .bxt-rail-shield button svg{background:oklch(1 0 0 / .06)!important}
+
+/* VIP HOST badge visible to everyone */
+.bxt-vip{display:inline-flex;align-items:center;gap:.2rem;margin-left:.35rem;padding:.12rem .45rem;border-radius:999px;font-size:.62rem;font-weight:900;letter-spacing:.04em;color:oklch(0.18 0.02 80);background:linear-gradient(135deg,#FFD700,#c9a227);box-shadow:0 0 0 1px color-mix(in oklab,#A855F7 45%,transparent),0 0 10px color-mix(in oklab,#FFD700 45%,transparent);white-space:nowrap;vertical-align:middle;text-shadow:none}
+.bxt-vip.sm{font-size:.52rem;padding:.08rem .35rem}
+.bxl-host .bxt-vip{margin:.1rem 0;display:inline-flex}
