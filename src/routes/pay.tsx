@@ -38,20 +38,24 @@ function Scanner({ onResult, onClose }: { onResult: (v: string) => void; onClose
     import('html5-qrcode').then(({ Html5Qrcode }) => {
       if (stopped) return;
       const s = new Html5Qrcode('bix-scanner'); ref.current = s;
-      s.start({ facingMode: 'environment' }, { fps: 10, qrbox: 230 }, text => { s.stop().catch(() => {}); ref.current = null; onResult(text); }, () => {})
+      s.start({ facingMode: 'environment' }, { fps: 12, qrbox: (w: number, h: number) => { const m = Math.floor(Math.min(w, h) * 0.7); return { width: m, height: m }; } }, text => { s.stop().catch(() => {}); ref.current = null; navigator.vibrate?.(30); onResult(text); }, () => {})
         .catch(() => setErr('Camera unavailable. Choose a QR image from your gallery or enter the code manually.'));
     });
     return () => { stopped = true; ref.current?.stop().catch(() => {}); };
   }, [onResult]);
-  return <div className="fixed inset-0 z-50 grid place-items-center bg-background/90 p-4 backdrop-blur"><div className="w-full max-w-sm rounded-[20px] border border-chart-2 bg-card p-5">
-    <div className="flex items-center justify-between"><b className="font-display">Scan BIX PAY QR</b><Button size="icon" variant="ghost" onClick={onClose} aria-label="Close"><X/></Button></div>
-    <div id="bix-scanner" className="mt-4 aspect-square overflow-hidden rounded-xl bg-background"/>
-    {err && <p className="mt-3 text-xs text-destructive">{err}</p>}
-    <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-full border border-chart-3 py-2.5 text-sm font-bold text-chart-3"><ImageUp size={16}/> Choose QR from gallery
-      <input type="file" accept="image/*" className="hidden" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; setErr(''); try { await ref.current?.stop().catch(() => {}); ref.current = null; const { Html5Qrcode } = await import('html5-qrcode'); const reader = new Html5Qrcode('bix-file-reader'); const text = await reader.scanFile(file, false); reader.clear(); onResult(text); } catch { setErr('No QR code found in that image. Try a clearer screenshot.'); } e.target.value = ''; }}/>
-    </label>
+  useEffect(() => { const prev = document.body.style.overflow; document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = prev; }; }, []);
+  return <div className="qr-full" role="dialog" aria-label="Scan BIX PAY QR">
+    <div id="bix-scanner" className="qr-full__cam"/>
+    <div className="qr-full__mask" aria-hidden><div className="qr-full__frame"><i/><i/><i/><i/><span className="qr-full__laser"/></div></div>
+    <div className="qr-full__top"><b className="font-display">Scan BIX PAY QR</b><button type="button" onClick={onClose} aria-label="Close" className="qr-full__x"><X size={20}/></button></div>
+    <div className="qr-full__bottom">
+      <p className="qr-full__hint">{err || 'Point the camera at a member\'s BIX PAY QR'}</p>
+      <label className="qr-full__gallery"><ImageUp size={16}/> Choose QR from gallery
+        <input type="file" accept="image/*" className="hidden" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; setErr(''); try { await ref.current?.stop().catch(() => {}); ref.current = null; const { Html5Qrcode } = await import('html5-qrcode'); const reader = new Html5Qrcode('bix-file-reader'); const text = await reader.scanFile(file, false); reader.clear(); onResult(text); } catch { setErr('No QR code found in that image. Try a clearer screenshot.'); } e.target.value = ''; }}/>
+      </label>
+    </div>
     <div id="bix-file-reader" className="hidden"/>
-  </div></div>;
+  </div>;
 }
 
 function PayPage() {
