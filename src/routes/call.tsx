@@ -72,7 +72,6 @@ function CallPage() {
   return <BixShell><div className="bixcall-page">
     <button type="button" className="bixcall-back" aria-label="Kembali" onClick={back}><ArrowLeft size={18}/></button>
     <section className="bixcall-hero"><img src={heroImg} alt="BIX CALL 3D" width={1024} height={640}/><div><b>BIX CALL</b><small>Chat · Suara · Video — khusus member BIXLINK</small></div></section>
-    {perm === 'default' && <button type="button" className="bixcall-notify" onClick={() => void enableBixNotifications().then(p => setPerm(String(p)))}>🔔 Aktifkan notifikasi chat & panggilan</button>}
     <MemberGate ready={ready} signedIn={!!user} title="BIX CALL"><CallInner/></MemberGate>
   </div></BixShell>;
 }
@@ -99,7 +98,7 @@ function CallInner() {
   return <main className="mx-auto max-w-xl px-4 py-5">
     <header className="comm-head">
       <span className="hub-emblem"><PhoneCall size={20}/></span>
-      <div className="min-w-0 flex-1"><h1 className="hub-title font-display text-lg font-black tracking-widest">BIX CALL · {TITLE[tab]}</h1>
+      <div className="min-w-0 flex-1"><h1 className="hub-title font-display text-lg font-black tracking-widest">{TITLE[tab]}</h1>
         <p className="comm-status"><i/>QUANTUM ENCRYPTED · LINE READY</p></div>
       {tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}
     </header>
