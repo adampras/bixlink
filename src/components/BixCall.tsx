@@ -27,7 +27,7 @@ function sysNotify(title: string, body: string, tag: string, ring: boolean, url 
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted' || !document.hidden) return;
   const opts = { body, tag, icon: foxLogo, badge: foxLogo, requireInteraction: ring, vibrate: ring ? [400, 200, 400, 200, 400] : [120], data: { url } } as NotificationOptions;
   void navigator.serviceWorker?.getRegistration().then(reg => {
-    if (reg) return reg.showNotification(title, opts);
+    if (reg) { void reg.showNotification(title, opts); return; }
     const n = new Notification(title, opts); n.onclick = () => { window.focus(); window.location.href = url; n.close(); };
   }).catch(() => { /* ignore */ });
 }
