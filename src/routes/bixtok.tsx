@@ -140,7 +140,7 @@ function BixtokPage() {
           if (window.history.length > 1) window.history.back(); else void navigate({ to: '/dashboard' });
         }}><Minimize2 size={18}/></button>
       </header>
-      <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={36} height={36}/><b>BIX<span>TOK</span></b></div></>}
+      <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={40} height={40}/></div></>}
       {section === 'home' && (tab === 'live'
         ? <>{top.length > 0 && <div className="bxt-board" aria-label="Top creators"><b>🏆 Top creators</b>{top.map((c, i) => <span key={c.name + i}><i>{['👑','🥈','🥉','4','5'][i]}</i>@{c.name}<small>{fmtCount(c.likes)} ♥</small></span>)}</div>}<LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/></>
         : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote} liveHosts={new Map(q.data.lives.map(l => [l.host_id, l]))} onEnterLive={setRoom}/>)}

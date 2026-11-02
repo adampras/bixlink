@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent as RPE }
 import { Maximize2, Volume2, X } from 'lucide-react';
 import { useRouter } from '@tanstack/react-router';
 import { bixtokMini, useBixtokMini } from '@/lib/bixtok-mini';
+import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
 
 // The LIVE room is code-split. After an app update the old file URL can vanish,
 // which used to throw and blank the whole screen. Retry, then show a reload card.
@@ -91,25 +92,37 @@ function useDrag() {
 }
 
 // Mini player keeps the speaker on; falls back to muted only if the browser blocks sound, then unmutes on first tap.
-function SoundVideo({ src }: { src: string }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => { const el = ref.current; if (!el) return; el.muted = false; el.volume = 1;
-    el.play().catch(() => { el.muted = true; void el.play().catch(() => {}); const on = () => { el.muted = false; void el.play().catch(() => {}); }; window.addEventListener('pointerdown', on, { once: true }); });
-  }, [src]);
-  return <video ref={ref} src={src} autoPlay loop playsInline className="h-full w-full object-contain"/>;
+function SoundVideo({ src, vref }: { src: string; vref: React.RefObject<HTMLVideoElement | null> }) {
+  useEffect(() => { const el = vref.current; if (!el) return undefined; el.muted = false; el.volume = 1;
+    const on = () => { el.muted = false; el.volume = 1; void el.play().catch(() => {}); };
+    el.play().catch(() => { el.muted = true; void el.play().catch(() => {}); });
+    window.addEventListener('pointerdown', on, { once: true, capture: true });
+    return () => window.removeEventListener('pointerdown', on, { capture: true });
+  }, [src, vref]);
+  return <video ref={vref} src={src} autoPlay loop playsInline className="h-full w-full object-contain"/>;
 }
 
 export function BixtokMiniHost() {
   const { room, mini, feed } = useBixtokMini();
   const router = useRouter();
   const drag = useDrag();
+  const vid = useRef<HTMLVideoElement | null>(null);
   const [nonce, setNonce] = useState(0);
+  const tiktok = feed?.kind === 'iframe' && feed.src.includes('tiktok.com');
+  // Unmute synchronously inside the tap so phone browsers allow sound.
+  const soundOn = () => {
+    const el = vid.current;
+    if (el) { el.muted = false; el.volume = 1; void el.play().catch(() => {}); }
+    else if (tiktok) window.dispatchEvent(new CustomEvent(BIXTOK_SOUND_EVENT, { detail: false }));
+    else setNonce(n => n + 1);
+    try { navigator.vibrate?.(10); } catch { /* unsupported */ }
+  };
   if (!room && feed) return <div className={`bxl-mini bxl-mini-feed${drag.tucked ? ' bxl-tucked' : ''}`} {...drag.bind}>
-    {feed.kind === 'iframe' ? <iframe key={`${feed.src}-${nonce}`} src={feed.src.replace('mute=1', 'mute=0')} title={feed.title} allow="autoplay; encrypted-media" className="h-full w-full border-0"/> : feed.kind === 'video' ? <SoundVideo key={nonce} src={feed.src}/> : <img src={feed.src} alt={feed.title} className="h-full w-full object-contain"/>}
+    {feed.kind === 'iframe' ? (tiktok ? <BixtokTikTokPlayer src={feed.src} title={feed.title ?? 'BIXTOK'} muted={false} className="h-full w-full border-0"/> : <iframe key={`${feed.src}-${nonce}`} src={feed.src.replace('mute=1', 'mute=0')} title={feed.title} allow="autoplay; encrypted-media" className="h-full w-full border-0"/>) : feed.kind === 'video' ? <SoundVideo src={feed.src} vref={vid}/> : <img src={feed.src} alt={feed.title} className="h-full w-full object-contain"/>}
     {feed.title && <p className="bxl-mini-cap">{feed.title}</p>}
     {drag.handles}
     <div className="bxl-mini-ctl"><span className="bxl-mini-badge feed">BIXTOK</span>
-      {feed.kind !== 'img' && <button type="button" aria-label="Sound on" onClick={() => setNonce(n => n + 1)}><Volume2 size={14}/></button>}
+      {feed.kind !== 'img' && <button type="button" aria-label="Sound on" onClick={soundOn}><Volume2 size={14}/></button>}
       <button type="button" aria-label="Open BIXTOK" onClick={() => { if (feed.id) bixtokMini.rememberId(feed.id); bixtokMini.setFeed(null); void router.navigate({ to: '/bixtok' }); }}><Maximize2 size={14}/></button>
       <button type="button" aria-label="Close BIXTOK mini" onClick={() => bixtokMini.setFeed(null)}><X size={14}/></button></div>
   </div>;
