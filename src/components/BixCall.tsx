@@ -63,8 +63,18 @@ export function BixCallHost() {
           const p = peer.data as { name?: string; whatsapp?: string } | null;
           setCall({ id: row.id, peerId: row.caller_id, peerName: p?.name ?? 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: p?.whatsapp ?? null });
           try { navigator.vibrate?.([300, 200, 300]); } catch { /* unsupported */ }
+          sysNotify(`📞 BIXCALL · ${row.kind === 'video' ? 'Video call' : 'Panggilan suara'} masuk`, `@${p?.name ?? 'Member'} memanggil Anda`, `call-${row.id}`, true);
         }
       }
+      // Chat alerts while the app is in the background
+      if (document.hidden) {
+        const { data: msgs } = await supabase.from('bix_chat_messages' as never).select('id, sender_id, body, created_at').eq('recipient_id', me).is('read_at', null).gt('created_at', lastChat.current).order('created_at', { ascending: true }).limit(5);
+        for (const m of (msgs as { id: string; sender_id: string; body: string; created_at: string }[] | null) ?? []) {
+          lastChat.current = m.created_at;
+          const peer = await supabase.rpc('bix_call_peer' as never, { p_user: m.sender_id } as never);
+          sysNotify(`💬 BIX COMM · @${(peer.data as { name?: string } | null)?.name ?? 'Member'}`, m.body.slice(0, 120), `chat-${m.sender_id}`, false, `/call?chat=${m.sender_id}`);
+        }
+      } else lastChat.current = new Date().toISOString();
     };
     const t = setInterval(() => void tick(), 2500);
     void tick();
