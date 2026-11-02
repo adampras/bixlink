@@ -5090,3 +5090,19 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .hub-midnight .hub-swipe > *:nth-child(3n+1) { scroll-snap-align: start; }
 .hub-midnight .hub-group .hub-tile { position: relative; overflow: hidden; }
 .hub-midnight .hub-group .hub-tile::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 40%; background: linear-gradient(180deg, color-mix(in oklab, var(--tone) 12%, transparent), transparent); pointer-events: none; }
+
+/* HUB lux v3: page dots, badges, recent row, grabber, reflective sheen */
+.hub-midnight .hub-grabber{width:2.6rem;height:4px;margin:-.4rem auto .5rem;border-radius:999px;background:linear-gradient(90deg,transparent,var(--primary),transparent)}
+.hub-dots{display:flex;justify-content:center;gap:.3rem;margin-top:.45rem}
+.hub-dots i{width:.35rem;height:.35rem;border-radius:999px;background:color-mix(in oklab,var(--tone) 30%,transparent);transition:width .25s,background .25s}
+.hub-dots i.on{width:1.1rem;background:var(--tone);box-shadow:0 0 8px var(--tone)}
+.hub-midnight .hub-badge{position:absolute;top:.3rem;right:.3rem;z-index:2;padding:.05rem .3rem;border-radius:999px;font-size:7.5px;font-weight:900;letter-spacing:.08em;line-height:1.4;color:var(--primary-foreground);background:var(--tone)}
+.hub-midnight .hub-badge-hot{background:linear-gradient(90deg,oklch(.75 .17 50),oklch(.65 .22 25))}
+.hub-midnight .hub-badge-new{background:linear-gradient(90deg,oklch(.72 .2 305),oklch(.83 .14 85))}
+.hub-midnight .hub-recent .hub-recent-tile{flex-direction:row;justify-content:flex-start;gap:.35rem;padding:.35rem .4rem!important;text-align:left}
+.hub-midnight .hub-recent .hub-recent-tile .hub-emblem{width:1.6rem;height:1.6rem;margin:0;border-radius:.5rem;animation:none}
+.hub-midnight .hub-recent .hub-recent-tile .hub-emblem svg{width:13px;height:13px}
+.hub-midnight .hub-recent .hub-recent-tile .text-xs{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-midnight .hub-group .hub-tile::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,transparent 40%,color-mix(in oklab,var(--tone) 18%,transparent) 50%,transparent 60%);transform:translateX(-120%);animation:hub-sheen 7s ease-in-out infinite}
+@keyframes hub-sheen{0%,70%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@media (prefers-reduced-motion:reduce){.hub-midnight .hub-group .hub-tile::before{animation:none;display:none}}
