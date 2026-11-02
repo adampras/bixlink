@@ -22,7 +22,14 @@ const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLE
 
 function CallPage() {
   const { user, ready } = useMember();
-  return <BixShell><MemberGate ready={ready} signedIn={!!user} title="BIX CALL"><CallInner/></MemberGate></BixShell>;
+  const [perm, setPerm] = useState<string>('granted');
+  useEffect(() => { setPerm(typeof Notification === 'undefined' ? 'unsupported' : Notification.permission); }, []);
+  const back = () => { if (window.history.length > 1) window.history.back(); else window.location.href = '/'; };
+  return <div className="bixcall-page lux-page" data-tone="violet">
+    <button type="button" className="bixcall-back" aria-label="Kembali" onClick={back}><ArrowLeft size={18}/></button>
+    {perm === 'default' && <button type="button" className="bixcall-notify" onClick={() => void enableBixNotifications().then(p => setPerm(String(p)))}>🔔 Aktifkan notifikasi chat & panggilan</button>}
+    <MemberGate ready={ready} signedIn={!!user} title="BIX CALL"><CallInner/></MemberGate>
+  </div>;
 }
 
 function CallInner() {
