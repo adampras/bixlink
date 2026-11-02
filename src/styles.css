@@ -5145,3 +5145,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .modal-panel .form-input:focus,.lux-pop .form-input:focus,.lux-page .form-input:focus{border-color:var(--tone,var(--primary));box-shadow:0 0 0 3px color-mix(in oklab,var(--tone,var(--primary)) 18%,transparent)}
 .modal-panel :is(.rounded-xl,.rounded-2xl).border,.lux-pop :is(.rounded-xl,.rounded-2xl).border{border-color:color-mix(in oklab,oklch(0.76 0.15 160) 22%,transparent)!important;background:color-mix(in oklab,oklch(0.76 0.15 160) 6%,var(--card))}
 .modal-panel :is(button,a):active,.lux-pop :is(button,a):active{transform:scale(.97)}
+.site-shell .wallet-tile.wallet-tile--square{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:.6rem;row-gap:.1rem;align-items:center}
+.site-shell .wallet-tile--square .wallet-tile-icon{grid-row:1/3}
+.site-shell .wallet-tile--square .wallet-tile-title{white-space:nowrap;align-self:end;padding-right:2.6rem}
+.site-shell .wallet-tile--square .wallet-tile-sub{grid-column:2;align-self:start}
