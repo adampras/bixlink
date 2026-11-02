@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { luxConfirm } from '@/lib/bixtok-confirm';
 import { useVipHosts, VipBadge } from '@/lib/bixtok-vip';
 import { useQueryClient } from '@tanstack/react-query';
 import { Eye, Gift, Heart, MessageCircle, Mic, MicOff, Radio, Send, Share2, SwitchCamera, Volume2, VolumeX, X, UserPlus, Check, Copy, Crown, Pin, Users, LogOut, Camera, ShoppingBag, Swords, Music2, Circle, MonitorUp, MonitorOff, UserRoundPlus, VideoOff, Image as ImageIcon, Sparkles, Minimize2 } from 'lucide-react';
@@ -513,7 +514,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       <span className="bxl-chip"><Heart size={13}/>{likes}</span>
       {host && !ended && <button className="bixtok-end" onClick={stop}>End</button>}
       {onMinimize && !ended && <button aria-label="Mini mode" className="bixtok-icon" onClick={onMinimize}><Minimize2 size={17}/></button>}
-      <button aria-label="Close" className="bixtok-icon" onClick={() => { if (host && !ended) { if (!window.confirm('Leave and end this LIVE?')) return; void stop(); } onClose(); }}><X size={18}/></button>
+      <button aria-label="Close" className="bixtok-icon" onClick={async () => { if (host && !ended) { if (!(await luxConfirm('Your viewers will see the LIVE has ended.', { title: 'End this LIVE?', ok: 'End LIVE', cancel: 'Stay', danger: true }))) return; void stop(); } onClose(); }}><X size={18}/></button>
     </header>
     <div className="bxl-sub">
       <span className="bixtok-badge">{live.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span>
