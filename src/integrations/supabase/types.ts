@@ -438,12 +438,16 @@ export type Database = {
           body: string
           created_at: string
           deleted_at: string | null
+          delivered_at: string | null
           forwarded: boolean
           hidden_by: string[]
           id: string
           kind: string
           media_path: string | null
           meta: Json | null
+          pinned_at: string | null
+          pinned_by: string | null
+          reactions: Json
           read_at: string | null
           recipient_id: string
           reply_body: string | null
@@ -454,12 +458,16 @@ export type Database = {
           body: string
           created_at?: string
           deleted_at?: string | null
+          delivered_at?: string | null
           forwarded?: boolean
           hidden_by?: string[]
           id?: string
           kind?: string
           media_path?: string | null
           meta?: Json | null
+          pinned_at?: string | null
+          pinned_by?: string | null
+          reactions?: Json
           read_at?: string | null
           recipient_id: string
           reply_body?: string | null
@@ -470,12 +478,16 @@ export type Database = {
           body?: string
           created_at?: string
           deleted_at?: string | null
+          delivered_at?: string | null
           forwarded?: boolean
           hidden_by?: string[]
           id?: string
           kind?: string
           media_path?: string | null
           meta?: Json | null
+          pinned_at?: string | null
+          pinned_by?: string | null
+          reactions?: Json
           read_at?: string | null
           recipient_id?: string
           reply_body?: string | null
@@ -2969,6 +2981,7 @@ export type Database = {
         Args: { p_everyone?: boolean; p_id: string }
         Returns: Json
       }
+      bix_chat_delivered: { Args: never; Returns: undefined }
       bix_chat_guard: {
         Args: { p_me: string; p_to: string }
         Returns: undefined
@@ -2977,16 +2990,39 @@ export type Database = {
         Args: { p_amount: number; p_note?: string; p_to: string }
         Returns: Json
       }
+      bix_chat_pin: {
+        Args: { p_id: string; p_pin: boolean }
+        Returns: undefined
+      }
+      bix_chat_react: { Args: { p_emoji: string; p_id: string }; Returns: Json }
       bix_chat_read: { Args: { p_peer: string }; Returns: undefined }
       bix_chat_reply_snip: {
         Args: { p_me: string; p_peer: string; p_reply: string }
         Returns: string
+      }
+      bix_chat_request: {
+        Args: { p_amount: number; p_note?: string; p_to: string }
+        Returns: Json
+      }
+      bix_chat_request_act: {
+        Args: { p_action: string; p_id: string }
+        Returns: Json
       }
       bix_chat_send: {
         Args: {
           p_body: string
           p_forwarded?: boolean
           p_reply?: string
+          p_to: string
+        }
+        Returns: Json
+      }
+      bix_chat_send_file: {
+        Args: {
+          p_mime: string
+          p_name: string
+          p_path: string
+          p_size: number
           p_to: string
         }
         Returns: Json
