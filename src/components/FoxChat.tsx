@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import fox from '@/assets/fox-icon-180.png.asset.json';
 import { Button } from '@/components/ui/button';
 import { clampChatPosition } from '@/lib/interaction-comfort';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { usePublicConfig } from '@/lib/useMember';
 
 const LOAN_CODE = /\b(akun\s*pinjam(an)?|pinjaman\s*leader|loan\s*account|akun\s*loan)\b/i;
@@ -26,6 +26,7 @@ export function FoxChat() {
   const [busy, setBusy] = useState(false);
   const [loanCta, setLoanCta] = useState(false);
   const navigate = useNavigate();
+  const onCall = useRouterState({ select: s => s.location.pathname === '/call' });
   const { data: cfg } = usePublicConfig();
   const end = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
@@ -84,6 +85,7 @@ export function FoxChat() {
     } finally { setBusy(false); }
   }
 
+  if (onCall) return null;
   return <>
     {open && <div className="fox-chat-panel fixed bottom-44 right-3 z-50 flex h-[62vh] max-h-[520px] w-[calc(100vw-1.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-primary/40 bg-card/85 shadow-2xl backdrop-blur-xl backdrop-saturate-150">
       <header className="flex items-center gap-2 border-b border-primary/20 px-3 py-2">

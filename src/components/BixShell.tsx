@@ -19,7 +19,7 @@ import { isBlockedByMaintenance } from '@/lib/site-control';
 import { TxFeedbackHost } from '@/components/TxFeedback';
 import { MarketTicker } from '@/components/TradingFlair';
 import { createPortal } from 'react-dom';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, MessageCircle, Phone, Users, Settings } from 'lucide-react';
 import { SiteSearch } from '@/components/SiteSearch';
 import { SitePopup } from '@/components/SitePopup';
 import { MemberWelcome } from '@/components/MemberWelcome';
@@ -53,6 +53,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const path = useRouterState({ select: s => s.location.pathname });
+  const callTab = useRouterState({ select: s => (s.location.search as { tab?: string }).tab });
   const navLoading = useRouterState({ select: s => s.status === 'pending' });
   const { language, setLanguage, t, updates } = useI18n();
   const marketEnabled = publicConfig?.readiness.marketEnabled === true;
@@ -134,12 +135,17 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     {user && !path.startsWith('/admin') && <MemberWelcome userId={user.id}/>}
     {user && path !== '/call' && !path.startsWith('/admin') && !path.startsWith('/bixtok') && <BixComposePad/>}
     <footer hidden={path === '/call'} className="border-t border-border py-4"><SocialLinks links={publicConfig?.readiness.socials} signedIn={!!user}/><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
-    {user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden`}>
+    {user && path === '/call' ? <nav aria-label="BIX CALL" data-no-translate className="glass-dock comm-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden">
+      <DockHub path={path} cfg={publicConfig?.isAdmin ? undefined : publicConfig?.readiness.dockHub}/>
+      {COMM_NAV.map(n => { const on = (callTab ?? 'chat') === n.tab; return <Link key={n.tab} to="/call" search={{ tab: n.tab }} aria-current={on ? 'page' : undefined} className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19} className="shrink-0"/><span className="max-w-full truncate">{n.label}</span></Link>; })}
+    </nav> : user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden`}>
       <DockHub path={path} cfg={publicConfig?.isAdmin ? undefined : publicConfig?.readiness.dockHub}/>
       {NAV.filter(n => n.to !== '/boost' && n.to !== '/').map(n => n as typeof NAV[number]).map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} title={n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19} className="shrink-0"/><span className="max-w-full truncate">{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')}</span></Link>; })}
     </nav>}
   </div>;
 }
+
+const COMM_NAV = [{ tab: 'chat', label: 'CHAT', icon: MessageCircle }, { tab: 'call', label: 'CALL', icon: Phone }, { tab: 'community', label: 'COMMUNITY', icon: Users }, { tab: 'setting', label: 'SETTING', icon: Settings }] as const;
 
 const SOCIAL_ICONS: Record<string, string> = {
   telegram: 'M21.9 4.3 18.7 19.6c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9.1-8.2c.4-.4-.1-.6-.6-.2L6.3 13.3l-4.8-1.5c-1-.3-1.1-1 .2-1.5L20.5 3c.9-.3 1.6.2 1.4 1.3Z',
