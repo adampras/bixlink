@@ -5579,12 +5579,12 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .comm-actions>button+button::before{content:"";position:absolute;left:0;top:25%;bottom:25%;width:1px;background:rgb(255 255 255 / .1)}
 .comm-actions>button:active{background:rgb(168 85 247 / .25)}
 .comm-actions>button.is-locked{opacity:.45;border-style:none}
-.comm-room-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;text-align:center}
-.comm-room-stats span{padding:.5rem .2rem;border-radius:12px;background:rgb(255 255 255 / .03);border:1px solid rgb(255 215 0 / .12)}
-.comm-room-stats b{display:block;font-size:1.05rem;color:#FFD700;font-variant-numeric:tabular-nums}
-.comm-room-stats small{font-size:10px;color:var(--muted-foreground)}
-.comm-room-links{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:.6rem}
-.comm-room-links a{display:flex;align-items:center;justify-content:center;gap:.3rem;padding:.5rem .3rem;border-radius:999px;font-size:10.5px;font-weight:700;border:1px solid rgb(168 85 247 / .35);background:rgb(168 85 247 / .1)}
+.comm-team-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;text-align:center}
+.comm-team-stats span{padding:.5rem .2rem;border-radius:12px;background:rgb(255 255 255 / .03);border:1px solid rgb(255 215 0 / .12)}
+.comm-team-stats b{display:block;font-size:1.05rem;color:#FFD700;font-variant-numeric:tabular-nums}
+.comm-team-stats small{font-size:10px;color:var(--muted-foreground)}
+.comm-team-links{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:.6rem}
+.comm-team-links a{display:flex;align-items:center;justify-content:center;gap:.3rem;padding:.5rem .3rem;border-radius:999px;font-size:10.5px;font-weight:700;border:1px solid rgb(168 85 247 / .35);background:rgb(168 85 247 / .1)}
 .comm-chips button.is-on{color:#FFD700;border-color:rgb(255 215 0 / .5)}
 .comm-more{display:block;width:100%;margin-top:.5rem;padding:.45rem;font-size:11px;font-weight:700;color:#FFD700}
 .comm-notify{display:flex;align-items:center;gap:.6rem}

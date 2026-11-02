@@ -18,9 +18,9 @@ export function CommunityTab({ render }: { render: (id: string, name: string) =>
   const direct = tree.filter(n => n.parent_id === user?.id).length;
   const list = tree.filter(n => (gen == null || n.depth === gen) && (!q.trim() || `${label(n)} ${n.member_code ?? ''}`.toLowerCase().includes(q.trim().toLowerCase().replace(/^@/, ''))));
   return <>
-    <section className="comm-card comm-room">
-      <div className="comm-room-stats"><span><b>{tree.length}</b><small>Anggota tim</small></span><span><b>{direct}</b><small>Langsung</small></span><span><b>{gens.length}</b><small>Generasi</small></span></div>
-      <div className="comm-room-links">
+    <section className="comm-card comm-team">
+      <div className="comm-team-stats"><span><b>{tree.length}</b><small>Anggota tim</small></span><span><b>{direct}</b><small>Langsung</small></span><span><b>{gens.length}</b><small>Generasi</small></span></div>
+      <div className="comm-team-links">
         <Link to="/bixtok"><Radio size={15}/>LIVE BIXTOK</Link>
         <Link to="/network"><GitBranch size={15}/>Network</Link>
         <Link to="/pay"><Wallet size={15}/>BIX PAY</Link>
