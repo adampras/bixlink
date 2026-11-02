@@ -5365,3 +5365,11 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .comm-compose button:disabled{opacity:.4}
 .comm-pay{border:1px solid oklch(0.82 0.15 85 / .5)}
 @media (prefers-reduced-motion:reduce){.comm-status i{animation:none}}
+.comm-clear{background:transparent!important;color:var(--muted-foreground)!important;padding:.3rem!important}
+.comm-chips{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem}
+.comm-chips>*{font-size:9px;font-weight:700;letter-spacing:.06em;padding:.18rem .5rem;border-radius:999px;border:1px solid oklch(0.65 0.2 300 / .3);color:oklch(0.8 0.1 300)}
+.comm-chips>button{border-color:oklch(0.82 0.15 85 / .4);color:oklch(0.86 0.12 85)}
+.comm-meta{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem;margin-top:.15rem}
+.comm-meta button{font-size:10px;font-weight:800;padding:.1rem .45rem;border-radius:999px;border:1px solid oklch(0.82 0.15 85 / .55);color:oklch(0.86 0.13 85)}
+.comm-meta i{font-size:9px;font-style:normal;font-weight:700;padding:.1rem .45rem;border-radius:999px;color:oklch(0.8 0.15 155);border:1px solid oklch(0.75 0.17 155 / .5)}
+.comm-meta small{font-size:9px;color:var(--muted-foreground)}
