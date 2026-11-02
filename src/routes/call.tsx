@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import { PhoneCall, Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown } from 'lucide-react';
-import { enableBixNotifications } from '@/components/BixCall';
 import { MemberGate } from '@/components/MemberGate';
-import { startBixCall } from '@/components/BixCall';
+import { startBixCall, enableBixNotifications } from '@/components/BixCall';
 import { useMember } from '@/lib/useMember';
 import { supabase } from '@/integrations/supabase/client';
 

@@ -160,7 +160,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
         await room.connect(res.url, res.token);
         await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true });
         if (call.kind === 'video') {
-          await room.localParticipant.setCameraEnabled(true, { facingMode: 'user', resolution: { width: 540, height: 960 } });
+          await room.localParticipant.setCameraEnabled(true, { facingMode: 'user', resolution: { width: 720, height: 1280 } });
           const pub = room.localParticipant.getTrackPublication(Track.Source.Camera);
           if (pub?.track && localV.current) pub.track.attach(localV.current);
         }
