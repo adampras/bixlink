@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BixShell } from '@/components/BixShell';
 import { pushNotify } from '@/lib/bix-push';
 import heroImg from '@/assets/bixcall-hero-3d.jpg';
+import { playDtmf, getRingVolume, setRingVolume, startRingtone } from '@/lib/bix-tones';
 
 export const Route = createFileRoute('/call')({
   head: () => ({ meta: [{ title: 'BIX CALL & CHAT — BIXLINK' }, { name: 'description', content: 'Private chat, voice and video calls between BIXLINK members, unlocked by staking tier.' }, { property: 'og:title', content: 'BIX CALL & CHAT — BIXLINK' }, { property: 'og:description', content: 'Secure member-to-member chat and calls inside BIXLINK.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
@@ -151,8 +152,8 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
     setHist(list.map(r => { const pid = r.caller_id === me ? r.callee_id : r.caller_id; const p = peers.get(pid); return { ...r, peerId: pid, peer: p?.name ?? 'Member', canCall: !!p?.can_call }; }));
   })(); }, [me]);
   return <>
+    <Dialpad me={me} tier={tier} onChat={onChat}/>
     <TierLadder tier={tier}/>
-    <FindMember me={me} tier={tier} onChat={onChat}/>
     <section className="comm-card"><h3 className="comm-h">Riwayat panggilan</h3>
       {hist.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada panggilan.</p> : <ul className="comm-list">{hist.map(h => <li key={h.id} className="comm-row">
         <span className={`comm-dir ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : ''}`}>{h.caller_id === me ? '↗' : '↙'}</span>
@@ -160,6 +161,30 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
         <ActionButtons peerId={h.peerId} name={h.peer} tier={tier} canCall={h.canCall} onChat={onChat}/></li>)}</ul>}
     </section>
   </>;
+}
+
+const PAD = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'];
+const SUB: Record<string, string> = { '2': 'ABC', '3': 'DEF', '4': 'GHI', '5': 'JKL', '6': 'MNO', '7': 'PQRS', '8': 'TUV', '9': 'WXYZ', '0': '+' };
+function Dialpad({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: (id: string, name: string) => void }) {
+  const [num, setNum] = useState('');
+  const [found, setFound] = useState<Found | null | undefined>(undefined);
+  const [busy, setBusy] = useState(false);
+  const press = (k: string) => { playDtmf(k); try { navigator.vibrate?.(8); } catch { /* optional */ } setFound(undefined); setNum(n => (n + k).slice(0, 20)); };
+  const find = async () => {
+    const t = num.trim(); if (t.length < 3) return;
+    setBusy(true); const { data } = await supabase.rpc('bix_call_find' as never, { p_query: t } as never); setBusy(false);
+    setFound((data as Found | null) ?? null);
+  };
+  return <section className="comm-card comm-dial">
+    <h3 className="comm-h">Papan panggil</h3>
+    <div className="comm-dial-num"><input value={num} onChange={e => { setNum(e.target.value.slice(0, 20)); setFound(undefined); }} inputMode="tel" placeholder="BIX-ID atau no. WA"/>
+      {num && <button type="button" aria-label="Hapus angka" onClick={() => { setNum(n => n.slice(0, -1)); setFound(undefined); }}>⌫</button>}</div>
+    <div className="comm-dial-pad">{PAD.map(k => <button key={k} type="button" onClick={() => press(k)}><b>{k}</b><small>{SUB[k] ?? ''}</small></button>)}</div>
+    <button type="button" className="comm-dial-go" onClick={() => void find()} disabled={busy || num.trim().length < 3}><Phone size={18}/>{busy ? 'Mencari…' : 'Cari & hubungi'}</button>
+    {found === null && <p className="mt-2 text-center text-xs text-muted-foreground">Member tidak ditemukan.</p>}
+    {found && <div className="comm-peer"><span className="comm-ava">{found.name.slice(0, 1).toUpperCase()}</span><b className="min-w-0 flex-1 truncate">@{found.name}</b>
+      {found.user_id === me ? <small>Akun Anda</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
+  </section>;
 }
 
 function TierLadder({ tier }: { tier: Tier | null }) {
@@ -194,6 +219,7 @@ function PrivacyTab({ tier }: { tier: Tier | null }) {
       <h3 className="comm-h mt-4">Nomor HP / WhatsApp</h3>
       <input value={wa} onChange={e => setWa(e.target.value)} inputMode="tel" placeholder="+628123456789" className="comm-input"/>
       <label className="comm-check"><input type="checkbox" checked={pub} onChange={e => setPub(e.target.checked)}/>Tampilkan tombol WhatsApp ke penelepon</label>
+      <RingSetting/>
       <button onClick={() => void save()} className="comm-save">Simpan</button>
       {msg && <p className="mt-2 text-center text-xs">{msg}</p>}
       <p className="mt-3 flex items-start gap-1.5 text-[10px] text-muted-foreground"><ShieldCheck size={12} className="mt-0.5 shrink-0"/>Chat dan panggilan tersambung lewat akun BIXLINK; nomor Anda tidak pernah dibagikan kecuali Anda mengaktifkan tombol WhatsApp.</p>
@@ -201,6 +227,16 @@ function PrivacyTab({ tier }: { tier: Tier | null }) {
   </>;
 }
 
+function RingSetting() {
+  const [v, setV] = useState(0.7);
+  useEffect(() => setV(getRingVolume()), []);
+  const test = () => { const stop = startRingtone(); setTimeout(stop, 2400); };
+  return <><h3 className="comm-h mt-4">Nada dering BIX CALL</h3>
+    <div className="comm-ring"><input type="range" min={0} max={1} step={0.1} value={v} aria-label="Volume nada dering" onChange={e => { const n = Number(e.target.value); setV(n); setRingVolume(n); }}/>
+      <span>{v === 0 ? 'Senyap' : `${Math.round(v * 100)}%`}</span><button type="button" onClick={test}>▶ Tes</button></div></>;
+}
+
+const QUICK = ['Halo! 👋', 'Bisa telepon sekarang?', 'Sebentar ya', 'Siap 👍', 'Cek BIX PAY 🪙', 'Terima kasih 🙏'];
 function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; name: string }; tier: Tier | null; onBack: () => void }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [text, setText] = useState('');
@@ -284,6 +320,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     {err && <p className="comm-err">{err}</p>}
     {busy && <p className="comm-busy">Mengirim…</p>}
     {payOpen && <div className="comm-payform"><b>🪙 Kirim BIX ke @{name}</b><input inputMode="decimal" value={amt} onChange={e => setAmt(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="Jumlah BIX" className="comm-input"/><input value={note} onChange={e => setNote(e.target.value)} maxLength={120} placeholder="Catatan (opsional)" className="comm-input"/><div><button type="button" onClick={() => setPayOpen(false)}>Batal</button><button type="button" className="comm-save" onClick={() => void pay()} disabled={busy}>Kirim BIX</button></div><small>Transfer instan lewat BIX PAY dari saldo BIX Wallet Anda.</small></div>}
+    {!locked && !recording && <div className="comm-quick">{QUICK.map(q => <button key={q} type="button" onClick={() => setText(t => t ? `${t} ${q}` : q)}>{q}</button>)}</div>}
     <form className="comm-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
       <button type="button" aria-label="Kirim BIX" className="comm-pay" onClick={() => setPayOpen(v => !v)} disabled={locked}><Coins size={16}/></button>
       <button type="button" aria-label="Kirim foto" className="comm-pay" onClick={() => fileRef.current?.click()} disabled={locked || busy}><ImagePlus size={16}/></button>

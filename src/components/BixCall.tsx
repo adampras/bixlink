@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
 import foxLogo from '@/assets/bixlink-logo-gold.webp';
 import { ensureBixPush, pushNotify } from '@/lib/bix-push';
+import { startRingtone, startRingback, playConnected, playEnded } from '@/lib/bix-tones';
 
 type Kind = 'voice' | 'video';
 type Active = { id: string; peerId: string; peerName: string; kind: Kind; role: 'caller' | 'callee'; status: string; whatsapp?: string | null };
@@ -144,6 +145,16 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
   const [pip, setPip] = useState({ x: 0, y: 0 });
   const live = call.status === 'accepted';
   const done = ['ended', 'declined', 'missed'].includes(call.status);
+  const [ringMuted, setRingMuted] = useState(false);
+  const ringing = !live && !done;
+  useEffect(() => {
+    if (!ringing || ringMuted) return;
+    const stop = call.role === 'callee' ? startRingtone() : startRingback();
+    const vib = call.role === 'callee' ? setInterval(() => { try { navigator.vibrate?.([400, 200, 400]); } catch { /* unsupported */ } }, 2600) : undefined;
+    return () => { stop(); if (vib) clearInterval(vib); try { navigator.vibrate?.(0); } catch { /* unsupported */ } };
+  }, [ringing, ringMuted, call.role]);
+  useEffect(() => { if (link === 'on') playConnected(); }, [link]);
+  useEffect(() => { if (done) playEnded(); }, [done]);
 
   // Join room when accepted (caller joins as soon as callee accepts)
   useEffect(() => {
