@@ -93,13 +93,30 @@ function useDrag() {
 
 // Mini player keeps the speaker on; falls back to muted only if the browser blocks sound, then unmutes on first tap.
 function SoundVideo({ src, vref }: { src: string; vref: React.RefObject<HTMLVideoElement | null> }) {
+  const [audible, setAudible] = useState(false); const [seek, setSeek] = useState<{ k: number; dir: -1 | 1 } | null>(null);
+  const lastTap = useRef(0); const sync = () => { const el = vref.current; setAudible(!!el && !el.paused && !el.muted && el.volume > 0); };
   useEffect(() => { const el = vref.current; if (!el) return undefined; el.muted = false; el.volume = 1;
     const on = () => { el.muted = false; el.volume = 1; void el.play().catch(() => {}); };
     el.play().catch(() => { el.muted = true; void el.play().catch(() => {}); });
     window.addEventListener('pointerdown', on, { once: true, capture: true });
-    return () => window.removeEventListener('pointerdown', on, { capture: true });
+    return () => { bixtokMini.savePos(src, el.currentTime); window.removeEventListener('pointerdown', on, { capture: true }); };
   }, [src, vref]);
-  return <video ref={vref} src={src} autoPlay loop playsInline className="h-full w-full object-contain"/>;
+  // Double-tap: left half rewinds 5s, right half skips 5s.
+  const onTap = (e: React.MouseEvent<HTMLVideoElement>) => {
+    const now = Date.now(); const dbl = now - lastTap.current < 320; lastTap.current = dbl ? 0 : now; if (!dbl) return;
+    const el = e.currentTarget; const r = el.getBoundingClientRect(); const dir = e.clientX - r.left < r.width / 2 ? -1 : 1;
+    el.currentTime = Math.max(0, Math.min((el.duration || Infinity) - 0.2, el.currentTime + dir * 5));
+    const k = now; setSeek({ k, dir }); setTimeout(() => setSeek(s => (s?.k === k ? null : s)), 650);
+    try { navigator.vibrate?.(8); } catch { /* unsupported */ }
+  };
+  return <>
+    <video ref={vref} src={src} autoPlay loop playsInline className="h-full w-full object-contain" onClick={onTap}
+      onLoadedMetadata={e => { const t = bixtokMini.getPos(src); const el = e.currentTarget; if (t > 0.5 && (!el.duration || t < el.duration - 0.5)) el.currentTime = t; }}
+      onTimeUpdate={e => bixtokMini.savePos(src, e.currentTarget.currentTime)}
+      onPlay={sync} onPause={sync} onVolumeChange={sync}/>
+    {seek && <span key={seek.k} className={`bxl-mini-seek ${seek.dir < 0 ? 'l' : 'r'}`} aria-hidden>{seek.dir < 0 ? '« 5s' : '5s »'}</span>}
+    {audible && <span className="bxl-mini-eq" aria-label="Sound on"><i/><i/><i/><i/></span>}
+  </>;
 }
 
 export function BixtokMiniHost() {

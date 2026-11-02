@@ -310,7 +310,7 @@ function Media({ v, muted }: { v: Video; muted: boolean }) {
 function AutoVideo({ src, filter, muted, paused = false }: { src: string; filter?: string | null; muted: boolean; paused?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   const pausedRef = useRef(paused); pausedRef.current = paused;
-  useEffect(() => { const el = ref.current; if (el && paused) { el.muted = true; el.pause(); } }, [paused]);
+  useEffect(() => { const el = ref.current; if (!el) return; if (paused) { bixtokMini.savePos(src, el.currentTime); el.muted = true; el.pause(); } else { const t = bixtokMini.getPos(src); if (t > 0.5 && Math.abs(el.currentTime - t) > 1) el.currentTime = t; } }, [paused]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { const el = ref.current; if (!el) return; el.volume = 1; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting && !pausedRef.current) el.play().catch(() => { el.muted = true; void el.play().catch(() => {}); const on = () => { if (!mutedRef.current && !pausedRef.current && el.getBoundingClientRect().top < innerHeight / 2 && el.getBoundingClientRect().bottom > innerHeight / 2) { el.muted = false; void el.play().catch(() => {}); } }; window.addEventListener('pointerdown', on, { once: true }); }); else el.pause(); }, { threshold: 0.6 }); io.observe(el); return () => io.disconnect(); }, []);
   const [pre, setPre] = useState<'metadata' | 'auto'>('metadata');
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setPre('auto'); io.disconnect(); } }, { rootMargin: '120% 0px' }); io.observe(el); return () => io.disconnect(); }, []);
@@ -319,7 +319,8 @@ function AutoVideo({ src, filter, muted, paused = false }: { src: string; filter
   const onClick = (e: React.MouseEvent<HTMLVideoElement>) => { const el = e.currentTarget; clearTimeout(tapT.current); if (e.detail > 1) return;
     tapT.current = window.setTimeout(() => { if (el.paused) { void el.play().catch(() => {}); setIcon('play'); } else { el.pause(); setIcon('pause'); } window.setTimeout(() => setIcon(null), 600); }, 300); };
   return <><video ref={ref} src={src} loop muted={muted} playsInline preload={pre} className="bixtok-video" style={{ filter: filterCss(filter) }} onClick={onClick}
-    onTimeUpdate={e => { const el = e.currentTarget; if (bar.current && el.duration) bar.current.style.transform = `scaleX(${el.currentTime / el.duration})`; }}
+    onLoadedMetadata={e => { const t = bixtokMini.getPos(src); const el = e.currentTarget; if (t > 0.5 && (!el.duration || t < el.duration - 0.5)) el.currentTime = t; }}
+    onTimeUpdate={e => { const el = e.currentTarget; bixtokMini.savePos(src, el.currentTime); if (bar.current && el.duration) bar.current.style.transform = `scaleX(${el.currentTime / el.duration})`; }}
     onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>
     <span className="bxt-progress" aria-hidden><span ref={bar}/></span>
     {icon && <span className="bxt-playicon" aria-hidden>{icon === 'pause' ? '❚❚' : '▶'}</span>}</>;
