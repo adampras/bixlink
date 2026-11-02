@@ -171,22 +171,30 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
         roomRef.current = room;
         room.on(RoomEvent.TrackSubscribed, (t: RemoteTrack) => {
           if (t.kind === Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); setRemoteVideo(true); }
-          if (t.kind === Track.Kind.Audio && audioBox.current) { audioBox.current.querySelectorAll('audio').forEach(a => a.remove()); const el = t.attach() as HTMLAudioElement; el.volume = 0.85; audioBox.current.appendChild(el); void el.play().catch(() => {}); }
+          if (t.kind === Track.Kind.Audio && audioBox.current) { audioBox.current.querySelectorAll('audio').forEach(a => a.remove()); const el = t.attach() as HTMLAudioElement; el.volume = shieldRef.current ? 0.7 : 0.9; audioBox.current.appendChild(el); void el.play().catch(() => {}); }
         });
         room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach(); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
         room.on(RoomEvent.ParticipantDisconnected, () => onEnd());
         await room.connect(res.url, res.token);
-        // Voice-tuned mic: hardware echo cancel + noise suppression, mono 48k, AGC off (AGC pumps gain at close range and causes howling).
-        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: false, channelCount: 1, sampleRate: 48000, voiceIsolation: true } as never, { dtx: true, red: true, audioPreset: { maxBitrate: 32000 } });
+        // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
+        try {
+          const vs = await openVoiceShield(); if (cancelled) { vs.stop(); return; }
+          voiceRef.current = vs;
+          await room.localParticipant.publishTrack(vs.track, { source: Track.Source.Microphone, dtx: true, red: true, audioPreset: { maxBitrate: 40000 } });
+        } catch {
+          await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } as never, { dtx: true, red: true });
+        }
         if (call.kind === 'video') {
-          await room.localParticipant.setCameraEnabled(true, { facingMode: 'user', resolution: { width: 720, height: 1280 } });
+          await room.localParticipant.setCameraEnabled(true, { facingMode: 'user', resolution: { width: 720, height: 1280, frameRate: 30 } },
+            { videoCodec: 'vp8', simulcast: true, degradationPreference: 'maintain-resolution', videoEncoding: { maxBitrate: 1_800_000, maxFramerate: 30 } });
           const pub = room.localParticipant.getTrackPublication(Track.Source.Camera);
+          const mt = pub?.track?.mediaStreamTrack; if (mt && 'contentHint' in mt) mt.contentHint = 'detail';
           if (pub?.track && localV.current) pub.track.attach(localV.current);
         }
         if (!cancelled) setLink('on');
       } catch { if (!cancelled) setLink('fail'); }
     })();
-    return () => { cancelled = true; void room?.disconnect(); roomRef.current = null; };
+    return () => { cancelled = true; void room?.disconnect(); roomRef.current = null; voiceRef.current?.stop(); voiceRef.current = null; };
   }, [live, call.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { if (!live) return; const t = setInterval(() => setSecs(s => s + 1), 1000); return () => clearInterval(t); }, [live]);
