@@ -3,7 +3,7 @@ const COMM_TABS: string[] = ['chat', 'call', 'community', 'setting'];
 import { useEffect, useRef, useState } from 'react';
 import { PhoneCall, Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
-import { startBixCall, enableBixNotifications } from '@/components/BixCall';
+import { startBixCall } from '@/components/BixCall';
 import { useMember } from '@/lib/useMember';
 import { CommunityTab, NotifyCard } from '@/components/BixCommExtras';
 import { supabase } from '@/integrations/supabase/client';
@@ -66,8 +66,6 @@ const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLE
 
 function CallPage() {
   const { user, ready } = useMember();
-  const [perm, setPerm] = useState<string>('granted');
-  useEffect(() => { setPerm(typeof Notification === 'undefined' ? 'unsupported' : Notification.permission); }, []);
   const back = () => { if (window.history.length > 1) window.history.back(); else window.location.href = '/'; };
   return <BixShell><div className="bixcall-page">
     <button type="button" className="bixcall-back" aria-label="Kembali" onClick={back}><ArrowLeft size={18}/></button>
