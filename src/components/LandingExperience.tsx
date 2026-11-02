@@ -1,3 +1,4 @@
+import { PartnershipPanel } from "@/components/PartnershipPanel";
 import { Link } from '@tanstack/react-router';
 import { Building2, CircleDollarSign, Globe2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
