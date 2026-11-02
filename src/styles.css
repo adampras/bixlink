@@ -5375,7 +5375,14 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .comm-meta small{font-size:9px;color:var(--muted-foreground)}
 
 /* BIX CALL full-screen page: no shell, only a back arrow */
-.bixcall-page{position:fixed;inset:0;z-index:60;overflow-y:auto;min-height:100dvh;padding:calc(env(safe-area-inset-top) + 58px) 14px calc(env(safe-area-inset-bottom) + 20px);background:radial-gradient(120% 60% at 50% 0%,rgba(168,85,247,.22),transparent 60%),#05040a}
-.bixcall-back{position:fixed;top:calc(env(safe-area-inset-top) + 12px);left:12px;z-index:61;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#FFD700;background:rgba(8,6,14,.78);border:1px solid rgba(255,215,0,.45);backdrop-filter:blur(10px);box-shadow:0 0 14px rgba(168,85,247,.35)}
+.bixcall-page{position:relative;padding:10px 0 110px}
+.bixcall-back{position:absolute;top:18px;left:18px;z-index:3;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#FFD700;background:rgba(8,6,14,.78);border:1px solid rgba(255,215,0,.45);backdrop-filter:blur(10px);box-shadow:0 0 14px rgba(168,85,247,.35)}
+.bixcall-hero{position:relative;margin:0 auto 12px;max-width:36rem;width:calc(100% - 24px);height:150px;border-radius:22px;overflow:hidden;border:1px solid rgba(255,215,0,.28);box-shadow:0 0 28px rgba(168,85,247,.25),inset 0 1px 0 rgba(255,215,0,.35)}
+.bixcall-hero img{width:100%;height:100%;object-fit:cover;animation:bixcall-float 7s ease-in-out infinite}
+.bixcall-hero div{position:absolute;left:0;right:0;bottom:0;padding:12px 16px;background:linear-gradient(transparent,rgba(5,4,10,.9))}
+.bixcall-hero b{display:block;font-size:20px;letter-spacing:.2em;background:linear-gradient(90deg,#FFD700,#A855F7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bixcall-hero small{font-size:10px;color:rgba(255,255,255,.7)}
+@keyframes bixcall-float{50%{transform:scale(1.05) translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.bixcall-hero img{animation:none}}
 .bixcall-back:active{transform:scale(.94)}
 .bixcall-notify{display:block;margin:0 auto 12px;padding:8px 14px;border-radius:999px;font-size:11px;font-weight:700;color:#FFD700;background:rgba(8,6,14,.7);border:1px solid rgba(255,215,0,.35)}

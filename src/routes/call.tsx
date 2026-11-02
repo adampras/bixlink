@@ -5,6 +5,8 @@ import { MemberGate } from '@/components/MemberGate';
 import { startBixCall, enableBixNotifications } from '@/components/BixCall';
 import { useMember } from '@/lib/useMember';
 import { supabase } from '@/integrations/supabase/client';
+import { BixShell } from '@/components/BixShell';
+import heroImg from '@/assets/bixcall-hero-3d.jpg';
 
 export const Route = createFileRoute('/call')({
   head: () => ({ meta: [{ title: 'BIX CALL & CHAT — BIXLINK' }, { name: 'description', content: 'Private chat, voice and video calls between BIXLINK members, unlocked by staking tier.' }, { property: 'og:title', content: 'BIX CALL & CHAT — BIXLINK' }, { property: 'og:description', content: 'Secure member-to-member chat and calls inside BIXLINK.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
@@ -24,11 +26,12 @@ function CallPage() {
   const [perm, setPerm] = useState<string>('granted');
   useEffect(() => { setPerm(typeof Notification === 'undefined' ? 'unsupported' : Notification.permission); }, []);
   const back = () => { if (window.history.length > 1) window.history.back(); else window.location.href = '/'; };
-  return <div className="bixcall-page lux-page" data-tone="violet">
+  return <BixShell><div className="bixcall-page">
     <button type="button" className="bixcall-back" aria-label="Kembali" onClick={back}><ArrowLeft size={18}/></button>
+    <section className="bixcall-hero"><img src={heroImg} alt="BIX CALL 3D" width={1024} height={640}/><div><b>BIX CALL</b><small>Chat · Suara · Video — khusus member BIXLINK</small></div></section>
     {perm === 'default' && <button type="button" className="bixcall-notify" onClick={() => void enableBixNotifications().then(p => setPerm(String(p)))}>🔔 Aktifkan notifikasi chat & panggilan</button>}
     <MemberGate ready={ready} signedIn={!!user} title="BIX CALL"><CallInner/></MemberGate>
-  </div>;
+  </div></BixShell>;
 }
 
 function CallInner() {
