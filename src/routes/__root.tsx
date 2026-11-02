@@ -1,3 +1,4 @@
+import { BixCallHost } from '@/components/BixCall';
 import { BixtokMiniHost } from '@/components/BixtokMiniHost';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -159,6 +160,7 @@ function RootComponent() {
         <Outlet />
         <BixtokMiniHost />
         <FoxChat />
+        <BixCallHost />
         <InteractionComfort />
       </I18nProvider>
     </QueryClientProvider>

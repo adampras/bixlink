@@ -1,3 +1,4 @@
+import { CallButtons } from '@/components/BixCall';
 import bixtokLogo from '@/assets/bixtok-logo.png';
 import { noteInterest, rankForYou, readAffinity } from '@/lib/bixtok-foryou';
 import { luxConfirm } from '@/lib/bixtok-confirm';
@@ -236,6 +237,7 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
       <p>{videos.filter(x => x.creator_id === peek.creator_id).length} posts · {videos.filter(x => x.creator_id === peek.creator_id).reduce((a, x) => a + Number(x.likes || 0), 0)} likes</p>
       {peek.creator_id && peek.creator_id !== me && <div className="bxt-peek-act">
         {liveHosts.has(peek.creator_id) && <button className="bixtok-cta" onClick={() => { const l = liveHosts.get(peek.creator_id!)!; setPeek(null); onEnterLive?.(l); }}>🔴 Watch LIVE</button>}
+        <CallButtons peerId={peek.creator_id} peerName={peek.creator_name}/>
         <button className="bixtok-cta" onClick={() => onFollow(peek.creator_id!)}>{following.has(peek.creator_id) ? 'Unfollow' : 'Follow'}</button>
         {peek.allow_gifts !== false && <button className="bixtok-cta" onClick={() => { const id = peek.id; setPeek(null); onGift(id); }}>🎁 Gift</button>}
       </div>}</div>
