@@ -26,7 +26,7 @@ export const Route = createFileRoute('/bixtok')({
 });
 
 const TAB_ICONS: Record<string, typeof Heart> = { foryou: Sparkles, live: Radio, following: UserCheck, favorite: Star, friends: Users, explore: Compass, nearby: MapPin, mine: User };
-type Cfg = { link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean };
+type Cfg = { link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_host_min_stake_usd?: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean };
 type Sched = { id: string; title: string; host_name: string; starts_at: string; reminded: boolean; count: number };
 type Gift = { id: string; name: string; emoji: string; currency: string; price: number };
 type Video = { id: string; creator_name: string; creator_id: string | null; caption: string; video_url: string; likes: number; media_path: string | null; media_kind: string; filter: string; overlay: string; allow_gifts: boolean; src: string; text_style: Partial<TextStyle> | null; music_title: string | null; music_url: string | null; source_kind: string; clean?: string | undefined };
@@ -310,6 +310,7 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
   const qc = useQueryClient(); const [title, setTitle] = useState(''); const [busy, setBusy] = useState(false);
   const [hidden, setHidden] = useState<string[]>([]); const shown = data.lives.filter(l => !hidden.includes(l.id));
   const eligible = data.stake > 0 && data.stake >= Number(data.cfg.live_min_stake_usd);
+  const hostMin = Number(data.cfg.live_host_min_stake_usd ?? 500);
   const [otitle, setOtitle] = useState('');
   const official = async () => { setBusy(true);
     const { data: id, error } = await supabase.rpc('bixtok_start_official_live', { p_title: otitle });
@@ -356,6 +357,9 @@ function LiveLobby({ data, onEnter, onNote }: { data: { cfg: Cfg; lives: Live[];
           <button className="bixtok-cta" disabled={busy}>{busy ? 'Starting…' : 'Start LIVE'}</button>
         </form>
        : <div><p className="text-xs text-muted-foreground">Go LIVE is open to members with an active staking package{Number(data.cfg.live_min_stake_usd) > 0 ? ` of at least $${Number(data.cfg.live_min_stake_usd).toFixed(2)}` : ''}.</p><Link to="/stake" className="bixtok-cta mt-3 inline-block">Join a staking package</Link></div>}
+      <p className="mt-3 text-xs text-muted-foreground">{data.stake >= hostMin
+        ? <b className="text-primary">👑 VIP HOST · your ${data.stake.toFixed(0)} staking unlocks the Host badge</b>
+        : <>Community LIVE from ${Number(data.cfg.live_min_stake_usd).toFixed(0)} · VIP HOST badge from ${hostMin.toFixed(0)} staking{data.stake > 0 ? ` (you: $${data.stake.toFixed(0)})` : ''}</>}</p>
     </div>
     <h3 className="mt-6 text-xs font-bold tracking-widest text-muted-foreground">LIVE NOW · {shown.length}</h3>
     <div className="bixtok-live-grid">{shown.map(l => <div key={l.id} className="relative"><button className={`w-full ${l.kind === 'official' ? 'bxt-official' : ''}`} onClick={() => onEnter(l)}><span className="bixtok-badge">{l.kind === 'official' ? 'OFFICIAL LIVE' : 'LIVE'}</span><b>{l.title}</b><small>@{l.host_name}</small></button>
