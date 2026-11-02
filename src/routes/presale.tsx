@@ -1,4 +1,3 @@
-import { Web3Connect } from '@/components/Web3Connect';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import heroLux from '@/assets/presale-hero-lux.jpg';
 import { useEffect, useRef, useState } from 'react';
@@ -67,28 +66,25 @@ function PresalePage() {
     try { const r = await buy({ data: { usd, strategy: strategy as 'standard' | PresaleStrategy } }); setMsg(`Locked ${number(r.bix)} BIX · Genesis certificate #GEN-${String(r.serial ?? 0).padStart(4, '0')}${r.dailyUsd > 0 ? ` · $${number(r.dailyUsd, { maximumFractionDigits: 2 })}/day USDT` : ''}.`); setReceipt({ usd, bix: Number(r.bix), serial: Number(r.serial ?? 0), dailyUsd: Number(r.dailyUsd ?? 0) }); txFeedback.success('Presale purchase successful', `${number(r.bix)} BIX locked.`); setSelection(null); await Promise.all([qc.invalidateQueries({ queryKey: ['presale'] }), qc.invalidateQueries({ queryKey: ['my-wallet'] }), qc.invalidateQueries({ queryKey: ['my-bixlink'] })]); }
     catch (e) { setPurchaseError(e instanceof Error ? e.message : 'Purchase failed'); } finally { setBusy(null); }
   };
-  return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10"><Web3Connect/>
+  return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
     {(() => {
       const stages = cfg?.stages ?? [{ price: 0.5 }, { price: 0.65 }, { price: 0.8 }];
       const ai = cfg?.activeStage ?? 0; const cur = stages[ai]; const ph = stagePhase(cur, now);
       const target = ph === 'upcoming' ? cur?.startsAt : ph === 'live' ? cur?.endsAt : null;
       const left = target ? Math.max(0, Date.parse(target) - now) : 0;
       const cd = [Math.floor(left / 864e5), Math.floor(left / 36e5) % 24, Math.floor(left / 6e4) % 60, Math.floor(left / 1e3) % 60];
-      return <section className="presale-portal relative mt-1 overflow-hidden rounded-3xl border border-chart-3/40">
-        <img src={heroLux} alt="BIXLINK Genesis Presale gold fox coin" width={1280} height={768} className="presale-portal-img absolute inset-0 h-full w-full object-cover"/>
-        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background"/>
+      return <section className="presale-portal presale-hero-min relative mt-1 overflow-hidden rounded-3xl border">
+        <img src={heroLux} alt="" aria-hidden width={1280} height={768} className="presale-hero-art"/>
         <div className="presale-portal-glow" aria-hidden/>
-        <div className="relative p-5 pt-24 sm:p-8 sm:pt-40">
-          <div className="flex items-center gap-2"><span className="presale-live-dot" aria-hidden/><p className="text-[10px] font-bold tracking-[0.35em] text-chart-3">GENESIS · STAGE {ai + 1} OF 3</p></div>
-          <h1 className="mt-2 font-display text-3xl font-black leading-none text-foreground sm:text-5xl">BIX <span className="presale-gold-text">PRESALE</span></h1>
-          <p className="mt-2 text-sm text-muted-foreground">Genesis allocation · locked BIX released by mining over time.</p>
-          <div className="mt-4 flex items-end gap-3"><span className="numeric font-display text-4xl font-black text-foreground">${number(cur?.price ?? 0.5, { maximumFractionDigits: 4 })}</span><span className="pb-1 text-xs text-muted-foreground">per BIX · USDT</span></div>
-          {target ? <div className="mt-4"><p className="text-[10px] font-bold tracking-[0.25em] text-muted-foreground">{ph === 'upcoming' ? 'STAGE OPENS IN' : 'STAGE CLOSES IN'}</p>
-            <div className="mt-1.5 grid max-w-xs grid-cols-4 gap-1.5">{cd.map((v, i) => <div key={i} className="presale-cd-cell"><b className="numeric font-display text-xl">{String(v).padStart(2, '0')}</b><span className="text-[9px] text-muted-foreground">{['DAYS', 'HRS', 'MIN', 'SEC'][i]}</span></div>)}</div></div>
-            : ph === 'ended' ? <p className="mt-4 text-xs font-bold text-destructive">This stage has closed · next stage opens soon.</p> : null}
-          <div className="mt-5 flex gap-2">
-            <Button className="flex-1 rounded-xl" onClick={() => setTab('packages')}>Presale packages</Button>
-            <Button asChild variant="outline" className="flex-1 rounded-xl border-chart-3/60 bg-background/40 text-chart-3 backdrop-blur"><Link to="/boost">BOOST APY</Link></Button>
+        <div className="relative p-4 sm:p-6">
+          <div className="flex items-center justify-between gap-2"><div className="flex items-center gap-2"><span className="presale-live-dot" aria-hidden/><p className="text-[9px] font-bold tracking-[0.3em] text-chart-3">GENESIS · STAGE {ai + 1}/3</p></div>{target ? <span className="presale-hero-chip">{ph === 'upcoming' ? 'Opens in' : 'Closes in'}</span> : ph === 'ended' ? <span className="presale-hero-chip text-destructive">Closed</span> : null}</div>
+          <h1 className="mt-2 font-display text-2xl font-black leading-none text-foreground sm:text-4xl">BIX <span className="presale-gold-text">PRESALE</span></h1>
+          <div className="mt-3 flex items-end gap-2"><span className="numeric font-display text-3xl font-black text-foreground">${number(cur?.price ?? 0.5, { maximumFractionDigits: 4 })}</span><span className="pb-1 text-[10px] text-muted-foreground">per BIX · USDT</span></div>
+          {target ? <div className="mt-3 grid max-w-[15rem] grid-cols-4 gap-1">{cd.map((v, i) => <div key={i} className="presale-cd-cell"><b className="numeric font-display text-base">{String(v).padStart(2, '0')}</b><span className="text-[8px] text-muted-foreground">{['DAYS', 'HRS', 'MIN', 'SEC'][i]}</span></div>)}</div>
+            : ph === 'ended' ? <p className="mt-3 text-[11px] font-bold text-destructive">This stage has closed · next stage opens soon.</p> : null}
+          <div className="mt-4 flex gap-2">
+            <Button size="sm" className="h-9 flex-1 rounded-full" onClick={() => setTab('packages')}>Presale packages</Button>
+            <Button asChild size="sm" variant="outline" className="h-9 flex-1 rounded-full border-chart-3/60 bg-background/40 text-chart-3 backdrop-blur"><Link to="/boost">BOOST APY</Link></Button>
           </div>
         </div>
         <ol className="relative grid grid-cols-3 gap-px border-t border-chart-3/25 bg-chart-3/15">{stages.map((s, i) => { const p = stagePhase(s, now); const state = i === ai ? 'is-active' : i < ai || p === 'ended' ? 'is-done' : ''; return <li key={i} className={`presale-stage-step ${state}`}>

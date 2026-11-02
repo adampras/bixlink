@@ -5161,3 +5161,19 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .tx-row.tx-bonus{--tx:var(--chart-3)}
 .tx-row .tx-chip{display:grid;place-items:center;flex-shrink:0;width:2.1rem;height:2.1rem;border-radius:.7rem;color:var(--tx);border:1px solid color-mix(in oklab,var(--tx) 45%,transparent);background:color-mix(in oklab,var(--tx) 14%,transparent);box-shadow:0 0 12px -4px var(--tx)}
 .tx-row .tx-amt{color:var(--tx)}
+
+/* Presale: minimalist lux hero + HUB tone */
+.presale-hero-min{border-color:color-mix(in oklab,var(--tone,var(--chart-3)) 32%,transparent)!important;background:radial-gradient(120% 90% at 100% 0%,color-mix(in oklab,var(--tone,var(--chart-3)) 16%,transparent),transparent 60%),linear-gradient(165deg,color-mix(in oklab,var(--card) 92%,var(--tone,var(--chart-3))),var(--background))!important;box-shadow:inset 0 1px 0 color-mix(in oklab,var(--tone,var(--chart-3)) 30%,transparent),0 18px 40px -26px var(--tone,var(--chart-3))!important}
+.presale-hero-art{position:absolute;right:-12%;top:-8%;width:62%;max-width:22rem;height:auto;aspect-ratio:5/3;object-fit:cover;opacity:.32;border-radius:50%;-webkit-mask-image:radial-gradient(closest-side,#000 40%,transparent);mask-image:radial-gradient(closest-side,#000 40%,transparent);pointer-events:none}
+.presale-hero-chip{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:.2rem .55rem;border-radius:999px;border:1px solid color-mix(in oklab,var(--tone,var(--chart-3)) 40%,transparent);color:var(--tone,var(--chart-3));background:color-mix(in oklab,var(--tone,var(--chart-3)) 10%,transparent)}
+.presale-hero-min .presale-cd-cell{padding:.3rem 0;border-radius:.6rem;border:1px solid color-mix(in oklab,var(--tone,var(--chart-3)) 26%,transparent);background:color-mix(in oklab,var(--background) 70%,transparent);display:flex;flex-direction:column;align-items:center}
+.presale-hero-min .presale-stage-step{padding:.45rem .3rem}
+.lux-page .presale-stat-card,.lux-page .presale-lux-card{border:1px solid color-mix(in oklab,var(--tone) 28%,transparent)!important;background:linear-gradient(165deg,color-mix(in oklab,var(--tone) 9%,var(--card)),color-mix(in oklab,var(--background) 92%,var(--tone)))!important;box-shadow:inset 0 1px 0 color-mix(in oklab,var(--tone) 24%,transparent),0 10px 24px -18px var(--tone)!important}
+.lux-page .presale-stat-card{border-radius:.9rem;padding:.55rem .3rem}
+.lux-page .presale-lux-card{border-radius:1rem}
+.lux-page .presale-lux-inner{padding:12px!important;border-radius:.95rem}
+.lux-page .presale-lux-price{font-size:clamp(1.1rem,5vw,1.6rem)}
+.lux-page .presale-tabs{border-color:color-mix(in oklab,var(--tone) 32%,transparent);background:color-mix(in oklab,var(--card) 80%,transparent)}
+.lux-page .presale-tabs button{padding:.4rem .75rem;font-size:.7rem}
+.lux-page .presale-tabs .is-active{background:linear-gradient(135deg,var(--tone),color-mix(in oklab,var(--tone) 60%,var(--background)))!important}
+.lux-page section[aria-label="Presale pool availability"]{border-color:color-mix(in oklab,var(--tone) 22%,transparent)}
