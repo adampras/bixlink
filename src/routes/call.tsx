@@ -4,6 +4,7 @@ import { PhoneCall, Search, ShieldCheck } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { CallButtons } from '@/components/BixCall';
+import { useMember } from '@/lib/useMember';
 import { supabase } from '@/integrations/supabase/client';
 
 export const Route = createFileRoute('/call')({
@@ -16,7 +17,8 @@ type Row = { id: string; caller_id: string; callee_id: string; kind: string; sta
 const PERMS = [['all', 'Semua member'], ['friends', 'Saling follow BIXTOK'], ['network', 'Tim jaringan saya'], ['none', 'Tidak menerima']] as const;
 
 function CallPage() {
-  return <BixShell><MemberGate><CallInner/></MemberGate></BixShell>;
+  const { user, ready } = useMember();
+  return <BixShell><MemberGate ready={ready} signedIn={!!user} title="BIX CALL"><CallInner/></MemberGate></BixShell>;
 }
 
 function CallInner() {
