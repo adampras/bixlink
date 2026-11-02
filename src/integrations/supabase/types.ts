@@ -417,6 +417,9 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          kind: string
+          media_path: string | null
+          meta: Json | null
           read_at: string | null
           recipient_id: string
           sender_id: string
@@ -425,6 +428,9 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          kind?: string
+          media_path?: string | null
+          meta?: Json | null
           read_at?: string | null
           recipient_id: string
           sender_id: string
@@ -433,6 +439,9 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          kind?: string
+          media_path?: string | null
+          meta?: Json | null
           read_at?: string | null
           recipient_id?: string
           sender_id?: string
@@ -2896,8 +2905,20 @@ export type Database = {
       }
       bix_can_manage_packages: { Args: never; Returns: boolean }
       bix_challenge_verified_team: { Args: { p_user: string }; Returns: number }
+      bix_chat_guard: {
+        Args: { p_me: string; p_to: string }
+        Returns: undefined
+      }
+      bix_chat_pay: {
+        Args: { p_amount: number; p_note?: string; p_to: string }
+        Returns: Json
+      }
       bix_chat_read: { Args: { p_peer: string }; Returns: undefined }
       bix_chat_send: { Args: { p_body: string; p_to: string }; Returns: Json }
+      bix_chat_send_media: {
+        Args: { p_body?: string; p_kind: string; p_path: string; p_to: string }
+        Returns: Json
+      }
       bix_chat_threads: { Args: never; Returns: Json }
       bix_claim_conditional_leader: {
         Args: { p_days: number; p_package: string }
