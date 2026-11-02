@@ -5399,3 +5399,19 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .comm-busy{text-align:center;font-size:11px;opacity:.7}
 .comm-payform{margin:0 12px 8px;padding:12px;border-radius:16px;display:grid;gap:8px;background:color-mix(in oklab,var(--card) 90%,transparent);border:1px solid color-mix(in oklab,#FFD700 40%,transparent)}
 .comm-payform>div{display:flex;gap:8px;justify-content:flex-end}.comm-payform small{font-size:10px;opacity:.7}
+
+/* BIX CALL dialpad, quick replies, ringtone */
+.comm-dial-num{display:flex;align-items:center;gap:.4rem;border-bottom:1px solid color-mix(in oklab,var(--primary) 30%,transparent);padding-bottom:.4rem}
+.comm-dial-num input{flex:1;min-width:0;background:transparent;border:0;outline:0;text-align:center;font-size:1.35rem;letter-spacing:.12em;font-weight:700;color:var(--foreground)}
+.comm-dial-num button{color:var(--muted-foreground);font-size:1.1rem;padding:0 .3rem}
+.comm-dial-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.75rem auto 0;max-width:16rem}
+.comm-dial-pad button{aspect-ratio:1.35;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:color-mix(in oklab,var(--card) 80%,transparent);border:1px solid color-mix(in oklab,var(--primary) 22%,transparent);transition:transform .1s,background .15s}
+.comm-dial-pad button:active{transform:scale(.92);background:color-mix(in oklab,var(--primary) 22%,var(--card))}
+.comm-dial-pad b{font-size:1.25rem;line-height:1}.comm-dial-pad small{font-size:.5rem;letter-spacing:.14em;color:var(--muted-foreground);min-height:.6rem}
+.comm-dial-go{margin:.75rem auto 0;display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;max-width:16rem;padding:.65rem;border-radius:999px;font-weight:800;font-size:.8rem;background:linear-gradient(135deg,var(--primary),color-mix(in oklab,var(--primary) 60%,var(--accent)));color:var(--primary-foreground)}
+.comm-dial-go:disabled{opacity:.45}
+.comm-quick{display:flex;gap:.35rem;overflow-x:auto;padding:.35rem .75rem;scrollbar-width:none}
+.comm-quick::-webkit-scrollbar{display:none}
+.comm-quick button{flex:none;font-size:.7rem;padding:.3rem .65rem;border-radius:999px;border:1px solid color-mix(in oklab,var(--primary) 30%,transparent);background:color-mix(in oklab,var(--card) 85%,transparent)}
+.comm-ring{display:flex;align-items:center;gap:.5rem}.comm-ring input{flex:1;accent-color:var(--primary)}
+.comm-ring span{font-size:.7rem;min-width:2.6rem;text-align:right}.comm-ring button{font-size:.7rem;padding:.25rem .6rem;border-radius:999px;border:1px solid color-mix(in oklab,var(--primary) 35%,transparent)}
