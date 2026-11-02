@@ -1679,6 +1679,7 @@ export type Database = {
           stage_max: number
           tester_code: string | null
           updated_at: string
+          withdraw_min_bix: number
         }
         Insert: {
           auto_follow_back?: boolean
@@ -1713,6 +1714,7 @@ export type Database = {
           stage_max?: number
           tester_code?: string | null
           updated_at?: string
+          withdraw_min_bix?: number
         }
         Update: {
           auto_follow_back?: boolean
@@ -1747,6 +1749,7 @@ export type Database = {
           stage_max?: number
           tester_code?: string | null
           updated_at?: string
+          withdraw_min_bix?: number
         }
         Relationships: []
       }

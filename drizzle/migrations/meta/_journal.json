@@ -939,6 +939,13 @@
       "when": 1793583765164,
       "tag": "0133_bixtok_clips_challenge",
       "breakpoints": true
+    },
+    {
+      "idx": 134,
+      "version": "7",
+      "when": 1793585269312,
+      "tag": "0134_bixtok_withdraw_min",
+      "breakpoints": true
     }
   ]
 }
