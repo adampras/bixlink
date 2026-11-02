@@ -4,6 +4,7 @@ import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, M
 import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
 import foxLogo from '@/assets/bixlink-logo-gold.webp';
+import { ensureBixPush, pushNotify } from '@/lib/bix-push';
 
 type Kind = 'voice' | 'video';
 type Active = { id: string; peerId: string; peerName: string; kind: Kind; role: 'caller' | 'callee'; status: string; whatsapp?: string | null };
@@ -18,8 +19,9 @@ const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${Str
 /** Ask once for phone notification permission (call from a user tap). */
 export async function enableBixNotifications() {
   if (typeof Notification === 'undefined') return 'unsupported';
-  if (Notification.permission === 'default') return Notification.requestPermission();
-  return Notification.permission;
+  const p = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission;
+  if (p === 'granted') await ensureBixPush();
+  return p;
 }
 
 /** System notification shown when BIXLINK is in the background. */
@@ -46,6 +48,8 @@ export function BixCallHost() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => { if (me && typeof Notification !== 'undefined' && Notification.permission === 'granted') void ensureBixPush(); }, [me]);
+
   // Outgoing calls
   useEffect(() => {
     const on = async (e: Event) => {
@@ -54,6 +58,7 @@ export function BixCallHost() {
       setErr('');
       const { data, error } = await supabase.rpc('bix_call_start' as never, { p_callee: d.peerId, p_kind: d.kind } as never);
       if (error) { setErr(error.message); setTimeout(() => setErr(''), 4000); return; }
+      pushNotify('call', data as unknown as string);
       const peer = await supabase.rpc('bix_call_peer' as never, { p_user: d.peerId } as never);
       setCall({ id: data as unknown as string, peerId: d.peerId, peerName: d.peerName, kind: d.kind, role: 'caller', status: 'ringing', whatsapp: (peer.data as { whatsapp?: string } | null)?.whatsapp ?? null });
     };
