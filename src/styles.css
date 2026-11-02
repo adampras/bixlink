@@ -5001,7 +5001,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxt-challenge b{font-size:.8rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bxt-challenge small{font-size:.6rem;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bxt-challenge.on{border-color:#FFD700;box-shadow:0 0 0 2px color-mix(in oklab,#FFD700 35%,transparent)}
-.bxl-clip-btn{position:absolute;left:.5rem;top:calc(6.6rem + 12.4rem);z-index:6;display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;font-size:1rem;color:oklch(0.97 0 0);background:oklch(0.12 0.01 260 / .6);backdrop-filter:blur(10px);border:1px solid color-mix(in oklab,#FFD700 40%,transparent)}
+.bxl-clip-btn{position:absolute;left:3.2rem;top:6.6rem;z-index:6;display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;font-size:1rem;color:oklch(0.97 0 0);background:oklch(0.12 0.01 260 / .6);backdrop-filter:blur(10px);border:1px solid color-mix(in oklab,#FFD700 40%,transparent)}
 .bxl-clip-btn small{font-size:.45rem;font-weight:900;margin-top:-.35rem}
 .bxl-clip-btn.on{background:oklch(0.55 0.22 25);animation:bxt-live-pulse 1s infinite}
 .bxl-clean .bxl-clip-btn{display:none}
