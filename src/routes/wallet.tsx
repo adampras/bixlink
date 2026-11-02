@@ -27,7 +27,7 @@ function EmptyState({ text, action, onAction }: { text: string; action?: string;
   return <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border bg-card/60 p-8 text-center"><span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary"><Inbox size={22}/></span><p className="text-sm text-muted-foreground">{text}</p>{action && onAction && <Button size="sm" variant="outline" className="rounded-full" onClick={onAction}>{action}</Button>}</div>;
 }
 
-const PARTNERS = [['Binance Pay', 'Crypto payments', 'diamond', '#F3BA2F', '#F3BA2F'], ['Mastercard', 'Card rails', 'rings', '#EB001B', '#F79E1B'], ['Visa', 'Global settlement', 'word', '#1A1F71', '#F7B600'], ['Tether', 'USDT liquidity', 'circle', '#26A17B', '#26A17B'], ['BNB Chain', 'BEP-20 network', 'diamond', '#F0B90B', '#F0B90B'], ['Alchemy Pay', 'Fiat gateway', 'circle', '#1E5BFF', '#00C2FF'], ['MoonPay', 'On-ramp', 'circle', '#7D00FF', '#B56BFF'], ['Chainlink', 'Price oracle', 'hex', '#375BD2', '#375BD2']] as const;
+import { PartnershipPanel } from '@/components/PartnershipPanel';
 export const Route = createFileRoute('/wallet')({ head: () => ({ meta: [{ title: 'Wallet — BIXLINK' }, { name: 'description', content: 'BIXLINK wallet: deposit, withdraw and staking reward history.' }, { property: 'og:title', content: 'Wallet — BIXLINK' }, { property: 'og:description', content: 'Deposit, withdraw and track BIXLINK rewards.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: WalletPage });
 
 const fee = (a: number) => Math.round((1 + a * 0.005) * 100) / 100;
@@ -180,11 +180,7 @@ function WalletPage() {
     </MemberGate>
   <WalletGateway open={cfg?.readiness.sovereignWalletEnabled !== false}/>
   <PoweredBy slim/>
-  <section className="wallet-partners" aria-label="Partnership ecosystem">
-    <div className="wallet-partners-title">PARTNERSHIP</div>
-    <div className="wallet-partners-grid">{PARTNERS.map(([n, s, shape, c1, c2], i) => <div key={n} className="wallet-partner" style={{ '--c1': c1, '--c2': c2, animationDelay: `${i * -0.6}s` } as CSSProperties}><span className={`wp-mark wp-${shape}`} aria-hidden>{shape === 'rings' ? <><i/><i/></> : shape === 'word' ? 'VISA' : shape === 'circle' && n === 'Tether' ? '₮' : null}</span><b>{n}</b><span>{s}</span></div>)}</div>
-    <p className="wallet-partners-note">Supported networks & payment rails in the ecosystem. Trademarks belong to their owners; no official partnership or endorsement implied.</p>
-  </section>
+  <PartnershipPanel/>
   <div className="h-24 md:h-0" aria-hidden/></main></BixShell>;
 }
 

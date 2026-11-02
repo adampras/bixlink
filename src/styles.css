@@ -5251,3 +5251,28 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .qr-full__bottom { position:absolute; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; gap:12px; padding:20px 16px calc(env(safe-area-inset-bottom) + 24px); background:linear-gradient(0deg, color-mix(in oklab, var(--background) 85%, transparent), transparent); }
 .qr-full__hint { font-size:12px; text-align:center; color:var(--foreground); }
 .qr-full__gallery { display:inline-flex; align-items:center; gap:8px; cursor:pointer; padding:10px 18px; border-radius:999px; font-size:12px; font-weight:800; letter-spacing:.06em; color:var(--chart-3); border:1px solid color-mix(in oklab, var(--chart-3) 55%, transparent); background:color-mix(in oklab, var(--card) 70%, transparent); backdrop-filter:blur(8px); }
+
+/* HUB Partnership panel (wallet + landing) */
+.hub-partners{max-width:64rem;margin:14px auto 0;padding:0 16px}
+.hub-partners--landing{max-width:48rem;margin:6px auto 18px}
+.hub-partners-panel{position:relative;overflow:hidden;padding:14px 12px 10px;border-radius:22px;background:linear-gradient(160deg,oklch(0.17 0.02 160/.92),oklch(0.12 0.01 260/.96));border:1px solid color-mix(in oklab,var(--chart-3) 30%,transparent);box-shadow:inset 0 1px 0 oklch(1 0 0/.08),0 18px 40px -22px oklch(0 0 0/.8)}
+.hub-partners-panel::before{content:"";position:absolute;left:12%;right:12%;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--chart-3),transparent)}
+.hub-partners-bg{position:absolute;inset:0;pointer-events:none;opacity:.13;filter:blur(1px)}
+.hub-partners-ghost{position:absolute;transform:scale(2.6);animation:hp-drift 9s ease-in-out infinite}
+.hub-partners-ghost .wp-mark{animation:none}
+@keyframes hp-drift{0%,100%{translate:0 0}50%{translate:6px -8px}}
+.hub-partners-head{position:relative;text-align:center;margin-bottom:10px}
+.hub-partners-head small{display:block;font-size:8px;font-weight:800;letter-spacing:.32em;color:var(--muted-foreground)}
+.hub-partners-head h3{font-size:13px;font-weight:900;letter-spacing:.3em;background:linear-gradient(90deg,var(--chart-3),oklch(0.75 0.2 305));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hub-partners-grid{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.hub-partner{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:68px;padding:8px 4px;border-radius:14px;background:linear-gradient(180deg,color-mix(in oklab,var(--c1) 16%,oklch(0.14 0.01 260/.9)),oklch(0.11 0.01 260/.92));border:1px solid color-mix(in oklab,var(--c1) 38%,transparent);box-shadow:inset 0 1px 0 oklch(1 0 0/.07);text-align:center;transition:transform .2s}
+.hub-partner::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,oklch(1 0 0/.1) 50%,transparent 65%);transform:translateX(-120%);animation:hp-sheen 6s ease-in-out infinite;animation-delay:inherit}
+@keyframes hp-sheen{0%,70%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.hub-partner:active{transform:scale(.97)}
+.hub-partner .wp-mark{width:24px;height:24px;font-size:12px;margin-bottom:4px}
+.hub-partner .wp-rings i{width:18px;height:18px}
+.hub-partner .wp-word{height:20px;font-size:10px;padding:0 6px}
+.hub-partner b{font-size:10px;font-weight:900;color:var(--foreground);line-height:1.1}
+.hub-partner span:not(.wp-mark){font-size:7.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:color-mix(in oklab,var(--c1) 55%,var(--muted-foreground));margin-top:2px}
+.hub-partners-note{position:relative;margin-top:8px;text-align:center;font-size:8.5px;color:var(--muted-foreground)}
+@media (prefers-reduced-motion:reduce){.hub-partners-ghost,.hub-partner::after{animation:none}}
