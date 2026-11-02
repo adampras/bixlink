@@ -18,8 +18,10 @@ export const Route = createFileRoute('/call')({
 type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call: boolean };
 type Row = { id: string; caller_id: string; callee_id: string; kind: string; status: string; created_at: string };
 type Tier = { stake: number; chat: boolean; voice: boolean; video: boolean; vip: boolean; tier: string; chat_enabled: boolean; min: { chat: number; voice: number; video: number; vip: number } };
-type Thread = { peer: string; name: string; body: string; at: string; mine: boolean; unread: number };
-type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null; kind?: string; media_path?: string | null; meta?: { amount?: number; note?: string | null } | null };
+type Thread = { peer: string; name: string; body: string; at: string; mine: boolean; unread: number; online?: boolean };
+type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null; kind?: string; media_path?: string | null; meta?: { amount?: number; note?: string | null } | null; reply_to?: string | null; reply_body?: string | null; forwarded?: boolean; deleted_at?: string | null; hidden_by?: string[] };
+type PeerState = { online?: boolean; typing?: boolean; last_seen?: string | null };
+const seenText = (s: PeerState) => s.typing ? 'sedang mengetik…' : s.online ? 'online' : s.last_seen ? `terakhir dilihat ${new Date(s.last_seen).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'ENCRYPTED CHAT';
 const urlCache = new Map<string, string>();
 function ChatMedia({ m }: { m: Msg }) {
   const [url, setUrl] = useState(m.media_path ? urlCache.get(m.media_path) ?? '' : '');
@@ -128,7 +130,7 @@ function ActionButtons({ peerId, name, tier, canCall, onChat }: { peerId: string
 function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: (id: string, name: string) => void }) {
   const [threads, setThreads] = useState<Thread[] | null>(null);
   useEffect(() => {
-    const load = async () => { const { data } = await supabase.rpc('bix_chat_threads' as never); setThreads((data as Thread[] | null) ?? []); };
+    const load = async () => { void supabase.rpc('bix_chat_sync' as never, {} as never); const { data } = await supabase.rpc('bix_chat_threads' as never); setThreads((data as Thread[] | null) ?? []); };
     void load(); const t = setInterval(() => void load(), 6000); return () => clearInterval(t);
   }, []);
   return <>
@@ -136,7 +138,7 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
     <FindMember me={me} tier={tier} onChat={onOpen}/>
     <section className="comm-card"><h3 className="comm-h">Percakapan</h3>
       {threads === null ? <p className="text-xs text-muted-foreground">Memuat…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada chat. Cari member di atas untuk mulai mengobrol.</p> :
-        <ul className="comm-list">{threads.map(t => <li key={t.peer}><button onClick={() => onOpen(t.peer, t.name)}><span className="comm-ava">{t.name.slice(0, 1).toUpperCase()}</span>
+        <ul className="comm-list">{threads.map(t => <li key={t.peer}><button onClick={() => onOpen(t.peer, t.name)}><span className={`comm-ava${t.online ? ' is-online' : ''}`}>{t.name.slice(0, 1).toUpperCase()}</span>
           <span className="min-w-0 flex-1 text-left"><b className="block truncate text-sm">@{t.name}</b><small className="block truncate text-muted-foreground">{t.mine ? 'Anda: ' : ''}{t.body}</small></span>
           <span className="text-right"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></button></li>)}</ul>}
     </section>
