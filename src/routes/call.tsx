@@ -19,17 +19,36 @@ type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call:
 type Row = { id: string; caller_id: string; callee_id: string; kind: string; status: string; created_at: string };
 type Tier = { stake: number; chat: boolean; voice: boolean; video: boolean; vip: boolean; tier: string; chat_enabled: boolean; min: { chat: number; voice: number; video: number; vip: number } };
 type Thread = { peer: string; name: string; body: string; at: string; mine: boolean; unread: number; online?: boolean };
-type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null; kind?: string; media_path?: string | null; meta?: { amount?: number; note?: string | null } | null; reply_to?: string | null; reply_body?: string | null; forwarded?: boolean; deleted_at?: string | null; hidden_by?: string[] };
+type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null; delivered_at?: string | null; reactions?: Record<string, string>; pinned_at?: string | null; kind?: string; media_path?: string | null; meta?: { amount?: number; note?: string | null; name?: string; size?: number; mime?: string; status?: string } | null; reply_to?: string | null; reply_body?: string | null; forwarded?: boolean; deleted_at?: string | null; hidden_by?: string[] };
 type PeerState = { online?: boolean; typing?: boolean; last_seen?: string | null };
 const seenText = (s: PeerState) => s.typing ? 'sedang mengetik…' : s.online ? 'online' : s.last_seen ? `terakhir dilihat ${new Date(s.last_seen).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'ENCRYPTED CHAT';
 const urlCache = new Map<string, string>();
-function ChatMedia({ m }: { m: Msg }) {
+const REACTS = ['👍', '❤️', '😂', '😮', '🙏', '🔥'];
+const fmtSize = (n = 0) => n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
+const fileIcon = (name = '') => { const e = name.split('.').pop()?.toLowerCase() ?? ''; return e === 'pdf' ? 'PDF' : ['xls', 'xlsx', 'csv'].includes(e) ? 'XLS' : ['doc', 'docx'].includes(e) ? 'DOC' : ['ppt', 'pptx'].includes(e) ? 'PPT' : ['zip', 'rar'].includes(e) ? 'ZIP' : 'FILE'; };
+const fmtBix = (n?: number) => Number(n ?? 0).toLocaleString('en-US', { maximumFractionDigits: 4 });
+function VoiceNote({ url }: { url: string }) {
+  const ref = useRef<HTMLAudioElement>(null);
+  const [rate, setRate] = useState(1);
+  const next = () => { const r = rate === 1 ? 1.5 : rate === 1.5 ? 2 : 1; setRate(r); if (ref.current) ref.current.playbackRate = r; };
+  return <span className="comm-voice"><audio ref={ref} src={url} controls preload="none" className="comm-audio" onPlay={e => { e.currentTarget.playbackRate = rate; }}/><button type="button" className="comm-rate" onClick={next} aria-label="Kecepatan putar">{rate}×</button></span>;
+}
+function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'pay' | 'decline' | 'cancel') => void }) {
   const [url, setUrl] = useState(m.media_path ? urlCache.get(m.media_path) ?? '' : '');
-  useEffect(() => { const p = m.media_path; if (!p || url) return; void supabase.storage.from('bix-chat').createSignedUrl(p, 3600).then(({ data }) => { if (data?.signedUrl) { urlCache.set(p, data.signedUrl); setUrl(data.signedUrl); } }); }, [m.media_path, url]);
-  if (m.kind === 'pay') return <span className="comm-paycard"><b>🪙 {Number(m.meta?.amount ?? 0).toLocaleString('en-US', { maximumFractionDigits: 4 })} BIX</b><small>BIX PAY · terkirim{m.meta?.note ? ` · ${m.meta.note}` : ''}</small></span>;
+  useEffect(() => { const p = m.media_path; if (!p || url) return; void supabase.storage.from('bix-chat').createSignedUrl(p, 3600, m.kind === 'file' ? { download: m.meta?.name || true } : undefined).then(({ data }) => { if (data?.signedUrl) { urlCache.set(p, data.signedUrl); setUrl(data.signedUrl); } }); }, [m.media_path, url, m.kind, m.meta?.name]);
+  if (m.kind === 'pay') return <span className="comm-paycard"><b>🪙 {fmtBix(m.meta?.amount)} BIX</b><small>BIX PAY · terkirim{m.meta?.note ? ` · ${m.meta.note}` : ''}</small></span>;
+  if (m.kind === 'request') {
+    const st = m.meta?.status ?? 'open'; const mine = m.sender_id === me;
+    return <span className={`comm-reqcard is-${st}`}><em>🧾 TAGIHAN BIX</em><b>{fmtBix(m.meta?.amount)} BIX</b>{m.meta?.note && <small>{m.meta.note}</small>}
+      {st === 'open' ? (mine ? <span className="comm-req-act"><i>Menunggu pembayaran</i><button type="button" onClick={() => onAct(m, 'cancel')}>Batalkan</button></span>
+        : <span className="comm-req-act"><button type="button" className="is-pay" onClick={() => onAct(m, 'pay')}>Bayar Sekarang</button><button type="button" onClick={() => onAct(m, 'decline')}>Tolak</button></span>)
+        : <i className="comm-req-st">{st === 'paid' ? '✓ Lunas via BIX PAY' : st === 'declined' ? 'Ditolak' : 'Dibatalkan'}</i>}
+    </span>;
+  }
   if (!url) return <span className="comm-media-wait">Memuat…</span>;
   if (m.kind === 'image') return <a href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Foto chat" className="comm-img" loading="lazy"/></a>;
-  return <audio src={url} controls preload="none" className="comm-audio"/>;
+  if (m.kind === 'file') return <a className="comm-filecard" href={url} target="_blank" rel="noopener noreferrer"><i>{fileIcon(m.meta?.name)}</i><span><b>{m.meta?.name ?? 'Dokumen'}</b><small>{fmtSize(m.meta?.size)} · Unduh</small></span></a>;
+  return <VoiceNote url={url}/>;
 }
 const PERMS = [['all', 'Semua member'], ['friends', 'Saling follow'], ['network', 'Tim jaringan'], ['none', 'Tidak menerima']] as const;
 const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLER · Suara', video: 'PRO · Video HD', vip: '👑 VIP CALLER' };
