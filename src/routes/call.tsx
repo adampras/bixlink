@@ -437,12 +437,13 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small></span>
       <ActionButtons peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>
     </header>
+    {pinned && <button type="button" className="comm-pinbar" onClick={() => jump(pinned.id)}><b>📌 Disematkan</b><span>{pinned.body}</span></button>}
     <div className="comm-msgs">
       {msgs.length === 0 && <p className="text-center text-xs text-muted-foreground">Mulai percakapan dengan @{name}</p>}
       {msgs.map(m => {
         const mine = m.sender_id === me;
         const q = m.reply_to ? findMsg(m.reply_to) : undefined;
-        return <p key={m.id} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
+        return <p key={m.id} id={`msg-${m.id}`} onDoubleClick={() => { if (!m.deleted_at && !locked) void react(m, '❤️'); }} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
           onPointerDown={() => holdStart(m)} onPointerUp={holdEnd} onPointerLeave={holdEnd} onContextMenu={e => { e.preventDefault(); if (!m.deleted_at) setMenu(m); }}>
           {m.forwarded && !m.deleted_at && <em className="comm-fwd">↪ Diteruskan</em>}
           {m.reply_to && !m.deleted_at && <span className="comm-quote"><b>{q ? (q.sender_id === me ? 'Anda' : `@${name}`) : 'Balasan'}</b>{q?.deleted_at ? 'Pesan dihapus' : q?.body ?? m.reply_body ?? 'Pesan sebelumnya'}</span>}
@@ -460,8 +461,9 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     {busy && <p className="comm-busy">Mengirim…</p>}
     {menu && <div className="comm-sheet-bg" onClick={() => setMenu(null)}><div className="comm-sheet" role="menu" onClick={e => e.stopPropagation()}>
       <p className="comm-sheet-preview">{menu.body}</p>
+      <div className="comm-reactbar">{REACTS.map(e => <button type="button" key={e} className={menu.reactions?.[me] === e ? 'is-mine' : ''} onClick={() => void react(menu, e)} aria-label={`Reaksi ${e}`}>{e}</button>)}</div>
       <button type="button" onClick={() => { setReplyTo(menu); setMenu(null); }} disabled={locked}>↩ Balas</button>
-      {menu.kind !== 'pay' && <button type="button" onClick={() => { setFwd(menu); setMenu(null); }} disabled={locked}>↪ Teruskan</button>}
+      {menu.kind !== 'pay' && menu.kind !== 'request' && menu.kind !== 'file' && <button type="button" onClick={() => { setFwd(menu); setMenu(null); }} disabled={locked}>↪ Teruskan</button>}
       {(!menu.kind || menu.kind === 'text') && <button type="button" onClick={() => { void navigator.clipboard?.writeText(menu.body); setMenu(null); toastOk('Disalin'); }}>⧉ Salin</button>}
       <button type="button" onClick={() => void pin(menu, !menu.pinned_at)}>📌 {menu.pinned_at ? 'Lepas sematan' : 'Sematkan'}</button>
       <button type="button" onClick={() => void remove(menu, false)}>🗑 Hapus untuk saya</button>
