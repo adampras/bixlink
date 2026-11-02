@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { CLIP_SECONDS, recordLiveClip } from '@/lib/bixtok-clip';
 import { luxConfirm } from '@/lib/bixtok-confirm';
 import { useVipHosts, VipBadge } from '@/lib/bixtok-vip';
 import { useQueryClient } from '@tanstack/react-query';
@@ -15,7 +16,7 @@ import { FACE_FILTERS, FX_SLIDERS, VOICE_FX, filterVideo, filterVoice, isNeutral
 
 type Live = { id: string; host_id: string; host_name: string; title: string; started_at: string; kind?: string };
 type Msg = { id: string; name: string; body: string; kind: string };
-type Cfg = { live_max_minutes: number; features: Record<string, boolean>; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean; backdrops_enabled?: boolean; live_backdrops?: unknown };
+type Cfg = { live_max_minutes: number; features: Record<string, boolean>; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean; backdrops_enabled?: boolean; live_backdrops?: unknown; clips_enabled?: boolean };
 type Pk = { a: string; b: string; started_at: string; ends_at: string };
 
 export const SHOWCASE = {
@@ -135,7 +136,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   const [showcase, setShowcase] = useState<ShowcaseKey | null>(null); const [pk, setPk] = useState<Pk | null>(null); const [pkScore, setPkScore] = useState<[number, number]>([0, 0]);
   const [sheet, setSheet] = useState<'board' | 'showcase' | 'pk' | 'bg' | 'fx' | 'cam' | null>(null); const [recording, setRecording] = useState(false);
   const [saver, setSaver] = useState<'hd' | 'sd' | 'audio'>('hd');
-  const [clean, setClean] = useState(false);
+  const [clean, setClean] = useState(false); const [clipping, setClipping] = useState(false);
   const [eco, setEco] = useState(false);
   useEffect(() => {
     try { if (localStorage.getItem('bxl-eco') === '1') setEco(true); } catch {}
@@ -543,6 +544,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       style={f.px != null ? { position: 'fixed', left: `${f.px - 15}px`, top: `${(f.py ?? 0) - 15}px`, bottom: 'auto', ['--drift' as string]: `${f.drift}px` } : { right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}
       {emojis.map(f => <span key={f.id} className="bxl-emoji-float" style={{ right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setEmojis(x => x.filter(y => y.id !== f.id))}>{f.e}</span>)}</div>
     {!ended && <div className="bxl-react-bar" role="group" aria-label="Quick reactions" onClick={e => e.stopPropagation()}>{QUICK_REACTIONS.map(e => <button key={e} type="button" aria-label={`React ${e}`} onClick={() => react(e)}>{e}</button>)}</div>}
+    {host && !ended && cfg.clips_enabled !== false && local && <button type="button" className={`bxl-clip-btn${clipping ? ' on' : ''}`} disabled={clipping} aria-label="Save a LIVE moment clip" onClick={e => { e.stopPropagation(); setClipping(true); flash(`Recording a ${CLIP_SECONDS}s moment…`); void recordLiveClip(local, live.id, me).then(() => flash('LIVE moment posted to your BIXTOK feed ✂️'), (err: Error) => flash(err.message)).finally(() => setClipping(false)); }}>✂️<small>{clipping ? 'REC' : 'Clip'}</small></button>}
     {host && publishing && !sharing && <div className="bxl-zoom-pill" role="group" aria-label="Camera zoom" onClick={e => e.stopPropagation()}>
       {[2, 1.5, 1].map(z => <button key={z} type="button" className={Math.abs(zoom - z) < 0.05 ? 'on' : ''} onClick={() => setZoom(clampZoom(z))}>{z}×</button>)}
       <input type="range" aria-label="Camera zoom" min={ZOOM_MIN} max={ZOOM_MAX} step={0.05} value={zoom} onChange={e => setZoom(clampZoom(+e.target.value))}/>
