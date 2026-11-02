@@ -974,6 +974,13 @@
       "when": 1793633149614,
       "tag": "0138_bix_chat_media_pay",
       "breakpoints": true
+    },
+    {
+      "idx": 139,
+      "version": "7",
+      "when": 1793633651187,
+      "tag": "0139_bix_push_subscriptions",
+      "breakpoints": true
     }
   ]
 }
