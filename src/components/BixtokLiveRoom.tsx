@@ -530,6 +530,11 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
       style={f.px != null ? { position: 'fixed', left: `${f.px - 15}px`, top: `${(f.py ?? 0) - 15}px`, bottom: 'auto', ['--drift' as string]: `${f.drift}px` } : { right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}
       {emojis.map(f => <span key={f.id} className="bxl-emoji-float" style={{ right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setEmojis(x => x.filter(y => y.id !== f.id))}>{f.e}</span>)}</div>
     {!ended && <div className="bxl-react-bar" role="group" aria-label="Quick reactions" onClick={e => e.stopPropagation()}>{QUICK_REACTIONS.map(e => <button key={e} type="button" aria-label={`React ${e}`} onClick={() => react(e)}>{e}</button>)}</div>}
+    {host && publishing && !sharing && <div className="bxl-zoom-pill" role="group" aria-label="Camera zoom" onClick={e => e.stopPropagation()}>
+      {[2, 1.5, 1].map(z => <button key={z} type="button" className={Math.abs(zoom - z) < 0.05 ? 'on' : ''} onClick={() => setZoom(clampZoom(z))}>{z}×</button>)}
+      <input type="range" aria-label="Camera zoom" min={ZOOM_MIN} max={ZOOM_MAX} step={0.05} value={zoom} onChange={e => setZoom(clampZoom(+e.target.value))}/>
+      <small>{zoom.toFixed(1)}×</small>
+    </div>}
     <button type="button" className={`bxl-qa-toggle${qaOnly ? ' on' : ''}`} aria-pressed={qaOnly} onClick={() => setQaOnly(v => !v)}>Q&amp;A{qaCount ? ` · ${qaCount}` : ''}</button>
     <div className={`bixtok-chat${showcase && cfg.showcase_enabled !== false ? ' with-card' : ''}`}>{(qaOnly ? msgs.filter(isQuestion) : msgs).map(m => <p key={m.id} className={`${m.kind === 'gift' ? 'gift' : ''}${isQuestion(m) ? ' q' : ''}`} onClick={host ? () => setModMsg(m) : undefined}><b>{m.name}</b> {m.body}</p>)}{qaOnly && !qaCount && <p className="q">No questions yet — viewers can end a message with “?”</p>}</div>
     <div className={`bxl-tools${host && !toolsOpen ? ' compact' : ''}`}>
@@ -543,7 +548,6 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
           <button aria-label="Slide sebelumnya" disabled={slideIdx === 0} onClick={() => setSlideIdx(i => Math.max(0, i - 1))}>‹</button>
           <button aria-label="Slide berikutnya" style={{ fontSize: '.65rem', fontWeight: 800 }} onClick={() => setSlideIdx(i => Math.min(slides.length - 1, i + 1))}>{slideIdx + 1}/{slides.length} ›</button>
         </>}
-        {host && <label className="bxl-zoom" onClick={e => e.stopPropagation()}><small>{zoom.toFixed(1)}×</small><input type="range" aria-label="Camera zoom" min={ZOOM_MIN} max={ZOOM_MAX} step={0.05} value={zoom} onChange={e => setZoom(clampZoom(+e.target.value))}/></label>}
         <button aria-label={mic ? 'Mute microphone' : 'Unmute microphone'} onClick={() => setMic(m => !m)}>{mic ? <Mic size={20}/> : <MicOff size={20}/>}</button>
       </>}
       {host && cfg.backdrops_enabled !== false && <button aria-label={camOff ? 'Turn camera on' : 'Camera off — show background'} className={camOff ? 'on' : ''} onClick={() => setSheet('bg')}>{camOff ? <VideoOff size={20}/> : <ImageIcon size={20}/>}</button>}

@@ -4939,3 +4939,16 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bixtok-brand b{display:none}
 .bxt-rail-shield{top:auto!important;bottom:calc(8.2rem + env(safe-area-inset-bottom))!important}
 .bxt-vinyl{bottom:calc(4.9rem + env(safe-area-inset-bottom))}
+
+/* LIVE zoom: standalone floating pill, kept out of the host tool row */
+.bxl-zoom-pill{position:absolute;right:.5rem;top:38%;z-index:6;display:flex;flex-direction:column;align-items:center;gap:.3rem;padding:.4rem .3rem;border-radius:999px;background:oklch(0.12 0.01 260 / .55);backdrop-filter:blur(12px);border:1px solid color-mix(in oklab,#FFD700 35%,transparent)}
+.bxl-zoom-pill button{width:2rem;height:2rem;border-radius:999px;font-size:.62rem;font-weight:800;color:oklch(0.97 0 0);background:oklch(1 0 0 / .08)}
+.bxl-zoom-pill button.on{background:#FFD700;color:oklch(0.15 0 0)}
+.bxl-zoom-pill input{writing-mode:vertical-lr;direction:rtl;width:4px;height:5.5rem;accent-color:#FFD700}
+.bxl-zoom-pill small{font-size:.58rem;font-weight:800;color:#FFD700}
+.bxl-clean .bxl-zoom-pill{display:none}
+
+/* Rail shield: smoked obsidian glass instead of solid teal */
+.bxt-rail-shield{background:linear-gradient(180deg,oklch(0.14 0.01 260 / .72),oklch(0.08 0.01 260 / .82))!important;backdrop-filter:blur(14px) saturate(130%);border:1px solid color-mix(in oklab,#FFD700 38%,transparent)!important}
+.bxt-rail-shield.closed{background:oklch(0.1 0.01 260 / .75)!important}
+.bxt-rail-shield button svg{background:oklch(1 0 0 / .06)!important}
