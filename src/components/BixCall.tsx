@@ -15,12 +15,30 @@ export function startBixCall(peerId: string, peerName: string, kind: Kind) {
 
 const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
+/** Ask once for phone notification permission (call from a user tap). */
+export async function enableBixNotifications() {
+  if (typeof Notification === 'undefined') return 'unsupported';
+  if (Notification.permission === 'default') return Notification.requestPermission();
+  return Notification.permission;
+}
+
+/** System notification shown when BIXLINK is in the background. */
+function sysNotify(title: string, body: string, tag: string, ring: boolean, url = '/call') {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted' || !document.hidden) return;
+  const opts = { body, tag, icon: foxLogo, badge: foxLogo, requireInteraction: ring, vibrate: ring ? [400, 200, 400, 200, 400] : [120], data: { url } } as NotificationOptions;
+  void navigator.serviceWorker?.getRegistration().then(reg => {
+    if (reg) { void reg.showNotification(title, opts); return; }
+    const n = new Notification(title, opts); n.onclick = () => { window.focus(); window.location.href = url; n.close(); };
+  }).catch(() => { /* ignore */ });
+}
+
 /** Global host: watches incoming calls and renders the luxury BIXLINK BIXTOK call screen. */
 export function BixCallHost() {
   const [me, setMe] = useState<string | null>(null);
   const [call, setCall] = useState<Active | null>(null);
   const [err, setErr] = useState('');
   const callRef = useRef<Active | null>(null); callRef.current = call;
+  const lastChat = useRef(new Date().toISOString());
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setMe(data.user?.id ?? null));
@@ -63,8 +81,18 @@ export function BixCallHost() {
           const p = peer.data as { name?: string; whatsapp?: string } | null;
           setCall({ id: row.id, peerId: row.caller_id, peerName: p?.name ?? 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: p?.whatsapp ?? null });
           try { navigator.vibrate?.([300, 200, 300]); } catch { /* unsupported */ }
+          sysNotify(`📞 BIXCALL · ${row.kind === 'video' ? 'Video call' : 'Panggilan suara'} masuk`, `@${p?.name ?? 'Member'} memanggil Anda`, `call-${row.id}`, true);
         }
       }
+      // Chat alerts while the app is in the background
+      if (document.hidden) {
+        const { data: msgs } = await supabase.from('bix_chat_messages' as never).select('id, sender_id, body, created_at').eq('recipient_id', me).is('read_at', null).gt('created_at', lastChat.current).order('created_at', { ascending: true }).limit(5);
+        for (const m of (msgs as { id: string; sender_id: string; body: string; created_at: string }[] | null) ?? []) {
+          lastChat.current = m.created_at;
+          const peer = await supabase.rpc('bix_call_peer' as never, { p_user: m.sender_id } as never);
+          sysNotify(`💬 BIX COMM · @${(peer.data as { name?: string } | null)?.name ?? 'Member'}`, m.body.slice(0, 120), `chat-${m.sender_id}`, false, `/call?chat=${m.sender_id}`);
+        }
+      } else lastChat.current = new Date().toISOString();
     };
     const t = setInterval(() => void tick(), 2500);
     void tick();
@@ -132,7 +160,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
         await room.connect(res.url, res.token);
         await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true });
         if (call.kind === 'video') {
-          await room.localParticipant.setCameraEnabled(true, { facingMode: 'user', resolution: { width: 540, height: 960 } });
+          await room.localParticipant.setCameraEnabled(true, { facingMode: 'user', resolution: { width: 720, height: 1280 } });
           const pub = room.localParticipant.getTrackPublication(Track.Source.Camera);
           if (pub?.track && localV.current) pub.track.attach(localV.current);
         }
