@@ -412,6 +412,33 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       bix_mining_accounts: {
         Row: {
           settled_at: string
@@ -1688,6 +1715,11 @@ export type Database = {
           challenge_tag: string | null
           challenge_title: string | null
           clips_enabled: boolean
+          comm_chat_enabled: boolean
+          comm_chat_min_usd: number
+          comm_video_min_usd: number
+          comm_vip_min_usd: number
+          comm_voice_min_usd: number
           creator_share_pct: number
           enabled: boolean
           features: Json
@@ -1723,6 +1755,11 @@ export type Database = {
           challenge_tag?: string | null
           challenge_title?: string | null
           clips_enabled?: boolean
+          comm_chat_enabled?: boolean
+          comm_chat_min_usd?: number
+          comm_video_min_usd?: number
+          comm_vip_min_usd?: number
+          comm_voice_min_usd?: number
           creator_share_pct?: number
           enabled?: boolean
           features?: Json
@@ -1758,6 +1795,11 @@ export type Database = {
           challenge_tag?: string | null
           challenge_title?: string | null
           clips_enabled?: boolean
+          comm_chat_enabled?: boolean
+          comm_chat_min_usd?: number
+          comm_video_min_usd?: number
+          comm_vip_min_usd?: number
+          comm_voice_min_usd?: number
           creator_share_pct?: number
           enabled?: boolean
           features?: Json
@@ -2854,12 +2896,17 @@ export type Database = {
       }
       bix_can_manage_packages: { Args: never; Returns: boolean }
       bix_challenge_verified_team: { Args: { p_user: string }; Returns: number }
+      bix_chat_read: { Args: { p_peer: string }; Returns: undefined }
+      bix_chat_send: { Args: { p_body: string; p_to: string }; Returns: Json }
+      bix_chat_threads: { Args: never; Returns: Json }
       bix_claim_conditional_leader: {
         Args: { p_days: number; p_package: string }
         Returns: Json
       }
       bix_claim_stake_profit: { Args: never; Returns: Json }
       bix_claim_vip: { Args: { p_level: number }; Returns: string }
+      bix_comm_me: { Args: never; Returns: Json }
+      bix_comm_tier: { Args: { p_uid: string }; Returns: Json }
       bix_consume_wallet_challenge: {
         Args: {
           p_id: string

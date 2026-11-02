@@ -57,3 +57,4 @@
 - Select the manifest from the root matched location during SSR; keep Sovereign Wallet manifest identity and scope stable so installation launches its existing in-place screens.
 - BIXTrade requests settle only via the bixtrade_review RPC (server checks; settled_usd feeds bix_wallet_balance) — atomic, owner-reviewed; profit never settles.
 - BIXGO uses real OSM map/GPS/OSRM distance in the browser (Leaflet lazy-loaded); city franchises live in the bixgo setting as commission-split references; PPOB goes through Digiflazz server functions with owner-only transactions until a member payment rule exists.
+- BIX COMM tiers: staking thresholds in bixtok_config, enforced in RPCs via bix_comm_tier; UI lock is a hint.
