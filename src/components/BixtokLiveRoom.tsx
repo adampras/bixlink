@@ -5,7 +5,7 @@ import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { useLiveRtc } from '@/lib/bixtok-rtc';
 import { useReplayRecorder } from '@/lib/bixtok-replay';
-import { MEDIA_HELP, openLiveMedia, type MediaIssue } from '@/lib/bixtok-media';
+import { MEDIA_HELP, listCameras, openLiveMedia, type MediaIssue } from '@/lib/bixtok-media';
 import { allBackdrops, backdropCss } from '@/lib/bixtok-backdrops';
 import { copyText } from '@/lib/copy-text';
 import { FACE_FILTERS, FX_SLIDERS, VOICE_FX, filterVideo, filterVoice, isNeutral, type FxLevels, type VoiceFx } from '@/lib/bixtok-filters';
@@ -253,17 +253,18 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     // Release the previous camera first: most Android phones cannot open two cameras at once (flip / retry).
     stream.current?.getTracks().forEach(t => t.stop()); stream.current = null;
     if (cam.current) cam.current.srcObject = null;
-    void openLiveMedia(facing).then(r => {
+    void openLiveMedia(facing, camId).then(r => {
       if (cancelled) { r.stream?.getTracks().forEach(t => t.stop()); return; }
       if (!r.stream) { setLocal(null); setCamErr(r.error); return; }
       stream.current = r.stream; raw.current = r.stream;
       r.stream.getAudioTracks().forEach(t => { t.enabled = mic; });
       if (cam.current) { cam.current.srcObject = r.stream; void cam.current.play().catch(() => {}); }
       setLocal(r.stream); setCamErr(r.error); setRawVer(v => v + 1);
+      void listCameras().then(setCams);
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [publishing, facing, camTry]);
+  }, [publishing, facing, camTry, camId]);
   useEffect(() => () => { stream.current?.getTracks().forEach(t => t.stop()); }, []);
   // Face filters + voice changer: process the raw camera/mic locally and publish the result.
   const raw = useRef<MediaStream | null>(null); const [rawVer, setRawVer] = useState(0);
