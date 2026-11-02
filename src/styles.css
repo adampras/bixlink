@@ -5386,3 +5386,4 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @media (prefers-reduced-motion:reduce){.bixcall-hero img{animation:none}}
 .bixcall-back:active{transform:scale(.94)}
 .bixcall-notify{display:block;margin:0 auto 12px;padding:8px 14px;border-radius:999px;font-size:11px;font-weight:700;color:#FFD700;background:rgba(8,6,14,.7);border:1px solid rgba(255,215,0,.35)}
+.site-header[hidden],footer[hidden]{display:none!important}
