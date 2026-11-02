@@ -5048,3 +5048,38 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxt-earn-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--chart-2),var(--chart-3));transition:width .4s}
 .bxt-tools a span,.bxt-tools button span{background:color-mix(in oklab,var(--bxt-tone,var(--chart-3)) 16%,transparent);color:var(--bxt-tone,var(--chart-3))}
 .bxt-inbox{--bxt-tone:var(--accent)}.bxt-page-profile{--bxt-tone:color-mix(in oklab,var(--foreground) 70%,var(--chart-3))}
+
+/* Nov 2: minimalist lux pass on phones — HUB, Inbox, Profile, Feed */
+.hub-midnight .hub-group { padding: .5rem; border-radius: 1rem; }
+.hub-midnight .hub-group-head { margin-bottom: .4rem; }
+.hub-midnight .hub-group .hub-tile { padding: .5rem .3rem !important; border-radius: .9rem !important; gap: .05rem; border-width: 1px; }
+.hub-midnight .hub-group .hub-emblem { width: 2.1rem; height: 2.1rem; margin-bottom: .2rem; border-radius: .7rem; }
+.hub-midnight .hub-group .hub-emblem svg { width: 17px; height: 17px; }
+.hub-midnight .hub-group .hub-tile .text-xs { font-size: 11px; letter-spacing: .01em; }
+.hub-midnight .hub-group .hub-tile .text-\[10px\] { font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.hub-swipe { grid-auto-columns: calc((100% - 1.2rem) / 3.4); gap: .4rem; }
+
+.bxt-inbox .bxt-list li, .bxt-inbox .bxt-list li > a { gap: .65rem; padding: .5rem .6rem; }
+.bxt-inbox .bxt-list li { margin-bottom: .4rem; border-radius: .9rem; border: 1px solid color-mix(in oklab, var(--bxt-tone) 28%, transparent); background: linear-gradient(145deg, color-mix(in oklab, var(--bxt-tone) 10%, var(--card)), color-mix(in oklab, var(--card) 70%, transparent)); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--chart-3) 14%, transparent); }
+.bxt-inbox .bxt-list li > a { padding: 0; }
+.bxt-inbox .bxt-ic { width: 2.4rem; height: 2.4rem; box-shadow: 0 0 0 1px color-mix(in oklab, var(--chart-3) 45%, transparent); }
+.bxt-inbox .bxt-ic svg { width: 17px; height: 17px; }
+.bxt-inbox .bxt-list b { font-size: .84rem; }
+.bxt-inbox .bxt-list p { font-size: .72rem; }
+.bxt-inbox .bxt-av { width: 3.2rem; height: 3.2rem; font-size: 1.1rem; box-shadow: 0 0 0 1px color-mix(in oklab, var(--chart-3) 50%, transparent); }
+.bxt-inbox .bxt-count { background: var(--chart-3); color: var(--background); }
+
+.bxt-page-profile .bxt-prof { margin-top: .5rem; padding: .75rem .85rem; border-radius: 1rem; border: 1px solid color-mix(in oklab, var(--chart-3) 30%, transparent); background: linear-gradient(150deg, color-mix(in oklab, var(--foreground) 7%, var(--card)), var(--card)); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 12%, transparent); }
+.bxt-page-profile .bxt-prof h1 { font-size: 1.25rem; }
+.bxt-page-profile .bxt-stats { gap: .9rem; margin-top: .55rem; }
+.bxt-page-profile .bxt-stats b { font-size: .95rem; color: var(--chart-3); }
+.bxt-page-profile .bxt-stats p { font-size: .65rem; }
+.bxt-page-profile .bxt-bigav { width: 4.2rem; height: 4.2rem; font-size: 1.5rem; border: 1.5px solid var(--chart-3); box-shadow: 0 0 18px -6px var(--chart-3); }
+.bxt-page-profile .bxt-bigav em { width: 1.3rem; height: 1.3rem; background: var(--chart-3); }
+.bxt-page-profile .bxt-bio { margin: .6rem 0 .4rem; font-size: .78rem; color: var(--muted-foreground); }
+.bxt-page-profile .bxt-pill { padding: .28rem .7rem; font-size: .72rem; border-color: color-mix(in oklab, var(--chart-3) 40%, transparent); }
+.bxt-page-profile .bxt-ptabs .on { color: var(--chart-3); box-shadow: inset 0 -2px 0 var(--chart-3); }
+
+.bixtok-tabs button { border: 1px solid transparent; }
+.bixtok-tabs button.on { border-color: color-mix(in oklab, var(--chart-3) 70%, transparent); }
+.bxt-nav button.on { color: var(--chart-3); }
