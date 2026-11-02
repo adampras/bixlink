@@ -390,8 +390,16 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     floatEmoji(e); try { navigator.vibrate?.(8); } catch { /* unsupported */ }
     void chan.current?.send({ type: 'broadcast', event: 'react', payload: { e } });
   };
+  // Immersive: one tap toggles all overlays; a quick second tap (and further rapid taps) sends likes instead.
+  const tapAt = useRef(0); const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tap = (e?: { clientX: number; clientY: number }) => {
     if (audioBlocked) void unlockAudio();
+    const t = Date.now(); const rapid = t - tapAt.current < 300; tapAt.current = t;
+    if (!rapid) { tapTimer.current = setTimeout(() => { tapTimer.current = null; setClean(c => !c); }, 300); return; }
+    if (tapTimer.current) { clearTimeout(tapTimer.current); tapTimer.current = null; }
+    like(e);
+  };
+  const like = (e?: { clientX: number; clientY: number }) => {
     setLikes(l => l + 1); pending.current += 1; sfx.pop();
     try { navigator.vibrate?.(10); } catch { /* unsupported */ }
     if (e && e.clientX) setFloaters(f => [...f.slice(-30), { id: Math.random(), x: 0, px: e.clientX, py: e.clientY, color: COLORS[Math.floor(Math.random() * COLORS.length)]!, drift: Math.random() * 60 - 30 }]);
