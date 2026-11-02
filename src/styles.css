@@ -5106,3 +5106,12 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .hub-midnight .hub-group .hub-tile::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,transparent 40%,color-mix(in oklab,var(--tone) 18%,transparent) 50%,transparent 60%);transform:translateX(-120%);animation:hub-sheen 7s ease-in-out infinite}
 @keyframes hub-sheen{0%,70%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
 @media (prefers-reduced-motion:reduce){.hub-midnight .hub-group .hub-tile::before{animation:none;display:none}}
+
+/* HUB lux carried into WALLET / STAKING / NETWORK / PROFILE (tone from .hub-tone-*) */
+.lux-page{position:relative;background:radial-gradient(110% 40% at 50% 0%,color-mix(in oklab,var(--tone) 12%,transparent),transparent 65%)}
+.lux-page :is(.rounded-\[20px\],.rounded-3xl,.rounded-2xl).border{border-color:color-mix(in oklab,var(--tone) 26%,transparent)!important;background:linear-gradient(165deg,color-mix(in oklab,var(--tone) 9%,var(--card)),color-mix(in oklab,var(--background) 92%,var(--tone)))!important;box-shadow:inset 0 1px 0 color-mix(in oklab,var(--tone) 22%,transparent),0 10px 24px -18px var(--tone)}
+.lux-page :is(h1,h2).section-title span,.lux-page .eyebrow{color:var(--tone)}
+.lux-page :is(button,a):active{transform:scale(.97)}
+.lux-page :is(button,a){transition:transform .15s}
+.lux-page .text-primary{color:var(--tone)}
+.lux-page .bg-primary\/15{background:color-mix(in oklab,var(--tone) 16%,transparent)}
