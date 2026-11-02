@@ -4994,3 +4994,14 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxt-confirm-actions button.danger{color:oklch(0.98 0 0);background:linear-gradient(135deg,oklch(0.62 0.22 25),oklch(0.48 0.2 20))}
 @keyframes bxtCfIn{from{opacity:0}}
 @keyframes bxtCfPop{from{opacity:0;transform:scale(.88) translateY(10px)}}
+
+/* Weekly challenge banner + LIVE clip button */
+.bxt-challenge{position:absolute;z-index:6;top:calc(max(.6rem, env(safe-area-inset-top)) + 3.2rem);left:4.2rem;right:.75rem;display:grid;gap:.05rem;text-align:left;padding:.45rem .8rem;border-radius:14px;color:oklch(0.97 0 0);background:linear-gradient(120deg,oklch(0.16 0.03 290 / .85),oklch(0.1 0.01 260 / .85));backdrop-filter:blur(10px);border:1px solid color-mix(in oklab,#FFD700 45%,transparent);box-shadow:0 8px 22px -12px oklch(0 0 0 / .8)}
+.bxt-challenge span{font-size:.55rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#FFD700}
+.bxt-challenge b{font-size:.8rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bxt-challenge small{font-size:.6rem;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bxt-challenge.on{border-color:#FFD700;box-shadow:0 0 0 2px color-mix(in oklab,#FFD700 35%,transparent)}
+.bxl-clip-btn{position:absolute;left:3.2rem;top:6.6rem;z-index:6;display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;font-size:1rem;color:oklch(0.97 0 0);background:oklch(0.12 0.01 260 / .6);backdrop-filter:blur(10px);border:1px solid color-mix(in oklab,#FFD700 40%,transparent)}
+.bxl-clip-btn small{font-size:.45rem;font-weight:900;margin-top:-.35rem}
+.bxl-clip-btn.on{background:oklch(0.55 0.22 25);animation:bxt-live-pulse 1s infinite}
+.bxl-clean .bxl-clip-btn{display:none}

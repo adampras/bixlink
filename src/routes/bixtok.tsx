@@ -1,10 +1,11 @@
 import bixtokLogo from '@/assets/bixtok-logo.png';
+import { noteInterest, rankForYou, readAffinity } from '@/lib/bixtok-foryou';
 import { luxConfirm } from '@/lib/bixtok-confirm';
 import { useVipHosts, VipBadge } from '@/lib/bixtok-vip';
 import { Volume2, VolumeX, Home, ShoppingBag, MessageSquare, User, Menu, Wallet, Clock, QrCode, Sparkles, Flame, Settings, ChevronRight, Bell, Zap, Bot, Grid3x3, Bookmark, Repeat2, Eye, ShieldCheck, Coins, Megaphone, BadgeDollarSign, Minimize2 } from 'lucide-react';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Gift, Heart, Lock, MessageCircle, Plus, Radio, Send, Share2, Trash2, X, Star, Users, UserCheck, Compass, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { MemberGate } from '@/components/MemberGate';
@@ -28,7 +29,7 @@ export const Route = createFileRoute('/bixtok')({
 });
 
 const TAB_ICONS: Record<string, typeof Heart> = { foryou: Sparkles, live: Radio, following: UserCheck, favorite: Star, friends: Users, explore: Compass, nearby: MapPin, mine: User };
-type Cfg = { link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_host_min_stake_usd?: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean };
+type Cfg = { challenge_enabled?: boolean; challenge_tag?: string | null; challenge_title?: string | null; challenge_prize?: string | null; challenge_ends_at?: string | null; clips_enabled?: boolean; link_slots?: number; max_links?: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_host_min_stake_usd?: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max?: number; live_cta?: boolean; host_gifts?: boolean; replay_enabled?: boolean; soundboard?: boolean; pk_enabled?: boolean; showcase_enabled?: boolean };
 type Sched = { id: string; title: string; host_name: string; starts_at: string; reminded: boolean; count: number };
 type Gift = { id: string; name: string; emoji: string; currency: string; price: number };
 type Video = { id: string; creator_name: string; creator_id: string | null; caption: string; video_url: string; likes: number; media_path: string | null; media_kind: string; filter: string; overlay: string; allow_gifts: boolean; src: string; text_style: Partial<TextStyle> | null; music_title: string | null; music_url: string | null; source_kind: string; clean?: string | undefined };
@@ -121,7 +122,12 @@ function BixtokPage() {
   const [tag, setTag] = useState('');
   const baseVids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
   const tags = [...new Set(baseVids.flatMap(v => (v.caption.match(/#[\p{L}\d_]+/gu) ?? []).map(t => t.toLowerCase())))].slice(0, 12);
-  const vids = tag ? baseVids.filter(v => v.caption.toLowerCase().includes(tag)) : baseVids;
+  const rankKey = q.data ? q.data.videos.map(v => v.id).join(',') : '';
+  const forYou = useMemo(() => (q.data ? rankForYou(q.data.videos, readAffinity(), following) : []), [rankKey, tab]); // eslint-disable-line react-hooks/exhaustive-deps
+  const ranked = tab === 'following' || tab === 'mine' ? baseVids : forYou;
+  const vids = tag ? ranked.filter(v => v.caption.toLowerCase().includes(tag)) : ranked;
+  const ch = q.data?.cfg; const chOpen = !!(ch?.challenge_enabled && ch.challenge_tag && (!ch.challenge_ends_at || new Date(ch.challenge_ends_at).getTime() > Date.now()));
+  const chTag = chOpen ? `#${String(ch!.challenge_tag).replace(/^#/, '').toLowerCase()}` : '';
   const top = q.data ? [...q.data.videos.reduce((m, v) => { if (!v.creator_id) return m; const c = m.get(v.creator_id) ?? { name: v.creator_name, likes: 0, posts: 0 }; c.likes += Number(v.likes || 0); c.posts++; m.set(v.creator_id, c); return m; }, new Map<string, { name: string; likes: number; posts: number }>()).values()].sort((a, b) => b.likes - a.likes).slice(0, 5) : [];
 
   return <MemberGate ready={ready} signedIn={!!user} title="BIXTOK"><main className="bixtok">
@@ -145,7 +151,7 @@ function BixtokPage() {
       <div className="bixtok-brand"><img src={bixtokLogo} alt="BIXTOK" width={40} height={40}/></div></>}
       {section === 'home' && (tab === 'live'
         ? <>{top.length > 0 && <div className="bxt-board" aria-label="Top creators"><b>🏆 Top creators</b>{top.map((c, i) => <span key={c.name + i}><i>{['👑','🥈','🥉','4','5'][i]}</i>@{c.name}<small>{fmtCount(c.likes)} ♥</small></span>)}</div>}<LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/></>
-        : <Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote} liveHosts={new Map(q.data.lives.map(l => [l.host_id, l]))} onEnterLive={setRoom}/>)}
+        : <>{chOpen && tab !== 'mine' && <button type="button" className={`bxt-challenge${tag === chTag ? ' on' : ''}`} onClick={() => setTag(t => (t === chTag ? '' : chTag))}><span>🏆 Weekly challenge</span><b>{ch!.challenge_title || chTag}</b><small>{chTag}{ch!.challenge_prize ? ` · Prize: ${ch!.challenge_prize}` : ''}{ch!.challenge_ends_at ? ` · ends ${new Date(ch!.challenge_ends_at).toLocaleDateString()}` : ''}{tag === chTag ? ' · showing entries' : ' · tap to see entries'}</small></button>}<Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote} liveHosts={new Map(q.data.lives.map(l => [l.host_id, l]))} onEnterLive={setRoom}/></>)}
       {section === 'inbox' && <Inbox followers={followers.size} lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
       {section === 'profile' && <ProfilePage follow={{ following, followers }} me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} all={q.data.videos} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
       {section === 'balance' && <BalancePage stake={q.data.stake} cfg={q.data.cfg} onBack={() => setSection('profile')} onLive={() => { setSection('home'); setTab('live'); }}/>}
@@ -184,8 +190,18 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
       if (el && feed) { feed.style.scrollSnapType = 'none'; feed.scrollTop = el.offsetTop; requestAnimationFrame(() => { feed.style.scrollSnapType = ''; }); if (Math.abs(feed.scrollTop - el.offsetTop) < 4 || n > 20) return; }
       if (n++ < 30) t = window.setTimeout(go, 60); };
     go(); return () => clearTimeout(t); }, [resume, videos.length > 0]);
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return undefined;
+    const timers = new Map<Element, number>();
+    const io = new IntersectionObserver(es => es.forEach(en => {
+      const id = (en.target as HTMLElement).dataset['vid']; const v = id ? videos.find(x => x.id === id) : undefined; if (!v) return;
+      if (en.isIntersecting) timers.set(en.target, window.setTimeout(() => noteInterest(v, 1, true), 3000)); else { clearTimeout(timers.get(en.target)); timers.delete(en.target); }
+    }), { threshold: 0.7 });
+    document.querySelectorAll('.bixtok-slide[data-vid]').forEach(el => io.observe(el));
+    return () => { io.disconnect(); timers.forEach(t => clearTimeout(t)); };
+  }, [videos]);
   if (!videos.length) return <p className="grid h-full place-items-center text-sm text-muted-foreground">No posts yet. Tap + to create one.</p>;
-  const like = async (v: Video) => { if (liked[v.id] || cfg.features['likes'] === false) return; setLiked(l => ({ ...l, [v.id]: true })); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); };
+  const like = async (v: Video) => { if (liked[v.id] || cfg.features['likes'] === false) return; setLiked(l => ({ ...l, [v.id]: true })); noteInterest(v, 3); await supabase.rpc('bixtok_like', { p_video: v.id }); qc.invalidateQueries({ queryKey: ['bixtok'] }); };
   const tapRef = useRef<{ t: number; id: string }>({ t: 0, id: '' });
   const [bursts, setBursts] = useState<{ k: number; x: number; y: number }[]>([]);
   const onTap = (e: React.PointerEvent, v: Video) => {
@@ -206,8 +222,8 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
       {v.creator_id && v.creator_id !== me && !liveHosts.has(v.creator_id) && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
       {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={() => void like(v)}><Heart/><small>{fmtCount(v.likes + (liked[v.id] ? 1 : 0))}</small></button>}
       <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
-      <button aria-label="Save" className={saved.ids.includes(v.id) ? 'on' : ''} onClick={() => onNote(saved.toggle(v.id) ? 'Saved to your profile' : 'Removed from saved')}><Bookmark/><small>Save</small></button>
-      {cfg.features['share'] !== false && <button aria-label="Share" onClick={() => setShare(v)}><Share2/><small>Share</small></button>}
+      <button aria-label="Save" className={saved.ids.includes(v.id) ? 'on' : ''} onClick={() => onNote(saved.toggle(v.id) ? (noteInterest(v, 4), 'Saved to your profile') : 'Removed from saved')}><Bookmark/><small>Save</small></button>
+      {cfg.features['share'] !== false && <button aria-label="Share" onClick={() => { noteInterest(v, 3); setShare(v); }}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
       </>}
       <button type="button" className="bxt-rail-toggle" aria-label={railOpen ? 'Collapse menu' : 'Expand menu'} onClick={() => setRailOpen(o => !o)}>{railOpen ? '›' : '‹'}</button>
