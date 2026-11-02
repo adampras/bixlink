@@ -452,7 +452,7 @@ function ProfilePage({ follow, me, email, videos, all = [], onCreate, onBalance,
   const name = p.data?.username || email.split('@')[0] || 'member';
   const likes = videos.reduce((a, v) => a + Number(v.likes || 0), 0);
   const copy = async () => { try { await navigator.clipboard.writeText(`${location.origin}/bixtok`); onNote('Profile link copied'); } catch { /* ignore */ } };
-  return <div className="bxt-page bxt-prof"><header className="bxt-head"><button aria-label="Create" onClick={onCreate}><Sparkles size={20}/></button><span/><button aria-label="Menu" onClick={() => setDrawer(true)}><Menu size={22}/></button></header>
+  return <div className="bxt-page bxt-page-profile"><header className="bxt-head"><button aria-label="Create" onClick={onCreate}><Sparkles size={20}/></button><span/><button aria-label="Menu" onClick={() => setDrawer(true)}><Menu size={22}/></button></header>
     <section className="bxt-prof"><div><h1>{name}</h1><small>@{name.toLowerCase()}</small>
       <div className="bxt-stats"><p><b>{follow.following.size}</b>Following</p><p><b>{follow.followers.size}</b>Followers</p><p><b>{[...follow.following].filter(x => follow.followers.has(x)).length}</b>Friends</p><p><b>{likes}</b>Likes</p></div></div>
       <button className="bxt-bigav" onClick={onCreate}>{name.slice(0, 1).toUpperCase()}<em><Plus size={14}/></em></button></section>
