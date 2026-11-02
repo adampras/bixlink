@@ -500,6 +500,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
         <div className="min-w-0"><b className="block truncate text-xs">@{live.host_name}</b>{vipHost && <VipBadge small/>}<small className="block truncate">{live.title}</small></div>
         {!host && <button className={`bxl-follow ${following ? 'on' : ''}`} aria-label={following ? 'Following' : 'Follow'} onClick={onFollow}>{following ? <Check size={14}/> : <UserPlus size={14}/>}</button>}
       </div>
+      {top.length > 0 && <div className="bxl-gifters" aria-label="Top gifters">{top.slice(0, 3).map((t, i) => <span key={i} className={`r${i + 1}`} title={`${t.name} · ${Number(t.total)} ${t.currency}`}>{t.name.slice(0, 1).toUpperCase()}<i>{i + 1}</i></span>)}</div>}
       <span className="bxl-chip"><Eye size={13}/>{viewers}</span>
       <span className="bxl-chip"><Heart size={13}/>{likes}</span>
       {host && !ended && <button className="bixtok-end" onClick={stop}>End</button>}
@@ -527,6 +528,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     {ended && <div className="bxl-endcard" role="dialog" aria-label="LIVE ended"><b>LIVE ended</b><small>Thanks for watching @{live.host_name}</small><button type="button" className="bxl-btn" onClick={onClose}>Exit LIVE</button></div>}
     {!host && entered && audioBlocked && sound && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Ketuk untuk mengaktifkan suara</button>}
     {banner && <div className="bxl-banner" key={banner.id}><Gift size={18}/><div><b>{banner.name}</b><small>{banner.body}</small></div></div>}
+    {mega && <div className="bxl-coinrain" key={`rain-${mega.id}`} aria-hidden>{Array.from({ length: 22 }, (_, i) => <i key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 7) * 0.18}s`, animationDuration: `${1.6 + (i % 5) * 0.25}s` }}>🪙</i>)}</div>}
     {mega && <div className="bxl-mega" key={mega.id} aria-hidden><span>{giftInfo(mega.body).emoji}</span><b>{mega.name}</b><small>{mega.body}</small></div>}
     <div className="bxl-floaters" aria-hidden>{floaters.map(f => <Heart key={f.id} className="bxl-heart" fill={f.color} color={f.color}
       style={f.px != null ? { position: 'fixed', left: `${f.px - 15}px`, top: `${(f.py ?? 0) - 15}px`, bottom: 'auto', ['--drift' as string]: `${f.drift}px` } : { right: `${f.x}px`, ['--drift' as string]: `${f.drift}px` }} onAnimationEnd={() => setFloaters(x => x.filter(y => y.id !== f.id))}/>)}
