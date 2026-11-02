@@ -235,7 +235,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     if (blob.size > 10 * 1024 * 1024) return fail('File maksimal 10 MB');
     setBusy(true);
     const path = `${me}/${peer.id}/${crypto.randomUUID()}.${ext}`;
-    const up = await supabase.storage.from('bix-chat').upload(path, blob, { contentType: blob.type || undefined });
+    const up = await supabase.storage.from('bix-chat').upload(path, blob, { contentType: blob.type || 'application/octet-stream' });
     if (up.error) { setBusy(false); return fail(up.error.message); }
     const { data, error } = await supabase.rpc('bix_chat_send_media' as never, { p_to: peer.id, p_kind: kind, p_path: path, p_body: '' } as never);
     setBusy(false);
