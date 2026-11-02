@@ -6,6 +6,7 @@ import { startBixCall, enableBixNotifications } from '@/components/BixCall';
 import { useMember } from '@/lib/useMember';
 import { supabase } from '@/integrations/supabase/client';
 import { BixShell } from '@/components/BixShell';
+import { pushNotify } from '@/lib/bix-push';
 import heroImg from '@/assets/bixcall-hero-3d.jpg';
 
 export const Route = createFileRoute('/call')({
@@ -228,7 +229,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     setText('');
     const { data, error } = await supabase.rpc('bix_chat_send' as never, { p_to: peer.id, p_body: b } as never);
     if (error) { setErr(error.message); setText(b); setTimeout(() => setErr(''), 4000); return; }
-    setMsgs(m => [...m, data as unknown as Msg]);
+    setMsgs(m => [...m, data as unknown as Msg]); pushNotify('chat', (data as unknown as Msg | null)?.id);
   };
   const fail = (e: string) => { setErr(e); setTimeout(() => setErr(''), 4000); };
   const upload = async (blob: Blob, kind: 'image' | 'voice', ext: string) => {
@@ -240,7 +241,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     const { data, error } = await supabase.rpc('bix_chat_send_media' as never, { p_to: peer.id, p_kind: kind, p_path: path, p_body: '' } as never);
     setBusy(false);
     if (error) return fail(error.message);
-    setMsgs(m => [...m, data as unknown as Msg]);
+    setMsgs(m => [...m, data as unknown as Msg]); pushNotify('chat', (data as unknown as Msg | null)?.id);
   };
   const rec = useRef<MediaRecorder | null>(null);
   const [recording, setRecording] = useState(false);
@@ -265,7 +266,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     setBusy(false);
     if (error) return fail(error.message);
     setPayOpen(false); setAmt(''); setNote(''); try { navigator.vibrate?.(20); } catch { /* optional */ }
-    setMsgs(m => [...m, data as unknown as Msg]);
+    setMsgs(m => [...m, data as unknown as Msg]); pushNotify('chat', (data as unknown as Msg | null)?.id);
   };
 
   return <main className="comm-room mx-auto max-w-xl">
