@@ -59,14 +59,33 @@ function CallInner() {
   </main>;
 }
 
+type Found = Peer & { code?: string | null; via?: string };
+const VIA: Record<string, string> = { id: 'BIX-ID', username: 'Username', whatsapp: 'WhatsApp' };
 function FindMember({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: (id: string, name: string) => void }) {
   const [q, setQ] = useState('');
-  const [found, setFound] = useState<Peer | null | undefined>(undefined);
-  const find = async () => { const { data } = await supabase.rpc('bix_call_find' as never, { p_query: q } as never); setFound((data as Peer | null) ?? null); };
+  const [found, setFound] = useState<Found | null | undefined>(undefined);
+  const [busy, setBusy] = useState(false);
+  const [recent, setRecent] = useState<string[]>([]);
+  useEffect(() => { try { setRecent(JSON.parse(localStorage.getItem('bixcall-recent') ?? '[]')); } catch { /* ignore */ } }, []);
+  const find = async (term = q) => {
+    const t = term.trim(); if (t.length < 3) return;
+    setBusy(true); setQ(t);
+    const { data } = await supabase.rpc('bix_call_find' as never, { p_query: t } as never);
+    setBusy(false); setFound((data as Found | null) ?? null);
+    if (data) { const r = [t, ...recent.filter(x => x !== t)].slice(0, 3); setRecent(r); localStorage.setItem('bixcall-recent', JSON.stringify(r)); }
+  };
+  const copy = (c: string) => { void navigator.clipboard?.writeText(c); try { navigator.vibrate?.(10); } catch { /* optional */ } };
   return <section className="comm-card">
-    <div className="comm-search"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => e.key === 'Enter' && void find()} placeholder="Kode BIX-xxxxxx atau @username"/><button onClick={() => void find()}>Cari</button></div>
-    {found === null && <p className="mt-2 text-xs text-muted-foreground">Member tidak ditemukan.</p>}
-    {found && <div className="comm-peer"><span className="comm-ava">{found.name.slice(0, 1).toUpperCase()}</span><b className="min-w-0 flex-1 truncate">@{found.name}</b>
+    <h3 className="comm-h">Lacak member</h3>
+    <div className="comm-search"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => e.key === 'Enter' && void find()} placeholder="BIX-ID, @username atau no. WA"/>
+      {q && <button type="button" className="comm-clear" aria-label="Hapus" onClick={() => { setQ(''); setFound(undefined); }}>✕</button>}
+      <button onClick={() => void find()} disabled={busy}>{busy ? '…' : 'Cari'}</button></div>
+    <div className="comm-chips"><span>BIX-ID</span><span>@Username</span><span>No. WA</span>
+      {recent.map(r => <button key={r} onClick={() => void find(r)}>↺ {r}</button>)}</div>
+    {found === null && <p className="mt-2 text-xs text-muted-foreground">Member tidak ditemukan. Nomor WA hanya bisa dilacak jika pemiliknya mengaktifkan tombol WhatsApp.</p>}
+    {found && <div className="comm-peer"><span className="comm-ava">{found.name.slice(0, 1).toUpperCase()}</span>
+      <span className="min-w-0 flex-1"><b className="block truncate">@{found.name}</b>
+        <span className="comm-meta">{found.code && <button onClick={() => copy(found.code!)}>{found.code} ⧉</button>}{found.whatsapp && <i>WA terhubung</i>}{found.via && <small>via {VIA[found.via]}</small>}</span></span>
       {found.user_id === me ? <small>Akun Anda</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
   </section>;
 }
