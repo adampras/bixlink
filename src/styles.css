@@ -5532,3 +5532,40 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bxpad footer button{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:12.5px;padding:10px 12px;border-radius:999px;border:1px solid rgb(255 255 255 / .15);background:rgb(255 255 255 / .05)}
 .bxpad footer button.is-gold{font-weight:800;color:#111;background:linear-gradient(135deg,#FFD700,#f5b400);border-color:transparent}
 .bxpad footer button:disabled{opacity:.45}
+
+/* ===== BIX CALL & Papan Mengetik — Lux Elegan ===== */
+@keyframes bxLuxBreath{0%,100%{box-shadow:0 0 0 0 rgb(52 211 153 / .55)}50%{box-shadow:0 0 0 5px rgb(52 211 153 / 0)}}
+@keyframes bxLuxSheen{0%{background-position:-160% 0}100%{background-position:260% 0}}
+@keyframes bxLuxSpin{to{transform:rotate(360deg)}}
+.bxpad-fab{background:radial-gradient(circle at 32% 22%,#2b2140 0%,#07070b 70%);border:1px solid transparent;background-clip:padding-box;box-shadow:0 0 0 1px rgb(255 215 0 / .7),0 0 0 4px rgb(255 215 0 / .08),0 0 0 5px rgb(255 215 0 / .3),0 10px 28px rgb(0 0 0 / .6),0 0 22px rgb(168 85 247 / .35);transition:transform .15s}
+.bxpad-fab:active{transform:scale(.9)}
+.bxpad-board{background:linear-gradient(135deg,#FFD700,#b8860b 35%,#A855F7 80%);box-shadow:0 0 24px rgb(168 85 247 / .18)}
+.bxpad-board textarea{background:linear-gradient(180deg,#0c0a12,#07070a)}
+.bxpad-chip{background:linear-gradient(160deg,rgb(255 255 255 / .05),rgb(255 255 255 / .01));border:1px solid rgb(220 220 230 / .14);backdrop-filter:blur(10px)}
+.bxpad-chip.is-on{border-color:rgb(255 215 0 / .6);box-shadow:inset 0 0 12px rgb(255 215 0 / .12)}
+.bxpad .is-gold,.comm-dial-go{background:linear-gradient(110deg,#a9781a,#FFD700 30%,#fff3b0 45%,#FFD700 60%,#a9781a);background-size:220% 100%;animation:bxLuxSheen 4.5s linear infinite;color:#1a1204!important;font-weight:800;border:0;box-shadow:0 6px 18px rgb(255 215 0 / .25)}
+/* Bubbles */
+.comm-msgs>p{background:linear-gradient(160deg,rgb(30 30 38 / .85),rgb(14 14 20 / .85));border:1px solid rgb(210 214 226 / .16);backdrop-filter:blur(12px);box-shadow:0 4px 14px rgb(0 0 0 / .3)}
+.comm-msgs>p.is-me{background:linear-gradient(140deg,#24153f,#0e0b1a);border:1px solid rgb(168 85 247 / .3);border-right:2px solid rgb(255 215 0 / .7);box-shadow:0 4px 16px rgb(168 85 247 / .16)}
+.comm-tick{color:#FFD700;text-shadow:0 0 6px rgb(255 215 0 / .5)}
+.comm-quick button{border-radius:999px;background:rgb(255 255 255 / .04);border:1px solid rgb(255 215 0 / .25);backdrop-filter:blur(10px);transition:transform .12s}
+.comm-quick button:active{transform:scale(.93)}
+.comm-room-head{background:linear-gradient(180deg,rgb(10 8 16 / .92),rgb(10 8 16 / .7));backdrop-filter:blur(16px);border-bottom:1px solid rgb(255 215 0 / .18)}
+.comm-input{background:#09080d;border:1px solid rgb(255 215 0 / .22)}
+.comm-input:focus,.comm-input:focus-within{border-color:rgb(255 215 0 / .6);box-shadow:0 0 0 3px rgb(168 85 247 / .15)}
+.comm-card{background:linear-gradient(160deg,rgb(24 20 34 / .8),rgb(8 8 12 / .9));border:1px solid rgb(255 215 0 / .14);box-shadow:inset 0 1px 0 rgb(255 255 255 / .05)}
+.comm-ava{box-shadow:0 0 0 1.5px rgb(255 215 0 / .55),0 0 0 3px rgb(200 200 210 / .15)}
+.comm-online,.comm-ava .on,.comm-ava i{animation:bxLuxBreath 2.4s ease-in-out infinite}
+.comm-pay,.comm-req{position:relative;overflow:hidden;background:linear-gradient(135deg,#3a2a06,#16110a 55%,#2b1e3f)!important;border:1px solid rgb(255 215 0 / .55)!important}
+.comm-pay::after,.comm-req::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 35%,rgb(255 240 180 / .18) 50%,transparent 65%);background-size:250% 100%;animation:bxLuxSheen 5s linear infinite}
+/* Dialpad */
+.comm-dial-pad button{background:radial-gradient(circle at 35% 25%,#24212e,#0a0a0e 75%);border:1px solid rgb(255 215 0 / .18);box-shadow:inset 0 1px 1px rgb(255 255 255 / .1),inset 0 -2px 4px rgb(0 0 0 / .6),0 4px 10px rgb(0 0 0 / .4)}
+.comm-dial-pad button:active{background:radial-gradient(circle,#3a2a55,#120e1c);box-shadow:0 0 14px rgb(168 85 247 / .4);border-color:rgb(255 215 0 / .5)}
+.comm-dial-pad b{color:#f5f0e0}
+/* Call screen */
+.bixcall-fox{position:relative}
+.bixcall-fox::before{content:"";position:absolute;inset:-10px;border-radius:999px;border:1.5px dashed rgb(168 85 247 / .5);animation:bxLuxSpin 14s linear infinite;pointer-events:none}
+.bixcall-btns button{backdrop-filter:blur(14px);border:1px solid rgb(255 255 255 / .12);box-shadow:inset 0 1px 0 rgb(255 255 255 / .08),0 6px 16px rgb(0 0 0 / .45)}
+.bixcall-btns button.end{background:linear-gradient(160deg,#e11d48,#7f1d1d)!important;box-shadow:0 0 18px rgb(225 29 72 / .45)}
+.bixcall-btns button.accept{background:linear-gradient(160deg,#10b981,#065f46)!important}
+@media (prefers-reduced-motion:reduce){.bxpad .is-gold,.comm-dial-go,.comm-pay::after,.comm-req::after,.bixcall-fox::before,.comm-online,.comm-ava i{animation:none}}
