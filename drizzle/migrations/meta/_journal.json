@@ -1016,6 +1016,13 @@
       "when": 1793676886961,
       "tag": "0144_flat_daily_package_profit",
       "breakpoints": true
+    },
+    {
+      "idx": 145,
+      "version": "7",
+      "when": 1793683706017,
+      "tag": "0145_wd_matching_and_one_time_sponsored_stake",
+      "breakpoints": true
     }
   ]
 }
