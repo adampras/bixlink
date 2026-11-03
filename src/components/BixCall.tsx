@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
 import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck } from 'lucide-react';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
@@ -259,10 +259,10 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
     <div className="bixcall-status"><i className={link === 'on' ? 'ok' : ''}/>{statusText}</div>
     {call.kind === 'video' && live && <video ref={localV} className="bixcall-pip" style={{ transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={dragPip} autoPlay playsInline muted/>}
     <footer className="bixcall-ctl">
-      {!live && !done && call.role === 'callee' && <>
-        <button className="end" aria-label="Tolak" onClick={onDecline}><PhoneOff/></button>
-        <button className="accept" aria-label="Terima" onClick={onAccept}>{call.kind === 'video' ? <Video/> : <Phone/>}</button>
-      </>}
+      {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
+        <SwipeKey tone="end" label="Tolak" onDone={onDecline} icon={<PhoneOff/>}/>
+        <SwipeKey tone="accept" label="Terima" onDone={onAccept} icon={call.kind === 'video' ? <Video/> : <Phone/>}/>
+      </div>}
       {!live && !done && call.role === 'caller' && <>
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
         <button className="end" aria-label="Batalkan" onClick={onEnd}><PhoneOff/></button>
@@ -286,4 +286,31 @@ export function CallButtons({ peerId, peerName, className = '' }: { peerId: stri
     <button type="button" aria-label="Voice call" onClick={e => { e.stopPropagation(); startBixCall(peerId, peerName, 'voice'); }}><Phone size={15}/></button>
     <button type="button" aria-label="Video call" onClick={e => { e.stopPropagation(); startBixCall(peerId, peerName, 'video'); }}><Video size={15}/></button>
   </span>;
+}
+
+/** Swipe-up key: drag the knob upward past the threshold to fire; tap-and-hold safe in pockets. Enter/Space also fires for accessibility. */
+function SwipeKey({ tone, label, icon, onDone }: { tone: 'accept' | 'end'; label: string; icon: React.ReactNode; onDone: () => void }) {
+  const [dy, setDy] = useState(0);
+  const [drag, setDrag] = useState(false);
+  const fired = useRef(false);
+  const LIMIT = 120, FIRE = 80;
+  const down = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (fired.current) return;
+    const y0 = e.clientY; setDrag(true);
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+    const move = (ev: PointerEvent) => { const d = Math.max(0, Math.min(LIMIT, y0 - ev.clientY)); setDy(d); };
+    const up = (ev: PointerEvent) => {
+      window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+      setDrag(false);
+      if (y0 - ev.clientY >= FIRE && !fired.current) { fired.current = true; setDy(LIMIT); try { navigator.vibrate?.(30); } catch { /* optional */ } onDone(); }
+      else setDy(0);
+    };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+  };
+  return <div className={`bc-swipe is-${tone}`}>
+    <span className="bc-swipe-track" aria-hidden="true"><i/><i/><i/></span>
+    <button type="button" className={`bc-swipe-knob${drag ? ' is-drag' : ''}`} style={{ transform: `translateY(${-dy}px)` }} aria-label={`Geser ke atas untuk ${label}`}
+      onPointerDown={down} onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !fired.current) { e.preventDefault(); fired.current = true; onDone(); } }}>{icon}</button>
+    <small>{label}</small>
+  </div>;
 }
