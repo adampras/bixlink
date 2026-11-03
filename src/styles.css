@@ -5649,3 +5649,32 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .ledger-history li[data-real=false] i{color:var(--chart-3)}
 .ledger-history li[data-real=true] i{color:var(--chart-2)}
 .ledger-empty{margin-top:8px;font-size:11px;color:var(--muted-foreground)}
+/* Vault Bond Deed + Black Titanium VIP Pass */
+.vf-overlay{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:16px;background:color-mix(in oklab,var(--background) 82%,transparent);backdrop-filter:blur(10px)}
+.vf-stage{position:relative;width:min(380px,100%);max-height:92dvh;overflow:auto;border:1px solid color-mix(in oklab,var(--chart-3) 45%,transparent);border-radius:20px;padding:14px;background:linear-gradient(160deg,var(--card),var(--background));box-shadow:0 24px 60px -20px color-mix(in oklab,var(--chart-3) 35%,transparent)}
+.vf-close{position:absolute;right:10px;top:10px;z-index:2;width:32px;height:32px}
+.vf-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 44px 12px 0}
+.vf-tabs button{display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--border);border-radius:999px;padding:7px 8px;font-size:11px;font-weight:700;color:var(--muted-foreground)}
+.vf-tabs button.is-on{border-color:var(--chart-3);color:var(--chart-3);background:color-mix(in oklab,var(--chart-3) 12%,transparent)}
+.vf-deed{position:relative;border:1px solid color-mix(in oklab,var(--chart-3) 60%,transparent);border-radius:14px;padding:16px;background:repeating-radial-gradient(circle at 50% 0,transparent 0 6px,color-mix(in oklab,var(--chart-3) 6%,transparent) 6px 7px),var(--card)}
+.vf-seal{font-size:9px;letter-spacing:.22em;font-weight:800;color:var(--chart-3);text-align:center}
+.vf-deed h3{margin-top:6px;text-align:center;font-family:var(--font-display,inherit);font-weight:900;font-size:18px}
+.vf-reg{text-align:center;font-size:11px;color:var(--muted-foreground);margin-top:2px}
+.vf-deed dl{margin-top:12px;display:grid;gap:6px;font-size:12px}
+.vf-deed dl div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--border);padding-bottom:5px}
+.vf-deed dt{color:var(--muted-foreground)}.vf-deed dd{font-weight:800;text-align:right}
+.vf-stamp{position:absolute;right:14px;bottom:70px;width:64px;height:64px;border-radius:50%;border:2px solid color-mix(in oklab,var(--chart-3) 70%,transparent);display:grid;place-content:center;text-align:center;transform:rotate(-14deg);color:var(--chart-3);opacity:.75}
+.vf-stamp span{font-size:10px;font-weight:900}.vf-stamp small{font-size:6px;letter-spacing:.1em}
+.vf-note{margin-top:14px;font-size:9.5px;color:var(--muted-foreground);padding-right:70px}
+.vf-dl{margin-top:10px;width:100%}
+.vf-card{position:relative;aspect-ratio:1.586;border-radius:16px;padding:16px;overflow:hidden;color:var(--foreground);background:linear-gradient(115deg,transparent 30%,color-mix(in oklab,var(--chart-3) 22%,transparent) 48%,transparent 62%),repeating-linear-gradient(90deg,color-mix(in oklab,var(--foreground) 4%,transparent) 0 1px,transparent 1px 3px),linear-gradient(145deg,var(--muted),var(--background));border:1px solid color-mix(in oklab,var(--chart-3) 50%,transparent);box-shadow:0 18px 40px -18px color-mix(in oklab,var(--chart-3) 50%,transparent)}
+.vf-chip{width:40px;height:30px;border-radius:6px;background:linear-gradient(135deg,var(--chart-3),color-mix(in oklab,var(--chart-3) 50%,var(--background)))}
+.vf-card-brand{position:absolute;right:16px;top:16px;font-weight:900;letter-spacing:.2em;color:var(--chart-3);font-size:13px}
+.vf-card-tier{margin-top:10px;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--chart-3)}
+.vf-card-no{margin-top:8px;font-size:17px;letter-spacing:.12em;font-weight:700}
+.vf-card-foot{position:absolute;left:16px;right:16px;bottom:14px;display:flex;justify-content:space-between;font-size:9px;letter-spacing:.14em;color:var(--muted-foreground)}
+.vf-card.is-locked>:not(.vf-lock){filter:blur(3px) grayscale(.8);opacity:.5}
+.vf-lock{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:6px;color:var(--chart-3);font-size:12px}
+.vf-ok{margin-top:10px;font-size:11px;color:var(--chart-2);text-align:center}
+.vf-progress{margin-top:12px;font-size:11px;color:var(--muted-foreground)}
+@media print{body *{visibility:hidden}#vf-deed-print,#vf-deed-print *{visibility:visible}#vf-deed-print{position:fixed;inset:0}.vf-dl{display:none}}
