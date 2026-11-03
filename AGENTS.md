@@ -18,7 +18,7 @@
 - Sovereign market: read-only terminal with timestamped public-data caches; signature login reuses WalletSignIn with an in-place callback so identities/authorization stay unchanged.
 - BIX PAY member transfers move BIX instantly in the internal ledger via a SECURITY DEFINER RPC gated by the owner-controlled bix_pay setting; owner can reverse — keeps transfers atomic and centrally controllable.
 - Clone accounts (bix_clone_accounts) are funded only via bix_allocations and excluded from member stats — auditable and separate.
-- Leader virtual balances (bix_leaders) count in bix_wallet_balance but withdraw is blocked until bix_leader_status qualifies — one server gate.
+- Withdrawable USDT only via bix_balance_ledger; BIX locks via bix_assert_bix_unlocked — one server gate per asset.
 - NETWORK: cycle-safe exploration, ancestry breadcrumbs, separate BIX/USDT metrics.
 - Calculate staking yield as a live display-only ledger projection from active stakes; never add projected USDT or BIX profit to spendable balances without a separate settlement rule.
 - Keep the 1,000,000 BIX reserve in an owner-only singleton vault initialized idempotently; never expose it in member balances or allow repeated generation.
