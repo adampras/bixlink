@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
+import { useRouter } from '@tanstack/react-router';
 import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck, Ear } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck, Ear, Radio, X } from 'lucide-react';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
 import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
