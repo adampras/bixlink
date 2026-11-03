@@ -12,7 +12,7 @@ import { getOwnerAnnouncements, saveAnnouncement } from '@/lib/updates.functions
 import { defaultReadiness, type Readiness } from '@/lib/readiness';
 import { dateTime } from '@/lib/bixlink';
 
-type AvailabilityKey = 'legalEnabled' | 'kycEnabled' | 'readinessEnabled' | 'homeOverviewEnabled' | 'marketEnabled' | 'footerEnabled' | 'liveActivityEnabled' | 'heroAnimEnabled' | 'presaleStageEnabled' | 'touchEffectsEnabled' | 'loanEnabled';
+type AvailabilityKey = 'legalEnabled' | 'kycEnabled' | 'readinessEnabled' | 'homeOverviewEnabled' | 'homeHoloEnabled' | 'marketEnabled' | 'footerEnabled' | 'liveActivityEnabled' | 'heroAnimEnabled' | 'presaleStageEnabled' | 'touchEffectsEnabled' | 'loanEnabled';
 const controls: { key: AvailabilityKey; label: string; detail: string }[] = [
   { key: 'touchEffectsEnabled', label: 'Efek sentuh premium', detail: 'Kilau tepi dan respons tekan halus pada tombol. Mengikuti preferensi kurangi animasi perangkat.' },
   { key: 'loanEnabled', label: 'Akun pinjaman leader', detail: 'Buka/tutup program akun pinjaman bersyarat (maks $1.000) di Profile dan FOX AI.' },
@@ -20,6 +20,7 @@ const controls: { key: AvailabilityKey; label: string; detail: string }[] = [
   { key: 'kycEnabled', label: 'Optional identity check', detail: 'Identity submissions in Settings and Withdraw.' },
   { key: 'readinessEnabled', label: 'Readiness information', detail: 'Additional footer information about the project.' },
   { key: 'homeOverviewEnabled', label: 'HOME top overview', detail: 'Recorded staking value, Deposit/Withdraw/Swap buttons and the 3 stat cards at the top of HOME.' },
+  { key: 'homeHoloEnabled', label: 'Kotak Hologram FOX (HOME)', detail: 'Kotak hologram reaktor FOX di atas chart Internal Market BIX pada HOME.' },
   { key: 'marketEnabled', label: 'Market & Updates', detail: 'Major coin prices and published owner announcements.' },
   { key: 'liveActivityEnabled', label: 'Live Global Activity', detail: 'Floating notices of community interest from 100 countries (labelled simulation; real ledger events marked).' },
   { key: 'heroAnimEnabled', label: 'Animated hero background', detail: 'Neural payment grid animation behind the landing page.' },
