@@ -7,7 +7,7 @@ import { agencyAmountValid, normalizeAgency, type AgencyApplication } from '@/li
 
 const usd = (n: number) => `$${Number(n).toLocaleString('en-US')}`;
 
-export function AgencyProgram({ userId }: { userId?: string }) {
+export function AgencyProgram({ userId }: { userId?: string | undefined }) {
   const qc = useQueryClient();
   const cfgQ = useQuery({ queryKey: ['agency-config'], queryFn: async () => normalizeAgency((await supabase.rpc('bix_agency_config')).data) });
   const mine = useQuery({ queryKey: ['agency-mine', userId], enabled: !!userId, queryFn: async () => ((await supabase.from('bix_agency_applications').select('*').eq('user_id', userId!).order('created_at', { ascending: false }).limit(1)).data ?? [])[0] as AgencyApplication | undefined });
