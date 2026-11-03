@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Camera, Eye, Plus, Trash2, Type, Video as VideoIcon, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BixAvatar, useSignedUrl } from '@/components/BixAvatar';
@@ -41,8 +42,8 @@ export function StoryBar({ me, myName }: { me: string; myName: string }) {
       </button>; })}
       {groups && others.length === 0 && <p className="bx-stories-empty">Story dari kontak chat, tim jaringan, dan teman saling follow muncul di sini selama 24 jam.</p>}
     </div>
-    {view !== null && list[view] && <StoryViewer me={me} groups={list} start={view} onClose={() => { setView(null); void reload(); }} onDeleted={() => void reload()}/>}
-    {compose && <StoryComposer me={me} onClose={() => setCompose(false)} onPosted={() => { setCompose(false); void reload(); invalidateCard(me); }}/>}
+    {view !== null && list[view] && createPortal(<StoryViewer me={me} groups={list} start={view} onClose={() => { setView(null); void reload(); }} onDeleted={() => void reload()}/>, document.body)}
+    {compose && createPortal(<StoryComposer me={me} onClose={() => setCompose(false)} onPosted={() => { setCompose(false); void reload(); invalidateCard(me); }}/>, document.body)}
   </section>;
 }
 

@@ -5851,9 +5851,9 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bx-story-item{display:flex;flex-direction:column;align-items:center;gap:.35rem;flex-shrink:0;width:3.9rem;background:none;border:0;color:inherit;padding:0}
 .bx-story-item small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:rgb(226 232 240 / .82)}
 .bx-story-ava{display:grid;place-items:center;width:3.3rem;height:3.3rem;border-radius:50%;font-size:18px;color:#FFD700;background:radial-gradient(circle at 30% 30%,#3a2160,#0b0812 72%);border:1.5px solid rgb(200 205 220 / .25)}
-.bx-story-add{position:absolute;right:.15rem;top:2.35rem;display:grid;place-items:center;width:1.25rem;height:1.25rem;border-radius:50%;background:linear-gradient(145deg,#FFF1A8,#FFD700 55%,#B8860B);color:#0b0812;border:2px solid #0b0812}
+.bx-story-add{position:absolute;right:.1rem;top:2.05rem;display:grid;place-items:center;width:1.25rem;height:1.25rem;border-radius:50%;background:linear-gradient(145deg,#FFF1A8,#FFD700 55%,#B8860B);color:#0b0812;border:2px solid #0b0812}
 .bx-stories-empty{align-self:center;font-size:10.5px;line-height:1.35;color:rgb(200 205 220 / .7);max-width:15rem}
-.bx-sv{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;background:#05040a;color:#f8fafc;touch-action:manipulation}
+.bx-sv{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;background:#05040a;color:#f8fafc;touch-action:manipulation}
 .bx-sv-bars{display:flex;gap:4px;padding:calc(env(safe-area-inset-top) + .6rem) .7rem 0}
 .bx-sv-bars i{flex:1;height:2.5px;border-radius:2px;background:rgb(255 255 255 / .22);overflow:hidden}
 .bx-sv-bars b{display:block;height:100%;background:linear-gradient(90deg,#FFD700,#fff6cf)}
@@ -5902,7 +5902,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .profile-photo .profile-avatar{display:block;cursor:pointer}
 .profile-avatar-img{display:block;width:100%;height:100%;border-radius:50%;border:3px solid var(--background);overflow:hidden}
 .profile-photo-cam{position:absolute;right:-2px;bottom:-2px;display:grid;place-items:center;width:1.6rem;height:1.6rem;border-radius:50%;background:linear-gradient(145deg,#FFF1A8,#FFD700 55%,#B8860B);color:#0b0812;border:2px solid var(--background);font-size:11px;font-weight:900}
-.profile-photo-del{position:absolute;left:-2px;bottom:-2px;display:grid;place-items:center;width:1.4rem;height:1.4rem;border-radius:50%;background:var(--card);color:var(--muted-foreground);border:1px solid var(--border)}
+.profile-photo-del{position:absolute;left:-4px;top:-4px;display:grid;place-items:center;width:1.4rem;height:1.4rem;border-radius:50%;background:var(--card);color:var(--muted-foreground);border:1px solid var(--border)}
 .profile-status{display:block;max-width:100%;margin-top:.35rem;padding:.3rem .7rem;border-radius:999px;border:1px dashed rgb(255 215 0 / .35);font-size:11.5px;text-align:left;color:var(--foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .profile-status em{font-style:normal;color:var(--muted-foreground)}
 .profile-status-edit{margin-top:.45rem;display:grid;gap:.4rem}
@@ -5916,3 +5916,5 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bixcall-av{overflow:visible}
 .bixcall-av-photo{position:relative;z-index:1;width:100%;height:100%;border-radius:50%;object-fit:cover}
 .bixcall-av-status{position:absolute;left:50%;top:calc(100% + 2.6rem);transform:translateX(-50%);white-space:nowrap;max-width:80vw;overflow:hidden;text-overflow:ellipsis;font-style:normal;font-size:11px;color:rgb(255 215 0 / .85)}
+
+body > .comm-sheet-bg{z-index:2147483001}
