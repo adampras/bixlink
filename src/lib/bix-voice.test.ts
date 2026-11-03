@@ -4,7 +4,8 @@ import { callerPhase, OFFLINE_MS } from '@/components/BixCall';
 
 describe('BIX CALL anti-storing and call phases', () => {
   it('shield gate cuts a nearby phone speaker (-44 dB) but passes a voice at the mouth (-22 dB)', () => {
-    expect(GATE_DB.shield).toBe(-40);
+    expect(GATE_DB.shield).toBe(-36);
+    expect(-38 > GATE_DB.shield).toBe(false);
     expect(-44 > GATE_DB.shield).toBe(false);
     expect(-22 > GATE_DB.shield).toBe(true);
   });
