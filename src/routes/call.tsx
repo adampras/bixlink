@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 const COMM_TABS: string[] = ['chat', 'call', 'community', 'setting'];
 import { useEffect, useRef, useState } from 'react';
-import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, Settings, X } from 'lucide-react';
+import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import { startBixCall } from '@/components/BixCall';
 import { BixGroupMeeting } from '@/components/BixGroupMeeting';
 import { useMember } from '@/lib/useMember';
-import { NotifyCard } from '@/components/BixCommExtras';
+import { CommunityTab, NotifyCard } from '@/components/BixCommExtras';
 import { supabase } from '@/integrations/supabase/client';
 import { BixShell } from '@/components/BixShell';
 import { BixAvatar, useBixCard } from '@/components/BixAvatar';
@@ -90,17 +90,16 @@ function CallInner() {
 
   if (chatWith) return <ChatRoom me={me} peer={chatWith} tier={tier} onBack={() => setChatWith(null)}/>;
   const open = (id: string, name: string) => setChatWith({ id, name });
-  const TITLE: Record<CommTab, string> = { chat: 'CHAT', call: 'PANGGILAN', community: 'CHAT', setting: 'PENGATURAN' };
-  const view: CommTab = tab === 'community' ? 'chat' : tab;
+  const TITLE: Record<CommTab, string> = { chat: 'CHAT', call: 'PANGGILAN', community: 'KOMUNITAS', setting: 'PENGATURAN' };
+  const view: CommTab = tab;
 
   return <main className="mx-auto max-w-xl px-4 py-5">
     <FindMember bar me={me} tier={tier} onChat={open}/>
-    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}
-      {view === 'setting' ? <Link to="/call" search={{ tab: 'chat' }} className="comm-gear" aria-label="Tutup pengaturan">✕</Link>
-        : <Link to="/call" search={{ tab: 'setting' }} className="comm-gear" aria-label="Pengaturan BIX CALL"><Settings size={16}/></Link>}</div>
+    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
 
     {view === 'chat' && <ChatTab me={me} tier={tier} onOpen={open}/>}
     {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
+    {view === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
     {view === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/></>}
   </main>;
 }
