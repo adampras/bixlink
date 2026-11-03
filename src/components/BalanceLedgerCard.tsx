@@ -17,10 +17,14 @@ export function BalanceLedgerCard({ hidden }: { hidden?: boolean }) {
   const b = (v: number) => hidden ? '••••' : `${number(Number(v), { maximumFractionDigits: 4 })} BIX`;
   const rows = (d.recent ?? []).filter(r => tab === 'real' ? r.real : !r.real);
   const hasSponsored = d.locked_usdt > 0 || d.sponsor_capital_usdt > 0 || d.vusdt_usdt > 0 || d.bonus_unreal_usdt > 0 || d.bonus_unreal_bix > 0 || d.locked_bix > 0;
-  return <section className="ledger-split mt-4" aria-label="Balance separation">
+  // Only sponsored leaders / conditional accounts (and owner-exempt accounts) see this audit; regular new members never do.
+  if (!d.is_leader && !hasSponsored && !d.exempt && d.owner_access !== 'closed') return null;
+  const status = d.owner_access === 'closed' && !d.exempt ? 'Closed' : d.exempt || d.qualified ? 'Unlocked' : `Escrow ${m(d.locked_usdt)}`;
+  return <details className="ledger-history ledger-split mt-6" aria-label="Balance separation">
+    <summary><ShieldCheck size={14}/> Real funds & sponsored escrow <span className="ml-auto pl-2 text-[11px] opacity-80">{status}</span></summary>
     {d.owner_access === 'closed' && !d.exempt && <p className="ledger-alert"><ShieldAlert size={14}/> This sponsored account is closed by Owner 1. Withdrawals and transfers are paused.</p>}
     {d.exempt && <p className="ledger-exempt"><BadgeCheck size={14}/> {EXEMPT[d.exempt]}</p>}
-    <div className="ledger-grid">
+    <div className="ledger-grid mt-3">
       <article className="ledger-card ledger-card--real">
         <header><ShieldCheck size={15}/><span>REAL FUNDS</span><em>Withdrawable</em></header>
         <strong className="numeric">{m(d.withdrawable_usdt)}</strong>
