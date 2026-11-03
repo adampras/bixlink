@@ -211,6 +211,7 @@ export type Database = {
           ended_at: string | null
           id: string
           kind: string
+          rang_at: string | null
           status: string
         }
         Insert: {
@@ -221,6 +222,7 @@ export type Database = {
           ended_at?: string | null
           id?: string
           kind?: string
+          rang_at?: string | null
           status?: string
         }
         Update: {
@@ -231,6 +233,7 @@ export type Database = {
           ended_at?: string | null
           id?: string
           kind?: string
+          rang_at?: string | null
           status?: string
         }
         Relationships: []
@@ -3106,6 +3109,7 @@ export type Database = {
       }
       bix_call_find: { Args: { p_query: string }; Returns: Json }
       bix_call_peer: { Args: { p_user: string }; Returns: Json }
+      bix_call_ring: { Args: { p_id: string }; Returns: undefined }
       bix_call_set: {
         Args: { p_id: string; p_status: string }
         Returns: string
