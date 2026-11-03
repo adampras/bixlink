@@ -5956,3 +5956,21 @@ body[data-bc-theme=matcha] .bixcall-head span{color:#9fe3a9}
 .bixcall-pip{animation:bcSwapIn .28s ease-out}
 @keyframes bcSwapIn{from{opacity:.4}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.bixcall-pip,.bixcall-self-big{animation:none}}
+
+/* BIX CALL — 4 core buttons with labels, camera flip overlay, video invite, incoming buzz */
+.bixcall-ctl>.bc-ctl4{width:auto;height:auto;border-radius:0;background:none;border:0;box-shadow:none;display:flex;gap:18px;place-items:initial}
+.bc-ctl4 label{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
+.bc-ctl4 button{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(160deg,rgb(48 46 58 / .9),rgb(16 15 22 / .95));border:1px solid rgb(210 214 226 / .2);box-shadow:inset 0 1px 0 rgb(255 255 255 / .1),0 4px 10px rgb(0 0 0 / .4);transition:transform .15s,box-shadow .2s}
+.bc-ctl4 button:active{transform:scale(.92)}
+.bc-ctl4 button.off{background:linear-gradient(160deg,#f1f5f9,#cbd5e1);color:#0b0812}
+.bc-ctl4 button.shield{color:#FFD700;border-color:rgb(255 215 0 / .7);box-shadow:0 0 14px rgb(255 215 0 / .35)}
+.bc-ctl4 button.end{background:linear-gradient(145deg,#ef4444,#991b1b);border:2px solid #FFD700}
+.bc-ctl4 span{font-size:10.5px;font-weight:700;letter-spacing:.02em;color:rgb(255 255 255 / .78)}
+@media (max-width:380px){.bixcall-ctl>.bc-ctl4{gap:12px}.bc-ctl4 button{width:50px;height:50px}}
+.bixcall-flip{position:absolute;z-index:4;top:calc(max(14px,env(safe-area-inset-top)) + 60px);right:14px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#FFD700;background:rgba(8,6,14,.7);border:1px solid rgba(255,215,0,.45);backdrop-filter:blur(10px);transition:opacity .25s}
+.bixcall.is-hidden .bixcall-flip,.bixcall.is-hidden .bc-vid-invite{opacity:0;pointer-events:none}
+.bc-vid-invite{position:absolute;z-index:5;left:50%;bottom:calc(max(28px,env(safe-area-inset-bottom)) + 104px);transform:translateX(-50%);max-width:92vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:bcInvite .35s ease-out}
+@keyframes bcInvite{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+.bixcall-av.is-buzz{animation:bcBuzz 3.2s infinite}
+@keyframes bcBuzz{0%,100%{transform:none}2%,6%,10%,14%,18%{transform:translateX(-3px) rotate(-1.5deg)}4%,8%,12%,16%,20%{transform:translateX(3px) rotate(1.5deg)}22%,31%,40%{transform:translateX(-2px)}26%,35%{transform:translateX(2px)}44%{transform:none}}
+@media (prefers-reduced-motion:reduce){.bixcall-av.is-buzz{animation:none}}
