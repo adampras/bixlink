@@ -22,7 +22,7 @@ export function useSignedUrl(bucket: 'bix-avatars' | 'bix-stories', path?: strin
   return url;
 }
 
-type Props = { userId?: string | null; name: string; path?: string | null; className?: string; online?: boolean; ring?: boolean; story?: 'new' | 'seen' | null; onStory?: () => void };
+type Props = { userId?: string | null | undefined; name: string; path?: string | null | undefined; className?: string | undefined; online?: boolean | undefined; ring?: boolean | undefined; story?: 'new' | 'seen' | null | undefined; onStory?: (() => void) | undefined };
 
 /** Member photo with initial fallback; shows a gold story ring when the member has a visible story. */
 export function BixAvatar({ userId, name, path, className = 'comm-ava', online, ring = true, story, onStory }: Props) {
