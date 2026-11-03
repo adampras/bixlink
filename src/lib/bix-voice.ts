@@ -10,8 +10,19 @@ export type VoiceShield = {
   stop: () => void;
 };
 
-/** Gate thresholds (dBFS). Shield on: a voice at the mouth (~-22..-15 dB) passes; a nearby phone speaker (~-44..-48 dB) is cut. */
-export const GATE_DB = { shield: -36, normal: -48 } as const;
+/** Gate thresholds (dBFS). Shield on: a soft voice at the mouth (~-40 dB) and normal speech (~-22..-15 dB) pass; crowd babble / a nearby speaker (~-45 dB and below, after OS noise suppression) is cut. */
+export const GATE_DB = { shield: -42, normal: -50 } as const;
+/** Gate tuning: hold ~600 ms after the last word so soft word endings are not chopped; a soft floor keeps breaths/quiet tails natural instead of dead silence. */
+export const GATE_TUNE = { holdTicks: 12, hysteresisDb: 5, floor: 0.07 } as const;
+
+/** One 50 ms gate step: returns the next hold counter and the gain target (before duck/howl). Pure so it can be tested with simulated noisy rooms. */
+export function gateStep(db: number, hold: number, shield = true): { hold: number; gain: number } {
+  const th = shield ? GATE_DB.shield : GATE_DB.normal;
+  let h = hold;
+  if (db > th) h = GATE_TUNE.holdTicks; else if (h > 0 && db < th - GATE_TUNE.hysteresisDb) h--;
+  const gain = !shield || h > 0 ? 1 : GATE_TUNE.floor;
+  return { hold: h, gain };
+}
 /** Resonance bands where phone-to-phone howling builds up. */
 export const HOWL_BANDS = [1800, 2400, 3200, 4100] as const;
 
@@ -29,7 +40,7 @@ export async function openVoiceShield(onHowl?: (howling: boolean) => void): Prom
   const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 7800; lp.Q.value = 0.7;
   const notches = HOWL_BANDS.map(f => { const n = ctx.createBiquadFilter(); n.type = 'peaking'; n.frequency.value = f; n.Q.value = 6; n.gain.value = 0; return n; });
   const comp = ctx.createDynamicsCompressor();
-  comp.threshold.value = -22; comp.knee.value = 10; comp.ratio.value = 3.5; comp.attack.value = 0.004; comp.release.value = 0.2;
+  comp.threshold.value = -26; comp.knee.value = 14; comp.ratio.value = 2.8; comp.attack.value = 0.004; comp.release.value = 0.2;
   const gate = ctx.createGain(); gate.gain.value = 1;
   const an = ctx.createAnalyser(); an.fftSize = 1024; an.smoothingTimeConstant = 0.2;
   const dst = ctx.createMediaStreamDestination();
@@ -45,7 +56,7 @@ export async function openVoiceShield(onHowl?: (howling: boolean) => void): Prom
     an.getFloatTimeDomainData(buf);
     let s = 0; for (let i = 0; i < buf.length; i++) { const v = buf[i] ?? 0; s += v * v; }
     const db = 20 * Math.log10(Math.sqrt(s / buf.length) + 1e-8);
-    if (db > (shield ? GATE_DB.shield : GATE_DB.normal)) open = 8; else if (open > 0 && db < (shield ? GATE_DB.shield : GATE_DB.normal) - 4) open--;
+    const g = gateStep(db, open, shield); open = g.hold;
     // Howl detector: one narrow tone far above the average spectrum for ~300 ms.
     an.getFloatFrequencyData(spec);
     let peak = -Infinity, sum = 0, cnt = 0;
@@ -54,9 +65,9 @@ export async function openVoiceShield(onHowl?: (howling: boolean) => void): Prom
     howlTicks = tonal ? howlTicks + 1 : Math.max(0, howlTicks - 1);
     const h = shield && howlTicks >= 6;
     if (h !== howling) { howling = h; onHowl?.(h); }
-    const base = !shield || open > 0 ? 1 : (shield ? 0.02 : 0.06);
+    const base = g.gain;
     const target = base * (duck ? 0.18 : 1) * (howling ? 0.35 : 1);
-    gate.gain.setTargetAtTime(target, ctx.currentTime, open > 0 ? 0.006 : 0.09);
+    gate.gain.setTargetAtTime(target, ctx.currentTime, open > 0 ? 0.006 : 0.14);
   }, 50);
 
   const setShield = (on: boolean) => {
