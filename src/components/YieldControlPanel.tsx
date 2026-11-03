@@ -2,13 +2,13 @@ import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Save, Shuffle, Sparkles } from 'lucide-react';
+import { Minus, Plus, Save, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getEditablePackages, saveDurationPackage } from '@/lib/packages.functions';
 import { updateSetting } from '@/lib/bixlink.functions';
 import { useMember, usePublicConfig, useReviewerAccess } from '@/lib/useMember';
 import { PACKAGE_DURATIONS } from '@/lib/package-options';
-import { fluctuatedApys, standardApys } from '@/lib/yield-preset';
+import { apyToDaily, cleanDaily, DAILY_MAX, DAILY_MIN, DAILY_STEP, flatApys, ladderApys, shiftApys } from '@/lib/yield-preset';
 import { number } from '@/lib/bixlink';
 
 export function YieldControlPanel({ market = true }: { market?: boolean }) {
@@ -22,21 +22,16 @@ export function YieldControlPanel({ market = true }: { market?: boolean }) {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ['duration-package-editor'], queryFn: () => load(), enabled: canEdit });
   const [price, setPrice] = useState('');
+  const [flat, setFlat] = useState(0.8);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const current = cfg?.bixMarket.priceUsd ?? 0;
   const refresh = () => Promise.all([qc.invalidateQueries({ queryKey: ['bix-public-packages'] }),qc.invalidateQueries({ queryKey: ['duration-package-editor'] }), qc.invalidateQueries({ queryKey: ['bix-public-config'] }), qc.invalidateQueries({ queryKey: ['bix-home-market'] })]);
 
-  async function applyStandard() {
+  async function applyAll(make: (apys: Record<string, number>) => Record<string, number>, label: string) {
     if (!q.data) return; setBusy(true); setMsg('');
-    try { for (const [i, p] of q.data.entries()) await save({ data: { id: p.id, price: Number(p.price_usd), apys: standardApys(i, q.data.length), enabled: p.enabled } }); await refresh(); setMsg(`Standard rates saved for ${q.data.length} packages. Existing stakes unchanged.`); }
-    catch (e) { setMsg(e instanceof Error ? e.message : 'Could not apply.'); } finally { setBusy(false); }
-  }
-  async function applyDaily() {
-    if (!q.data) return; setBusy(true); setMsg('');
-    const day = new Date().toISOString().slice(0, 10);
-    try { for (const [i, p] of q.data.entries()) await save({ data: { id: p.id, price: Number(p.price_usd), apys: fluctuatedApys(i, day, q.data.length), enabled: p.enabled } }); await refresh(); setMsg(`Profit harian ${day} diperbarui untuk ${q.data.length} paket (0.50%–0.98%, hanya stake baru).`); }
-    catch (e) { setMsg(e instanceof Error ? e.message : 'Could not apply.'); } finally { setBusy(false); }
+    try { for (const p of q.data) await save({ data: { id: p.id, price: Number(p.price_usd), apys: make(p.duration_apys), enabled: p.enabled } }); await refresh(); setMsg(`${label} — ${q.data.length} paket diperbarui. Staking yang berjalan tidak berubah.`); }
+    catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal menerapkan.'); } finally { setBusy(false); }
   }
   async function savePrice(v: number) {
     setBusy(true); setMsg('');
