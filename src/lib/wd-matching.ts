@@ -3,7 +3,7 @@ export const DEFAULT_WD_MATCHING: WdMatchingConfig = { enabled: false, feePct: 5
 export function normalizeWdMatching(v: unknown): WdMatchingConfig {
   const o = (v && typeof v === 'object' ? v : {}) as Record<string, unknown>;
   const n = (k: keyof WdMatchingConfig) => Number.isFinite(Number(o[k])) ? Number(o[k]) : DEFAULT_WD_MATCHING[k] as number;
-  return { enabled: o.enabled === true, feePct: n('feePct'), matchPct: n('matchPct'), minStakeUsd: n('minStakeUsd') };
+  return { enabled: o['enabled'] === true, feePct: n('feePct'), matchPct: n('matchPct'), minStakeUsd: n('minStakeUsd') };
 }
 export function wdMatchingError(c: WdMatchingConfig): string | null {
   if (c.feePct < 0.5 || c.feePct > 20) return 'Fee WD harus 0,5%–20%';
