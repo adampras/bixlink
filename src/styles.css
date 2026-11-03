@@ -5678,3 +5678,15 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .vf-ok{margin-top:10px;font-size:11px;color:var(--chart-2);text-align:center}
 .vf-progress{margin-top:12px;font-size:11px;color:var(--muted-foreground)}
 @media print{body *{visibility:hidden}#vf-deed-print,#vf-deed-print *{visibility:visible}#vf-deed-print{position:fixed;inset:0}.vf-dl{display:none}}
+
+/* Lux obsidian-gold presale & staking surfaces */
+.lux-sheet { background: linear-gradient(160deg, color-mix(in oklab, var(--card) 92%, var(--chart-3) 8%), var(--background)) !important; border-color: color-mix(in oklab, var(--chart-3) 55%, transparent) !important; box-shadow: 0 30px 80px -30px color-mix(in oklab, var(--chart-3) 45%, transparent); }
+.lux-eyebrow { font-size: 9px; font-weight: 800; letter-spacing: .28em; text-transform: uppercase; color: var(--chart-3); }
+.lux-gold-text { background: linear-gradient(120deg, var(--chart-3), color-mix(in oklab, var(--chart-3) 55%, var(--foreground)), var(--chart-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lux-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid color-mix(in oklab, var(--chart-3) 18%, transparent); }
+.lux-row dt { color: var(--muted-foreground); } .lux-row dd { font-weight: 700; text-align: right; }
+.lux-note { display: flex; gap: 8px; padding: 10px; border-radius: 12px; font-size: 10.5px; line-height: 1.5; color: var(--muted-foreground); background: color-mix(in oklab, var(--chart-3) 7%, transparent); border: 1px solid color-mix(in oklab, var(--chart-3) 20%, transparent); }
+.lux-cta { background: linear-gradient(120deg, var(--chart-3), color-mix(in oklab, var(--chart-3) 70%, var(--foreground))) !important; color: var(--background) !important; font-weight: 800; letter-spacing: .04em; box-shadow: 0 10px 28px -12px var(--chart-3); }
+.lux-seal { margin: 0 auto; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 999px; color: var(--chart-3); border: 1px solid var(--chart-3); background: radial-gradient(circle, color-mix(in oklab, var(--chart-3) 22%, transparent), transparent 70%); box-shadow: 0 0 30px -6px var(--chart-3); }
+.lux-plaque, .lux-sov { border: 1px solid color-mix(in oklab, var(--chart-3) 55%, transparent); background: linear-gradient(150deg, color-mix(in oklab, var(--card) 90%, var(--chart-3) 10%), var(--background) 60%, color-mix(in oklab, var(--card) 92%, var(--chart-3) 8%)); box-shadow: 0 0 40px -16px var(--chart-3), inset 0 1px 0 color-mix(in oklab, var(--chart-3) 30%, transparent); }
+.lux-sov-hero { padding: 28px 20px; text-align: center; background: radial-gradient(ellipse at top, color-mix(in oklab, var(--chart-3) 18%, transparent), transparent 70%); border-bottom: 1px solid color-mix(in oklab, var(--chart-3) 25%, transparent); }
