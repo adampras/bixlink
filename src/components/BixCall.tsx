@@ -306,18 +306,23 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     {ear && live && <div className="bc-ear" role="button" tabIndex={0} aria-label="Ketuk dua kali untuk menyalakan layar" onDoubleClick={() => setEar(false)} onKeyDown={e => { if (e.key === 'Enter') setEar(false); }}><span>{fmt(secs)}</span><small>Mode telinga aktif · ketuk dua kali untuk kembali</small></div>}
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
-      <span>{live && link === 'on' ? `BIX ${call.kind === 'video' ? 'HD VIDEO' : 'HD VOICE'} • 48 kHz • ENCRYPTED` : '✨ BIX CALL • ENCRYPTED SECURE CALL ✨'}</span>
+      <span>{live && link === 'on' ? `SOVEREIGN ENCRYPTED • 48 kHz ${call.kind === 'video' ? 'HD VIDEO' : 'HD VOICE'}` : 'BIX CALL • SOVEREIGN ENCRYPTED'}</span>
       {live && link === 'on' && <em className={`bc-q is-${quality}`} aria-label={`Kualitas jaringan: ${quality === 'excellent' ? 'sangat baik' : quality === 'good' ? 'baik' : quality === 'poor' ? 'lemah' : 'mengukur'}`}><i/><i/><i/></em>}
     </header>
     {!(remoteVideo && call.kind === 'video') && <div className="bixcall-center">
-      <div className={`bixcall-av${live && link === 'on' ? ' talking' : ''}${!live && !done ? ' ringing' : ''}`}><b>{call.peerName.slice(0, 1).toUpperCase()}</b></div>
+      <div className={`bixcall-av is-${call.offline ? 'offline' : live && link === 'on' ? 'talking' : ringing ? (call.role === 'caller' ? phase : 'ringing') : 'idle'}`} style={live && link === 'on' ? { ['--lvl' as string]: Math.min(1, level * 3) } : undefined}>
+        <span className="bixcall-av-ring" aria-hidden="true"/><span className="bixcall-av-ring r2" aria-hidden="true"/>
+        <b>{call.peerName.slice(0, 1).toUpperCase()}</b>
+      </div>
       <h2>@{call.peerName}</h2>
-      <p>{call.kind === 'video' ? '📹 Video Call' : '📞 Voice Call'}</p>
+      <p>{call.kind === 'video' ? 'Video Call' : 'Voice Call'} · BIX CALL</p>
       {live && link === 'on' && <div className="bc-wave" aria-hidden="true">{[0.5, 0.8, 1, 0.7, 0.9, 0.6, 1, 0.75, 0.55].map((k, i) => <i key={i} style={{ transform: `scaleY(${0.12 + Math.min(1, level * 3) * k})` }}/>)}</div>}
+      {call.offline && <div className="bc-offline" role="status"><b>Member belum aktif di BIXLINK</b><small>Panggilan tidak sampai ke perangkatnya. Kirim pesan agar dibaca saat ia kembali online.</small></div>}
     </div>}
-    <div className="bixcall-status"><i className={link === 'on' ? 'ok' : ''}/>{statusText}</div>
+    <div className="bixcall-status"><i className={dot}/>{statusText}</div>
+    {howl && live && <div className="bc-howl" role="status">Pantulan suara diredam otomatis</div>}
     {call.kind === 'video' && live && <video ref={localV} className="bixcall-pip" style={{ transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={dragPip} autoPlay playsInline muted/>}
-    <footer className="bixcall-ctl">
+    <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}`}>
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Maaf, sedang sibuk. Nanti saya hubungi kembali.', 'Sedang rapat, kirim pesan saja ya.', 'Saya telepon balik 5 menit lagi.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
@@ -335,9 +340,14 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         <button aria-label="Speaker" onClick={speaker}><Volume2/></button>
         {call.kind === 'voice' && <button aria-label="Mode telinga (layar gelap)" onClick={() => setEar(true)}><Ear/></button>}
         <button aria-label={shield ? 'Perisai anti-storing aktif' : 'Aktifkan perisai anti-storing'} className={shield ? 'shield' : ''} onClick={toggleShield}><ShieldCheck/></button>
+        <button aria-label={near ? 'Ruang Dekat aktif' : 'Aktifkan Ruang Dekat (HP berdekatan)'} aria-pressed={near} className={near ? 'shield' : ''} onClick={toggleNear}><Radio/></button>
         <button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button>
       </>}
-      {done && wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
+      {call.offline ? <>
+        <button type="button" className="bc-pill is-chat" onClick={openChat}><MessageCircle size={16}/> Kirim Pesan BIX CHAT</button>
+        {wa && <a className="bc-pill is-wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer"><Phone size={16}/> Hubungi WhatsApp</a>}
+        <button type="button" className="bc-pill is-close" onClick={onClose}><X size={16}/> Tutup</button>
+      </> : done && wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
     </footer>
   </div>;
 }
