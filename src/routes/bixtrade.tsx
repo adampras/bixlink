@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { BixtradePlan } from '@/components/BixtradePlan';
 import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, bixtradeBotMood, checkBixtradeRequest, dailySeries, projectBixtrade, readBixtrade, withdrawNet, type BixtradeSettings, type BixtradeStrategy } from '@/lib/bixtrade';
-import { BixtradeBot3D } from '@/components/BixtradeBot3D';
+import { BixtradeBot3D, BOT_PERSONA } from '@/components/BixtradeBot3D';
 import { useServerFn } from '@tanstack/react-start';
 import { getBixtradePrices, runBixtradeCycle, runBixtradeLive } from '@/lib/bixtrade.functions';
 import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Network, Radar, Send, Share2, Volume2, VolumeX, Zap } from 'lucide-react';
@@ -109,6 +109,9 @@ function BixtradePage() {
     o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.2);
   }, [tick]); // eslint-disable-line react-hooks/exhaustive-deps
   const pending = reqs.filter(r => r.status === 'pending').length;
+  const mood = bixtradeBotMood({ capital, routes: profitable.length, lastExecAt: fundExecs[0]?.executed_at, now: Date.now() });
+  const top = profitable[0];
+  const statusText = mood === 'sleep' ? 'Bot siaga — aktif otomatis setelah deposit disetujui.' : mood === 'trade' ? `Eksekusi otomatis tercatat${fundExecs[0] ? ` (${Number(fundExecs[0].net_usd) >= 0 ? '+' : ''}${Number(fundExecs[0].net_usd).toFixed(4)} USDT)` : ''}.` : top ? `Menemukan selisih ${top.net.toFixed(2)}% pada ${top.pair} (${top.buy} → ${top.sell}).` : 'Memindai peluang harga di 6 bursa…';
 
   const submit = async () => {
     if (!cfg) return;
@@ -154,8 +157,9 @@ function BixtradePage() {
         <p className="arb-ai-status"><i/> Neural scanner online · {profitable.length ? `${profitable.length} routes` : 'scanning'}</p>
         <span className="mt-2 flex items-center gap-2"><button type="button" onClick={toggleSound} aria-label={sound ? 'Mute execution sound' : 'Enable execution sound'} className="arb-icon-btn">{sound ? <Volume2 size={15}/> : <VolumeX size={15}/>}</button><span className="arb-live"><i/> LIVE</span></span>
       </div>
-      <BixtradeBot3D mood={bixtradeBotMood({ capital, routes: profitable.length, lastExecAt: fundExecs[0]?.executed_at, now: Date.now() })} routes={profitable.length}/>
+      <BixtradeBot3D mood={mood} routes={profitable.length} strategy={strategy}/>
     </section>
+    <p className="arb-status" aria-live="polite"><i/><span><b>{BOT_PERSONA[strategy].name}</b> · {statusText}</span></p>
     <section className="mt-3 grid grid-cols-4 gap-2">
       {([['Bot', capital.toFixed(0)], ['P/L', realized.toFixed(2)], ['Win', `${cfg.winRate}%`], ['Ping', `${rows.length ? Math.round(rows.reduce((s, r) => s + r.ms, 0) / rows.length) : '—'}ms`]] as const).map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
     </section>
@@ -190,7 +194,7 @@ function BixtradePage() {
       </div>
       <div className="mt-3 grid gap-2">
         <p className="text-[11px] text-muted-foreground">Strategy</p>
-        <div className="grid grid-cols-3 gap-1.5">{BIXTRADE_STRATEGIES.map(s => <button key={s.key} type="button" onClick={() => { navigator.vibrate?.(12); setStrategy(s.key); }} className={`arb-strat ${strategy === s.key ? 'is-on' : ''}`}><b>{s.name}</b><span>{s.pairs}</span><em>Risk: {s.risk}</em></button>)}</div>
+        <div className="arb-botpick">{BIXTRADE_STRATEGIES.map(s => { const pz = BOT_PERSONA[s.key]; return <button key={s.key} type="button" aria-pressed={strategy === s.key} onClick={() => { navigator.vibrate?.(12); setStrategy(s.key); }} data-variant={pz.variant} className={`arb-botcard ${strategy === s.key ? 'is-on' : ''}`}><BixtradeBot3D mini mood={strategy === s.key ? (mood === 'sleep' ? 'scan' : mood) : 'scan'} strategy={s.key}/><b>{pz.name}</b><span>{s.name}</span><span>{s.pairs}</span><em>Risk {s.risk}</em></button>; })}</div>
         <label className="mt-1 text-[11px] text-muted-foreground">Amount (USDT) {mode === 'deposit' ? `· ${cfg.minAlloc}–${cfg.maxAlloc}` : `· min ${cfg.minWithdraw} · fee ${cfg.withdrawFeePct}%`}
           <input className="form-input mt-1" type="number" inputMode="decimal" value={reqAmt} onChange={e => setReqAmt(e.target.value)} placeholder="0.00"/></label>
         <div className="arb-chips">{[100, 500, 1000, 5000].map(v => <button key={v} type="button" onClick={() => setReqAmt(String(v))}>${v.toLocaleString()}</button>)}
