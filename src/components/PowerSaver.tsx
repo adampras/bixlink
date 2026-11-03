@@ -6,12 +6,12 @@ import { useEffect } from 'react';
 export function PowerSaver() {
   useEffect(() => {
     const root = document.documentElement;
-    const vis = () => { root.dataset.appHidden = document.hidden ? '1' : '0'; };
+    const vis = () => { root.dataset['appHidden'] = document.hidden ? '1' : '0'; };
     vis();
     document.addEventListener('visibilitychange', vis);
 
     const nav = navigator as Navigator & { connection?: { saveData?: boolean }; getBattery?: () => Promise<{ level: number; charging: boolean; addEventListener: (e: string, f: () => void) => void }> };
-    const setLow = (low: boolean) => { root.dataset.lowPower = low ? '1' : '0'; };
+    const setLow = (low: boolean) => { root.dataset['lowPower'] = low ? '1' : '0'; };
     const weak = (navigator.hardwareConcurrency || 8) <= 4 || !!nav.connection?.saveData;
     setLow(weak);
     nav.getBattery?.().then(b => {
