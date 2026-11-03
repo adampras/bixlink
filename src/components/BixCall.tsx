@@ -205,7 +205,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const attachAudio = (t: RemoteTrack) => {
     const box = audioBox.current; if (!box) return;
     box.querySelectorAll(`audio[data-sid="${t.sid}"]`).forEach(a => a.remove());
-    const el = t.attach() as HTMLAudioElement; el.dataset.sid = t.sid ?? ''; el.autoplay = true; el.setAttribute('playsinline', '');
+    const el = t.attach() as HTMLAudioElement; el.dataset['sid'] = t.sid ?? ''; el.autoplay = true; el.setAttribute('playsinline', '');
     box.appendChild(el); applyVolume();
     void el.play().then(() => setAudioBlocked(false)).catch(() => setAudioBlocked(true));
   };
