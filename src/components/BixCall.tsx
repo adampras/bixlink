@@ -9,7 +9,14 @@ import { ensureBixPush, pushNotify } from '@/lib/bix-push';
 import { startChosenRingtone, startRingback, playConnected, playEnded } from '@/lib/bix-tones';
 
 type Kind = 'voice' | 'video';
-type Active = { id: string; peerId: string; peerName: string; kind: Kind; role: 'caller' | 'callee'; status: string; whatsapp?: string | null };
+/** rang = callee's device acknowledged the call ("Berdering"); offline = no acknowledgement within OFFLINE_MS. */
+type Active = { id: string; peerId: string; peerName: string; kind: Kind; role: 'caller' | 'callee'; status: string; whatsapp?: string | null; rang?: boolean; offline?: boolean };
+/** Caller phases: "Memanggil" until the callee device acks, then "Berdering"; no ack after 25 s means offline. */
+export const OFFLINE_MS = 25000;
+export const RING_TIMEOUT_MS = 40000;
+export function callerPhase(c: { rang?: boolean; offline?: boolean }): 'calling' | 'ringing' | 'offline' {
+  return c.offline ? 'offline' : c.rang ? 'ringing' : 'calling';
+}
 
 /** Start a call from anywhere: dispatches to the global BixCallHost. */
 export function startBixCall(peerId: string, peerName: string, kind: Kind) {
