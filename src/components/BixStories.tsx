@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Camera, Eye, Plus, Trash2, Type, Video as VideoIcon, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BixAvatar, useSignedUrl } from '@/components/BixAvatar';
-import { invalidateCard, saveStatus, useNoop } from '@/lib/bix-stories-helpers';
+import { invalidateCard, saveStatus } from '@/lib/bix-avatar';
 
 export type Story = { id: string; kind: 'text' | 'photo' | 'video'; media_path: string | null; caption: string | null; bg: string; created_at: string; viewed: boolean; views?: number | null };
 export type StoryGroup = { user_id: string; name: string; avatar_path: string | null; mine: boolean; unseen: boolean; stories: Story[] };
@@ -23,7 +23,6 @@ export function StoryBar({ me, myName }: { me: string; myName: string }) {
   const { groups, reload } = useStoryFeed(me);
   const [view, setView] = useState<number | null>(null);
   const [compose, setCompose] = useState(false);
-  useNoop();
   const list = groups ?? [];
   const mineIdx = list.findIndex(g => g.mine);
   const others = list.filter(g => !g.mine);
