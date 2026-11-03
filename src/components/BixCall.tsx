@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
 import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck } from 'lucide-react';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
@@ -259,10 +259,10 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
     <div className="bixcall-status"><i className={link === 'on' ? 'ok' : ''}/>{statusText}</div>
     {call.kind === 'video' && live && <video ref={localV} className="bixcall-pip" style={{ transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={dragPip} autoPlay playsInline muted/>}
     <footer className="bixcall-ctl">
-      {!live && !done && call.role === 'callee' && <>
-        <button className="end" aria-label="Tolak" onClick={onDecline}><PhoneOff/></button>
-        <button className="accept" aria-label="Terima" onClick={onAccept}>{call.kind === 'video' ? <Video/> : <Phone/>}</button>
-      </>}
+      {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
+        <SwipeKey tone="end" label="Tolak" onDone={onDecline} icon={<PhoneOff/>}/>
+        <SwipeKey tone="accept" label="Terima" onDone={onAccept} icon={call.kind === 'video' ? <Video/> : <Phone/>}/>
+      </div>}
       {!live && !done && call.role === 'caller' && <>
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
         <button className="end" aria-label="Batalkan" onClick={onEnd}><PhoneOff/></button>
