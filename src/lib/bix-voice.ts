@@ -17,15 +17,16 @@ export const HOWL_BANDS = [1800, 2400, 3200, 4100] as const;
 
 export async function openVoiceShield(onHowl?: (howling: boolean) => void): Promise<VoiceShield> {
   const raw = await navigator.mediaDevices.getUserMedia({
-    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, sampleRate: 48000, voiceIsolation: true } as MediaTrackConstraints,
+    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: false, channelCount: 1, sampleRate: 48000, voiceIsolation: true } as MediaTrackConstraints,
   });
   const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   if (!AC) return { track: raw.getAudioTracks()[0]!, raw, setShield: () => {}, setDuck: () => {}, stop: () => raw.getTracks().forEach(t => t.stop()) };
   const ctx = new AC({ sampleRate: 48000 });
-  void ctx.resume().catch(() => {});
+  const wake = () => { if (ctx.state !== 'running') void ctx.resume().catch(() => {}); };
+  wake(); const wakeT = setInterval(wake, 1000);
   const src = ctx.createMediaStreamSource(raw);
-  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 110; hp.Q.value = 0.7;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 7200; lp.Q.value = 0.7;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 130; hp.Q.value = 0.7;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6500; lp.Q.value = 0.7;
   const notches = HOWL_BANDS.map(f => { const n = ctx.createBiquadFilter(); n.type = 'peaking'; n.frequency.value = f; n.Q.value = 2; n.gain.value = 0; return n; });
   const comp = ctx.createDynamicsCompressor();
   comp.threshold.value = -26; comp.knee.value = 12; comp.ratio.value = 6; comp.attack.value = 0.004; comp.release.value = 0.2;
