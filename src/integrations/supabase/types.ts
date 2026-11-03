@@ -172,6 +172,36 @@ export type Database = {
           },
         ]
       }
+      bix_call_rooms: {
+        Row: {
+          code: string
+          created_at: string
+          host_id: string
+          id: string
+          status: string
+          title: string
+          video: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          host_id: string
+          id?: string
+          status?: string
+          title: string
+          video?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          host_id?: string
+          id?: string
+          status?: string
+          title?: string
+          video?: boolean
+        }
+        Relationships: []
+      }
       bix_calls: {
         Row: {
           answered_at: string | null

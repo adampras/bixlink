@@ -1030,6 +1030,13 @@
       "when": 1793692543406,
       "tag": "0146_owner2_multi_wallets",
       "breakpoints": true
+    },
+    {
+      "idx": 147,
+      "version": "7",
+      "when": 1793693880231,
+      "tag": "0147_bix_group_rooms",
+      "breakpoints": true
     }
   ]
 }
