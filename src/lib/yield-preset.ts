@@ -1,24 +1,32 @@
 import { PACKAGE_DURATIONS } from '@/lib/package-options';
 
-/** Standard daily profit grid: tier i (0–7) and duration j (30D…360D). Range 0.50%–0.97% per day. */
-export function standardDailyPct(tierIndex: number, durationIndex: number, tierCount = 8): number {
-  const i = Math.max(0, Math.min(tierCount - 1, tierIndex));
-  const j = Math.max(0, Math.min(PACKAGE_DURATIONS.length - 1, durationIndex));
-  return Math.round((0.5 + i / Math.max(1, tierCount - 1) * 0.35 + j * 0.03) * 100) / 100;
-}
+/** Flat daily profit: always 0.5%–1.2% per day, in clean 0.05% steps. */
+export const DAILY_MIN = 0.5;
+export const DAILY_MAX = 1.2;
+export const DAILY_STEP = 0.05;
 
-/** Stored APY is annual (daily × 365); server caps it at 360. */
-export function standardApys(tierIndex: number, tierCount = 8): Record<string, number> {
-  return Object.fromEntries(PACKAGE_DURATIONS.map((d, j) => [String(d), Math.min(360, Math.round(standardDailyPct(tierIndex, j, tierCount) * 365 * 10000) / 10000)]));
+/** Clamp and round a daily % to the flat grid (no long decimals). */
+export function cleanDaily(pct: number): number {
+  const v = Math.round(Number(pct) / DAILY_STEP) * DAILY_STEP;
+  return Math.round(Math.max(DAILY_MIN, Math.min(DAILY_MAX, Number.isFinite(v) ? v : DAILY_MIN)) * 100) / 100;
 }
+/** Stored value is annual (daily × 365). */
+export const dailyToApy = (daily: number) => Math.round(cleanDaily(daily) * 365 * 10000) / 10000;
+export const apyToDaily = (apy: number) => cleanDaily(Number(apy) / 365);
 
-/** Daily fluctuation: standard rate ± up to 0.08%, deterministic per UTC day, clamped to 0.50%–0.98%. */
-export function fluctuatedDailyPct(tierIndex: number, durationIndex: number, dayKey: string, tierCount = 8): number {
-  let h = 2166136261;
-  for (const c of `${dayKey}:${tierIndex}:${durationIndex}`) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
-  const jitter = ((h >>> 0) % 17 - 8) / 100;
-  return Math.round(Math.max(0.5, Math.min(0.98, standardDailyPct(tierIndex, durationIndex, tierCount) + jitter)) * 100) / 100;
+/** Duration ladder preset: 30D 0.5% · 60D 0.6% · 90D 0.8% · 180D 1.0% · 360D 1.2%. */
+export const LADDER: Record<string, number> = { '30': 0.5, '60': 0.6, '90': 0.8, '180': 1.0, '360': 1.2 };
+
+export function dailyMapToApys(daily: Record<string, number>): Record<string, number> {
+  return Object.fromEntries(PACKAGE_DURATIONS.map(d => [String(d), dailyToApy(daily[String(d)] ?? DAILY_MIN)]));
 }
-export function fluctuatedApys(tierIndex: number, dayKey: string, tierCount = 8): Record<string, number> {
-  return Object.fromEntries(PACKAGE_DURATIONS.map((d, j) => [String(d), Math.min(360, Math.round(fluctuatedDailyPct(tierIndex, j, dayKey, tierCount) * 365 * 10000) / 10000)]));
+export function apysToDailyMap(apys: Record<string, number>): Record<string, number> {
+  return Object.fromEntries(PACKAGE_DURATIONS.map(d => [String(d), apyToDaily(apys[String(d)] ?? 0)]));
+}
+export const ladderApys = () => dailyMapToApys(LADDER);
+export const flatApys = (daily: number) => dailyMapToApys(Object.fromEntries(PACKAGE_DURATIONS.map(d => [String(d), daily])));
+/** Shift every duration by a small step, staying inside 0.5%–1.2%. */
+export function shiftApys(apys: Record<string, number>, delta: number): Record<string, number> {
+  const daily = apysToDailyMap(apys);
+  return dailyMapToApys(Object.fromEntries(Object.entries(daily).map(([k, v]) => [k, v + delta])));
 }
