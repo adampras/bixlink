@@ -1044,6 +1044,13 @@
       "when": 1793706443832,
       "tag": "0148_bix_call_ring_ack",
       "breakpoints": true
+    },
+    {
+      "idx": 149,
+      "version": "7",
+      "when": 1793711517501,
+      "tag": "0149_bix_profile_photo_status_stories",
+      "breakpoints": true
     }
   ]
 }
