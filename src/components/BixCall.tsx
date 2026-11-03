@@ -78,33 +78,40 @@ export function BixCallHost() {
   // Poll incoming + status of active call
   useEffect(() => {
     if (!me) return;
-    let stop = false;
+    let stop = false; let n = 0;
     const tick = async () => {
       const cur = callRef.current;
+      // Mark incoming chat as reached this device (double tick) whenever the app is open.
+      if (n++ % 4 === 0) void supabase.rpc('bix_chat_delivered' as never);
       if (cur) {
-        const { data } = await supabase.from('bix_calls' as never).select('status').eq('id', cur.id).maybeSingle();
-        const st = (data as { status?: string } | null)?.status;
-        if (st && st !== cur.status && !stop) setCall(c => c && c.id === cur.id ? { ...c, status: st } : c);
-        if (cur.role === 'caller' && cur.status === 'ringing' && st === 'ringing') { /* still ringing */ }
+        const { data } = await supabase.from('bix_calls' as never).select('status, rang_at').eq('id', cur.id).maybeSingle();
+        const row = data as { status?: string; rang_at?: string | null } | null;
+        const st = row?.status; const rang = !!row?.rang_at;
+        if (!stop && ((st && st !== cur.status) || (rang && !cur.rang))) {
+          if (rang && !cur.rang && cur.role === 'caller') { try { navigator.vibrate?.(25); } catch { /* optional */ } }
+          setCall(c => c && c.id === cur.id ? { ...c, status: c.offline ? c.status : (st ?? c.status), rang: c.rang || rang } : c);
+        }
       } else {
         const since = new Date(Date.now() - 40000).toISOString();
         const { data } = await supabase.from('bix_calls' as never).select('id, caller_id, kind, status').eq('callee_id', me).eq('status', 'ringing').gte('created_at', since).order('created_at', { ascending: false }).limit(1);
         const row = (data as { id: string; caller_id: string; kind: Kind }[] | null)?.[0];
         if (row && !stop) {
+          // Acknowledge: caller switches from "Memanggil" to "Berdering".
+          void supabase.rpc('bix_call_ring' as never, { p_id: row.id } as never);
           const peer = await supabase.rpc('bix_call_peer' as never, { p_user: row.caller_id } as never);
           const p = peer.data as { name?: string; whatsapp?: string } | null;
-          setCall({ id: row.id, peerId: row.caller_id, peerName: p?.name ?? 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: p?.whatsapp ?? null });
+          setCall({ id: row.id, peerId: row.caller_id, peerName: p?.name ?? 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: p?.whatsapp ?? null, rang: true });
           try { navigator.vibrate?.([300, 200, 300]); } catch { /* unsupported */ }
           sysNotify(`📞 BIXCALL · ${row.kind === 'video' ? 'Video call' : 'Panggilan suara'} masuk`, `@${p?.name ?? 'Member'} memanggil Anda`, `call-${row.id}`, true);
         }
       }
       // Chat alerts while the app is in the background
       if (document.hidden) {
-        const { data: msgs } = await supabase.from('bix_chat_messages' as never).select('id, sender_id, body, created_at').eq('recipient_id', me).is('read_at', null).gt('created_at', lastChat.current).order('created_at', { ascending: true }).limit(5);
+        const { data: msgs } = await supabase.from('bix_messages' as never).select('id, sender_id, body, created_at').eq('recipient_id', me).is('read_at', null).gt('created_at', lastChat.current).order('created_at', { ascending: true }).limit(5);
         for (const m of (msgs as { id: string; sender_id: string; body: string; created_at: string }[] | null) ?? []) {
           lastChat.current = m.created_at;
           const peer = await supabase.rpc('bix_call_peer' as never, { p_user: m.sender_id } as never);
-          sysNotify(`💬 BIX COMM · @${(peer.data as { name?: string } | null)?.name ?? 'Member'}`, m.body.slice(0, 120), `chat-${m.sender_id}`, false, `/call?chat=${m.sender_id}`);
+          sysNotify(`💬 BIX COMM · @${(peer.data as { name?: string } | null)?.name ?? 'Member'}`, (m.body ?? '').slice(0, 120), `chat-${m.sender_id}`, false, `/call?chat=${m.sender_id}`);
         }
       } else lastChat.current = new Date().toISOString();
     };
@@ -113,19 +120,21 @@ export function BixCallHost() {
     return () => { stop = true; clearInterval(t); };
   }, [me]);
 
-  // Caller timeout after 40s ringing
+  // Caller: no device ack after 25 s → offline screen; ringing but unanswered after 40 s → end.
   useEffect(() => {
-    if (!call || call.role !== 'caller' || call.status !== 'ringing') return;
-    const t = setTimeout(() => void setStatus('ended'), 40000);
+    if (!call || call.role !== 'caller' || call.status !== 'ringing' || call.offline) return;
+    const t = call.rang
+      ? setTimeout(() => void setStatus('ended'), RING_TIMEOUT_MS)
+      : setTimeout(() => { setCall(c => c ? { ...c, offline: true } : c); void setStatus('ended'); }, OFFLINE_MS);
     return () => clearTimeout(t);
-  }, [call?.id, call?.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [call?.id, call?.status, call?.rang, call?.offline]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-close finished calls
+  // Auto-close finished calls (the offline screen stays until the caller closes it)
   useEffect(() => {
-    if (!call || !['ended', 'declined', 'missed'].includes(call.status)) return;
+    if (!call || call.offline || !['ended', 'declined', 'missed'].includes(call.status)) return;
     const t = setTimeout(() => setCall(null), 2200);
     return () => clearTimeout(t);
-  }, [call?.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [call?.status, call?.offline]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setStatus = async (s: 'accepted' | 'declined' | 'ended') => {
     const cur = callRef.current; if (!cur) return;
