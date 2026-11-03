@@ -1,16 +1,10 @@
 import { useState } from 'react';
-import { ArrowUpRight, X } from 'lucide-react';
+import { ArrowUpRight, ScrollText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { number, type Package } from '@/lib/bixlink';
 import { initialDuration, packageApy, PACKAGE_DURATIONS } from '@/lib/package-options';
-import { dailyRate, nftTier, nftSignature, NFT_ART, NFT_NAME } from '@/lib/nft';
-import type { CSSProperties } from 'react';
-import { NftCard } from '@/components/NftCard';
-import { packageArtwork } from '@/lib/nft-catalog';
-import { useNftCatalog } from '@/lib/useNftCatalog';
-import { createPortal } from 'react-dom';
-import { packageCard } from '@/lib/package-cards';
-import { valueCard } from '@/lib/value-cards';
+import { dailyRate } from '@/lib/nft';
+import { VaultFacilityDialog, VIP_PASS_THRESHOLD } from '@/components/VaultFacility';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMember } from '@/lib/useMember';
@@ -24,10 +18,6 @@ export function DurationPackageCard({ pkg, index, onStake }: { pkg: Package; ind
   const apy = packageApy(pkg, days);
   const price = Number(pkg.price_usd);
   const perDay = price * dailyRate(apy) / 100;
-  const tier = nftTier(price, days);
-  const catalog = useNftCatalog();
-  const art = packageArtwork(catalog.data ?? [], index, days, price);
-  const card = valueCard(price) ?? packageCard(pkg.id, price);
   return <article className={`duration-package tier-tone-${index % 8}`} aria-label={`${pkg.id} package`}>
     <header className="duration-package-head">
       <div><p className="text-xs font-bold">Tier {String(index + 1).padStart(2, '0')}</p><h3 className="mt-1 text-2xl font-bold">{pkg.id}</h3></div>
