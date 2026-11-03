@@ -5754,3 +5754,37 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .bc-ear{position:fixed;inset:0;z-index:20;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:rgba(255,255,255,.35);touch-action:manipulation}
 .bc-ear span{font:600 22px ui-monospace,monospace;color:rgba(255,215,0,.5)}
 .bc-ear small{font-size:11px}
+
+/* BIXTrade AI personas — bright, clear neural-tech look */
+:root { --bot-aegis: oklch(0.82 0.14 210); --bot-nexus: oklch(0.86 0.16 88); --bot-vortex: oklch(0.72 0.22 305); }
+.bot3d[data-variant="aegis"]:not([data-mood="sleep"]) { --bc: var(--bot-aegis); }
+.bot3d[data-variant="nexus"]:not([data-mood="sleep"]) { --bc: var(--bot-nexus); }
+.bot3d[data-variant="vortex"]:not([data-mood="sleep"]) { --bc: var(--bot-vortex); }
+.bot3d { --metal: color-mix(in oklab, var(--foreground) 34%, var(--card)); }
+.bot3d-grid { position:absolute; left:-10%; right:-10%; bottom:-4%; height:42%; transform:perspective(260px) rotateX(64deg); transform-origin:bottom; background-image:linear-gradient(color-mix(in oklab, var(--bc) 55%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--bc) 55%, transparent) 1px, transparent 1px); background-size:18px 18px; mask-image:radial-gradient(ellipse at 50% 30%, #000 20%, transparent 70%); animation:bot3d-grid 2.4s linear infinite; pointer-events:none; }
+.bot3d[data-mood="trade"] .bot3d-grid { animation-duration:.7s; }
+.bot3d[data-mood="sleep"] .bot3d-grid { animation:none; opacity:.35; }
+.bot3d-orbit.o3 { inset:-2% 18%; border-style:dotted; transform:rotateY(70deg) rotateX(20deg); animation-duration:8s; }
+.bot3d-net { position:absolute; inset:0; pointer-events:none; }
+.bot3d-net i { position:absolute; left:50%; top:50%; width:5px; height:5px; border-radius:50%; background:var(--bc); box-shadow:0 0 8px var(--bc); transform:rotate(calc(var(--i) * 45deg)) translateX(46%); transform-origin:0 0; animation:bot3d-node 3s ease-in-out infinite; animation-delay:calc(var(--i) * -.37s); }
+.bot3d-net i::after { content:""; position:absolute; right:100%; top:2px; width:60px; height:1px; background:linear-gradient(90deg, transparent, var(--bc)); opacity:.6; }
+.bot3d[data-mood="sleep"] .bot3d-net { opacity:.25; }
+.bot3d-core { backdrop-filter:blur(2px); background:radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--foreground) 70%, transparent), color-mix(in oklab, var(--bc) 60%, transparent) 40%, color-mix(in oklab, var(--background) 60%, transparent)) !important; box-shadow:0 0 16px var(--bc), inset 0 0 10px var(--bc) !important; }
+.bot3d[data-variant="aegis"] .bot3d-torso { clip-path:polygon(15% 0,85% 0,100% 30%,85% 100%,15% 100%,0 30%); }
+.bot3d[data-variant="vortex"] .bot3d-head { border-radius:50% 50% 24% 24% / 60% 60% 40% 40%; }
+.bot3d[data-variant="vortex"] .bot3d-orbit { border-width:2px; }
+.bot3d.is-mini { width:100%; max-width:92px; margin:0 auto; cursor:default; }
+.bot3d.is-mini .bot3d-ant::after { animation:none; }
+@keyframes bot3d-grid { to { background-position:0 18px; } }
+@keyframes bot3d-node { 0%,100% { opacity:.25; scale:.7; } 50% { opacity:1; scale:1.2; } }
+
+.arb-botpick { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.arb-botcard { position:relative; display:grid; justify-items:center; gap:2px; padding:8px 6px 10px; border-radius:16px; border:1px solid var(--border); background:linear-gradient(170deg, color-mix(in oklab, var(--bcard) 14%, var(--card)), var(--background)); text-align:center; transition:transform .25s, box-shadow .25s, border-color .25s; }
+.arb-botcard[data-variant="aegis"] { --bcard: var(--bot-aegis); } .arb-botcard[data-variant="nexus"] { --bcard: var(--bot-nexus); } .arb-botcard[data-variant="vortex"] { --bcard: var(--bot-vortex); }
+.arb-botcard b { font-size:11px; letter-spacing:.06em; color:var(--bcard); }
+.arb-botcard span { font-size:9.5px; color:var(--muted-foreground); }
+.arb-botcard em { font-style:normal; font-size:9px; padding:1px 7px; border-radius:999px; border:1px solid color-mix(in oklab, var(--bcard) 50%, transparent); color:var(--bcard); }
+.arb-botcard.is-on { border-color:var(--bcard); box-shadow:0 0 0 1px var(--bcard) inset, 0 8px 24px -10px var(--bcard); transform:translateY(-2px); }
+.arb-status { display:flex; align-items:center; gap:8px; margin-top:10px; padding:9px 12px; border-radius:12px; font-size:12px; border:1px solid color-mix(in oklab, var(--chart-2) 35%, transparent); background:color-mix(in oklab, var(--chart-2) 8%, var(--card)); }
+.arb-status i { width:8px; height:8px; border-radius:50%; background:var(--chart-2); box-shadow:0 0 10px var(--chart-2); animation:arb-blink 1.2s infinite; flex:none; }
+@media (prefers-reduced-motion: reduce) { .bot3d-grid, .bot3d-net i, .bot3d-orbit { animation:none !important; } }
