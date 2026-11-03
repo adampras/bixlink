@@ -7,8 +7,14 @@ import type { SovereignConfig } from '@/lib/presale';
 import { valueCard } from '@/lib/value-cards';
 
 function SovereignVideo({ usd }: { usd: number }) {
-  const card = valueCard(usd);
-  return card ? <img src={card.url} alt={`${card.name} NFT`} loading="lazy" className="block w-full object-contain"/> : null;
+  void valueCard;
+  return <div className="lux-sov-hero" aria-hidden>
+    <span className="lux-eyebrow">BIXLINK · SOVEREIGN RESERVE</span>
+    <Crown size={40} className="mx-auto mt-4 lux-gold-text"/>
+    <b className="mt-3 block font-display text-lg tracking-[0.2em] lux-gold-text">FOUNDER DEED</b>
+    <span className="mt-1 block text-[10px] tracking-[0.3em] text-muted-foreground">+ BLACK TITANIUM VIP PASS</span>
+    <span className="numeric mt-4 block font-display text-2xl font-black">${number(usd)}</span>
+  </div>;
 }
 
 /** Digital sapphire plaque certificate for a Sovereign holder. */

@@ -134,23 +134,7 @@ function PresalePage() {
       {(s?.sponsorRewards?.length ?? 0) > 0 && <p className="mt-6 text-xs text-muted-foreground"><Users size={13} className="inline"/> Sponsor rewards: {s?.sponsorRewards?.length} referral purchases, released on the same mining schedule.</p>}
     </>}
     <p className="terminal-disclosure mt-8"><ShieldCheck size={14}/> No guarantee of profit. Presale BIX is an internal ledger allocation, not an on-chain token. Mined-out BIX is shown for tracking and is not spendable until the owner opens settlement. Sponsor bonus goes only to your direct referrer.</p>
-    <PresalePurchaseDialog selection={selection} balance={Number(s?.balanceUsd ?? 0)} busy={busy !== null} error={purchaseError} onClose={() => setSelection(null)} onConfirm={confirmBuy}/>
-    <Dialog open={receipt !== null} onOpenChange={open => { if (!open) setReceipt(null); }}>
-      <DialogContent className="max-w-sm border-chart-3 text-center">
-        {receipt && <>
-          <BadgeCheck size={44} className="mx-auto text-chart-3"/>
-          <DialogTitle className="font-display text-xl font-black text-chart-3">Purchase successful</DialogTitle>
-          <DialogDescription className="text-xs">Your Genesis allocation is confirmed and recorded.</DialogDescription>
-          <dl className="mt-2 text-left text-sm">
-            <div className="flex justify-between border-t border-border py-2"><dt className="text-muted-foreground">Certificate</dt><dd className="numeric font-bold">#GEN-{String(receipt.serial).padStart(4, '0')}</dd></div>
-            <div className="flex justify-between border-t border-border py-2"><dt className="text-muted-foreground">Paid</dt><dd className="numeric font-bold">{number(receipt.usd)} USDT</dd></div>
-            <div className="flex justify-between border-t border-border py-2"><dt className="text-muted-foreground">Locked BIX</dt><dd className="numeric font-bold text-primary">{number(receipt.bix)} BIX</dd></div>
-            {receipt.dailyUsd > 0 && <div className="flex justify-between border-y border-border py-2"><dt className="text-muted-foreground">USDT daily terms</dt><dd className="numeric">{number(receipt.dailyUsd, { maximumFractionDigits: 2 })} USDT</dd></div>}
-          </dl>
-          <Button className="mt-3 w-full" onClick={() => { setReceipt(null); setTab('portfolio'); }}>View my portfolio</Button>
-        </>}
-      </DialogContent>
-    </Dialog>
+    <PresalePurchaseDialog selection={selection} receipt={receipt} balance={Number(s?.balanceUsd ?? 0)} busy={busy !== null} error={purchaseError} onClose={() => { setSelection(null); setReceipt(null); }} onConfirm={confirmBuy} onPortfolio={() => { setReceipt(null); setSelection(null); setTab('portfolio'); }}/>
     {nftPreview !== null && <VaultFacilityDialog kind="presale" principal={nftPreview} days={cfg?.packages.find(x => x.usd === nftPreview)?.releaseDays ?? 180} label={`Presale $${number(nftPreview)}`} onClose={() => setNftPreview(null)}/>}
   </main></BixShell>;
 }
