@@ -838,6 +838,7 @@ export type Database = {
           asset: string
           code: string
           enabled: boolean
+          extra_wallets: Json
           label: string
           network: string
           owner_id: string
@@ -854,6 +855,7 @@ export type Database = {
           asset?: string
           code: string
           enabled?: boolean
+          extra_wallets?: Json
           label?: string
           network?: string
           owner_id: string
@@ -870,6 +872,7 @@ export type Database = {
           asset?: string
           code?: string
           enabled?: boolean
+          extra_wallets?: Json
           label?: string
           network?: string
           owner_id?: string
@@ -3335,6 +3338,7 @@ export type Database = {
         }
         Returns: string
       }
+      bix_owner_wallets_save_extra: { Args: { p_wallets: Json }; Returns: Json }
       bix_p2p_bix_delta: { Args: { p_user: string }; Returns: number }
       bix_p2p_cancel: { Args: { p_offer: string }; Returns: undefined }
       bix_p2p_post: {

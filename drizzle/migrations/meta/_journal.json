@@ -1023,6 +1023,13 @@
       "when": 1793683706017,
       "tag": "0145_wd_matching_and_one_time_sponsored_stake",
       "breakpoints": true
+    },
+    {
+      "idx": 146,
+      "version": "7",
+      "when": 1793692543406,
+      "tag": "0146_owner2_multi_wallets",
+      "breakpoints": true
     }
   ]
 }
