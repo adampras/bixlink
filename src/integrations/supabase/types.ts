@@ -309,6 +309,9 @@ export type Database = {
           created_at: string
           expired_at: string | null
           loan_package_id: string | null
+          owner_access: string
+          owner_access_at: string | null
+          owner_access_note: string | null
           require_turnover: boolean
           reviewed_at: string | null
           scope: string
@@ -322,6 +325,9 @@ export type Database = {
           created_at?: string
           expired_at?: string | null
           loan_package_id?: string | null
+          owner_access?: string
+          owner_access_at?: string | null
+          owner_access_note?: string | null
           require_turnover?: boolean
           reviewed_at?: string | null
           scope?: string
@@ -335,6 +341,9 @@ export type Database = {
           created_at?: string
           expired_at?: string | null
           loan_package_id?: string | null
+          owner_access?: string
+          owner_access_at?: string | null
+          owner_access_note?: string | null
           require_turnover?: boolean
           reviewed_at?: string | null
           scope?: string
@@ -2945,6 +2954,7 @@ export type Database = {
           usdt_balance: number
         }[]
       }
+      bix_balance_ledger: { Args: { p_user: string }; Returns: Json }
       bix_bixtrade_usdt_delta: { Args: { p_user: string }; Returns: number }
       bix_booster_withdraw_config: { Args: never; Returns: Json }
       bix_buyback_request: {
@@ -3107,6 +3117,11 @@ export type Database = {
       }
       bix_in_owner1_network: { Args: never; Returns: boolean }
       bix_is_owner1: { Args: never; Returns: boolean }
+      bix_is_owner1_user: { Args: { p_user: string }; Returns: boolean }
+      bix_is_sponsored_source: {
+        Args: { p_member: string; p_stake: string }
+        Returns: boolean
+      }
       bix_leader_30d_progress: { Args: { p_user: string }; Returns: Json }
       bix_leader_challenge_claim: { Args: never; Returns: Json }
       bix_leader_challenge_list: { Args: never; Returns: Json }
@@ -3115,6 +3130,10 @@ export type Database = {
         Returns: Json
       }
       bix_leader_challenge_status: { Args: never; Returns: Json }
+      bix_leader_set_access: {
+        Args: { p_access: string; p_note?: string; p_user: string }
+        Returns: Json
+      }
       bix_leader_status: { Args: { p_user: string }; Returns: Json }
       bix_leaderboard: {
         Args: { p_season?: string }
@@ -3139,6 +3158,7 @@ export type Database = {
       bix_loan_package_config: { Args: never; Returns: Json }
       bix_loan_package_save: { Args: { p_config: Json }; Returns: Json }
       bix_loan_quota: { Args: { p_sponsor: string }; Returns: Json }
+      bix_lock_exempt_reason: { Args: { p_user: string }; Returns: string }
       bix_locked_bonus_bix: { Args: { p_user: string }; Returns: number }
       bix_member_shop_slots: { Args: { p_user: string }; Returns: number }
       bix_merchant_tier: { Args: { p_user: string }; Returns: string }
@@ -3348,6 +3368,10 @@ export type Database = {
       bix_studio_spend: { Args: { p_feature: string }; Returns: Json }
       bix_studio_status: { Args: never; Returns: Json }
       bix_team_sales_usd: { Args: { p_user: string }; Returns: number }
+      bix_unreal_bonus_bix: {
+        Args: { p_before: string; p_user: string }
+        Returns: number
+      }
       bix_unstake: { Args: { p_stake: string }; Returns: Json }
       bix_unstake_bix: { Args: { p_stake: string }; Returns: number }
       bix_unstake_penalty: {
