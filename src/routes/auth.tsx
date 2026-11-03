@@ -14,7 +14,7 @@ export const Route = createFileRoute('/auth')({ head: () => ({ meta: [{ title: '
 function Auth() {
   const [mode, setMode] = useState<'signin'|'forgot'>('signin');
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false); const [show, setShow] = useState(false);
-  useEffect(() => { const saved = window.localStorage.getItem('bixlink-login-identifier'); if (saved) { setEmail(saved); setNotice('Account ready. Enter your password to sign in.'); } }, []);
+  useEffect(() => { const saved = window.localStorage.getItem('bixlink-login-identifier'); const verified = new URLSearchParams(window.location.search).get('verified') === '1'; if (saved) setEmail(saved); if (verified) setNotice('Email verified. Your account is active — enter your password to sign in.'); else if (saved) setNotice('Enter your password to sign in. New accounts must confirm their email first.'); }, []);
   const navigate = useNavigate();
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setNotice('');
@@ -24,8 +24,9 @@ function Auth() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong.';
       if (/not confirmed/i.test(msg)) {
-        const { error: rErr } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: `${window.location.origin}/auth` } });
-        setNotice(rErr ? `Email not confirmed. ${rErr.message}` : 'Email not confirmed yet. We sent a NEW confirmation link — open only the newest email, then sign in.');
+        if (!email.includes('@')) { setNotice('Email not verified yet. Open the activation email we sent you, or sign in with your email address to receive a new link.'); return; }
+        const { error: rErr } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: `${window.location.origin}/auth?verified=1` } });
+        setNotice(rErr ? `Email not verified yet. ${rErr.message}` : 'Email not verified yet. We sent a NEW activation link — open only the newest email, then sign in.');
       } else setNotice(msg);
     } finally { setBusy(false); }
   }

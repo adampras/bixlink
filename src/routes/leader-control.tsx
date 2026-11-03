@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useMember, usePublicConfig } from '@/lib/useMember';
-import { getAdminLeaders, getLeaderCandidates, reviewLeader, updateDockHub } from '@/lib/bixlink.functions';
+import { getAdminLeaders, getLeaderCandidates, reviewLeader, setLeaderAccess, updateDockHub } from '@/lib/bixlink.functions';
 import { getLoanPackages, saveLoanPackages } from '@/lib/loan-packages.functions';
 import { type LoanConfig } from '@/lib/loan-packages';
 import { HUB_ITEMS, hubVisible } from '@/lib/dock-hub';
@@ -95,8 +95,26 @@ function Roster({ kind }: { kind: 'leader' | 'loan' }) {
           <Button size="sm" onClick={() => act(l.user_id, 'approved', l.virtual_usd, l.require_turnover)}>Simpan / Setujui</Button>
           <Button size="sm" variant="outline" onClick={() => act(l.user_id, 'rejected', l.virtual_usd, l.require_turnover)}>Tolak</Button>
         </div>
+        <AccessSwitch userId={l.user_id} value={(l as { owner_access?: string }).owner_access ?? 'normal'} onDone={m => { setMsg(m); qc.invalidateQueries({ queryKey: ['owner-leaders'] }); }}/>
       </div>;
     })}
+  </div>;
+}
+
+const ACCESS = [
+  { v: 'normal', label: 'Normal', hint: 'Aturan target berlaku' },
+  { v: 'open', label: 'Buka', hint: 'Bebas semua syarat' },
+  { v: 'closed', label: 'Tutup', hint: 'Bekukan WD & transfer' },
+] as const;
+
+function AccessSwitch({ userId, value, onDone }: { userId: string; value: string; onDone: (m: string) => void }) {
+  const save = useServerFn(setLeaderAccess); const [busy, setBusy] = useState(false);
+  return <div className="mt-2 rounded-xl border border-border p-2">
+    <div className="text-[10px] font-black tracking-widest text-muted-foreground">AKSES AKUN BERSPONSOR · OWNER 1</div>
+    <div className="mt-1.5 grid grid-cols-3 gap-1.5" role="radiogroup" aria-label="Akses akun bersponsor">{ACCESS.map(a => <button key={a.v} type="button" role="radio" aria-checked={value === a.v} disabled={busy}
+      onClick={async () => { if (value === a.v) return; if (a.v !== 'normal' && !confirm(`${a.label} akun ini? ${a.hint}.`)) return; setBusy(true); try { await save({ data: { userId, access: a.v } }); onDone(`Akses diubah ke ${a.label}.`); } catch (e) { onDone(e instanceof Error ? e.message : 'Gagal mengubah akses.'); } finally { setBusy(false); } }}
+      className={`rounded-lg border px-2 py-1.5 text-left text-[11px] font-bold ${value === a.v ? (a.v === 'closed' ? 'border-destructive bg-destructive/15 text-destructive' : a.v === 'open' ? 'border-chart-2 bg-chart-2/15 text-chart-2' : 'border-primary bg-primary/15 text-primary') : 'border-border text-muted-foreground'}`}>
+      {a.label}<span className="block text-[9px] font-medium opacity-80">{a.hint}</span></button>)}</div>
   </div>;
 }
 

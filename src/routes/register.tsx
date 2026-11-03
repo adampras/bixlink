@@ -22,7 +22,9 @@ export const Route = createFileRoute('/register')({
 
 function RegisterPage() {
   const [email, setEmail] = useState(''); const [fullName, setFullName] = useState(''); const [username, setUsername] = useState(''); const [password, setPassword] = useState(''); const [referral, setReferral] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState<{ username: string; email: string; whatsapp: string; referral: string } | null>(null); const [copied, setCopied] = useState(false);
+  const [done, setDone] = useState<{ username: string; email: string; whatsapp: string; referral: string; verify: boolean } | null>(null); const [cooldown, setCooldown] = useState(0); const [resendMsg, setResendMsg] = useState('');
+  useEffect(() => { if (cooldown <= 0) return; const t = window.setTimeout(() => setCooldown(c => c - 1), 1000); return () => window.clearTimeout(t); }, [cooldown]);
+  const resend = async () => { if (!done || cooldown > 0) return; setResendMsg(''); const { error } = await supabase.auth.resend({ type: 'signup', email: done.email, options: { emailRedirectTo: `${window.location.origin}/auth?verified=1` } }); setResendMsg(error ? error.message : 'A new verification email is on its way. Open only the newest one.'); setCooldown(60); }; const [copied, setCopied] = useState(false);
   const copyAccount = async () => { if (!done) return; try { await navigator.clipboard.writeText(`BIXLINK account\nUsername: ${done.username}\nEmail: ${done.email}\nWhatsApp: ${done.whatsapp}\nSponsor: ${done.referral || '-'}`); setCopied(true); } catch { setCopied(false); } };
   const [country, setCountry] = useState('ID'); const [phone, setPhone] = useState('');
   const { ref, target } = Route.useSearch();
@@ -46,9 +48,9 @@ function RegisterPage() {
       if (!free) throw new Error('That username is already taken.');
       if (code) window.localStorage.setItem('bixlink-ref', code); else window.localStorage.removeItem('bixlink-ref');
       if (!passwordValid(password)) throw new Error(PASSWORD_HINT);
-      await createManualAccount(() => supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: fullName.trim().slice(0, 80), username: uname, whatsapp, whatsapp_country: dial.iso } } }), () => supabase.auth.signOut());
+      const created = await createManualAccount(() => supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth?verified=1`, data: { full_name: fullName.trim().slice(0, 80), username: uname, whatsapp, whatsapp_country: dial.iso } } }), () => supabase.auth.signOut());
       window.localStorage.setItem(LOGIN_IDENTIFIER_KEY, uname);
-      setDone({ username: uname, email: email.trim(), whatsapp, referral: code });
+      setDone({ username: uname, email: email.trim(), whatsapp, referral: code, verify: created.confirmationRequired }); setCooldown(60);
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
   const label = 'block text-xs font-bold text-muted-foreground';
@@ -79,8 +81,9 @@ function RegisterPage() {
     <p className="mt-6 text-center text-sm text-muted-foreground">Already have an account? <Link to="/auth" className="font-bold text-chart-2">Sign in</Link></p>
   </div></main>
   <Dialog open={!!done} onOpenChange={() => {}}><DialogContent className="max-w-sm border-chart-3/40 bg-card" onInteractOutside={e => e.preventDefault()}>
-    <DialogHeader><DialogTitle className="text-center text-xl font-black tracking-wide">ACCOUNT CREATED</DialogTitle><DialogDescription className="text-center">Save your login details, then sign in manually with your password.</DialogDescription></DialogHeader>
+    <DialogHeader><DialogTitle className="text-center text-xl font-black tracking-wide">{done?.verify ? 'VERIFY YOUR EMAIL' : 'ACCOUNT CREATED'}</DialogTitle><DialogDescription className="text-center">{done?.verify ? <>We sent an activation link to <b className="text-foreground">{done.email}</b>. Open it to activate your account, then sign in. Check your Inbox and Spam folder.</> : 'Save your login details, then sign in manually with your password.'}</DialogDescription></DialogHeader>
     {done && <dl className="space-y-2 rounded-xl border border-border bg-background/60 p-3 text-sm">{([['Username', done.username], ['Email', done.email], ['WhatsApp', done.whatsapp], ['Sponsor', done.referral || '—']] as const).map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-muted-foreground">{k}</dt><dd className="truncate font-bold">{v}</dd></div>)}</dl>}
+    {done?.verify && <div className="rounded-xl border border-chart-3/40 bg-chart-3/10 p-3 text-center text-xs"><p className="font-bold text-chart-3">Your account stays inactive until the email is confirmed.</p><Button type="button" variant="outline" size="sm" disabled={cooldown > 0} className="mt-2 rounded-full" onClick={resend}>{cooldown > 0 ? `Resend email in ${cooldown}s` : 'Resend verification email'}</Button>{resendMsg && <p role="status" className="mt-2 text-muted-foreground">{resendMsg}</p>}</div>}
     <div className="grid gap-2"><Button variant="outline" className="rounded-full" onClick={copyAccount}>{copied ? 'Copied ✓' : 'Copy account details'}</Button><Button className="rounded-full bg-primary font-black text-primary-foreground" onClick={() => window.location.assign('/auth')}>Continue to sign in <ArrowRight/></Button></div>
   </DialogContent></Dialog></BixShell>;
 }
