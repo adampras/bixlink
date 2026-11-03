@@ -1,4 +1,4 @@
-import { useEffect, useState, type UIEvent } from 'react';
+import { useEffect, useRef, useState, type UIEvent } from 'react';
 import { Link } from '@tanstack/react-router';
 import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, UserRound, Bot, Bike, WalletCards, PhoneCall, type LucideIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -44,15 +44,23 @@ export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, bool
     const body = <>{!compact && BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<span className="hub-emblem" style={{ animationDelay: `${(n % 4) * -0.9}s` }}><Icon size={20} strokeWidth={1.7}/></span><div className="text-xs font-black">{i.label}</div>{!compact && <div className="mt-0.5 text-[10px] text-muted-foreground">{i.note}</div>}</>;
     return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => pick(i.id)} className={cls}>{body}</a> : <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={cls}>{body}</Link>;
   };
+  const [drag, setDrag] = useState(0);
+  const start = useRef<{ y: number; t: number } | null>(null);
+  const onDown = (e: React.PointerEvent) => { start.current = { y: e.clientY, t: Date.now() }; (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId); };
+  const onMove = (e: React.PointerEvent) => { if (start.current) setDrag(Math.max(0, e.clientY - start.current.y)); };
+  const onUp = (e: React.PointerEvent) => { const s0 = start.current; start.current = null; if (!s0) return; const dy = e.clientY - s0.y; const v = dy / Math.max(1, Date.now() - s0.t); if (dy > 80 || v > 0.6) { try { navigator.vibrate?.(10); } catch { /* unsupported */ } setOpen(false); } setDrag(0); };
+  useEffect(() => { if (!open) setDrag(0); }, [open]);
   const recentItems = recent.map(id => items.find(i => i.id === id)).filter((i): i is typeof items[number] => !!i);
   return <>
     <button type="button" onClick={() => setOpen(true)} aria-label="Open BIX HUB" className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}>
       <LayoutGrid size={19} className="shrink-0"/><span>HUB</span>
     </button>
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="bottom" className="hub-midnight max-h-[80vh] overflow-y-auto rounded-t-3xl pb-8">
+      <SheetContent side="bottom" className="hub-midnight max-h-[80vh] overflow-y-auto rounded-t-3xl pb-8" style={drag ? { transform: `translateY(${drag}px)`, transition: 'none' } : { transition: 'transform .35s cubic-bezier(.2,.9,.3,1.2)' }}>
+        <div className="touch-none -mx-6 -mt-6 cursor-grab px-6 pt-6 pb-1" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} aria-label="Geser ke bawah untuk menutup HUB">
         <div className="hub-grabber" aria-hidden/>
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest">BIX HUB</SheetTitle></SheetHeader>
+        </div>
         {recentItems.length > 0 && <section className="hub-group hub-tone-gold hub-recent mt-2">
           <h3 className="hub-group-head"><span>Terakhir dibuka</span></h3>
           <div className="grid grid-cols-3 gap-2">{recentItems.map((i, n) => tile(i, n, true))}</div>
