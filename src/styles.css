@@ -5923,3 +5923,8 @@ body > .comm-sheet-bg{z-index:2147483001}
 .sticky-top-bar{position:sticky;top:0;z-index:45}
 .sticky-top-bar .site-header{position:relative;top:auto}
 .sticky-top-bar .quantum-hud{background-color:color-mix(in oklab,var(--background) 88%,transparent);backdrop-filter:blur(18px)}
+
+/* BIX CALL slim layout: gear + floating dial button */
+.comm-subhead .comm-gear{margin-left:auto;display:inline-grid;place-items:center;width:34px;height:34px;border-radius:999px;border:1px solid color-mix(in oklab,var(--primary) 45%,transparent);background:color-mix(in oklab,var(--card) 85%,transparent);color:var(--primary)}
+.comm-fab{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:40;width:58px;height:58px;border-radius:999px;display:grid;place-items:center;color:#07050c;background:linear-gradient(135deg,#FFF1A8,#FFD700 55%,#B8860B);box-shadow:0 10px 28px -8px rgba(255,215,0,.6),0 0 0 3px rgba(168,85,247,.35)}
+.comm-fab.is-open{background:linear-gradient(135deg,#2a1a40,#07050c);color:#FFD700}

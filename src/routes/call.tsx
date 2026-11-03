@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 const COMM_TABS: string[] = ['chat', 'call', 'community', 'setting'];
 import { useEffect, useRef, useState } from 'react';
-import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip } from 'lucide-react';
+import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, Settings, X } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import { startBixCall } from '@/components/BixCall';
 import { BixGroupMeeting } from '@/components/BixGroupMeeting';
 import { useMember } from '@/lib/useMember';
-import { CommunityTab, NotifyCard } from '@/components/BixCommExtras';
+import { NotifyCard } from '@/components/BixCommExtras';
 import { supabase } from '@/integrations/supabase/client';
 import { BixShell } from '@/components/BixShell';
 import { BixAvatar, useBixCard } from '@/components/BixAvatar';
@@ -90,16 +90,18 @@ function CallInner() {
 
   if (chatWith) return <ChatRoom me={me} peer={chatWith} tier={tier} onBack={() => setChatWith(null)}/>;
   const open = (id: string, name: string) => setChatWith({ id, name });
-  const TITLE: Record<CommTab, string> = { chat: 'CHAT', call: 'PANGGILAN', community: 'KOMUNITAS', setting: 'PENGATURAN' };
+  const TITLE: Record<CommTab, string> = { chat: 'CHAT', call: 'PANGGILAN', community: 'CHAT', setting: 'PENGATURAN' };
+  const view: CommTab = tab === 'community' ? 'chat' : tab;
 
   return <main className="mx-auto max-w-xl px-4 py-5">
     <FindMember bar me={me} tier={tier} onChat={open}/>
-    <div className="comm-subhead"><b>{TITLE[tab]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
+    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}
+      {view === 'setting' ? <Link to="/call" search={{ tab: 'chat' }} className="comm-gear" aria-label="Tutup pengaturan">✕</Link>
+        : <Link to="/call" search={{ tab: 'setting' }} className="comm-gear" aria-label="Pengaturan BIX CALL"><Settings size={16}/></Link>}</div>
 
-    {tab === 'chat' && <ChatTab me={me} tier={tier} onOpen={open}/>}
-    {tab === 'call' && <><BixGroupMeeting me={me} tier={tier}/><CallTab me={me} tier={tier} onChat={open}/></>}
-    {tab === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
-    {tab === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/></>}
+    {view === 'chat' && <ChatTab me={me} tier={tier} onOpen={open}/>}
+    {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
+    {view === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/></>}
   </main>;
 }
 
@@ -175,8 +177,10 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
     for (const r of list) { const pid = r.caller_id === me ? r.callee_id : r.caller_id; if (!peers.has(pid)) { const { data: p } = await supabase.rpc('bix_call_peer' as never, { p_user: pid } as never); peers.set(pid, p as Peer | null); } }
     setHist(list.map(r => { const pid = r.caller_id === me ? r.callee_id : r.caller_id; const p = peers.get(pid); return { ...r, peerId: pid, peer: p?.name ?? 'Member', canCall: !!p?.can_call }; }));
   })(); }, [me]);
+  const [pad, setPad] = useState(false);
   return <>
-    <Dialpad me={me} tier={tier} onChat={onChat}/>
+    {pad && <Dialpad me={me} tier={tier} onChat={onChat}/>}
+    <button type="button" className={`comm-fab${pad ? ' is-open' : ''}`} aria-label={pad ? 'Tutup papan panggil' : 'Buka papan panggil'} onClick={() => setPad(v => !v)}>{pad ? <X size={22}/> : <Phone size={22}/>}</button>
     <section className="comm-card"><h3 className="comm-h">Riwayat panggilan</h3>
       {hist.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada panggilan.</p> : <ul className="comm-list">{hist.map(h => <li key={h.id} className="comm-row">
         <span className={`comm-dir ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.caller_id === me ? '↗' : '↙'}</span>
