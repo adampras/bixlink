@@ -55,15 +55,16 @@ export function YieldControlPanel({ market = true }: { market?: boolean }) {
       </section>}
       <section className="mt-6 border-y border-border py-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><h2 className="font-display text-xl font-bold">{q.data?.length ?? 'All'} staking packages · daily profit</h2><p className="mt-1 text-xs text-muted-foreground">Daily reference rates · 0.50%–0.98%. Running stakes keep their original terms. No guaranteed profit.</p></div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" disabled={busy || !q.data} onClick={applyStandard}><Sparkles size={16}/>Standard</Button>
-            <Button disabled={busy || !q.data} onClick={applyDaily}><Shuffle size={16}/>{busy ? 'Applying…' : 'Update daily profit · all packages'}</Button>
-          </div>
+          <div><h2 className="font-display text-xl font-bold">{q.data?.length ?? 'Semua'} paket · profit harian flat</h2><p className="mt-1 text-xs text-muted-foreground">Rentang 0,5%–1,2% per hari. Staking yang berjalan tetap memakai angka lamanya. Proyeksi, bukan jaminan.</p></div>
         </div>
-        {q.isPending ? <p className="mt-4">Loading packages…</p> : <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[620px] text-sm"><thead className="text-xs text-muted-foreground"><tr><th className="p-2 text-left">Package</th>{PACKAGE_DURATIONS.map(d => <th key={d} className="p-2">{d}D now → standard</th>)}</tr></thead>
-          <tbody>{(q.data ?? []).map((p, i) => { const std = standardApys(i, q.data?.length ?? 8); return <tr key={p.id} className="border-t border-border"><td className="p-2 font-bold">{p.id} <span className="text-xs text-muted-foreground">${number(Number(p.price_usd))}</span></td>{PACKAGE_DURATIONS.map(d => <td key={d} className="numeric p-2 text-center text-xs">{number((p.duration_apys[String(d)] ?? 0) / 365, { maximumFractionDigits: 2 })}% → <b className="text-chart-2">{number((std[String(d)] ?? 0) / 365, { maximumFractionDigits: 2 })}%</b></td>)}</tr>; })}</tbody></table></div>}
-        <p className="mt-3 text-xs text-muted-foreground">Fine-tune any single package in Admin → Packages.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-border p-3"><p className="text-xs font-bold">1 · Tangga durasi</p><p className="mt-1 text-[11px] text-muted-foreground">30H 0,5% · 60H 0,6% · 90H 0,8% · 180H 1,0% · 360H 1,2%</p><Button className="mt-2 w-full" variant="outline" disabled={busy || !q.data} onClick={() => applyAll(() => ladderApys(), 'Tangga durasi diterapkan')}><Sparkles size={16}/>Terapkan</Button></div>
+          <div className="rounded-xl border border-border p-3"><p className="text-xs font-bold">2 · Flat sama rata</p><div className="mt-2 flex gap-2"><input aria-label="Flat daily profit" className="form-input numeric" type="number" min={DAILY_MIN} max={DAILY_MAX} step={DAILY_STEP} value={flat} onChange={e => setFlat(Number(e.target.value))} onBlur={() => setFlat(cleanDaily(flat))}/><span className="self-center text-xs">%/hari</span></div><Button className="mt-2 w-full" disabled={busy || !q.data} onClick={() => applyAll(() => flatApys(flat), `Flat ${cleanDaily(flat)}% diterapkan`)}>Terapkan ke semua</Button></div>
+          <div className="rounded-xl border border-border p-3"><p className="text-xs font-bold">3 · Geser sedikit</p><p className="mt-1 text-[11px] text-muted-foreground">Naik/turun 0,05% semua paket, tetap dalam 0,5%–1,2%.</p><div className="mt-2 grid grid-cols-2 gap-2"><Button variant="outline" disabled={busy || !q.data} onClick={() => applyAll(a => shiftApys(a, -DAILY_STEP), 'Turun 0,05%')}><Minus size={16}/>0,05%</Button><Button variant="outline" disabled={busy || !q.data} onClick={() => applyAll(a => shiftApys(a, DAILY_STEP), 'Naik 0,05%')}><Plus size={16}/>0,05%</Button></div></div>
+        </div>
+        {q.isPending ? <p className="mt-4">Memuat paket…</p> : <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[520px] text-sm"><thead className="text-xs text-muted-foreground"><tr><th className="p-2 text-left">Paket</th>{PACKAGE_DURATIONS.map(d => <th key={d} className="p-2">{d} hari</th>)}</tr></thead>
+          <tbody>{(q.data ?? []).map(p => <tr key={p.id} className="border-t border-border"><td className="p-2 font-bold">{p.id} <span className="text-xs text-muted-foreground">${number(Number(p.price_usd))}</span></td>{PACKAGE_DURATIONS.map(d => <td key={d} className="numeric p-2 text-center text-xs"><b className="text-chart-2">{apyToDaily(p.duration_apys[String(d)] ?? 0)}%</b></td>)}</tr>)}</tbody></table></div>}
+        <p className="mt-3 text-xs text-muted-foreground">Ubah satu paket tertentu di tab "Edit paket".</p>
       </section>
     </>}
   </div>;
