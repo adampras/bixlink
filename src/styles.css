@@ -5930,7 +5930,7 @@ body > .comm-sheet-bg{z-index:2147483001}
 .comm-fab.is-open{background:linear-gradient(135deg,#2a1a40,#07050c);color:#FFD700}
 
 /* BIX CALL: search bar stays locked under the sticky header */
-.bixcall-page .bc-wrap{position:sticky;top:var(--bix-header-h,64px);z-index:25;margin:-6px -8px 12px;padding:6px 8px;border-radius:0 0 22px 22px;background:linear-gradient(180deg,rgb(7 5 12 / .92),rgb(7 5 12 / .6));backdrop-filter:blur(16px)}
+.bixcall-page .bc-wrap{position:sticky;top:0;z-index:25;margin:-6px -8px 12px;padding:6px 8px;border-radius:0 0 22px 22px;background:linear-gradient(180deg,rgb(7 5 12 / .92),rgb(7 5 12 / .6));backdrop-filter:blur(16px)}
 
 /* BIX CALL: Black Matcha Lux colour model (owner switch) */
 body[data-bc-theme=matcha] .bixcall-page{--bcm-g:#7fd88a;--bcm-g2:#2d6a4f;--bcm-o:#ff8c1a;background:radial-gradient(120% 60% at 50% 0%,rgb(45 106 79 / .28),transparent 60%),radial-gradient(80% 40% at 100% 100%,rgb(255 140 26 / .1),transparent 60%),#050806}
