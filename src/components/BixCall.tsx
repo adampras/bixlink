@@ -226,7 +226,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         roomRef.current = room;
         room.on(RoomEvent.TrackSubscribed, (t: RemoteTrack) => {
           if (t.kind === Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); if (backV.current) t.attach(backV.current); setRemoteVideo(true); }
-          if (t.kind === Track.Kind.Audio && audioBox.current) { audioBox.current.querySelectorAll('audio').forEach(a => a.remove()); const el = t.attach() as HTMLAudioElement; el.volume = shieldRef.current ? 0.7 : 0.9; audioBox.current.appendChild(el); void el.play().catch(() => {}); }
+          if (t.kind === Track.Kind.Audio && audioBox.current) { audioBox.current.querySelectorAll('audio').forEach(a => a.remove()); const el = t.attach() as HTMLAudioElement; audioBox.current.appendChild(el); applyVolume(); void el.play().catch(() => {}); }
         });
         room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach(); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
         room.on(RoomEvent.ParticipantDisconnected, () => onEnd());
@@ -234,7 +234,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         await room.connect(res.url, res.token);
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         try {
-          const vs = await openVoiceShield(); if (cancelled) { vs.stop(); return; }
+          const vs = await openVoiceShield(h => { howlRef.current = h; setHowl(h); applyVolume(); }); if (cancelled) { vs.stop(); return; }
           voiceRef.current = vs;
           await room.localParticipant.publishTrack(vs.track, { source: Track.Source.Microphone, dtx: true, red: true, audioPreset: { maxBitrate: 40000 } });
         } catch {
@@ -277,8 +277,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const speaker = () => { audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = shieldRef.current ? 0.85 : 1; void a.play().catch(() => {}); }); };
   const toggleShield = () => {
     const n = !shield; setShield(n); shieldRef.current = n; voiceRef.current?.setShield(n);
-    audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = n ? 0.7 : 0.9; });
+    if (!n) { howlRef.current = false; setHowl(false); }
+    applyVolume();
   };
+  const toggleNear = () => { const n = !near; setNear(n); nearRef.current = n; if (!n) voiceRef.current?.setDuck(false); };
+  const openChat = () => { onClose(); void router.navigate({ to: '/call', search: { chat: call.peerId } as never }); };
 
   const dragPip = (e: React.PointerEvent) => {
     const sx = e.clientX - pip.x, sy = e.clientY - pip.y;
@@ -287,9 +290,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
   };
 
-  const statusText = done ? (call.status === 'declined' ? 'Panggilan ditolak' : call.status === 'missed' ? 'Tidak terjawab' : 'Panggilan berakhir')
+  const statusText = call.offline ? 'Member sedang offline'
+    : done ? (call.status === 'declined' ? 'Panggilan ditolak' : call.status === 'missed' ? 'Tidak terjawab' : 'Panggilan berakhir')
     : live ? (link === 'on' ? fmt(secs) : link === 'fail' ? 'Gagal tersambung' : 'Menyambungkan…')
-    : call.role === 'caller' ? 'Memanggil…' : call.kind === 'video' ? 'Panggilan video masuk' : 'Panggilan suara masuk';
+    : call.role === 'caller' ? (phase === 'ringing' ? 'Berdering…' : 'Memanggil…') : call.kind === 'video' ? 'Panggilan video masuk' : 'Panggilan suara masuk';
+  const dot = link === 'on' ? 'ok' : call.offline ? 'off' : ringing && call.role === 'caller' ? (phase === 'ringing' ? 'ring' : 'calling') : ringing ? 'ring' : '';
   const wa = call.whatsapp?.replace(/[^0-9]/g, '');
 
   const showVideo = remoteVideo && call.kind === 'video';
