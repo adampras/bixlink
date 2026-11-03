@@ -3512,7 +3512,7 @@ html[data-color-mode="light"] .landing-presale-band .hero-ribbon { background:li
 
 /* Mobile clarity polish */
 @media (max-width:480px){
-  html,body{overflow-x:hidden}
+  html,body{overflow-x:clip}
   main img,main video{max-width:100%}
   .eyebrow{font-size:10px;letter-spacing:.18em}
   .section-title{font-size:clamp(1.35rem,6.4vw,1.75rem);line-height:1.15}
@@ -5919,3 +5919,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 
 body > .comm-sheet-bg{z-index:2147483001}
 .comm-sheet.bx-sc{background:linear-gradient(170deg,#160d26,#07050c 70%);border:1px solid rgb(255 215 0 / .22);opacity:1}
+/* Opsi A: HUD + header diam, ticker ikut scroll */
+.sticky-top-bar{position:sticky;top:0;z-index:45}
+.sticky-top-bar .site-header{position:relative;top:auto}
+.sticky-top-bar .quantum-hud{background-color:color-mix(in oklab,var(--background) 88%,transparent);backdrop-filter:blur(18px)}
