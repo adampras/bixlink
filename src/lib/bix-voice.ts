@@ -45,7 +45,7 @@ export async function openVoiceShield(onHowl?: (howling: boolean) => void): Prom
     an.getFloatTimeDomainData(buf);
     let s = 0; for (let i = 0; i < buf.length; i++) { const v = buf[i] ?? 0; s += v * v; }
     const db = 20 * Math.log10(Math.sqrt(s / buf.length) + 1e-8);
-    if (db > (shield ? GATE_DB.shield : GATE_DB.normal)) open = 7; else if (open > 0) open--;
+    if (db > (shield ? GATE_DB.shield : GATE_DB.normal)) open = 8; else if (open > 0 && db < (shield ? GATE_DB.shield : GATE_DB.normal) - 4) open--;
     // Howl detector: one narrow tone far above the average spectrum for ~300 ms.
     an.getFloatFrequencyData(spec);
     let peak = -Infinity, sum = 0, cnt = 0;
@@ -54,7 +54,7 @@ export async function openVoiceShield(onHowl?: (howling: boolean) => void): Prom
     howlTicks = tonal ? howlTicks + 1 : Math.max(0, howlTicks - 1);
     const h = shield && howlTicks >= 6;
     if (h !== howling) { howling = h; onHowl?.(h); }
-    const base = !shield || open > 0 ? 1 : 0.06;
+    const base = !shield || open > 0 ? 1 : (shield ? 0 : 0.06);
     const target = base * (duck ? 0.18 : 1) * (howling ? 0.35 : 1);
     gate.gain.setTargetAtTime(target, ctx.currentTime, open > 0 ? 0.01 : 0.12);
   }, 50);
@@ -68,6 +68,6 @@ export async function openVoiceShield(onHowl?: (howling: boolean) => void): Prom
   const track = dst.stream.getAudioTracks()[0]!;
   return {
     track, raw, setShield, setDuck: (on: boolean) => { duck = on; },
-    stop: () => { clearInterval(tick); raw.getTracks().forEach(t => t.stop()); track.stop(); void ctx.close().catch(() => {}); },
+    stop: () => { clearInterval(tick); clearInterval(wakeT); raw.getTracks().forEach(t => t.stop()); track.stop(); void ctx.close().catch(() => {}); },
   };
 }
