@@ -29,6 +29,51 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_agency_applications: {
+        Row: {
+          city: string | null
+          commitment_usd: number
+          contact: string
+          country: string
+          created_at: string
+          id: string
+          license_no: string | null
+          note: string | null
+          reviewed_at: string | null
+          status: string
+          tier: string
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          commitment_usd: number
+          contact: string
+          country: string
+          created_at?: string
+          id?: string
+          license_no?: string | null
+          note?: string | null
+          reviewed_at?: string | null
+          status?: string
+          tier: string
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          commitment_usd?: number
+          contact?: string
+          country?: string
+          created_at?: string
+          id?: string
+          license_no?: string | null
+          note?: string | null
+          reviewed_at?: string | null
+          status?: string
+          tier?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_allocations: {
         Row: {
           amount_bix: number
@@ -2939,12 +2984,32 @@ export type Database = {
       }
       apply_bix_leader: { Args: never; Returns: undefined }
       assign_bix_referrer: { Args: { p_code: string }; Returns: boolean }
+      bix_agency_apply: {
+        Args: {
+          p_city: string
+          p_contact: string
+          p_country: string
+          p_tier: string
+          p_usd: number
+        }
+        Returns: string
+      }
+      bix_agency_config: { Args: never; Returns: Json }
+      bix_agency_review: {
+        Args: { p_id: string; p_note: string; p_status: string }
+        Returns: Json
+      }
+      bix_agency_save: { Args: { p_config: Json }; Returns: Json }
       bix_arena_admin_config: { Args: never; Returns: Json }
       bix_arena_config: { Args: never; Returns: Json }
       bix_arena_save: { Args: { p_config: Json }; Returns: undefined }
       bix_arena_streak: { Args: { p_user: string }; Returns: number }
       bix_assert_bix_unlocked: {
         Args: { p_amount: number; p_user: string }
+        Returns: undefined
+      }
+      bix_assert_real_stake_funds: {
+        Args: { p_usdt: number; p_user: string }
         Returns: undefined
       }
       bix_asset_balances: {

@@ -12,6 +12,7 @@ import { ProfitSimulator } from '@/components/ProfitSimulator';
 import { PresaleCommission } from '@/components/PresaleCommission';
 import { GenesisCertificate, PresaleStrategies } from '@/components/PresaleStrategies';
 import { SovereignAllocation } from '@/components/SovereignAllocation';
+import { AgencyProgram } from '@/components/AgencyProgram';
 import { WhaleDesk } from '@/components/InstitutionalSuite';
 import { DEFAULT_STRATEGIES, dividendSettled, type PresaleStrategy } from '@/lib/presale-strategy';
 import { number } from '@/lib/bixlink';
@@ -131,6 +132,7 @@ function PresalePage() {
       </section>}
       {(s?.sponsorRewards?.length ?? 0) > 0 && <p className="mt-6 text-xs text-muted-foreground"><Users size={13} className="inline"/> Sponsor rewards: {s?.sponsorRewards?.length} referral purchases, released on the same mining schedule.</p>}
     </>}
+    <AgencyProgram userId={user?.id}/>
     <p className="terminal-disclosure mt-8"><ShieldCheck size={14}/> No guarantee of profit. Presale BIX is an internal ledger allocation, not an on-chain token. Mined-out BIX is shown for tracking and is not spendable until the owner opens settlement. Sponsor bonus goes only to your direct referrer.</p>
     <PresalePurchaseDialog selection={selection} receipt={receipt} balance={Number(s?.balanceUsd ?? 0)} busy={busy !== null} error={purchaseError} onClose={() => { setSelection(null); setReceipt(null); }} onConfirm={confirmBuy} onPortfolio={() => { setReceipt(null); setSelection(null); setTab('portfolio'); }}/>
     {nftPreview !== null && <VaultFacilityDialog kind="presale" principal={nftPreview} days={cfg?.packages.find(x => x.usd === nftPreview)?.releaseDays ?? 180} label={`Presale $${number(nftPreview)}`} onClose={() => setNftPreview(null)}/>}

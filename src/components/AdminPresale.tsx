@@ -10,6 +10,7 @@ const toLocalInput = (iso?: string | null) => { if (!iso) return ''; const d = n
 const fromLocalInput = (v: string) => v ? new Date(v).toISOString() : null;
 import { presaleSettingsSchema } from '@/lib/presale-settings';
 import { DEFAULT_STRATEGIES } from '@/lib/presale-strategy';
+import { AdminAgency } from '@/components/AdminAgency';
 
 export function AdminPresale({ onMessage }: { onMessage: (m: string) => void }) {
   const load = useServerFn(getPresaleStatus); const save = useServerFn(savePresale);
@@ -84,5 +85,6 @@ export function AdminPresale({ onMessage }: { onMessage: (m: string) => void }) 
       } catch (e) { setNotice(e instanceof Error ? e.message : 'Pengaturan gagal disimpan.'); }
       finally { setSaving(false); }
     }}>{saving ? 'Menyimpan…' : 'Save presale'}</Button>
+    <AdminAgency/>
   </section>;
 }
