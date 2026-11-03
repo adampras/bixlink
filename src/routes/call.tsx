@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import { startBixCall } from '@/components/BixCall';
+import { BixGroupMeeting } from '@/components/BixGroupMeeting';
 import { useMember } from '@/lib/useMember';
 import { CommunityTab, NotifyCard } from '@/components/BixCommExtras';
 import { supabase } from '@/integrations/supabase/client';
@@ -94,7 +95,7 @@ function CallInner() {
     <div className="comm-subhead"><b>{TITLE[tab]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
 
     {tab === 'chat' && <ChatTab me={me} tier={tier} onOpen={open}/>}
-    {tab === 'call' && <CallTab me={me} tier={tier} onChat={open}/>}
+    {tab === 'call' && <><BixGroupMeeting me={me} tier={tier}/><CallTab me={me} tier={tier} onChat={open}/></>}
     {tab === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
     {tab === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/></>}
   </main>;
