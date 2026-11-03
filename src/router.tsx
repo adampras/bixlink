@@ -46,7 +46,7 @@ export const getRouter = () => {
     defaultPreloadDelay: 60,
     defaultPreloadStaleTime: 0,
     defaultOnCatch: (err: unknown) => { const error = err as Error;
-      if (typeof window !== "undefined" && /dynamically imported module|Importing a module script failed/.test(error?.message ?? "")) {
+      if (typeof window !== "undefined" && /dynamically imported module|Importing a module script failed|reading '(component|options)'/.test(error?.message ?? "")) {
         const last = Number(sessionStorage.getItem("bix-chunk-reload") || 0);
         if (Date.now() - last < 15000) return;
         sessionStorage.setItem("bix-chunk-reload", String(Date.now()));
