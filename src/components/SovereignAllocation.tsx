@@ -7,14 +7,20 @@ import type { SovereignConfig } from '@/lib/presale';
 import { valueCard } from '@/lib/value-cards';
 
 function SovereignVideo({ usd }: { usd: number }) {
-  const card = valueCard(usd);
-  return card ? <img src={card.url} alt={`${card.name} NFT`} loading="lazy" className="block w-full object-contain"/> : null;
+  void valueCard;
+  return <div className="lux-sov-hero" aria-hidden>
+    <span className="lux-eyebrow">BIXLINK · SOVEREIGN RESERVE</span>
+    <Crown size={40} className="mx-auto mt-4 lux-gold-text"/>
+    <b className="mt-3 block font-display text-lg tracking-[0.2em] lux-gold-text">FOUNDER DEED</b>
+    <span className="mt-1 block text-[10px] tracking-[0.3em] text-muted-foreground">+ BLACK TITANIUM VIP PASS</span>
+    <span className="numeric mt-4 block font-display text-2xl font-black">${number(usd)}</span>
+  </div>;
 }
 
 /** Digital sapphire plaque certificate for a Sovereign holder. */
 export function SovereignPlaque({ serial, slots = 21, strategy, bix, holder }: { serial: number; slots?: number; strategy?: string; bix: number; holder?: string }) {
   const id = `SOV-${String(serial).padStart(2, '0')}/${slots}`;
-  return <figure className="relative overflow-hidden rounded-2xl border border-chart-3/70 bg-gradient-to-br from-card via-background to-card p-5 shadow-[0_0_40px_-14px_var(--chart-3)]">
+  return <figure className="lux-plaque relative overflow-hidden rounded-2xl p-5">
     <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-primary/10 to-transparent"/>
     <div className="relative flex items-center justify-between"><span className="text-[10px] font-bold tracking-[0.3em] text-chart-3">OMEGA GENESIS</span><ShieldCheck size={18} className="text-chart-3"/></div>
     <b className="relative mt-3 block font-display text-xl">Sovereign Founder</b>
@@ -25,7 +31,7 @@ export function SovereignPlaque({ serial, slots = 21, strategy, bix, holder }: {
       <div><dt className="text-muted-foreground">BIX allocation</dt><dd className="numeric font-bold">{number(bix)}</dd></div>
       {holder && <div className="col-span-2"><dt className="text-muted-foreground">Holder</dt><dd className="font-bold">{holder}</dd></div>}
     </dl>
-    <p className="relative mt-3 text-[10px] text-muted-foreground">In-app certificate. Physical sapphire plaque is arranged manually with the team.</p>
+    <p className="relative mt-3 text-[10px] text-muted-foreground">Founder Deed + VIP Pass recorded in-app. Physical sapphire plaque is arranged manually with the team.</p>
   </figure>;
 }
 
@@ -35,7 +41,7 @@ export function SovereignAllocation({ cfg, claimed, settings, open, busy, onBuy 
   const q = strategyQuote(s, cfg.usd, cfg.bix, cfg.releaseDays, st);
   const left = Math.max(0, cfg.slots - claimed);
   const live = open && st.enabled && cfg.enabled && left > 0;
-  return <section className="mt-6 overflow-hidden rounded-2xl border border-chart-3/60 bg-card/70 shadow-[0_0_40px_-12px_var(--chart-3)]">
+  return <section className="lux-sov mt-6 overflow-hidden rounded-3xl">
     <div className="grid md:grid-cols-2">
       <div className="relative">
         <SovereignVideo usd={cfg.usd}/>
@@ -60,12 +66,12 @@ export function SovereignAllocation({ cfg, claimed, settings, open, busy, onBuy 
           <div className="flex justify-between border-b border-border py-2"><dt className="text-muted-foreground">Release</dt><dd className="numeric font-bold">{cfg.releaseDays} days</dd></div>
         </dl>
         <ul className="mt-3 space-y-1 text-[11px] text-muted-foreground">
-          <li>• Sovereign Founder certificate with permanent serial</li>
+          <li>• Sovereign Founder Deed with permanent serial + Black Titanium VIP Pass</li>
           <li>• Physical sapphire acrylic plaque (arranged with the team after purchase)</li>
           <li>• Private concierge contact with the development team</li>
         </ul>
         <div className="mt-4"><SovereignPlaque serial={Math.min(claimed + 1, cfg.slots)} slots={cfg.slots} strategy={s} bix={q.bix}/></div>
-        <Button className="mt-4 w-full rounded-full" disabled={!live || busy} onClick={() => onBuy(cfg.usd, s)}>{left === 0 ? 'All slots claimed' : busy ? 'Processing…' : live ? `Claim Sovereign slot · ${s}` : 'Not open yet'}</Button>
+        <Button className="lux-cta mt-4 w-full rounded-full" disabled={!live || busy} onClick={() => onBuy(cfg.usd, s)}>{left === 0 ? 'All slots claimed' : busy ? 'Processing…' : live ? `Claim Sovereign slot · ${s}` : 'Not open yet'}</Button>
         <p className="mt-2 text-[10px] text-muted-foreground">BIX stays locked and is released over the period. Internal ledger record, not an on-chain token yet. No guarantee of profit.</p>
       </div>
     </div>
