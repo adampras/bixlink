@@ -4,6 +4,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Crown, Landmark, UserPlus, LayoutGrid, Wallet, Trophy } from 'lucide-react';
 import { ChallengeReview } from '@/components/ChallengeReview';
+import { WdMatchingPanel } from '@/components/WdMatchingPanel';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
@@ -43,13 +44,13 @@ function Page() {
   </MemberGate></BixShell>;
 }
 
-type Tab = 'leader' | 'loan' | 'none' | 'packages' | 'hub' | 'withdraw' | 'challenge';
+type Tab = 'leader' | 'loan' | 'none' | 'packages' | 'hub' | 'withdraw' | 'challenge' | 'wdm';
 
 function Control() {
   const [tab, setTab] = useState<Tab>('leader');
   const tabs: { id: Tab; label: string; Icon: typeof Crown }[] = [
     { id: 'leader', label: 'Leader 3×', Icon: Crown }, { id: 'loan', label: 'Loan 5×', Icon: Landmark },
-    { id: 'none', label: 'Belum ambil', Icon: UserPlus }, { id: 'packages', label: 'Paket loan', Icon: Landmark }, { id: 'hub', label: 'Menu HUB', Icon: LayoutGrid }, { id: 'withdraw', label: 'Tarik USDT virtual', Icon: Wallet }, { id: 'challenge', label: 'Challenge 1000', Icon: Trophy },
+    { id: 'none', label: 'Belum ambil', Icon: UserPlus }, { id: 'packages', label: 'Paket loan', Icon: Landmark }, { id: 'hub', label: 'Menu HUB', Icon: LayoutGrid }, { id: 'withdraw', label: 'Tarik USDT virtual', Icon: Wallet }, { id: 'challenge', label: 'Challenge 1000', Icon: Trophy }, { id: 'wdm', label: 'WD Matching', Icon: Wallet },
   ];
   return <>
     <div className="flex gap-2 overflow-x-auto pb-1">{tabs.map(t => <button key={t.id} onClick={() => setTab(t.id)} className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${tab === t.id ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground'}`}><t.Icon size={13}/>{t.label}</button>)}</div>
@@ -59,6 +60,7 @@ function Control() {
     {tab === 'hub' && <HubToggles/>}
     {tab === 'withdraw' && <VusdtWithdraw/>}
     {tab === 'challenge' && <ChallengeReview/>}
+    {tab === 'wdm' && <WdMatchingPanel/>}
   </>;
 }
 

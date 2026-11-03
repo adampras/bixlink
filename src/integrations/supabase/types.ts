@@ -360,6 +360,7 @@ export type Database = {
           require_turnover: boolean
           reviewed_at: string | null
           scope: string
+          sponsored_stake_used: boolean
           status: string
           support_kind: string
           turnover_multiple: number
@@ -376,6 +377,7 @@ export type Database = {
           require_turnover?: boolean
           reviewed_at?: string | null
           scope?: string
+          sponsored_stake_used?: boolean
           status?: string
           support_kind?: string
           turnover_multiple?: number
@@ -392,6 +394,7 @@ export type Database = {
           require_turnover?: boolean
           reviewed_at?: string | null
           scope?: string
+          sponsored_stake_used?: boolean
           status?: string
           support_kind?: string
           turnover_multiple?: number
@@ -1730,6 +1733,39 @@ export type Database = {
           chain_id?: number
           created_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      bix_wd_matching: {
+        Row: {
+          base_usd: number
+          created_at: string
+          id: string
+          member_id: string
+          rate_pct: number
+          upline_id: string
+          usdt_amount: number
+          withdraw_id: string
+        }
+        Insert: {
+          base_usd: number
+          created_at?: string
+          id?: string
+          member_id: string
+          rate_pct: number
+          upline_id: string
+          usdt_amount: number
+          withdraw_id: string
+        }
+        Update: {
+          base_usd?: number
+          created_at?: string
+          id?: string
+          member_id?: string
+          rate_pct?: number
+          upline_id?: string
+          usdt_amount?: number
+          withdraw_id?: string
         }
         Relationships: []
       }
@@ -3465,6 +3501,8 @@ export type Database = {
         Returns: string
       }
       bix_wallet_balance: { Args: { p_user: string }; Returns: number }
+      bix_wd_matching_config: { Args: never; Returns: Json }
+      bix_wd_matching_save: { Args: { p_config: Json }; Returns: Json }
       bix_withdraw_stake_profit: {
         Args: { p_asset: string; p_stake: string }
         Returns: Json
