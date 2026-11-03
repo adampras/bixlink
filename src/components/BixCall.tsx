@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
+import { useRouter } from '@tanstack/react-router';
 import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck, Ear } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck, Ear, Radio, X } from 'lucide-react';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
 import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
@@ -9,7 +10,14 @@ import { ensureBixPush, pushNotify } from '@/lib/bix-push';
 import { startChosenRingtone, startRingback, playConnected, playEnded } from '@/lib/bix-tones';
 
 type Kind = 'voice' | 'video';
-type Active = { id: string; peerId: string; peerName: string; kind: Kind; role: 'caller' | 'callee'; status: string; whatsapp?: string | null };
+/** rang = callee's device acknowledged the call ("Berdering"); offline = no acknowledgement within OFFLINE_MS. */
+type Active = { id: string; peerId: string; peerName: string; kind: Kind; role: 'caller' | 'callee'; status: string; whatsapp?: string | null; rang?: boolean; offline?: boolean };
+/** Caller phases: "Memanggil" until the callee device acks, then "Berdering"; no ack after 25 s means offline. */
+export const OFFLINE_MS = 25000;
+export const RING_TIMEOUT_MS = 40000;
+export function callerPhase(c: { rang?: boolean; offline?: boolean }): 'calling' | 'ringing' | 'offline' {
+  return c.offline ? 'offline' : c.rang ? 'ringing' : 'calling';
+}
 
 /** Start a call from anywhere: dispatches to the global BixCallHost. */
 export function startBixCall(peerId: string, peerName: string, kind: Kind) {
@@ -71,33 +79,40 @@ export function BixCallHost() {
   // Poll incoming + status of active call
   useEffect(() => {
     if (!me) return;
-    let stop = false;
+    let stop = false; let n = 0;
     const tick = async () => {
       const cur = callRef.current;
+      // Mark incoming chat as reached this device (double tick) whenever the app is open.
+      if (n++ % 4 === 0) void supabase.rpc('bix_chat_delivered' as never);
       if (cur) {
-        const { data } = await supabase.from('bix_calls' as never).select('status').eq('id', cur.id).maybeSingle();
-        const st = (data as { status?: string } | null)?.status;
-        if (st && st !== cur.status && !stop) setCall(c => c && c.id === cur.id ? { ...c, status: st } : c);
-        if (cur.role === 'caller' && cur.status === 'ringing' && st === 'ringing') { /* still ringing */ }
+        const { data } = await supabase.from('bix_calls' as never).select('status, rang_at').eq('id', cur.id).maybeSingle();
+        const row = data as { status?: string; rang_at?: string | null } | null;
+        const st = row?.status; const rang = !!row?.rang_at;
+        if (!stop && ((st && st !== cur.status) || (rang && !cur.rang))) {
+          if (rang && !cur.rang && cur.role === 'caller') { try { navigator.vibrate?.(25); } catch { /* optional */ } }
+          setCall(c => c && c.id === cur.id ? { ...c, status: c.offline ? c.status : (st ?? c.status), rang: c.rang || rang } : c);
+        }
       } else {
         const since = new Date(Date.now() - 40000).toISOString();
         const { data } = await supabase.from('bix_calls' as never).select('id, caller_id, kind, status').eq('callee_id', me).eq('status', 'ringing').gte('created_at', since).order('created_at', { ascending: false }).limit(1);
         const row = (data as { id: string; caller_id: string; kind: Kind }[] | null)?.[0];
         if (row && !stop) {
+          // Acknowledge: caller switches from "Memanggil" to "Berdering".
+          void supabase.rpc('bix_call_ring' as never, { p_id: row.id } as never);
           const peer = await supabase.rpc('bix_call_peer' as never, { p_user: row.caller_id } as never);
           const p = peer.data as { name?: string; whatsapp?: string } | null;
-          setCall({ id: row.id, peerId: row.caller_id, peerName: p?.name ?? 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: p?.whatsapp ?? null });
+          setCall({ id: row.id, peerId: row.caller_id, peerName: p?.name ?? 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: p?.whatsapp ?? null, rang: true });
           try { navigator.vibrate?.([300, 200, 300]); } catch { /* unsupported */ }
           sysNotify(`📞 BIXCALL · ${row.kind === 'video' ? 'Video call' : 'Panggilan suara'} masuk`, `@${p?.name ?? 'Member'} memanggil Anda`, `call-${row.id}`, true);
         }
       }
       // Chat alerts while the app is in the background
       if (document.hidden) {
-        const { data: msgs } = await supabase.from('bix_chat_messages' as never).select('id, sender_id, body, created_at').eq('recipient_id', me).is('read_at', null).gt('created_at', lastChat.current).order('created_at', { ascending: true }).limit(5);
+        const { data: msgs } = await supabase.from('bix_messages' as never).select('id, sender_id, body, created_at').eq('recipient_id', me).is('read_at', null).gt('created_at', lastChat.current).order('created_at', { ascending: true }).limit(5);
         for (const m of (msgs as { id: string; sender_id: string; body: string; created_at: string }[] | null) ?? []) {
           lastChat.current = m.created_at;
           const peer = await supabase.rpc('bix_call_peer' as never, { p_user: m.sender_id } as never);
-          sysNotify(`💬 BIX COMM · @${(peer.data as { name?: string } | null)?.name ?? 'Member'}`, m.body.slice(0, 120), `chat-${m.sender_id}`, false, `/call?chat=${m.sender_id}`);
+          sysNotify(`💬 BIX COMM · @${(peer.data as { name?: string } | null)?.name ?? 'Member'}`, (m.body ?? '').slice(0, 120), `chat-${m.sender_id}`, false, `/call?chat=${m.sender_id}`);
         }
       } else lastChat.current = new Date().toISOString();
     };
@@ -106,19 +121,21 @@ export function BixCallHost() {
     return () => { stop = true; clearInterval(t); };
   }, [me]);
 
-  // Caller timeout after 40s ringing
+  // Caller: no device ack after 25 s → offline screen; ringing but unanswered after 40 s → end.
   useEffect(() => {
-    if (!call || call.role !== 'caller' || call.status !== 'ringing') return;
-    const t = setTimeout(() => void setStatus('ended'), 40000);
+    if (!call || call.role !== 'caller' || call.status !== 'ringing' || call.offline) return;
+    const t = call.rang
+      ? setTimeout(() => void setStatus('ended'), RING_TIMEOUT_MS)
+      : setTimeout(() => { setCall(c => c ? { ...c, offline: true } : c); void setStatus('ended'); }, OFFLINE_MS);
     return () => clearTimeout(t);
-  }, [call?.id, call?.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [call?.id, call?.status, call?.rang, call?.offline]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-close finished calls
+  // Auto-close finished calls (the offline screen stays until the caller closes it)
   useEffect(() => {
-    if (!call || !['ended', 'declined', 'missed'].includes(call.status)) return;
+    if (!call || call.offline || !['ended', 'declined', 'missed'].includes(call.status)) return;
     const t = setTimeout(() => setCall(null), 2200);
     return () => clearTimeout(t);
-  }, [call?.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [call?.status, call?.offline]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setStatus = async (s: 'accepted' | 'declined' | 'ended') => {
     const cur = callRef.current; if (!cur) return;
@@ -128,11 +145,12 @@ export function BixCallHost() {
 
   return <>
     {err && <div className="bixcall-toast" role="alert">{err}</div>}
-    {call && <CallScreen call={call} onAccept={() => void setStatus('accepted')} onDecline={() => void setStatus('declined')} onEnd={() => void setStatus('ended')}/>}
+    {call && <CallScreen call={call} onAccept={() => void setStatus('accepted')} onDecline={() => void setStatus('declined')} onEnd={() => void setStatus('ended')} onClose={() => setCall(null)}/>}
   </>;
 }
 
-function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAccept: () => void; onDecline: () => void; onEnd: () => void }) {
+function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Active; onAccept: () => void; onDecline: () => void; onEnd: () => void; onClose: () => void }) {
+  const router = useRouter();
   const remoteV = useRef<HTMLVideoElement>(null);
   const backV = useRef<HTMLVideoElement>(null);
   const localV = useRef<HTMLVideoElement>(null);
@@ -154,33 +172,48 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
   const [shield, setShield] = useState(true);
   const shieldRef = useRef(true);
   const ringing = !live && !done;
+  const phase = callerPhase(call);
   const [quality, setQuality] = useState<'excellent' | 'good' | 'poor' | 'unknown'>('unknown');
   const [level, setLevel] = useState(0);
   const [ear, setEar] = useState(false);
+  const [near, setNear] = useState(false);
+  const nearRef = useRef(false);
+  const [howl, setHowl] = useState(false);
+  const howlRef = useRef(false);
   const [replyOpen, setReplyOpen] = useState(false);
   const quickReply = async (text: string) => {
     setReplyOpen(false);
     await supabase.rpc('bix_chat_send' as never, { p_to: call.peerId, p_body: text, p_reply: null } as never);
     onDecline();
   };
-  // Remote voice level for the live waveform (cheap 150ms poll, paused in ear mode).
+  /** Remote speaker volume: lower with the shield, lower again while a howl is detected. */
+  const applyVolume = () => {
+    const base = shieldRef.current ? 0.7 : 0.9;
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = howlRef.current ? base * 0.75 : base; });
+  };
+  // Remote voice level: drives the waveform and the "Ruang Dekat" half-duplex duck.
   useEffect(() => {
-    if (link !== 'on' || ear) return;
+    if (link !== 'on') return;
+    let hang = 0;
     const t = setInterval(() => {
       const r = roomRef.current; if (!r) return;
       let m = 0; r.remoteParticipants.forEach(p => { m = Math.max(m, p.audioLevel ?? 0); });
-      setLevel(m);
+      if (!ear) setLevel(m);
+      if (m > 0.04) hang = 4; else if (hang > 0) hang--;
+      voiceRef.current?.setDuck(nearRef.current && hang > 0);
     }, 150);
     return () => clearInterval(t);
   }, [link, ear]);
+  // Callee rings at once; caller hears the ringback only after the callee device acknowledges ("Berdering").
   useEffect(() => {
     if (!ringing || ringMuted) return;
+    if (call.role === 'caller' && phase !== 'ringing') return;
     const stop = call.role === 'callee' ? startChosenRingtone() : startRingback();
     const vib = call.role === 'callee' ? setInterval(() => { try { navigator.vibrate?.([400, 200, 400]); } catch { /* unsupported */ } }, 2600) : undefined;
     return () => { stop(); if (vib) clearInterval(vib); try { navigator.vibrate?.(0); } catch { /* unsupported */ } };
-  }, [ringing, ringMuted, call.role]);
+  }, [ringing, ringMuted, call.role, phase]);
   useEffect(() => { if (link === 'on') playConnected(); }, [link]);
-  useEffect(() => { if (done) playEnded(); }, [done]);
+  useEffect(() => { if (done && !call.offline) playEnded(); }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Join room when accepted (caller joins as soon as callee accepts)
   useEffect(() => {
@@ -195,7 +228,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
         roomRef.current = room;
         room.on(RoomEvent.TrackSubscribed, (t: RemoteTrack) => {
           if (t.kind === Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); if (backV.current) t.attach(backV.current); setRemoteVideo(true); }
-          if (t.kind === Track.Kind.Audio && audioBox.current) { audioBox.current.querySelectorAll('audio').forEach(a => a.remove()); const el = t.attach() as HTMLAudioElement; el.volume = shieldRef.current ? 0.7 : 0.9; audioBox.current.appendChild(el); void el.play().catch(() => {}); }
+          if (t.kind === Track.Kind.Audio && audioBox.current) { audioBox.current.querySelectorAll('audio').forEach(a => a.remove()); const el = t.attach() as HTMLAudioElement; audioBox.current.appendChild(el); applyVolume(); void el.play().catch(() => {}); }
         });
         room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach(); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
         room.on(RoomEvent.ParticipantDisconnected, () => onEnd());
@@ -203,7 +236,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
         await room.connect(res.url, res.token);
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         try {
-          const vs = await openVoiceShield(); if (cancelled) { vs.stop(); return; }
+          const vs = await openVoiceShield(h => { howlRef.current = h; setHowl(h); applyVolume(); }); if (cancelled) { vs.stop(); return; }
           voiceRef.current = vs;
           await room.localParticipant.publishTrack(vs.track, { source: Track.Source.Microphone, dtx: true, red: true, audioPreset: { maxBitrate: 40000 } });
         } catch {
@@ -246,8 +279,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
   const speaker = () => { audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = shieldRef.current ? 0.85 : 1; void a.play().catch(() => {}); }); };
   const toggleShield = () => {
     const n = !shield; setShield(n); shieldRef.current = n; voiceRef.current?.setShield(n);
-    audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = n ? 0.7 : 0.9; });
+    if (!n) { howlRef.current = false; setHowl(false); }
+    applyVolume();
   };
+  const toggleNear = () => { const n = !near; setNear(n); nearRef.current = n; if (!n) voiceRef.current?.setDuck(false); };
+  const openChat = () => { onClose(); void router.navigate({ to: '/call', search: { chat: call.peerId } as never }); };
 
   const dragPip = (e: React.PointerEvent) => {
     const sx = e.clientX - pip.x, sy = e.clientY - pip.y;
@@ -256,9 +292,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
     window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
   };
 
-  const statusText = done ? (call.status === 'declined' ? 'Panggilan ditolak' : call.status === 'missed' ? 'Tidak terjawab' : 'Panggilan berakhir')
+  const statusText = call.offline ? 'Member sedang offline'
+    : done ? (call.status === 'declined' ? 'Panggilan ditolak' : call.status === 'missed' ? 'Tidak terjawab' : 'Panggilan berakhir')
     : live ? (link === 'on' ? fmt(secs) : link === 'fail' ? 'Gagal tersambung' : 'Menyambungkan…')
-    : call.role === 'caller' ? 'Memanggil…' : call.kind === 'video' ? 'Panggilan video masuk' : 'Panggilan suara masuk';
+    : call.role === 'caller' ? (phase === 'ringing' ? 'Berdering…' : 'Memanggil…') : call.kind === 'video' ? 'Panggilan video masuk' : 'Panggilan suara masuk';
+  const dot = link === 'on' ? 'ok' : call.offline ? 'off' : ringing && call.role === 'caller' ? (phase === 'ringing' ? 'ring' : 'calling') : ringing ? 'ring' : '';
   const wa = call.whatsapp?.replace(/[^0-9]/g, '');
 
   const showVideo = remoteVideo && call.kind === 'video';
@@ -270,18 +308,23 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
     {ear && live && <div className="bc-ear" role="button" tabIndex={0} aria-label="Ketuk dua kali untuk menyalakan layar" onDoubleClick={() => setEar(false)} onKeyDown={e => { if (e.key === 'Enter') setEar(false); }}><span>{fmt(secs)}</span><small>Mode telinga aktif · ketuk dua kali untuk kembali</small></div>}
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
-      <span>{live && link === 'on' ? `BIX ${call.kind === 'video' ? 'HD VIDEO' : 'HD VOICE'} • 48 kHz • ENCRYPTED` : '✨ BIX CALL • ENCRYPTED SECURE CALL ✨'}</span>
+      <span>{live && link === 'on' ? `SOVEREIGN ENCRYPTED • 48 kHz ${call.kind === 'video' ? 'HD VIDEO' : 'HD VOICE'}` : 'BIX CALL • SOVEREIGN ENCRYPTED'}</span>
       {live && link === 'on' && <em className={`bc-q is-${quality}`} aria-label={`Kualitas jaringan: ${quality === 'excellent' ? 'sangat baik' : quality === 'good' ? 'baik' : quality === 'poor' ? 'lemah' : 'mengukur'}`}><i/><i/><i/></em>}
     </header>
     {!(remoteVideo && call.kind === 'video') && <div className="bixcall-center">
-      <div className={`bixcall-av${live && link === 'on' ? ' talking' : ''}${!live && !done ? ' ringing' : ''}`}><b>{call.peerName.slice(0, 1).toUpperCase()}</b></div>
+      <div className={`bixcall-av is-${call.offline ? 'offline' : live && link === 'on' ? 'talking' : ringing ? (call.role === 'caller' ? phase : 'ringing') : 'idle'}`} style={live && link === 'on' ? { ['--lvl' as string]: Math.min(1, level * 3) } : undefined}>
+        <span className="bixcall-av-ring" aria-hidden="true"/><span className="bixcall-av-ring r2" aria-hidden="true"/>
+        <b>{call.peerName.slice(0, 1).toUpperCase()}</b>
+      </div>
       <h2>@{call.peerName}</h2>
-      <p>{call.kind === 'video' ? '📹 Video Call' : '📞 Voice Call'}</p>
+      <p>{call.kind === 'video' ? 'Video Call' : 'Voice Call'} · BIX CALL</p>
       {live && link === 'on' && <div className="bc-wave" aria-hidden="true">{[0.5, 0.8, 1, 0.7, 0.9, 0.6, 1, 0.75, 0.55].map((k, i) => <i key={i} style={{ transform: `scaleY(${0.12 + Math.min(1, level * 3) * k})` }}/>)}</div>}
+      {call.offline && <div className="bc-offline" role="status"><b>Member belum aktif di BIXLINK</b><small>Panggilan tidak sampai ke perangkatnya. Kirim pesan agar dibaca saat ia kembali online.</small></div>}
     </div>}
-    <div className="bixcall-status"><i className={link === 'on' ? 'ok' : ''}/>{statusText}</div>
+    <div className="bixcall-status"><i className={dot}/>{statusText}</div>
+    {howl && live && <div className="bc-howl" role="status">Pantulan suara diredam otomatis</div>}
     {call.kind === 'video' && live && <video ref={localV} className="bixcall-pip" style={{ transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={dragPip} autoPlay playsInline muted/>}
-    <footer className="bixcall-ctl">
+    <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}`}>
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Maaf, sedang sibuk. Nanti saya hubungi kembali.', 'Sedang rapat, kirim pesan saja ya.', 'Saya telepon balik 5 menit lagi.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
@@ -299,9 +342,14 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
         <button aria-label="Speaker" onClick={speaker}><Volume2/></button>
         {call.kind === 'voice' && <button aria-label="Mode telinga (layar gelap)" onClick={() => setEar(true)}><Ear/></button>}
         <button aria-label={shield ? 'Perisai anti-storing aktif' : 'Aktifkan perisai anti-storing'} className={shield ? 'shield' : ''} onClick={toggleShield}><ShieldCheck/></button>
+        <button aria-label={near ? 'Ruang Dekat aktif' : 'Aktifkan Ruang Dekat (HP berdekatan)'} aria-pressed={near} className={near ? 'shield' : ''} onClick={toggleNear}><Radio/></button>
         <button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button>
       </>}
-      {done && wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
+      {call.offline ? <>
+        <button type="button" className="bc-pill is-chat" onClick={openChat}><MessageCircle size={16}/> Kirim Pesan BIX CHAT</button>
+        {wa && <a className="bc-pill is-wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer"><Phone size={16}/> Hubungi WhatsApp</a>}
+        <button type="button" className="bc-pill is-close" onClick={onClose}><X size={16}/> Tutup</button>
+      </> : done && wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
     </footer>
   </div>;
 }

@@ -5788,3 +5788,50 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .arb-status { display:flex; align-items:center; gap:8px; margin-top:10px; padding:9px 12px; border-radius:12px; font-size:12px; border:1px solid color-mix(in oklab, var(--chart-2) 35%, transparent); background:color-mix(in oklab, var(--chart-2) 8%, var(--card)); }
 .arb-status i { width:8px; height:8px; border-radius:50%; background:var(--chart-2); box-shadow:0 0 10px var(--chart-2); animation:arb-blink 1.2s infinite; flex:none; }
 @media (prefers-reduced-motion: reduce) { .bot3d-grid, .bot3d-net i, .bot3d-orbit { animation:none !important; } }
+
+/* ===== BIX CALL lux pass: call phases, dual-ring avatar, obsidian dock, receipts ===== */
+.bixcall{background:radial-gradient(110% 60% at 50% 18%,rgb(168 85 247 / .28),transparent 62%),radial-gradient(80% 45% at 50% 105%,rgb(255 215 0 / .12),transparent 70%),linear-gradient(180deg,#07060c,#030207)}
+.bixcall-head{background:linear-gradient(135deg,rgb(14 12 22 / .82),rgb(6 5 10 / .82));border:1px solid rgb(255 215 0 / .38);box-shadow:inset 0 1px 0 rgb(255 255 255 / .06),0 8px 24px rgb(0 0 0 / .45),0 0 18px rgb(168 85 247 / .22)}
+.bixcall-head span{letter-spacing:.14em;background:linear-gradient(90deg,#fff3c4,#FFD700 45%,#c9a227);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bixcall-av{position:relative;width:132px;height:132px;border:2px solid rgb(255 215 0 / .85);background:radial-gradient(circle at 32% 28%,#2a1a44,#0b0812 70%);box-shadow:inset 0 2px 10px rgb(255 255 255 / .08),0 0 0 6px rgb(30 30 40 / .9),0 0 0 7px rgb(200 205 220 / .25),0 0 42px rgb(255 215 0 / .22);animation:none}
+.bixcall-av b{position:relative;z-index:1;background:linear-gradient(180deg,#fff6cf,#FFD700 55%,#b8860b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bixcall-av-ring{position:absolute;inset:-14px;border-radius:50%;border:1.5px solid rgb(168 85 247 / .55);opacity:0;pointer-events:none}
+.bixcall-av-ring.r2{inset:-28px;border-color:rgb(255 215 0 / .35)}
+.bixcall-av.is-calling .bixcall-av-ring{border-color:rgb(255 215 0 / .6);animation:bcRadar 2.2s ease-out infinite}
+.bixcall-av.is-calling .bixcall-av-ring.r2{animation-delay:1.1s}
+.bixcall-av.is-ringing .bixcall-av-ring{border-color:rgb(16 185 129 / .75);animation:bcRadar 1.3s ease-out infinite}
+.bixcall-av.is-ringing .bixcall-av-ring.r2{border-color:rgb(16 185 129 / .45);animation-delay:.65s}
+.bixcall-av.is-ringing{border-color:#10b981;box-shadow:inset 0 2px 10px rgb(255 255 255 / .08),0 0 0 6px rgb(30 30 40 / .9),0 0 0 7px rgb(16 185 129 / .35),0 0 42px rgb(16 185 129 / .3)}
+.bixcall-av.is-talking .bixcall-av-ring{opacity:calc(.25 + var(--lvl,0) * .75);transform:scale(calc(1 + var(--lvl,0) * .12));transition:transform .15s,opacity .15s}
+.bixcall-av.is-offline{filter:grayscale(.85);opacity:.75;border-color:rgb(148 163 184 / .6)}
+@keyframes bcRadar{0%{opacity:.9;transform:scale(.85)}100%{opacity:0;transform:scale(1.35)}}
+.bixcall-center p{letter-spacing:.16em;text-transform:uppercase;font-size:10px;font-weight:700;color:rgb(226 232 240 / .7)}
+.bixcall-status{background:linear-gradient(135deg,rgb(16 14 24 / .8),rgb(6 5 10 / .8));border:1px solid rgb(255 255 255 / .1);letter-spacing:.04em}
+.bixcall-status i.calling{background:#FFD700;box-shadow:0 0 10px #FFD700;animation:bcBlink 1s steps(2,start) infinite}
+.bixcall-status i.ring{background:#10b981;box-shadow:0 0 10px #10b981;animation:bcBlink 1.4s ease-in-out infinite}
+.bixcall-status i.off{background:#94a3b8;box-shadow:none}
+@keyframes bcBlink{50%{opacity:.25}}
+.bc-offline{margin:16px auto 0;max-width:290px;padding:12px 14px;border-radius:16px;background:linear-gradient(160deg,rgb(24 24 32 / .85),rgb(10 10 16 / .85));border:1px solid rgb(148 163 184 / .3);display:grid;gap:4px}
+.bc-offline b{font-size:13px;color:#e2e8f0}.bc-offline small{font-size:11px;line-height:1.4;color:rgb(203 213 225 / .75)}
+.bc-howl{position:relative;z-index:3;margin-top:8px;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.06em;color:#FFD700;background:rgb(255 215 0 / .1);border:1px solid rgb(255 215 0 / .35)}
+.bixcall-ctl{background:linear-gradient(180deg,rgb(22 20 30 / .85),rgb(6 5 10 / .9));border:1px solid rgb(255 215 0 / .22);box-shadow:inset 0 1px 0 rgb(255 255 255 / .07),0 16px 40px rgb(0 0 0 / .55),0 0 24px rgb(168 85 247 / .16)}
+.bixcall-ctl>button,.bixcall-ctl>a{background:linear-gradient(160deg,rgb(48 46 58 / .9),rgb(16 15 22 / .95));border:1px solid rgb(210 214 226 / .2);box-shadow:inset 0 1px 0 rgb(255 255 255 / .1),0 4px 10px rgb(0 0 0 / .4)}
+.bixcall-ctl>.off{background:linear-gradient(160deg,#f1f5f9,#cbd5e1);color:#0b0812}
+.bixcall-ctl>.end{background:radial-gradient(circle at 35% 30%,#ef4444,#7f1d1d 75%);border:1.5px solid #FFD700;box-shadow:0 0 16px rgb(239 68 68 / .45),inset 0 1px 0 rgb(255 255 255 / .2)}
+.bixcall-ctl.is-offline{flex-direction:column;gap:8px;width:min(320px,92vw);padding:12px}
+.bixcall-ctl>.bc-pill{width:100%;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:800;letter-spacing:.02em}
+.bixcall-ctl>.bc-pill.is-chat{background:linear-gradient(135deg,#7e3fe0,#3b1f6e);border-color:rgb(255 215 0 / .55);color:#fff}
+.bixcall-ctl>.bc-pill.is-wa{background:linear-gradient(135deg,#16a34a,#065f46);color:#fff}
+.bixcall-ctl>.bc-pill.is-close{background:transparent;color:rgb(226 232 240 / .8)}
+/* Chat receipts: ✓ titanium = on server (offline) · ✓✓ silver = reached device · ✓✓ gold = read */
+.comm-tick{font-weight:900;letter-spacing:-.12em;text-shadow:none}
+.comm-tick.is-sent{color:#94a3b8;opacity:.65}
+.comm-tick.is-delivered{color:#e2e8f0;opacity:.9}
+.comm-tick.is-read{color:#FFD700;opacity:1;text-shadow:0 0 6px rgb(255 215 0 / .65)}
+/* Call history badges */
+.comm-dir.is-in{color:#10b981}.comm-dir.is-out{color:#FFD700}.comm-dir.is-miss{color:#f43f5e}
+.comm-hbadge{display:inline-block;margin-right:4px;padding:0 6px;border-radius:999px;font-style:normal;font-size:9px;font-weight:800;letter-spacing:.05em;border:1px solid currentColor}
+.comm-hbadge.is-in{color:#10b981;background:rgb(16 185 129 / .1)}
+.comm-hbadge.is-out{color:#FFD700;background:rgb(255 215 0 / .08)}
+.comm-hbadge.is-miss{color:#f43f5e;background:rgb(244 63 94 / .1)}
+@media (prefers-reduced-motion:reduce){.bixcall-av-ring,.bixcall-status i{animation:none!important}}
