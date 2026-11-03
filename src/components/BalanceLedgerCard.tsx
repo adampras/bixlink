@@ -58,5 +58,5 @@ export function BalanceLedgerCard({ hidden }: { hidden?: boolean }) {
         <div className="text-right"><b className="numeric">{m(r.usdt)}</b><span className="numeric">{b(r.bix)}</span><i>{r.real ? 'Available' : 'Escrow · sponsored'}</i></div>
       </li>)}</ul> : <p className="ledger-empty">No {tab === 'real' ? 'real' : 'sponsored'} bonus yet.</p>}
     </details>
-  </section>;
+  </details>;
 }
