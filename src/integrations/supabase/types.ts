@@ -1398,6 +1398,65 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_stories: {
+        Row: {
+          bg: string
+          caption: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          kind: string
+          media_path: string | null
+          user_id: string
+        }
+        Insert: {
+          bg?: string
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          kind?: string
+          media_path?: string | null
+          user_id: string
+        }
+        Update: {
+          bg?: string
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          kind?: string
+          media_path?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bix_story_views: {
+        Row: {
+          story_id: string
+          viewed_at: string
+          viewer_id: string
+        }
+        Insert: {
+          story_id: string
+          viewed_at?: string
+          viewer_id: string
+        }
+        Update: {
+          story_id?: string
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_story_views_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "bix_stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bix_studio_config: {
         Row: {
           costs: Json
@@ -2759,27 +2818,36 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_path: string | null
           call_permission: string
           created_at: string
           full_name: string
+          status_text: string | null
+          status_updated_at: string | null
           user_id: string
           username: string
           whatsapp: string | null
           whatsapp_public: boolean
         }
         Insert: {
+          avatar_path?: string | null
           call_permission?: string
           created_at?: string
           full_name: string
+          status_text?: string | null
+          status_updated_at?: string | null
           user_id: string
           username: string
           whatsapp?: string | null
           whatsapp_public?: boolean
         }
         Update: {
+          avatar_path?: string | null
           call_permission?: string
           created_at?: string
           full_name?: string
+          status_text?: string | null
+          status_updated_at?: string | null
           user_id?: string
           username?: string
           whatsapp?: string | null
@@ -3399,6 +3467,10 @@ export type Database = {
       bix_presale_paid: { Args: { p_user: string }; Returns: number }
       bix_presale_save: { Args: { p_config: Json }; Returns: Json }
       bix_presale_status: { Args: never; Returns: Json }
+      bix_profile_card: { Args: { p_user: string }; Returns: Json }
+      bix_profile_me: { Args: never; Returns: Json }
+      bix_profile_set_avatar: { Args: { p_path: string }; Returns: undefined }
+      bix_profile_set_status: { Args: { p_status: string }; Returns: undefined }
       bix_profit_claimed: {
         Args: never
         Returns: {
@@ -3492,6 +3564,24 @@ export type Database = {
         Args: { p_codes: string[]; p_enabled: boolean }
         Returns: Json
       }
+      bix_story_can_view: {
+        Args: { p_author: string; p_viewer: string }
+        Returns: boolean
+      }
+      bix_story_can_view_path: { Args: { p_name: string }; Returns: boolean }
+      bix_story_delete: { Args: { p_id: string }; Returns: string }
+      bix_story_feed: { Args: never; Returns: Json }
+      bix_story_mark_view: { Args: { p_id: string }; Returns: undefined }
+      bix_story_post: {
+        Args: {
+          p_bg: string
+          p_caption: string
+          p_kind: string
+          p_path: string
+        }
+        Returns: string
+      }
+      bix_story_viewers: { Args: { p_id: string }; Returns: Json }
       bix_studio_grant: {
         Args: {
           p_code: string

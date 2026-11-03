@@ -24,6 +24,7 @@ import { hasVerifiedEmail, isWalletOnlyAccount } from '@/lib/wallet-login';
 import { WalletAccountDetails } from '@/components/WalletAccountDetails';
 import { InstallAppButton } from '@/components/InstallPrompt';
 import { SovereignWalletSwitch } from '@/components/SovereignWalletSwitch';
+import { ProfilePhotoHeader } from '@/components/ProfilePhotoEditor';
 
 export const Route = createFileRoute('/profile')({ head: () => ({ meta: [{ title: 'Profile — BIXLINK' }, { name: 'description', content: 'Your BIXLINK account, referral code and network.' }, { property: 'og:title', content: 'Profile — BIXLINK' }, { property: 'og:description', content: 'Manage your BIXLINK member profile.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: ProfilePage });
 
@@ -59,7 +60,7 @@ function ProfilePage() {
   useEffect(() => { if (data && !data.referral?.code && !autoMade.current) { autoMade.current = true; void makeCode().then(() => qc.invalidateQueries({ queryKey: ['my-bixlink'] })).catch(() => {}); } }, [data, makeCode, qc]);
   return <BixShell><main className="profile-page mx-auto max-w-3xl px-5 py-8 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="PROFILE">
-      <header className="profile-identity"><div className="profile-avatar"><img src={headerMark.url} alt="BIXLINK member emblem"/></div><div className="min-w-0"><div className="eyebrow">{walletOnly ? 'WALLET MEMBER' : 'MEMBER ACCOUNT'}</div><h1 className="break-all">{accountLabel}</h1><p>Active since {user && formatDate(user.created_at)}</p>{badges.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{badges.map(({ Icon, label, cls }) => <span key={label} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${cls}`}><Icon size={11}/>{label}</span>)}</div>}</div></header>
+      <ProfilePhotoHeader fallback={headerMark.url}><div className="eyebrow">{walletOnly ? 'WALLET MEMBER' : 'MEMBER ACCOUNT'}</div><h1 className="break-all">{accountLabel}</h1><p>Active since {user && formatDate(user.created_at)}</p>{badges.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{badges.map(({ Icon, label, cls }) => <span key={label} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${cls}`}><Icon size={11}/>{label}</span>)}</div>}</ProfilePhotoHeader>
       {walletOnly && <WalletAccountDetails/>}
       <section className="profile-referral">
         <div className="profile-section-head"><h2>Referral code</h2>{data?.referral?.code && <span><Check size={11}/> Active</span>}</div>

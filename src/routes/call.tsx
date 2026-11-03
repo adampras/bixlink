@@ -9,6 +9,8 @@ import { useMember } from '@/lib/useMember';
 import { CommunityTab, NotifyCard } from '@/components/BixCommExtras';
 import { supabase } from '@/integrations/supabase/client';
 import { BixShell } from '@/components/BixShell';
+import { BixAvatar, useBixCard } from '@/components/BixAvatar';
+import { StoryBar } from '@/components/BixStories';
 import { pushNotify } from '@/lib/bix-push';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
 
@@ -26,7 +28,7 @@ export const Route = createFileRoute('/call')({
 type CommTab = 'chat' | 'call' | 'community' | 'setting';
 type CallSearch = { tab?: CommTab; chat?: string; n?: string };
 
-type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call: boolean };
+type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call: boolean; avatar_path?: string | null; status_text?: string | null };
 type Row = { id: string; caller_id: string; callee_id: string; kind: string; status: string; created_at: string };
 type Tier = { stake: number; chat: boolean; voice: boolean; video: boolean; vip: boolean; tier: string; chat_enabled: boolean; min: { chat: number; voice: number; video: number; vip: number } };
 type Thread = { peer: string; name: string; body: string; at: string; mine: boolean; unread: number; online?: boolean };
@@ -125,8 +127,8 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
     {(!bar || q) && <div className="comm-chips"><span>BIX-ID</span><span>@Username</span><span>No. WA</span>
       {recent.map(r => <button key={r} onClick={() => void find(r)}>↺ {r}</button>)}</div>}
     {found === null && <p className="mt-2 text-xs text-muted-foreground">Member tidak ditemukan. Nomor WA hanya bisa dilacak jika pemiliknya mengaktifkan tombol WhatsApp.</p>}
-    {found && <div className="comm-peer"><span className="comm-ava">{found.name.slice(0, 1).toUpperCase()}</span>
-      <span className="min-w-0 flex-1"><b className="block truncate">@{found.name}</b>
+    {found && <div className="comm-peer"><BixAvatar userId={found.user_id} name={found.name}/>
+      <span className="min-w-0 flex-1"><b className="block truncate">@{found.name}</b>{found.status_text && <em className="comm-statusline">{found.status_text}</em>}
         <span className="comm-meta">{found.code && <button onClick={() => copy(found.code!)}>{found.code} ⧉</button>}{found.whatsapp && <i>WA terhubung</i>}{found.via && <small>via {VIA[found.via]}</small>}</span></span>
       {found.user_id === me ? <small>Akun Anda</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
   </section>;
@@ -155,9 +157,10 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
   }, []);
   return <>
     {tier && !tier.chat && <p className="comm-lock"><Lock size={13}/>{tier.chat_enabled ? `BIX CHAT terbuka mulai staking $${tier.min.chat}.` : 'BIX CHAT sedang ditutup Admin.'}</p>}
+    <StoryBar me={me} myName="Saya"/>
     <section className="comm-card"><h3 className="comm-h">Percakapan</h3>
       {threads === null ? <p className="text-xs text-muted-foreground">Memuat…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada chat. Cari member di atas untuk mulai mengobrol.</p> :
-        <ul className="comm-list">{threads.map(t => <li key={t.peer}><button onClick={() => onOpen(t.peer, t.name)}><span className={`comm-ava${t.online ? ' is-online' : ''}`}>{t.name.slice(0, 1).toUpperCase()}</span>
+        <ul className="comm-list">{threads.map(t => <li key={t.peer}><button onClick={() => onOpen(t.peer, t.name)}><BixAvatar userId={t.peer} name={t.name} online={t.online}/>
           <span className="min-w-0 flex-1 text-left"><b className="block truncate text-sm">@{t.name}</b><small className="block truncate text-muted-foreground">{t.mine ? 'Anda: ' : ''}{t.body}</small></span>
           <span className="text-right"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></button></li>)}</ul>}
     </section>
@@ -202,7 +205,7 @@ function Dialpad({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
     <div className="comm-dial-pad">{PAD.map(k => <button key={k} type="button" onClick={() => press(k)}><b>{k}</b><small>{SUB[k] ?? ''}</small></button>)}</div>
     <button type="button" className="comm-dial-go" onClick={() => void find()} disabled={busy || num.trim().length < 3}><Phone size={18}/>{busy ? 'Mencari…' : 'Cari & hubungi'}</button>
     {found === null && <p className="mt-2 text-center text-xs text-muted-foreground">Member tidak ditemukan.</p>}
-    {found && <div className="comm-peer"><span className="comm-ava">{found.name.slice(0, 1).toUpperCase()}</span><b className="min-w-0 flex-1 truncate">@{found.name}</b>
+    {found && <div className="comm-peer"><BixAvatar userId={found.user_id} name={found.name}/><b className="min-w-0 flex-1 truncate">@{found.name}</b>
       {found.user_id === me ? <small>Akun Anda</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
   </section>;
 }
@@ -289,6 +292,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   const end = useRef<HTMLDivElement>(null);
   const typingAt = useRef(0);
   const locked = !!tier && !tier.chat;
+  const peerCard = useBixCard(peer.id);
 
   const sync = async (typing: boolean) => {
     const { data } = await supabase.rpc('bix_chat_sync' as never, { p_peer: peer.id, p_typing: typing } as never);
@@ -450,8 +454,8 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   return <main className="comm-room mx-auto max-w-xl">
     <header className="comm-room-head">
       <button onClick={onBack} aria-label="Kembali"><ArrowLeft size={18}/></button>
-      <span className={`comm-ava${state.online ? ' is-online' : ''}`}>{name.slice(0, 1).toUpperCase()}</span>
-      <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small></span>
+      <BixAvatar userId={peer.id} name={name} online={state.online}/>
+      <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small>{peerCard?.status_text && <em className="comm-statusline">{peerCard.status_text}</em>}</span>
       <ActionButtons peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>
     </header>
     {pinned && <button type="button" className="comm-pinbar" onClick={() => jump(pinned.id)}><b>📌 Disematkan</b><span>{pinned.body}</span></button>}

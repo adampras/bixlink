@@ -8,6 +8,14 @@ import { getBixCallToken } from '@/lib/bix-call.functions';
 import foxLogo from '@/assets/bixlink-logo-gold.webp';
 import { ensureBixPush, pushNotify } from '@/lib/bix-push';
 import { startChosenRingtone, startRingback, playConnected, playEnded } from '@/lib/bix-tones';
+import { useBixCard, useSignedUrl } from '@/components/BixAvatar';
+
+/** Large caller/callee photo inside the call ring; falls back to the gold initial. */
+function CallPeerPhoto({ peerId, name }: { peerId: string; name: string }) {
+  const card = useBixCard(peerId);
+  const url = useSignedUrl('bix-avatars', card?.avatar_path);
+  return <>{url ? <img className="bixcall-av-photo" src={url} alt={`Foto @${name}`}/> : <b>{name.slice(0, 1).toUpperCase()}</b>}{card?.status_text && <em className="bixcall-av-status">{card.status_text}</em>}</>;
+}
 
 type Kind = 'voice' | 'video';
 /** rang = callee's device acknowledged the call ("Berdering"); offline = no acknowledgement within OFFLINE_MS. */
@@ -314,7 +322,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     {!(remoteVideo && call.kind === 'video') && <div className="bixcall-center">
       <div className={`bixcall-av is-${call.offline ? 'offline' : live && link === 'on' ? 'talking' : ringing ? (call.role === 'caller' ? phase : 'ringing') : 'idle'}`} style={live && link === 'on' ? { ['--lvl' as string]: Math.min(1, level * 3) } : undefined}>
         <span className="bixcall-av-ring" aria-hidden="true"/><span className="bixcall-av-ring r2" aria-hidden="true"/>
-        <b>{call.peerName.slice(0, 1).toUpperCase()}</b>
+        <CallPeerPhoto peerId={call.peerId} name={call.peerName}/>
       </div>
       <h2>@{call.peerName}</h2>
       <p>{call.kind === 'video' ? 'Video Call' : 'Voice Call'} · BIX CALL</p>
