@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPoin
 import { useRouter } from '@tanstack/react-router';
 import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck, Ear, Radio, X } from 'lucide-react';
+import { syncBixCallTheme } from '@/lib/bix-call-theme';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
 import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
@@ -54,6 +55,7 @@ function sysNotify(title: string, body: string, tag: string, ring: boolean, url 
 
 /** Global host: watches incoming calls and renders the luxury BIXLINK BIXTOK call screen. */
 export function BixCallHost() {
+  useEffect(() => { syncBixCallTheme(); }, []);
   const [me, setMe] = useState<string | null>(null);
   const [call, setCall] = useState<Active | null>(null);
   const [err, setErr] = useState('');
@@ -264,7 +266,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         try {
           const vs = await openVoiceShield(h => { howlRef.current = h; setHowl(h); applyVolume(); }); if (cancelled) { vs.stop(); return; }
           voiceRef.current = vs;
-          await room.localParticipant.publishTrack(vs.track, { source: Track.Source.Microphone, dtx: true, red: true, audioPreset: { maxBitrate: 40000 } });
+          await room.localParticipant.publishTrack(vs.track, { source: Track.Source.Microphone, dtx: false, red: true, audioPreset: { maxBitrate: 64000 } });
         } catch {
           await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } as never, { dtx: true, red: true });
         }
