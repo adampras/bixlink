@@ -30,7 +30,7 @@ export const registerManualAccount = createServerFn({ method: 'POST' })
     if (error || !available) throw new Error('That username is unavailable.');
     return createManualAccount(
       () => client.auth.signUp({ email: data.email, password: data.password, options: {
-        emailRedirectTo: `${origin}/auth`,
+        emailRedirectTo: `${origin}/auth?verified=1`,
         data: { full_name: data.fullName, username: data.username, whatsapp: data.whatsapp, whatsapp_country: data.country },
       } }),
       () => client.auth.signOut({ scope: 'local' }),
