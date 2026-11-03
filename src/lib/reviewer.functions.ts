@@ -38,6 +38,21 @@ export const saveReviewerDepositWallet = createServerFn({ method: 'POST' }).midd
     return { ok: true };
   });
 
+const extraSchema = z.object({ code: z.string().optional(), label: z.string().trim().max(40), network: z.enum(['BEP20', 'TRC20', 'ERC20']), asset: z.enum(['USDT', 'USDC']).optional(), address: z.string().trim().max(120), enabled: z.boolean(), mode: z.enum(['both', 'flex', 'unique']).optional() });
+export const getReviewerExtraWallets = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
+  const { data } = await context.supabase.from('bix_owner_deposit_wallets').select('extra_wallets').eq('owner_id', context.userId).maybeSingle();
+  return ((data?.extra_wallets ?? []) as DepositWallet[]);
+});
+export const saveReviewerExtraWallets = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { wallets: DepositWallet[] }) => z.object({ wallets: z.array(extraSchema).max(10) }).parse(d))
+  .handler(async ({ context, data }) => {
+    if (!(await isReviewer(context))) throw new Error('Owner 2 access required');
+    const { data: out, error } = await context.supabase.rpc('bix_owner_wallets_save_extra', { p_wallets: data.wallets as unknown as Json });
+    if (error) throw new Error(error.message);
+    return out as unknown as DepositWallet[];
+  });
+
 // Each reviewer (Owner 2–5) only sees members of their own referral downline; clones always excluded.
 async function reviewerScope(admin: any, reviewerId: string): Promise<string[]> {
   const [{ data: refs, error }, { data: clones, error: cloneError }] = await Promise.all([
