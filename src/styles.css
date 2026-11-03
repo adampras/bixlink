@@ -5720,3 +5720,21 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .comm-meet-bar button{min-width:2.75rem;height:2.75rem;border-radius:999px;display:grid;place-items:center;background:var(--muted);color:var(--foreground);padding:0 .8rem}
 .comm-meet-bar .is-off{background:var(--destructive);color:var(--background)}.comm-meet-bar .is-hand{background:var(--chart-3);color:var(--background)}
 .comm-meet-bar .is-end{background:var(--destructive);color:var(--background)}.comm-meet-bar .is-text{font-size:.72rem;font-weight:700}.comm-meet-bar .is-danger{color:var(--destructive)}
+
+/* BIX CALL swipe-up answer */
+.bixcall-ctl:has(.bc-swipe-row){background:transparent;border:0;backdrop-filter:none;padding:0}
+.bc-swipe-row{display:flex;gap:72px;align-items:flex-end}
+.bixcall-ctl .bc-swipe{width:auto;height:auto;border-radius:0;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative}
+.bc-swipe-track{position:absolute;bottom:34px;display:flex;flex-direction:column-reverse;gap:4px;pointer-events:none}
+.bc-swipe-track i{width:12px;height:12px;border-left:2px solid currentColor;border-top:2px solid currentColor;transform:rotate(45deg);opacity:.2;animation:bcChev 1.4s infinite}
+.bc-swipe-track i:nth-child(2){animation-delay:.2s}.bc-swipe-track i:nth-child(3){animation-delay:.4s}
+.bc-swipe.is-accept{color:#34d399}.bc-swipe.is-end{color:#f87171}
+.bc-swipe-track{bottom:80px}
+.bc-swipe-knob{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;color:#fff;touch-action:none;transition:transform .35s cubic-bezier(.34,1.56,.64,1);cursor:grab}
+.bc-swipe-knob.is-drag{transition:none}
+.is-accept .bc-swipe-knob{background:linear-gradient(145deg,#10b981,#047857);box-shadow:0 0 0 6px rgba(16,185,129,.18),0 10px 30px rgba(16,185,129,.45);animation:bcPulse 1.6s infinite}
+.is-end .bc-swipe-knob{background:linear-gradient(145deg,#ef4444,#991b1b);box-shadow:0 0 0 6px rgba(239,68,68,.15),0 10px 30px rgba(239,68,68,.35)}
+.bc-swipe small{font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.75)}
+@keyframes bcChev{0%,100%{opacity:.15}50%{opacity:.9}}
+@keyframes bcPulse{0%,100%{box-shadow:0 0 0 6px rgba(16,185,129,.18),0 10px 30px rgba(16,185,129,.45)}50%{box-shadow:0 0 0 14px rgba(16,185,129,.05),0 10px 30px rgba(16,185,129,.45)}}
+@media (prefers-reduced-motion:reduce){.bc-swipe-track i,.is-accept .bc-swipe-knob{animation:none}}
