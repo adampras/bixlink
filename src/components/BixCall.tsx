@@ -314,7 +314,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     {!(remoteVideo && call.kind === 'video') && <div className="bixcall-center">
       <div className={`bixcall-av is-${call.offline ? 'offline' : live && link === 'on' ? 'talking' : ringing ? (call.role === 'caller' ? phase : 'ringing') : 'idle'}`} style={live && link === 'on' ? { ['--lvl' as string]: Math.min(1, level * 3) } : undefined}>
         <span className="bixcall-av-ring" aria-hidden="true"/><span className="bixcall-av-ring r2" aria-hidden="true"/>
-        <b>{call.peerName.slice(0, 1).toUpperCase()}</b>
+        <CallPeerPhoto peerId={call.peerId} name={call.peerName}/>
       </div>
       <h2>@{call.peerName}</h2>
       <p>{call.kind === 'video' ? 'Video Call' : 'Voice Call'} · BIX CALL</p>
