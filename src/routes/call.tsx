@@ -9,7 +9,7 @@ import { CommunityTab, NotifyCard } from '@/components/BixCommExtras';
 import { supabase } from '@/integrations/supabase/client';
 import { BixShell } from '@/components/BixShell';
 import { pushNotify } from '@/lib/bix-push';
-import { playDtmf, getRingVolume, setRingVolume, startRingtone } from '@/lib/bix-tones';
+import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
 
 export const Route = createFileRoute('/call')({
   head: () => ({ meta: [{ title: 'BIX CALL & CHAT — BIXLINK' }, { name: 'description', content: 'Private chat, voice and video calls between BIXLINK members, unlocked by staking tier.' }, { property: 'og:title', content: 'BIX CALL & CHAT — BIXLINK' }, { property: 'og:description', content: 'Secure member-to-member chat and calls inside BIXLINK.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
@@ -248,11 +248,28 @@ function PrivacyTab({ tier }: { tier: Tier | null }) {
 
 function RingSetting() {
   const [v, setV] = useState(0.7);
-  useEffect(() => setV(getRingVolume()), []);
-  const test = () => { const stop = startRingtone(); setTimeout(stop, 2400); };
+  const [id, setId] = useState('lux');
+  const [dev, setDev] = useState('');
+  const [note, setNote] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+  const stopRef = useRef<(() => void) | null>(null);
+  useEffect(() => { setV(getRingVolume()); setId(getRingId()); void loadDeviceRingtone().then(f => setDev(f?.name ?? '')); return () => stopRef.current?.(); }, []);
+  const test = (rid = id) => { stopRef.current?.(); const stop = startChosenRingtone(rid); stopRef.current = stop; setTimeout(() => { stop(); if (stopRef.current === stop) stopRef.current = null; }, 4000); };
+  const pick = (rid: string) => { if (rid === 'device' && !dev) { fileRef.current?.click(); return; } setId(rid); setRingId(rid); test(rid); };
+  const upload = async (f: File) => {
+    if (!f.type.startsWith('audio/')) { setNote('Pilih file audio (MP3, M4A, WAV, OGG).'); return; }
+    if (f.size > 8 * 1024 * 1024) { setNote('Maksimal 8 MB.'); return; }
+    await saveDeviceRingtone(f); setDev(f.name); setId('device'); setRingId('device'); setNote('Nada dering tersimpan di HP ini'); test('device');
+  };
   return <><h3 className="comm-h mt-4">Nada dering BIX CALL</h3>
     <div className="comm-ring"><input type="range" min={0} max={1} step={0.1} value={v} aria-label="Volume nada dering" onChange={e => { const n = Number(e.target.value); setV(n); setRingVolume(n); }}/>
-      <span>{v === 0 ? 'Senyap' : `${Math.round(v * 100)}%`}</span><button type="button" onClick={test}>▶ Tes</button></div></>;
+      <span>{v === 0 ? 'Senyap' : `${Math.round(v * 100)}%`}</span><button type="button" onClick={() => test()}>▶ Tes</button></div>
+    <div className="comm-ring-list">{RINGTONES.map(r => <button key={r.id} type="button" className={id === r.id ? 'is-on' : ''} onClick={() => pick(r.id)}>
+      <span>{r.id === 'device' ? `📱 ${dev ? dev : r.name}` : `🔔 ${r.name}`}</span><small>{id === r.id ? '✓ Dipakai' : '▶'}</small></button>)}</div>
+    <div className="comm-ring mt-2"><button type="button" onClick={() => fileRef.current?.click()}>📁 {dev ? 'Ganti nada dari HP' : 'Pilih nada dari HP'}</button>
+      {dev && <button type="button" onClick={() => { void clearDeviceRingtone(); setDev(''); if (id === 'device') { setId('lux'); setRingId('lux'); } }}>Hapus</button>}</div>
+    <input ref={fileRef} type="file" accept="audio/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void upload(f); }}/>
+    {note && <p className="mt-1 text-center text-[10px] text-muted-foreground">{note}</p>}</>;
 }
 
 const QUICK = ['Halo! 👋', 'Bisa telepon sekarang?', 'Sebentar ya', 'Siap 👍', 'Cek BIX PAY 🪙', 'Terima kasih 🙏'];

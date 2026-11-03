@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
 import foxLogo from '@/assets/bixlink-logo-gold.webp';
 import { ensureBixPush, pushNotify } from '@/lib/bix-push';
-import { startRingtone, startRingback, playConnected, playEnded } from '@/lib/bix-tones';
+import { startChosenRingtone, startRingback, playConnected, playEnded } from '@/lib/bix-tones';
 
 type Kind = 'voice' | 'video';
 type Active = { id: string; peerId: string; peerName: string; kind: Kind; role: 'caller' | 'callee'; status: string; whatsapp?: string | null };
@@ -134,6 +134,7 @@ export function BixCallHost() {
 
 function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAccept: () => void; onDecline: () => void; onEnd: () => void }) {
   const remoteV = useRef<HTMLVideoElement>(null);
+  const backV = useRef<HTMLVideoElement>(null);
   const localV = useRef<HTMLVideoElement>(null);
   const audioBox = useRef<HTMLDivElement>(null);
   const roomRef = useRef<Room | null>(null);
@@ -155,7 +156,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
   const ringing = !live && !done;
   useEffect(() => {
     if (!ringing || ringMuted) return;
-    const stop = call.role === 'callee' ? startRingtone() : startRingback();
+    const stop = call.role === 'callee' ? startChosenRingtone() : startRingback();
     const vib = call.role === 'callee' ? setInterval(() => { try { navigator.vibrate?.([400, 200, 400]); } catch { /* unsupported */ } }, 2600) : undefined;
     return () => { stop(); if (vib) clearInterval(vib); try { navigator.vibrate?.(0); } catch { /* unsupported */ } };
   }, [ringing, ringMuted, call.role]);
@@ -171,10 +172,10 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
       try {
         const res = await getBixCallToken({ data: { callId: call.id } });
         if (!res.ok || cancelled) { setLink('fail'); return; }
-        room = new Room({ adaptiveStream: true, dynacast: true });
+        room = new Room({ adaptiveStream: false, dynacast: true });
         roomRef.current = room;
         room.on(RoomEvent.TrackSubscribed, (t: RemoteTrack) => {
-          if (t.kind === Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); setRemoteVideo(true); }
+          if (t.kind === Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); if (backV.current) t.attach(backV.current); setRemoteVideo(true); }
           if (t.kind === Track.Kind.Audio && audioBox.current) { audioBox.current.querySelectorAll('audio').forEach(a => a.remove()); const el = t.attach() as HTMLAudioElement; el.volume = shieldRef.current ? 0.7 : 0.9; audioBox.current.appendChild(el); void el.play().catch(() => {}); }
         });
         room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach(); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
@@ -189,7 +190,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
           await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } as never, { dtx: true, red: true });
         }
         if (call.kind === 'video') {
-          await room.localParticipant.setCameraEnabled(true, { facingMode: 'user', resolution: { width: 720, height: 1280, frameRate: 30 } },
+          await room.localParticipant.setCameraEnabled(true, { facingMode: 'user', resolution: { width: 1280, height: 720, frameRate: 30 } },
             { videoCodec: 'vp8', simulcast: true, degradationPreference: 'maintain-resolution', videoEncoding: { maxBitrate: 1_800_000, maxFramerate: 30 } });
           const pub = room.localParticipant.getTrackPublication(Track.Source.Camera);
           const mt = pub?.track?.mediaStreamTrack; if (mt && 'contentHint' in mt) mt.contentHint = 'detail';
@@ -242,8 +243,9 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
 
   const showVideo = remoteVideo && call.kind === 'video';
   return <div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}`} role="dialog" aria-label="BIX CALL">
+    <video ref={backV} className={`bixcall-back${showVideo && !fill ? " on" : ""}`} autoPlay playsInline muted aria-hidden="true"/>
     <video ref={remoteV} className={`bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} autoPlay playsInline onClick={() => { if (showVideo) setHideUi(v => !v); }} onDoubleClick={() => setFill(v => !v)}/>
-    {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Tampilkan utuh' : 'Penuhi layar'}>{fill ? '⤡ Utuh' : '⤢ Penuh'}</button>}
+    {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Tampilkan utuh' : 'Penuhi layar'}>{fill ? '⤡ Sudut lega' : '⤢ Layar penuh'}</button>}
     <div ref={audioBox} hidden/>
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
