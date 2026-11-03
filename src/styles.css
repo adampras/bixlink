@@ -5738,3 +5738,19 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 @keyframes bcChev{0%,100%{opacity:.15}50%{opacity:.9}}
 @keyframes bcPulse{0%,100%{box-shadow:0 0 0 6px rgba(16,185,129,.18),0 10px 30px rgba(16,185,129,.45)}50%{box-shadow:0 0 0 14px rgba(16,185,129,.05),0 10px 30px rgba(16,185,129,.45)}}
 @media (prefers-reduced-motion:reduce){.bc-swipe-track i,.is-accept .bc-swipe-knob{animation:none}}
+.bixcall-ctl:has(.bc-swipe-row){flex-direction:column;align-items:center;gap:14px}
+.bixcall-ctl>.bc-swipe-row,.bixcall-ctl>.bc-replies,.bixcall-ctl>.bc-reply-btn{width:auto;height:auto;border-radius:0;background:none;border:0;place-items:initial}
+.bixcall-ctl>.bc-reply-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,215,0,.35);font-size:12px;font-weight:700;color:#FFD700}
+.bixcall-ctl>.bc-replies{display:flex;flex-direction:column;gap:6px;max-width:300px}
+.bc-replies button{padding:9px 14px;border-radius:14px;background:rgba(8,6,14,.85);border:1px solid rgba(168,85,247,.45);color:#fff;font-size:12px;text-align:left}
+.bc-q{display:inline-flex;align-items:flex-end;gap:2px;height:11px;margin-left:2px}
+.bc-q i{width:3px;border-radius:1px;background:rgba(255,255,255,.25)}
+.bc-q i:nth-child(1){height:4px}.bc-q i:nth-child(2){height:7px}.bc-q i:nth-child(3){height:11px}
+.bc-q.is-excellent i{background:#10b981}
+.bc-q.is-good i:nth-child(-n+2){background:#FFD700}
+.bc-q.is-poor i:nth-child(1){background:#f87171}
+.bc-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:34px;margin-top:10px}
+.bc-wave i{width:4px;height:34px;border-radius:4px;background:linear-gradient(#FFD700,#A855F7);transform-origin:center;transition:transform .14s ease-out}
+.bc-ear{position:fixed;inset:0;z-index:20;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:rgba(255,255,255,.35);touch-action:manipulation}
+.bc-ear span{font:600 22px ui-monospace,monospace;color:rgba(255,215,0,.5)}
+.bc-ear small{font-size:11px}

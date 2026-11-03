@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
 import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck, Ear } from 'lucide-react';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
 import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
@@ -154,6 +154,25 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
   const [shield, setShield] = useState(true);
   const shieldRef = useRef(true);
   const ringing = !live && !done;
+  const [quality, setQuality] = useState<'excellent' | 'good' | 'poor' | 'unknown'>('unknown');
+  const [level, setLevel] = useState(0);
+  const [ear, setEar] = useState(false);
+  const [replyOpen, setReplyOpen] = useState(false);
+  const quickReply = async (text: string) => {
+    setReplyOpen(false);
+    await supabase.rpc('bix_chat_send' as never, { p_to: call.peerId, p_body: text, p_reply: null } as never);
+    onDecline();
+  };
+  // Remote voice level for the live waveform (cheap 150ms poll, paused in ear mode).
+  useEffect(() => {
+    if (link !== 'on' || ear) return;
+    const t = setInterval(() => {
+      const r = roomRef.current; if (!r) return;
+      let m = 0; r.remoteParticipants.forEach(p => { m = Math.max(m, p.audioLevel ?? 0); });
+      setLevel(m);
+    }, 150);
+    return () => clearInterval(t);
+  }, [link, ear]);
   useEffect(() => {
     if (!ringing || ringMuted) return;
     const stop = call.role === 'callee' ? startChosenRingtone() : startRingback();
@@ -180,6 +199,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
         });
         room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach(); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
         room.on(RoomEvent.ParticipantDisconnected, () => onEnd());
+        room.on(RoomEvent.ConnectionQualityChanged, (q, p) => { if (p.isLocal) setQuality(String(q) as 'excellent' | 'good' | 'poor' | 'unknown'); });
         await room.connect(res.url, res.token);
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         try {
@@ -247,18 +267,23 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
     <video ref={remoteV} className={`bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} autoPlay playsInline onClick={() => { if (showVideo) setHideUi(v => !v); }} onDoubleClick={() => setFill(v => !v)}/>
     {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Tampilkan utuh' : 'Penuhi layar'}>{fill ? '⤡ Sudut lega' : '⤢ Layar penuh'}</button>}
     <div ref={audioBox} hidden/>
+    {ear && live && <div className="bc-ear" role="button" tabIndex={0} aria-label="Ketuk dua kali untuk menyalakan layar" onDoubleClick={() => setEar(false)} onKeyDown={e => { if (e.key === 'Enter') setEar(false); }}><span>{fmt(secs)}</span><small>Mode telinga aktif · ketuk dua kali untuk kembali</small></div>}
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
-      <span>✨ LAYANAN KHUSUS BIXLINK BIXTOK • ENCRYPTED SECURE CALL ✨</span>
+      <span>{live && link === 'on' ? `BIX ${call.kind === 'video' ? 'HD VIDEO' : 'HD VOICE'} • 48 kHz • ENCRYPTED` : '✨ BIX CALL • ENCRYPTED SECURE CALL ✨'}</span>
+      {live && link === 'on' && <em className={`bc-q is-${quality}`} aria-label={`Kualitas jaringan: ${quality === 'excellent' ? 'sangat baik' : quality === 'good' ? 'baik' : quality === 'poor' ? 'lemah' : 'mengukur'}`}><i/><i/><i/></em>}
     </header>
     {!(remoteVideo && call.kind === 'video') && <div className="bixcall-center">
       <div className={`bixcall-av${live && link === 'on' ? ' talking' : ''}${!live && !done ? ' ringing' : ''}`}><b>{call.peerName.slice(0, 1).toUpperCase()}</b></div>
       <h2>@{call.peerName}</h2>
       <p>{call.kind === 'video' ? '📹 Video Call' : '📞 Voice Call'}</p>
+      {live && link === 'on' && <div className="bc-wave" aria-hidden="true">{[0.5, 0.8, 1, 0.7, 0.9, 0.6, 1, 0.75, 0.55].map((k, i) => <i key={i} style={{ transform: `scaleY(${0.12 + Math.min(1, level * 3) * k})` }}/>)}</div>}
     </div>}
     <div className="bixcall-status"><i className={link === 'on' ? 'ok' : ''}/>{statusText}</div>
     {call.kind === 'video' && live && <video ref={localV} className="bixcall-pip" style={{ transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={dragPip} autoPlay playsInline muted/>}
     <footer className="bixcall-ctl">
+      {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Maaf, sedang sibuk. Nanti saya hubungi kembali.', 'Sedang rapat, kirim pesan saja ya.', 'Saya telepon balik 5 menit lagi.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
+      {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
         <SwipeKey tone="end" label="Tolak" onDone={onDecline} icon={<PhoneOff/>}/>
         <SwipeKey tone="accept" label="Terima" onDone={onAccept} icon={call.kind === 'video' ? <Video/> : <Phone/>}/>
@@ -272,6 +297,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
         {call.kind === 'video' && <button aria-label="Kamera" className={cam ? '' : 'off'} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button>}
         {call.kind === 'video' && <button aria-label="Balik kamera" onClick={() => void flip()}><SwitchCamera/></button>}
         <button aria-label="Speaker" onClick={speaker}><Volume2/></button>
+        {call.kind === 'voice' && <button aria-label="Mode telinga (layar gelap)" onClick={() => setEar(true)}><Ear/></button>}
         <button aria-label={shield ? 'Perisai anti-storing aktif' : 'Aktifkan perisai anti-storing'} className={shield ? 'shield' : ''} onClick={toggleShield}><ShieldCheck/></button>
         <button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button>
       </>}
