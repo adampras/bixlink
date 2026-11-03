@@ -10,7 +10,7 @@ const EXEMPT: Record<string, string> = { owner1: 'Owner 1 · no restrictions', c
 /** Two-column split of the USDT wallet: real withdrawable funds vs sponsored/virtual escrow. Figures come from the server ledger RPC. */
 export function BalanceLedgerCard({ hidden }: { hidden?: boolean }) {
   const fetchLedger = useServerFn(getMyBalanceLedger);
-  const { data: d } = useQuery({ queryKey: ['balance-ledger'], queryFn: () => fetchLedger(), staleTime: 30_000 });
+  const { data: d } = useQuery({ queryKey: ['my-wallet', 'ledger'], queryFn: () => fetchLedger(), staleTime: 30_000 });
   const [tab, setTab] = useState<'real' | 'unreal'>('real');
   if (!d) return null;
   const m = (v: number) => hidden ? '••••' : money(Number(v));
