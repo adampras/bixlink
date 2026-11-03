@@ -44,3 +44,48 @@ const DTMF: Record<string, [number, number]> = {
   '7': [852, 1209], '8': [852, 1336], '9': [852, 1477], '*': [941, 1209], '0': [941, 1336], '#': [941, 1477],
 };
 export const playDtmf = (k: string) => { const p = DTMF[k]; if (p) tone(p, 0, 0.14, 0.12); };
+
+/* ---- Ringtone choices + member's own device ringtone (stored only on this phone) ---- */
+export const RINGTONES = [
+  { id: 'lux', name: 'BIXLINK Luxury Arpeggio' },
+  { id: 'fox', name: 'Fox Genesis Chime' },
+  { id: 'obsidian', name: 'Obsidian Titanium' },
+  { id: 'harp', name: 'Elegance Harp' },
+  { id: 'classic', name: 'Digital Classic VIP' },
+  { id: 'neon', name: 'Neon Future Pulse' },
+  { id: 'device', name: 'Nada dari perangkat saya' },
+] as const;
+const RKEY = 'bixcall-ring-id';
+export const getRingId = () => { try { return localStorage.getItem(RKEY) || 'lux'; } catch { return 'lux'; } };
+export const setRingId = (id: string) => { try { localStorage.setItem(RKEY, id); } catch { /* ignore */ } };
+
+const DB = 'bixcall-ring', ST = 'files';
+const db = () => new Promise<IDBDatabase>((res, rej) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(ST); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+export async function saveDeviceRingtone(f: File) { const d = await db(); await new Promise((res, rej) => { const t = d.transaction(ST, 'readwrite'); t.objectStore(ST).put({ blob: f, name: f.name }, 'custom'); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+export async function loadDeviceRingtone(): Promise<{ blob: Blob; name: string } | null> {
+  try { const d = await db(); return await new Promise(res => { const r = d.transaction(ST).objectStore(ST).get('custom'); r.onsuccess = () => res(r.result ?? null); r.onerror = () => res(null); }); } catch { return null; }
+}
+export async function clearDeviceRingtone() { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).delete('custom'); } catch { /* ignore */ } }
+
+const PATTERNS: Record<string, [() => void, number]> = {
+  fox: [() => { const v = getRingVolume() * 0.33; [523.25, 587.33, 783.99, 880, 1046.5].forEach((f, i) => tone([f], i * 0.14, 0.45, v, 'sine')); }, 2400],
+  obsidian: [() => { const v = getRingVolume() * 0.3; tone([392, 587.33], 0, 0.9, v, 'triangle'); tone([440, 659.25], 1.0, 0.9, v, 'triangle'); }, 2800],
+  harp: [() => { const v = getRingVolume() * 0.32; [392, 493.88, 587.33, 783.99, 987.77, 1174.7].forEach((f, i) => tone([f], i * 0.1, 0.9, v, 'sine')); }, 2600],
+  classic: [() => { const v = getRingVolume() * 0.22; for (let i = 0; i < 8; i++) tone([1300, 1700], i * 0.09, 0.07, v, 'square'); for (let i = 0; i < 8; i++) tone([1300, 1700], 1 + i * 0.09, 0.07, v, 'square'); }, 3000],
+  neon: [() => { const v = getRingVolume() * 0.25; [220, 330, 440, 660].forEach((f, i) => tone([f, f * 1.5], i * 0.2, 0.18, v, 'sawtooth')); }, 2000],
+};
+
+/** Plays the member's chosen ringtone (built-in or from their device) until stop() is called. */
+export function startChosenRingtone(id = getRingId()): () => void {
+  if (id === 'device') {
+    let el: HTMLAudioElement | null = null; let url = ''; let stopped = false; let fallback: (() => void) | null = null;
+    void loadDeviceRingtone().then(f => {
+      if (stopped) return;
+      if (!f) { fallback = startRingtone(); return; }
+      url = URL.createObjectURL(f.blob); el = new Audio(url); el.loop = true; el.volume = getRingVolume();
+      void el.play().catch(() => { if (!stopped) fallback = startRingtone(); });
+    });
+    return () => { stopped = true; el?.pause(); if (url) URL.revokeObjectURL(url); fallback?.(); };
+  }
+  const p = PATTERNS[id]; return p ? loop(p[0], p[1]) : startRingtone();
+}
