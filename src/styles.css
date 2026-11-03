@@ -5690,3 +5690,12 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 .lux-seal { margin: 0 auto; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 999px; color: var(--chart-3); border: 1px solid var(--chart-3); background: radial-gradient(circle, color-mix(in oklab, var(--chart-3) 22%, transparent), transparent 70%); box-shadow: 0 0 30px -6px var(--chart-3); }
 .lux-plaque, .lux-sov { border: 1px solid color-mix(in oklab, var(--chart-3) 55%, transparent); background: linear-gradient(150deg, color-mix(in oklab, var(--card) 90%, var(--chart-3) 10%), var(--background) 60%, color-mix(in oklab, var(--card) 92%, var(--chart-3) 8%)); box-shadow: 0 0 40px -16px var(--chart-3), inset 0 1px 0 color-mix(in oklab, var(--chart-3) 30%, transparent); }
 .lux-sov-hero { padding: 28px 20px; text-align: center; background: radial-gradient(ellipse at top, color-mix(in oklab, var(--chart-3) 18%, transparent), transparent 70%); border-bottom: 1px solid color-mix(in oklab, var(--chart-3) 25%, transparent); }
+
+/* BIX CALL — true edge-to-edge video + ambient backdrop */
+.bixcall-remote{inset:0;width:100vw;height:100dvh;object-fit:cover;object-position:center 30%;z-index:0}
+.bixcall-remote.fit{object-fit:contain;background:transparent}
+.bixcall-back{position:absolute;inset:-8%;width:116%;height:116%;object-fit:cover;filter:blur(28px) brightness(.55) saturate(1.2);opacity:0;z-index:0;pointer-events:none;transition:opacity .3s}
+.bixcall-back.on{opacity:1}
+.comm-ring-list{display:grid;gap:6px;margin-top:8px}
+.comm-ring-list button{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:12px;font-size:12px;border:1px solid rgb(255 215 0 / .18);background:rgb(255 255 255 / .03)}
+.comm-ring-list button.is-on{border-color:#FFD700;color:#FFD700;box-shadow:0 0 10px rgb(255 215 0 / .25)}
