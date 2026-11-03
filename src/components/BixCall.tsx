@@ -144,11 +144,11 @@ export function BixCallHost() {
 
   return <>
     {err && <div className="bixcall-toast" role="alert">{err}</div>}
-    {call && <CallScreen call={call} onAccept={() => void setStatus('accepted')} onDecline={() => void setStatus('declined')} onEnd={() => void setStatus('ended')}/>}
+    {call && <CallScreen call={call} onAccept={() => void setStatus('accepted')} onDecline={() => void setStatus('declined')} onEnd={() => void setStatus('ended')} onClose={() => setCall(null)}/>}
   </>;
 }
 
-function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAccept: () => void; onDecline: () => void; onEnd: () => void }) {
+function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Active; onAccept: () => void; onDecline: () => void; onEnd: () => void; onClose: () => void }) {
   const remoteV = useRef<HTMLVideoElement>(null);
   const backV = useRef<HTMLVideoElement>(null);
   const localV = useRef<HTMLVideoElement>(null);
@@ -170,33 +170,48 @@ function CallScreen({ call, onAccept, onDecline, onEnd }: { call: Active; onAcce
   const [shield, setShield] = useState(true);
   const shieldRef = useRef(true);
   const ringing = !live && !done;
+  const phase = callerPhase(call);
   const [quality, setQuality] = useState<'excellent' | 'good' | 'poor' | 'unknown'>('unknown');
   const [level, setLevel] = useState(0);
   const [ear, setEar] = useState(false);
+  const [near, setNear] = useState(false);
+  const nearRef = useRef(false);
+  const [howl, setHowl] = useState(false);
+  const howlRef = useRef(false);
   const [replyOpen, setReplyOpen] = useState(false);
   const quickReply = async (text: string) => {
     setReplyOpen(false);
     await supabase.rpc('bix_chat_send' as never, { p_to: call.peerId, p_body: text, p_reply: null } as never);
     onDecline();
   };
-  // Remote voice level for the live waveform (cheap 150ms poll, paused in ear mode).
+  /** Remote speaker volume: lower with the shield, lower again while a howl is detected. */
+  const applyVolume = () => {
+    const base = shieldRef.current ? 0.7 : 0.9;
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = howlRef.current ? base * 0.75 : base; });
+  };
+  // Remote voice level: drives the waveform and the "Ruang Dekat" half-duplex duck.
   useEffect(() => {
-    if (link !== 'on' || ear) return;
+    if (link !== 'on') return;
+    let hang = 0;
     const t = setInterval(() => {
       const r = roomRef.current; if (!r) return;
       let m = 0; r.remoteParticipants.forEach(p => { m = Math.max(m, p.audioLevel ?? 0); });
-      setLevel(m);
+      if (!ear) setLevel(m);
+      if (m > 0.04) hang = 4; else if (hang > 0) hang--;
+      voiceRef.current?.setDuck(nearRef.current && hang > 0);
     }, 150);
     return () => clearInterval(t);
   }, [link, ear]);
+  // Callee rings at once; caller hears the ringback only after the callee device acknowledges ("Berdering").
   useEffect(() => {
     if (!ringing || ringMuted) return;
+    if (call.role === 'caller' && phase !== 'ringing') return;
     const stop = call.role === 'callee' ? startChosenRingtone() : startRingback();
     const vib = call.role === 'callee' ? setInterval(() => { try { navigator.vibrate?.([400, 200, 400]); } catch { /* unsupported */ } }, 2600) : undefined;
     return () => { stop(); if (vib) clearInterval(vib); try { navigator.vibrate?.(0); } catch { /* unsupported */ } };
-  }, [ringing, ringMuted, call.role]);
+  }, [ringing, ringMuted, call.role, phase]);
   useEffect(() => { if (link === 'on') playConnected(); }, [link]);
-  useEffect(() => { if (done) playEnded(); }, [done]);
+  useEffect(() => { if (done && !call.offline) playEnded(); }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Join room when accepted (caller joins as soon as callee accepts)
   useEffect(() => {
