@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { KycCard } from '@/components/KycCard';
 import { getMyWallet, requestWithdraw, requestSwap } from '@/lib/bixlink.functions';
+import { BalanceLedgerCard } from '@/components/BalanceLedgerCard';
 import { getFiatRates } from '@/lib/market.functions';
 import { getMyDepositWallets, createDepositIntent, checkDepositIntent, claimDepositIntent, verifyDeposit } from '@/lib/deposit.functions';
 import { dateTime, money, number } from '@/lib/bixlink';
@@ -111,6 +112,7 @@ function WalletPage() {
         <p className="mt-2 text-[10px] text-foreground/70">Display-only USD reference conversions. Rates may be delayed.</p></>}
         <div className="wallet-actions wallet-actions--inside"><button type="button" className="wallet-action wallet-action--in" onClick={() => setModal('deposit')}><span><ArrowDownToLine size={18}/></span><b>Deposit</b></button><button type="button" className="wallet-action wallet-action--out" onClick={() => setModal('withdraw')}><span><ArrowUpFromLine size={18}/></span><b>Withdraw</b></button></div>
       </div>
+      <BalanceLedgerCard hidden={hidden}/>
       <div className="mt-4 grid grid-cols-2 gap-3">
         <Link to="/pay" className="wallet-tile wallet-tile--pay wallet-tile--square"><span className={`wallet-tile-status${cfg?.bixPay.enabled ? ' is-open' : ''}`}><i/>{cfg?.bixPay.enabled ? 'LIVE' : 'OFF'}</span><span className="wallet-tile-icon"><QrCode size={24}/></span><b className="wallet-tile-title">BIX PAY</b><span className="wallet-tile-sub">QR Pay · BIX</span></Link>
         <Link to="/transfer" className="wallet-tile wallet-tile--transfer wallet-tile--square"><span className={`wallet-tile-status${cfg?.usdtTransfer.enabled ? ' is-open' : ''}`}><i/>{cfg?.usdtTransfer.enabled ? 'LIVE' : 'OFF'}</span><span className="wallet-tile-icon"><Send size={22}/></span><b className="wallet-tile-title">TRANSFER</b><span className="wallet-tile-sub">Member · USDT</span></Link>
