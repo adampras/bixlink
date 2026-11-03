@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, ShieldCheck, Ear, Radio, X } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, X } from 'lucide-react';
 import { syncBixCallTheme } from '@/lib/bix-call-theme';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,7 @@ import foxLogo from '@/assets/bixlink-logo-gold.webp';
 import { ensureBixPush, pushNotify } from '@/lib/bix-push';
 import { startChosenRingtone, startRingback, playConnected, playEnded } from '@/lib/bix-tones';
 import { useBixCard, useSignedUrl } from '@/components/BixAvatar';
+import { INCOMING_VIBE, VIBE_EVERY_MS, pickRoute, tiltOf, type Route, type Tilt } from '@/lib/bix-call-route';
 
 /** Large caller/callee photo inside the call ring; falls back to the gold initial. */
 function CallPeerPhoto({ peerId, name }: { peerId: string; name: string }) {
@@ -180,14 +181,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const done = ['ended', 'declined', 'missed'].includes(call.status);
   const [ringMuted, setRingMuted] = useState(false);
   const voiceRef = useRef<VoiceShield | null>(null);
-  const [shield, setShield] = useState(true);
   const shieldRef = useRef(true);
   const ringing = !live && !done;
   const phase = callerPhase(call);
   const [quality, setQuality] = useState<'excellent' | 'good' | 'poor' | 'unknown'>('unknown');
   const [level, setLevel] = useState(0);
-  const [ear, setEar] = useState(false);
-  const [near, setNear] = useState(false);
+  const ear = false;
   const nearRef = useRef(false);
   const [howl, setHowl] = useState(false);
   const howlRef = useRef(false);
@@ -235,10 +234,16 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     if (!ringing || ringMuted) return;
     if (call.role === 'caller' && phase !== 'ringing') return;
     const stop = call.role === 'callee' ? startChosenRingtone() : startRingback();
-    const vib = call.role === 'callee' ? setInterval(() => { try { navigator.vibrate?.([400, 200, 400]); } catch { /* unsupported */ } }, 2600) : undefined;
-    return () => { stop(); if (vib) clearInterval(vib); try { navigator.vibrate?.(0); } catch { /* unsupported */ } };
+    return () => { stop(); };
   }, [ringing, ringMuted, call.role, phase]);
-  useEffect(() => { if (link === 'on') playConnected(); }, [link]);
+  // Incoming call vibration: keeps buzzing in a WA-style rhythm until answered/declined, even if the ringtone is muted.
+  useEffect(() => {
+    if (!ringing || call.role !== 'callee') return;
+    const buzz = () => { try { navigator.vibrate?.(INCOMING_VIBE); } catch { /* unsupported */ } };
+    buzz(); const t = setInterval(buzz, VIBE_EVERY_MS);
+    return () => { clearInterval(t); try { navigator.vibrate?.(0); } catch { /* unsupported */ } };
+  }, [ringing, call.role]);
+  useEffect(() => { if (link === 'on') { playConnected(); try { navigator.vibrate?.(60); } catch { /* unsupported */ } } }, [link]);
   useEffect(() => { if (done && !call.offline) playEnded(); }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Join room when accepted (caller joins as soon as callee accepts)
@@ -257,6 +262,9 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
           if (t.kind === Track.Kind.Audio) attachAudio(t);
         });
         room.on(RoomEvent.AudioPlaybackStatusChanged, () => setAudioBlocked(!room?.canPlaybackAudio));
+        // Remote camera on/off mid-call (voice → video upgrade without redialing).
+        room.on(RoomEvent.TrackMuted, (pub, p) => { if (!p.isLocal && pub.kind === Track.Kind.Video) setRemoteVideo(false); });
+        room.on(RoomEvent.TrackUnmuted, (pub, p) => { if (!p.isLocal && pub.kind === Track.Kind.Video) setRemoteVideo(true); });
         room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach().forEach(e => e.remove()); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
         room.on(RoomEvent.ParticipantDisconnected, () => onEnd());
         room.on(RoomEvent.ConnectionQualityChanged, (q, p) => { if (p.isLocal) setQuality(String(q) as 'excellent' | 'good' | 'poor' | 'unknown'); });
@@ -271,14 +279,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         } catch {
           await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } as never, { dtx: true, red: true });
         }
-        if (call.kind === 'video') {
-          await room.localParticipant.setCameraEnabled(true, { facingMode: 'user', resolution: { width: 1280, height: 720, frameRate: 30 } },
-            { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: 2_600_000, maxFramerate: 30, priority: 'high' } as never,
-              videoSimulcastLayers: [{ width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 800_000, maxFramerate: 30 } }] as never });
-          const pub = room.localParticipant.getTrackPublication(Track.Source.Camera);
-          const mt = pub?.track?.mediaStreamTrack; if (mt && 'contentHint' in mt) mt.contentHint = 'detail';
-          if (pub?.track && localV.current) pub.track.attach(localV.current);
-        }
+        if (call.kind === 'video') await startCam(room, true);
         if (!cancelled) setLink('on');
       } catch { if (!cancelled) setLink('fail'); }
     })();
@@ -293,33 +294,66 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     if (voiceRef.current && pub?.track) { if (n) await pub.track.unmute(); else await pub.track.mute(); return; }
     await roomRef.current?.localParticipant.setMicrophoneEnabled(n);
   };
-  const toggleCam = async () => {
-    const n = !cam; setCam(n);
-    const lp = roomRef.current?.localParticipant; if (!lp) return;
-    await lp.setCameraEnabled(n, { facingMode: front ? 'user' : 'environment' });
-    const pub = lp.getTrackPublication(Track.Source.Camera);
-    if (n && pub?.track && localV.current) pub.track.attach(localV.current);
+  /** Turn the camera on/off inside the same room — a voice call becomes a video call without hanging up. */
+  const startCam = async (room: Room, on: boolean, facing: 'user' | 'environment' = 'user') => {
+    const lp = room.localParticipant;
+    await lp.setCameraEnabled(on, { facingMode: facing, resolution: { width: 1280, height: 720, frameRate: 30 } },
+      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: 2_600_000, maxFramerate: 30, priority: 'high' } as never,
+        videoSimulcastLayers: [{ width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 800_000, maxFramerate: 30 } }] as never });
+    const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
+    setCam(on);
   };
+  const toggleCam = async () => {
+    const r = roomRef.current; if (!r) return;
+    try { await startCam(r, !cam, front ? 'user' : 'environment'); } catch { setCam(false); }
+  };
+  // (Re)attach the local camera whenever its preview element appears or moves (pip ⇄ big).
+  useEffect(() => {
+    const t = roomRef.current?.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
+    if (cam && t && localV.current) t.attach(localV.current);
+  }, [cam, swapped, remoteVideo, link]);
   const flip = async () => {
     const pub = roomRef.current?.localParticipant.getTrackPublication(Track.Source.Camera);
     const tr = pub?.track as unknown as { restartTrack?: (o: object) => Promise<void> } | undefined;
     const nf = !front; setFront(nf);
     await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment' }).catch(() => {});
   };
-  const speaker = async () => {
-    const n = !loud; setLoud(n); loudRef.current = n;
+  const manualAt = useRef(0);
+  const speaker = () => { manualAt.current = Date.now(); void route(!loud); };
+  const route = async (n: boolean) => {
+    if (n === loudRef.current) return;
+    setLoud(n); loudRef.current = n;
     void roomRef.current?.startAudio().catch(() => {});
     let sinkId = '';
     if (n) { try { const outs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audiooutput'); sinkId = outs.find(d => /speaker|pengeras/i.test(d.label))?.deviceId ?? ''; } catch { /* unsupported */ } }
     audioBox.current?.querySelectorAll('audio').forEach(a => { const s = a as HTMLAudioElement & { setSinkId?: (id: string) => Promise<void> }; void s.setSinkId?.(sinkId).catch(() => {}); void a.play().catch(() => {}); });
     applyVolume();
   };
-  const toggleShield = () => {
-    const n = !shield; setShield(n); shieldRef.current = n; voiceRef.current?.setShield(n);
-    if (!n) { howlRef.current = false; setHowl(false); }
-    applyVolume();
+  // Auto loudspeaker: video on → speaker; voice call follows the phone (laid flat = speaker, at the ear = earpiece).
+  // A manual tap on the speaker button wins for 10 s.
+  const tiltRef = useRef<Tilt>('between');
+  const anyVideo = cam || remoteVideo;
+  useEffect(() => {
+    if (link !== 'on') return;
+    const decide = () => {
+      if (Date.now() - manualAt.current < 10000) return;
+      const next: Route = pickRoute({ video: anyVideo, tilt: tiltRef.current, current: loudRef.current ? 'speaker' : 'ear' });
+      void route(next === 'speaker');
+    };
+    decide();
+    let pending: Tilt | null = null; let since = 0;
+    const onTilt = (e: DeviceOrientationEvent) => {
+      const t = tiltOf(e.beta, e.gamma);
+      if (t !== pending) { pending = t; since = Date.now(); return; }
+      if (t !== tiltRef.current && Date.now() - since > 900) { tiltRef.current = t; decide(); }
+    };
+    window.addEventListener('deviceorientation', onTilt);
+    return () => window.removeEventListener('deviceorientation', onTilt);
+  }, [link, anyVideo]); // eslint-disable-line react-hooks/exhaustive-deps
+  const askTilt = () => {
+    const D = (globalThis as { DeviceOrientationEvent?: { requestPermission?: () => Promise<string> } }).DeviceOrientationEvent;
+    void D?.requestPermission?.().catch(() => {});
   };
-  const toggleNear = () => { const n = !near; setNear(n); nearRef.current = n; if (!n) voiceRef.current?.setDuck(false); };
   const openChat = () => { onClose(); void router.navigate({ to: '/call', search: { chat: call.peerId } as never }); };
 
   const dragPip = (e: React.PointerEvent) => {
@@ -336,32 +370,34 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const dot = link === 'on' ? 'ok' : call.offline ? 'off' : ringing && call.role === 'caller' ? (phase === 'ringing' ? 'ring' : 'calling') : ringing ? 'ring' : '';
   const wa = call.whatsapp?.replace(/[^0-9]/g, '');
 
-  const showVideo = remoteVideo && call.kind === 'video';
+  const showVideo = live && remoteVideo;
+  const sw = swapped && showVideo && cam;
   return <div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}`} role="dialog" aria-label="BIX CALL">
     <video ref={backV} className={`bixcall-back${showVideo && !fill ? " on" : ""}`} autoPlay playsInline muted aria-hidden="true"/>
-    <video ref={remoteV} className={swapped && showVideo && live ? 'bixcall-pip is-peer' : `bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} style={swapped && showVideo && live ? { transform: `translate(${pip.x}px, ${pip.y}px)` } : undefined} onPointerDown={swapped && showVideo && live ? dragPip : undefined} autoPlay playsInline onClick={() => { if (showVideo && !swapped) setHideUi(v => !v); }} onDoubleClick={() => { if (!swapped) setFill(v => !v); }}/>
+    <video ref={remoteV} className={sw ? 'bixcall-pip is-peer' : `bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} style={sw ? { transform: `translate(${pip.x}px, ${pip.y}px)` } : undefined} onPointerDown={sw ? dragPip : undefined} autoPlay playsInline onClick={() => { if (showVideo && !sw) setHideUi(v => !v); }} onDoubleClick={() => { if (!sw) setFill(v => !v); }}/>
     {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Tampilkan utuh' : 'Penuhi layar'}>{fill ? '⤡ Sudut lega' : '⤢ Layar penuh'}</button>}
     <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>
     {audioBlocked && live && <button type="button" className="bc-pill is-chat" style={{ position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 5 }} onClick={unlockAudio}><Volume2 size={16}/> Ketuk untuk dengar suara</button>}
-    {ear && live && <div className="bc-ear" role="button" tabIndex={0} aria-label="Ketuk dua kali untuk menyalakan layar" onDoubleClick={() => setEar(false)} onKeyDown={e => { if (e.key === 'Enter') setEar(false); }}><span>{fmt(secs)}</span><small>Mode telinga aktif · ketuk dua kali untuk kembali</small></div>}
+    {live && link === 'on' && remoteVideo && !cam && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
+    {live && cam && <button type="button" className="bixcall-flip" aria-label="Balik kamera" onClick={() => void flip()}><SwitchCamera size={18}/></button>}
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
-      <span>{live && link === 'on' ? `SOVEREIGN ENCRYPTED • 48 kHz ${call.kind === 'video' ? 'HD VIDEO' : 'HD VOICE'}` : 'BIX CALL • SOVEREIGN ENCRYPTED'}</span>
+      <span>{live && link === 'on' ? `SOVEREIGN ENCRYPTED • 48 kHz ${anyVideo ? 'HD VIDEO' : 'HD VOICE'}` : 'BIX CALL • SOVEREIGN ENCRYPTED'}</span>
       {live && link === 'on' && <em className={`bc-q is-${quality}`} aria-label={`Kualitas jaringan: ${quality === 'excellent' ? 'sangat baik' : quality === 'good' ? 'baik' : quality === 'poor' ? 'lemah' : 'mengukur'}`}><i/><i/><i/></em>}
     </header>
-    {!(remoteVideo && call.kind === 'video') && <div className="bixcall-center">
-      <div className={`bixcall-av is-${call.offline ? 'offline' : live && link === 'on' ? 'talking' : ringing ? (call.role === 'caller' ? phase : 'ringing') : 'idle'}`} style={live && link === 'on' ? { ['--lvl' as string]: Math.min(1, level * 3) } : undefined}>
+    {!showVideo && <div className="bixcall-center">
+      <div className={`bixcall-av${ringing && call.role === 'callee' ? ' is-buzz' : ''} is-${call.offline ? 'offline' : live && link === 'on' ? 'talking' : ringing ? (call.role === 'caller' ? phase : 'ringing') : 'idle'}`} style={live && link === 'on' ? { ['--lvl' as string]: Math.min(1, level * 3) } : undefined}>
         <span className="bixcall-av-ring" aria-hidden="true"/><span className="bixcall-av-ring r2" aria-hidden="true"/>
         <CallPeerPhoto peerId={call.peerId} name={call.peerName}/>
       </div>
       <h2>@{call.peerName}</h2>
-      <p>{call.kind === 'video' ? 'Video Call' : 'Voice Call'} · BIX CALL</p>
+      <p>{(live ? anyVideo : call.kind === 'video') ? 'Video Call' : 'Voice Call'} · BIX CALL{live && link === 'on' ? ` · ${loud ? 'Loudspeaker' : 'Speaker telinga'}` : ''}</p>
       {live && link === 'on' && <div className="bc-wave" aria-hidden="true">{[0.5, 0.8, 1, 0.7, 0.9, 0.6, 1, 0.75, 0.55].map((k, i) => <i key={i} style={{ transform: `scaleY(${0.12 + Math.min(1, level * 3) * k})` }}/>)}</div>}
       {call.offline && <div className="bc-offline" role="status"><b>Member belum aktif di BIXLINK</b><small>Panggilan tidak sampai ke perangkatnya. Kirim pesan agar dibaca saat ia kembali online.</small></div>}
     </div>}
     <div className="bixcall-status"><i className={dot}/>{statusText}</div>
     {howl && live && <div className="bc-howl" role="status">Pantulan suara diredam otomatis</div>}
-    {call.kind === 'video' && live && <video ref={localV} className={swapped && showVideo ? 'bixcall-remote on bixcall-self-big' : 'bixcall-pip'} style={swapped && showVideo ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={swapped && showVideo ? undefined : dragPip} onClick={() => { if (swapped && showVideo) setHideUi(v => !v); }} autoPlay playsInline muted/>}
+    {cam && live && <video ref={localV} className={sw ? 'bixcall-remote on bixcall-self-big' : 'bixcall-pip'} style={sw ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={sw ? undefined : dragPip} onClick={() => { if (sw) setHideUi(v => !v); }} autoPlay playsInline muted/>}
     <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}`}>
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Maaf, sedang sibuk. Nanti saya hubungi kembali.', 'Sedang rapat, kirim pesan saja ya.', 'Saya telepon balik 5 menit lagi.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
@@ -373,16 +409,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
         <button className="end" aria-label="Batalkan" onClick={onEnd}><PhoneOff/></button>
       </>}
-      {live && <>
-        <button aria-label={mic ? 'Bisukan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button>
-        {call.kind === 'video' && <button aria-label="Kamera" className={cam ? '' : 'off'} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button>}
-        {call.kind === 'video' && <button aria-label="Balik kamera" onClick={() => void flip()}><SwitchCamera/></button>}
-        <button aria-label={loud ? 'Loudspeaker aktif' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={() => void speaker()}><Volume2/></button>
-        {call.kind === 'voice' && <button aria-label="Mode telinga (layar gelap)" onClick={() => setEar(true)}><Ear/></button>}
-        <button aria-label={shield ? 'Perisai anti-storing aktif' : 'Aktifkan perisai anti-storing'} className={shield ? 'shield' : ''} onClick={toggleShield}><ShieldCheck/></button>
-        <button aria-label={near ? 'Ruang Dekat aktif' : 'Aktifkan Ruang Dekat (HP berdekatan)'} aria-pressed={near} className={near ? 'shield' : ''} onClick={toggleNear}><Radio/></button>
-        <button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button>
-      </>}
+      {live && <div className="bc-ctl4" onPointerDown={askTilt}>
+        <label><button aria-label={mic ? 'Bisukan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button><span>{mic ? 'Mikrofon' : 'Bisu'}</span></label>
+        <label><button aria-label={loud ? 'Loudspeaker aktif' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={speaker}>{loud ? <Volume2/> : <VolumeX/>}</button><span>{loud ? 'Speaker' : 'Telinga'}</span></label>
+        <label><button aria-label={cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} className={cam ? 'shield' : ''} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>{cam ? 'Video' : 'Video'}</span></label>
+        <label><button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button><span>Akhiri</span></label>
+      </div>}
       {call.offline ? <>
         <button type="button" className="bc-pill is-chat" onClick={openChat}><MessageCircle size={16}/> Kirim Pesan BIX CHAT</button>
         {wa && <a className="bc-pill is-wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer"><Phone size={16}/> Hubungi WhatsApp</a>}
