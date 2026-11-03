@@ -21,6 +21,7 @@ import { AppSplash } from "../components/AppSplash";
 import { InstallPrompt } from "../components/InstallPrompt";
 import { InteractionComfort } from '../components/InteractionComfort';
 import { FoxChat } from "../components/FoxChat";
+import { PowerSaver } from "../components/PowerSaver";
 import { I18nProvider } from "../lib/i18n";
 
 function NotFoundComponent() {
@@ -162,6 +163,7 @@ function RootComponent() {
         <FoxChat />
         <BixCallHost />
         <InteractionComfort />
+        <PowerSaver />
       </I18nProvider>
     </QueryClientProvider>
   );
