@@ -19,7 +19,8 @@ import { Eye, Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { txFeedback } from '@/components/TxFeedback';
 import { BadgeCheck } from 'lucide-react';
-import { NFT_ART, NFT_NAME, type NftTier } from '@/lib/nft';
+import { NFT_ART, type NftTier } from '@/lib/nft';
+import { VaultFacilityDialog, VIP_PASS_THRESHOLD } from '@/components/VaultFacility';
 import { PresalePurchaseDialog, type PresaleSelection } from '@/components/PresalePurchaseDialog';
 import { strategyQuote } from '@/lib/presale-strategy';
 import { poolAvailability } from '@/lib/marketing';
@@ -44,7 +45,7 @@ function PresalePage() {
   const [selection, setSelection] = useState<PresaleSelection | null>(null);
   const [purchaseError, setPurchaseError] = useState('');
   const [receipt, setReceipt] = useState<{ usd: number; bix: number; serial: number; dailyUsd: number } | null>(null);
-  const [nftPreview, setNftPreview] = useState<NftTier | null>(null);
+  const [nftPreview, setNftPreview] = useState<number | null>(null);
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   const s = q.data; const cfg = s?.config;
   const pool = poolAvailability(cfg?.poolCap ?? 0, s?.poolUsed ?? 0);
@@ -105,10 +106,9 @@ function PresalePage() {
       {tab === 'packages' && <>
         {GROUPS.map(g => { const list = cfg.packages.filter(p => p.usd >= g.min && p.usd < g.max); if (!list.length) return null; return <section key={g.name} className="mt-6">
           <div className="flex items-baseline justify-between"><h2 className="font-display text-base font-black tracking-wide">{g.name}</h2><span className="text-[11px] text-muted-foreground">{g.range}</span></div>
-          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">{list.map(p => { const tier = presaleArtTier(p.usd); return <article key={p.usd} className="presale-lux-card presale-card-uniform">
+          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">{list.map(p => { return <article key={p.usd} className="presale-lux-card presale-card-uniform">
             <div className="presale-lux-inner flex h-full flex-col">
-              {valueCard(p.usd) && <img src={valueCard(p.usd)!.url} alt={`${valueCard(p.usd)!.name} NFT $${number(p.usd)}`} loading="lazy" className="value-nft mb-3" style={{ filter: p.usd > 10000 ? `hue-rotate(${Math.round(Math.log10(p.usd / 10000) * 220)}deg)` : undefined }}/>}
-              <div className="flex items-center justify-between gap-2"><span className="truncate text-[10px] font-bold text-muted-foreground">{valueCard(p.usd) ? `${valueCard(p.usd)!.name.toUpperCase()} NFT` : `${NFT_NAME[tier].toUpperCase()} · ${tier}`}</span>{!valueCard(p.usd) && <button type="button" className="nft-preview-chip" onClick={() => setNftPreview(tier)}><Eye size={12}/> NFT</button>}</div>
+              <div className="flex items-center justify-between gap-2"><span className="truncate text-[10px] font-bold text-chart-3">{p.usd >= VIP_PASS_THRESHOLD ? 'FOUNDER DEED + VIP PASS' : 'FOUNDER DEED'}</span><button type="button" className="nft-preview-chip" onClick={() => setNftPreview(p.usd)}><Eye size={12}/> Deed</button></div>
               <h3 className="presale-lux-price numeric font-display text-[clamp(1.25rem,5.5vw,1.875rem)] font-black">${number(p.usd)}</h3>
               <dl className="mt-2 grid grid-cols-2 gap-2 text-xs"><div><dt className="text-muted-foreground">Total BIX</dt><dd className="numeric font-bold text-primary"><Lock size={11} className="inline"/> {number(p.bix)}</dd></div><div><dt className="text-muted-foreground">Release</dt><dd className="numeric font-bold">{p.releaseDays} days</dd></div><div className="col-span-2"><dt className="text-muted-foreground">Earnings limit</dt><dd className="numeric font-bold text-chart-3">{maxCapLabel(p.usd)}</dd></div></dl>
               <Button className="mt-auto w-full rounded-lg" disabled={!cfg.enabled || busy !== null} onClick={() => onBuy(p.usd)}>{busy === p.usd ? 'Processing…' : 'Buy package'}</Button>
@@ -151,10 +151,6 @@ function PresalePage() {
         </>}
       </DialogContent>
     </Dialog>
-    <Dialog open={nftPreview !== null} onOpenChange={open => { if (!open) setNftPreview(null); }}>
-      <DialogContent className="nft-preview-dialog">
-        {nftPreview && <><img src={NFT_ART[nftPreview]} alt={`${NFT_NAME[nftPreview]} certificate artwork`}/><div className="p-4"><DialogTitle className="font-display text-base">{NFT_NAME[nftPreview]} · {nftPreview}</DialogTitle><DialogDescription className="mt-1 text-xs">In-app certificate artwork issued with this allocation. Not an on-chain NFT.</DialogDescription></div></>}
-      </DialogContent>
-    </Dialog>
+    {nftPreview !== null && <VaultFacilityDialog kind="presale" principal={nftPreview} days={cfg?.packages.find(x => x.usd === nftPreview)?.releaseDays ?? 180} label={`Presale $${number(nftPreview)}`} onClose={() => setNftPreview(null)}/>}
   </main></BixShell>;
 }
