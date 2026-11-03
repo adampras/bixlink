@@ -109,7 +109,7 @@ function Tile({ p, hand, self }: { p: Participant; hand: boolean; self: boolean 
   const ref = useRef<HTMLVideoElement>(null);
   const pub = p.getTrackPublication(Track.Source.Camera);
   const track = pub && !pub.isMuted ? pub.track : undefined;
-  useEffect(() => { const el = ref.current; if (track && el) { track.attach(el); return () => { track.detach(el); }; } }, [track]);
+  useEffect(() => { const el = ref.current; if (track && el) { track.attach(el); return () => { track.detach(el); }; } return undefined; }, [track]);
   const muted = p.getTrackPublication(Track.Source.Microphone)?.isMuted ?? true;
   const name = p.name || 'Member';
   return <div className={`comm-meet-tile ${p.isSpeaking ? 'is-speaking' : ''}`}>
