@@ -90,16 +90,18 @@ function CallInner() {
 
   if (chatWith) return <ChatRoom me={me} peer={chatWith} tier={tier} onBack={() => setChatWith(null)}/>;
   const open = (id: string, name: string) => setChatWith({ id, name });
-  const TITLE: Record<CommTab, string> = { chat: 'CHAT', call: 'PANGGILAN', community: 'KOMUNITAS', setting: 'PENGATURAN' };
+  const TITLE: Record<CommTab, string> = { chat: 'CHAT', call: 'PANGGILAN', community: 'CHAT', setting: 'PENGATURAN' };
+  const view: CommTab = tab === 'community' ? 'chat' : tab;
 
   return <main className="mx-auto max-w-xl px-4 py-5">
     <FindMember bar me={me} tier={tier} onChat={open}/>
-    <div className="comm-subhead"><b>{TITLE[tab]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
+    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}
+      {view === 'setting' ? <Link to="/call" search={{ tab: 'chat' }} className="comm-gear" aria-label="Tutup pengaturan">✕</Link>
+        : <Link to="/call" search={{ tab: 'setting' }} className="comm-gear" aria-label="Pengaturan BIX CALL"><Settings size={16}/></Link>}</div>
 
-    {tab === 'chat' && <ChatTab me={me} tier={tier} onOpen={open}/>}
-    {tab === 'call' && <><BixGroupMeeting me={me} tier={tier}/><CallTab me={me} tier={tier} onChat={open}/></>}
-    {tab === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
-    {tab === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/></>}
+    {view === 'chat' && <ChatTab me={me} tier={tier} onOpen={open}/>}
+    {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
+    {view === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/></>}
   </main>;
 }
 
