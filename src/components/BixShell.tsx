@@ -25,7 +25,6 @@ import { SitePopup } from '@/components/SitePopup';
 import { MemberWelcome } from '@/components/MemberWelcome';
 import { stakingUpdates } from '@/lib/staking-activity';
 import { DockHub } from '@/components/DockHub';
-import { BixComposePad } from '@/components/BixComposePad';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
@@ -133,7 +132,6 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     <TxFeedbackHost/>
     <SitePopup path={path} popups={publicConfig?.landingContent.popups} signedIn={!!user}/>
     {user && !path.startsWith('/admin') && <MemberWelcome userId={user.id}/>}
-    {user && path !== '/call' && !path.startsWith('/admin') && !path.startsWith('/bixtok') && <BixComposePad/>}
     <footer hidden={path === '/call'} className="border-t border-border py-4"><SocialLinks links={publicConfig?.readiness.socials} signedIn={!!user}/><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
     {user && path === '/call' ? <nav aria-label="BIX CALL" data-no-translate className="glass-dock comm-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden">
       <DockHub path={path} cfg={publicConfig?.isAdmin ? undefined : publicConfig?.readiness.dockHub}/>

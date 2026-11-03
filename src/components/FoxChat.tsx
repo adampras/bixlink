@@ -26,7 +26,7 @@ export function FoxChat() {
   const [busy, setBusy] = useState(false);
   const [loanCta, setLoanCta] = useState(false);
   const navigate = useNavigate();
-  const onCall = useRouterState({ select: s => s.location.pathname === '/call' });
+  const onCall = useRouterState({ select: s => s.location.pathname.startsWith('/call') });
   const { data: cfg } = usePublicConfig();
   const end = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
