@@ -150,6 +150,7 @@ export function BixCallHost() {
 }
 
 function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Active; onAccept: () => void; onDecline: () => void; onEnd: () => void; onClose: () => void }) {
+  const router = useRouter();
   const remoteV = useRef<HTMLVideoElement>(null);
   const backV = useRef<HTMLVideoElement>(null);
   const localV = useRef<HTMLVideoElement>(null);
