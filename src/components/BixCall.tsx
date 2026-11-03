@@ -194,10 +194,25 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     await supabase.rpc('bix_chat_send' as never, { p_to: call.peerId, p_body: text, p_reply: null } as never);
     onDecline();
   };
-  /** Remote speaker volume: lower with the shield, lower again while a howl is detected. */
+  const [loud, setLoud] = useState(false);
+  const loudRef = useRef(false);
+  const [audioBlocked, setAudioBlocked] = useState(false);
+  /** Remote volume: earpiece mode is softer; loudspeaker is full; lowered while a howl is detected. */
   const applyVolume = () => {
-    const base = shieldRef.current ? 0.7 : 0.9;
-    audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = howlRef.current ? base * 0.75 : base; });
+    const base = loudRef.current ? 1 : shieldRef.current ? 0.8 : 0.9;
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? base * 0.75 : base; });
+  };
+  const attachAudio = (t: RemoteTrack) => {
+    const box = audioBox.current; if (!box) return;
+    box.querySelectorAll(`audio[data-sid="${t.sid}"]`).forEach(a => a.remove());
+    const el = t.attach() as HTMLAudioElement; el.dataset.sid = t.sid ?? ''; el.autoplay = true; el.setAttribute('playsinline', '');
+    box.appendChild(el); applyVolume();
+    void el.play().then(() => setAudioBlocked(false)).catch(() => setAudioBlocked(true));
+  };
+  const unlockAudio = () => {
+    void roomRef.current?.startAudio().catch(() => {});
+    audioBox.current?.querySelectorAll('audio').forEach(a => void a.play().catch(() => {}));
+    setAudioBlocked(false);
   };
   // Remote voice level: drives the waveform and the "Ruang Dekat" half-duplex duck.
   useEffect(() => {
@@ -284,7 +299,14 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const nf = !front; setFront(nf);
     await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment' }).catch(() => {});
   };
-  const speaker = () => { audioBox.current?.querySelectorAll('audio').forEach(a => { a.volume = shieldRef.current ? 0.85 : 1; void a.play().catch(() => {}); }); };
+  const speaker = async () => {
+    const n = !loud; setLoud(n); loudRef.current = n;
+    void roomRef.current?.startAudio().catch(() => {});
+    let sinkId = '';
+    if (n) { try { const outs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audiooutput'); sinkId = outs.find(d => /speaker|pengeras/i.test(d.label))?.deviceId ?? ''; } catch { /* unsupported */ } }
+    audioBox.current?.querySelectorAll('audio').forEach(a => { const s = a as HTMLAudioElement & { setSinkId?: (id: string) => Promise<void> }; void s.setSinkId?.(sinkId).catch(() => {}); void a.play().catch(() => {}); });
+    applyVolume();
+  };
   const toggleShield = () => {
     const n = !shield; setShield(n); shieldRef.current = n; voiceRef.current?.setShield(n);
     if (!n) { howlRef.current = false; setHowl(false); }
