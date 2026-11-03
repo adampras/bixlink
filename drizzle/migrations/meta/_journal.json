@@ -1009,6 +1009,13 @@
       "when": 1793675066679,
       "tag": "0143_sponsored_stake_block_and_agency",
       "breakpoints": true
+    },
+    {
+      "idx": 144,
+      "version": "7",
+      "when": 1793676886961,
+      "tag": "0144_flat_daily_package_profit",
+      "breakpoints": true
     }
   ]
 }
