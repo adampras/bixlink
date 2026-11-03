@@ -51,7 +51,7 @@ function StakePage() {
   const refreshAll = async () => { await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); await qc.invalidateQueries({ queryKey: ['my-wallet'] }); await bal.refetch(); };
   const qc = useQueryClient();
   const daily = (p: Package) => (p.price_usd * p.apy / 100 / 365);
-  useEffect(() => { setNow(Date.now()); const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  useEffect(() => { setNow(Date.now()); const t = setInterval(() => { if (!document.hidden) setNow(Date.now()); }, 1000); return () => clearInterval(t); }, []);
   const liveOf = (s: { amount_usd: number | string; apy: number | string; lock_days: number; activated_at: string | null; created_at: string }) => { const d = Math.max(0, Math.min(elapsedDays(s), s.lock_days)); return Number(s.amount_usd) * Number(s.apy) / 100 / 365 * d; };
   const activeStakes = (data?.stakes ?? []).filter(s => s.status === 'active');
   const liveTotal = activeStakes.reduce((n, s) => n + liveOf(s), 0);

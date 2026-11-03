@@ -116,7 +116,7 @@ function SovereignApp() {
         try { localStorage.setItem('sov-quotes', JSON.stringify({ savedAt: Date.now(), data: m })); } catch {}
       } catch { setSnapshot(cached ? 'Offline snapshot' : 'Data unavailable'); }
     };
-    void prices(); const timer = setInterval(() => void prices(), 30000);
+    void prices(); const timer = setInterval(() => { if (!document.hidden) void prices(); }, 30000);
     return () => { clearInterval(timer); };
   }, []);
 

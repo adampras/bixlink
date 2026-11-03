@@ -69,7 +69,7 @@ function WalletPage() {
     else if (r.status === 'expired' || r.status === 'missing') { setIntent(null); setNotice('This deposit request expired. Create a new one.'); }
     else setNotice('Still waiting for the blockchain to confirm your transfer. This updates automatically.');
   };
-  useEffect(() => { if (!intent) return; const t = setInterval(() => { poll(intent.id).catch(() => {}); }, 15000); return () => clearInterval(t); }, [intent?.id]);
+  useEffect(() => { if (!intent) return; const t = setInterval(() => { if (!document.hidden) poll(intent.id).catch(() => {}); }, 15000); return () => clearInterval(t); }, [intent?.id]);
   const [vault, setVault] = useState(false);
   const submit = async () => {
     if (modal === 'withdraw' && (amt < 10 || amt > 10000)) {
