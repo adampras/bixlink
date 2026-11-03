@@ -251,12 +251,15 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         roomRef.current = room;
         room.on(RoomEvent.TrackSubscribed, (t: RemoteTrack) => {
           if (t.kind === Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); if (backV.current) t.attach(backV.current); setRemoteVideo(true); }
-          if (t.kind === Track.Kind.Audio && audioBox.current) { audioBox.current.querySelectorAll('audio').forEach(a => a.remove()); const el = t.attach() as HTMLAudioElement; audioBox.current.appendChild(el); applyVolume(); void el.play().catch(() => {}); }
+          if (t.kind === Track.Kind.Audio) attachAudio(t);
         });
-        room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach(); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
+        room.on(RoomEvent.AudioPlaybackStatusChanged, () => setAudioBlocked(!room?.canPlaybackAudio));
+        room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach().forEach(e => e.remove()); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
         room.on(RoomEvent.ParticipantDisconnected, () => onEnd());
         room.on(RoomEvent.ConnectionQualityChanged, (q, p) => { if (p.isLocal) setQuality(String(q) as 'excellent' | 'good' | 'poor' | 'unknown'); });
         await room.connect(res.url, res.token);
+        void room.startAudio().catch(() => {});
+        room.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { if (pub.track && pub.kind === Track.Kind.Audio) attachAudio(pub.track as RemoteTrack); }));
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         try {
           const vs = await openVoiceShield(h => { howlRef.current = h; setHowl(h); applyVolume(); }); if (cancelled) { vs.stop(); return; }
@@ -334,7 +337,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     <video ref={backV} className={`bixcall-back${showVideo && !fill ? " on" : ""}`} autoPlay playsInline muted aria-hidden="true"/>
     <video ref={remoteV} className={`bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} autoPlay playsInline onClick={() => { if (showVideo) setHideUi(v => !v); }} onDoubleClick={() => setFill(v => !v)}/>
     {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Tampilkan utuh' : 'Penuhi layar'}>{fill ? '⤡ Sudut lega' : '⤢ Layar penuh'}</button>}
-    <div ref={audioBox} hidden/>
+    <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>
+    {audioBlocked && live && <button type="button" className="bc-pill is-chat" style={{ position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 5 }} onClick={unlockAudio}><Volume2 size={16}/> Ketuk untuk dengar suara</button>}
     {ear && live && <div className="bc-ear" role="button" tabIndex={0} aria-label="Ketuk dua kali untuk menyalakan layar" onDoubleClick={() => setEar(false)} onKeyDown={e => { if (e.key === 'Enter') setEar(false); }}><span>{fmt(secs)}</span><small>Mode telinga aktif · ketuk dua kali untuk kembali</small></div>}
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
@@ -369,7 +373,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         <button aria-label={mic ? 'Bisukan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button>
         {call.kind === 'video' && <button aria-label="Kamera" className={cam ? '' : 'off'} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button>}
         {call.kind === 'video' && <button aria-label="Balik kamera" onClick={() => void flip()}><SwitchCamera/></button>}
-        <button aria-label="Speaker" onClick={speaker}><Volume2/></button>
+        <button aria-label={loud ? 'Loudspeaker aktif' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={() => void speaker()}><Volume2/></button>
         {call.kind === 'voice' && <button aria-label="Mode telinga (layar gelap)" onClick={() => setEar(true)}><Ear/></button>}
         <button aria-label={shield ? 'Perisai anti-storing aktif' : 'Aktifkan perisai anti-storing'} className={shield ? 'shield' : ''} onClick={toggleShield}><ShieldCheck/></button>
         <button aria-label={near ? 'Ruang Dekat aktif' : 'Aktifkan Ruang Dekat (HP berdekatan)'} aria-pressed={near} className={near ? 'shield' : ''} onClick={toggleNear}><Radio/></button>
