@@ -176,8 +176,8 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
     <Dialpad me={me} tier={tier} onChat={onChat}/>
     <section className="comm-card"><h3 className="comm-h">Riwayat panggilan</h3>
       {hist.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada panggilan.</p> : <ul className="comm-list">{hist.map(h => <li key={h.id} className="comm-row">
-        <span className={`comm-dir ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : ''}`}>{h.caller_id === me ? '↗' : '↙'}</span>
-        <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{h.peer}</b><small className="text-muted-foreground">{h.kind === 'video' ? 'Video' : 'Suara'} · {h.status === 'missed' ? 'Tidak terjawab' : h.status === 'declined' ? 'Ditolak' : h.status === 'ended' ? 'Selesai' : h.status} · {new Date(h.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></span>
+        <span className={`comm-dir ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.caller_id === me ? '↗' : '↙'}</span>
+        <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{h.peer}</b><small className="text-muted-foreground"><em className={`comm-hbadge ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.status === 'missed' ? 'Tak terjawab' : h.status === 'declined' ? 'Ditolak' : h.caller_id === me ? 'Keluar' : 'Masuk'}</em> {h.kind === 'video' ? 'Video' : 'Suara'} · {new Date(h.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></span>
         <ActionButtons peerId={h.peerId} name={h.peer} tier={tier} canCall={h.canCall} onChat={onChat}/></li>)}</ul>}
     </section>
   </>;
@@ -465,7 +465,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
           {m.forwarded && !m.deleted_at && <em className="comm-fwd">↪ Diteruskan</em>}
           {m.reply_to && !m.deleted_at && <span className="comm-quote"><b>{q ? (q.sender_id === me ? 'Anda' : `@${name}`) : 'Balasan'}</b>{q?.deleted_at ? 'Pesan dihapus' : q?.body ?? m.reply_body ?? 'Pesan sebelumnya'}</span>}
           {m.deleted_at ? <span>🚫 {mine ? 'Anda menghapus pesan ini' : 'Pesan ini telah dihapus'}</span> : m.kind && m.kind !== 'text' ? <ChatMedia m={m} me={me} onAct={(x, a) => void reqAct(x, a)}/> : m.body}
-          <small>{m.pinned_at && '📌 '}{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && !m.deleted_at && <span className={`comm-tick${m.read_at ? ' is-read' : ''}`} aria-label={m.read_at ? 'Dibaca' : m.delivered_at ? 'Terkirim' : 'Terkirim ke server'}>{m.read_at || m.delivered_at ? ' ✓✓' : ' ✓'}</span>}</small>
+          <small>{m.pinned_at && '📌 '}{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && !m.deleted_at && <span className={`comm-tick ${m.read_at ? 'is-read' : m.delivered_at ? 'is-delivered' : 'is-sent'}`} aria-label={m.read_at ? 'Dibaca' : m.delivered_at ? 'Diterima perangkat' : 'Terkirim, penerima offline'}>{m.read_at || m.delivered_at ? ' ✓✓' : ' ✓'}</span>}</small>
           {!m.deleted_at && Object.keys(m.reactions ?? {}).length > 0 && <span className="comm-reacts">{Object.entries(Object.values(m.reactions ?? {}).reduce<Record<string, number>>((a, e) => { a[e] = (a[e] ?? 0) + 1; return a; }, {})).map(([e, n]) => <button type="button" key={e} className={m.reactions?.[me] === e ? 'is-mine' : ''} onClick={ev => { ev.stopPropagation(); void react(m, e); }}>{e}{n > 1 && <i>{n}</i>}</button>)}</span>}
           {!m.deleted_at && <button type="button" className="comm-more" aria-label="Opsi pesan" onClick={() => setMenu(m)}>⋯</button>}
         </p>;
