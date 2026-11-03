@@ -5945,3 +5945,14 @@ body[data-bc-theme=matcha] .bixcall-page .comm-badge{background:linear-gradient(
 body[data-bc-theme=matcha] .bixcall-page .comm-chips span,body[data-bc-theme=matcha] .bixcall-page .comm-chips button{border-color:rgb(127 216 138 / .3);color:#bfeac5}
 body[data-bc-theme=matcha] .bixcall{background:radial-gradient(90% 55% at 50% 22%,rgb(45 106 79 / .55),transparent 65%),radial-gradient(70% 40% at 50% 100%,rgb(255 140 26 / .16),transparent 70%),#030604}
 body[data-bc-theme=matcha] .bixcall-head span{color:#9fe3a9}
+
+/* BIX CALL — tap-to-swap PiP + crisp video */
+.bixcall-pip{z-index:4;border:1.5px solid rgb(255 215 0 / .85);box-shadow:0 10px 30px rgb(0 0 0 / .55),0 0 0 3px rgb(168 85 247 / .25);transition:box-shadow .2s,border-color .2s;cursor:pointer;will-change:transform}
+.bixcall-pip:active{box-shadow:0 0 0 3px rgb(255 215 0 / .6),0 10px 30px rgb(0 0 0 / .6)}
+.bixcall-pip.is-peer{object-fit:cover}
+.bixcall-remote,.bixcall-pip{image-rendering:auto;backface-visibility:hidden;transform-style:flat}
+.bixcall-remote.on{filter:contrast(1.06) saturate(1.06) brightness(1.02)}
+.bixcall-self-big{animation:bcSwapIn .28s ease-out}
+.bixcall-pip{animation:bcSwapIn .28s ease-out}
+@keyframes bcSwapIn{from{opacity:.4}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.bixcall-pip,.bixcall-self-big{animation:none}}

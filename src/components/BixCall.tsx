@@ -174,6 +174,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const [remoteVideo, setRemoteVideo] = useState(false);
   const [pip, setPip] = useState({ x: 0, y: 0 });
   const [fill, setFill] = useState(true);
+  const [swapped, setSwapped] = useState(false);
   const [hideUi, setHideUi] = useState(false);
   const live = call.status === 'accepted';
   const done = ['ended', 'declined', 'missed'].includes(call.status);
@@ -272,7 +273,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         }
         if (call.kind === 'video') {
           await room.localParticipant.setCameraEnabled(true, { facingMode: 'user', resolution: { width: 1280, height: 720, frameRate: 30 } },
-            { videoCodec: 'vp8', simulcast: true, degradationPreference: 'maintain-resolution', videoEncoding: { maxBitrate: 1_800_000, maxFramerate: 30 } });
+            { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: 2_600_000, maxFramerate: 30, priority: 'high' } as never,
+              videoSimulcastLayers: [{ width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 800_000, maxFramerate: 30 } }] as never });
           const pub = room.localParticipant.getTrackPublication(Track.Source.Camera);
           const mt = pub?.track?.mediaStreamTrack; if (mt && 'contentHint' in mt) mt.contentHint = 'detail';
           if (pub?.track && localV.current) pub.track.attach(localV.current);
@@ -321,9 +323,9 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const openChat = () => { onClose(); void router.navigate({ to: '/call', search: { chat: call.peerId } as never }); };
 
   const dragPip = (e: React.PointerEvent) => {
-    const sx = e.clientX - pip.x, sy = e.clientY - pip.y;
-    const move = (m: PointerEvent) => setPip({ x: m.clientX - sx, y: m.clientY - sy });
-    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+    const sx = e.clientX - pip.x, sy = e.clientY - pip.y, ox = e.clientX, oy = e.clientY; let moved = false;
+    const move = (m: PointerEvent) => { if (Math.abs(m.clientX - ox) + Math.abs(m.clientY - oy) > 8) moved = true; if (moved) setPip({ x: m.clientX - sx, y: m.clientY - sy }); };
+    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); if (!moved) { setSwapped(v => !v); try { navigator.vibrate?.(12); } catch { /* unsupported */ } } };
     window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
   };
 
@@ -337,7 +339,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const showVideo = remoteVideo && call.kind === 'video';
   return <div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}`} role="dialog" aria-label="BIX CALL">
     <video ref={backV} className={`bixcall-back${showVideo && !fill ? " on" : ""}`} autoPlay playsInline muted aria-hidden="true"/>
-    <video ref={remoteV} className={`bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} autoPlay playsInline onClick={() => { if (showVideo) setHideUi(v => !v); }} onDoubleClick={() => setFill(v => !v)}/>
+    <video ref={remoteV} className={swapped && showVideo && live ? 'bixcall-pip is-peer' : `bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} style={swapped && showVideo && live ? { transform: `translate(${pip.x}px, ${pip.y}px)` } : undefined} onPointerDown={swapped && showVideo && live ? dragPip : undefined} autoPlay playsInline onClick={() => { if (showVideo && !swapped) setHideUi(v => !v); }} onDoubleClick={() => { if (!swapped) setFill(v => !v); }}/>
     {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Tampilkan utuh' : 'Penuhi layar'}>{fill ? '⤡ Sudut lega' : '⤢ Layar penuh'}</button>}
     <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>
     {audioBlocked && live && <button type="button" className="bc-pill is-chat" style={{ position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 5 }} onClick={unlockAudio}><Volume2 size={16}/> Ketuk untuk dengar suara</button>}
@@ -359,7 +361,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     </div>}
     <div className="bixcall-status"><i className={dot}/>{statusText}</div>
     {howl && live && <div className="bc-howl" role="status">Pantulan suara diredam otomatis</div>}
-    {call.kind === 'video' && live && <video ref={localV} className="bixcall-pip" style={{ transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={dragPip} autoPlay playsInline muted/>}
+    {call.kind === 'video' && live && <video ref={localV} className={swapped && showVideo ? 'bixcall-remote on bixcall-self-big' : 'bixcall-pip'} style={swapped && showVideo ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={swapped && showVideo ? undefined : dragPip} onClick={() => { if (swapped && showVideo) setHideUi(v => !v); }} autoPlay playsInline muted/>}
     <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}`}>
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Maaf, sedang sibuk. Nanti saya hubungi kembali.', 'Sedang rapat, kirim pesan saja ya.', 'Saya telepon balik 5 menit lagi.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
