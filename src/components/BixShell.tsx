@@ -1,4 +1,3 @@
-import { QuantumHud } from '@/components/TechSuite';
 import { BixZoomButton } from '@/components/BixZoom';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -110,7 +109,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   const selectedLanguage = LANGUAGES.find(item => item.code === language) ?? LANGUAGES[0];
 
   return <div data-presentation-theme={presentationTheme} style={{ ["--brand-watermark" as string]: `url(${headerMark.url})` }} className={`site-shell ${path === '/admin' ? 'admin1-shell ' : ''}min-h-screen bg-background pb-24 text-foreground xl:pb-0`}>
-    {navLoading && <div className="route-progress" aria-hidden/>}<div className="sticky-top-bar">{path !== '/call' && <QuantumHud/>}<header hidden={path === '/call'} className="site-header" data-no-translate><div className="mx-auto grid grid-cols-[auto_minmax(0,1fr)] max-w-7xl items-center gap-2 px-5 py-3 xl:flex xl:justify-between md:px-8">
+    {navLoading && <div className="route-progress" aria-hidden/>}<div className="sticky-top-bar"><header hidden={path === '/call'} className="site-header" data-no-translate><div className="mx-auto grid grid-cols-[auto_minmax(0,1fr)] max-w-7xl items-center gap-2 px-5 py-3 xl:flex xl:justify-between md:px-8">
       <Link to={"/"} className="header-brand"><img src={headerMark.url} width={42} height={42} alt="BIXLINK fox emblem" className="rounded-full object-cover"/><span className="brand-mark" aria-label="BIXLINK"><i>BIX</i><i>LI</i><i>NK</i></span></Link>
       {user && <nav className="hidden items-center gap-2 xl:flex">
         {NAV.map(n => <Link key={n.to} to={n.to} className={`nav-link ${path === n.to ? 'active' : ''}`}><n.icon size={15}/>{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : n.to === '/boost' ? 'boost' : 'network')}</Link>)}
