@@ -9,7 +9,7 @@ import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, bixtr
 import { BixtradeBot3D, BOT_PERSONA } from '@/components/BixtradeBot3D';
 import { useServerFn } from '@tanstack/react-start';
 import { getBixtradePrices, runBixtradeCycle, runBixtradeLive } from '@/lib/bixtrade.functions';
-import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Network, Radar, Send, Share2, Volume2, VolumeX, Zap } from 'lucide-react';
+import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Network, Radar, Send, Share2, Volume2, VolumeX, Zap, Menu, X, ChevronDown } from 'lucide-react';
 
 export const Route = createFileRoute('/bixtrade')({
   head: () => ({ meta: [
@@ -52,6 +52,7 @@ function BixtradePage() {
   const [pairFilter, setPairFilter] = useState('ALL');
   const [logFilter, setLogFilter] = useState<'all' | 'win' | 'scratch'>('all');
   const [receipt, setReceipt] = useState<Exec | null>(null);
+  const [menu, setMenu] = useState(false);
   useEffect(() => { void supabase.rpc('is_bix_admin').then(({ data }) => setIsAdmin(data === true)); }, [uid]);
   const audio = useRef<AudioContext | null>(null);
   useEffect(() => { setSound(localStorage.getItem('bixtrade-sound') === '1'); }, []);
@@ -190,14 +191,14 @@ function BixtradePage() {
     {stream.length > 0 && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ AI SCAN · {s}</span>)}</div></div>}
 
     {tab === 'cockpit' && <>
-    <BixtradeTreasury execs={fundExecs} onOpenLogs={() => setTab('logs')}/>
+    <div id="arb-track"/><BixtradeTreasury execs={fundExecs} onOpenLogs={() => setTab('logs')}/>
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-2"/> Live execution pulse</h2>
       <div className="mt-3 grid gap-2">{fundExecs.slice(0, 3).map((x, i) => <button type="button" key={x.id} style={{ animationDelay: `${i * 60}ms` }} onClick={() => setReceipt(x)} className="arb-pulse-row text-left"><i/><span><b>{x.pair}</b> {x.buy_venue} → {x.sell_venue}<br/><span className="text-muted-foreground">{Number(x.notional_usd).toFixed(2)} USDT · {new Date(x.executed_at).toLocaleTimeString()}</span></span><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)}</b></button>)}
         {!fundExecs.length && <p className="text-xs text-muted-foreground">{capital > 0 ? 'Bot is scanning — the first executions appear within a few minutes.' : funding === 'virtual' ? 'Add Neural AI Pool allocation to start executions. Trade size follows your capital (15–50% per ticket).' : 'Executions start after your deposit is approved. Trade size follows your capital (15–50% per ticket).'}</p>}</div>
     </section>
 
-    <section className="arb-card mt-4">
+    <section id="arb-wallet" className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><ArrowDownToLine size={18} className="text-chart-3"/> Bot wallet</h2>
       <div className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
         <div className="arb-stat"><p>{funding === 'real' ? 'Main wallet' : 'Recorded P/L'}</p><b>{funding === 'real' ? (mainUsdt === null ? '—' : mainUsdt.toFixed(2)) : realized.toFixed(2)}</b><small>{funding === 'real' ? 'USDT available' : 'pool allocation'}</small></div>
