@@ -1058,6 +1058,13 @@
       "when": 1793772891288,
       "tag": "0150_p2p_market_pulse",
       "breakpoints": true
+    },
+    {
+      "idx": 151,
+      "version": "7",
+      "when": 1793772924605,
+      "tag": "0151_p2p_market_pulse_merchants",
+      "breakpoints": true
     }
   ]
 }
