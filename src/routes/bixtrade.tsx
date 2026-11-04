@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { BixtradePlan } from '@/components/BixtradePlan';
 import { BixtradeTreasury } from '@/components/BixtradeTreasury';
+import { BotFleetStage } from '@/components/BotFleetStage';
 import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, bixtradeBotMood, checkBixtradeRequest, dailySeries, projectBixtrade, readBixtrade, withdrawNet, type BixtradeSettings, type BixtradeStrategy } from '@/lib/bixtrade';
 import { BixtradeBot3D, BOT_PERSONA } from '@/components/BixtradeBot3D';
 import { useServerFn } from '@tanstack/react-start';
@@ -53,6 +54,7 @@ function BixtradePage() {
   const [logFilter, setLogFilter] = useState<'all' | 'win' | 'scratch'>('all');
   const [receipt, setReceipt] = useState<Exec | null>(null);
   const [menu, setMenu] = useState(false);
+  const [fleet, setFleet] = useState(false);
   useEffect(() => { void supabase.rpc('is_bix_admin').then(({ data }) => setIsAdmin(data === true)); }, [uid]);
   const audio = useRef<AudioContext | null>(null);
   useEffect(() => { setSound(localStorage.getItem('bixtrade-sound') === '1'); }, []);
@@ -153,7 +155,7 @@ function BixtradePage() {
   const n = Number(reqAmt) || 0;
   const go = (t: typeof tab, f?: 'real' | 'virtual', anchor?: string) => { setTab(t); if (f) setFunding(f); setMenu(false); setTimeout(() => (anchor ? document.getElementById(anchor) : document.querySelector('.arb-tabs'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); };
   const MENU: { title: string; items: [string, () => void][] }[] = [
-    { title: 'Trading Engine', items: [['Live Cockpit', () => go('cockpit')], ['Spread Radar 6 Bursa', () => go('radar')], ['Peta Rute Arbitrase', () => go('radar')]] },
+    { title: 'Trading Engine', items: [['Neural Bot Arsenal', () => { setMenu(false); setFleet(true); }], ['Live Cockpit', () => go('cockpit')], ['Spread Radar 6 Bursa', () => go('radar')], ['Peta Rute Arbitrase', () => go('radar')]] },
     { title: 'Rekam Jejak Nyata', items: [['Track Record', () => go('cockpit', undefined, 'arb-track')], ['Log Eksekusi & Resi', () => go('logs')], ['Request Saya', () => go('logs')]] },
     { title: 'Analisis AI', items: [['Grafik Kinerja', () => go('ai')], ['Kalkulator Proyeksi', () => go('ai')]] },
     { title: 'Modal Bot', items: [['Live Asset Engine', () => go('cockpit', 'real', 'arb-wallet')], ['Neural AI Pool', () => go('cockpit', 'virtual', 'arb-wallet')]] },
@@ -212,7 +214,7 @@ function BixtradePage() {
         <Button variant={mode === 'withdraw' ? 'default' : 'outline'} onClick={() => setMode('withdraw')} disabled={!cfg.withdrawOpen}><ArrowUpFromLine size={15}/> Withdraw</Button>
       </div>
       <div className="mt-3 grid gap-2">
-        <p className="text-[11px] text-muted-foreground">Strategy</p>
+        <div className="flex items-center justify-between"><p className="text-[11px] text-muted-foreground">Strategy · <b className="text-foreground">{BOT_PERSONA[strategy].name}</b></p><button type="button" className="fleet-open" onClick={() => setFleet(true)}>Buka Bot Arsenal ⤢</button></div>
         <div className="arb-botpick">{BIXTRADE_STRATEGIES.map(s => { const pz = BOT_PERSONA[s.key]; return <button key={s.key} type="button" aria-pressed={strategy === s.key} onClick={() => { navigator.vibrate?.(12); setStrategy(s.key); }} data-variant={pz.variant} className={`arb-botcard ${strategy === s.key ? 'is-on' : ''}`}><BixtradeBot3D mini mood={strategy === s.key ? (mood === 'sleep' ? 'scan' : mood) : 'scan'} strategy={s.key}/><b>{pz.name}</b><span>{s.name}</span><span>{s.pairs}</span><em>Risk {s.risk}</em></button>; })}</div>
         <label className="mt-1 text-[11px] text-muted-foreground">Amount (USDT) {mode === 'deposit' ? `· ${cfg.minAlloc}–${cfg.maxAlloc}` : `· min ${cfg.minWithdraw} · fee ${cfg.withdrawFeePct}%`}
           <input className="form-input mt-1" type="number" inputMode="decimal" value={reqAmt} onChange={e => setReqAmt(e.target.value)} placeholder="0.00"/></label>
@@ -287,6 +289,7 @@ function BixtradePage() {
 
     </>}
 
+    {fleet && <BotFleetStage value={strategy} onPick={k => { setStrategy(k); setFleet(false); }} onClose={() => setFleet(false)}/>}
     {receipt && <div className="zoom-center" role="dialog" aria-modal="true" aria-label="Execution receipt" onClick={() => setReceipt(null)}><div className="zoom-panel arb-receipt" onClick={e => e.stopPropagation()}>
       <p className="shop-eyebrow">EXECUTION RECEIPT</p>
       <h3 className="font-display text-xl font-bold">{receipt.pair}</h3>

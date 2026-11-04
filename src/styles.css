@@ -6204,3 +6204,39 @@ html.comm-room-open,html.comm-room-open body{overflow:hidden;overscroll-behavior
 .arb-drawer details button:hover{color:var(--chart-3);background:var(--secondary)}
 .arb-drawer-cta{display:grid;gap:.6rem;margin-top:1.25rem}
 @keyframes arbDrawer{from{transform:translateX(100%)}to{transform:none}}
+
+/* Neural Bot Arsenal — full-screen bot stage */
+.fleet-open { font-size:11px; font-weight:700; color:var(--chart-3); border:1px solid color-mix(in oklab, var(--chart-3) 45%, transparent); border-radius:999px; padding:4px 10px; }
+.fleet-stage { position:fixed; inset:0; z-index:90; overflow-y:auto; background:radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--chart-3) 14%, transparent), transparent 55%), oklch(0.11 0.01 280); padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 24px); }
+.fleet-head { position:sticky; top:0; z-index:2; display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 4px 14px; background:linear-gradient(oklch(0.11 0.01 280), oklch(0.11 0.01 280 / .85)); border-bottom:1px solid color-mix(in oklab, var(--primary) 35%, transparent); }
+.fleet-head p { font-size:10px; letter-spacing:.22em; color:var(--muted-foreground); }
+.fleet-head h2 { font-family:var(--font-display); font-size:24px; font-weight:800; letter-spacing:.04em; color:var(--foreground); }
+.fleet-head h2 span { background:linear-gradient(90deg, var(--primary), var(--chart-3)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.fleet-head button { display:grid; place-items:center; width:40px; height:40px; border-radius:999px; border:1px solid var(--border); color:var(--foreground); }
+.fleet-list { display:grid; gap:14px; max-width:720px; margin:16px auto 0; }
+.fleet-card { --bcard: var(--chart-3); display:grid; grid-template-columns:120px 1fr; gap:12px; align-items:center; padding:14px; border-radius:22px; border:1px solid color-mix(in oklab, var(--bcard) 40%, var(--border)); background:linear-gradient(150deg, color-mix(in oklab, var(--bcard) 16%, oklch(0.14 0.01 280)), oklch(0.1 0.01 280)); box-shadow:0 18px 40px -24px var(--bcard); }
+.fleet-card[data-variant="aegis"] { --bcard: var(--bot-aegis); } .fleet-card[data-variant="nexus"] { --bcard: var(--bot-nexus); } .fleet-card[data-variant="vortex"] { --bcard: var(--bot-vortex); }
+.fleet-card.is-on { outline:2px solid var(--bcard); }
+.fleet-body { display:grid; gap:4px; }
+.fleet-body > b { font-family:var(--font-display); font-size:20px; letter-spacing:.06em; color:var(--bcard); }
+.fleet-body > span { font-size:13px; color:var(--foreground); }
+.fleet-body ul { margin:4px 0; display:grid; gap:2px; font-size:12px; color:var(--muted-foreground); }
+.fleet-body li::before { content:"◆ "; color:var(--bcard); }
+.fleet-body em { font-style:normal; font-size:11px; color:var(--muted-foreground); }
+.fleet-body button { margin-top:6px; display:flex; justify-content:center; align-items:center; gap:6px; min-height:42px; border-radius:14px; font-weight:800; background:var(--bcard); color:oklch(0.12 0.01 280); }
+.fleet-note { max-width:720px; margin:16px auto 0; font-size:11px; color:var(--muted-foreground); text-align:center; }
+/* BIXTRADE-style landing */
+.ltx { max-width:1100px; margin:0 auto; padding:16px 20px 8px; }
+.ltx-bar { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border:1px solid var(--border); border-radius:16px; background:oklch(0.1 0.01 280 / .9); }
+.ltx-bar span, .ltx h1 span { color:var(--chart-3); }
+.ltx-hero { display:grid; grid-template-columns:1.2fr 1fr; gap:12px; align-items:center; margin-top:14px; padding:18px; border-radius:24px; border:1px solid color-mix(in oklab, var(--primary) 35%, var(--border)); background:radial-gradient(circle at 80% 30%, color-mix(in oklab, var(--chart-3) 18%, transparent), transparent 60%), oklch(0.1 0.01 280); }
+.ltx h1 { font-size:clamp(24px, 6vw, 44px); font-weight:800; line-height:1.1; color:var(--foreground); }
+.ltx-sub { margin-top:8px; font-size:13px; color:var(--muted-foreground); }
+.ltx-cta { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.ltx-go, .ltx-ghost { min-height:42px; display:inline-flex; align-items:center; padding:0 18px; border-radius:14px; font-weight:800; font-size:13px; }
+.ltx-go { background:var(--primary); color:var(--primary-foreground); }
+.ltx-ghost { border:1px solid var(--border); color:var(--foreground); }
+.ltx-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
+.ltx-fleet { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+.ltx-note { margin-top:10px; font-size:10px; color:var(--muted-foreground); }
+@media (max-width:640px) { .ltx-hero { grid-template-columns:1fr; } .ltx-grid { grid-template-columns:repeat(2,1fr); } .fleet-card { grid-template-columns:96px 1fr; } }
