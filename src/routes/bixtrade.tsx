@@ -54,7 +54,6 @@ function BixtradePage() {
   const [logFilter, setLogFilter] = useState<'all' | 'win' | 'scratch'>('all');
   const [receipt, setReceipt] = useState<Exec | null>(null);
   const [menu, setMenu] = useState(false);
-  const [fleet, setFleet] = useState(false);
   useEffect(() => { void supabase.rpc('is_bix_admin').then(({ data }) => setIsAdmin(data === true)); }, [uid]);
   const audio = useRef<AudioContext | null>(null);
   useEffect(() => { setSound(localStorage.getItem('bixtrade-sound') === '1'); }, []);
@@ -155,7 +154,7 @@ function BixtradePage() {
   const n = Number(reqAmt) || 0;
   const go = (t: typeof tab, f?: 'real' | 'virtual', anchor?: string) => { setTab(t); if (f) setFunding(f); setMenu(false); setTimeout(() => (anchor ? document.getElementById(anchor) : document.querySelector('.arb-tabs'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); };
   const MENU: { title: string; items: [string, () => void][] }[] = [
-    { title: 'Trading Engine', items: [['Neural Bot Arsenal', () => { setMenu(false); setFleet(true); }], ['Live Cockpit', () => go('cockpit')], ['Spread Radar 6 Bursa', () => go('radar')], ['Peta Rute Arbitrase', () => go('radar')]] },
+    { title: 'Trading Engine', items: [['Neural Bot Arsenal', () => go('bots')], ['Live Cockpit', () => go('cockpit')], ['Spread Radar 6 Bursa', () => go('radar')], ['Peta Rute Arbitrase', () => go('radar')]] },
     { title: 'Rekam Jejak Nyata', items: [['Track Record', () => go('cockpit', undefined, 'arb-track')], ['Log Eksekusi & Resi', () => go('logs')], ['Request Saya', () => go('logs')]] },
     { title: 'Analisis AI', items: [['Grafik Kinerja', () => go('ai')], ['Kalkulator Proyeksi', () => go('ai')]] },
     { title: 'Modal Bot', items: [['Live Asset Engine', () => go('cockpit', 'real', 'arb-wallet')], ['Neural AI Pool', () => go('cockpit', 'virtual', 'arb-wallet')]] },
@@ -290,7 +289,6 @@ function BixtradePage() {
 
     </>}
 
-    {fleet && <BotFleetStage value={strategy} onPick={k => { setStrategy(k); setFleet(false); }} onClose={() => setFleet(false)}/>}
     {receipt && <div className="zoom-center" role="dialog" aria-modal="true" aria-label="Execution receipt" onClick={() => setReceipt(null)}><div className="zoom-panel arb-receipt" onClick={e => e.stopPropagation()}>
       <p className="shop-eyebrow">EXECUTION RECEIPT</p>
       <h3 className="font-display text-xl font-bold">{receipt.pair}</h3>
