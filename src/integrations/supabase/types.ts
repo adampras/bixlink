@@ -3443,6 +3443,7 @@ export type Database = {
       bix_owner_wallets_save_extra: { Args: { p_wallets: Json }; Returns: Json }
       bix_p2p_bix_delta: { Args: { p_user: string }; Returns: number }
       bix_p2p_cancel: { Args: { p_offer: string }; Returns: undefined }
+      bix_p2p_market_pulse: { Args: never; Returns: Json }
       bix_p2p_post: {
         Args: { p_amount: number; p_price: number; p_side: string }
         Returns: string

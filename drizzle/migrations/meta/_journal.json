@@ -1051,6 +1051,13 @@
       "when": 1793711517501,
       "tag": "0149_bix_profile_photo_status_stories",
       "breakpoints": true
+    },
+    {
+      "idx": 150,
+      "version": "7",
+      "when": 1793772891288,
+      "tag": "0150_p2p_market_pulse",
+      "breakpoints": true
     }
   ]
 }
