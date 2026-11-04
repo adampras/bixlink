@@ -4,6 +4,7 @@ import { Camera, Eye, Plus, Trash2, Type, Video as VideoIcon, X } from 'lucide-r
 import { supabase } from '@/integrations/supabase/client';
 import { BixAvatar, useSignedUrl } from '@/components/BixAvatar';
 import { invalidateCard, saveStatus } from '@/lib/bix-avatar';
+import { compressImage } from '@/lib/bix-image';
 
 export type Story = { id: string; kind: 'text' | 'photo' | 'video'; media_path: string | null; caption: string | null; bg: string; created_at: string; viewed: boolean; views?: number | null };
 export type StoryGroup = { user_id: string; name: string; avatar_path: string | null; mine: boolean; unseen: boolean; stories: Story[] };
@@ -20,21 +21,39 @@ export function useStoryFeed(me: string) {
 }
 
 /** WhatsApp-style story strip at the top of BIX CHAT. */
-export function StoryBar({ me, myName }: { me: string; myName: string }) {
+export function StoryBar({ me, myName, list: asList }: { me: string; myName: string; list?: boolean }) {
   const { groups, reload } = useStoryFeed(me);
   const [view, setView] = useState<number | null>(null);
-  const [compose, setCompose] = useState(false);
+  const [compose, setCompose] = useState<false | 'text' | 'photo'>(false);
   const list = groups ?? [];
   const mineIdx = list.findIndex(g => g.mine);
   const others = list.filter(g => !g.mine);
+  const portals = <>
+    {view !== null && list[view] && createPortal(<StoryViewer me={me} groups={list} start={view} onClose={() => { setView(null); void reload(); }} onDeleted={() => void reload()}/>, document.body)}
+    {compose && createPortal(<StoryComposer me={me} start={compose} onClose={() => setCompose(false)} onPosted={() => { setCompose(false); void reload(); invalidateCard(me); }}/>, document.body)}
+  </>;
+  if (asList) return <section className="bx-upd" aria-label="Status">
+    <h3>Status</h3>
+    <button type="button" className="bx-upd-row" onClick={() => mineIdx >= 0 ? setView(mineIdx) : setCompose('text')}>
+      <span className="bx-upd-me"><BixAvatar userId={me} name={myName} className="bx-story-ava" story={mineIdx >= 0 ? 'seen' : null}/><i onClick={e => { e.stopPropagation(); setCompose('text'); }}><Plus size={13}/></i></span>
+      <span><b>{mineIdx >= 0 ? 'Status saya' : 'Tambah Status'}</b><small>{mineIdx >= 0 ? `${list[mineIdx]?.stories.length ?? 0} pembaruan · ketuk untuk lihat` : 'Akan hilang setelah 24 jam'}</small></span>
+    </button>
+    <p className="bx-upd-label">Pembaruan terkini</p>
+    {groups === null ? <p className="bx-stories-empty">Memuat…</p> : others.length === 0 ? <p className="bx-stories-empty">Status dari kontak chat, tim jaringan, dan teman saling follow muncul di sini selama 24 jam.</p>
+      : others.map(g => { const i = list.indexOf(g); const last = g.stories[g.stories.length - 1]; return <button key={g.user_id} type="button" className="bx-upd-row" onClick={() => setView(i)}>
+        <BixAvatar userId={g.user_id} path={g.avatar_path} name={g.name} className="bx-story-ava" story={g.unseen ? 'new' : 'seen'}/>
+        <span><b>@{g.name}</b><small>{last ? ago(last.created_at) : ''}</small></span></button>; })}
+    <div className="bx-upd-fabs"><button type="button" aria-label="Status teks" className="is-pen" onClick={() => setCompose('text')}><Type size={18}/></button><button type="button" aria-label="Status foto atau video" onClick={() => setCompose('photo')}><Camera size={22}/></button></div>
+    {portals}
+  </section>;
   return <section className="bx-stories" aria-label="Story 24 jam">
     <div className="bx-stories-row">
       <div className="bx-story-me">
-        <button type="button" className="bx-story-item" onClick={() => mineIdx >= 0 ? setView(mineIdx) : setCompose(true)}>
+        <button type="button" className="bx-story-item" onClick={() => mineIdx >= 0 ? setView(mineIdx) : setCompose('text')}>
           <BixAvatar userId={me} name={myName} className="bx-story-ava" story={mineIdx >= 0 ? 'seen' : null}/>
           <small>Story saya</small>
         </button>
-        <button type="button" className="bx-story-add" aria-label="Buat story" onClick={() => setCompose(true)}><Plus size={13}/></button>
+        <button type="button" className="bx-story-add" aria-label="Buat story" onClick={() => setCompose('text')}><Plus size={13}/></button>
       </div>
       {others.map(g => { const i = list.indexOf(g); return <button key={g.user_id} type="button" className="bx-story-item" onClick={() => setView(i)}>
         <BixAvatar userId={g.user_id} path={g.avatar_path} name={g.name} className="bx-story-ava" story={g.unseen ? 'new' : 'seen'}/>
@@ -42,8 +61,7 @@ export function StoryBar({ me, myName }: { me: string; myName: string }) {
       </button>; })}
       {groups && others.length === 0 && <p className="bx-stories-empty">Story dari kontak chat, tim jaringan, dan teman saling follow muncul di sini selama 24 jam.</p>}
     </div>
-    {view !== null && list[view] && createPortal(<StoryViewer me={me} groups={list} start={view} onClose={() => { setView(null); void reload(); }} onDeleted={() => void reload()}/>, document.body)}
-    {compose && createPortal(<StoryComposer me={me} onClose={() => setCompose(false)} onPosted={() => { setCompose(false); void reload(); invalidateCard(me); }}/>, document.body)}
+    {portals}
   </section>;
 }
 
@@ -131,7 +149,10 @@ function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; gr
   </div>;
 }
 
-function StoryComposer({ me, onClose, onPosted }: { me: string; onClose: () => void; onPosted: () => void }) {
+function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: 'text' | 'photo'; onClose: () => void; onPosted: () => void }) {
+  const opened = useRef(false);
+  useEffect(() => { if (start === 'photo' && !opened.current) { opened.current = true; mediaRef.current?.click(); } }, [start]);
+  const mediaRef = useRef<HTMLInputElement>(null);
   const [mode, setMode] = useState<'text' | 'photo' | 'video'>('text');
   const [text, setText] = useState('');
   const [bg, setBg] = useState('gold');
@@ -164,7 +185,8 @@ function StoryComposer({ me, onClose, onPosted }: { me: string; onClose: () => v
         if (!file) throw new Error('Pilih media terlebih dulu');
         const ext = (file.name.split('.').pop() || (mode === 'photo' ? 'jpg' : 'mp4')).toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5);
         path = `${me}/${crypto.randomUUID()}.${ext}`;
-        const up = await supabase.storage.from('bix-stories').upload(path, file, { contentType: file.type, upsert: false });
+        const body = mode === 'photo' ? await compressImage(file) : file;
+        const up = await supabase.storage.from('bix-stories').upload(path, body, { contentType: body.type || file.type, upsert: false });
         if (up.error) throw new Error(up.error.message);
       }
       const { error } = await supabase.rpc('bix_story_post' as never, { p_kind: mode, p_path: path, p_caption: text, p_bg: bg } as never);
@@ -183,6 +205,7 @@ function StoryComposer({ me, onClose, onPosted }: { me: string; onClose: () => v
       <button type="button" className={mode === 'video' ? 'is-on' : ''} onClick={() => videoRef.current?.click()}><VideoIcon size={15}/>Video</button>
     </div>
     <input ref={photoRef} type="file" accept="image/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void pick(f, 'photo'); }}/>
+    <input ref={mediaRef} type="file" accept="image/*,video/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void pick(f, f.type.startsWith('video/') ? 'video' : 'photo'); }}/>
     <input ref={videoRef} type="file" accept="video/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void pick(f, 'video'); }}/>
     {mode === 'text' ? <div className={`bx-sc-canvas bx-sv-text is-${bg}`}><textarea value={text} onChange={e => setText(e.target.value)} maxLength={200} placeholder="Tulis status Anda…" aria-label="Teks story"/></div>
       : preview && <div className="bx-sc-canvas">{mode === 'photo' ? <img src={preview} alt="Pratinjau story"/> : <video src={preview} controls playsInline/>}</div>}

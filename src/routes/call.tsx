@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-const COMM_TABS: string[] = ['chat', 'call', 'community', 'setting'];
+const COMM_TABS: string[] = ['chat', 'updates', 'call', 'community', 'setting'];
 import { useEffect, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
@@ -12,6 +12,8 @@ import { BixShell } from '@/components/BixShell';
 import { BixAvatar, useBixCard } from '@/components/BixAvatar';
 import { StoryBar } from '@/components/BixStories';
 import { pushNotify } from '@/lib/bix-push';
+import { compressImage } from '@/lib/bix-image';
+import { Camera, MoreVertical } from 'lucide-react';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
 
 export const Route = createFileRoute('/call')({
@@ -25,7 +27,7 @@ export const Route = createFileRoute('/call')({
   },
   component: CallPage,
 });
-type CommTab = 'chat' | 'call' | 'community' | 'setting';
+type CommTab = 'chat' | 'updates' | 'call' | 'community' | 'setting';
 type CallSearch = { tab?: CommTab; chat?: string; n?: string };
 
 type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call: boolean; avatar_path?: string | null; status_text?: string | null };
@@ -60,6 +62,7 @@ function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'p
   }
   if (!url) return <span className="comm-media-wait">Memuat…</span>;
   if (m.kind === 'image') return <a href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Foto chat" className="comm-img" loading="lazy"/></a>;
+  if (m.kind === 'file' && (m.meta?.mime ?? '').startsWith('video/')) return <video src={url} controls playsInline preload="metadata" className="comm-img"/>;
   if (m.kind === 'file') return <a className="comm-filecard" href={url} target="_blank" rel="noopener noreferrer"><i>{fileIcon(m.meta?.name)}</i><span><b>{m.meta?.name ?? 'Dokumen'}</b><small>{fmtSize(m.meta?.size)} · Unduh</small></span></a>;
   return <VoiceNote url={url}/>;
 }
@@ -90,18 +93,26 @@ function CallInner() {
 
   if (chatWith) return <ChatRoom me={me} peer={chatWith} tier={tier} onBack={() => setChatWith(null)}/>;
   const open = (id: string, name: string) => setChatWith({ id, name });
-  const TITLE: Record<CommTab, string> = { chat: 'CHAT', call: 'PANGGILAN', community: 'KOMUNITAS', setting: 'PENGATURAN' };
+  const TITLE: Record<CommTab, string> = { chat: 'CHAT', updates: 'PEMBARUAN', call: 'PANGGILAN', community: 'KOMUNITAS', setting: 'PENGATURAN' };
   const view: CommTab = tab;
 
   return <main className="mx-auto max-w-xl px-4 py-5">
     <FindMember bar me={me} tier={tier} onChat={open}/>
-    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
+    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}<CommMenu/></div>
 
     {view === 'chat' && <ChatTab me={me} tier={tier} onOpen={open}/>}
+    {view === 'updates' && <StoryBar me={me} myName="Saya" list/>}
     {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
     {view === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
     {view === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/></>}
   </main>;
+}
+
+function CommMenu() {
+  const [o, setO] = useState(false);
+  const go = [['chat', 'Chat'], ['updates', 'Pembaruan · Status'], ['community', 'Komunitas'], ['call', 'Panggilan'], ['setting', 'Pengaturan']] as const;
+  return <span className="comm-kebab"><button type="button" aria-label="Menu" onClick={() => setO(v => !v)}><MoreVertical size={18}/></button>
+    {o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }
 
 type Found = Peer & { code?: string | null; via?: string };
@@ -316,6 +327,15 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me, peer.id]);
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [msgs.length]);
+  // Full-screen room that tracks the visible area, so the keyboard never pushes the page up.
+  const roomRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const vv = window.visualViewport; const el = roomRef.current;
+    document.documentElement.classList.add('comm-room-open');
+    const fit = () => { if (!el) return; const h = vv?.height ?? window.innerHeight; el.style.height = `${h}px`; el.style.transform = `translateY(${vv?.offsetTop ?? 0}px)`; window.scrollTo(0, 0); end.current?.scrollIntoView({ block: 'end' }); };
+    fit(); vv?.addEventListener('resize', fit); vv?.addEventListener('scroll', fit);
+    return () => { vv?.removeEventListener('resize', fit); vv?.removeEventListener('scroll', fit); document.documentElement.classList.remove('comm-room-open'); };
+  }, []);
 
   const onType = (v: string) => {
     setText(v);
@@ -412,6 +432,17 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     if (error) return fail(error.message);
     added(data);
   };
+  const camRef = useRef<HTMLInputElement>(null);
+  const sendPicked = async (f: File) => {
+    if (f.type.startsWith('video/')) {
+      if (f.size > 10 * 1024 * 1024) return fail('Video maksimal 10 MB');
+      return sendFile(f);
+    }
+    setBusy(true);
+    const b = await compressImage(f);
+    setBusy(false);
+    await upload(b, 'image', b === f ? (f.name.split('.').pop() || 'jpg').toLowerCase().slice(0, 5) : 'jpg');
+  };
   const request = async () => {
     const a = Number(amt); if (!(a > 0)) return fail('Masukkan jumlah BIX');
     setBusy(true);
@@ -454,7 +485,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   const pinned = msgs.find(x => x.pinned_at && !x.deleted_at);
   const jump = (id: string) => document.getElementById(`msg-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  return <main className="comm-room mx-auto max-w-xl">
+  return <main ref={roomRef} className="comm-room is-full mx-auto max-w-xl">
     <header className="comm-room-head">
       <button onClick={onBack} aria-label="Kembali"><ArrowLeft size={18}/></button>
       <BixAvatar userId={peer.id} name={name} online={state.online}/>
@@ -500,8 +531,9 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     {!locked && !recording && !replyTo && <div className="comm-quick">{QUICK.map(q => <button key={q} type="button" onClick={() => onType(text ? `${text} ${q}` : q)}>{q}</button>)}</div>}
     <form className="comm-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
       <span className="bc-plus-wrap"><button type="button" aria-label="Lampiran" className="bc-plus" onClick={() => setMenuOpen(v => !v)} disabled={locked}>+</button>
-        {menuOpen && <span className="bc-menu" role="menu"><button type="button" onClick={() => { setMenuOpen(false); setPayOpen(true); }}><Coins size={15}/>BIX PAY</button><button type="button" disabled={busy} onClick={() => { setMenuOpen(false); fileRef.current?.click(); }}><ImagePlus size={15}/>Foto</button><button type="button" disabled={busy} onClick={() => { setMenuOpen(false); docRef.current?.click(); }}><Paperclip size={15}/>Dokumen</button></span>}</span>
-      <input ref={fileRef} type="file" accept="image/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void upload(f, 'image', (f.name.split('.').pop() || 'jpg').toLowerCase().slice(0, 5)); }}/>
+        {menuOpen && <span className="bc-menu" role="menu"><button type="button" onClick={() => { setMenuOpen(false); setPayOpen(true); }}><Coins size={15}/>BIX PAY</button><button type="button" disabled={busy} onClick={() => { setMenuOpen(false); fileRef.current?.click(); }}><ImagePlus size={15}/>Galeri</button><button type="button" disabled={busy} onClick={() => { setMenuOpen(false); camRef.current?.click(); }}><Camera size={15}/>Kamera</button><button type="button" disabled={busy} onClick={() => { setMenuOpen(false); docRef.current?.click(); }}><Paperclip size={15}/>Dokumen</button></span>}</span>
+      <input ref={fileRef} type="file" accept="image/*,video/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>
+      <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>
       <input ref={docRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendFile(f); }}/>
       {recording ? <span className="comm-rec"><i/>Merekam… ketuk ■ untuk kirim</span> : <input value={text} onChange={e => onType(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked} aria-label="Tulis pesan"/>}
       {text.trim() ? <button type="submit" aria-label="Kirim"><Send size={16}/></button> : <button type="button" aria-label={recording ? 'Stop & kirim' : 'Rekam pesan suara'} className={recording ? 'is-rec' : ''} onClick={() => void toggleRec()} disabled={locked || busy}>{recording ? <Square size={14}/> : <Mic size={16}/>}</button>}

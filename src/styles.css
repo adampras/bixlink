@@ -6167,3 +6167,26 @@ code, pre, .numeric.select-all, .select-all, .select-text, [data-copyable], [dat
 /* sharpen stake header: drop muddy watermark/gradient */
 .stake-compact .stake-lux-head { background: var(--background) !important; }
 .stake-compact .stake-lux-head::after { display: none; }
+
+/* BIX COMM — WA-style flow */
+.comm-subhead{position:relative}
+.comm-kebab{margin-left:auto;position:relative}
+.comm-kebab>button{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;color:#FFD700}
+.comm-kebab-menu{position:absolute;right:0;top:38px;z-index:60;min-width:200px;display:flex;flex-direction:column;padding:6px;border-radius:16px;background:#0d0b14;border:1px solid rgb(255 215 0 / .25);box-shadow:0 18px 40px rgb(0 0 0 / .6)}
+.comm-kebab-menu a{padding:12px 14px;border-radius:10px;font-size:14px;font-weight:600;color:#f5f3ff}
+.comm-kebab-menu a:active{background:rgb(255 215 0 / .1)}
+.bx-upd{position:relative;padding-bottom:120px}
+.bx-upd h3{font-size:20px;font-weight:800;margin:.4rem 0 .6rem}
+.bx-upd-row{display:flex;align-items:center;gap:14px;width:100%;padding:10px 2px;text-align:left}
+.bx-upd-row b{display:block;font-size:15px}.bx-upd-row small{display:block;font-size:12px;color:var(--muted-foreground)}
+.bx-upd-row .bx-story-ava{width:54px;height:54px;flex:none}
+.bx-upd-me{position:relative;flex:none}
+.bx-upd-me i{position:absolute;right:-2px;bottom:-2px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#FFD700;color:#000;border:2px solid #05040a}
+.bx-upd-label{margin:.9rem 0 .2rem;font-size:13px;color:var(--muted-foreground)}
+.bx-upd-fabs{position:fixed;right:18px;bottom:96px;z-index:45;display:flex;flex-direction:column;align-items:center;gap:12px}
+.bx-upd-fabs button{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;color:#000;background:linear-gradient(145deg,#FFE680,#FFD700 55%,#B8860B);box-shadow:0 10px 26px rgb(255 215 0 / .3)}
+.bx-upd-fabs .is-pen{width:46px;height:46px;border-radius:14px;color:#FFD700;background:#1a1626;border:1px solid rgb(255 215 0 / .3)}
+html.comm-room-open,html.comm-room-open body{overflow:hidden;overscroll-behavior:none}
+.comm-room.is-full{position:fixed;left:0;right:0;top:0;z-index:55;max-width:none;height:100dvh;padding:max(.4rem,env(safe-area-inset-top)) .6rem max(.4rem,env(safe-area-inset-bottom));background:#05040a;will-change:transform}
+.comm-room.is-full .comm-msgs{min-height:0;overscroll-behavior:contain}
+@media (min-width:640px){.comm-room.is-full{left:50%;width:36rem;margin-left:-18rem}}
