@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { money, number } from '@/lib/bixlink';
 import { P2P_CEILING, P2P_FLOOR, p2pPriceAllowed } from '@/lib/shipping';
 import { bestOffer, expressMax } from '@/lib/p2p-express';
+import { DEMO_POOL, demoFeed, demoPool } from '@/lib/p2p-demo-pool';
 
 type Offer = { id: string; user_id: string; side: string; price_usd: number; remaining_bix: number; amount_bix: number; status: string; created_at: string };
 type Fill = { id: string; at: string; bix: number; price: number; side: 'BUY' | 'SELL'; who: string };
@@ -58,7 +59,14 @@ export function P2PDesk({ userId }: { userId?: string | undefined }) {
 
   return <div className="p2p-desk grid gap-4">
     <P2PStats pulse={pulse.data ?? null} asks={asks} bids={bids} />
-    <P2PTicker fills={pulse.data?.recent ?? []} fresh={fresh} />
+    <P2PPoolBox />
+    <div className="p2p-boxes">
+      <button className="p2p-box is-buy" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowUpRight size={22} /><b>BELI BIX</b><small>Bayar USDT · real escrow</small></button>
+      <button className="p2p-box is-sell" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowDownRight size={22} /><b>JUAL BIX</b><small>Terima USDT · real escrow</small></button>
+      <button className="p2p-box" onClick={() => { buzz(); setMode('DESK'); }}><Activity size={20} /><b>PASANG HARGA</b><small>Iklan merchant sendiri</small></button>
+      <Link to="/buyback" className="p2p-box"><Zap size={20} /><b>JUAL CEPAT</b><small>Dev buyback</small></Link>
+    </div>
+    <P2PLiveFeed real={pulse.data?.recent ?? []} fresh={fresh} />
     <div role="tablist" aria-label="Trading mode" className="p2p-modes">
       <button role="tab" aria-selected={mode === 'EXPRESS'} className={mode === 'EXPRESS' ? 'is-on' : ''} onClick={() => setMode('EXPRESS')}><Zap size={15} />Express</button>
       <button role="tab" aria-selected={mode === 'DESK'} className={mode === 'DESK' ? 'is-on' : ''} onClick={() => setMode('DESK')}><Activity size={15} />Merchant desk</button>
@@ -90,6 +98,40 @@ function P2PStats({ pulse, asks, bids }: { pulse: Pulse | null; asks: Offer[]; b
     <div className="p2p-stat"><span>TRADES</span><b className="numeric">{number(Number(pulse?.trades_24h ?? 0))}</b><small>{number(Number(pulse?.trades_total ?? 0))} all time</small></div>
     <div className="p2p-stat"><span>BOOK</span><b className="numeric">{asks.length + bids.length} offers</b><small>{spread != null ? `Spread $${spread.toFixed(4)}` : `${asks.length} sell · ${bids.length} buy`}</small></div>
     <div className="p2p-escrow"><ShieldCheck size={14} />Internal ledger escrow · funds locked until filled or cancelled<span className="p2p-live"><i />LIVE</span></div>
+  </section>;
+}
+
+function useClock(ms: number) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const id = setInterval(() => { if (!document.hidden) setNow(Date.now()); }, ms); return () => clearInterval(id); }, [ms]);
+  return now;
+}
+
+function P2PPoolBox() {
+  const now = useClock(DEMO_POOL.stepMs);
+  const p = demoPool(now);
+  return <section className="p2p-pool" aria-label="Demo liquidity pool">
+    <div><span>DEMO POOL BIX</span><b className="numeric">{number(p.bix)}</b><small>dari {number(DEMO_POOL.bix)}</small></div>
+    <div><span>DEMO POOL vUSDT</span><b className="numeric">{money(p.vusdt)}</b><small>dari {money(DEMO_POOL.vusdt)}</small></div>
+    <div><span>HARGA DEMO</span><b className="numeric">${p.price.toFixed(4)}</b><small>koridor ${DEMO_POOL.min.toFixed(2)}–${DEMO_POOL.max.toFixed(2)}</small></div>
+    <div><span>DEMO 24 JAM</span><b className="numeric">{number(p.trades24h)}</b><small>{number(p.volume24h)} BIX</small></div>
+  </section>;
+}
+
+function P2PLiveFeed({ real, fresh }: { real: Fill[]; fresh: Set<string> }) {
+  const now = useClock(DEMO_POOL.stepMs);
+  const rows = [...real.map(f => ({ ...f, demo: false as const })), ...demoFeed(now, 12)]
+    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 12);
+  return <section className="p2p-panel p2p-feed" aria-label="Live trades">
+    <div className="mb-2 flex items-center justify-between"><h3 className="text-sm font-bold">Transaksi Langsung 24 Jam</h3><span className="p2p-live"><i />LIVE</span></div>
+    <ul>{rows.map(f => <li key={f.id} className={`${fresh.has(f.id) || f.id === `demo-${Math.floor(now / DEMO_POOL.stepMs)}` ? 'is-fresh' : ''}`}>
+      <b className={f.side === 'BUY' ? 'text-chart-2' : 'text-destructive'}>{f.side === 'BUY' ? '▲ BELI' : '▼ JUAL'}</b>
+      <span className="truncate">{f.who}</span>
+      <span className="numeric">{number(Number(f.bix))} BIX</span>
+      <span className="numeric">${Number(f.price).toFixed(4)}</span>
+      <em className={f.demo ? 'is-demo' : 'is-real'}>{f.demo ? 'DEMO' : 'REAL ✓'}</em>
+    </li>)}</ul>
+    <p className="mt-2 text-[10px] text-muted-foreground">DEMO = simulasi pool vUSDT otomatis (tanpa saldo nyata). REAL = transaksi member tercatat di ledger internal. Tombol Beli/Jual Anda selalu masuk ke escrow REAL.</p>
   </section>;
 }
 
