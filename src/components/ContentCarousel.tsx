@@ -12,7 +12,7 @@ import { RoadmapCard } from '@/components/RoadmapCard';
 import type { ContentItem } from '@/lib/landing-content';
 
 export function ContentCarousel({ items: rawItems, group, title }: { items: ContentItem[]; group: 'spaces' | 'roadmap'; title: string }) {
-  const items = toEnglish(group === 'spaces' ? withNarratives(rawItems, defaultSpaces, spaceNarratives) : withNarratives(rawItems, defaultRoadmap, roadmapNarratives));
+  const items = group === 'spaces' ? withNarratives(toEnglish(rawItems), defaultSpaces, spaceNarratives) : withNarratives(toEnglish(rawItems), defaultRoadmap, roadmapNarratives);
   const [open, setOpen] = useState<number | null>(null);
   const openRef = useRef(false);
   openRef.current = open !== null;
