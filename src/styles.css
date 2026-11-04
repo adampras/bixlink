@@ -6192,10 +6192,12 @@ html.comm-room-open,html.comm-room-open body{overflow:hidden;overscroll-behavior
 @media (min-width:640px){.comm-room.is-full{left:50%;width:36rem;margin-left:-18rem}}
 .arb-webbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin:-.5rem -.25rem .75rem;padding:.6rem .75rem;border:1px solid color-mix(in oklab,var(--chart-3) 35%,transparent);border-radius:1rem;background:color-mix(in oklab,var(--background) 92%,transparent);backdrop-filter:blur(10px)}
 .arb-burger{display:grid;place-items:center;width:42px;height:42px;border-radius:.75rem;background:var(--secondary);color:var(--foreground)}
-.arb-drawer{position:fixed;inset:0;z-index:60;background:color-mix(in oklab,var(--background) 55%,transparent);display:flex;justify-content:flex-end}
-.arb-drawer nav{width:min(84vw,360px);height:100%;overflow-y:auto;padding:4.5rem 1rem 2rem;background:var(--card);border-left:1px solid var(--border);animation:arbDrawer .22s ease-out}
-.arb-drawer details{border-bottom:1px solid var(--border)}
-.arb-drawer summary{display:flex;justify-content:space-between;align-items:center;padding:1rem .25rem;font-weight:700;cursor:pointer;list-style:none}
+.arb-drawer{position:fixed;inset:0;z-index:60;background:rgb(0 0 0 / .85);backdrop-filter:blur(6px);display:flex;justify-content:flex-end}
+.arb-drawer nav{width:min(84vw,360px);height:100%;overflow-y:auto;padding:4.5rem 1rem 2rem;background:#08060f;border-left:1px solid rgb(255 215 0 / .25);box-shadow:-20px 0 40px rgb(0 0 0 / .7);animation:arbDrawer .22s ease-out;color:#fff}
+.arb-drawer details{border-bottom:1px solid rgb(255 255 255 / .1)}
+.arb-drawer summary{display:flex;justify-content:space-between;align-items:center;padding:1rem .25rem;font-weight:700;cursor:pointer;list-style:none;color:#fff}
+.arb-drawer details[open] summary{color:#FFD700}
+.arb-drawer details button{color:rgb(255 255 255 / .82)!important}
 .arb-drawer summary::-webkit-details-marker{display:none}
 .arb-drawer details[open] summary svg{transform:rotate(180deg)}
 .arb-drawer details button{display:block;width:100%;text-align:left;padding:.65rem 1rem;font-size:.9rem;color:var(--muted-foreground);border-radius:.5rem}
