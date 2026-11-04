@@ -9,7 +9,7 @@ import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, bixtr
 import { BixtradeBot3D, BOT_PERSONA } from '@/components/BixtradeBot3D';
 import { useServerFn } from '@tanstack/react-start';
 import { getBixtradePrices, runBixtradeCycle, runBixtradeLive } from '@/lib/bixtrade.functions';
-import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Network, Radar, Send, Share2, Volume2, VolumeX, Zap } from 'lucide-react';
+import { Activity, ArrowDownToLine, ArrowUpFromLine, BarChart3, Construction, Copy, Cpu, Network, Radar, Send, Share2, Volume2, VolumeX, Zap, Menu, X, ChevronDown } from 'lucide-react';
 
 export const Route = createFileRoute('/bixtrade')({
   head: () => ({ meta: [
@@ -52,6 +52,7 @@ function BixtradePage() {
   const [pairFilter, setPairFilter] = useState('ALL');
   const [logFilter, setLogFilter] = useState<'all' | 'win' | 'scratch'>('all');
   const [receipt, setReceipt] = useState<Exec | null>(null);
+  const [menu, setMenu] = useState(false);
   useEffect(() => { void supabase.rpc('is_bix_admin').then(({ data }) => setIsAdmin(data === true)); }, [uid]);
   const audio = useRef<AudioContext | null>(null);
   useEffect(() => { setSound(localStorage.getItem('bixtrade-sound') === '1'); }, []);
@@ -150,7 +151,23 @@ function BixtradePage() {
 
   const proj = projectBixtrade(cfg, amount, days);
   const n = Number(reqAmt) || 0;
+  const go = (t: typeof tab, f?: 'real' | 'virtual', anchor?: string) => { setTab(t); if (f) setFunding(f); setMenu(false); setTimeout(() => (anchor ? document.getElementById(anchor) : document.querySelector('.arb-tabs'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); };
+  const MENU: { title: string; items: [string, () => void][] }[] = [
+    { title: 'Trading Engine', items: [['Live Cockpit', () => go('cockpit')], ['Spread Radar 6 Bursa', () => go('radar')], ['Peta Rute Arbitrase', () => go('radar')]] },
+    { title: 'Rekam Jejak Nyata', items: [['Track Record', () => go('cockpit', undefined, 'arb-track')], ['Log Eksekusi & Resi', () => go('logs')], ['Request Saya', () => go('logs')]] },
+    { title: 'Analisis AI', items: [['Grafik Kinerja', () => go('ai')], ['Kalkulator Proyeksi', () => go('ai')]] },
+    { title: 'Modal Bot', items: [['Live Asset Engine', () => go('cockpit', 'real', 'arb-wallet')], ['Neural AI Pool', () => go('cockpit', 'virtual', 'arb-wallet')]] },
+  ];
   return <BixShell><main className="arb-lux mx-auto max-w-6xl px-4 py-6 md:px-8">
+    <header className="arb-webbar">
+      <b className="font-display">BIX<span className="text-chart-3">TRADE</span></b>
+      <span className="arb-live"><i/> 6 VENUES</span>
+      <button type="button" className="arb-burger" aria-expanded={menu} aria-label={menu ? 'Tutup menu' : 'Buka menu'} onClick={() => setMenu(m => !m)}>{menu ? <X size={20}/> : <Menu size={20}/>}</button>
+    </header>
+    {menu && <div className="arb-drawer" role="dialog" aria-label="Menu BIXTRADE" onClick={() => setMenu(false)}><nav onClick={e => e.stopPropagation()}>
+      {MENU.map(g => <details key={g.title} open={g.title === 'Trading Engine'}><summary>{g.title}<ChevronDown size={16}/></summary>{g.items.map(([l, fn]) => <button key={l} type="button" onClick={fn}>{l}</button>)}</details>)}
+      <div className="arb-drawer-cta"><Button className="w-full" onClick={() => { setMode('deposit'); go('cockpit', 'real', 'arb-wallet'); }}>Request Deposit Bot</Button><Button asChild variant="outline" className="w-full"><Link to="/dashboard">← Kembali ke BIXLINK</Link></Button></div>
+    </nav></div>}
     <section className="arb-ai-hero">
       <div className="arb-ai-copy">
         <p className="shop-eyebrow">AI QUANT ENGINE</p>
@@ -174,14 +191,14 @@ function BixtradePage() {
     {stream.length > 0 && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ AI SCAN · {s}</span>)}</div></div>}
 
     {tab === 'cockpit' && <>
-    <BixtradeTreasury/>
+    <div id="arb-track"/><BixtradeTreasury execs={fundExecs} onOpenLogs={() => setTab('logs')}/>
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-2"/> Live execution pulse</h2>
       <div className="mt-3 grid gap-2">{fundExecs.slice(0, 3).map((x, i) => <button type="button" key={x.id} style={{ animationDelay: `${i * 60}ms` }} onClick={() => setReceipt(x)} className="arb-pulse-row text-left"><i/><span><b>{x.pair}</b> {x.buy_venue} → {x.sell_venue}<br/><span className="text-muted-foreground">{Number(x.notional_usd).toFixed(2)} USDT · {new Date(x.executed_at).toLocaleTimeString()}</span></span><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)}</b></button>)}
         {!fundExecs.length && <p className="text-xs text-muted-foreground">{capital > 0 ? 'Bot is scanning — the first executions appear within a few minutes.' : funding === 'virtual' ? 'Add Neural AI Pool allocation to start executions. Trade size follows your capital (15–50% per ticket).' : 'Executions start after your deposit is approved. Trade size follows your capital (15–50% per ticket).'}</p>}</div>
     </section>
 
-    <section className="arb-card mt-4">
+    <section id="arb-wallet" className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><ArrowDownToLine size={18} className="text-chart-3"/> Bot wallet</h2>
       <div className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
         <div className="arb-stat"><p>{funding === 'real' ? 'Main wallet' : 'Recorded P/L'}</p><b>{funding === 'real' ? (mainUsdt === null ? '—' : mainUsdt.toFixed(2)) : realized.toFixed(2)}</b><small>{funding === 'real' ? 'USDT available' : 'pool allocation'}</small></div>
