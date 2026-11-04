@@ -9,7 +9,7 @@ export function WdMatchingPanel() {
   const [cfg, setCfg] = useState<WdMatchingConfig | null>(null);
   const [msg, setMsg] = useState('');
   useEffect(() => { supabase.rpc('bix_wd_matching_config').then(r => setCfg(normalizeWdMatching(r.data))); }, []);
-  if (!cfg) return <p className="text-sm text-muted-foreground">Memuat…</p>;
+  if (!cfg) return <p className="text-sm text-muted-foreground">Loading…</p>;
   const err = wdMatchingError(cfg);
   const ex = wdSplit(100, cfg);
   const save = async () => {

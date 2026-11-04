@@ -36,7 +36,7 @@ type Tier = { stake: number; chat: boolean; voice: boolean; video: boolean; vip:
 type Thread = { peer: string; name: string; body: string; at: string; mine: boolean; unread: number; online?: boolean };
 type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null; delivered_at?: string | null; reactions?: Record<string, string>; pinned_at?: string | null; kind?: string; media_path?: string | null; meta?: { amount?: number; note?: string | null; name?: string; size?: number; mime?: string; status?: string } | null; reply_to?: string | null; reply_body?: string | null; forwarded?: boolean; deleted_at?: string | null; hidden_by?: string[] };
 type PeerState = { online?: boolean; typing?: boolean; last_seen?: string | null };
-const seenText = (s: PeerState) => s.typing ? 'typing…' : s.online ? 'online' : s.last_seen ? `terakhir dilihat ${new Date(s.last_seen).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'ENCRYPTED CHAT';
+const seenText = (s: PeerState) => s.typing ? 'typing…' : s.online ? 'online' : s.last_seen ? `last seen ${new Date(s.last_seen).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'ENCRYPTED CHAT';
 const urlCache = new Map<string, string>();
 const REACTS = ['👍', '❤️', '😂', '😮', '🙏', '🔥'];
 const fmtSize = (n = 0) => n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
@@ -60,13 +60,13 @@ function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'p
         : <i className="comm-req-st">{st === 'paid' ? '✓ Lunas via BIX PAY' : st === 'declined' ? 'Rejected' : 'Dibatalkan'}</i>}
     </span>;
   }
-  if (!url) return <span className="comm-media-wait">Memuat…</span>;
+  if (!url) return <span className="comm-media-wait">Loading…</span>;
   if (m.kind === 'image') return <a href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Chat photo" className="comm-img" loading="lazy"/></a>;
   if (m.kind === 'file' && (m.meta?.mime ?? '').startsWith('video/')) return <video src={url} controls playsInline preload="metadata" className="comm-img"/>;
   if (m.kind === 'file') return <a className="comm-filecard" href={url} target="_blank" rel="noopener noreferrer"><i>{fileIcon(m.meta?.name)}</i><span><b>{m.meta?.name ?? 'Dokumen'}</b><small>{fmtSize(m.meta?.size)} · Unduh</small></span></a>;
   return <VoiceNote url={url}/>;
 }
-const PERMS = [['all', 'All members'], ['friends', 'Saling follow'], ['network', 'Tim jaringan'], ['none', 'Not accepting']] as const;
+const PERMS = [['all', 'All members'], ['friends', 'Saling follow'], ['network', 'Network team'], ['none', 'Not accepting']] as const;
 const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLER · Voice', video: 'PRO · Video HD', vip: '👑 VIP CALLER' };
 
 function CallPage() {
@@ -141,7 +141,7 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
     {found === null && <p className="mt-2 text-xs text-muted-foreground">Member not found. WA number can only be tracked if the owner enables the WhatsApp button.</p>}
     {found && <div className="comm-peer"><BixAvatar userId={found.user_id} name={found.name}/>
       <span className="min-w-0 flex-1"><b className="block truncate">@{found.name}</b>{found.status_text && <em className="comm-statusline">{found.status_text}</em>}
-        <span className="comm-meta">{found.code && <button onClick={() => copy(found.code!)}>{found.code} ⧉</button>}{found.whatsapp && <i>WA terhubung</i>}{found.via && <small>via {VIA[found.via]}</small>}</span></span>
+        <span className="comm-meta">{found.code && <button onClick={() => copy(found.code!)}>{found.code} ⧉</button>}{found.whatsapp && <i>WA connected</i>}{found.via && <small>via {VIA[found.via]}</small>}</span></span>
       {found.user_id === me ? <small>Your account</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
   </section>;
 }
@@ -168,10 +168,10 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
     void load(); const t = setInterval(() => void load(), 6000); return () => clearInterval(t);
   }, []);
   return <>
-    {tier && !tier.chat && <p className="comm-lock"><Lock size={13}/>{tier.chat_enabled ? `BIX CHAT terbuka mulai staking $${tier.min.chat}.` : 'BIX CHAT is currently closed by Admin.'}</p>}
+    {tier && !tier.chat && <p className="comm-lock"><Lock size={13}/>{tier.chat_enabled ? `BIX CHAT unlocks with staking from $${tier.min.chat}.` : 'BIX CHAT is currently closed by Admin.'}</p>}
     <StoryBar me={me} myName="Saya"/>
     <section className="comm-card"><h3 className="comm-h">Percakapan</h3>
-      {threads === null ? <p className="text-xs text-muted-foreground">Memuat…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">No chats yet. Search for members above to start chatting.</p> :
+      {threads === null ? <p className="text-xs text-muted-foreground">Loading…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">No chats yet. Search for members above to start chatting.</p> :
         <ul className="comm-list">{threads.map(t => <li key={t.peer}><button onClick={() => onOpen(t.peer, t.name)}><BixAvatar userId={t.peer} name={t.name} online={t.online}/>
           <span className="min-w-0 flex-1 text-left"><b className="block truncate text-sm">@{t.name}</b><small className="block truncate text-muted-foreground">{t.mine ? 'You: ' : ''}{t.body}</small></span>
           <span className="text-right"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></button></li>)}</ul>}
@@ -547,7 +547,7 @@ function ForwardSheet({ me, msg, onPick, onClose }: { me: string; msg: Msg; onPi
   return <div className="comm-sheet-bg" onClick={onClose}><div className="comm-sheet" role="dialog" aria-label="Teruskan pesan" onClick={e => e.stopPropagation()}>
     <b className="comm-sheet-title">↪ Teruskan ke…</b>
     <p className="comm-sheet-preview">{msg.body}</p>
-    {threads === null ? <small>Memuat…</small> : threads.filter(t => t.peer !== me).length === 0 ? <small>Belum ada percakapan lain.</small> :
+    {threads === null ? <small>Loading…</small> : threads.filter(t => t.peer !== me).length === 0 ? <small>Belum ada percakapan lain.</small> :
       <ul className="comm-fwd-list">{threads.filter(t => t.peer !== me).map(t => <li key={t.peer}><button type="button" onClick={() => onPick({ id: t.peer, name: t.name })}><span className={`comm-ava${t.online ? ' is-online' : ''}`}>{t.name.slice(0, 1).toUpperCase()}</span><b>@{t.name}</b></button></li>)}</ul>}
     <button type="button" className="ghost" onClick={onClose}>Batal</button>
   </div></div>;

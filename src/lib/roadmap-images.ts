@@ -6,7 +6,7 @@ import dao from '@/assets/phase-dao.jpg';
 import milestone from '@/assets/phase-milestone.jpg';
 
 const phases = [launch, staking, rwa, ecosystem, dao, milestone];
-const byTitle: Record<string, string> = { LAUNCH: launch, 'STAKING APP BETA': staking, 'RWA LISTING': rwa, ECOSYSTEM: ecosystem, DAO: dao, '21 JUTA MILESTONE': milestone, '21M MILESTONE': milestone };
+const byTitle: Record<string, string> = { LAUNCH: launch, 'STAKING APP BETA': staking, 'RWA LISTING': rwa, ECOSYSTEM: ecosystem, DAO: dao, '21 MILLION MILESTONE': milestone, '21M MILESTONE': milestone };
 export function roadmapImage(title: string, index: number) {
   return byTitle[title.trim().toUpperCase()] ?? phases[index];
 }

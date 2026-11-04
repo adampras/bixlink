@@ -62,7 +62,7 @@ export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, bool
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest">BIX HUB</SheetTitle></SheetHeader>
         </div>
         {recentItems.length > 0 && <section className="hub-group hub-tone-gold hub-recent mt-2">
-          <h3 className="hub-group-head"><span>Terakhir dibuka</span></h3>
+          <h3 className="hub-group-head"><span>Last opened</span></h3>
           <div className="grid grid-cols-3 gap-2">{recentItems.map((i, n) => tile(i, n, true))}</div>
         </section>}
         {HUB_GROUPS.map(g => { const list = items.filter(i => i.group === g); if (!list.length) return null; const st = GROUP_STYLE[g] ?? { tone: 'gold', swipe: false }; const swipe = st.swipe && list.length > 3;

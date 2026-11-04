@@ -54,7 +54,7 @@ export async function dispatchWalletAlerts(admin: any) {
     const events: { key: string; title: string }[] = [];
     const isDep = tx.type === 'deposit';
     if ((isDep ? t.deposit : t.withdraw) && tx.created_at >= since) events.push({ key: `${tx.id}:new`, title: isDep ? '🟢 INCOMING DEPOSIT' : '🟡 PENGAJUAN WITHDRAW' });
-    if (t.review && tx.status !== 'pending') events.push({ key: `${tx.id}:${tx.status}`, title: tx.status === 'approved' ? (isDep ? '✅ DEPOSIT DIKONFIRMASI' : '🔵 WITHDRAWAL APPROVED') : `❌ ${isDep ? 'DEPOSIT' : 'WITHDRAW'} DITOLAK` });
+    if (t.review && tx.status !== 'pending') events.push({ key: `${tx.id}:${tx.status}`, title: tx.status === 'approved' ? (isDep ? '✅ DEPOSIT DIKONFIRMASI' : '🔵 WITHDRAWAL APPROVED') : `❌ ${isDep ? 'DEPOSIT' : 'WITHDRAW'} REJECTED` });
     if (!events.length) continue;
     const { data: p } = await admin.from('profiles').select('username,full_name').eq('user_id', tx.user_id).maybeSingle();
     for (const ev of events) {
@@ -64,7 +64,7 @@ export async function dispatchWalletAlerts(admin: any) {
         `<b>${ev.title}</b> · BIXLINK`,
         `Member: <b>${esc(p?.username ?? '-')}</b>${p?.full_name ? ` (${esc(p.full_name)})` : ''}`,
         `Amount: <b>${money(tx.amount_usd)}</b>${tx.fee_usd ? ` · Fee ${money(tx.fee_usd)} · Bersih ${money(tx.net_usd)}` : ''}`,
-        tx.network ? `Jaringan: ${esc(String(tx.network))}` : '',
+        tx.network ? `Network: ${esc(String(tx.network))}` : '',
         tx.address ? `Alamat: <code>${esc(String(tx.address))}</code>` : '',
         tx.tx_hash ? `TxID: <code>${esc(String(tx.tx_hash))}</code>` : '',
         `Status: ${String(tx.status).toUpperCase()}`,

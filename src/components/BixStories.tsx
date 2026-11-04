@@ -39,7 +39,7 @@ export function StoryBar({ me, myName, list: asList }: { me: string; myName: str
       <span><b>{mineIdx >= 0 ? 'Status saya' : 'Add Status'}</b><small>{mineIdx >= 0 ? `${list[mineIdx]?.stories.length ?? 0} updates · tap to view` : 'Will disappear after 24 hours'}</small></span>
     </button>
     <p className="bx-upd-label">Recent updates</p>
-    {groups === null ? <p className="bx-stories-empty">Memuat…</p> : others.length === 0 ? <p className="bx-stories-empty">Status from chat contacts, network team, and mutual followers will appear here for 24 hours.</p>
+    {groups === null ? <p className="bx-stories-empty">Loading…</p> : others.length === 0 ? <p className="bx-stories-empty">Status from chat contacts, network team, and mutual followers will appear here for 24 hours.</p>
       : others.map(g => { const i = list.indexOf(g); const last = g.stories[g.stories.length - 1]; return <button key={g.user_id} type="button" className="bx-upd-row" onClick={() => setView(i)}>
         <BixAvatar userId={g.user_id} path={g.avatar_path} name={g.name} className="bx-story-ava" story={g.unseen ? 'new' : 'seen'}/>
         <span><b>@{g.name}</b><small>{last ? ago(last.created_at) : ''}</small></span></button>; })}
@@ -71,7 +71,7 @@ function StoryMedia({ s, onReady, onEnded, paused }: { s: Story; onReady: (ms: n
   useEffect(() => { if (s.kind === 'text') onReady(PHOTO_MS); }, [s.id, s.kind, onReady]);
   useEffect(() => { const v = vref.current; if (!v) return; if (paused) v.pause(); else void v.play().catch(() => {}); }, [paused, url]);
   if (s.kind === 'text') return <div className={`bx-sv-text is-${s.bg}`}><p>{s.caption}</p></div>;
-  if (!url) return <div className="bx-sv-wait">Memuat…</div>;
+  if (!url) return <div className="bx-sv-wait">Loading…</div>;
   if (s.kind === 'photo') return <img className="bx-sv-media" src={url} alt="Story" onLoad={() => onReady(PHOTO_MS)}/>;
   return <video ref={vref} className="bx-sv-media" src={url} playsInline autoPlay onLoadedMetadata={e => onReady(Math.min(30, e.currentTarget.duration || 15) * 1000)} onEnded={onEnded}/>;
 }
@@ -133,8 +133,8 @@ function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; gr
     <div className="bx-sv-stage" {...hold}>
       <StoryMedia key={s.id} s={s} onReady={onReady} onEnded={next} paused={paused || !!viewers}/>
       {s.caption && s.kind !== 'text' && <p className="bx-sv-cap">{s.caption}</p>}
-      <button type="button" className="bx-sv-tap is-prev" aria-label="Sebelumnya" onClick={prev}/>
-      <button type="button" className="bx-sv-tap is-next" aria-label="Berikutnya" onClick={next}/>
+      <button type="button" className="bx-sv-tap is-prev" aria-label="Previous" onClick={prev}/>
+      <button type="button" className="bx-sv-tap is-next" aria-label="Next" onClick={next}/>
     </div>
     {note && <p className="bx-sv-note" role="status">{note}</p>}
     <footer className="bx-sv-foot">
@@ -195,7 +195,7 @@ function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: '
       onPosted();
     } catch (e) { setErr(e instanceof Error ? e.message : 'Failed to post story'); } finally { setBusy(false); }
   };
-  const quickStatus = async () => { try { await saveStatus(me, text); setStatus('Status profil diperbarui'); setTimeout(() => setStatus(''), 2500); } catch (e) { setErr(e instanceof Error ? e.message : 'Gagal'); } };
+  const quickStatus = async () => { try { await saveStatus(me, text); setStatus('Profile status updated'); setTimeout(() => setStatus(''), 2500); } catch (e) { setErr(e instanceof Error ? e.message : 'Gagal'); } };
 
   return <div className="comm-sheet-bg" onClick={onClose}><div className="comm-sheet bx-sc" role="dialog" aria-label="Buat story" onClick={e => e.stopPropagation()}>
     <div className="bx-sc-head"><b>Create Story · 24 hours</b><button type="button" aria-label="Close" onClick={onClose}><X size={18}/></button></div>
@@ -214,7 +214,7 @@ function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: '
     {err && <p className="comm-err">{err}</p>}
     {status && <p className="comm-busy">{status}</p>}
     <button type="button" className="comm-save" disabled={busy || (mode === 'text' ? !text.trim() : !file)} onClick={() => void post()}>{busy ? 'Memasang…' : 'Pasang Story'}</button>
-    {mode === 'text' && text.trim() && <button type="button" className="ghost" onClick={() => void quickStatus()}>Jadikan status profil saja</button>}
+    {mode === 'text' && text.trim() && <button type="button" className="ghost" onClick={() => void quickStatus()}>Set as profile status only</button>}
     <small className="bx-sc-hint">Visible to chat contacts, network team, and mutual followers. Automatically disappears after 24 hours · max 10 active stories.</small>
   </div></div>;
 }

@@ -16,7 +16,7 @@ export function AdminStakingControls({ onMessage }: { onMessage: (message: strin
       {tab('daily', <Shuffle size={16}/>, 'Profit harian')}
       {tab('packages', <SlidersHorizontal size={16}/>, 'Edit paket')}
       {tab('market', <LineChart size={16}/>, 'Price & chart')}
-      {tab('skin', <Gem size={16}/>, 'Desain jaringan')}
+      {tab('skin', <Gem size={16}/>, 'Network design')}
     </div>
     {view === 'market' ? <AdminMarketTab onMessage={onMessage}/> : view === 'daily' ? <YieldControlPanel market={false}/> : view === 'skin' ? <AdminStakingSkin onMessage={onMessage}/> : <AdminDurationPackages onMessage={onMessage}/>}
   </section>;

@@ -34,9 +34,9 @@ export function StakeCalculator({ packages, onPick }: { packages: Package[]; onP
     <div className="stake-pick-stage"
       onTouchStart={e => { startX.current = e.touches[0]?.clientX ?? null; }}
       onTouchEnd={e => { const s = startX.current; const x = e.changedTouches[0]?.clientX; startX.current = null; if (s == null || x == null) return; const d = x - s; if (Math.abs(d) > 50) go(i + (d < 0 ? 1 : -1)); }}>
-      <button type="button" aria-label="Paket sebelumnya" className="stake-pick-arrow is-left" onClick={() => go(i - 1)}><ChevronLeft size={18}/></button>
+      <button type="button" aria-label="Previous package" className="stake-pick-arrow is-left" onClick={() => go(i - 1)}><ChevronLeft size={18}/></button>
       <div className="auric-stake"><div className="auric-card is-active"><DurationPackageCard key={list[i]!.id} pkg={list[i]!} index={i} onStake={onPick}/></div></div>
-      <button type="button" aria-label="Paket berikutnya" className="stake-pick-arrow is-right" onClick={() => go(i + 1)}><ChevronRight size={18}/></button>
+      <button type="button" aria-label="Next package" className="stake-pick-arrow is-right" onClick={() => go(i + 1)}><ChevronRight size={18}/></button>
     </div>
     <div className="stake-pick-dots" aria-hidden>{list.map((p, n) => <i key={p.id} className={n === i ? 'on' : ''}/>)}</div>
   </section>;

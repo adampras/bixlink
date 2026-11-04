@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 
 type Cfg = { challenge_enabled?: boolean; challenge_tag?: string | null; challenge_title?: string | null; challenge_prize?: string | null; challenge_ends_at?: string | null; clips_enabled?: boolean; link_slots: number; max_links: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max: number; live_cta: boolean; host_gifts: boolean; auto_follow_back: boolean; replay_enabled: boolean; soundboard: boolean; pk_enabled: boolean; showcase_enabled: boolean; pk_bix_weight: number; withdraw_min_bix?: number; owner2_isolation?: boolean; tester_code?: string | null; creator_share_pct?: number; backdrops_enabled?: boolean; live_backdrops?: { id: string; name: string; url?: string; css?: string }[] };
-const FEATURES: [string, string][] = [['upload', 'Member link & camera posting'], ['music', 'Pencarian musik'], ['filters', 'Filter wajah'], ['text', 'Teks bebas geser'], ['likes', 'Like'], ['comments', 'Komentar LIVE'], ['share', 'Bagikan'], ['bixp_gifts', 'Saweran BIXP'], ['bix_gifts', 'Saweran BIXCOIN']];
+const FEATURES: [string, string][] = [['upload', 'Member link & camera posting'], ['music', 'Pencarian musik'], ['filters', 'Filter wajah'], ['text', 'Teks bebas geser'], ['likes', 'Like'], ['comments', 'Komentar LIVE'], ['share', 'Share'], ['bixp_gifts', 'Saweran BIXP'], ['bix_gifts', 'Saweran BIXCOIN']];
 
 export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
   const qc = useQueryClient();
@@ -36,7 +36,7 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
   const [bg, setBg] = useState({ name: '', value: '' });
   const [snd, setSnd] = useState({ title: '', artist: '', category: 'Trending', audio_url: '' });
 
-  if (q.isLoading || !cfg) return <p className="mt-8 text-sm text-muted-foreground">Memuat BIXTOK…</p>;
+  if (q.isLoading || !cfg) return <p className="mt-8 text-sm text-muted-foreground">Loading BIXTOK…</p>;
   const Toggle = ({ on, label, onChange }: { on: boolean; label: string; onChange: (v: boolean) => void }) => <label className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 text-sm"><span>{label}</span><input type="checkbox" checked={on} onChange={e => onChange(e.target.checked)} className="h-5 w-5 accent-primary"/></label>;
 
   return <section className="mt-8 max-w-4xl space-y-8">
@@ -87,7 +87,7 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
       <div className="mt-4 rounded-lg border border-border p-3">
         <b className="text-sm">🏆 Tantangan mingguan &amp; ✂️ Klip LIVE</b>
         <p className="text-xs text-muted-foreground">Banner appears in For You feed. Rewards are announcement text only — winners are reviewed and paid manually by Admin, not automatically.</p>
-        <label className="mt-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={cfg.challenge_enabled === true} onChange={e => set({ challenge_enabled: e.target.checked })}/>Tampilkan tantangan</label>
+        <label className="mt-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={cfg.challenge_enabled === true} onChange={e => set({ challenge_enabled: e.target.checked })}/>Show challenges</label>
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
           <input className="form-input" placeholder="Tagar (mis. BIXFoxDance)" value={cfg.challenge_tag ?? ''} onChange={e => set({ challenge_tag: e.target.value.replace(/[^\p{L}\d_]/gu, '').slice(0, 30) })}/>
           <input className="form-input" placeholder="Judul tantangan" value={cfg.challenge_title ?? ''} onChange={e => set({ challenge_title: e.target.value.slice(0, 80) })}/>
@@ -127,13 +127,13 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
         setSched({ title: '', at: '', host: 'BIXLINK OFFICIAL' }); }}>
         <input className="form-input" required placeholder="Judul (mis. Webinar BIXLINK)" value={sched.title} onChange={e => setSched({ ...sched, title: e.target.value })}/>
         <input className="form-input" placeholder="Nama host" value={sched.host} onChange={e => setSched({ ...sched, host: e.target.value })}/>
-        <input className="form-input" required type="datetime-local" aria-label="Waktu mulai" value={sched.at} onChange={e => setSched({ ...sched, at: e.target.value })}/>
+        <input className="form-input" required type="datetime-local" aria-label="Start time" value={sched.at} onChange={e => setSched({ ...sched, at: e.target.value })}/>
         <Button type="submit"><Plus/>Jadwalkan</Button>
       </form>
     </div>
 
     <div className="rounded-xl border border-border bg-card p-5">
-      <h3 className="font-bold">Katalog hadiah saweran</h3>
+      <h3 className="font-bold">Tip gift catalog</h3>
       <div className="mt-3 space-y-2">{q.data!.gifts.map(g => <div key={g.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-border p-2 text-sm">
         <span className="text-xl">{g.emoji}</span><b className="flex-1">{g.name}</b>
         <input className="form-input w-24" type="number" min={0.01} step="0.01" defaultValue={g.price} onBlur={e => Number(e.target.value) !== Number(g.price) && run(supabase.from('bixtok_gifts').update({ price: Number(e.target.value) }).eq('id', g.id), 'Harga diubah.')}/>
@@ -141,9 +141,9 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
         <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={g.enabled} onChange={e => run(supabase.from('bixtok_gifts').update({ enabled: e.target.checked }).eq('id', g.id), 'Status hadiah diubah.')}/>Active</label>
         <Button size="icon" variant="ghost" title="Delete gift" onClick={() => run(supabase.from('bixtok_gifts').delete().eq('id', g.id), 'Hadiah dihapus.')}><Trash2/></Button>
       </div>)}</div>
-      <form className="mt-3 grid gap-2 sm:grid-cols-5" onSubmit={e => { e.preventDefault(); run(supabase.from('bixtok_gifts').insert({ name: gift.name.trim().slice(0, 40), emoji: gift.emoji.slice(0, 4), currency: gift.currency, price: Number(gift.price), sort: (q.data!.gifts.length + 1) }), 'Hadiah ditambahkan.'); setGift({ name: '', emoji: '🎁', currency: 'BIXP', price: '1' }); }}>
+      <form className="mt-3 grid gap-2 sm:grid-cols-5" onSubmit={e => { e.preventDefault(); run(supabase.from('bixtok_gifts').insert({ name: gift.name.trim().slice(0, 40), emoji: gift.emoji.slice(0, 4), currency: gift.currency, price: Number(gift.price), sort: (q.data!.gifts.length + 1) }), 'Gift added.'); setGift({ name: '', emoji: '🎁', currency: 'BIXP', price: '1' }); }}>
         <input className="form-input" placeholder="Emoji" value={gift.emoji} onChange={e => setGift({ ...gift, emoji: e.target.value })}/>
-        <input className="form-input sm:col-span-2" placeholder="Nama hadiah" required value={gift.name} onChange={e => setGift({ ...gift, name: e.target.value })}/>
+        <input className="form-input sm:col-span-2" placeholder="Gift name" required value={gift.name} onChange={e => setGift({ ...gift, name: e.target.value })}/>
         <div className="flex gap-1"><select className="form-input" value={gift.currency} onChange={e => setGift({ ...gift, currency: e.target.value })}><option>BIXP</option><option>BIX</option></select><input className="form-input w-20" type="number" min={0.01} step="0.01" value={gift.price} onChange={e => setGift({ ...gift, price: e.target.value })}/></div>
         <Button type="submit"><Plus/>Add</Button>
       </form>
@@ -185,7 +185,7 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
       <form className="mt-3 grid gap-2 sm:grid-cols-4" onSubmit={e => { e.preventDefault(); if (!/^https:\/\//.test(snd.audio_url)) return onMessage('Audio link must be https://'); run(supabase.from('bixtok_sounds').insert({ ...snd, title: snd.title.slice(0, 80), sort: q.data!.sounds.length + 1 }), 'Musik ditambahkan.'); setSnd({ title: '', artist: '', category: 'Trending', audio_url: '' }); }}>
         <input className="form-input" required placeholder="Judul" value={snd.title} onChange={e => setSnd({ ...snd, title: e.target.value })}/>
         <input className="form-input" placeholder="Artis" value={snd.artist} onChange={e => setSnd({ ...snd, artist: e.target.value })}/>
-        <input className="form-input" placeholder="Kategori" value={snd.category} onChange={e => setSnd({ ...snd, category: e.target.value })}/>
+        <input className="form-input" placeholder="Category" value={snd.category} onChange={e => setSnd({ ...snd, category: e.target.value })}/>
         <input className="form-input" required placeholder="Link MP3 https://…" value={snd.audio_url} onChange={e => setSnd({ ...snd, audio_url: e.target.value })}/>
         <Button type="submit" className="sm:col-span-4"><Plus/>Add music</Button>
       </form>

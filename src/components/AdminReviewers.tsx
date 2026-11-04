@@ -23,7 +23,7 @@ export function AdminReviewers({ members, onMessage }: { members: { id: string; 
     <p className="mt-1 text-xs text-muted-foreground">Each Owner logs in with a regular account then opens /review. New Owners start with all menus closed; toggle them on individually. They only see the sponsor network below them.</p>
     <form className="mt-4 flex flex-wrap gap-2" onSubmit={async e => { e.preventDefault(); const id = String(new FormData(e.currentTarget).get('user')); setSaving(true); try { await save({ data: { userId: id, enabled: true } }); await refresh(); onMessage(`Owner ${ids.length + 2} ditambahkan.`); } catch (error) { onMessage(error instanceof Error ? error.message : 'Failed to add Owner.'); } finally { setSaving(false); } }}>
       <select name="user" aria-label="New Owner account" className="form-input min-w-0 flex-1" required disabled={saving} defaultValue=""><option value="" disabled>Select member account</option>{members.filter(m => !ids.includes(m.id)).map(m => <option key={m.id} value={m.id}>{m.email}</option>)}</select>
-      <Button disabled={saving} className="rounded-full bg-foreground text-background hover:bg-foreground/90">{saving ? <Loader2 className="animate-spin"/> : <UserCheck/>}{saving ? 'Menyimpan…' : `Jadikan Owner ${ids.length + 2}`}</Button>
+      <Button disabled={saving} className="rounded-full bg-foreground text-background hover:bg-foreground/90">{saving ? <Loader2 className="animate-spin"/> : <UserCheck/>}{saving ? 'Saving…' : `Jadikan Owner ${ids.length + 2}`}</Button>
     </form>
     <div className="mt-5 space-y-3">{ids.map((id, i) => <div key={id} className="rounded-2xl border border-border p-4">
       <div className="flex items-center justify-between gap-3"><div className="min-w-0"><b className="text-sm text-primary">Owner {i + 2}</b><p className="break-all text-xs text-muted-foreground">{members.find(m => m.id === id)?.email ?? id}</p></div>
@@ -34,7 +34,7 @@ export function AdminReviewers({ members, onMessage }: { members: { id: string; 
   </section>;
 }
 
-const PERM_LABEL: Record<keyof ReviewerPermissions, string> = { apy: 'APY & paket staking', wallet: 'Dompet & review deposit/withdraw', market: 'Market Price', referral: 'Bonus Referral', leaders: 'Leader bersponsor & Team Support' };
+const PERM_LABEL: Record<keyof ReviewerPermissions, string> = { apy: 'APY & paket staking', wallet: 'Wallet & deposit/withdrawal review', market: 'Market Price', referral: 'Bonus Referral', leaders: 'Leader bersponsor & Team Support' };
 
 export function AdminTurnover({ members }: { members: { id: string; email: string }[] }) {
   const fetchT = useServerFn(getOwnerTurnover);
@@ -44,9 +44,9 @@ export function AdminTurnover({ members }: { members: { id: string; email: strin
   const rows = q.data.owners; const sub = rows.reduce((a, r) => a + r.deposit, 0);
   return <section className="rounded-2xl border border-border bg-card p-4">
     <h3 className="font-bold text-primary">Omset real USDT per Owner</h3>
-    <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs"><div><b className="block text-base text-chart-2">{usd(q.data.total.deposit)}</b>Total deposit global</div><div><b className="block text-base text-primary">{usd(sub)}</b>Jaringan sub-owner</div><div><b className="block text-base">{usd(q.data.total.withdraw)}</b>Total withdraw</div></div>
+    <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs"><div><b className="block text-base text-chart-2">{usd(q.data.total.deposit)}</b>Total deposit global</div><div><b className="block text-base text-primary">{usd(sub)}</b>Sub-owner network</div><div><b className="block text-base">{usd(q.data.total.withdraw)}</b>Total withdraw</div></div>
     <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="text-muted-foreground"><tr><th className="p-2">Owner</th><th>Member</th><th>Deposit</th><th>Withdraw</th><th>Net</th></tr></thead>
       <tbody>{rows.map(r => <tr key={r.userId} className="border-t border-border"><td className="p-2 break-all">{members.find(m => m.id === r.userId)?.email ?? r.code}</td><td>{r.members}</td><td className="text-chart-2">{usd(r.deposit)}</td><td>{usd(r.withdraw)}</td><td>{usd(r.deposit - r.withdraw)}</td></tr>)}
-      <tr className="border-t border-border font-bold"><td className="p-2">Jaringan Owner 1 / umum</td><td>—</td><td>{usd(q.data.total.deposit - sub)}</td><td>—</td><td>—</td></tr></tbody></table></div>
+      <tr className="border-t border-border font-bold"><td className="p-2">Owner 1 / public network</td><td>—</td><td>{usd(q.data.total.deposit - sub)}</td><td>—</td><td>—</td></tr></tbody></table></div>
   </section>;
 }

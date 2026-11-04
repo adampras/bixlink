@@ -48,7 +48,7 @@ async function summary(admin: any) {
     `Approved deposits: <b>${money(sum(dep))}</b> (${dep.length} txs)`,
     `Approved withdrawals: <b>${money(sum(wd))}</b> (${wd.length} txs)`,
     `Pending review: ${pendDep} deposits · ${pendWd} withdrawals`,
-    `Staking aktif: <b>${act.length}</b> posisi · ${stakers.size} member · ${money(act.reduce((s: number, r: any) => s + Number(r.amount_usd ?? 0), 0))}`,
+    `Active staking: <b>${act.length}</b> positions · ${stakers.size} members · ${money(act.reduce((s: number, r: any) => s + Number(r.amount_usd ?? 0), 0))}`,
     '<i>Clone/support accounts are not counted.</i>',
   ].join('\n');
 }
@@ -84,7 +84,7 @@ async function member(admin: any, q: string) {
   const wd = (tx ?? []).filter((t: any) => t.type === 'withdraw' && t.status === 'approved').reduce((s: number, t: any) => s + Number(t.amount_usd), 0);
   return [
     `<b>👤 ${esc(p?.username ?? '-')}</b>${p?.full_name ? ` (${esc(p.full_name)})` : ''}`,
-    `Kode: ${esc(code?.code ?? '-')} · Sponsor: ${esc(sponsor)}`,
+    `Code: ${esc(code?.code ?? '-')} · Sponsor: ${esc(sponsor)}`,
     `Tipe: ${clones.has(uid) ? 'Clone/support' : 'Organik'}`,
     `Bergabung: ${new Date(p?.created_at ?? Date.now()).toLocaleDateString('id-ID')}`,
     `Deposit: ${money(dep)} · Withdraw: ${money(wd)}`,
@@ -97,11 +97,11 @@ async function toggle(admin: any, which: 'loan' | 'register', arg: string) {
   const { data } = await admin.from('app_settings').select('value').eq('key', 'readiness').maybeSingle();
   const v: any = { ...(data?.value ?? {}) };
   const cur = which === 'loan' ? v.loanEnabled !== false : v.modules?.register !== false;
-  if (!on && !off) return `Status ${which === 'loan' ? 'akun pinjaman' : 'pendaftaran'}: <b>${cur ? 'ON' : 'OFF'}</b>\nGunakan: on / off`;
+  if (!on && !off) return `Status ${which === 'loan' ? 'akun pinjaman' : 'pendaftaran'}: <b>${cur ? 'ON' : 'OFF'}</b>\nUse: on / off`;
   if (which === 'loan') v.loanEnabled = on; else v.modules = { ...(v.modules ?? {}), register: on };
   const { error } = await admin.from('app_settings').upsert({ key: 'readiness', value: v }, { onConflict: 'key' });
   if (error) return `Failed: ${esc(error.message)}`;
-  return `✅ ${which === 'loan' ? 'Akun pinjaman' : 'Pendaftaran'} sekarang <b>${on ? 'ON' : 'OFF'}</b>`;
+  return `✅ ${which === 'loan' ? 'Akun pinjaman' : 'Pendaftaran'} is now <b>${on ? 'ON' : 'OFF'}</b>`;
 }
 
 export async function loanQuotaText(admin: any, sponsorId: string) {

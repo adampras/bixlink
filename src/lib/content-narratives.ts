@@ -85,7 +85,7 @@ Phase targets:
 This represents a development milestone, not a price target.`,
 };
 
-Object.assign(roadmapNarratives, { LAUNCH: roadmapNarratives['PELUNCURAN'], 'STAKING APP BETA': roadmapNarratives['STAKING BETA'], 'RWA LISTING': roadmapNarratives['RWA LIST'], ECOSYSTEM: roadmapNarratives['EKOSISTEM'] });
+Object.assign(roadmapNarratives, { LAUNCH: roadmapNarratives['PELUNCURAN'], 'STAKING APP BETA': roadmapNarratives['STAKING BETA'], 'RWA LISTING': roadmapNarratives['RWA LIST'], ECOSYSTEM: roadmapNarratives['ECOSYSTEM'] });
 
 const key = (title: string) => title.trim().toUpperCase();
 

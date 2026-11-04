@@ -26,7 +26,7 @@ function OwnerDesk() {
   const qc = useQueryClient(); const [busy, setBusy] = useState<string | null>(null); const [msg, setMsg] = useState('');
   const q = useQuery({ queryKey: ['admin-wallet'], queryFn: () => fetchData(), refetchInterval: 30000 });
   if (q.isError) return <main className="mx-auto max-w-3xl p-6"><p role="alert" className="text-destructive">This page is exclusively for Owner 1.</p><Link to="/profile" className="mt-3 inline-block text-sm underline">Back to Profile</Link></main>;
-  if (!q.data) return <main className="mx-auto max-w-3xl p-6 text-muted-foreground">Memuat…</main>;
+  if (!q.data) return <main className="mx-auto max-w-3xl p-6 text-muted-foreground">Loading…</main>;
   const txs = q.data.transactions; const swaps = q.data.swaps;
   const real = txs.filter(t => t.type === 'deposit' && t.status === 'approved' && t.tx_hash);
   const wdDone = txs.filter(t => t.type === 'withdraw' && t.status === 'approved');

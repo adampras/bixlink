@@ -28,16 +28,16 @@ export function AdminReports({ onMessage }: { onMessage: (msg: string) => void }
   return (
     <div className="mt-8 max-w-3xl">
       <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-2 pb-2 text-xs uppercase text-muted-foreground">
-        <span>Kategori</span>
+        <span>Category</span>
         {PERIODS.map(p => <span key={p.key} className="text-right">{p.label}</span>)}
       </div>
-      <Row label="Staking USDT (nilai)" values={report.stakingUsd} format={v => money(v)} />
+      <Row label="USDT staking (value)" values={report.stakingUsd} format={v => money(v)} />
       <Row label="USDT Staking (amount)" values={report.stakingCount} format={v => number(v)} />
       <Row label="Staking BIX" values={report.stakingBix} format={v => `${number(v)} BIX`} />
       <Row label="Bonus referral BIX" values={report.referralBix} format={v => `${number(v)} BIX`} />
-      <Row label="Bonus jaringan USDT" values={report.networkUsdt} format={v => money(v)} />
-      <Row label="Bonus jaringan BIX" values={report.networkBix} format={v => `${number(v)} BIX`} />
-      <Row label="Hadiah mining BIX" values={report.miningBix} format={v => `${number(v)} BIX`} />
+      <Row label="USDT network bonus" values={report.networkUsdt} format={v => money(v)} />
+      <Row label="BIX network bonus" values={report.networkBix} format={v => `${number(v)} BIX`} />
+      <Row label="BIX mining rewards" values={report.miningBix} format={v => `${number(v)} BIX`} />
       <p className="mt-4 text-xs text-muted-foreground">{report.miningNote} Angka dihitung dari waktu pencatatan (UTC).</p>
     </div>
   );

@@ -45,11 +45,11 @@ export function DepositRecovery({ onMessage }: { onMessage: (m: string) => void 
   };
   const runScan = async () => { setBusy('scan'); try { setScanData(await scan({ data: {} })); } catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to scan.'); } finally { setBusy(''); } };
 
-  if (w.isLoading) return <p className="mt-6 text-sm text-muted-foreground">Memuat wallet deposit…</p>;
+  if (w.isLoading) return <p className="mt-6 text-sm text-muted-foreground">Loading deposit wallet…</p>;
   if (w.error) return null;
 
   const Cands = ({ list, c, h }: { list: Cand[]; c: string; h: string }) => list.length ? <div className="mt-2 flex flex-wrap gap-1.5">{list.map(x => <button key={x.code + x.createdAt} type="button" onClick={() => pick(c, h, x.code)} className="rounded-full border border-chart-3/60 bg-chart-3/10 px-2.5 py-1 text-[11px] font-bold text-chart-3 hover:bg-chart-3/20">
-    {x.code} · {x.kind === 'unique' ? 'kode unik' : 'lapor'} {x.amount.toFixed(x.kind === 'unique' ? 3 : 2)}</button>)}</div> : null;
+    {x.code} · {x.kind === 'unique' ? 'unique code' : 'lapor'} {x.amount.toFixed(x.kind === 'unique' ? 3 : 2)}</button>)}</div> : null;
 
   return <section className="mt-8 rounded-[20px] border border-chart-2/60 bg-card p-5">
     <h2 className="flex items-center gap-2 font-display text-lg font-bold"><LifeBuoy size={18} className="text-chart-2"/> Pemulihan deposit on-chain</h2>
@@ -74,9 +74,9 @@ export function DepositRecovery({ onMessage }: { onMessage: (m: string) => void 
           {found.queuedBy && <p className="mt-2 text-xs text-chart-3">TxID ini sudah diajukan oleh {found.queuedBy} dan masih menunggu.</p>}
           {found.candidates.length > 0 && <div className="mt-2 text-xs text-muted-foreground">Likely owner (deposit requests with similar amounts, past 72 hours):<Cands list={found.candidates} c={code} h={found.hash}/></div>}
           <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-            <Input value={member} onChange={e => setMember(e.target.value)} placeholder="Kode referral / username member" aria-label="Member penerima"/>
-            <Input value={note} onChange={e => setNote(e.target.value)} placeholder="Catatan (opsional)" maxLength={120} aria-label="Catatan"/>
-            <Button type="button" onClick={approve} disabled={busy === 'credit' || !member.trim()} className="gap-2"><CheckCircle2 size={16}/>{busy === 'credit' ? 'Menyimpan…' : 'Approve & kreditkan'}</Button>
+            <Input value={member} onChange={e => setMember(e.target.value)} placeholder="Referral code / member username" aria-label="Member penerima"/>
+            <Input value={note} onChange={e => setNote(e.target.value)} placeholder="Note (optional)" maxLength={120} aria-label="Note"/>
+            <Button type="button" onClick={approve} disabled={busy === 'credit' || !member.trim()} className="gap-2"><CheckCircle2 size={16}/>{busy === 'credit' ? 'Saving…' : 'Approve & kreditkan'}</Button>
           </div></>}
       </div>}
 
@@ -117,10 +117,10 @@ function ManualCredit({ wallet, onMessage }: { wallet: string; onMessage: (m: st
     <h3 className="flex items-center gap-2 font-display text-base font-bold"><AlertTriangle size={16} className="text-chart-3"/> Kredit manual (blockchain sibuk) · Owner 1</h3>
     <p className="mt-1 text-[11px] text-muted-foreground">Use only if you have seen the funds arrive in the Owner wallet. A member can only have one manual credit without a TxID. When the TxID is later approved via On-chain Check, the TxID is only linked to this credit — balance will not increase again.</p>
     <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_120px_1fr_auto]">
-      <Input value={member} onChange={e => setMember(e.target.value)} placeholder="Kode referral / username" aria-label="Member"/>
+      <Input value={member} onChange={e => setMember(e.target.value)} placeholder="Referral code / username" aria-label="Member"/>
       <Input value={amount} onChange={e => setAmount(e.target.value)} placeholder="USD" inputMode="decimal" aria-label="Amount"/>
-      <Input value={note} onChange={e => setNote(e.target.value)} placeholder="Proof: time, sender wallet, etc." maxLength={120} aria-label="Catatan bukti"/>
-      <Button type="button" variant="outline" onClick={submit} disabled={busy}>{busy ? 'Menyimpan…' : 'Kreditkan'}</Button>
+      <Input value={note} onChange={e => setNote(e.target.value)} placeholder="Proof: time, sender wallet, etc." maxLength={120} aria-label="Proof notes"/>
+      <Button type="button" variant="outline" onClick={submit} disabled={busy}>{busy ? 'Saving…' : 'Kreditkan'}</Button>
     </div>
   </div>;
 }

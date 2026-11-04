@@ -27,10 +27,10 @@ export function AdminMiningRigs({ onMessage }: { onMessage: (m: string) => void 
 
   return <section className="mt-6 space-y-4 rounded-2xl border border-border p-4">
     <div className="flex items-center justify-between"><h2 className="font-black">Mining Machine · Packages, Prices & Quotas</h2><Button size="sm" onClick={() => setEdit({ ...blank })}>+ New package</Button></div>
-    <div className="overflow-x-auto"><table className="w-full min-w-[600px] text-left text-sm"><thead className="text-xs text-muted-foreground"><tr>{['Kode','Nama','TH/s','USDT Price','Terpesan / Kuota','Status',''].map((x) => <th key={x} className="p-2">{x}</th>)}</tr></thead>
+    <div className="overflow-x-auto"><table className="w-full min-w-[600px] text-left text-sm"><thead className="text-xs text-muted-foreground"><tr>{['Code','Nama','TH/s','USDT Price','Terpesan / Kuota','Status',''].map((x) => <th key={x} className="p-2">{x}</th>)}</tr></thead>
       <tbody>{rigs.map((r) => <tr key={r.id} className="border-t border-border"><td className="p-2 font-mono">{r.id}</td><td className="p-2">{r.name}</td><td className="p-2">{r.hashrate_th}</td><td className="p-2">${r.price_usd.toLocaleString()}</td><td className="p-2">{r.reserved} / {r.quota}</td><td className="p-2">{r.enabled ? 'Open' : 'Close'}</td><td className="p-2"><Button size="sm" variant="outline" onClick={() => setEdit(r)}>Edit</Button></td></tr>)}</tbody></table></div>
     {edit && <div className="grid gap-2 rounded-xl border border-primary/40 p-3 text-sm sm:grid-cols-2">
-      <label className="grid gap-1">Kode (A-Z, 0-9)<input disabled={rigs.some((r) => r.id === edit.id)} value={edit.id} onChange={f('id')} className="rounded border border-border bg-background p-2" /></label>
+      <label className="grid gap-1">Code (A-Z, 0-9)<input disabled={rigs.some((r) => r.id === edit.id)} value={edit.id} onChange={f('id')} className="rounded border border-border bg-background p-2" /></label>
       <label className="grid gap-1">Nama<input value={edit.name} onChange={f('name')} className="rounded border border-border bg-background p-2" /></label>
       <label className="grid gap-1">Hashrate TH/s<input type="number" value={edit.hashrate_th} onChange={f('hashrate_th', true)} className="rounded border border-border bg-background p-2" /></label>
       <label className="grid gap-1">USDT Price<input type="number" value={edit.price_usd} onChange={f('price_usd', true)} className="rounded border border-border bg-background p-2" /></label>
