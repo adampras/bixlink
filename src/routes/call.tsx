@@ -149,7 +149,7 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
 function ActionButtons({ peerId, name, tier, canCall, onChat }: { peerId: string; name: string; tier: Tier | null; canCall: boolean; onChat: (id: string, name: string) => void }) {
   const [hint, setHint] = useState('');
   const call = (k: 'voice' | 'video') => {
-    if (!tier?.[k]) { setHint(`Butuh staking aktif $${tier?.min[k] ?? '-'} untuk ${k === 'voice' ? 'panggilan suara' : 'video call'}`); setTimeout(() => setHint(''), 3500); return; }
+    if (!tier?.[k]) { setHint(`Requires an active stake of $${tier?.min[k] ?? '-'} for ${k === 'voice' ? 'voice calls' : 'video calls'}`); setTimeout(() => setHint(''), 3500); return; }
     if (!canCall) { setHint('This member does not accept calls from you'); setTimeout(() => setHint(''), 3500); return; }
     startBixCall(peerId, name, k);
   };

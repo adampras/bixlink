@@ -114,7 +114,7 @@ export function BixCallHost() {
           const p = peer.data as { name?: string; whatsapp?: string } | null;
           setCall({ id: row.id, peerId: row.caller_id, peerName: p?.name ?? 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: p?.whatsapp ?? null, rang: true });
           try { navigator.vibrate?.([300, 200, 300]); } catch { /* unsupported */ }
-          sysNotify(`📞 BIXCALL · Incoming ${row.kind === 'video' ? 'Video call' : 'Panggilan suara'}`, `@${p?.name ?? 'Member'} is calling you`, `call-${row.id}`, true);
+          sysNotify(`📞 BIXCALL · Incoming ${row.kind === 'video' ? 'Video call' : 'Voice call'}`, `@${p?.name ?? 'Member'} is calling you`, `call-${row.id}`, true);
         }
       }
       // Chat alerts while the app is in the background
@@ -403,7 +403,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     {howl && live && <div className="bc-howl" role="status">Echo is automatically reduced</div>}
     {cam && live && <video ref={localV} className={sw ? 'bixcall-remote on bixcall-self-big' : 'bixcall-pip'} style={sw ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={sw ? undefined : dragPip} onClick={() => { if (sw) setHideUi(v => !v); }} autoPlay playsInline muted/>}
     <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}`}>
-      {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Maaf, sedang sibuk. Nanti saya hubungi kembali.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
+      {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Sorry, I am busy right now. I will call you back.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Decline with message</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
         <SwipeKey tone="end" label="Reject" onDone={onDecline} icon={<PhoneOff/>}/>
