@@ -4,7 +4,7 @@ import { BixtradeBot3D, BOT_PERSONA } from '@/components/BixtradeBot3D';
 import { BIXTRADE_STRATEGIES } from '@/lib/bixtrade';
 
 /** Owner-switchable BIXTRADE-style landing hero; presentation only, no figures are invented. */
-export function LandingTradeStyle({ bixPrice }: { bixPrice?: number }) {
+export function LandingTradeStyle({ bixPrice }: { bixPrice?: number | undefined }) {
   return <section className="ltx">
     <header className="ltx-bar"><b className="font-display">BIX<span>LINK</span></b><span className="arb-live"><i/> NEURAL ONLINE</span></header>
     <div className="ltx-hero">
