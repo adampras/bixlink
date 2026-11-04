@@ -25,6 +25,5 @@ function TradePage() {
       <div className="flex gap-1.5"><Link to="/quantum-exchange" className="trade-chip">QUANTUM · SOON</Link><Link to="/mining" className="trade-chip">MINING · SOON</Link></div>
     </div>
     <P2PDesk userId={user?.id} refPrice={ref} />
-    <p className="mt-3 text-[10px] text-muted-foreground">Internal market — not an exchange listing. Trades settle in the BIXLINK internal ledger between members.</p>
   </main></BixShell>;
 }

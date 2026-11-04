@@ -81,7 +81,14 @@ export function P2PDesk({ userId, refPrice }: { userId?: string | undefined; ref
           </section>
         </div>}
     <Link to="/buyback" className="p2p-buyback"><span className="flex items-center gap-2"><Zap size={15} />SELL BIX · DEV BUYBACK $0.25</span><span className="text-xs text-muted-foreground">Fast sell →</span></Link>
-    <aside className="shop-disclosure">Member-to-member trades settle instantly inside the BIXLINK internal ledger at the agreed price. Prices are limited to the ${P2P_FLOOR}–${P2P_CEILING} corridor. Activity shown is real recorded internal trades only. This is not an external exchange; internal trades do not indicate external market liquidity or listing value.</aside>
+    <aside className="lux-deed" aria-label="Market disclosure">
+      <div className="lux-deed-head"><ShieldCheck size={14} />BIXLINK INTERNAL ESCROW PROTOCOL</div>
+      <ul>
+        <li><b>Instant settlement</b><span>Member-to-member trades settle instantly inside the BIXLINK internal ledger at the agreed price.</span></li>
+        <li><b>Price corridor ${P2P_FLOOR}–${P2P_CEILING}</b><span>Prices are limited to this corridor. AMM POOL rows are a labelled simulation and never move member balances.</span></li>
+        <li><b>Internal utility market</b><span>Not an external exchange; internal trades do not indicate external market liquidity or listing value.</span></li>
+      </ul>
+    </aside>
     {take && <div className="modal-backdrop" onClick={() => setTake(null)}><div role="dialog" aria-modal="true" aria-label="Confirm trade" className="modal-panel max-w-sm" onClick={e => e.stopPropagation()}><div className="flex items-center justify-between"><h3 className="font-display text-lg font-bold">{take.side === 'SELL' ? 'Buy BIX' : 'Sell BIX'}</h3><Button size="icon" variant="ghost" aria-label="Close" onClick={() => setTake(null)}><X /></Button></div><p className="mt-1 text-xs text-muted-foreground">Price ${Number(take.price_usd).toFixed(4)} · up to {number(Number(take.remaining_bix))} BIX</p><input className="form-input mt-3 w-full" type="number" min={0} max={take.remaining_bix} value={takeAmt} onChange={e => setTakeAmt(e.target.value)} /><p className="mt-2 text-sm">{take.side === 'SELL' ? 'You pay' : 'You receive'}: <b className="numeric">{money(Number(takeAmt || 0) * take.price_usd)}</b></p><Button className="mt-4 w-full" disabled={busy} onClick={doTake}>Confirm trade</Button></div></div>}
   </div>;
 }
