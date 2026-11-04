@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-const COMM_TABS: string[] = ['chat', 'call', 'community', 'setting'];
+const COMM_TABS: string[] = ['chat', 'updates', 'call', 'community', 'setting'];
 import { useEffect, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
@@ -27,7 +27,7 @@ export const Route = createFileRoute('/call')({
   },
   component: CallPage,
 });
-type CommTab = 'chat' | 'call' | 'community' | 'setting';
+type CommTab = 'chat' | 'updates' | 'call' | 'community' | 'setting';
 type CallSearch = { tab?: CommTab; chat?: string; n?: string };
 
 type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call: boolean; avatar_path?: string | null; status_text?: string | null };
@@ -93,18 +93,26 @@ function CallInner() {
 
   if (chatWith) return <ChatRoom me={me} peer={chatWith} tier={tier} onBack={() => setChatWith(null)}/>;
   const open = (id: string, name: string) => setChatWith({ id, name });
-  const TITLE: Record<CommTab, string> = { chat: 'CHAT', call: 'PANGGILAN', community: 'KOMUNITAS', setting: 'PENGATURAN' };
+  const TITLE: Record<CommTab, string> = { chat: 'CHAT', updates: 'PEMBARUAN', call: 'PANGGILAN', community: 'KOMUNITAS', setting: 'PENGATURAN' };
   const view: CommTab = tab;
 
   return <main className="mx-auto max-w-xl px-4 py-5">
     <FindMember bar me={me} tier={tier} onChat={open}/>
-    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
+    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}<CommMenu/></div>
 
     {view === 'chat' && <ChatTab me={me} tier={tier} onOpen={open}/>}
+    {view === 'updates' && <StoryBar me={me} myName="Saya" list/>}
     {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
     {view === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
     {view === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/></>}
   </main>;
+}
+
+function CommMenu() {
+  const [o, setO] = useState(false);
+  const go = [['chat', 'Chat'], ['updates', 'Pembaruan · Status'], ['community', 'Komunitas'], ['call', 'Panggilan'], ['setting', 'Pengaturan']] as const;
+  return <span className="comm-kebab"><button type="button" aria-label="Menu" onClick={() => setO(v => !v)}><MoreVertical size={18}/></button>
+    {o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }
 
 type Found = Peer & { code?: string | null; via?: string };
