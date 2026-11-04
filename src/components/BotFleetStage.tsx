@@ -5,8 +5,8 @@ import { BixtradeBot3D, BOT_PERSONA } from '@/components/BixtradeBot3D';
 const TRAITS: Record<BixtradeStrategy, string[]> = {
   core: ['Low-drawdown shield', 'BTC · ETH prioritas', 'Eksekusi selektif'],
   active: ['Momentum seimbang', 'Multi-pair BTC · ETH · SOL · BNB', 'Frekuensi menengah'],
-  flash: ['Arbitrase segitiga kilat', 'Lintas 6 bursa', 'Latensi mikro'],
-} as Record<BixtradeStrategy, string[]>;
+  triangular: ['Arbitrase segitiga kilat', 'Lintas 6 bursa', 'Latensi mikro'],
+};
 
 /** Full-screen standalone stage for choosing the BIXTRADE bot; selection only, no funds move. */
 export function BotFleetStage({ value, onPick, onClose }: { value: BixtradeStrategy; onPick: (s: BixtradeStrategy) => void; onClose: () => void }) {
