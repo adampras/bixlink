@@ -16,11 +16,8 @@ export const Route = createFileRoute('/p2p')({
 });
 function P2PPage() {
   const { user } = useMember();
-  return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8">
-    <p className="shop-eyebrow">INTERNAL TRADING DESK</p>
-    <h1 className="mt-1 font-display text-3xl font-bold">P2P <span className="text-chart-3">BIX Market</span></h1>
-    <p className="mt-1 mb-4 text-sm text-muted-foreground">Buy or sell in one tap with Express, or set your own price on the Merchant desk.</p>
-    <Link to="/arbitrage" className="mb-4 inline-block text-xs font-bold text-chart-3 underline">Arbitrage & spread calculator →</Link>
+  return <BixShell><main className="mx-auto max-w-7xl px-5 pt-4 pb-28 md:px-8">
+    <div className="mb-3 flex items-end justify-between gap-3"><div><p className="shop-eyebrow">INTERNAL TRADING DESK</p><h1 className="font-display text-2xl font-bold leading-tight">P2P <span className="text-chart-3">BIX Market</span></h1></div><Link to="/arbitrage" className="shrink-0 text-[11px] font-bold text-chart-3 underline">Kalkulator spread →</Link></div>
     <P2PDesk userId={user?.id} />
   </main></BixShell>;
 }

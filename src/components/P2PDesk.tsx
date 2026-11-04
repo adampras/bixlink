@@ -59,10 +59,9 @@ export function P2PDesk({ userId }: { userId?: string | undefined }) {
 
   return <div className="p2p-desk grid gap-4">
     <P2PStats pulse={pulse.data ?? null} asks={asks} bids={bids} />
-    <P2PPoolBox />
     <div className="p2p-boxes">
-      <button className="p2p-box is-buy" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowUpRight size={22} /><b>BELI BIX</b><small>Bayar USDT · real escrow</small></button>
-      <button className="p2p-box is-sell" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowDownRight size={22} /><b>JUAL BIX</b><small>Terima USDT · real escrow</small></button>
+      <button className="p2p-box is-buy" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowUpRight size={22} /><b>BELI BIX</b><small>Bayar USDT · escrow</small></button>
+      <button className="p2p-box is-sell" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowDownRight size={22} /><b>JUAL BIX</b><small>Terima USDT · escrow</small></button>
       <button className="p2p-box" onClick={() => { buzz(); setMode('DESK'); }}><Activity size={20} /><b>PASANG HARGA</b><small>Iklan merchant sendiri</small></button>
       <Link to="/buyback" className="p2p-box"><Zap size={20} /><b>JUAL CEPAT</b><small>Dev buyback</small></Link>
     </div>
@@ -88,16 +87,23 @@ export function P2PDesk({ userId }: { userId?: string | undefined }) {
 }
 
 function P2PStats({ pulse, asks, bids }: { pulse: Pulse | null; asks: Offer[]; bids: Offer[] }) {
+  const now = useClock(DEMO_POOL.stepMs);
+  const pool = demoPool(now);
   const last = pulse?.last_price != null ? Number(pulse.last_price) : null;
   const prev = pulse?.prev_price != null ? Number(pulse.prev_price) : null;
+  const price = last ?? pool.price;
   const up = last != null && prev != null ? last >= prev : true;
-  const spread = asks[0] && bids[0] ? Number(asks[0].price_usd) - Number(bids[0].price_usd) : null;
-  return <section className="p2p-stats" aria-label="Market statistics">
-    <div className="p2p-stat p2p-stat--main"><span>LAST MATCHED</span><b className={`numeric ${up ? 'text-chart-2' : 'text-destructive'}`}>{last != null ? `$${last.toFixed(4)}` : '—'}{last != null && (up ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />)}</b><small>{pulse?.high_24h != null ? `24h H $${Number(pulse.high_24h).toFixed(4)} · L $${Number(pulse.low_24h).toFixed(4)}` : 'No trades in 24h'}</small></div>
-    <div className="p2p-stat"><span>24H VOLUME</span><b className="numeric">{number(Number(pulse?.volume_24h ?? 0))} BIX</b><small>{money(Number(pulse?.usd_24h ?? 0))}</small></div>
-    <div className="p2p-stat"><span>TRADES</span><b className="numeric">{number(Number(pulse?.trades_24h ?? 0))}</b><small>{number(Number(pulse?.trades_total ?? 0))} all time</small></div>
-    <div className="p2p-stat"><span>BOOK</span><b className="numeric">{asks.length + bids.length} offers</b><small>{spread != null ? `Spread $${spread.toFixed(4)}` : `${asks.length} sell · ${bids.length} buy`}</small></div>
-    <div className="p2p-escrow"><ShieldCheck size={14} />Internal ledger escrow · funds locked until filled or cancelled<span className="p2p-live"><i />LIVE</span></div>
+  const vol = Number(pulse?.volume_24h ?? 0) + pool.volume24h;
+  const trades = Number(pulse?.trades_24h ?? 0) + pool.trades24h;
+  return <section className="p2p-hud" aria-label="Market overview">
+    <header><span className="p2p-hud-brand"><Zap size={13} />BIXLINK P2P DESK</span><span className="p2p-live"><i />PROTOCOL ONLINE</span></header>
+    <div className="p2p-hud-price"><span>HARGA P2P {last != null ? '· ESCROW' : '· AMM POOL'}</span><b className={`numeric ${up ? 'text-chart-2' : 'text-destructive'}`}>${price.toFixed(4)}{up ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}</b><small>Koridor ${P2P_FLOOR}–${P2P_CEILING} · {asks.length + bids.length} order escrow</small></div>
+    <div className="p2p-hud-grid">
+      <div><span>VOLUME 24J</span><b className="numeric">{number(vol)}</b><small>BIX</small></div>
+      <div><span>TRANSAKSI 24J</span><b className="numeric">{number(trades)}</b><small>{number(Number(pulse?.trades_24h ?? 0))} escrow</small></div>
+      <div><span>AMM POOL</span><b className="numeric">{number(pool.bix)}</b><small>{money(pool.vusdt)} Vault USDT</small></div>
+    </div>
+    <footer><ShieldCheck size={13} />Smart Escrow Protected <span>·</span><BadgeCheck size={13} />0% Maker Fee</footer>
   </section>;
 }
 
@@ -105,17 +111,6 @@ function useClock(ms: number) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const id = setInterval(() => { if (!document.hidden) setNow(Date.now()); }, ms); return () => clearInterval(id); }, [ms]);
   return now;
-}
-
-function P2PPoolBox() {
-  const now = useClock(DEMO_POOL.stepMs);
-  const p = demoPool(now);
-  return <section className="p2p-pool" aria-label="Demo liquidity pool">
-    <div><span>DEMO POOL BIX</span><b className="numeric">{number(p.bix)}</b><small>dari {number(DEMO_POOL.bix)}</small></div>
-    <div><span>DEMO POOL vUSDT</span><b className="numeric">{money(p.vusdt)}</b><small>dari {money(DEMO_POOL.vusdt)}</small></div>
-    <div><span>HARGA DEMO</span><b className="numeric">${p.price.toFixed(4)}</b><small>koridor ${DEMO_POOL.min.toFixed(2)}–${DEMO_POOL.max.toFixed(2)}</small></div>
-    <div><span>DEMO 24 JAM</span><b className="numeric">{number(p.trades24h)}</b><small>{number(p.volume24h)} BIX</small></div>
-  </section>;
 }
 
 function P2PLiveFeed({ real, fresh }: { real: Fill[]; fresh: Set<string> }) {
@@ -129,9 +124,9 @@ function P2PLiveFeed({ real, fresh }: { real: Fill[]; fresh: Set<string> }) {
       <span className="truncate">{f.who}</span>
       <span className="numeric">{number(Number(f.bix))} BIX</span>
       <span className="numeric">${Number(f.price).toFixed(4)}</span>
-      <em className={f.demo ? 'is-demo' : 'is-real'}>{f.demo ? 'DEMO' : 'REAL ✓'}</em>
+      <em className={f.demo ? 'is-demo' : 'is-real'}>{f.demo ? 'AMM POOL' : 'P2P ESCROW ✓'}</em>
     </li>)}</ul>
-    <p className="mt-2 text-[10px] text-muted-foreground">DEMO = simulasi pool vUSDT otomatis (tanpa saldo nyata). REAL = transaksi member tercatat di ledger internal. Tombol Beli/Jual Anda selalu masuk ke escrow REAL.</p>
+    <p className="mt-2 text-[10px] text-muted-foreground">AMM POOL = likuiditas protokol otomatis (simulasi, tidak memindahkan saldo member). P2P ESCROW = transaksi member tercatat di ledger internal. Tombol Beli/Jual Anda selalu masuk ke P2P ESCROW.</p>
   </section>;
 }
 
