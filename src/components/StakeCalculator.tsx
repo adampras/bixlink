@@ -15,7 +15,7 @@ export function StakeCalculator({ packages, onPick }: { packages: Package[]; onP
   const prices = useMemo(() => [...new Set(packages.filter(p => p.enabled !== false && !p.retired).map(p => p.price_usd))].sort((a, b) => a - b), [packages]);
   const [idx, setIdx] = useState(Math.min(2, Math.max(0, prices.length - 1)));
   if (!prices.length) return null;
-  const amount = prices[Math.min(idx, prices.length - 1)];
+  const amount = prices[Math.min(idx, prices.length - 1)] ?? 0;
   const pkg = fitPackage(packages, amount);
   const daily = pkg ? (pkg.price_usd * pkg.apy) / 100 / 365 : 0;
   return <section aria-label="Kalkulator simulasi" className="stake-calc auric-card mb-5 rounded-2xl border p-4">
