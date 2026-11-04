@@ -272,7 +272,7 @@ function BixtradePage() {
       <p className="shop-eyebrow">EXECUTION RECEIPT</p>
       <h3 className="font-display text-xl font-bold">{receipt.pair}</h3>
       <p className="font-mono text-[10px] text-muted-foreground">{receipt.ref}</p>
-      <dl>{([['Leg 1 · Buy', `${receipt.buy_venue} @ ${Number(receipt.buy_price).toFixed(4)}`], ['Leg 2 · Sell', `${receipt.sell_venue} @ ${Number(receipt.sell_price).toFixed(4)}`], ['Quantity', Number(receipt.qty).toFixed(6)], ['Size', `${Number(receipt.notional_usd).toFixed(2)} USDT`], ['Taker fees (2 legs)', `${Number(receipt.fee_usd).toFixed(4)} USDT`], ['Net result', `${Number(receipt.net_usd).toFixed(4)} USDT`], ['Latency', `${receipt.latency_ms} ms`], ['Time', new Date(receipt.executed_at).toLocaleString()], ['Funding', receipt.funding === 'virtual' ? 'Virtual USDT (paper)' : 'Real USDT record'], ['Price source', receipt.source === 'live_quotes' ? 'Live exchange quotes' : 'Engine record']] as const).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+      <dl>{([['Leg 1 · Buy', `${receipt.buy_venue} @ ${Number(receipt.buy_price).toFixed(4)}`], ['Leg 2 · Sell', `${receipt.sell_venue} @ ${Number(receipt.sell_price).toFixed(4)}`], ['Quantity', Number(receipt.qty).toFixed(6)], ['Size', `${Number(receipt.notional_usd).toFixed(2)} USDT`], ['Taker fees (2 legs)', `${Number(receipt.fee_usd).toFixed(4)} USDT`], ['Net result', `${Number(receipt.net_usd).toFixed(4)} USDT`], ['Latency', `${receipt.latency_ms} ms`], ['Time', new Date(receipt.executed_at).toLocaleString()], ['Funding', receipt.funding === 'virtual' ? 'Neural AI Pool (protocol allocation)' : 'Live Asset Engine record'], ['Price source', receipt.source === 'live_quotes' ? 'Live exchange quotes' : 'Engine record']] as const).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
       <p className="mt-2 text-[10px] text-muted-foreground">Recorded performance entry; no external exchange order and no automatic wallet credit.</p>
       <Button className="mt-3 w-full" onClick={() => setReceipt(null)}>Close</Button>
     </div></div>}
@@ -323,11 +323,11 @@ function ShareCard({ text }: { text: string }) {
   </section>;
 }
 
-const REASON: Record<string, string> = { ok: 'Executed: spread beat both taker fees.', below_fees: 'No trade: every real spread is below the 0.2% round-trip fee — a real bot waits.', no_capital: 'Add Virtual USDT bot capital to start live paper execution.', wait: 'Cooling down — next check in under a minute.', closed: 'BIXTrade is closed.' };
+const REASON: Record<string, string> = { ok: 'Executed: spread beat both taker fees.', below_fees: 'No trade: every real spread is below the 0.2% round-trip fee — a real bot waits.', no_capital: 'Add Neural AI Pool allocation to start live execution.', wait: 'Cooling down — next check in under a minute.', closed: 'BIXTrade is closed.' };
 function LivePanel({ live }: { live: { scan: LiveScan[]; reason: string; at: number } | null }) {
   return <section className="arb-card mt-4">
-    <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-3"/> Real exchange quotes · Virtual USDT</h2>
-    <p className="text-[11px] text-muted-foreground">Best bid/ask pulled every 20 s from public order books. Virtual USDT trades are paper-executed at these exact prices; no exchange order is placed.</p>
+    <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-3"/> Real exchange quotes · Neural AI Pool</h2>
+    <p className="text-[11px] text-muted-foreground">Best bid/ask pulled every 20 s from public order books. AI Pool executions are recorded internally at these exact prices; no external exchange order is placed.</p>
     {!live ? <p className="py-4 text-center text-xs text-muted-foreground">Connecting to exchanges…</p> : <>
       <div className="mt-3 grid gap-2">{live.scan.map(s => <div key={s.pair} className="border-t border-border pt-2 text-[11px]">
         <div className="flex justify-between"><b>{s.pair}</b><b className={s.netPct > 0 ? 'text-chart-2' : 'text-muted-foreground'}>{s.buy ? `${s.spreadPct.toFixed(3)}% · net ${s.netPct.toFixed(3)}%` : 'feed unavailable'}</b></div>
