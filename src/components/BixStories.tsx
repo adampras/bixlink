@@ -11,7 +11,7 @@ export type StoryGroup = { user_id: string; name: string; avatar_path: string | 
 
 const BGS = [['gold', 'Emas'], ['violet', 'Ungu'], ['emerald', 'Zamrud'], ['obsidian', 'Obsidian'], ['ruby', 'Ruby']] as const;
 const PHOTO_MS = 6000;
-const ago = (iso: string) => { const m = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000)); return m < 60 ? `${m} mnt lalu` : `${Math.floor(m / 60)} jam lalu`; };
+const ago = (iso: string) => { const m = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000)); return m < 60 ? `${m} mnt lalu` : `${Math.floor(m / 60)} hours ago`; };
 
 export function useStoryFeed(me: string) {
   const [groups, setGroups] = useState<StoryGroup[] | null>(null);
@@ -36,17 +36,17 @@ export function StoryBar({ me, myName, list: asList }: { me: string; myName: str
     <h3>Status</h3>
     <button type="button" className="bx-upd-row" onClick={() => mineIdx >= 0 ? setView(mineIdx) : setCompose('text')}>
       <span className="bx-upd-me"><BixAvatar userId={me} name={myName} className="bx-story-ava" story={mineIdx >= 0 ? 'seen' : null}/><i onClick={e => { e.stopPropagation(); setCompose('text'); }}><Plus size={13}/></i></span>
-      <span><b>{mineIdx >= 0 ? 'Status saya' : 'Tambah Status'}</b><small>{mineIdx >= 0 ? `${list[mineIdx]?.stories.length ?? 0} pembaruan · ketuk untuk lihat` : 'Akan hilang setelah 24 jam'}</small></span>
+      <span><b>{mineIdx >= 0 ? 'Status saya' : 'Add Status'}</b><small>{mineIdx >= 0 ? `${list[mineIdx]?.stories.length ?? 0} updates · tap to view` : 'Will disappear after 24 hours'}</small></span>
     </button>
-    <p className="bx-upd-label">Pembaruan terkini</p>
-    {groups === null ? <p className="bx-stories-empty">Memuat…</p> : others.length === 0 ? <p className="bx-stories-empty">Status dari kontak chat, tim jaringan, dan teman saling follow muncul di sini selama 24 jam.</p>
+    <p className="bx-upd-label">Recent updates</p>
+    {groups === null ? <p className="bx-stories-empty">Memuat…</p> : others.length === 0 ? <p className="bx-stories-empty">Status from chat contacts, network team, and mutual followers will appear here for 24 hours.</p>
       : others.map(g => { const i = list.indexOf(g); const last = g.stories[g.stories.length - 1]; return <button key={g.user_id} type="button" className="bx-upd-row" onClick={() => setView(i)}>
         <BixAvatar userId={g.user_id} path={g.avatar_path} name={g.name} className="bx-story-ava" story={g.unseen ? 'new' : 'seen'}/>
         <span><b>@{g.name}</b><small>{last ? ago(last.created_at) : ''}</small></span></button>; })}
-    <div className="bx-upd-fabs"><button type="button" aria-label="Status teks" className="is-pen" onClick={() => setCompose('text')}><Type size={18}/></button><button type="button" aria-label="Status foto atau video" onClick={() => setCompose('photo')}><Camera size={22}/></button></div>
+    <div className="bx-upd-fabs"><button type="button" aria-label="Status teks" className="is-pen" onClick={() => setCompose('text')}><Type size={18}/></button><button type="button" aria-label="Photo or video status" onClick={() => setCompose('photo')}><Camera size={22}/></button></div>
     {portals}
   </section>;
-  return <section className="bx-stories" aria-label="Story 24 jam">
+  return <section className="bx-stories" aria-label="24-hour Story">
     <div className="bx-stories-row">
       <div className="bx-story-me">
         <button type="button" className="bx-story-item" onClick={() => mineIdx >= 0 ? setView(mineIdx) : setCompose('text')}>
@@ -59,7 +59,7 @@ export function StoryBar({ me, myName, list: asList }: { me: string; myName: str
         <BixAvatar userId={g.user_id} path={g.avatar_path} name={g.name} className="bx-story-ava" story={g.unseen ? 'new' : 'seen'}/>
         <small>@{g.name}</small>
       </button>; })}
-      {groups && others.length === 0 && <p className="bx-stories-empty">Story dari kontak chat, tim jaringan, dan teman saling follow muncul di sini selama 24 jam.</p>}
+      {groups && others.length === 0 && <p className="bx-stories-empty">Stories from chat contacts, network team, and mutual followers will appear here for 24 hours.</p>}
     </div>
     {portals}
   </section>;
@@ -127,8 +127,8 @@ function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; gr
     <header className="bx-sv-head">
       <BixAvatar userId={g.user_id} path={g.avatar_path} name={g.name} className="comm-ava" ring={false}/>
       <span className="min-w-0 flex-1"><b className="block truncate">{g.mine ? 'Story saya' : `@${g.name}`}</b><small>{ago(s.created_at)}</small></span>
-      {g.mine && <button type="button" aria-label="Hapus story" onClick={() => void del()}><Trash2 size={17}/></button>}
-      <button type="button" aria-label="Tutup" onClick={onClose}><X size={20}/></button>
+      {g.mine && <button type="button" aria-label="Delete story" onClick={() => void del()}><Trash2 size={17}/></button>}
+      <button type="button" aria-label="Close" onClick={onClose}><X size={20}/></button>
     </header>
     <div className="bx-sv-stage" {...hold}>
       <StoryMedia key={s.id} s={s} onReady={onReady} onEnded={next} paused={paused || !!viewers}/>
@@ -139,12 +139,12 @@ function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; gr
     {note && <p className="bx-sv-note" role="status">{note}</p>}
     <footer className="bx-sv-foot">
       {g.mine ? <button type="button" className="bx-sv-views" onClick={() => void openViewers()}><Eye size={15}/> {s.views ?? 0} dilihat</button>
-        : <form onSubmit={e => { e.preventDefault(); void sendReply(); }}><input value={reply} onFocus={() => setPaused(true)} onBlur={() => !reply && setPaused(false)} onChange={e => setReply(e.target.value)} maxLength={300} placeholder={`Balas @${g.name}…`}/><button type="submit" disabled={!reply.trim()}>Kirim</button></form>}
+        : <form onSubmit={e => { e.preventDefault(); void sendReply(); }}><input value={reply} onFocus={() => setPaused(true)} onBlur={() => !reply && setPaused(false)} onChange={e => setReply(e.target.value)} maxLength={300} placeholder={`Balas @${g.name}…`}/><button type="submit" disabled={!reply.trim()}>Send</button></form>}
     </footer>
     {viewers && <div className="comm-sheet-bg" onClick={() => { setViewers(null); setPaused(false); }}><div className="comm-sheet" onClick={e => e.stopPropagation()}>
       <p className="comm-sheet-preview"><Eye size={13}/> Dilihat oleh {viewers.length}</p>
-      {viewers.length === 0 ? <p className="py-3 text-center text-xs text-muted-foreground">Belum ada yang melihat.</p> : <ul className="bx-sv-viewers">{viewers.map(v => <li key={v.user_id}><BixAvatar userId={v.user_id} path={v.avatar_path} name={v.name} ring={false}/><b>@{v.name}</b><small>{new Date(v.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small></li>)}</ul>}
-      <button type="button" className="ghost" onClick={() => { setViewers(null); setPaused(false); }}>Tutup</button>
+      {viewers.length === 0 ? <p className="py-3 text-center text-xs text-muted-foreground">No views yet.</p> : <ul className="bx-sv-viewers">{viewers.map(v => <li key={v.user_id}><BixAvatar userId={v.user_id} path={v.avatar_path} name={v.name} ring={false}/><b>@{v.name}</b><small>{new Date(v.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small></li>)}</ul>}
+      <button type="button" className="ghost" onClick={() => { setViewers(null); setPaused(false); }}>Close</button>
     </div></div>}
   </div>;
 }
@@ -167,13 +167,13 @@ function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: '
 
   const pick = async (f: File, kind: 'photo' | 'video') => {
     setErr('');
-    if (kind === 'photo' && (!f.type.startsWith('image/') || f.size > 10 * 1024 * 1024)) return setErr('Foto JPG/PNG/WebP, maksimal 10 MB.');
+    if (kind === 'photo' && (!f.type.startsWith('image/') || f.size > 10 * 1024 * 1024)) return setErr('JPG/PNG/WebP photo, max 10 MB.');
     if (kind === 'video') {
       if (!f.type.startsWith('video/') || f.size > 30 * 1024 * 1024) return setErr('Video maksimal 30 MB.');
       const u = URL.createObjectURL(f);
       const d = await new Promise<number>(r => { const v = document.createElement('video'); v.preload = 'metadata'; v.onloadedmetadata = () => r(v.duration); v.onerror = () => r(0); v.src = u; });
       URL.revokeObjectURL(u);
-      if (d > 31) return setErr('Durasi video maksimal 30 detik.');
+      if (d > 31) return setErr('Video duration maximum 30 seconds.');
     }
     setMode(kind); setFile(f); setPreview(URL.createObjectURL(f));
   };
@@ -182,7 +182,7 @@ function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: '
     try {
       let path: string | null = null;
       if (mode !== 'text') {
-        if (!file) throw new Error('Pilih media terlebih dulu');
+        if (!file) throw new Error('Select media first');
         const ext = (file.name.split('.').pop() || (mode === 'photo' ? 'jpg' : 'mp4')).toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5);
         path = `${me}/${crypto.randomUUID()}.${ext}`;
         const body = mode === 'photo' ? await compressImage(file) : file;
@@ -193,21 +193,21 @@ function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: '
       if (error) { if (path) void supabase.storage.from('bix-stories').remove([path]); throw new Error(error.message); }
       try { navigator.vibrate?.(15); } catch { /* optional */ }
       onPosted();
-    } catch (e) { setErr(e instanceof Error ? e.message : 'Gagal memasang story'); } finally { setBusy(false); }
+    } catch (e) { setErr(e instanceof Error ? e.message : 'Failed to post story'); } finally { setBusy(false); }
   };
   const quickStatus = async () => { try { await saveStatus(me, text); setStatus('Status profil diperbarui'); setTimeout(() => setStatus(''), 2500); } catch (e) { setErr(e instanceof Error ? e.message : 'Gagal'); } };
 
   return <div className="comm-sheet-bg" onClick={onClose}><div className="comm-sheet bx-sc" role="dialog" aria-label="Buat story" onClick={e => e.stopPropagation()}>
-    <div className="bx-sc-head"><b>Buat Story · 24 jam</b><button type="button" aria-label="Tutup" onClick={onClose}><X size={18}/></button></div>
+    <div className="bx-sc-head"><b>Create Story · 24 hours</b><button type="button" aria-label="Close" onClick={onClose}><X size={18}/></button></div>
     <div className="bx-sc-modes">
       <button type="button" className={mode === 'text' ? 'is-on' : ''} onClick={() => { setMode('text'); setFile(null); setPreview(''); }}><Type size={15}/>Teks</button>
-      <button type="button" className={mode === 'photo' ? 'is-on' : ''} onClick={() => photoRef.current?.click()}><Camera size={15}/>Foto</button>
+      <button type="button" className={mode === 'photo' ? 'is-on' : ''} onClick={() => photoRef.current?.click()}><Camera size={15}/>Photo</button>
       <button type="button" className={mode === 'video' ? 'is-on' : ''} onClick={() => videoRef.current?.click()}><VideoIcon size={15}/>Video</button>
     </div>
     <input ref={photoRef} type="file" accept="image/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void pick(f, 'photo'); }}/>
     <input ref={mediaRef} type="file" accept="image/*,video/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void pick(f, f.type.startsWith('video/') ? 'video' : 'photo'); }}/>
     <input ref={videoRef} type="file" accept="video/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void pick(f, 'video'); }}/>
-    {mode === 'text' ? <div className={`bx-sc-canvas bx-sv-text is-${bg}`}><textarea value={text} onChange={e => setText(e.target.value)} maxLength={200} placeholder="Tulis status Anda…" aria-label="Teks story"/></div>
+    {mode === 'text' ? <div className={`bx-sc-canvas bx-sv-text is-${bg}`}><textarea value={text} onChange={e => setText(e.target.value)} maxLength={200} placeholder="Write your status…" aria-label="Teks story"/></div>
       : preview && <div className="bx-sc-canvas">{mode === 'photo' ? <img src={preview} alt="Pratinjau story"/> : <video src={preview} controls playsInline/>}</div>}
     {mode === 'text' ? <div className="bx-sc-bgs">{BGS.map(([k, l]) => <button key={k} type="button" aria-label={`Latar ${l}`} className={`is-${k}${bg === k ? ' is-on' : ''}`} onClick={() => setBg(k)}/>)}</div>
       : <input className="comm-input" value={text} onChange={e => setText(e.target.value)} maxLength={200} placeholder="Keterangan (opsional)"/>}
@@ -215,6 +215,6 @@ function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: '
     {status && <p className="comm-busy">{status}</p>}
     <button type="button" className="comm-save" disabled={busy || (mode === 'text' ? !text.trim() : !file)} onClick={() => void post()}>{busy ? 'Memasang…' : 'Pasang Story'}</button>
     {mode === 'text' && text.trim() && <button type="button" className="ghost" onClick={() => void quickStatus()}>Jadikan status profil saja</button>}
-    <small className="bx-sc-hint">Terlihat oleh kontak chat, tim jaringan, dan teman saling follow. Hilang otomatis setelah 24 jam · maks 10 story aktif.</small>
+    <small className="bx-sc-hint">Visible to chat contacts, network team, and mutual followers. Automatically disappears after 24 hours · max 10 active stories.</small>
   </div></div>;
 }

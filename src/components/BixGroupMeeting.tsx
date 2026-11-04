@@ -24,16 +24,16 @@ export function BixGroupMeeting({ me, tier }: { me: string; tier: Tier }) {
   useEffect(() => { void load(); const t = setInterval(() => void load(), 15000); return () => clearInterval(t); }, []);
   const create = async () => {
     setMsg('');
-    if (!tier?.voice) { setMsg('Panggilan grup butuh tier CALLER ($30 staking aktif).'); return; }
+    if (!tier?.voice) { setMsg('Group calls require CALLER tier ($30 active staking).'); return; }
     if (title.trim().length < 2) { setMsg('Isi nama room dulu.'); return; }
     const c = newCode();
     const { error } = await supabase.from('bix_call_rooms').insert({ host_id: me, title: title.trim().slice(0, 60), code: c, video: video && !!tier.video });
-    if (error) { setMsg('Gagal membuat room.'); return; }
+    if (error) { setMsg('Failed to create room.'); return; }
     setTitle(''); await load(); setActive(c);
   };
   if (active) return <MeetingStage code={active} me={me} onLeave={() => { setActive(null); void load(); }}/>;
   return <section className="comm-group mt-4">
-    <div className="comm-group-head"><Users size={16}/><b>Panggilan Grup</b><small>Rapat suara/video bersama tim</small></div>
+    <div className="comm-group-head"><Users size={16}/><b>Group Call</b><small>Voice/video meeting with the team</small></div>
     <div className="comm-group-form">
       <input className="form-input" placeholder="Nama room, mis. Rapat Tim Jakarta" value={title} onChange={e => setTitle(e.target.value)} maxLength={60}/>
       <label className="comm-group-check"><input type="checkbox" checked={video} disabled={!tier?.video} onChange={e => setVideo(e.target.checked)}/> Video {tier?.video ? '' : '(tier PRO)'}</label>
@@ -45,8 +45,8 @@ export function BixGroupMeeting({ me, tier }: { me: string; tier: Tier }) {
     </div>
     {msg && <p className="comm-group-msg">{msg}</p>}
     {rooms.length > 0 && <ul className="comm-group-list">{rooms.map(r => <li key={r.id}>
-      <span><b>{r.title}</b><small>{r.video ? '🎥 Video' : '🎙️ Suara'} · {r.code}{r.host_id === me ? ' · Host' : ''}</small></span>
-      <button type="button" onClick={() => setActive(r.code)}>Masuk</button>
+      <span><b>{r.title}</b><small>{r.video ? '🎥 Video' : '🎙️ Voice'} · {r.code}{r.host_id === me ? ' · Host' : ''}</small></span>
+      <button type="button" onClick={() => setActive(r.code)}>Join</button>
     </li>)}</ul>}
   </section>;
 }
@@ -77,7 +77,7 @@ function MeetingStage({ code, me, onLeave }: { code: string; me: string; onLeave
         try { const vs = await openVoiceShield(); shield.current = vs; await room.localParticipant.publishTrack(vs.track, { source: Track.Source.Microphone, dtx: true, red: true }); }
         catch { await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true }); }
         sync();
-      } catch (e) { setErr(e instanceof Error ? e.message : 'Gagal masuk room'); }
+      } catch (e) { setErr(e instanceof Error ? e.message : 'Failed to join room'); }
     })();
     return () => { dead = true; void room?.disconnect(); shield.current?.stop(); roomRef.current = null; };
   }, [code, getToken]);
@@ -88,7 +88,7 @@ function MeetingStage({ code, me, onLeave }: { code: string; me: string; onLeave
   const hand = () => { const n = !hands[me]; setHands(h => ({ ...h, [me]: n })); send({ hand: n }); };
   const close = async () => { if (info) await supabase.from('bix_call_rooms').update({ status: 'closed' }).eq('id', info.id); onLeave(); };
 
-  if (err) return <section className="comm-group mt-4"><p className="comm-group-msg">{err}</p><button type="button" className="comm-group-btn" onClick={onLeave}>Kembali</button></section>;
+  if (err) return <section className="comm-group mt-4"><p className="comm-group-msg">{err}</p><button type="button" className="comm-group-btn" onClick={onLeave}>Back</button></section>;
   return <section className="comm-meet mt-4">
     <div ref={audioBox} hidden/>
     <header><div><b>{info?.title ?? 'Menghubungkan…'}</b><small>{people.length} peserta · kode {code}</small></div>
@@ -96,11 +96,11 @@ function MeetingStage({ code, me, onLeave }: { code: string; me: string; onLeave
     <div className="comm-meet-grid">{people.map(p => <Tile key={p.identity} p={p} hand={!!hands[p.identity]} self={p.identity === me}/>)}</div>
     <div className="comm-meet-bar">
       <button type="button" className={mic ? '' : 'is-off'} onClick={() => void toggleMic()} aria-label="Mikrofon">{mic ? <Mic size={18}/> : <MicOff size={18}/>}</button>
-      {info?.video && <button type="button" className={cam ? '' : 'is-off'} onClick={() => void toggleCam()} aria-label="Kamera">{cam ? <Video size={18}/> : <VideoOff size={18}/>}</button>}
+      {info?.video && <button type="button" className={cam ? '' : 'is-off'} onClick={() => void toggleCam()} aria-label="Camera">{cam ? <Video size={18}/> : <VideoOff size={18}/>}</button>}
       <button type="button" className={hands[me] ? 'is-hand' : ''} onClick={hand} aria-label="Angkat tangan"><Hand size={18}/></button>
-      {info?.isHost && <button type="button" onClick={() => send({ muteAll: true })} className="is-text">Mute semua</button>}
-      <button type="button" className="is-end" onClick={onLeave} aria-label="Keluar"><PhoneOff size={18}/></button>
-      {info?.isHost && <button type="button" className="is-text is-danger" onClick={() => void close()}>Tutup room</button>}
+      {info?.isHost && <button type="button" onClick={() => send({ muteAll: true })} className="is-text">Mute all</button>}
+      <button type="button" className="is-end" onClick={onLeave} aria-label="Leave"><PhoneOff size={18}/></button>
+      {info?.isHost && <button type="button" className="is-text is-danger" onClick={() => void close()}>Close room</button>}
     </div>
   </section>;
 }

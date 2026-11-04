@@ -20,8 +20,8 @@ export function AdminNavigation({ groups, tab, onSelect }: { groups: AdminGroup[
   return <nav aria-label="Owner sections" className="admin-navigation mt-6 min-w-0 border-b border-border pb-5">
     <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg border border-border bg-card px-3">
       <Search size={16} className="shrink-0 text-primary"/>
-      <input aria-label="Cari menu admin" className="min-w-0 bg-transparent py-3 text-sm outline-none" placeholder="Cari menu admin…" value={query} onChange={e => setQuery(e.target.value)}/>
-      {query ? <Button size="icon" variant="ghost" aria-label="Hapus pencarian" className="size-8" onClick={() => setQuery('')}><X size={14}/></Button> : <span className="size-8"/>}
+      <input aria-label="Search admin menu" className="min-w-0 bg-transparent py-3 text-sm outline-none" placeholder="Search admin menu…" value={query} onChange={e => setQuery(e.target.value)}/>
+      {query ? <Button size="icon" variant="ghost" aria-label="Clear search" className="size-8" onClick={() => setQuery('')}><X size={14}/></Button> : <span className="size-8"/>}
     </div>
     {!term && <div role="group" aria-label="Kategori admin" className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-6">
       {groups.map(g => <button key={g.title} type="button" aria-pressed={openCat === g.title} className={`admin-cat-chip admin-cat--${g.tone}`} onClick={() => setOpenCat(g.title)}>{g.title}</button>)}
@@ -35,8 +35,8 @@ export function AdminNavigation({ groups, tab, onSelect }: { groups: AdminGroup[
           : <div key={g.title} role="group" aria-label={g.title} className={`admin-cat-tabs admin-cat--${g.tone}`}>{btns}</div>;
       })}
     </div>
-    {!visible.length && <p role="status" className="mt-4 text-sm text-muted-foreground">Menu tidak ditemukan.</p>}
-    <p className="mt-3 text-xs text-muted-foreground">Menu aktif: <b className="text-foreground">{tab}</b></p>
+    {!visible.length && <p role="status" className="mt-4 text-sm text-muted-foreground">Menu not found.</p>}
+    <p className="mt-3 text-xs text-muted-foreground">Active menu: <b className="text-foreground">{tab}</b></p>
   </nav>;
 }
 

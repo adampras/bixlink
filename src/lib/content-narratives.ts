@@ -58,7 +58,7 @@ Phase targets:
 • Management-reviewed deposit and withdrawal settlement workflows
 • Comprehensive transaction history for every member
 Projections do not constitute guaranteed returns.`,
-  'DAFTAR RWA': `This phase formalizes the real-world asset verification framework prior to any on-chain integration.
+  'RWA LIST': `This phase formalizes the real-world asset verification framework prior to any on-chain integration.
 
 Phase targets:
 • Asset curation and appraisal standards
@@ -85,7 +85,7 @@ Phase targets:
 This represents a development milestone, not a price target.`,
 };
 
-Object.assign(roadmapNarratives, { LAUNCH: roadmapNarratives['PELUNCURAN'], 'STAKING APP BETA': roadmapNarratives['STAKING BETA'], 'RWA LISTING': roadmapNarratives['DAFTAR RWA'], ECOSYSTEM: roadmapNarratives['EKOSISTEM'] });
+Object.assign(roadmapNarratives, { LAUNCH: roadmapNarratives['PELUNCURAN'], 'STAKING APP BETA': roadmapNarratives['STAKING BETA'], 'RWA LISTING': roadmapNarratives['RWA LIST'], ECOSYSTEM: roadmapNarratives['EKOSISTEM'] });
 
 const key = (title: string) => title.trim().toUpperCase();
 

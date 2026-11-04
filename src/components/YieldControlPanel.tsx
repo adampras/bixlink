@@ -30,8 +30,8 @@ export function YieldControlPanel({ market = true }: { market?: boolean }) {
 
   async function applyAll(make: (apys: Record<string, number>) => Record<string, number>, label: string) {
     if (!q.data) return; setBusy(true); setMsg('');
-    try { for (const p of q.data) await save({ data: { id: p.id, price: Number(p.price_usd), apys: make(p.duration_apys), enabled: p.enabled } }); await refresh(); setMsg(`${label} — ${q.data.length} paket diperbarui. Staking yang berjalan tidak berubah.`); }
-    catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal menerapkan.'); } finally { setBusy(false); }
+    try { for (const p of q.data) await save({ data: { id: p.id, price: Number(p.price_usd), apys: make(p.duration_apys), enabled: p.enabled } }); await refresh(); setMsg(`${label} — ${q.data.length} packages updated. Active staking remains unchanged.`); }
+    catch (e) { setMsg(e instanceof Error ? e.message : 'Failed to apply.'); } finally { setBusy(false); }
   }
   async function savePrice(v: number) {
     setBusy(true); setMsg('');
@@ -55,16 +55,16 @@ export function YieldControlPanel({ market = true }: { market?: boolean }) {
       </section>}
       <section className="mt-6 border-y border-border py-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><h2 className="font-display text-xl font-bold">{q.data?.length ?? 'Semua'} paket · profit harian flat</h2><p className="mt-1 text-xs text-muted-foreground">Rentang 0,5%–1,2% per hari. Staking yang berjalan tetap memakai angka lamanya. Proyeksi, bukan jaminan.</p></div>
+          <div><h2 className="font-display text-xl font-bold">{q.data?.length ?? 'All'} paket · profit harian flat</h2><p className="mt-1 text-xs text-muted-foreground">Range 0.5%–1.2% per day. Active staking continues using previous rates. Projection, not a guarantee.</p></div>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-border p-3"><p className="text-xs font-bold">1 · Tangga durasi</p><p className="mt-1 text-[11px] text-muted-foreground">30H 0,5% · 60H 0,6% · 90H 0,8% · 180H 1,0% · 360H 1,2%</p><Button className="mt-2 w-full" variant="outline" disabled={busy || !q.data} onClick={() => applyAll(() => ladderApys(), 'Tangga durasi diterapkan')}><Sparkles size={16}/>Terapkan</Button></div>
-          <div className="rounded-xl border border-border p-3"><p className="text-xs font-bold">2 · Flat sama rata</p><div className="mt-2 flex gap-2"><input aria-label="Flat daily profit" className="form-input numeric" type="number" min={DAILY_MIN} max={DAILY_MAX} step={DAILY_STEP} value={flat} onChange={e => setFlat(Number(e.target.value))} onBlur={() => setFlat(cleanDaily(flat))}/><span className="self-center text-xs">%/hari</span></div><Button className="mt-2 w-full" disabled={busy || !q.data} onClick={() => applyAll(() => flatApys(flat), `Flat ${cleanDaily(flat)}% diterapkan`)}>Terapkan ke semua</Button></div>
-          <div className="rounded-xl border border-border p-3"><p className="text-xs font-bold">3 · Geser sedikit</p><p className="mt-1 text-[11px] text-muted-foreground">Naik/turun 0,05% semua paket, tetap dalam 0,5%–1,2%.</p><div className="mt-2 grid grid-cols-2 gap-2"><Button variant="outline" disabled={busy || !q.data} onClick={() => applyAll(a => shiftApys(a, -DAILY_STEP), 'Turun 0,05%')}><Minus size={16}/>0,05%</Button><Button variant="outline" disabled={busy || !q.data} onClick={() => applyAll(a => shiftApys(a, DAILY_STEP), 'Naik 0,05%')}><Plus size={16}/>0,05%</Button></div></div>
+          <div className="rounded-xl border border-border p-3"><p className="text-xs font-bold">2 · Flat sama rata</p><div className="mt-2 flex gap-2"><input aria-label="Flat daily profit" className="form-input numeric" type="number" min={DAILY_MIN} max={DAILY_MAX} step={DAILY_STEP} value={flat} onChange={e => setFlat(Number(e.target.value))} onBlur={() => setFlat(cleanDaily(flat))}/><span className="self-center text-xs">%/hari</span></div><Button className="mt-2 w-full" disabled={busy || !q.data} onClick={() => applyAll(() => flatApys(flat), `Flat ${cleanDaily(flat)}% diterapkan`)}>Apply to all</Button></div>
+          <div className="rounded-xl border border-border p-3"><p className="text-xs font-bold">3 · Geser sedikit</p><p className="mt-1 text-[11px] text-muted-foreground">Adjust all packages up/down by 0.05%, staying within 0.5%–1.2%.</p><div className="mt-2 grid grid-cols-2 gap-2"><Button variant="outline" disabled={busy || !q.data} onClick={() => applyAll(a => shiftApys(a, -DAILY_STEP), 'Turun 0,05%')}><Minus size={16}/>0,05%</Button><Button variant="outline" disabled={busy || !q.data} onClick={() => applyAll(a => shiftApys(a, DAILY_STEP), 'Naik 0,05%')}><Plus size={16}/>0,05%</Button></div></div>
         </div>
         {q.isPending ? <p className="mt-4">Memuat paket…</p> : <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[520px] text-sm"><thead className="text-xs text-muted-foreground"><tr><th className="p-2 text-left">Paket</th>{PACKAGE_DURATIONS.map(d => <th key={d} className="p-2">{d} hari</th>)}</tr></thead>
           <tbody>{(q.data ?? []).map(p => <tr key={p.id} className="border-t border-border"><td className="p-2 font-bold">{p.id} <span className="text-xs text-muted-foreground">${number(Number(p.price_usd))}</span></td>{PACKAGE_DURATIONS.map(d => <td key={d} className="numeric p-2 text-center text-xs"><b className="text-chart-2">{apyToDaily(p.duration_apys[String(d)] ?? 0)}%</b></td>)}</tr>)}</tbody></table></div>}
-        <p className="mt-3 text-xs text-muted-foreground">Ubah satu paket tertentu di tab "Edit paket".</p>
+        <p className="mt-3 text-xs text-muted-foreground">Modify a specific package in the "Edit package" tab.</p>
       </section>
     </>}
   </div>;

@@ -41,14 +41,14 @@ export async function shrinkImage(file: File, size = 512): Promise<Blob> {
   const out = await new Promise<Blob | null>(r => c.toBlob(r, 'image/webp', 0.86));
   if (out && out.type === 'image/webp') return out;
   const jpg = await new Promise<Blob | null>(r => c.toBlob(r, 'image/jpeg', 0.86));
-  if (!jpg) throw new Error('Gagal memproses foto');
+  if (!jpg) throw new Error('Failed to process photo');
   return jpg;
 }
 
 /** Upload a new profile photo for the signed-in member and remove the previous one. */
 export async function uploadAvatar(userId: string, file: File, oldPath?: string | null): Promise<string> {
-  if (!file.type.startsWith('image/')) throw new Error('Pilih file foto (JPG, PNG, WebP).');
-  if (file.size > 15 * 1024 * 1024) throw new Error('Foto maksimal 15 MB.');
+  if (!file.type.startsWith('image/')) throw new Error('Select a photo file (JPG, PNG, WebP).');
+  if (file.size > 15 * 1024 * 1024) throw new Error('Maximum photo size is 15 MB.');
   const blob = await shrinkImage(file);
   const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
   const path = `${userId}/${crypto.randomUUID()}.${ext}`;

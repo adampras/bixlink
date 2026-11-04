@@ -110,7 +110,7 @@ function BixgoPage() {
   const pos = step === 'track' ? 10 + stage * 27 : 9;
 
   const enabledSet = new Set(list.map(s => s.key));
-  const soon = (l: string) => l === 'Pulsa & bills' ? setSub('bills') : toast(`${l} — segera hadir di BIXGO`);
+  const soon = (l: string) => l === 'Pulsa & bills' ? setSub('bills') : toast(`${l} — coming soon to BIXGO`);
   const pick = (s: BixgoService) => { if (s === 'ride' || s === 'car') { setSub(s); return; } setSvc(s); setTier(0); setCart({}); setStep('form'); setView('order'); setTab('order'); };
   const go = (v: BixgoView) => { setView(v); if (v === 'activity') setTab('history'); if (v === 'order') setTab('order'); };
   const memberName = user?.email?.split('@')[0] || 'Member BIXLINK';
@@ -120,9 +120,9 @@ function BixgoPage() {
     {sub === 'bills' && <BixgoBills onBack={() => setSub(null)}/>}
     {(sub === 'ride' || sub === 'car') && <BixgoRideBooking cfg={cfg} start={sub} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
     {!sub && <>
-    {view === 'home' && <BixgoHome enabled={enabledSet} balance="Buka Wallet" onPick={pick} onSoon={soon}/>}
+    {view === 'home' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
     {view === 'inbox' && <BixgoInbox/>}
-    {view === 'account' && <BixgoAccount name={memberName} balance="Lihat saldo" onBack={() => go('home')} onSoon={soon}/>}
+    {view === 'account' && <BixgoAccount name={memberName} balance="View balance" onBack={() => go('home')} onSoon={soon}/>}
     {(view === 'order' || view === 'activity') && <main className="px-4 pb-6 pt-4">
     <section className="flex items-center gap-3">
       <button aria-label="Back" onClick={() => go('home')}><ArrowLeft className="h-6 w-6"/></button>

@@ -19,7 +19,7 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
   const save = useServerFn(updateSetting);
   const loadBonus = useCallback(async () => { const { data } = await supabase.from('bixtrade_bonuses').select('id,user_id,member_id,kind,amount_usd,status').eq('status', 'pending').order('created_at', { ascending: false }).limit(50); setBonuses((data ?? []) as Bonus[]); }, []);
   useEffect(() => { void loadBonus(); }, [loadBonus]);
-  const reviewBonus = async (id: string, ok: boolean) => { const { error } = await supabase.rpc('bixtrade_bonus_review', { p_id: id, p_approve: ok }); onMessage(error ? error.message : ok ? 'Bonus disetujui (dicatat, tidak otomatis masuk saldo).' : 'Bonus ditolak.'); void loadBonus(); };
+  const reviewBonus = async (id: string, ok: boolean) => { const { error } = await supabase.rpc('bixtrade_bonus_review', { p_id: id, p_approve: ok }); onMessage(error ? error.message : ok ? 'Bonus approved (recorded, not automatically added to balance).' : 'Bonus rejected.'); void loadBonus(); };
   const tg = (k: 'planEnabled' | 'matchingEnabled' | 'sponsorBonusEnabled' | 'earlyExitEnabled' | 'compoundEnabled' | 'leaderPoolEnabled' | 'milestoneEnabled', label: string) => <label className="flex items-center justify-between gap-3"><b>{label}</b><Switch checked={s[k]} disabled={busy} onCheckedChange={v => submit({ ...s, [k]: v })}/></label>;
   const fld = (k: keyof BixtradeSettings, label: string, step = '0.1') => <label>{label}<input className="form-input mt-1" type="number" step={step} value={Number(s[k])} onChange={num(k)}/></label>;
   useEffect(() => { setS(readBixtrade(initial)); }, [initial]);
@@ -32,21 +32,21 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
   const num = (k: keyof BixtradeSettings) => (e: React.ChangeEvent<HTMLInputElement>) => setS(v => ({ ...v, [k]: Number(e.target.value) }));
   const submit = async (next = s) => {
     setBusy(true);
-    try { await save({ data: { key: 'bixtrade', value: next } }); setS(next); onMessage(`BIXTrade disimpan · ${next.enabled ? 'AKTIF' : 'Under Reconstruction'}.`); onSaved?.(); }
-    catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal menyimpan BIXTrade.'); } finally { setBusy(false); }
+    try { await save({ data: { key: 'bixtrade', value: next } }); setS(next); onMessage(`BIXTrade saved · ${next.enabled ? 'AKTIF' : 'Under Reconstruction'}.`); onSaved?.(); }
+    catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save BIXTrade.'); } finally { setBusy(false); }
   };
   const decide = async (id: string, status: 'approved' | 'rejected') => {
     const { data, error } = await supabase.rpc('bixtrade_review', { p_id: id, p_status: status });
     const d = data as { kind?: string; settled_usd?: number } | null;
-    onMessage(error ? error.message : status === 'rejected' ? 'Permintaan ditolak.' : d?.kind === 'deposit' ? `Disetujui · ${Number(d.settled_usd).toFixed(2)} USDT dipindah dari wallet utama ke bot.` : `Disetujui · ${Number(d?.settled_usd).toFixed(2)} USDT (bersih) dikembalikan ke wallet utama.`); void load();
+    onMessage(error ? error.message : status === 'rejected' ? 'Request rejected.' : d?.kind === 'deposit' ? `Approved · ${Number(d.settled_usd).toFixed(2)} USDT moved from main wallet to bot.` : `Approved · ${Number(d?.settled_usd).toFixed(2)} USDT (net) returned to main wallet.`); void load();
   };
   const sw = (k: 'depositOpen' | 'withdrawOpen', label: string) => <label className="flex items-center justify-between gap-3"><b>{label}</b><Switch checked={s[k]} disabled={busy} onCheckedChange={v => submit({ ...s, [k]: v })}/></label>;
-  return <AdminFold title="BIXTrade Bot Arbitrase" tone="gold" badge={s.enabled ? 'AKTIF' : 'UNDER RECONSTRUCTION'}>
+  return <AdminFold title="BIXTrade Bot Arbitrase" tone="gold" badge={s.enabled ? 'ACTIVE' : 'UNDER RECONSTRUCTION'}>
     <div className="mt-4 grid gap-4 text-xs">
-      <label className="flex items-center justify-between gap-3"><span><b>Buka halaman BIXTrade</b><br/><span className="text-muted-foreground">Saat ditutup, member melihat “Under Reconstruction”.</span></span>
+      <label className="flex items-center justify-between gap-3"><span><b>Open BIXTrade page</b><br/><span className="text-muted-foreground">When closed, members see “Under Reconstruction”.</span></span>
         <Switch checked={s.enabled} disabled={busy} onCheckedChange={v => submit({ ...s, enabled: v })}/></label>
-      {sw('depositOpen', 'Buka deposit bot')}
-      {sw('withdrawOpen', 'Buka withdraw bot')}
+      {sw('depositOpen', 'Enable bot deposit')}
+      {sw('withdrawOpen', 'Enable bot withdrawal')}
       <div className="grid gap-3 sm:grid-cols-2">
         <label>Profit harian minimum (%)<input className="form-input mt-1" type="number" step="0.01" min={0} max={5} value={s.minDailyPct} onChange={num('minDailyPct')}/></label>
         <label>Profit harian maksimum (%)<input className="form-input mt-1" type="number" step="0.01" min={0} max={5} value={s.maxDailyPct} onChange={num('maxDailyPct')}/></label>
@@ -54,42 +54,42 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
         <label>Deposit minimum (USDT)<input className="form-input mt-1" type="number" min={10} value={s.minAlloc} onChange={num('minAlloc')}/></label>
         <label>Deposit maksimum (USDT)<input className="form-input mt-1" type="number" min={10} value={s.maxAlloc} onChange={num('maxAlloc')}/></label>
         <label>Withdraw minimum (USDT)<input className="form-input mt-1" type="number" min={1} value={s.minWithdraw} onChange={num('minWithdraw')}/></label>
-        <label>Biaya withdraw (%)<input className="form-input mt-1" type="number" step="0.1" min={0} max={20} value={s.withdrawFeePct} onChange={num('withdrawFeePct')}/></label>
-        <label>Masa kunci (hari)<input className="form-input mt-1" type="number" min={0} max={365} value={s.lockDays} onChange={num('lockDays')}/></label>
-        <label className="sm:col-span-2">Pesan saat ditutup<input className="form-input mt-1" maxLength={200} value={s.notice ?? ''} onChange={e => setS(v => ({ ...v, notice: e.target.value }))}/></label>
+        <label>Withdrawal fee (%)<input className="form-input mt-1" type="number" step="0.1" min={0} max={20} value={s.withdrawFeePct} onChange={num('withdrawFeePct')}/></label>
+        <label>Lock period (days)<input className="form-input mt-1" type="number" min={0} max={365} value={s.lockDays} onChange={num('lockDays')}/></label>
+        <label className="sm:col-span-2">Message when closed<input className="form-input mt-1" maxLength={200} value={s.notice ?? ''} onChange={e => setS(v => ({ ...v, notice: e.target.value }))}/></label>
       </div>
       <div className="grid gap-3 rounded-lg border border-border p-3">
         <b>Marketing plan & pembonusan</b>
-        {tg('planEnabled', 'Tampilkan plan ke member')}
+        {tg('planEnabled', 'Show plans to members')}
         <div className="grid gap-3 sm:grid-cols-3">{fld('memberSharePct', 'Bagi hasil member (%)')}{fld('companySharePct', 'Perusahaan (%)')}{fld('affiliateSharePct', 'Pool afiliasi (%)')}</div>
-        <p className="text-muted-foreground">Total bagi hasil harus 100%.</p>
+        <p className="text-muted-foreground">Total profit sharing must be 100%.</p>
         {tg('matchingEnabled', 'Bonus matching profit L1–L3')}
         <div className="grid gap-3 sm:grid-cols-3">{fld('matchL1', 'Level 1 (%)')}{fld('matchL2', 'Level 2 (%)')}{fld('matchL3', 'Level 3 (%)')}</div>
-        {tg('sponsorBonusEnabled', 'Bonus sponsor deposit (dicatat untuk review)')}
+        {tg('sponsorBonusEnabled', 'Deposit sponsor bonus (recorded for review)')}
         {fld('sponsorBonusPct', 'Bonus sponsor (%)')}
-        {tg('earlyExitEnabled', 'Izinkan tarik dini dengan penalti')}
-        {fld('earlyExitPct', 'Penalti tarik dini (%)')}
+        {tg('earlyExitEnabled', 'Allow early withdrawal with penalty')}
+        {fld('earlyExitPct', 'Early withdrawal penalty (%)')}
         {tg('compoundEnabled', 'Bonus compound')}
         {fld('compoundBonusPct', 'Bonus compound (%)')}
         {tg('leaderPoolEnabled', 'Leader pool')}
         <div className="grid gap-3 sm:grid-cols-2">{fld('leaderPoolPct', 'Leader pool (%)')}{fld('leaderPoolMinTeamUsd', 'Syarat modal tim (USDT)', '1')}</div>
         {tg('milestoneEnabled', 'Reward milestone tim')}
         <div className="grid gap-3 sm:grid-cols-2">{fld('milestoneTargetUsd', 'Target modal tim (USDT)', '1')}{fld('milestoneRewardUsd', 'Reward (USDT)', '1')}</div>
-        <label>Pilihan siklus (hari, pisahkan koma)<input className="form-input mt-1" defaultValue={s.cycleDays.join(',')} key={s.cycleDays.join(',')} onBlur={e => { const d = e.target.value.split(',').map(x => Math.round(Number(x))).filter(x => x >= 1 && x <= 365).slice(0, 6); if (d.length) setS(v => ({ ...v, cycleDays: d })); }}/></label>
+        <label>Cycle options (days, comma-separated)<input className="form-input mt-1" defaultValue={s.cycleDays.join(',')} key={s.cycleDays.join(',')} onBlur={e => { const d = e.target.value.split(',').map(x => Math.round(Number(x))).filter(x => x >= 1 && x <= 365).slice(0, 6); if (d.length) setS(v => ({ ...v, cycleDays: d })); }}/></label>
       </div>
-      <p className="text-muted-foreground">Setujui deposit = USDT wallet utama member dipindah ke modal bot (dicek saldo cukup). Setujui withdraw = jumlah bersih setelah biaya kembali ke wallet utama (dicek modal & masa kunci). Profit hanya proyeksi, tidak pernah ditambahkan.</p>
-      <Button disabled={busy} onClick={() => submit()}>{busy ? 'Menyimpan…' : 'Simpan pengaturan'}</Button>
+      <p className="text-muted-foreground">Approve deposit = member's main wallet USDT moved to bot capital (checks for sufficient balance). Approve withdraw = net amount after fees returned to main wallet (checks capital & lock period). Profit is only a projection, never added.</p>
+      <Button disabled={busy} onClick={() => submit()}>{busy ? 'Menyimpan…' : 'Save settings'}</Button>
 
-      <div className="border-t border-border pt-3"><b>Bonus sponsor menunggu review</b>
-        <div className="mt-2 grid gap-2">{bonuses.length ? bonuses.map(b => <div key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-2"><span>{b.kind} · {Number(b.amount_usd).toFixed(2)} USDT<br/><span className="text-muted-foreground">penerima {b.user_id.slice(0, 8)} · dari {b.member_id.slice(0, 8)}</span></span><span className="flex gap-1"><Button size="sm" onClick={() => reviewBonus(b.id, true)}>Setujui</Button><Button size="sm" variant="outline" onClick={() => reviewBonus(b.id, false)}>Tolak</Button></span></div>) : <p className="text-muted-foreground">Tidak ada bonus pending.</p>}</div>
+      <div className="border-t border-border pt-3"><b>Sponsor bonus awaiting review</b>
+        <div className="mt-2 grid gap-2">{bonuses.length ? bonuses.map(b => <div key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-2"><span>{b.kind} · {Number(b.amount_usd).toFixed(2)} USDT<br/><span className="text-muted-foreground">penerima {b.user_id.slice(0, 8)} · dari {b.member_id.slice(0, 8)}</span></span><span className="flex gap-1"><Button size="sm" onClick={() => reviewBonus(b.id, true)}>Setujui</Button><Button size="sm" variant="outline" onClick={() => reviewBonus(b.id, false)}>Tolak</Button></span></div>) : <p className="text-muted-foreground">No pending bonuses.</p>}</div>
       </div>
       <div className="border-t border-border pt-3">
         <div className="flex items-center justify-between"><b>Permintaan deposit / withdraw bot</b>
-          <select className="form-input w-auto" value={filter} onChange={e => setFilter(e.target.value as 'pending' | 'all')}><option value="pending">Pending</option><option value="all">Semua</option></select></div>
+          <select className="form-input w-auto" value={filter} onChange={e => setFilter(e.target.value as 'pending' | 'all')}><option value="pending">Pending</option><option value="all">All</option></select></div>
         <div className="mt-2 grid gap-2">{reqs.length ? reqs.map(r => <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-2">
           <span><b className="uppercase">{r.kind}</b>{r.funding === 'virtual' ? ' · VIRTUAL (demo)' : ''} {Number(r.amount_usd).toFixed(2)} USDT{r.kind === 'withdraw' ? ` (bersih ${withdrawNet(s, Number(r.amount_usd)).toFixed(2)})` : ''} · {r.strategy}<br/><span className="text-muted-foreground">{r.user_id.slice(0, 8)} · {new Date(r.created_at).toLocaleString()}</span></span>
-          {r.status === 'pending' ? <span className="flex gap-1"><Button size="sm" onClick={() => decide(r.id, 'approved')}>Setujui</Button><Button size="sm" variant="outline" onClick={() => decide(r.id, 'rejected')}>Tolak</Button></span> : <span className={`arb-badge is-${r.status}`}>{r.status}</span>}
-        </div>) : <p className="text-muted-foreground">Tidak ada permintaan.</p>}</div>
+          {r.status === 'pending' ? <span className="flex gap-1"><Button size="sm" onClick={() => decide(r.id, 'approved')}>Setujui</Button><Button size="sm" variant="outline" onClick={() => decide(r.id, 'rejected')}>Reject</Button></span> : <span className={`arb-badge is-${r.status}`}>{r.status}</span>}
+        </div>) : <p className="text-muted-foreground">No requests.</p>}</div>
       </div>
     </div>
   </AdminFold>;

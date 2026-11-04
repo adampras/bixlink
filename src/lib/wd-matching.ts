@@ -6,9 +6,9 @@ export function normalizeWdMatching(v: unknown): WdMatchingConfig {
   return { enabled: o['enabled'] === true, feePct: n('feePct'), matchPct: n('matchPct'), minStakeUsd: n('minStakeUsd') };
 }
 export function wdMatchingError(c: WdMatchingConfig): string | null {
-  if (c.feePct < 0.5 || c.feePct > 20) return 'Fee WD harus 0,5%–20%';
-  if (c.matchPct < 0 || c.matchPct > c.feePct) return 'Matching harus 0% sampai sebesar fee WD';
-  if (c.minStakeUsd < 0 || c.minStakeUsd > 100000) return 'Minimum staking aktif tidak valid';
+  if (c.feePct < 0.5 || c.feePct > 20) return 'WD fee must be 0.5%–20%';
+  if (c.matchPct < 0 || c.matchPct > c.feePct) return 'Matching must be 0% up to WD fee';
+  if (c.minStakeUsd < 0 || c.minStakeUsd > 100000) return 'Invalid minimum active staking';
   return null;
 }
 /** Split of one withdrawal: fee charged, upline royalty, platform share. */

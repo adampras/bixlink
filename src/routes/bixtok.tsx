@@ -507,23 +507,23 @@ function CreatorEarnings() {
     setBusy(true); setMsg('');
     const { data, error } = await supabase.rpc('bixtok_claim_earnings' as never);
     setBusy(false);
-    if (error) return setMsg(error.message.includes('No BIXTOK') ? 'Belum ada BIX untuk ditarik.' : error.message.includes('Minimum') ? `Minimal penarikan ${min} BIX.` : error.message);
+    if (error) return setMsg(error.message.includes('No BIXTOK') ? 'No BIX to withdraw yet.' : error.message.includes('Minimum') ? `Minimal penarikan ${min} BIX.` : error.message);
     const r = data as unknown as { bix: number };
-    setMsg(`Berhasil ditarik ke BIXLINK Wallet: ${Number(r.bix)} BIX`);
+    setMsg(`Successfully withdrawn to BIXLINK Wallet: ${Number(r.bix)} BIX`);
     qc.invalidateQueries();
   };
   return <div className="bxt-card bxt-earn" style={{ display: 'block' }}>
-    <div className="flex items-center justify-between"><b>Saldo Hadiah BIXTOK</b><Gift size={16} className="bxt-gifticon"/></div>
+    <div className="flex items-center justify-between"><b>BIXTOK Reward Balance</b><Gift size={16} className="bxt-gifticon"/></div>
     <div className="mt-2 grid grid-cols-2 gap-2 text-center">
-      <div className="bxt-earn-box bxt-earn-bix"><small>BIXCOIN · bisa ditarik</small><p className="text-lg font-bold">{bix.toLocaleString('en-US', { maximumFractionDigits: 4 })}</p></div>
-      <div className="bxt-earn-box bxt-earn-bixp"><small>BIXP · tertahan di BIXTOK</small><p className="text-lg font-bold">{Number(e?.bixp ?? 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</p></div>
+      <div className="bxt-earn-box bxt-earn-bix"><small>BIXCOIN · withdrawable</small><p className="text-lg font-bold">{bix.toLocaleString('en-US', { maximumFractionDigits: 4 })}</p></div>
+      <div className="bxt-earn-box bxt-earn-bixp"><small>BIXP · retained in BIXTOK</small><p className="text-lg font-bold">{Number(e?.bixp ?? 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</p></div>
     </div>
     <div className="mt-3"><div className="flex justify-between text-[11px]"><span>Menuju minimal penarikan</span><b>{Math.min(bix, min).toLocaleString('en-US', { maximumFractionDigits: 2 })} / {min} BIX</b></div><div className="bxt-earn-bar"><i style={{ width: `${Math.min(100, bix / min * 100)}%` }}/></div></div>
-    <button className="bixtok-cta mt-3 w-full" disabled={busy || !ok} onClick={claim}>{busy ? 'Memproses…' : ok ? `Tarik ${bix.toLocaleString('en-US', { maximumFractionDigits: 4 })} BIX ke Wallet` : `Kurang ${(min - bix).toLocaleString('en-US', { maximumFractionDigits: 2 })} BIX lagi`}</button>
+    <button className="bixtok-cta mt-3 w-full" disabled={busy || !ok} onClick={claim}>{busy ? 'Memproses…' : ok ? `Withdraw ${bix.toLocaleString('en-US', { maximumFractionDigits: 4 })} BIX to Wallet` : `${(min - bix).toLocaleString('en-US', { maximumFractionDigits: 2 })} more BIX needed`}</button>
     {msg && <p className="mt-2 text-xs">{msg}</p>}
-    <ul className="mt-2 space-y-0.5 text-[10px] text-muted-foreground"><li>• Saweran & bonus masuk ke sini dulu, lalu Anda tarik manual.</li><li>• Minimal penarikan {min} BIX ke saldo utama BIXLINK Wallet.</li><li>• BIXP tetap di BIXTOK untuk dipakai menyawer kreator lain.</li><li>Sudah ditarik: {Number(e?.claimed_bix ?? 0)} BIX.</li></ul>
+    <ul className="mt-2 space-y-0.5 text-[10px] text-muted-foreground"><li>• Tips & bonuses go here first, then you withdraw manually.</li><li>• Minimal penarikan {min} BIX ke saldo utama BIXLINK Wallet.</li><li>• BIXP stays in BIXTOK to be used for tipping other creators.</li><li>Sudah ditarik: {Number(e?.claimed_bix ?? 0)} BIX.</li></ul>
     <button className="mt-2 flex w-full items-center justify-between text-xs" onClick={() => setOpen(o => !o)}><span>Gift history</span><ChevronRight size={14} style={{ transform: open ? 'rotate(90deg)' : undefined }}/></button>
-    {open && <ul className="mt-2 space-y-1 text-xs">{(e?.recent ?? []).length === 0 ? <li className="text-muted-foreground">Belum ada hadiah.</li> : e!.recent.map((r, i) => <li key={i} className="flex justify-between gap-2"><span>@{r.sender} · {r.gift_name}</span><span>{Number(r.amount)} {r.currency} {r.claimed_at ? '✓' : '•'}</span></li>)}</ul>}
+    {open && <ul className="mt-2 space-y-1 text-xs">{(e?.recent ?? []).length === 0 ? <li className="text-muted-foreground">No rewards yet.</li> : e!.recent.map((r, i) => <li key={i} className="flex justify-between gap-2"><span>@{r.sender} · {r.gift_name}</span><span>{Number(r.amount)} {r.currency} {r.claimed_at ? '✓' : '•'}</span></li>)}</ul>}
   </div>;
 }
 

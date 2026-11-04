@@ -52,7 +52,7 @@ export const lookupRecoveryTx = createServerFn({ method: 'POST' }).middleware([r
     const { verifyUsdtDeposit } = await import('./deposit.server');
     const caller = await recoveryCaller(context, supabaseAdmin);
     const wallet = caller.wallets.find(w => w.code === data.walletCode);
-    if (!wallet) return { ok: false as const, reason: 'Wallet ini tidak ada dalam akses Anda.' };
+    if (!wallet) return { ok: false as const, reason: 'This wallet is not within your access.' };
     const hash = normalizeHash(wallet.network, data.txHash);
     const result = await verifyUsdtDeposit(wallet.network, hash, wallet.address, wallet.asset);
     if (!result.ok) return { ok: false as const, reason: result.reason, pending: !!result.pending };
@@ -78,7 +78,7 @@ export const creditRecoveryTx = createServerFn({ method: 'POST' }).middleware([r
     const { verifyUsdtDeposit } = await import('./deposit.server');
     const caller = await recoveryCaller(context, admin);
     const wallet = caller.wallets.find(w => w.code === data.walletCode);
-    if (!wallet) throw new Error('Wallet ini tidak ada dalam akses Anda.');
+    if (!wallet) throw new Error('This wallet is not within your access.');
     const hash = normalizeHash(wallet.network, data.txHash);
 
     // Resolve member by referral code or username.
@@ -86,11 +86,11 @@ export const creditRecoveryTx = createServerFn({ method: 'POST' }).middleware([r
     const { data: byCode } = await admin.from('referral_codes').select('user_id').ilike('code', key).limit(2);
     let memberId = byCode?.length === 1 ? byCode[0]!.user_id : null;
     if (!memberId) { const { data: byName } = await admin.from('profiles').select('user_id').ilike('username', key).limit(2); if (byName?.length === 1) memberId = byName[0]!.user_id; }
-    if (!memberId) throw new Error('Member tidak ditemukan. Gunakan kode referral atau username yang tepat.');
-    if (caller.scope && !caller.scope.has(memberId)) throw new Error('Member ini di luar jaringan Anda.');
-    if (memberId === caller.userId) throw new Error('Tidak bisa mengkreditkan ke akun sendiri.');
+    if (!memberId) throw new Error('Member not found. Use a valid referral code or username.');
+    if (caller.scope && !caller.scope.has(memberId)) throw new Error('This member is outside your network.');
+    if (memberId === caller.userId) throw new Error('Cannot credit your own account.');
     const { data: clone } = await admin.from('bix_clone_accounts').select('user_id').eq('user_id', memberId).maybeSingle();
-    if (clone) throw new Error('Akun clone tidak boleh menerima deposit on-chain.');
+    if (clone) throw new Error('Clone accounts cannot receive on-chain deposits.');
 
     const result = await verifyUsdtDeposit(wallet.network, hash, wallet.address, wallet.asset);
     if (!result.ok) throw new Error(result.reason);
@@ -100,7 +100,7 @@ export const creditRecoveryTx = createServerFn({ method: 'POST' }).middleware([r
     const names = await memberNames(admin);
     const st = await hashStatus(admin, hash);
     if (st.credited) throw new Error(`TxID ini sudah masuk ke ${st.credited.user_id === memberId ? 'member ini' : (!caller.scope || caller.scope.has(st.credited.user_id) ? names.get(st.credited.user_id)?.code ?? 'member lain' : 'member lain')}.`);
-    if (st.queued && st.queued.user_id !== memberId) throw new Error('TxID ini sudah diajukan member lain. Tolak pengajuan itu dulu bila salah.');
+    if (st.queued && st.queued.user_id !== memberId) throw new Error('This TxID has already been submitted by another member. Reject that submission first if incorrect.');
 
     const now = new Date().toISOString();
     const approver = names.get(caller.userId)?.code ?? (caller.owner1 ? 'OWNER 1' : 'OWNER 2');
@@ -111,7 +111,7 @@ export const creditRecoveryTx = createServerFn({ method: 'POST' }).middleware([r
     const { data: manual } = await admin.from('wallet_transactions').select('id,amount_usd,note').eq('user_id', memberId).eq('type', 'deposit').eq('status', 'approved').is('tx_hash', null).ilike('note', 'Manual owner credit%').order('created_at').limit(1).maybeSingle();
     if (manual) {
       const { error } = await admin.from('wallet_transactions').update({ tx_hash: hash, note: `${manual.note} · TxID linked ${now}` }).eq('id', manual.id).is('tx_hash', null);
-      if (error) throw new Error(error.code === '23505' ? 'TxID ini sudah dikreditkan.' : error.message);
+      if (error) throw new Error(error.code === '23505' ? 'This TxID has already been credited.' : error.message);
       return { ok: true, amount: 0, member: names.get(memberId)?.code ?? '—', txId: manual.id, linked: true, previous: Number(manual.amount_usd) };
     }
 
@@ -124,13 +124,13 @@ export const creditRecoveryTx = createServerFn({ method: 'POST' }).middleware([r
     let txId: string;
     if (targetId) {
       const { data: upd, error } = await admin.from('wallet_transactions').update(row).eq('id', targetId).eq('status', 'pending').select('id').maybeSingle();
-      if (error) throw new Error(error.code === '23505' ? 'TxID ini sudah dikreditkan.' : error.message);
-      if (!upd) throw new Error('Pengajuan member sudah diproses. Muat ulang lalu coba lagi.');
+      if (error) throw new Error(error.code === '23505' ? 'This TxID has already been credited.' : error.message);
+      if (!upd) throw new Error('Member submission has already been processed. Reload and try again.');
       txId = upd.id;
       await admin.from('deposit_intents').update({ status: 'credited', tx_hash: hash, credited_at: now }).eq('claim_tx_id', txId).eq('status', 'pending');
     } else {
       const { data: ins, error } = await admin.from('wallet_transactions').insert({ ...row, user_id: memberId, type: 'deposit' }).select('id').single();
-      if (error) throw new Error(error.code === '23505' ? 'TxID ini sudah dikreditkan.' : error.message);
+      if (error) throw new Error(error.code === '23505' ? 'This TxID has already been credited.' : error.message);
       txId = ins.id;
     }
     return { ok: true, amount, member: names.get(memberId)?.code ?? '—', txId };
@@ -145,19 +145,19 @@ export const manualCreditNoHash = createServerFn({ method: 'POST' }).middleware(
     const { supabaseAdmin: admin } = await import('@/integrations/supabase/client.server');
     const { recoveryCaller, memberNames } = await import('./deposit-recovery.server');
     const caller = await recoveryCaller(context, admin);
-    if (!caller.owner1) throw new Error('Kredit tanpa TxID hanya untuk Owner 1.');
+    if (!caller.owner1) throw new Error('Crediting without TxID is only for Owner 1.');
     const wallet = caller.wallets.find(w => w.code === data.walletCode);
-    if (!wallet) throw new Error('Wallet tidak ditemukan.');
+    if (!wallet) throw new Error('Wallet not found.');
     const key = data.member.replace(/^@/, '');
     const { data: byCode } = await admin.from('referral_codes').select('user_id').ilike('code', key).limit(2);
     let memberId = byCode?.length === 1 ? byCode[0]!.user_id : null;
     if (!memberId) { const { data: byName } = await admin.from('profiles').select('user_id').ilike('username', key).limit(2); if (byName?.length === 1) memberId = byName[0]!.user_id; }
-    if (!memberId) throw new Error('Member tidak ditemukan.');
-    if (memberId === caller.userId) throw new Error('Tidak bisa mengkreditkan ke akun sendiri.');
+    if (!memberId) throw new Error('Member not found.');
+    if (memberId === caller.userId) throw new Error('Cannot credit your own account.');
     const { data: clone } = await admin.from('bix_clone_accounts').select('user_id').eq('user_id', memberId).maybeSingle();
-    if (clone) throw new Error('Akun clone tidak boleh menerima deposit.');
+    if (clone) throw new Error('Clone accounts cannot receive deposits.');
     const { data: open } = await admin.from('wallet_transactions').select('id,amount_usd,created_at').eq('user_id', memberId).eq('type', 'deposit').eq('status', 'approved').is('tx_hash', null).ilike('note', 'Manual owner credit%').limit(1);
-    if (open?.length) throw new Error(`Member ini masih punya kredit manual ${open[0]!.amount_usd} USD tanpa TxID. Lengkapi TxID-nya dulu lewat Cek on-chain agar tidak ganda.`);
+    if (open?.length) throw new Error(`This member still has a manual credit of ${open[0]!.amount_usd} USD without a TxID. Complete the TxID via On-chain Check first to avoid duplicates.`);
     const amount = manualCreditAmount(data.amount);
     const names = await memberNames(admin);
     const now = new Date().toISOString();

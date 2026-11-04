@@ -18,8 +18,8 @@ export function BixtradeTreasury({ execs: rawExecs, onOpenLogs }: { execs?: Exec
     <div className="mt-3 grid grid-cols-3 gap-2 text-center">
       {[[String(execs.length), 'Eksekusi'], [`${execs.length ? Math.round(wins / execs.length * 100) : 0}%`, 'Win rate asli'], [String(venues), 'Bursa terpakai']].map(([a, b]) => <div key={b} className="arb-hud"><b>{a}</b><small>{b}</small></div>)}
     </div>
-    <p className="mt-3 text-[11px]">{last ? <>Terakhir: <b>{new Date(last.executed_at).toLocaleString()}</b> · {last.buy_venue} → {last.sell_venue}</> : 'Belum ada eksekusi tercatat.'}</p>
-    {onOpenLogs && execs.length > 0 && <button type="button" onClick={onOpenLogs} className="mt-2 text-xs font-bold text-chart-3 underline">Lihat semua resi →</button>}
-    <p className="mt-3 text-[10px] text-muted-foreground">Setiap angka dihitung langsung dari catatan eksekusi Anda dengan harga bursa publik. Ini catatan kinerja, tidak otomatis masuk dompet; hasil masa lalu tidak menjamin hasil berikutnya.</p>
+    <p className="mt-3 text-[11px]">{last ? <>Terakhir: <b>{new Date(last.executed_at).toLocaleString()}</b> · {last.buy_venue} → {last.sell_venue}</> : 'No executions recorded yet.'}</p>
+    {onOpenLogs && execs.length > 0 && <button type="button" onClick={onOpenLogs} className="mt-2 text-xs font-bold text-chart-3 underline">View all receipts →</button>}
+    <p className="mt-3 text-[10px] text-muted-foreground">Every figure is calculated directly from your execution records using public exchange prices. This is a performance record, not automatically credited to your wallet; past performance does not guarantee future results.</p>
   </section>;
 }

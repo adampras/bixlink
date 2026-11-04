@@ -24,9 +24,9 @@ export function StakeCalculator({ packages, onPick }: { packages: Package[]; onP
     setIdx(next);
     stripRef.current?.children[next]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   };
-  return <section aria-label="Pilih paket staking" className="stake-pick">
-    <div className="stake-pick-head"><span>PILIH PAKET</span><em>Ketuk nominal atau geser kartu</em></div>
-    <div ref={stripRef} role="tablist" aria-label="Nominal paket" className="stake-pick-chips">
+  return <section aria-label="Select staking package" className="stake-pick">
+    <div className="stake-pick-head"><span>SELECT PACKAGE</span><em>Tap amount or swipe card</em></div>
+    <div ref={stripRef} role="tablist" aria-label="Package amount" className="stake-pick-chips">
       {list.map((p, n) => <button key={p.id} type="button" role="tab" aria-selected={n === i} onClick={() => go(n)} className="stake-pick-chip">
         <b className="numeric">${number(Number(p.price_usd), { maximumFractionDigits: 0 })}</b><small>{p.id}</small>
       </button>)}

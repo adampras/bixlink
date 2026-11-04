@@ -153,7 +153,7 @@ export const getAdminReport = createServerFn({ method: 'GET' }).middleware([requ
     networkUsdt: bucket(usdtRows, row => Number(row.total_usd)),
     networkBix: bucket(usdtRows, row => Number(row.bix_amount)),
     miningBix: bucket((vbix.data ?? []) as { amount_vbix: number; created_at: string }[], row => Number(row.amount_vbix)),
-    miningNote: 'Dalam vBIX (mining + bonus jaringan). Konversi ke BIX belum dibuka.',
+    miningNote: 'In vBIX (mining + network bonus). Conversion to BIX is not open yet.',
   };
 });
 
@@ -571,7 +571,7 @@ export const claimConditionalLeader = createServerFn({ method: 'POST' }).middlew
         res.sponsor_id ? admin.from('referral_codes').select('code').eq('user_id', res.sponsor_id).maybeSingle() : Promise.resolve({ data: null }),
       ]);
       const fmt = (n: number) => `$${Number(n).toLocaleString('en-US')}`;
-      const html = [`<b>📢 KLAIM AKUN PINJAMAN (LOAN)</b>`, `👤 Member: ${me?.code ?? '-'}`, `📦 Paket: ${fmt(res.value_usd)} (Target 5×: ${fmt(res.target_usd)})`, `🤝 Sponsor: ${sp?.code ?? '-'}`, res.sponsor_id ? await loanQuotaText(admin, res.sponsor_id) : ''].filter(Boolean).join('\n');
+      const html = [`<b>📢 CLAIM LOAN ACCOUNT</b>`, `👤 Member: ${me?.code ?? '-'}`, `📦 Paket: ${fmt(res.value_usd)} (Target 5×: ${fmt(res.target_usd)})`, `🤝 Sponsor: ${sp?.code ?? '-'}`, res.sponsor_id ? await loanQuotaText(admin, res.sponsor_id) : ''].filter(Boolean).join('\n');
       await sendAll(html, await readToggles(admin));
     } catch (e) { console.error('loan notify', e); }
     return res;

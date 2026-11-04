@@ -8,15 +8,15 @@ import { defaultReadiness, moduleOpen, MODULE_KEYS, type ModuleKey, type Readine
 
 type Simple = { key: 'swap' | 'bix_pay' | 'usdt_transfer'; label: string; detail: string };
 const SIMPLE: Simple[] = [
-  { key: 'swap', label: 'Swap BIX ⇄ USDT', detail: 'Tukar saldo di menu Wallet.' },
-  { key: 'bix_pay', label: 'BIX PAY', detail: 'Kirim BIX antar member.' },
-  { key: 'usdt_transfer', label: 'Transfer USDT', detail: 'Kirim USDT antar member.' },
+  { key: 'swap', label: 'Swap BIX ⇄ USDT', detail: 'Swap balance in the Wallet menu.' },
+  { key: 'bix_pay', label: 'BIX PAY', detail: 'Send BIX between members.' },
+  { key: 'usdt_transfer', label: 'Transfer USDT', detail: 'Send USDT between members.' },
 ];
 const MODULES: Record<ModuleKey, [string, string]> = {
-  p2p: ['P2P Desk', 'Halaman jual/beli BIX antar member.'],
-  arena: ['Fox Arena', 'Game, misi dan klaim BIXP.'],
-  nft: ['Marketplace & NFT', 'Toko merchandise dan koleksi NFT.'],
-  register: ['Pendaftaran umum', 'Halaman daftar mandiri. OFF: hanya Leader/Admin yang bisa mendaftarkan.'],
+  p2p: ['P2P Desk', 'Member-to-member BIX buy/sell page.'],
+  arena: ['Fox Arena', 'Games, missions, and BIXP claims.'],
+  nft: ['Marketplace & NFT', 'Merchandise store and NFT collections.'],
+  register: ['Pendaftaran umum', 'Self-registration page. OFF: only Leaders/Admins can register members.'],
   trade: ['Trade Terminal', 'Halaman TRADE BIX/USDT (pasar internal).'],
 };
 
@@ -30,7 +30,7 @@ export function AdminModuleSwitches({ readiness, simple, onMessage, onSaved }: {
   async function run(task: () => Promise<unknown>, note: string) {
     setBusy(true);
     try { await task(); await onSaved(); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage(note); }
-    catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal menyimpan.'); }
+    catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save.'); }
     finally { setBusy(false); }
   }
   const row = (key: string, label: string, detail: string, on: boolean, toggle: () => void) => <div key={key} className="flex items-center justify-between gap-3 rounded-[14px] border border-border bg-card px-4 py-3">
@@ -39,13 +39,13 @@ export function AdminModuleSwitches({ readiness, simple, onMessage, onSaved }: {
   </div>;
   return <section className="mt-8 grid gap-3">
     <h2 className="flex items-center gap-2 font-display text-xl font-bold"><Power size={18} className="text-primary"/>Saklar Sentral</h2>
-    <p className="text-xs text-muted-foreground">Satu tombol untuk membuka/menutup fitur bagi member. Admin tetap bisa melihat semua halaman.</p>
+    <p className="text-xs text-muted-foreground">One toggle to enable/disable features for members. Admins can still view all pages.</p>
     <div className="grid gap-2 md:grid-cols-2">
       {MODULE_KEYS.map(k => { const on = moduleOpen(ready, k); const [label, detail] = MODULES[k]; return row(k, label, detail, on, () => {
         const next = { ...ready, modules: { ...ready.modules, [k]: !on } };
         run(async () => { await save({ data: { key: 'readiness', value: next as unknown as Record<string, unknown> } }); setReady(next); }, `${label} ${on ? 'ditutup' : 'dibuka'}.`);
       }); })}
-      {([['consortiumVaultEnabled','Consortium Vault $2M','Halaman privat /consortium-vault dengan PIN.'],['web3WalletEnabled','Web3 Connect Wallet','Tombol connect TokenPocket/MetaMask di STAKE, WALLET, PRESALE.']] as const).map(([k,label,detail]) => { const on = Boolean(ready[k]); return row(k, label, detail, on, () => {
+      {([['consortiumVaultEnabled','Consortium Vault $2M','Private /consortium-vault page with PIN.'],['web3WalletEnabled','Web3 Connect Wallet','TokenPocket/MetaMask connect button in STAKE, WALLET, PRESALE.']] as const).map(([k,label,detail]) => { const on = Boolean(ready[k]); return row(k, label, detail, on, () => {
         const next = { ...ready, [k]: !on };
         run(async () => { await save({ data: { key: 'readiness', value: next as unknown as Record<string, unknown> } }); setReady(next); }, `${label} ${on ? 'ditutup' : 'dibuka'}.`);
       }); })}

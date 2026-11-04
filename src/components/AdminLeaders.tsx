@@ -46,7 +46,7 @@ export function AdminLeaders({ onMessage }: { onMessage: (m: string) => void }) 
           <label className="flex items-center gap-1"><input name="req" type="checkbox" defaultChecked={l.require_turnover}/> Require 3× turnover for WD</label>
           <Button size="sm" className="rounded-full"><Check/> {l.status === 'approved' ? 'Update' : 'Approve'}</Button>
           {l.status !== 'rejected' && <Button type="button" size="sm" variant="destructive" className="rounded-full" onClick={() => act(l.user_id, 'rejected', 0, l.require_turnover, 'Leader rejected.')}><X/> Reject</Button>}
-          <Button type="button" size="sm" variant="outline" className="rounded-full" onClick={async () => { if (!confirm('Reset kunci HP akun pinjaman ini?')) return; try { await resetDev({ data: { userId: l.user_id } }); onMessage('Kunci HP direset. Leader dapat mengikat HP baru.'); } catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal reset.'); } }}>Reset kunci HP</Button>
+          <Button type="button" size="sm" variant="outline" className="rounded-full" onClick={async () => { if (!confirm('Reset phone lock for this loan account?')) return; try { await resetDev({ data: { userId: l.user_id } }); onMessage('Phone lock reset. Leader can bind a new phone.'); } catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to reset.'); } }}>Reset kunci HP</Button>
         </form>
       </div>; })}{!leaders.length && <p className="text-sm text-muted-foreground">No leader applications yet.</p>}</div>
   </div>;

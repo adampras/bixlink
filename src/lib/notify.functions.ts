@@ -28,7 +28,7 @@ export const saveNotifySettings = createServerFn({ method: 'POST' }).middleware(
 export const testNotify = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   await owner(context);
   const { sendAll } = await import('./notify.server');
-  return sendAll('<b>🔔 UJI COBA NOTIFIKASI</b> · BIXLINK\nKoneksi notifikasi Admin aktif.', { telegram: true, whatsapp: true, deposit: true, withdraw: true, review: true });
+  return sendAll('<b>🔔 NOTIFICATION TEST</b> · BIXLINK\nAdmin notification connection is active.', { telegram: true, whatsapp: true, deposit: true, withdraw: true, review: true });
 });
 
 // Called right after member/owner wallet actions so alerts arrive immediately; also runs on the deposit cron.

@@ -40,7 +40,7 @@ const FEED: Card[] = [
   { img: m6, name: 'BIXMart Hub - Abian Tubuh', promo: 'Diskon 50%', rating: 4.9, km: 1.1, kind: 'mart', svc: 'mart' },
   { img: promo, name: 'Kode promo: KIRIMBIX', kind: 'food', svc: 'send', brand: true },
   { img: m5, name: 'AYAM GEPREK JUARA - Cilinaya', promo: 'Diskon 50%', rating: 4.6, km: 0.6, kind: 'food', svc: 'food' },
-  { img: m7, name: 'Fox Burger - Epicentrum', promo: 'Diskon 39% untuk pengguna baru', ad: true, rating: 4.6, km: 2.2, kind: 'food', svc: 'food' },
+  { img: m7, name: 'Fox Burger - Epicentrum', promo: '39% discount for new users', ad: true, rating: 4.6, km: 2.2, kind: 'food', svc: 'food' },
 ];
 
 export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<BixgoService>; balance: string; onPick: (s: BixgoService) => void; onSoon: (label: string) => void }) {
@@ -53,13 +53,13 @@ export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<B
           <Link to="/" aria-label="Kembali" className="grid h-9 w-9 place-items-center rounded-full bg-background/25 backdrop-blur"><ArrowLeft className="h-5 w-5"/></Link>
           <span className="rounded-full bg-background/25 px-3 py-1 text-[11px] font-bold tracking-widest">BIXGO</span>
         </div>
-        <h1 className="mt-4 text-2xl font-black leading-tight">Mau ke mana hari ini?</h1>
+        <h1 className="mt-4 text-2xl font-black leading-tight">Where are you going today?</h1>
         <p className="text-xs opacity-90">Ride · Food · Send · Mart dalam satu aplikasi</p>
         <span className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-background/10"/>
       </div>
       <label className="mt-3 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5">
         <Search className="h-4 w-4 text-muted-foreground"/>
-        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari makanan, belanja, atau layanan" className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"/>
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search food, shopping, or services" className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"/>
       </label>
     </header>
     <section className="no-scrollbar overflow-x-auto px-2 pt-4">
@@ -73,8 +73,8 @@ export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<B
     <div className="mt-3 flex justify-center gap-1"><span className="h-1 w-5 rounded-full bg-foreground"/><span className="h-1 w-1 rounded-full bg-muted-foreground"/></div>
     <section className="no-scrollbar mt-4 flex gap-2 overflow-x-auto px-3">
       <Link to="/wallet" className="min-w-[132px] rounded-2xl border border-border bg-card px-3 py-2.5"><p className="text-[11px] text-muted-foreground">Balance</p><p className="flex items-center justify-between text-sm font-bold">{balance}<span className="ml-2 inline-block h-5 w-5 rounded-full border-4" style={{ borderColor: 'var(--bixgo-wallet)' }}/></p></Link>
-      <Link to="/wallet" className="min-w-[160px] rounded-2xl border border-border bg-card px-3 py-2.5"><p className="text-[11px] text-muted-foreground">Top Up</p><p className="flex items-center justify-between text-sm font-bold">di Wallet BIX<Plus className="ml-2 h-5 w-5 rounded bg-primary p-0.5 text-primary-foreground"/></p></Link>
-      <Link to="/pay" className="min-w-[140px] rounded-2xl border border-border bg-card px-3 py-2.5"><p className="text-[11px] text-muted-foreground">Bayar sekarang</p><p className="text-sm font-bold">BIX PAY</p></Link>
+      <Link to="/wallet" className="min-w-[160px] rounded-2xl border border-border bg-card px-3 py-2.5"><p className="text-[11px] text-muted-foreground">Top Up</p><p className="flex items-center justify-between text-sm font-bold">in BIX Wallet<Plus className="ml-2 h-5 w-5 rounded bg-primary p-0.5 text-primary-foreground"/></p></Link>
+      <Link to="/pay" className="min-w-[140px] rounded-2xl border border-border bg-card px-3 py-2.5"><p className="text-[11px] text-muted-foreground">Pay now</p><p className="text-sm font-bold">BIX PAY</p></Link>
     </section>
     <section className="mt-4 grid grid-cols-2 gap-3 px-3 pb-6">
       {feed.map(c => <button key={c.name} onClick={() => enabled.has(c.svc) ? onPick(c.svc) : onSoon(c.name)} className="overflow-hidden rounded-2xl border border-border bg-card text-left shadow-sm active:scale-[0.98] transition">
@@ -90,50 +90,50 @@ export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<B
         </div>
       </button>)}
     </section>
-    <p className="px-4 pb-4 text-center text-[10px] text-muted-foreground">Nama merchant, foto dan promo adalah contoh pratinjau.</p>
+    <p className="px-4 pb-4 text-center text-[10px] text-muted-foreground">Merchant names, photos, and promos are preview examples.</p>
   </>;
 }
 
 export function BixgoInbox() {
-  const items = [['Promo BIXFood', 'Diskon s.d. 50% untuk resto pilihan hari ini.'], ['BIXRide', 'Perjalanan pertama Anda dapat potongan tarif BIX.'], ['Info BIXGO', 'BIXGO masih pratinjau — belum ada pembayaran nyata.']];
-  return <section className="px-4 py-4"><h2 className="mb-3 text-lg font-bold">Kotak Masuk</h2>
+  const items = [['Promo BIXFood', 'Up to 50% off for selected restaurants today.'], ['BIXRide', 'Your first trip gets a BIX fare discount.'], ['Info BIXGO', 'BIXGO is still in preview — no real payments yet.']];
+  return <section className="px-4 py-4"><h2 className="mb-3 text-lg font-bold">Inbox</h2>
     {items.map(([t, b]) => <div key={t} className="mb-2 flex gap-3 rounded-2xl border border-border bg-card p-3"><Bell className="h-5 w-5 shrink-0 text-primary"/><div><p className="text-sm font-semibold">{t}</p><p className="text-xs text-muted-foreground">{b}</p></div></div>)}
   </section>;
 }
 
 export function BixgoAccount({ name, balance, onBack, onSoon }: { name: string; balance: string; onBack: () => void; onSoon: (l: string) => void }) {
   const Row = ({ label, right, badge, to }: { label: string; right?: string; badge?: boolean; to?: string }) => {
-    const inner = <><span className="text-[15px] font-semibold">{label}</span><span className="flex items-center gap-2 text-sm">{badge && <b style={{ color: 'var(--bixgo-alert)' }}>Baru</b>}{right && <b>{right}</b>}<ChevronRight className="h-4 w-4"/></span></>;
+    const inner = <><span className="text-[15px] font-semibold">{label}</span><span className="flex items-center gap-2 text-sm">{badge && <b style={{ color: 'var(--bixgo-alert)' }}>New</b>}{right && <b>{right}</b>}<ChevronRight className="h-4 w-4"/></span></>;
     return to ? <Link to={to} className="flex w-full items-center justify-between py-3.5">{inner}</Link> : <button onClick={() => onSoon(label)} className="flex w-full items-center justify-between py-3.5">{inner}</button>;
   };
   return <section className="pb-6">
-    <div className="px-4 pt-3"><button aria-label="Kembali" onClick={onBack}><ArrowLeft className="h-6 w-6"/></button></div>
+    <div className="px-4 pt-3"><button aria-label="Back" onClick={onBack}><ArrowLeft className="h-6 w-6"/></button></div>
     <div className="mx-4 mt-3 rounded-3xl bg-card p-4 shadow-sm">
       <div className="flex items-center gap-3"><span className="grid h-14 w-14 place-items-center rounded-full bg-primary text-primary-foreground"><User className="h-8 w-8"/></span><b className="flex-1 text-lg">{name}</b><Link to="/profile" className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary">Profil</Link></div>
-      <button onClick={() => onSoon('BIXGO VIP')} className="mt-3 w-full rounded-full border border-border px-3 py-1.5 text-left text-xs font-semibold">✦ Bergabung dengan BIXGO Unlimited</button>
+      <button onClick={() => onSoon('BIXGO VIP')} className="mt-3 w-full rounded-full border border-border px-3 py-1.5 text-left text-xs font-semibold">✦ Join BIXGO Unlimited</button>
     </div>
     <div className="no-scrollbar mt-3 flex gap-3 overflow-x-auto px-4">
       <div className="min-w-[150px] rounded-2xl border border-border bg-card p-3"><div className="flex justify-between"><span className="inline-block h-8 w-8 rounded-full border-[6px]" style={{ borderColor: 'var(--bixgo-wallet)' }}/><span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold">Utama</span></div><p className="mt-3 font-bold">BIX Wallet</p><p className="text-sm text-muted-foreground">{balance}</p></div>
       <Link to="/pay" className="min-w-[150px] rounded-2xl p-3 text-primary-foreground" style={{ background: 'var(--bixgo-header)' }}><p className="mt-11 font-bold">BIX PAY</p><p className="text-sm opacity-90">Bayar & transfer</p></Link>
-      <button onClick={() => onSoon('Tambah metode')} className="min-w-[120px] rounded-2xl border border-border bg-card p-3 text-left"><Plus className="h-6 w-6 text-primary"/><p className="mt-6 text-sm font-bold">Tambah metode</p></button>
+      <button onClick={() => onSoon('Add method')} className="min-w-[120px] rounded-2xl border border-border bg-card p-3 text-left"><Plus className="h-6 w-6 text-primary"/><p className="mt-6 text-sm font-bold">Add method</p></button>
     </div>
     <div className="mx-4 mt-3 space-y-2">
-      <button onClick={() => onSoon('Akun Keluarga')} className="flex w-full items-center justify-between rounded-2xl bg-card p-4 text-sm font-semibold">Buka akun BIXGO Keluarga<User className="h-6 w-6 text-primary"/></button>
-      <button onClick={() => onSoon('BIXGO for Business')} className="flex w-full items-center justify-between rounded-2xl bg-card p-4 text-sm font-semibold">Lihat BIXGO for Business<Briefcase className="h-6 w-6 text-accent"/></button>
+      <button onClick={() => onSoon('Family Account')} className="flex w-full items-center justify-between rounded-2xl bg-card p-4 text-sm font-semibold">Open a BIXGO Family account<User className="h-6 w-6 text-primary"/></button>
+      <button onClick={() => onSoon('BIXGO for Business')} className="flex w-full items-center justify-between rounded-2xl bg-card p-4 text-sm font-semibold">View BIXGO for Business<Briefcase className="h-6 w-6 text-accent"/></button>
     </div>
     <div className="mt-5 px-4">
       <h3 className="text-xl font-black">Lebih banyak keuntungan</h3>
       <Row label="BIXGO Rewards" right="0 BIXP"/><Row label="Langganan"/><Row label="Tantangan" to="/arena"/>
       <h3 className="mt-5 text-xl font-black">Umum</h3>
-      <Row label="Favorit"/><Row label="Preferensi makanan" badge/><Row label="Metode Pembayaran" to="/wallet"/><Row label="Pengaturan" to="/settings"/><Row label="Pengaturan keamanan" to="/settings"/><Row label="Bahasa" to="/settings"/><Row label="Tempat Tersimpan"/><Row label="Calendars" badge/>
-      <h3 className="mt-5 text-xl font-black">Bantuan</h3>
-      <Row label="Pusat Bantuan"/>
+      <Row label="Favorit"/><Row label="Preferensi makanan" badge/><Row label="Metode Pembayaran" to="/wallet"/><Row label="Settings" to="/settings"/><Row label="Security settings" to="/settings"/><Row label="Bahasa" to="/settings"/><Row label="Saved Places"/><Row label="Calendars" badge/>
+      <h3 className="mt-5 text-xl font-black">Help</h3>
+      <Row label="Help Center"/>
     </div>
   </section>;
 }
 
 export function BixgoBottomNav({ view, setView, inbox }: { view: BixgoView; setView: (v: BixgoView) => void; inbox: number }) {
-  const tabs: [BixgoView, string, typeof Home][] = [['home', 'Beranda', Home], ['order', 'Scan', ScanLine], ['activity', 'Aktivitas', ClipboardList], ['inbox', 'Kotak Masuk', MessageSquare], ['account', 'Akun', User]];
+  const tabs: [BixgoView, string, typeof Home][] = [['home', 'Beranda', Home], ['order', 'Scan', ScanLine], ['activity', 'Aktivitas', ClipboardList], ['inbox', 'Inbox', MessageSquare], ['account', 'Account', User]];
   return <nav className="sticky bottom-0 z-20 grid grid-cols-5 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
     {tabs.map(([k, l, I]) => <button key={k} onClick={() => setView(k)} className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] ${view === k ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
       <I className={`h-5 w-5 ${view === k ? 'fill-primary/20' : ''}`}/>{l}

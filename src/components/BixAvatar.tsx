@@ -33,7 +33,7 @@ export function BixAvatar({ userId, name, path, className = 'comm-ava', online, 
   const [broken, setBroken] = useState(false);
   useEffect(() => setBroken(false), [url]);
   const cls = `${className} bx-ava${online ? ' is-online' : ''}${ring && st ? ` has-story is-${st}` : ''}`;
-  const inner = url && !broken ? <img src={url} alt={`Foto @${name}`} loading="lazy" onError={() => setBroken(true)}/> : <b>{(name || 'M').slice(0, 1).toUpperCase()}</b>;
-  if (st && onStory) return <span role="button" tabIndex={0} aria-label={`Lihat story @${name}`} className={cls} onClick={e => { e.stopPropagation(); onStory(); }} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onStory(); } }}>{inner}</span>;
+  const inner = url && !broken ? <img src={url} alt={`Photo of @${name}`} loading="lazy" onError={() => setBroken(true)}/> : <b>{(name || 'M').slice(0, 1).toUpperCase()}</b>;
+  if (st && onStory) return <span role="button" tabIndex={0} aria-label={`View @${name}'s story`} className={cls} onClick={e => { e.stopPropagation(); onStory(); }} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onStory(); } }}>{inner}</span>;
   return <span className={cls}>{inner}</span>;
 }

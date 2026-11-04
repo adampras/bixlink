@@ -33,7 +33,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoS
   const locate = async () => {
     setBusy('gps'); setErr('');
     try { const p = await getDevicePosition(); setFrom(await reverseGeocode(p.lat, p.lng)); setActive('to'); }
-    catch (e) { setErr(e instanceof Error ? e.message : 'GPS gagal'); } finally { setBusy(null); }
+    catch (e) { setErr(e instanceof Error ? e.message : 'GPS failed'); } finally { setBusy(null); }
   };
   useEffect(() => { void locate(); }, []);
   useEffect(() => {
@@ -45,8 +45,8 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoS
 
   const search = async () => {
     setBusy('search'); setErr('');
-    try { const r = await searchPlaces(q, from ?? undefined); setResults(r); if (!r.length) setErr('Alamat tidak ditemukan. Coba nama jalan + kota.'); }
-    catch (e) { setErr(e instanceof Error ? e.message : 'Pencarian gagal'); } finally { setBusy(null); }
+    try { const r = await searchPlaces(q, from ?? undefined); setResults(r); if (!r.length) setErr('Address not found. Try street name + city.'); }
+    catch (e) { setErr(e instanceof Error ? e.message : 'Search failed'); } finally { setBusy(null); }
   };
   const choose = (p: Place) => { if (active === 'from') { setFrom(p); setActive('to'); } else setTo(p); setResults([]); setQ(''); };
   const tapMap = async (p: { lat: number; lng: number }) => { setBusy('rev'); const place = await reverseGeocode(p.lat, p.lng); setBusy(null); if (active === 'from') setFrom(place); else setTo(place); };
@@ -67,11 +67,11 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoS
         </Suspense>
       </ClientOnly>
       <header className="absolute inset-x-3 top-3 z-[500] flex items-center gap-2">
-        <button aria-label="Kembali" onClick={stage === 'pickup' ? onBack : () => setStage('pickup')} className="grid h-11 w-11 place-items-center rounded-full bg-background shadow-lg"><ArrowLeft className="h-5 w-5"/></button>
+        <button aria-label="Back" onClick={stage === 'pickup' ? onBack : () => setStage('pickup')} className="grid h-11 w-11 place-items-center rounded-full bg-background shadow-lg"><ArrowLeft className="h-5 w-5"/></button>
         {stage === 'pickup' && <form onSubmit={e => { e.preventDefault(); void search(); }} className="flex flex-1 items-center gap-2 rounded-full bg-background px-4 py-2.5 shadow-lg">
           <span className={`h-3 w-3 rounded-full border-[3px] ${active === 'from' ? 'border-primary' : 'border-destructive'}`}/>
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder={active === 'from' ? 'Cari titik jemput…' : 'Mau ke mana?'} className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"/>
-          <button aria-label="Cari">{busy === 'search' ? <Loader2 className="h-4 w-4 animate-spin"/> : <Search className="h-4 w-4 text-muted-foreground"/>}</button>
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder={active === 'from' ? 'Search pickup point…' : 'Where to?'} className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"/>
+          <button aria-label="Search">{busy === 'search' ? <Loader2 className="h-4 w-4 animate-spin"/> : <Search className="h-4 w-4 text-muted-foreground"/>}</button>
         </form>}
       </header>
       {results.length > 0 && <div className="absolute inset-x-3 top-16 z-[500] max-h-60 overflow-y-auto rounded-2xl bg-background shadow-xl">{results.map(r => <button key={`${r.lat},${r.lng}`} onClick={() => choose(r)} className="flex w-full items-start gap-2 border-b border-border px-3 py-2.5 text-left"><MapPin className="mt-0.5 h-4 w-4 text-primary"/><span><b className="block text-sm">{r.name}</b><span className="text-[11px] text-muted-foreground">{r.detail}</span></span></button>)}</div>}
@@ -87,7 +87,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoS
         <span className="min-w-0 flex-1"><span className="text-[10px] font-bold uppercase text-muted-foreground">{k === 'from' ? 'Jemput' : 'Tujuan'}</span><b className="block truncate text-sm">{p?.name ?? (k === 'from' ? 'Mendeteksi GPS…' : 'Cari alamat atau ketuk peta')}</b>{p && <span className="block truncate text-xs text-muted-foreground">{p.detail}</span>}</span>
       </button>; })}
       <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Store className="h-3.5 w-3.5"/>{branch ? `Dilayani BIXGO ${branch.city}${branch.partner ? ' · ' + branch.partner : ''}` : 'Belum ada cabang franchise di area ini'}</p>
-      <button disabled={!from || !to || busy === 'route'} onClick={() => setStage('choose')} className="mt-4 w-full rounded-full bg-primary py-3.5 text-base font-bold text-primary-foreground disabled:opacity-40">{busy === 'route' ? 'Menghitung rute…' : 'Lanjut pilih kendaraan'}</button>
+      <button disabled={!from || !to || busy === 'route'} onClick={() => setStage('choose')} className="mt-4 w-full rounded-full bg-primary py-3.5 text-base font-bold text-primary-foreground disabled:opacity-40">{busy === 'route' ? 'Menghitung rute…' : 'Continue to select vehicle'}</button>
     </section>}
 
     {stage === 'choose' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-3 pt-3">
@@ -101,15 +101,15 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoS
       </button>; })}
       <div className="mt-2 rounded-2xl border border-border p-3 text-[11px] text-muted-foreground">
         <b className="text-foreground">Pembagian komisi {cfg.commissionPct}% ({idr(commission)})</b>
-        <p>{branch ? `Franchise ${branch.city} ${idr(split.franchise)} · Pusat ${idr(split.platform)} · Pool ${idr(split.pool)}` : `Pusat BIXGO ${idr(split.platform)} (tanpa cabang)`}</p>
+        <p>{branch ? `Franchise ${branch.city} ${idr(split.franchise)} · Pusat ${idr(split.platform)} · Pool ${idr(split.pool)}` : `BIXGO Center ${idr(split.platform)} (no branch)`}</p>
       </div>
     </section>}
 
     {stage === 'booked' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-4 pt-5 text-center">
       <CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">Pesanan demo dibuat</h2>
       <p className="text-sm text-muted-foreground">{cur.name} · {from?.name} → {to?.name}</p><p className="mt-1 text-xl font-black">{idr(price(cur).final)}</p>
-      <p className="mt-2 text-[11px] text-muted-foreground">Lokasi & jarak asli, tetapi pemesanan masih pratinjau — belum ada pengemudi yang dikirim dan tidak ada pembayaran.</p>
-      <button onClick={onBack} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground">Kembali ke Beranda</button>
+      <p className="mt-2 text-[11px] text-muted-foreground">Real location & distance, but booking is still in preview — no driver dispatched and no payment.</p>
+      <button onClick={onBack} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground">Back to Home</button>
     </section>}
 
     {stage === 'choose' && <footer className="fixed inset-x-0 bottom-0 z-[600] mx-auto max-w-xl border-t border-border bg-background px-3 pb-4 pt-2">

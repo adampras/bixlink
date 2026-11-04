@@ -24,7 +24,7 @@ export const franchiseSchema = z.object({
   franchisePct: z.number().min(0).max(100),
   platformPct: z.number().min(0).max(100),
   poolPct: z.number().min(0).max(100),
-}).strict().refine(f => Math.round((f.franchisePct + f.platformPct + f.poolPct) * 100) === 10_000, 'Pembagian franchise + pusat + pool harus 100%');
+}).strict().refine(f => Math.round((f.franchisePct + f.platformPct + f.poolPct) * 100) === 10_000, 'Franchise + central + pool split must equal 100%');
 export type BixgoFranchise = z.infer<typeof franchiseSchema>;
 
 export const bixgoSettingsSchema = z.object({

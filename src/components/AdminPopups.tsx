@@ -18,27 +18,27 @@ export function AdminPopups({ content, onMessage, onSaved }: { content?: Landing
   const upload = async (i: number, file?: File) => {
     if (!file) return;
     const ext = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' } as Record<string, string>)[file.type];
-    if (!ext || file.size > 5 * 1024 * 1024) { onMessage('Pilih JPG, PNG atau WebP, maksimal 5 MB.'); return; }
+    if (!ext || file.size > 5 * 1024 * 1024) { onMessage('Select JPG, PNG or WebP, maximum 5 MB.'); return; }
     setBusy(`img-${i}`);
     const path = `images/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from('bix-content').upload(path, file, { contentType: file.type, upsert: false });
     setBusy(undefined);
     if (error) { onMessage(error.message); return; }
-    set(i, { image: path }); onMessage('Foto diunggah. Tekan Simpan untuk menerapkan.');
+    set(i, { image: path }); onMessage('Photo uploaded. Click Save to apply.');
   };
   const persist = async () => {
     setBusy('save');
     try {
       const base = content ?? defaultLandingContent;
       await save({ data: { key: 'landing_content', value: { ...base, popups: items.map(it => ({ ...it, title: it.title.trim() || 'BIXLINK', description: it.description.trim(), ctaLabel: it.ctaLabel?.trim() || undefined, url: it.url?.trim() || undefined })) } as Record<string, unknown> } });
-      await onSaved(); onMessage('Pop-up tersimpan.');
-    } catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal menyimpan pop-up.'); }
+      await onSaved(); onMessage('Pop-up saved.');
+    } catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save pop-up.'); }
     setBusy(undefined);
   };
   return <section className="space-y-4">
-    <div><h3 className="font-display text-xl font-bold">Banner & Pop-up</h3><p className="mt-1 text-xs text-muted-foreground">Unggah foto apa saja — bingkai otomatis memotong ke rasio 16:10 dan menempatkannya di kartu kaca emas. Satu pop-up aktif per lokasi, muncul sekali per sesi. Rekomendasi: HOME pengunjung (event prelaunch), Presale (alokasi terbatas), Wallet (tips keamanan).</p></div>
+    <div><h3 className="font-display text-xl font-bold">Banner & Pop-up</h3><p className="mt-1 text-xs text-muted-foreground">Upload any photo — the frame automatically crops to a 16:10 ratio and places it on a gold glass card. One active pop-up per location, appearing once per session. Recommendations: Visitor HOME (prelaunch event), Presale (limited allocation), Wallet (security tips).</p></div>
     {items.map((it, i) => <article key={i} className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-[180px_1fr]">
-      <div className="site-popup__art overflow-hidden rounded-lg border border-border">{it.image ? <ContentImage path={it.image} alt="" className="site-popup__img"/> : <div className="grid h-full place-items-center text-[10px] text-muted-foreground">Belum ada foto</div>}</div>
+      <div className="site-popup__art overflow-hidden rounded-lg border border-border">{it.image ? <ContentImage path={it.image} alt="" className="site-popup__img"/> : <div className="grid h-full place-items-center text-[10px] text-muted-foreground">No photos yet</div>}</div>
       <div className="grid gap-2">
         <div className="flex flex-wrap gap-2">
           <select className="form-input h-9 w-auto py-0 text-xs" value={it.placement} onChange={e => set(i, { placement: e.target.value as PopupPlacement })} aria-label="Lokasi pop-up">{POPUP_PLACEMENTS.map(p => <option key={p} value={p}>{LABEL[p]}</option>)}</select>
@@ -51,6 +51,6 @@ export function AdminPopups({ content, onMessage, onSaved }: { content?: Landing
         <div className="grid gap-2 sm:grid-cols-2"><input className="form-input" maxLength={24} placeholder="Teks tombol (opsional)" value={it.ctaLabel ?? ''} onChange={e => set(i, { ctaLabel: e.target.value })}/><input className="form-input" maxLength={300} placeholder="Link /presale atau https://…" value={it.url ?? ''} onChange={e => set(i, { url: e.target.value })}/></div>
       </div>
     </article>)}
-    <div className="flex flex-wrap gap-2"><Button type="button" variant="outline" disabled={items.length >= 8} onClick={() => setItems(cur => [...cur, { title: '', description: '', placement: 'home', enabled: true }])}><Plus/> Tambah pop-up</Button><Button type="button" disabled={Boolean(busy)} onClick={() => void persist()}><Save/>{busy === 'save' ? 'Menyimpan…' : 'Save'}</Button></div>
+    <div className="flex flex-wrap gap-2"><Button type="button" variant="outline" disabled={items.length >= 8} onClick={() => setItems(cur => [...cur, { title: '', description: '', placement: 'home', enabled: true }])}><Plus/> Add pop-up</Button><Button type="button" disabled={Boolean(busy)} onClick={() => void persist()}><Save/>{busy === 'save' ? 'Menyimpan…' : 'Save'}</Button></div>
   </section>;
 }

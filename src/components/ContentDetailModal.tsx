@@ -14,7 +14,7 @@ export function ContentDetailModal({ item, eyebrow, fallbackSrc, onClose }: { it
             <DialogDescription className="text-sm text-muted-foreground">{item.description}</DialogDescription>
           </DialogHeader>
           <div className="mt-4 whitespace-pre-line border-t border-border pt-4 text-sm leading-7 text-foreground/90">{item.detail}</div>
-          <p className="mt-5 text-[11px] leading-5 text-muted-foreground">Narasi pengembangan, bukan jaminan hasil, harga, atau jadwal penyelesaian.</p>
+          <p className="mt-5 text-[11px] leading-5 text-muted-foreground">Development narrative, not a guarantee of results, price, or completion timeline.</p>
         </div>
       </>}
     </DialogContent>
