@@ -4,6 +4,7 @@ import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { BixtradePlan } from '@/components/BixtradePlan';
+import { BixtradeTreasury } from '@/components/BixtradeTreasury';
 import { BIXTRADE_PAIRS, BIXTRADE_STRATEGIES, BIXTRADE_VENUES, botCapital, bixtradeBotMood, checkBixtradeRequest, dailySeries, projectBixtrade, readBixtrade, withdrawNet, type BixtradeSettings, type BixtradeStrategy } from '@/lib/bixtrade';
 import { BixtradeBot3D, BOT_PERSONA } from '@/components/BixtradeBot3D';
 import { useServerFn } from '@tanstack/react-start';
@@ -173,6 +174,7 @@ function BixtradePage() {
     {stream.length > 0 && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ AI SCAN · {s}</span>)}</div></div>}
 
     {tab === 'cockpit' && <>
+    <BixtradeTreasury/>
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-2"/> Live execution pulse</h2>
       <div className="mt-3 grid gap-2">{fundExecs.slice(0, 3).map((x, i) => <button type="button" key={x.id} style={{ animationDelay: `${i * 60}ms` }} onClick={() => setReceipt(x)} className="arb-pulse-row text-left"><i/><span><b>{x.pair}</b> {x.buy_venue} → {x.sell_venue}<br/><span className="text-muted-foreground">{Number(x.notional_usd).toFixed(2)} USDT · {new Date(x.executed_at).toLocaleTimeString()}</span></span><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)}</b></button>)}
