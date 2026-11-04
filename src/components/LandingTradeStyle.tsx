@@ -30,9 +30,9 @@ export function LandingTradeStyle({ bixPrice }: { bixPrice?: number | undefined 
         <div className="lci-auth"><Link to="/auth" className="lci-ghost">Login</Link><Link to="/register" className="lci-go">Register</Link></div>
       </nav>
     </div>}
-    {notice && <div className="lci-notice"><AlertTriangle size={22}/><div><b>Beware of scams impersonating BIXLINK</b><Link to="/risk">Baca pengumuman <ArrowRight size={14}/></Link></div><button type="button" aria-label="Close announcement" onClick={() => setNotice(false)}><X size={18}/></button></div>}
+    {notice && <div className="lci-notice"><AlertTriangle size={22}/><div><b>Beware of scams impersonating BIXLINK</b><Link to="/risk">Read announcement <ArrowRight size={14}/></Link></div><button type="button" aria-label="Close announcement" onClick={() => setNotice(false)}><X size={18}/></button></div>}
     <div className="lci-hero">
-      <h1 className="font-display">Integrated solution for <span>ekosistem digital</span> You</h1>
+      <h1 className="font-display">Integrated solution for <span>digital ecosystem</span> You</h1>
       <i className="lci-line" aria-hidden/>
       <p>From staking, AI bots, P2P market to community communication — all connected in one platform.</p>
       <Link to="/register" className="lci-go lci-cta">Register now</Link>

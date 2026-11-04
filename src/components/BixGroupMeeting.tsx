@@ -35,12 +35,12 @@ export function BixGroupMeeting({ me, tier }: { me: string; tier: Tier }) {
   return <section className="comm-group mt-4">
     <div className="comm-group-head"><Users size={16}/><b>Group Call</b><small>Voice/video meeting with the team</small></div>
     <div className="comm-group-form">
-      <input className="form-input" placeholder="Nama room, mis. Rapat Tim Jakarta" value={title} onChange={e => setTitle(e.target.value)} maxLength={60}/>
+      <input className="form-input" placeholder="Room name, e.g. Jakarta Team Meeting" value={title} onChange={e => setTitle(e.target.value)} maxLength={60}/>
       <label className="comm-group-check"><input type="checkbox" checked={video} disabled={!tier?.video} onChange={e => setVideo(e.target.checked)}/> Video {tier?.video ? '' : '(tier PRO)'}</label>
       <button type="button" className="comm-group-btn" onClick={() => void create()}>+ Buat room</button>
     </div>
     <div className="comm-group-form">
-      <input className="form-input" placeholder="Kode room (6 huruf)" value={code} onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}/>
+      <input className="form-input" placeholder="Room code (6 letters)" value={code} onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}/>
       <button type="button" className="comm-group-btn is-alt" disabled={code.length !== 6} onClick={() => setActive(code)}>Gabung</button>
     </div>
     {msg && <p className="comm-group-msg">{msg}</p>}
@@ -92,7 +92,7 @@ function MeetingStage({ code, me, onLeave }: { code: string; me: string; onLeave
   return <section className="comm-meet mt-4">
     <div ref={audioBox} hidden/>
     <header><div><b>{info?.title ?? 'Menghubungkan…'}</b><small>{people.length} peserta · kode {code}</small></div>
-      <button type="button" aria-label="Salin kode room" onClick={async () => { if (await copyText(code)) { setCopied(true); setTimeout(() => setCopied(false), 1800); } }}>{copied ? <Check size={14}/> : <Copy size={14}/>}</button></header>
+      <button type="button" aria-label="Copy room code" onClick={async () => { if (await copyText(code)) { setCopied(true); setTimeout(() => setCopied(false), 1800); } }}>{copied ? <Check size={14}/> : <Copy size={14}/>}</button></header>
     <div className="comm-meet-grid">{people.map(p => <Tile key={p.identity} p={p} hand={!!hands[p.identity]} self={p.identity === me}/>)}</div>
     <div className="comm-meet-bar">
       <button type="button" className={mic ? '' : 'is-off'} onClick={() => void toggleMic()} aria-label="Mikrofon">{mic ? <Mic size={18}/> : <MicOff size={18}/>}</button>

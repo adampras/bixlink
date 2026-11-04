@@ -18,7 +18,7 @@ const MEMBER = [
   { to: '/stake', label: 'Stake', k: 'staking paket' },
   { to: '/profit', label: 'Profit', k: 'keuntungan' },
   { to: '/boost', label: 'Boost APY', k: 'booster tier' },
-  { to: '/network', label: 'Network', k: 'jaringan referral tim' },
+  { to: '/network', label: 'Network', k: 'team referral network' },
   { to: '/presale', label: 'Presale & Sovereign', k: 'genesis 100000' },
   { to: '/market', label: 'Market & Updates', k: 'price market' },
   { to: '/nft-marketplace', label: 'NFT Marketplace', k: 'toko merchandise shop' },

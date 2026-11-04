@@ -36,8 +36,8 @@ export function ReviewerMultiWallets({ onMessage }: { onMessage: (m: string) => 
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         <label className="text-xs text-muted-foreground">Koin<select className="form-input mt-1" value={w.asset ?? 'USDT'} onChange={e => set(i, { asset: e.target.value as 'USDT' | 'USDC' })}><option>USDT</option><option>USDC</option></select></label>
-        <label className="text-xs text-muted-foreground">Jaringan<select className="form-input mt-1" value={w.network} onChange={e => set(i, { network: e.target.value as DepositWallet['network'] })}>{['BEP20', 'TRC20', 'ERC20'].map(n => <option key={n}>{n}</option>)}</select></label>
-        <label className="text-xs text-muted-foreground">Model deposit<select className="form-input mt-1" value={w.mode ?? 'both'} onChange={e => set(i, { mode: e.target.value as DepositMode })}><option value="flex">Any amount (TxID)</option><option value="unique">Kode unik 3 digit</option><option value="both">Keduanya</option></select></label>
+        <label className="text-xs text-muted-foreground">Network<select className="form-input mt-1" value={w.network} onChange={e => set(i, { network: e.target.value as DepositWallet['network'] })}>{['BEP20', 'TRC20', 'ERC20'].map(n => <option key={n}>{n}</option>)}</select></label>
+        <label className="text-xs text-muted-foreground">Model deposit<select className="form-input mt-1" value={w.mode ?? 'both'} onChange={e => set(i, { mode: e.target.value as DepositMode })}><option value="flex">Any amount (TxID)</option><option value="unique">3-digit unique code</option><option value="both">Keduanya</option></select></label>
       </div>
       <label className="mt-3 block text-xs text-muted-foreground">Alamat wallet<input className="form-input mt-1 font-mono text-xs" maxLength={120} value={w.address} onChange={e => set(i, { address: e.target.value.trim() })} placeholder={w.network === 'TRC20' ? 'T…' : '0x…'}/></label>
       {!ok && <p className="mt-1 flex items-center gap-1 text-[11px] text-destructive"><AlertTriangle size={12}/>Alamat tidak cocok dengan jaringan {w.network}.</p>}
@@ -45,7 +45,7 @@ export function ReviewerMultiWallets({ onMessage }: { onMessage: (m: string) => 
     </div>; })}</div>
     <div className="mt-4 flex flex-wrap gap-2">
       <Button type="button" variant="outline" className="rounded-full" disabled={rows.length >= MAX} onClick={() => setRows(r => [...r, { ...TEMPLATES[0]!, label: '' }])}><Plus/> Add wallet</Button>
-      <Button disabled={busy} className="rounded-full" onClick={async () => { setBusy(true); try { const out = await save({ data: { wallets: rows } }); setRows(out); await qc.invalidateQueries({ queryKey: ['my-deposit-wallets'] }); onMessage('Wallet saved. Active wallets are instantly visible to members in your network.'); } catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save wallet.'); } setBusy(false); }}><Save/> {busy ? 'Menyimpan…' : 'Save wallet'}</Button>
+      <Button disabled={busy} className="rounded-full" onClick={async () => { setBusy(true); try { const out = await save({ data: { wallets: rows } }); setRows(out); await qc.invalidateQueries({ queryKey: ['my-deposit-wallets'] }); onMessage('Wallet saved. Active wallets are instantly visible to members in your network.'); } catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save wallet.'); } setBusy(false); }}><Save/> {busy ? 'Saving…' : 'Save wallet'}</Button>
     </div>
   </section>;
 }

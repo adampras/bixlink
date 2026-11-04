@@ -23,7 +23,7 @@ export function ChallengeReview() {
     <h2 className="font-display font-bold">Challenge 1.000 member terverifikasi → 1.000 BIX</h2>
     <p className="mt-1 text-xs text-muted-foreground">Leaders/approved loans only. Count = entire team with verified real emails, no clones. Check live numbers before approving.</p>
     {msg && <p className="mt-2 text-xs" role="status">{msg}</p>}
-    {isLoading ? <p className="mt-3 text-sm">Memuat…</p> : data.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">No claims yet.</p> :
+    {isLoading ? <p className="mt-3 text-sm">Loading…</p> : data.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">No claims yet.</p> :
     <div className="mt-3 space-y-2">{data.map(r => <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3 text-xs">
       <div><b>{r.email ?? '—'}</b><div className="text-muted-foreground">Saat klaim {r.count} · live {r.liveCount} · {new Date(r.createdAt).toLocaleDateString('id-ID')}</div></div>
       {r.status === 'pending' ? <div className="flex gap-2"><Button size="sm" onClick={() => review(r.id, true)}>Setujui</Button><Button size="sm" variant="outline" onClick={() => review(r.id, false)}>Tolak</Button></div> : <span className="font-bold uppercase">{r.status}</span>}

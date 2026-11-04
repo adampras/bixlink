@@ -26,7 +26,7 @@ const METHODS = [
   { id: 'telegram', label: 'Telegram', icon: Send, ph: '@username' },
   { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, ph: '+628123456789' },
 ] as const;
-const SRC: [string, string][] = [['staking_profit', 'Profit staking'], ['network_bonus', 'Bonus jaringan'], ['vip_reward', 'VIP'], ['swap_bought', 'Swap buy'], ['allocation', 'Alokasi admin'], ['transfer_in', 'Incoming transfer'], ['p2p_net', 'P2P net']];
+const SRC: [string, string][] = [['staking_profit', 'Profit staking'], ['network_bonus', 'Network bonus'], ['vip_reward', 'VIP'], ['swap_bought', 'Swap buy'], ['allocation', 'Alokasi admin'], ['transfer_in', 'Incoming transfer'], ['p2p_net', 'P2P net']];
 
 function BuybackPage() {
   const { user } = useMember();

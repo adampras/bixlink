@@ -99,7 +99,7 @@ export const creditRecoveryTx = createServerFn({ method: 'POST' }).middleware([r
 
     const names = await memberNames(admin);
     const st = await hashStatus(admin, hash);
-    if (st.credited) throw new Error(`TxID ini sudah masuk ke ${st.credited.user_id === memberId ? 'member ini' : (!caller.scope || caller.scope.has(st.credited.user_id) ? names.get(st.credited.user_id)?.code ?? 'member lain' : 'member lain')}.`);
+    if (st.credited) throw new Error(`This TxID has already been credited to ${st.credited.user_id === memberId ? 'member ini' : (!caller.scope || caller.scope.has(st.credited.user_id) ? names.get(st.credited.user_id)?.code ?? 'member lain' : 'member lain')}.`);
     if (st.queued && st.queued.user_id !== memberId) throw new Error('This TxID has already been submitted by another member. Reject that submission first if incorrect.');
 
     const now = new Date().toISOString();

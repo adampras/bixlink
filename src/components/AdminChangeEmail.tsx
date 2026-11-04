@@ -14,9 +14,9 @@ export function AdminChangeEmail({ onMessage }: { onMessage: (m: string) => void
     <h3 className="font-display text-lg font-black">Change member email</h3>
     <p className="text-xs text-muted-foreground">Enter member code, username, or old email. New email is active immediately without confirmation.</p>
     <div className="grid gap-2 sm:grid-cols-2">
-      <input className={cls} placeholder="Kode / username / email lama" value={member} onChange={e => setMember(e.target.value)} required/>
+      <input className={cls} placeholder="Previous code / username / email" value={member} onChange={e => setMember(e.target.value)} required/>
       <input className={cls} type="email" placeholder="New email" value={newEmail} onChange={e => setNewEmail(e.target.value)} required/>
     </div>
-    <Button type="submit" disabled={busy} className="rounded-full">{busy ? 'Menyimpan…' : 'Change email'}</Button>
+    <Button type="submit" disabled={busy} className="rounded-full">{busy ? 'Saving…' : 'Change email'}</Button>
   </form>;
 }

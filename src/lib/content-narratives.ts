@@ -76,7 +76,7 @@ Phase targets:
 • Governance proposal and voting mechanism design
 • Transparent treasury management protocols
 • Progressive transition toward community-led governance`,
-  '21 JUTA MILESTONE': `Comprehensive ecosystem milestone review aligned with the fixed 21,000,000 BIX supply cap and halving schedule.
+  '21M MILESTONE': `Comprehensive ecosystem milestone review aligned with the fixed 21,000,000 BIX supply cap and halving schedule.
 
 Phase targets:
 • Tokenomics distribution and allocation audit
@@ -85,7 +85,7 @@ Phase targets:
 This represents a development milestone, not a price target.`,
 };
 
-Object.assign(roadmapNarratives, { LAUNCH: roadmapNarratives['PELUNCURAN'], 'STAKING APP BETA': roadmapNarratives['STAKING BETA'], 'RWA LISTING': roadmapNarratives['RWA LIST'], ECOSYSTEM: roadmapNarratives['EKOSISTEM'] });
+Object.assign(roadmapNarratives, { LAUNCH: roadmapNarratives['PELUNCURAN'], 'STAKING APP BETA': roadmapNarratives['STAKING BETA'], 'RWA LISTING': roadmapNarratives['RWA LIST'], ECOSYSTEM: roadmapNarratives['ECOSYSTEM'] });
 
 const key = (title: string) => title.trim().toUpperCase();
 

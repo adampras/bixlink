@@ -29,7 +29,7 @@ export function OwnerRevenueTable() {
         <thead className="sticky top-0 bg-card text-muted-foreground"><tr><th className="py-2">Tanggal</th><th>Member</th><th>Wallet</th><th>Owner</th><th className="text-right">Amount</th></tr></thead>
         <tbody>{rows.map(r => <tr key={r.id} className="border-t border-border"><td className="py-2">{dateTime(r.created_at)}</td><td className="font-mono">{r.member_code}</td><td>{r.wallet_code ?? '—'} · {r.network ?? ''}</td><td>{r.owner_code}</td><td className="text-right font-mono tabular-nums text-chart-2">{money(r.amount_usd)}</td></tr>)}</tbody>
       </table>
-      {!rows.length && <p className="py-4 text-sm text-muted-foreground">{isLoading ? 'Memuat…' : 'No turnover yet.'}</p>}
+      {!rows.length && <p className="py-4 text-sm text-muted-foreground">{isLoading ? 'Loading…' : 'No turnover yet.'}</p>}
     </div>
   </section>;
 }

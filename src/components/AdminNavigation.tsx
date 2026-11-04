@@ -23,7 +23,7 @@ export function AdminNavigation({ groups, tab, onSelect }: { groups: AdminGroup[
       <input aria-label="Search admin menu" className="min-w-0 bg-transparent py-3 text-sm outline-none" placeholder="Search admin menu…" value={query} onChange={e => setQuery(e.target.value)}/>
       {query ? <Button size="icon" variant="ghost" aria-label="Clear search" className="size-8" onClick={() => setQuery('')}><X size={14}/></Button> : <span className="size-8"/>}
     </div>
-    {!term && <div role="group" aria-label="Kategori admin" className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-6">
+    {!term && <div role="group" aria-label="Admin category" className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-6">
       {groups.map(g => <button key={g.title} type="button" aria-pressed={openCat === g.title} className={`admin-cat-chip admin-cat--${g.tone}`} onClick={() => setOpenCat(g.title)}>{g.title}</button>)}
     </div>}
     <div className="mt-3 grid gap-3">

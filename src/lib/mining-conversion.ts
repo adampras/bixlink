@@ -5,7 +5,7 @@ export const MINING_POOL_CAP = 1_000_000;
 export const miningConversionSchema = z.object({
   enabled: z.boolean(),
   vbixPerBix: z.number().finite().positive().max(1_000_000_000).nullable(),
-}).strict().refine(value => !value.enabled || value.vbixPerBix !== null, 'Tentukan nilai BIXP per BIX sebelum membuka konversi.');
+}).strict().refine(value => !value.enabled || value.vbixPerBix !== null, 'Set the BIXP value per BIX before enabling conversion.');
 
 export function conversionQuote(vbix: number, rate: number | null, converted: number, poolUsed: number) {
   if (!rate || !Number.isFinite(rate) || rate <= 0) return 0;

@@ -32,7 +32,7 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
   const num = (k: keyof BixtradeSettings) => (e: React.ChangeEvent<HTMLInputElement>) => setS(v => ({ ...v, [k]: Number(e.target.value) }));
   const submit = async (next = s) => {
     setBusy(true);
-    try { await save({ data: { key: 'bixtrade', value: next } }); setS(next); onMessage(`BIXTrade saved · ${next.enabled ? 'AKTIF' : 'Under Reconstruction'}.`); onSaved?.(); }
+    try { await save({ data: { key: 'bixtrade', value: next } }); setS(next); onMessage(`BIXTrade saved · ${next.enabled ? 'ACTIVE' : 'Under Reconstruction'}.`); onSaved?.(); }
     catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save BIXTrade.'); } finally { setBusy(false); }
   };
   const decide = async (id: string, status: 'approved' | 'rejected') => {
@@ -61,7 +61,7 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
       <div className="grid gap-3 rounded-lg border border-border p-3">
         <b>Marketing plan & pembonusan</b>
         {tg('planEnabled', 'Show plans to members')}
-        <div className="grid gap-3 sm:grid-cols-3">{fld('memberSharePct', 'Bagi hasil member (%)')}{fld('companySharePct', 'Perusahaan (%)')}{fld('affiliateSharePct', 'Pool afiliasi (%)')}</div>
+        <div className="grid gap-3 sm:grid-cols-3">{fld('memberSharePct', 'Member revenue share (%)')}{fld('companySharePct', 'Perusahaan (%)')}{fld('affiliateSharePct', 'Pool afiliasi (%)')}</div>
         <p className="text-muted-foreground">Total profit sharing must be 100%.</p>
         {tg('matchingEnabled', 'Bonus matching profit L1–L3')}
         <div className="grid gap-3 sm:grid-cols-3">{fld('matchL1', 'Level 1 (%)')}{fld('matchL2', 'Level 2 (%)')}{fld('matchL3', 'Level 3 (%)')}</div>
@@ -72,13 +72,13 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
         {tg('compoundEnabled', 'Bonus compound')}
         {fld('compoundBonusPct', 'Bonus compound (%)')}
         {tg('leaderPoolEnabled', 'Leader pool')}
-        <div className="grid gap-3 sm:grid-cols-2">{fld('leaderPoolPct', 'Leader pool (%)')}{fld('leaderPoolMinTeamUsd', 'Syarat modal tim (USDT)', '1')}</div>
-        {tg('milestoneEnabled', 'Reward milestone tim')}
-        <div className="grid gap-3 sm:grid-cols-2">{fld('milestoneTargetUsd', 'Target modal tim (USDT)', '1')}{fld('milestoneRewardUsd', 'Reward (USDT)', '1')}</div>
+        <div className="grid gap-3 sm:grid-cols-2">{fld('leaderPoolPct', 'Leader pool (%)')}{fld('leaderPoolMinTeamUsd', 'Team capital requirement (USDT)', '1')}</div>
+        {tg('milestoneEnabled', 'Team milestone reward')}
+        <div className="grid gap-3 sm:grid-cols-2">{fld('milestoneTargetUsd', 'Team capital target (USDT)', '1')}{fld('milestoneRewardUsd', 'Reward (USDT)', '1')}</div>
         <label>Cycle options (days, comma-separated)<input className="form-input mt-1" defaultValue={s.cycleDays.join(',')} key={s.cycleDays.join(',')} onBlur={e => { const d = e.target.value.split(',').map(x => Math.round(Number(x))).filter(x => x >= 1 && x <= 365).slice(0, 6); if (d.length) setS(v => ({ ...v, cycleDays: d })); }}/></label>
       </div>
       <p className="text-muted-foreground">Approve deposit = member's main wallet USDT moved to bot capital (checks for sufficient balance). Approve withdraw = net amount after fees returned to main wallet (checks capital & lock period). Profit is only a projection, never added.</p>
-      <Button disabled={busy} onClick={() => submit()}>{busy ? 'Menyimpan…' : 'Save settings'}</Button>
+      <Button disabled={busy} onClick={() => submit()}>{busy ? 'Saving…' : 'Save settings'}</Button>
 
       <div className="border-t border-border pt-3"><b>Sponsor bonus awaiting review</b>
         <div className="mt-2 grid gap-2">{bonuses.length ? bonuses.map(b => <div key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-2"><span>{b.kind} · {Number(b.amount_usd).toFixed(2)} USDT<br/><span className="text-muted-foreground">penerima {b.user_id.slice(0, 8)} · dari {b.member_id.slice(0, 8)}</span></span><span className="flex gap-1"><Button size="sm" onClick={() => reviewBonus(b.id, true)}>Setujui</Button><Button size="sm" variant="outline" onClick={() => reviewBonus(b.id, false)}>Tolak</Button></span></div>) : <p className="text-muted-foreground">No pending bonuses.</p>}</div>

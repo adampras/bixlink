@@ -5,9 +5,9 @@ import { ChevronDown, Menu, X } from 'lucide-react';
 
 type Item = { label: string; anchor?: string; to?: string };
 const GROUPS: Array<{ title: string; items: Item[] }> = [
-  { title: 'Ecosystem Services', items: [{ label: 'Sovereign Staking', anchor: 'lx-bento' }, { label: 'Ekosistem Premium', anchor: 'lx-ecosystem' }, { label: 'Kategori Pengembangan', anchor: 'lx-spaces' }] },
-  { title: 'BIXCOIN & Tokenomics', items: [{ label: 'Official BIXCOIN', anchor: 'lx-coin' }, { label: 'Tokenomics 21 Juta BIX', anchor: 'lx-tokenomics' }, { label: 'Roadmap', anchor: 'lx-roadmap' }] },
-  { title: 'Transparansi & Keamanan', items: [{ label: 'Trust Center', anchor: 'lx-trust' }, { label: 'Tim & Kemitraan', anchor: 'lx-team' }, { label: 'Berita Kripto', anchor: 'lx-news' }, { label: 'FAQ', anchor: 'lx-faq' }] },
+  { title: 'Ecosystem Services', items: [{ label: 'Sovereign Staking', anchor: 'lx-bento' }, { label: 'Premium Ecosystem', anchor: 'lx-ecosystem' }, { label: 'Development Categories', anchor: 'lx-spaces' }] },
+  { title: 'BIXCOIN & Tokenomics', items: [{ label: 'Official BIXCOIN', anchor: 'lx-coin' }, { label: '21 Million BIX Tokenomics', anchor: 'lx-tokenomics' }, { label: 'Roadmap', anchor: 'lx-roadmap' }] },
+  { title: 'Transparency & Security', items: [{ label: 'Trust Center', anchor: 'lx-trust' }, { label: 'Team & Partnerships', anchor: 'lx-team' }, { label: 'Crypto News', anchor: 'lx-news' }, { label: 'FAQ', anchor: 'lx-faq' }] },
 ];
 
 export function LandingHeroMenu() {

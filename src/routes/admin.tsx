@@ -63,11 +63,11 @@ export const Route = createFileRoute('/admin')({ head: () => ({ meta: [{ title: 
 type AdminData = Awaited<ReturnType<typeof getAdminData>>;
 const ADMIN_GROUPS: AdminGroup[] = [
   { title: '1 · Pusat Kontrol', tone: 'gold', hint: 'Saklar sentral, vault, maintenance', tabs: [['Overview','saklar sentral maintenance vault brankas ringkasan p2p arena register bixtrade bot arbitrase'],['Growth & Safety','radar aktivitas flash event circuit breaker freeze withdraw telegram']] },
-  { title: '2 · Kas & Dompet', tone: 'cyan', hint: 'Deposit, withdraw, BIX PAY, laporan', tabs: [['Wallet','dompet deposit ikat wallet bix pay transfer swap telegram notifikasi pemulihan deposit onchain approve txid'],['Reports','laporan transfer']] },
+  { title: '2 · Cash & Wallets', tone: 'cyan', hint: 'Deposit, withdraw, BIX PAY, laporan', tabs: [['Wallet','wallet deposit link wallet bix pay transfer swap telegram notifications recovery deposit onchain approve txid'],['Reports','laporan transfer']] },
   { title: '3 · Staking & Yield', tone: 'emerald', hint: 'APY, paket, permintaan stake', tabs: [['Staking','apy profit yield paket durasi'],['Stakes','unstake approve request history']] },
-  { title: '4 · Member & Jaringan', tone: 'rose', hint: 'User, audit deposit, leader, loan, kuota', tabs: [['Users','member ban owner 2 omset audit real deposit loan kuota'],['Referrals','bonus komisi sponsor'],['Kepemimpinan & Tim','team leader vip clones create loan account']] },
-  { title: '5 · Pasar & Presale', tone: 'violet', hint: 'BIX price, presale, materials', tabs: [['Presale','price stage strategy'],['Market','bix market price'],['Marketing','pdf video materi']] },
-  { title: '6 · Tampilan & Ekosistem', tone: 'slate', hint: 'Tema, landing, game, NFT, toko, arsip', tabs: [['Desain & Tampilan','tema wallet splash popup banner booster visual pengumuman'],['Landing','konten hero sponsor sosial'],['Arena','fox game quest bixp'],['BIXTOK','video live saweran gift'],['Mining','vbix'],['NFT','sertifikat kartu'],['Marketplace','shop katalog toko'],['Token','bep20 kontrak smart contract arsip'],['RWA','income source sumber arsip']] },
+  { title: '4 · Members & Network', tone: 'rose', hint: 'User, audit deposit, leader, loan, kuota', tabs: [['Users','member ban owner 2 omset audit real deposit loan kuota'],['Referrals','bonus komisi sponsor'],['Leadership & Team','team leader vip clones create loan account']] },
+  { title: '5 · Market & Presale', tone: 'violet', hint: 'BIX price, presale, materials', tabs: [['Presale','price stage strategy'],['Market','bix market price'],['Marketing','pdf video materi']] },
+  { title: '6 · Appearance & Ecosystem', tone: 'slate', hint: 'Tema, landing, game, NFT, toko, arsip', tabs: [['Desain & Tampilan','theme wallet splash popup banner booster visuals announcements'],['Landing','konten hero sponsor sosial'],['Arena','fox game quest bixp'],['BIXTOK','video live saweran gift'],['Mining','vbix'],['NFT','sertifikat kartu'],['Marketplace','shop katalog toko'],['Token','bep20 kontrak smart contract arsip'],['RWA','income source sumber arsip']] },
 ];
 let adminVerified = false;
 function Admin() {
@@ -108,12 +108,12 @@ function Admin() {
     {tab === 'Wallet' && <AdminWallet members={data?.members ?? []} depositWallets={(data?.settings.find(s=>s.key==='deposit_wallets')?.value as {wallets?: DepositWallet[]} | undefined)?.wallets} swapEnabled={Boolean((data?.settings.find(s=>s.key==='swap')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>} 
     {tab === 'Wallet' && <AdminBixPay enabled={Boolean((data?.settings.find(s=>s.key==='bix_pay')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>}
     {tab === 'Wallet' && <AdminTransferToggle enabled={Boolean((data?.settings.find(s=>s.key==='usdt_transfer')?.value as {enabled?: boolean} | undefined)?.enabled)} onMessage={setMessage}/>}
-    {tab === 'Kepemimpinan & Tim' && <AdminWorkspace label="Kepemimpinan & Tim" panels={[
-      { title: 'Tim & VIP', content: <><AdminCreateAccount onMessage={setMessage}/><AdminChangeEmail onMessage={setMessage}/><AdminTeams onMessage={setMessage}/></> },
+    {tab === 'Leadership & Team' && <AdminWorkspace label="Leadership & Team" panels={[
+      { title: 'Team & VIP', content: <><AdminCreateAccount onMessage={setMessage}/><AdminChangeEmail onMessage={setMessage}/><AdminTeams onMessage={setMessage}/></> },
       { title: 'Leader bersponsor', content: <AdminLeaders onMessage={setMessage}/> },
       { title: 'Clones', content: <AdminClones onMessage={setMessage}/> },
     ]}/>}
-    {tab === 'Users' && <><AdminFold title="Owner 2 / Reviewer" tone="violet"><AdminReviewers members={data?.members ?? []} onMessage={setMessage}/></AdminFold><AdminFold title="Omset member" tone="emerald"><AdminTurnover members={data?.members ?? []}/></AdminFold><AdminFold title="Audit deposit · real vs support · saklar omset" tone="cyan"><DepositAudit onMessage={setMessage}/></AdminFold><AdminFold title="Leader jaringan" tone="gold"><NetworkLeaders onMessage={setMessage}/></AdminFold></>}
+    {tab === 'Users' && <><AdminFold title="Owner 2 / Reviewer" tone="violet"><AdminReviewers members={data?.members ?? []} onMessage={setMessage}/></AdminFold><AdminFold title="Omset member" tone="emerald"><AdminTurnover members={data?.members ?? []}/></AdminFold><AdminFold title="Audit deposit · real vs support · saklar omset" tone="cyan"><DepositAudit onMessage={setMessage}/></AdminFold><AdminFold title="Network leader" tone="gold"><NetworkLeaders onMessage={setMessage}/></AdminFold></>}
     {tab === 'Desain & Tampilan' && <AdminWorkspace label="Desain & Tampilan" panels={[
       { title: 'Tema & Wallet', content: <AdminAppearance initialReadiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/> },
       { title: 'Visibilitas & Updates', content: <AdminReadiness initial={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} onMessage={setMessage} onSaved={refresh}/> },

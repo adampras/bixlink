@@ -28,9 +28,9 @@ function Editor({ pkg, index, onSave }: { pkg: Row; index: number; onSave: (m: s
   }}>
     <header className="duration-package-head"><h3 className="text-xl font-bold">{pkg.id}</h3><label className="flex items-center gap-2 text-xs font-bold"><Switch aria-label={`${pkg.id} availability`} checked={enabled} onCheckedChange={setEnabled} disabled={busy}/>{enabled ? 'OPEN' : 'CLOSED'}</label></header>
     <div className="duration-package-body space-y-4">
-      <label className="block text-xs font-bold">Nilai paket (USDT)<input aria-label={`${pkg.id} amount`} className="form-input mt-2" type="number" required min="0.01" max="10000000" step="0.01" value={price} onChange={e => setPrice(Number(e.target.value))}/></label>
+      <label className="block text-xs font-bold">Package value (USDT)<input aria-label={`${pkg.id} amount`} className="form-input mt-2" type="number" required min="0.01" max="10000000" step="0.01" value={price} onChange={e => setPrice(Number(e.target.value))}/></label>
       <div className="grid grid-cols-2 gap-3">{PACKAGE_DURATIONS.map(d => { const v = daily[String(d)] ?? DAILY_MIN; return <label key={d} className="text-xs font-bold">{d} hari · profit % / hari<input aria-label={`${pkg.id} ${d}D daily profit`} className="form-input mt-1" type="number" min={DAILY_MIN} max={DAILY_MAX} step={DAILY_STEP} required value={v} onChange={e => setDaily(c => ({ ...c, [String(d)]: Number(e.target.value) }))} onBlur={() => setDaily(c => ({ ...c, [String(d)]: cleanDaily(v) }))}/><span className="mt-1 block font-normal text-muted-foreground">≈ ${(price * cleanDaily(v) / 100).toFixed(2)} / hari</span></label>; })}</div>
-      <Button className="duration-stake w-full" type="submit" disabled={busy}><Save size={16}/>{busy ? 'Menyimpan…' : 'Save package'}</Button>
+      <Button className="duration-stake w-full" type="submit" disabled={busy}><Save size={16}/>{busy ? 'Saving…' : 'Save package'}</Button>
     </div>
   </form>;
 }

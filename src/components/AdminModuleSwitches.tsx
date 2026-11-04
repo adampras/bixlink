@@ -16,8 +16,8 @@ const MODULES: Record<ModuleKey, [string, string]> = {
   p2p: ['P2P Desk', 'Member-to-member BIX buy/sell page.'],
   arena: ['Fox Arena', 'Games, missions, and BIXP claims.'],
   nft: ['Marketplace & NFT', 'Merchandise store and NFT collections.'],
-  register: ['Pendaftaran umum', 'Self-registration page. OFF: only Leaders/Admins can register members.'],
-  trade: ['Trade Terminal', 'Halaman TRADE BIX/USDT (pasar internal).'],
+  register: ['Public registration', 'Self-registration page. OFF: only Leaders/Admins can register members.'],
+  trade: ['Trade Terminal', 'TRADE BIX/USDT page (internal market).'],
 };
 
 /** One screen of ON/OFF switches; each switch writes its existing owner-verified setting. */

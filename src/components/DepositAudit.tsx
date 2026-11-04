@@ -10,7 +10,7 @@ export function DepositAudit({ onMessage }: { onMessage: (m: string) => void }) 
   const load = useServerFn(getDepositAudit); const toggle = useServerFn(setSupportQualified);
   const q = useQuery({ queryKey: ['deposit-audit'], queryFn: () => load() });
   const [busy, setBusy] = useState('');
-  if (q.isLoading) return <p className="mt-6 text-sm text-muted-foreground">Memuat audit deposit…</p>;
+  if (q.isLoading) return <p className="mt-6 text-sm text-muted-foreground">Loading deposit audit…</p>;
   if (q.error) return <p className="mt-6 text-sm text-destructive">{q.error instanceof Error ? q.error.message : 'Akses ditutup.'}</p>;
   const real = q.data?.real ?? []; const support = q.data?.support ?? [];
   const realTotal = real.filter(r => r.status === 'approved').reduce((s, r) => s + r.base, 0);
@@ -19,7 +19,7 @@ export function DepositAudit({ onMessage }: { onMessage: (m: string) => void }) 
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><BadgeCheck size={18} className="text-chart-2"/> Real deposit · 3 angka unik</h2>
       <p className="mt-1 text-xs text-muted-foreground">Real USDT deposits to deposit wallet. 3 decimals are unique transfer matching codes. Total approved: <b className="text-chart-2">{money(realTotal)}</b></p>
       <div className="mt-4 max-h-[60vh] overflow-auto"><table className="w-full min-w-[640px] text-left text-xs">
-        <thead className="text-muted-foreground"><tr><th className="p-2">Member</th><th className="p-2">Tanggal</th><th className="p-2">Pokok</th><th className="p-2">Kode unik</th><th className="p-2">Transfer amount</th><th className="p-2">TxID</th><th className="p-2">Status</th></tr></thead>
+        <thead className="text-muted-foreground"><tr><th className="p-2">Member</th><th className="p-2">Tanggal</th><th className="p-2">Pokok</th><th className="p-2">Unique code</th><th className="p-2">Transfer amount</th><th className="p-2">TxID</th><th className="p-2">Status</th></tr></thead>
         <tbody>{real.map(r => <tr key={r.id} className="border-t border-border">
           <td className="p-2"><b className="font-mono text-primary">{r.code}</b><div className="text-muted-foreground">{r.name}</div></td>
           <td className="p-2">{dateTime(r.createdAt)}</td>
@@ -38,7 +38,7 @@ export function DepositAudit({ onMessage }: { onMessage: (m: string) => void }) 
         <div className="min-w-0"><b className="font-mono text-primary">{s.code}</b> <span className="text-muted-foreground">{s.name}</span>
           <div className="mt-1">{s.kind === 'clone' ? <span className="rounded-full border border-chart-3 px-2 py-0.5 text-[10px] font-bold uppercase text-chart-3">Clone</span> : s.supportKind === 'loan' ? <span className="rounded-full border border-secondary bg-secondary/15 px-2 py-0.5 text-[10px] font-black uppercase text-secondary">Pinjaman mandiri · target 5×</span> : <span className="rounded-full border border-accent bg-accent/15 px-2 py-0.5 text-[10px] font-black uppercase text-accent">Support USDT virtual · target 3×</span>} <span className="numeric">{s.value}</span> · {dateTime(s.createdAt)}</div></div>
         {s.kind === 'leader' ? <label className="flex items-center gap-2 font-bold">
-          <span className={s.requireTurnover ? 'text-chart-3' : 'text-chart-2'}>{s.requireTurnover ? `🔒 Wajib ${s.multiple ?? 3}× omset` : '🔓 Qualified dibuka'}</span>
+          <span className={s.requireTurnover ? 'text-chart-3' : 'text-chart-2'}>{s.requireTurnover ? `🔒 ${s.multiple ?? 3}× turnover required` : '🔓 Qualified dibuka'}</span>
           <button type="button" role="switch" aria-checked={!!s.requireTurnover} aria-label={`Saklar ${s.multiple ?? 3}× omset ${s.code}`} disabled={busy === s.userId}
             onClick={async () => { setBusy(s.userId); try { await toggle({ data: { userId: s.userId, requireTurnover: !s.requireTurnover } }); await q.refetch(); onMessage(`${s.code}: ${!s.requireTurnover ? `wajib ${s.multiple ?? 3}× omset` : 'qualified dibuka'}.`); } catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save.'); } finally { setBusy(''); } }}
             className={`relative h-6 w-11 rounded-full border transition-colors ${s.requireTurnover ? 'border-chart-3 bg-chart-3/30' : 'border-chart-2 bg-chart-2/30'}`}>

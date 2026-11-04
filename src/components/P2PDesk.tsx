@@ -119,7 +119,7 @@ function P2PStats({ pulse, asks, bids, refPrice }: { pulse: Pulse | null; asks: 
       {refPrice ? <em className="p2p-hud-ref">Patokan ${refPrice.toFixed(4)}{price < refPrice && <i>Hemat {((1 - price / refPrice) * 100).toFixed(1)}%</i>}</em> : null}</div>
     <P2PSpark now={now} />
     <p className="p2p-hud-engine"><i />MATCHING ENGINE AKTIF · rata-rata cocok ~{Math.round(DEMO_POOL.stepMs / 1500)} detik</p>
-    <div className="p2p-tape" aria-label="Transaksi terbaru"><div className="p2p-tape-track">{[0, 1].map(k => <span key={k} aria-hidden={k === 1} className="contents">{demoFeed(now, 8).map(f => <span key={`${k}${f.id}`} className="p2p-tape-item"><b className={f.side === 'BUY' ? 'text-chart-2' : 'text-destructive'}>{f.side === 'BUY' ? '▲' : '▼'}</b>{f.who} {number(f.bix)} BIX @ ${f.price.toFixed(4)}</span>)}</span>)}</div></div>
+    <div className="p2p-tape" aria-label="Recent transactions"><div className="p2p-tape-track">{[0, 1].map(k => <span key={k} aria-hidden={k === 1} className="contents">{demoFeed(now, 8).map(f => <span key={`${k}${f.id}`} className="p2p-tape-item"><b className={f.side === 'BUY' ? 'text-chart-2' : 'text-destructive'}>{f.side === 'BUY' ? '▲' : '▼'}</b>{f.who} {number(f.bix)} BIX @ ${f.price.toFixed(4)}</span>)}</span>)}</div></div>
     <div className="p2p-hud-grid">
       <div><span>VOLUME 24J</span><b className="numeric">{number(vol)}</b><small>BIX</small></div>
       <div><span>TRANSAKSI 24J</span><b className="numeric">{number(trades)}</b><small>{number(Number(pulse?.trades_24h ?? 0))} escrow</small></div>

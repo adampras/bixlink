@@ -38,7 +38,7 @@ const FEED: Card[] = [
   { img: m3, name: 'Seafood Table - Monjok', promo: 'Diskon total tagihan s.d. 25%', rating: 4.7, km: 2.4, kind: 'food', svc: 'food' },
   { img: m4, name: 'Tempong Arjuna - Pejanggik', promo: 'Diskon 30%', rating: 4.7, km: 1.0, kind: 'food', svc: 'food' },
   { img: m6, name: 'BIXMart Hub - Abian Tubuh', promo: 'Diskon 50%', rating: 4.9, km: 1.1, kind: 'mart', svc: 'mart' },
-  { img: promo, name: 'Kode promo: KIRIMBIX', kind: 'food', svc: 'send', brand: true },
+  { img: promo, name: 'Promo code: KIRIMBIX', kind: 'food', svc: 'send', brand: true },
   { img: m5, name: 'AYAM GEPREK JUARA - Cilinaya', promo: 'Diskon 50%', rating: 4.6, km: 0.6, kind: 'food', svc: 'food' },
   { img: m7, name: 'Fox Burger - Epicentrum', promo: '39% discount for new users', ad: true, rating: 4.6, km: 2.2, kind: 'food', svc: 'food' },
 ];
@@ -54,7 +54,7 @@ export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<B
           <span className="rounded-full bg-background/25 px-3 py-1 text-[11px] font-bold tracking-widest">BIXGO</span>
         </div>
         <h1 className="mt-4 text-2xl font-black leading-tight">Where are you going today?</h1>
-        <p className="text-xs opacity-90">Ride · Food · Send · Mart dalam satu aplikasi</p>
+        <p className="text-xs opacity-90">Ride · Food · Send · Mart in one app</p>
         <span className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-background/10"/>
       </div>
       <label className="mt-3 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5">
@@ -109,7 +109,7 @@ export function BixgoAccount({ name, balance, onBack, onSoon }: { name: string; 
   return <section className="pb-6">
     <div className="px-4 pt-3"><button aria-label="Back" onClick={onBack}><ArrowLeft className="h-6 w-6"/></button></div>
     <div className="mx-4 mt-3 rounded-3xl bg-card p-4 shadow-sm">
-      <div className="flex items-center gap-3"><span className="grid h-14 w-14 place-items-center rounded-full bg-primary text-primary-foreground"><User className="h-8 w-8"/></span><b className="flex-1 text-lg">{name}</b><Link to="/profile" className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary">Profil</Link></div>
+      <div className="flex items-center gap-3"><span className="grid h-14 w-14 place-items-center rounded-full bg-primary text-primary-foreground"><User className="h-8 w-8"/></span><b className="flex-1 text-lg">{name}</b><Link to="/profile" className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary">Profile</Link></div>
       <button onClick={() => onSoon('BIXGO VIP')} className="mt-3 w-full rounded-full border border-border px-3 py-1.5 text-left text-xs font-semibold">✦ Join BIXGO Unlimited</button>
     </div>
     <div className="no-scrollbar mt-3 flex gap-3 overflow-x-auto px-4">
@@ -133,7 +133,7 @@ export function BixgoAccount({ name, balance, onBack, onSoon }: { name: string; 
 }
 
 export function BixgoBottomNav({ view, setView, inbox }: { view: BixgoView; setView: (v: BixgoView) => void; inbox: number }) {
-  const tabs: [BixgoView, string, typeof Home][] = [['home', 'Beranda', Home], ['order', 'Scan', ScanLine], ['activity', 'Aktivitas', ClipboardList], ['inbox', 'Inbox', MessageSquare], ['account', 'Account', User]];
+  const tabs: [BixgoView, string, typeof Home][] = [['home', 'Home', Home], ['order', 'Scan', ScanLine], ['activity', 'Aktivitas', ClipboardList], ['inbox', 'Inbox', MessageSquare], ['account', 'Account', User]];
   return <nav className="sticky bottom-0 z-20 grid grid-cols-5 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
     {tabs.map(([k, l, I]) => <button key={k} onClick={() => setView(k)} className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] ${view === k ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
       <I className={`h-5 w-5 ${view === k ? 'fill-primary/20' : ''}`}/>{l}

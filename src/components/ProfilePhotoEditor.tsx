@@ -5,7 +5,7 @@ import { BixAvatar } from '@/components/BixAvatar';
 import { removeAvatar, saveStatus, uploadAvatar } from '@/lib/bix-avatar';
 
 type Me = { user_id: string; name: string; avatar_path: string | null; status_text: string | null };
-const SUGGEST = ['🟢 Siap edukasi tim', '📞 Available for calls', '⏳ In a meeting', '🚀 Fokus membangun jaringan', '🌙 Istirahat'];
+const SUGGEST = ['🟢 Ready to train the team', '📞 Available for calls', '⏳ In a meeting', '🚀 Focused on building a network', '🌙 Istirahat'];
 
 /** Profile photo + short status, shared by Profile and BIX CALL (one source of truth on the member profile). */
 export function ProfilePhotoHeader({ fallback, children }: { fallback: string; children: React.ReactNode }) {
@@ -38,7 +38,7 @@ export function ProfilePhotoHeader({ fallback, children }: { fallback: string; c
     <div className="min-w-0 flex-1">
       {children}
       {editing ? <div className="profile-status-edit">
-        <input value={status} onChange={e => setStatus(e.target.value)} maxLength={80} placeholder="Tulis status singkat…" aria-label="Status profil" autoFocus onKeyDown={e => e.key === 'Enter' && void save()}/>
+        <input value={status} onChange={e => setStatus(e.target.value)} maxLength={80} placeholder="Tulis status singkat…" aria-label="Profile status" autoFocus onKeyDown={e => e.key === 'Enter' && void save()}/>
         <div className="profile-status-chips">{SUGGEST.map(s => <button key={s} type="button" onClick={() => setStatus(s)}>{s}</button>)}</div>
         <div className="profile-status-act"><button type="button" onClick={() => { setEditing(false); setStatus(me?.status_text ?? ''); }}>Batal</button>{me?.status_text && <button type="button" onClick={() => void save('')}>Delete</button>}<button type="button" className="is-gold" onClick={() => void save()}>Save</button></div>
       </div> : <button type="button" className="profile-status" onClick={() => setEditing(true)}>{me?.status_text ? <span>{me.status_text}</span> : <em>+ Add status (shown in BIX CALL)</em>}</button>}

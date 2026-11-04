@@ -35,7 +35,7 @@ function Page() {
   const owner1 = useQuery({ queryKey: ['is-owner1', user?.id], enabled: !!user, queryFn: async () => { const { data } = await supabase.rpc('bix_is_owner1' as never); return data === true; } });
   return <BixShell><MemberGate ready={ready} signedIn={!!user} title="Leader & Loan control">
     <div className="mx-auto max-w-5xl space-y-4 px-4 py-6">
-      <Link to="/profile" className="inline-flex items-center gap-1 text-xs text-muted-foreground"><ArrowLeft size={14}/> Profil</Link>
+      <Link to="/profile" className="inline-flex items-center gap-1 text-xs text-muted-foreground"><ArrowLeft size={14}/> Profile</Link>
       <h1 className="font-display text-xl font-black text-primary">Kontrol Leader & Loan</h1>
       {owner1.isLoading ? <p className="text-sm text-muted-foreground">Memeriksa akses…</p>
         : !owner1.data ? <p className="rounded-xl border border-border p-4 text-sm">This page is exclusively for Owner 1.</p>
@@ -74,7 +74,7 @@ function Roster({ kind }: { kind: 'leader' | 'loan' }) {
     try { await review({ data: { userId: id, status, virtualUsd: Number(edit[id] ?? cur), requireTurnover: req } }); setMsg('Saved.'); qc.invalidateQueries({ queryKey: ['owner-leaders'] }); }
     catch (e) { setMsg(e instanceof Error ? e.message : 'Failed to save'); }
   };
-  if (q.isLoading) return <p className="text-sm text-muted-foreground">Memuat…</p>;
+  if (q.isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (q.error) return <p className="text-sm text-destructive">{(q.error as Error).message}</p>;
   return <div className="space-y-2">
     <p className="text-xs text-muted-foreground">{kind === 'leader' ? 'Target 3× of personal real staking turnover.' : 'Target 5× of L1 team real staking turnover.'} Kunci 360 hari. Hangus otomatis bila dalam 30 hari omset riil kurang dari 10% nilai paket. Akun virtual, clone dan loan lain tidak dihitung.</p>
@@ -93,7 +93,7 @@ function Roster({ kind }: { kind: 'leader' | 'loan' }) {
         <div className="mt-1 flex justify-between text-[11px] text-muted-foreground"><span>{usd(done)} / {usd(target)} ({mult}×)</span><span>{pct.toFixed(0)}%</span></div>
         {l.status === 'approved' && l.require_turnover && <Expiry30 userId={l.user_id}/>}
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Input className="h-8 w-28 text-xs" inputMode="decimal" value={edit[l.user_id] ?? String(l.virtual_usd)} onChange={e => setEdit(v => ({ ...v, [l.user_id]: e.target.value }))} aria-label="Nilai paket USD"/>
+          <Input className="h-8 w-28 text-xs" inputMode="decimal" value={edit[l.user_id] ?? String(l.virtual_usd)} onChange={e => setEdit(v => ({ ...v, [l.user_id]: e.target.value }))} aria-label="Package value USD"/>
           <Button size="sm" onClick={() => act(l.user_id, 'approved', l.virtual_usd, l.require_turnover)}>Save / Approve</Button>
           <Button size="sm" variant="outline" onClick={() => act(l.user_id, 'rejected', l.virtual_usd, l.require_turnover)}>Reject</Button>
         </div>
@@ -127,7 +127,7 @@ function Candidates() {
   return <div className="space-y-2">
     <Input placeholder="Search username…" value={f} onChange={e => setF(e.target.value)}/>
     <p className="text-xs text-muted-foreground">{rows.length} member belum mengambil paket leader maupun loan. Tambahkan lewat Admin panel → Leader.</p>
-    {q.isLoading && <p className="text-sm text-muted-foreground">Memuat…</p>}
+    {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
     <div className="divide-y divide-border rounded-2xl border border-border">{rows.slice(0, 100).map(m => <div key={m.user_id} className="flex justify-between px-3 py-2 text-sm"><span className="truncate">{m.username || m.user_id.slice(0, 8)}</span><span className="truncate text-xs text-muted-foreground">{m.full_name}</span></div>)}</div>
   </div>;
 }
@@ -137,7 +137,7 @@ function Packages() {
   const q = useQuery({ queryKey: ['loan-packages'], queryFn: () => load() });
   const [cfg, setCfg] = useState<LoanConfig | null>(null); const [msg, setMsg] = useState('');
   useEffect(() => { if (q.data) setCfg(q.data); }, [q.data]);
-  if (!cfg) return <p className="text-sm text-muted-foreground">{q.error ? (q.error as Error).message : 'Memuat…'}</p>;
+  if (!cfg) return <p className="text-sm text-muted-foreground">{q.error ? (q.error as Error).message : 'Loading…'}</p>;
   const set = (i: number, p: Partial<LoanConfig['packages'][number]>) => setCfg({ packages: cfg.packages.map((r, j) => j === i ? { ...r, ...p } : r) });
   const remove = (i: number) => { if (cfg.packages.length > 1 && confirm(`Delete package ${cfg.packages[i]?.id}?`)) setCfg({ packages: cfg.packages.filter((_, j) => j !== i) }); };
   const add = () => setCfg({ packages: [...cfg.packages, { id: `PAKET${cfg.packages.length + 1}`, usd: 100, enabled: true, quota: 10 }] });
@@ -145,7 +145,7 @@ function Packages() {
     <p className="text-xs text-muted-foreground">All packages: 360 days · 5× target · member popups immediately reflect changes after saving. Packages already claimed by members remain active.</p>
     {cfg.packages.map((p, i) => <div key={i} className="flex flex-wrap items-end gap-2 rounded-2xl border border-border bg-card/70 p-3">
       <label className="text-[10px] text-muted-foreground">Nama<Input className="h-8 w-32 uppercase" value={p.id} onChange={e => set(i, { id: e.target.value.toUpperCase() })}/></label>
-      <label className="text-[10px] text-muted-foreground">Nilai USD<Input className="h-8 w-28" inputMode="decimal" value={p.usd} onChange={e => set(i, { usd: Number(e.target.value) || 0 })}/></label>
+      <label className="text-[10px] text-muted-foreground">USD value<Input className="h-8 w-28" inputMode="decimal" value={p.usd} onChange={e => set(i, { usd: Number(e.target.value) || 0 })}/></label>
       <label className="text-[10px] text-muted-foreground">Kuota sponsor<Input className="h-8 w-20" inputMode="numeric" value={p.quota} onChange={e => set(i, { quota: Number(e.target.value) || 1 })}/></label>
       <label className="flex h-8 items-center gap-2 text-xs"><Switch checked={p.enabled} onCheckedChange={v => set(i, { enabled: v })}/>{p.enabled ? 'Open' : 'Close'}</label>
       <Button size="sm" variant="outline" className="h-8 text-destructive" disabled={cfg.packages.length <= 1} onClick={() => remove(i)}>Delete</Button>
@@ -187,7 +187,7 @@ function VusdtWithdraw() {
     <p className="text-xs text-muted-foreground">Withdraw virtual USDT balance from members/leaders who received Owner 1 transfers. Any amount up to the remaining virtual balance not used for staking.</p>
     <Input placeholder="Search username / code…" value={f} onChange={e => setF(e.target.value)}/>
     {msg && <p className="text-xs text-primary">{msg}</p>}
-    {q.isLoading && <p className="text-sm text-muted-foreground">Memuat…</p>}
+    {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
     {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
     {rows.length === 0 && !q.isLoading && <p className="rounded-xl border border-border p-4 text-sm text-muted-foreground">No recipients yet.</p>}
     {rows.map(r => { const max = Math.max(0, Math.min(Number(r.transfer_balance) + Number(r.leader_virtual), Number(r.wallet_balance)));
