@@ -1,7 +1,8 @@
 type Exec = { net_usd: number; notional_usd: number; executed_at: string; buy_venue: string; sell_venue: string; source?: string };
 
 /** Track record built only from recorded execution rows — no generated figures. */
-export function BixtradeTreasury({ execs, onOpenLogs }: { execs: Exec[]; onOpenLogs?: () => void }) {
+export function BixtradeTreasury({ execs: rawExecs, onOpenLogs }: { execs?: Exec[] | null; onOpenLogs?: () => void }) {
+  const execs = Array.isArray(rawExecs) ? rawExecs : [];
   const total = execs.reduce((a, x) => a + Number(x.net_usd), 0);
   const volume = execs.reduce((a, x) => a + Number(x.notional_usd), 0);
   const wins = execs.filter(x => Number(x.net_usd) > 0).length;
