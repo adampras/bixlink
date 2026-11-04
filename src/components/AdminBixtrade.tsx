@@ -32,7 +32,7 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
   const num = (k: keyof BixtradeSettings) => (e: React.ChangeEvent<HTMLInputElement>) => setS(v => ({ ...v, [k]: Number(e.target.value) }));
   const submit = async (next = s) => {
     setBusy(true);
-    try { await save({ data: { key: 'bixtrade', value: next } }); setS(next); onMessage(`BIXTrade saved · ${next.enabled ? 'AKTIF' : 'Under Reconstruction'}.`); onSaved?.(); }
+    try { await save({ data: { key: 'bixtrade', value: next } }); setS(next); onMessage(`BIXTrade saved · ${next.enabled ? 'ACTIVE' : 'Under Reconstruction'}.`); onSaved?.(); }
     catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save BIXTrade.'); } finally { setBusy(false); }
   };
   const decide = async (id: string, status: 'approved' | 'rejected') => {

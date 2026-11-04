@@ -74,14 +74,14 @@ export function AdminPresale({ onMessage }: { onMessage: (m: string) => void }) 
     {notice && <p role="status" className="text-sm text-primary">{notice}</p>}
     <Button className="w-fit" disabled={saving} onClick={async () => {
       const parsed = presaleSettingsSchema.safeParse(cfg);
-      if (!parsed.success) { const issue = parsed.error.issues[0]; setNotice(issue?.path[0] === 'stages' ? 'Fill in the prices for all three stages with numbers greater than 0 before saving.' : `Check ${issue?.path.join(' / ') ?? 'pengaturan'} before saving.`); return; }
+      if (!parsed.success) { const issue = parsed.error.issues[0]; setNotice(issue?.path[0] === 'stages' ? 'Fill in the prices for all three stages with numbers greater than 0 before saving.' : `Check ${issue?.path.join(' / ') ?? 'settings'} before saving.`); return; }
       setSaving(true); setNotice('');
       try {
         await save({ data: parsed.data });
         const fresh = await load(); const next = withPresaleStages(fresh.config);
         setCfg(next); setUsed(Number(fresh.poolUsed)); setPrice(next.stages?.[next.activeStage ?? 0]?.price ?? presalePrice(next.packages));
         await queryClient.invalidateQueries({ queryKey: ['presale'] });
-        setNotice(`Saved — Stage ${(next.activeStage ?? 0) + 1}, presale ${next.enabled ? 'BUKA' : 'TUTUP'}.`); onMessage('Presale settings saved.');
+        setNotice(`Saved — Stage ${(next.activeStage ?? 0) + 1}, presale ${next.enabled ? 'OPEN' : 'CLOSED'}.`); onMessage('Presale settings saved.');
       } catch (e) { setNotice(e instanceof Error ? e.message : 'Failed to save settings.'); }
       finally { setSaving(false); }
     }}>{saving ? 'Saving…' : 'Save presale'}</Button>

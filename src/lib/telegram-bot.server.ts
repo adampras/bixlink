@@ -97,7 +97,7 @@ async function toggle(admin: any, which: 'loan' | 'register', arg: string) {
   const { data } = await admin.from('app_settings').select('value').eq('key', 'readiness').maybeSingle();
   const v: any = { ...(data?.value ?? {}) };
   const cur = which === 'loan' ? v.loanEnabled !== false : v.modules?.register !== false;
-  if (!on && !off) return `Status ${which === 'loan' ? 'akun pinjaman' : 'pendaftaran'}: <b>${cur ? 'ON' : 'OFF'}</b>\nUse: on / off`;
+  if (!on && !off) return `Status ${which === 'loan' ? 'loan account' : 'registration'}: <b>${cur ? 'ON' : 'OFF'}</b>\nUse: on / off`;
   if (which === 'loan') v.loanEnabled = on; else v.modules = { ...(v.modules ?? {}), register: on };
   const { error } = await admin.from('app_settings').upsert({ key: 'readiness', value: v }, { onConflict: 'key' });
   if (error) return `Failed: ${esc(error.message)}`;
