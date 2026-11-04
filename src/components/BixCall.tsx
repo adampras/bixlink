@@ -201,7 +201,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const [audioBlocked, setAudioBlocked] = useState(false);
   /** Remote volume: earpiece mode is softer; loudspeaker is full; lowered while a howl is detected. */
   const applyVolume = () => {
-    const base = loudRef.current ? 1 : shieldRef.current ? 0.8 : 0.9;
+    const base = loudRef.current ? 0.85 : 1;
     audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? base * 0.75 : base; });
   };
   const attachAudio = (t: RemoteTrack) => {
@@ -272,18 +272,18 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         void room.startAudio().catch(() => {});
         room.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { if (pub.track && pub.kind === Track.Kind.Audio) attachAudio(pub.track as RemoteTrack); }));
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
-        try {
-          const vs = await openVoiceShield(h => { howlRef.current = h; setHowl(h); applyVolume(); }); if (cancelled) { vs.stop(); return; }
-          voiceRef.current = vs;
-          await room.localParticipant.publishTrack(vs.track, { source: Track.Source.Microphone, dtx: false, red: true, audioPreset: { maxBitrate: 64000 } });
-        } catch {
-          await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } as never, { dtx: true, red: true });
-        }
+        // Native mic track: keeps the phone's hardware echo canceller linked to the call output (a WebAudio-processed track breaks it → echo/howl).
+        if (cancelled) return;
+        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, audioPreset: { maxBitrate: 48000 } });
         if (call.kind === 'video') await startCam(room, true);
         if (!cancelled) setLink('on');
       } catch { if (!cancelled) setLink('fail'); }
     })();
-    return () => { cancelled = true; void room?.disconnect(); roomRef.current = null; voiceRef.current?.stop(); voiceRef.current = null; };
+    return () => {
+      cancelled = true;
+      room?.localParticipant.trackPublications.forEach(p => p.track?.mediaStreamTrack?.stop());
+      void room?.disconnect(true); roomRef.current = null; voiceRef.current?.stop(); voiceRef.current = null;
+    };
   }, [live, call.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { if (!live) return; const t = setInterval(() => setSecs(s => s + 1), 1000); return () => clearInterval(t); }, [live]);
@@ -301,6 +301,13 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean; type?: string; effectiveType?: string } }).connection;
     const saver = document.documentElement.dataset['lowPower'] === '1' || !!conn?.saveData || conn?.type === 'cellular' || /2g|3g/.test(conn?.effectiveType ?? '');
     const res = saver ? { width: 854, height: 480, frameRate: 24 } : { width: 1280, height: 720, frameRate: 30 };
+    if (!on) {
+      // Fully release the camera so the phone's camera indicator turns off at once.
+      const pub = lp.getTrackPublication(Track.Source.Camera);
+      if (pub?.track) { const t = pub.track; await lp.unpublishTrack(t, true).catch(() => {}); t.mediaStreamTrack?.stop(); }
+      if (localV.current) localV.current.srcObject = null;
+      setCam(false); return;
+    }
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
       { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 900_000 : 2_600_000, maxFramerate: res.frameRate, priority: 'high' } as never,
         videoSimulcastLayers: [{ width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 800_000, maxFramerate: 30 } }] as never });
@@ -376,7 +383,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
 
   const showVideo = live && remoteVideo;
   const sw = swapped && showVideo && cam;
-  return <div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}`} role="dialog" aria-label="BIX CALL">
+  return <div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}`} role="dialog" aria-label="BIX CALL" onPointerDownCapture={() => { if (live) unlockAudio(); }}>
     <video ref={backV} className={`bixcall-back${showVideo && !fill ? " on" : ""}`} autoPlay playsInline muted aria-hidden="true"/>
     <video ref={remoteV} className={sw ? 'bixcall-pip is-peer' : `bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} style={sw ? { transform: `translate(${pip.x}px, ${pip.y}px)` } : undefined} onPointerDown={sw ? dragPip : undefined} autoPlay playsInline onClick={() => { if (showVideo && !sw) setHideUi(v => !v); }} onDoubleClick={() => { if (!sw) setFill(v => !v); }}/>
     {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Show in full' : 'Penuhi layar'}>{fill ? '⤡ Sudut lega' : '⤢ Layar penuh'}</button>}
