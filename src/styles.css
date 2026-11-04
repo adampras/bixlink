@@ -6289,3 +6289,9 @@ html.comm-room-open,html.comm-room-open body{overflow:hidden;overscroll-behavior
 .lhm-cta a:first-child{background:linear-gradient(135deg,#FFD700,#e8b923);color:#08060f}
 .lhm-cta a:last-child{border:1px solid rgb(255 215 0/.45);color:#FFD700}
 .lhm-panel>p{font-size:11px;color:rgb(255 255 255/.55);text-align:center}
+
+/* Battery + clarity polish: pause heavy BIXTOK/CALL effects on low power, crisper muted text */
+html[data-low-power='1'] .bixcall-wave, html[data-low-power='1'] .bixtok-gift-fx, html[data-low-power='1'] [class*='gift-anim'] { animation: none !important; display: none; }
+html[data-app-hidden='1'] .bixcall-wave * { animation-play-state: paused !important; }
+.text-muted-foreground { color: color-mix(in oklab, var(--foreground) 78%, transparent); }
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }

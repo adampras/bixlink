@@ -297,8 +297,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   /** Turn the camera on/off inside the same room — a voice call becomes a video call without hanging up. */
   const startCam = async (room: Room, on: boolean, facing: 'user' | 'environment' = 'user') => {
     const lp = room.localParticipant;
-    await lp.setCameraEnabled(on, { facingMode: facing, resolution: { width: 1280, height: 720, frameRate: 30 } },
-      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: 2_600_000, maxFramerate: 30, priority: 'high' } as never,
+    // Data/battery saver: low-power devices, Save-Data or cellular links get a 480p/24fps profile.
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean; type?: string; effectiveType?: string } }).connection;
+    const saver = document.documentElement.dataset['lowPower'] === '1' || !!conn?.saveData || conn?.type === 'cellular' || /2g|3g/.test(conn?.effectiveType ?? '');
+    const res = saver ? { width: 854, height: 480, frameRate: 24 } : { width: 1280, height: 720, frameRate: 30 };
+    await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
+      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 900_000 : 2_600_000, maxFramerate: res.frameRate, priority: 'high' } as never,
         videoSimulcastLayers: [{ width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 800_000, maxFramerate: 30 } }] as never });
     const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
     setCam(on);
