@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { money, number } from '@/lib/bixlink';
 import { P2P_CEILING, P2P_FLOOR, p2pPriceAllowed } from '@/lib/shipping';
 import { bestOffer, expressMax } from '@/lib/p2p-express';
-import { DEMO_POOL, demoFeed, demoPool } from '@/lib/p2p-demo-pool';
+import { DEMO_POOL, demoFeed, demoPool, demoPrice } from '@/lib/p2p-demo-pool';
 
 type Offer = { id: string; user_id: string; side: string; price_usd: number; remaining_bix: number; amount_bix: number; status: string; created_at: string };
 type Fill = { id: string; at: string; bix: number; price: number; side: 'BUY' | 'SELL'; who: string };
@@ -18,7 +18,7 @@ type Pulse = { last_price: number | null; prev_price: number | null; volume_24h:
 const ago = (iso: string) => { const s = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 1000)); return s < 60 ? `${s}s ago` : s < 3600 ? `${Math.round(s / 60)}m ago` : s < 86400 ? `${Math.round(s / 3600)}h ago` : `${Math.round(s / 86400)}d ago`; };
 const buzz = (ms = 14) => { try { navigator.vibrate?.(ms); } catch { /* unsupported */ } };
 
-export function P2PDesk({ userId }: { userId?: string | undefined }) {
+export function P2PDesk({ userId, refPrice }: { userId?: string | undefined; refPrice?: number }) {
   const qc = useQueryClient();
   const book = useQuery({ queryKey: ['p2p-book'], enabled: !!userId, refetchInterval: 10000, queryFn: async () => {
     const { data, error } = await supabase.from('bix_p2p_offers').select('*').eq('status', 'open').order('price_usd').limit(200);
@@ -58,7 +58,7 @@ export function P2PDesk({ userId }: { userId?: string | undefined }) {
   const doTake = async () => { if (!take) return; const n = Number(takeAmt); if (!(n > 0) || n > Number(take.remaining_bix)) { toast.error('Enter an amount up to the offer size'); return; } if (await run(() => supabase.rpc('bix_p2p_take', { p_offer: take.id, p_amount: n }), 'Trade completed · settled in the internal ledger')) setTake(null); };
 
   return <div className="p2p-desk grid gap-4">
-    <P2PStats pulse={pulse.data ?? null} asks={asks} bids={bids} />
+    <P2PStats pulse={pulse.data ?? null} asks={asks} bids={bids} refPrice={refPrice} />
     <div className="p2p-boxes">
       <button className="p2p-box is-buy" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowUpRight size={22} /><b>BELI BIX</b><small>Bayar USDT · escrow</small></button>
       <button className="p2p-box is-sell" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowDownRight size={22} /><b>JUAL BIX</b><small>Terima USDT · escrow</small></button>
@@ -86,7 +86,18 @@ export function P2PDesk({ userId }: { userId?: string | undefined }) {
   </div>;
 }
 
-function P2PStats({ pulse, asks, bids }: { pulse: Pulse | null; asks: Offer[]; bids: Offer[] }) {
+function P2PSpark({ now }: { now: number }) {
+  const cur = Math.floor(now / DEMO_POOL.stepMs);
+  const pts = Array.from({ length: 48 }, (_, i) => demoPrice(cur - (47 - i) * 30));
+  const lo = DEMO_POOL.min, hi = DEMO_POOL.max;
+  const d = pts.map((p, i) => `${i ? 'L' : 'M'}${(i / 47 * 300).toFixed(1)},${(44 - (p - lo) / (hi - lo) * 40).toFixed(1)}`).join(' ');
+  return <svg className="p2p-spark" viewBox="0 0 300 48" preserveAspectRatio="none" aria-hidden="true">
+    <defs><linearGradient id="p2pSparkFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--chart-2)" stopOpacity=".35" /><stop offset="1" stopColor="var(--chart-2)" stopOpacity="0" /></linearGradient></defs>
+    <path d={`${d} L300,48 L0,48 Z`} fill="url(#p2pSparkFill)" /><path d={d} fill="none" stroke="var(--chart-2)" strokeWidth="1.6" vectorEffect="non-scaling-stroke" />
+  </svg>;
+}
+
+function P2PStats({ pulse, asks, bids, refPrice }: { pulse: Pulse | null; asks: Offer[]; bids: Offer[]; refPrice?: number | undefined }) {
   const now = useClock(DEMO_POOL.stepMs);
   const pool = demoPool(now);
   const last = pulse?.last_price != null ? Number(pulse.last_price) : null;
@@ -97,7 +108,11 @@ function P2PStats({ pulse, asks, bids }: { pulse: Pulse | null; asks: Offer[]; b
   const trades = Number(pulse?.trades_24h ?? 0) + pool.trades24h;
   return <section className="p2p-hud" aria-label="Market overview">
     <header><span className="p2p-hud-brand"><Zap size={13} />BIXLINK P2P DESK</span><span className="p2p-live"><i />PROTOCOL ONLINE</span></header>
-    <div className="p2p-hud-price"><span>HARGA P2P {last != null ? '· ESCROW' : '· AMM POOL'}</span><b className={`numeric ${up ? 'text-chart-2' : 'text-destructive'}`}>${price.toFixed(4)}{up ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}</b><small>Koridor ${P2P_FLOOR}–${P2P_CEILING} · {asks.length + bids.length} order escrow</small></div>
+    <div className="p2p-hud-price"><span>HARGA P2P {last != null ? '· ESCROW' : '· AMM POOL'}</span><b className={`numeric ${up ? 'text-chart-2' : 'text-destructive'}`}>${price.toFixed(4)}{up ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}</b><small>Koridor ${P2P_FLOOR}–${P2P_CEILING} · {asks.length + bids.length} order escrow</small>
+      {refPrice ? <em className="p2p-hud-ref">Patokan ${refPrice.toFixed(4)}{price < refPrice && <i>Hemat {((1 - price / refPrice) * 100).toFixed(1)}%</i>}</em> : null}</div>
+    <P2PSpark now={now} />
+    <p className="p2p-hud-engine"><i />MATCHING ENGINE AKTIF · rata-rata cocok ~{Math.round(DEMO_POOL.stepMs / 1500)} detik</p>
+    <div className="p2p-tape" aria-label="Transaksi terbaru"><div className="p2p-tape-track">{[0, 1].map(k => <span key={k} aria-hidden={k === 1} className="contents">{demoFeed(now, 8).map(f => <span key={`${k}${f.id}`} className="p2p-tape-item"><b className={f.side === 'BUY' ? 'text-chart-2' : 'text-destructive'}>{f.side === 'BUY' ? '▲' : '▼'}</b>{f.who} {number(f.bix)} BIX @ ${f.price.toFixed(4)}</span>)}</span>)}</div></div>
     <div className="p2p-hud-grid">
       <div><span>VOLUME 24J</span><b className="numeric">{number(vol)}</b><small>BIX</small></div>
       <div><span>TRANSAKSI 24J</span><b className="numeric">{number(trades)}</b><small>{number(Number(pulse?.trades_24h ?? 0))} escrow</small></div>
