@@ -133,7 +133,7 @@ function BixtradePage() {
     const { error } = await supabase.rpc('bixtrade_admin_virtual_deposit', { p_amount: v, p_strategy: strategy });
     setBusy(false);
     if (error) { setMsg(error.message); return; }
-    setReqAmt(''); setMsg('Virtual USDT is now active as bot capital.'); void loadReqs();
+    setReqAmt(''); setMsg('Neural AI Pool allocation is now active.'); void loadReqs();
   };
 
   if (!cfg) return <BixShell><main className="mx-auto max-w-5xl px-5 py-16 text-center text-sm text-muted-foreground">Loading BIXTrade…</main></BixShell>;
@@ -164,30 +164,30 @@ function BixtradePage() {
       {([['Bot', capital.toFixed(0)], ['P/L', realized.toFixed(2)], ['Win', `${cfg.winRate}%`], ['Ping', `${rows.length ? Math.round(rows.reduce((s, r) => s + r.ms, 0) / rows.length) : '—'}ms`]] as const).map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
     </section>
     <div className="arb-switch mt-2" role="tablist" aria-label="Funding mode">
-      <button type="button" className={funding === 'real' ? 'is-on' : ''} onClick={() => setFunding('real')}><i/> Real USDT<small>Settled</small></button>
-      <button type="button" className={funding === 'virtual' ? 'is-on' : ''} onClick={() => setFunding('virtual')}><i/> Virtual USDT<small>Sandbox demo</small></button>
+      <button type="button" className={funding === 'real' ? 'is-on' : ''} onClick={() => setFunding('real')}><i/> Live Asset Engine<small>Main wallet USDT</small></button>
+      <button type="button" className={funding === 'virtual' ? 'is-on' : ''} onClick={() => setFunding('virtual')}><i/> Neural AI Pool<small>Protocol allocation</small></button>
     </div>
     <nav className="arb-tabs mt-3" aria-label="BIXTrade sections">
       {([['cockpit', Cpu, 'Cockpit'], ['radar', Radar, 'Radar'], ['ai', BarChart3, 'AI'], ['logs', Activity, 'Logs']] as const).map(([k, Icon, l]) => <button key={k} type="button" onClick={() => setTab(k)} className={tab === k ? 'is-on' : ''}><Icon size={15}/>{l}</button>)}
     </nav>
-    {stream.length > 0 && tab === 'radar' && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ {s}</span>)}</div></div>}
+    {stream.length > 0 && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ AI SCAN · {s}</span>)}</div></div>}
 
     {tab === 'cockpit' && <>
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-2"/> Live execution pulse</h2>
       <div className="mt-3 grid gap-2">{fundExecs.slice(0, 3).map((x, i) => <button type="button" key={x.id} style={{ animationDelay: `${i * 60}ms` }} onClick={() => setReceipt(x)} className="arb-pulse-row text-left"><i/><span><b>{x.pair}</b> {x.buy_venue} → {x.sell_venue}<br/><span className="text-muted-foreground">{Number(x.notional_usd).toFixed(2)} USDT · {new Date(x.executed_at).toLocaleTimeString()}</span></span><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)}</b></button>)}
-        {!fundExecs.length && <p className="text-xs text-muted-foreground">{capital > 0 ? 'Bot is scanning — the first executions appear within a few minutes.' : funding === 'virtual' ? 'Add Virtual USDT bot capital to start executions. Trade size follows your capital (15–50% per ticket).' : 'Executions start after your deposit is approved. Trade size follows your capital (15–50% per ticket).'}</p>}</div>
+        {!fundExecs.length && <p className="text-xs text-muted-foreground">{capital > 0 ? 'Bot is scanning — the first executions appear within a few minutes.' : funding === 'virtual' ? 'Add Neural AI Pool allocation to start executions. Trade size follows your capital (15–50% per ticket).' : 'Executions start after your deposit is approved. Trade size follows your capital (15–50% per ticket).'}</p>}</div>
     </section>
 
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><ArrowDownToLine size={18} className="text-chart-3"/> Bot wallet</h2>
       <div className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
-        <div className="arb-stat"><p>{funding === 'real' ? 'Main wallet' : 'Recorded P/L'}</p><b>{funding === 'real' ? (mainUsdt === null ? '—' : mainUsdt.toFixed(2)) : realized.toFixed(2)}</b><small>{funding === 'real' ? 'USDT available' : 'virtual USDT'}</small></div>
+        <div className="arb-stat"><p>{funding === 'real' ? 'Main wallet' : 'Recorded P/L'}</p><b>{funding === 'real' ? (mainUsdt === null ? '—' : mainUsdt.toFixed(2)) : realized.toFixed(2)}</b><small>{funding === 'real' ? 'USDT available' : 'pool allocation'}</small></div>
         <div className="arb-stat"><p>Bot capital</p><b>{capital.toFixed(2)}</b><small>USDT · settled</small></div>
         <div className="arb-stat"><p>Pending</p><b>{pending}</b><small>requests</small></div>
         <div className="arb-stat"><p>Lock period</p><b>{cfg.lockDays}</b><small>days</small></div>
       </div>
-      {funding === 'virtual' && <p className="mt-2 text-[11px] text-chart-3">Demo mode: virtual USDT runs the bot exactly like real USDT, but it never leaves or returns to your main wallet.</p>}
+      {funding === 'virtual' && <p className="mt-2 text-[11px] text-chart-3">Neural AI Pool: protocol allocation runs the bot with the same engine 24/7, but it is never withdrawn to or from your main wallet.</p>}
       <div className="mt-3 grid grid-cols-2 gap-2">
         <Button variant={mode === 'deposit' ? 'default' : 'outline'} onClick={() => setMode('deposit')} disabled={!cfg.depositOpen}><ArrowDownToLine size={15}/> Deposit</Button>
         <Button variant={mode === 'withdraw' ? 'default' : 'outline'} onClick={() => setMode('withdraw')} disabled={!cfg.withdrawOpen}><ArrowUpFromLine size={15}/> Withdraw</Button>
@@ -201,7 +201,7 @@ function BixtradePage() {
           <button type="button" onClick={() => { const max = mode === 'withdraw' ? capital : funding === 'real' ? Math.min(mainUsdt ?? 0, cfg.maxAlloc) : cfg.maxAlloc; setReqAmt(String(Math.floor(max * 100) / 100)); }}>MAX</button></div>
         {mode === 'withdraw' && n > 0 && <p className="text-xs">You receive ≈ <b className="text-chart-2">{withdrawNet(cfg, n).toFixed(2)} USDT</b> after fee{cfg.earlyExitEnabled && cfg.lockDays > 0 ? <> · before lock ends ≈ <b>{withdrawNet(cfg, n, true).toFixed(2)}</b></> : null}</p>}
         <Button className="arb-go" disabled={busy || (mode === 'deposit' ? !cfg.depositOpen : !cfg.withdrawOpen)} onClick={() => { navigator.vibrate?.([18, 40, 18]); submit(); }}>{busy ? 'Sending…' : mode === 'deposit' ? 'Request deposit' : 'Request withdrawal'}</Button>
-        {isAdmin && funding === 'virtual' && mode === 'deposit' && <Button variant="outline" disabled={busy} onClick={instantVirtual}><Zap size={15}/> Admin instant virtual deposit</Button>}
+        {isAdmin && funding === 'virtual' && mode === 'deposit' && <Button variant="outline" disabled={busy} onClick={instantVirtual}><Zap size={15}/> Admin instant pool allocation</Button>}
         {msg && <p className="text-xs text-chart-3">{msg}</p>}
         <p className="text-[10px] text-muted-foreground">Every request is reviewed by the owner. When a deposit is approved, the amount moves from your main wallet USDT into the bot; an approved withdrawal returns the amount after fee to your main wallet. Projected profit is never added automatically.</p>
       </div>
@@ -250,7 +250,7 @@ function BixtradePage() {
       {([['Trades', fundExecs.length], ['Win', `${fundExecs.length ? Math.round(fundExecs.filter(x => Number(x.net_usd) > 0).length / fundExecs.length * 100) : 0}%`], ['Avg', `${fundExecs.length ? Math.round(fundExecs.reduce((s, x) => s + x.latency_ms, 0) / fundExecs.length) : 0}ms`]] as const).map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
     </section>
     <details className="arb-card mt-3" open>
-      <summary className="cursor-pointer font-display text-lg font-bold">Execution history ({logExecs.length}) · {funding === 'real' ? 'Real' : 'Virtual'}</summary>
+      <summary className="cursor-pointer font-display text-lg font-bold">Execution history ({logExecs.length}) · {funding === 'real' ? 'Live Asset' : 'AI Pool'}</summary>
       <div className="arb-chips mt-2">{(['all', 'win', 'scratch'] as const).map(k => <button key={k} type="button" className={logFilter === k ? 'is-on' : ''} onClick={() => setLogFilter(k)}>{k === 'all' ? 'All' : k === 'win' ? 'Profit' : 'Scratch / loss'}</button>)}</div>
       <p className="mt-2 text-[11px] text-muted-foreground">Total recorded: <b className={realized >= 0 ? 'text-chart-2' : 'text-destructive'}>{realized.toFixed(4)} USDT</b> — a performance record, not added to your wallet. Tap a trade for its receipt.</p>
       <div className="mt-3 grid gap-2">{logExecs.length ? logExecs.map(x => <button type="button" key={x.id} onClick={() => setReceipt(x)} className="arb-log-row">
