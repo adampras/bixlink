@@ -23,7 +23,7 @@ function identity(n: Node) { return n.username || n.full_name || n.member_code |
 
 function NetworkPage() {
  const { user, ready, data, error } = useMember(); const { data: cfg } = usePublicConfig();
- const [selected, setSelected] = useState<string | null>(null); const [showHistory, setShowHistory] = useState(false); const [expanded, setExpanded] = useState<string | null>(null); const [showAllRows, setShowAllRows] = useState(false); const [search, setSearch] = useState(''); const [generation, setGeneration] = useState<number | null>(null);
+ const [selected, setSelected] = useState<string | null>(null); const [expanded, setExpanded] = useState<string | null>(null); const [showAllRows, setShowAllRows] = useState(false); const [search, setSearch] = useState(''); const [generation, setGeneration] = useState<number | null>(null);
  const [tab, setTab] = useState<'team'|'bonus'|'history'>('team');
  const [gender, setGender] = useState<'m'|'f'>('m'); const [regOpen, setRegOpen] = useState(false); const [regTarget, setRegTarget] = useState('');
  useEffect(() => { if (localStorage.getItem('bix-avatar') === 'f') setGender('f'); }, []);
