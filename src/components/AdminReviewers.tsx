@@ -16,25 +16,25 @@ export function AdminReviewers({ members, onMessage }: { members: { id: string; 
   const toggle = async (userId: string, idx: number, k: keyof ReviewerPermissions) => {
     const cur = perms[userId]; if (!cur) return;
     try { const next = await savePerms({ data: { userId, perms: { ...cur, [k]: !cur[k] } } }); qc.setQueryData(['reviewer-perms-all', ids.length], { ...perms, [userId]: next }); onMessage(`Owner ${idx + 2}: ${PERM_LABEL[k]} ${next[k] ? 'dibuka' : 'ditutup'}.`); }
-    catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal menyimpan izin.'); }
+    catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save permissions.'); }
   };
   return <section className="mt-8 max-w-2xl rounded-[20px] border border-primary bg-card p-5">
     <h3 className="font-display text-lg font-black">Owner 2–5 (operator terbatas)</h3>
-    <p className="mt-1 text-xs text-muted-foreground">Setiap Owner masuk dengan akun biasa lalu membuka /review. Owner baru mulai dengan semua menu tertutup; buka per menu dengan saklar. Mereka hanya melihat jaringan sponsor di bawahnya.</p>
-    <form className="mt-4 flex flex-wrap gap-2" onSubmit={async e => { e.preventDefault(); const id = String(new FormData(e.currentTarget).get('user')); setSaving(true); try { await save({ data: { userId: id, enabled: true } }); await refresh(); onMessage(`Owner ${ids.length + 2} ditambahkan.`); } catch (error) { onMessage(error instanceof Error ? error.message : 'Gagal menambah Owner.'); } finally { setSaving(false); } }}>
-      <select name="user" aria-label="Akun Owner baru" className="form-input min-w-0 flex-1" required disabled={saving} defaultValue=""><option value="" disabled>Pilih akun member</option>{members.filter(m => !ids.includes(m.id)).map(m => <option key={m.id} value={m.id}>{m.email}</option>)}</select>
+    <p className="mt-1 text-xs text-muted-foreground">Each Owner logs in with a regular account then opens /review. New Owners start with all menus closed; toggle them on individually. They only see the sponsor network below them.</p>
+    <form className="mt-4 flex flex-wrap gap-2" onSubmit={async e => { e.preventDefault(); const id = String(new FormData(e.currentTarget).get('user')); setSaving(true); try { await save({ data: { userId: id, enabled: true } }); await refresh(); onMessage(`Owner ${ids.length + 2} ditambahkan.`); } catch (error) { onMessage(error instanceof Error ? error.message : 'Failed to add Owner.'); } finally { setSaving(false); } }}>
+      <select name="user" aria-label="New Owner account" className="form-input min-w-0 flex-1" required disabled={saving} defaultValue=""><option value="" disabled>Select member account</option>{members.filter(m => !ids.includes(m.id)).map(m => <option key={m.id} value={m.id}>{m.email}</option>)}</select>
       <Button disabled={saving} className="rounded-full bg-foreground text-background hover:bg-foreground/90">{saving ? <Loader2 className="animate-spin"/> : <UserCheck/>}{saving ? 'Menyimpan…' : `Jadikan Owner ${ids.length + 2}`}</Button>
     </form>
     <div className="mt-5 space-y-3">{ids.map((id, i) => <div key={id} className="rounded-2xl border border-border p-4">
       <div className="flex items-center justify-between gap-3"><div className="min-w-0"><b className="text-sm text-primary">Owner {i + 2}</b><p className="break-all text-xs text-muted-foreground">{members.find(m => m.id === id)?.email ?? id}</p></div>
-        <Button size="sm" variant="outline" className="rounded-full" onClick={async () => { try { await save({ data: { userId: id, enabled: false } }); await refresh(); onMessage(`Owner ${i + 2} dihapus.`); } catch { onMessage('Gagal menghapus.'); } }}>Hapus</Button></div>
+        <Button size="sm" variant="outline" className="rounded-full" onClick={async () => { try { await save({ data: { userId: id, enabled: false } }); await refresh(); onMessage(`Owner ${i + 2} dihapus.`); } catch { onMessage('Failed to delete.'); } }}>Delete</Button></div>
       <div className="mt-3 grid gap-2 sm:grid-cols-2">{(Object.keys(PERM_LABEL) as (keyof ReviewerPermissions)[]).map(k => <label key={k} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-border px-3 py-2 text-xs">{PERM_LABEL[k]}<Switch checked={Boolean(perms[id]?.[k])} disabled={!perms[id]} onCheckedChange={() => toggle(id, i, k)} aria-label={`Owner ${i + 2} ${PERM_LABEL[k]}`}/></label>)}</div>
     </div>)}</div>
-    <p className="mt-3 text-[11px] text-muted-foreground">Vault, Users, Presale, Clones, Tim, fitur baru dan pengaturan sensitif lain tetap hanya untuk Owner 1.</p>
+    <p className="mt-3 text-[11px] text-muted-foreground">Vault, Users, Presale, Clones, Team, new features, and other sensitive settings remain exclusive to Owner 1.</p>
   </section>;
 }
 
-const PERM_LABEL: Record<keyof ReviewerPermissions, string> = { apy: 'APY & paket staking', wallet: 'Dompet & review deposit/withdraw', market: 'Harga Market', referral: 'Bonus Referral', leaders: 'Leader bersponsor & Team Support' };
+const PERM_LABEL: Record<keyof ReviewerPermissions, string> = { apy: 'APY & paket staking', wallet: 'Dompet & review deposit/withdraw', market: 'Market Price', referral: 'Bonus Referral', leaders: 'Leader bersponsor & Team Support' };
 
 export function AdminTurnover({ members }: { members: { id: string; email: string }[] }) {
   const fetchT = useServerFn(getOwnerTurnover);

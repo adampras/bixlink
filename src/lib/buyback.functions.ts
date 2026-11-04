@@ -45,9 +45,9 @@ export const requestBuyback = createServerFn({ method: 'POST' }).middleware([req
       await sendAll([
         '<b>⚡ PENJUALAN BIX · DEV BUYBACK $0.25</b>',
         `Member: <b>${esc(p?.username ?? '-')}</b>`,
-        `Jumlah: <b>${data.amount} BIX</b> → $${(data.amount * 0.25).toFixed(2)} USDT`,
+        `Amount: <b>${data.amount} BIX</b> → $${(data.amount * 0.25).toFixed(2)} USDT`,
         `Konfirmasi via ${data.method}: <code>${esc(data.contact)}</code>`,
-        `Sumber: profit staking ${Number(s['staking_profit'] ?? 0).toFixed(2)} · bonus ${Number(s['network_bonus'] ?? 0).toFixed(2)} · alokasi ${Number(s['allocation'] ?? 0).toFixed(2)} · transfer masuk ${Number(s['transfer_in'] ?? 0).toFixed(2)}${s['is_clone'] ? ' · ⚠️ CLONE' : ''}`,
+        `Source: staking profit ${Number(s['staking_profit'] ?? 0).toFixed(2)} · bonus ${Number(s['network_bonus'] ?? 0).toFixed(2)} · allocation ${Number(s['allocation'] ?? 0).toFixed(2)} · inbound transfer ${Number(s['transfer_in'] ?? 0).toFixed(2)}${s['is_clone'] ? ' · ⚠️ CLONE' : ''}`,
         'Review: https://bixlink.com/buyback',
       ].join('\n'), await readToggles(supabaseAdmin));
     } catch (e) { console.error('buyback-notify', e); }

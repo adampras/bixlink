@@ -9,10 +9,10 @@ const toPlace = (r: { lat: string; lon: string; display_name: string; name?: str
 
 export function getDevicePosition(): Promise<{ lat: number; lng: number; accuracy: number }> {
   return new Promise((res, rej) => {
-    if (!navigator.geolocation) return rej(new Error('Perangkat tidak mendukung GPS'));
+    if (!navigator.geolocation) return rej(new Error('Device does not support GPS'));
     navigator.geolocation.getCurrentPosition(
       p => res({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy }),
-      e => rej(new Error(e.code === 1 ? 'Izin lokasi ditolak. Aktifkan lokasi untuk BIXGO di pengaturan browser.' : 'Lokasi belum bisa dibaca, coba lagi di tempat terbuka.')),
+      e => rej(new Error(e.code === 1 ? 'Location permission denied. Enable location for BIXGO in browser settings.' : 'Location cannot be detected yet, try again in an open area.')),
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
   });
 }
@@ -29,7 +29,7 @@ export async function searchPlaces(q: string, near?: { lat: number; lng: number 
   if (q.trim().length < 3) return [];
   const vb = near ? `&viewbox=${near.lng - 0.5},${near.lat + 0.5},${near.lng + 0.5},${near.lat - 0.5}` : '';
   const r = await fetch(`${NOM}/search?format=jsonv2&accept-language=id&limit=6&countrycodes=id${vb}&q=${encodeURIComponent(q)}`);
-  if (!r.ok) throw new Error('Pencarian alamat sedang sibuk, coba lagi.');
+  if (!r.ok) throw new Error('Address search is busy, please try again.');
   return ((await r.json()) as any[]).map(toPlace);
 }
 

@@ -314,18 +314,18 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
   /** Phone-friendly presentation: broadcast chosen images (slides, PDF screenshots) as the LIVE video. */
   const startSlides = async (files: FileList | null) => {
     const list = [...(files ?? [])].filter(f => f.type.startsWith('image/')).slice(0, 30);
-    if (!list.length) { flash('Pilih gambar slide (JPG/PNG). Untuk PDF, simpan halamannya sebagai gambar dulu.'); return; }
+    if (!list.length) { flash('Select slide images (JPG/PNG). For PDF, save the pages as images first.'); return; }
     const imgs = await Promise.all(list.map(f => new Promise<HTMLImageElement>((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = URL.createObjectURL(f); }))).catch(() => []);
-    if (!imgs.length) { flash('Gambar tidak bisa dibuka'); return; }
+    if (!imgs.length) { flash('Cannot open image'); return; }
     const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; slideCanvas.current = c;
     drawSlide(imgs[0]);
     const track = (c as HTMLCanvasElement & { captureStream: (fps?: number) => MediaStream }).captureStream(10).getVideoTracks()[0];
-    if (!track) { flash('Perangkat ini belum mendukung mode presentasi'); return; }
+    if (!track) { flash('This device does not support presentation mode yet'); return; }
     const s = stream.current;
     camTrack.current = s?.getVideoTracks()[0] ?? null;
     const next = new MediaStream([track, ...(s?.getAudioTracks() ?? [])]);
     stream.current = next; setLocal(next); setSlides(imgs); setSlideIdx(0); setSharing(true);
-    flash(`Presentasi ${imgs.length} slide sedang tayang`);
+    flash(`Presentation of ${imgs.length} slides is live`);
   };
   const toggleShare = async () => {
     if (sharing) { stopShare(); return; }
@@ -536,7 +536,7 @@ export function BixtokLiveRoom({ live, me, cfg, following, onFollow, onClose, on
     {burst && <div className="bxl-sfx-burst" key={burst.id} aria-hidden onAnimationEnd={() => setBurst(null)}>{burst.e}</div>}
     {host && recording && <span className="bxl-rec"><Circle size={9} fill="currentColor"/> REC</span>}
     {ended && <div className="bxl-endcard" role="dialog" aria-label="LIVE ended"><b>LIVE ended</b><small>Thanks for watching @{live.host_name}</small><button type="button" className="bxl-btn" onClick={onClose}>Exit LIVE</button></div>}
-    {!host && entered && audioBlocked && sound && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Ketuk untuk mengaktifkan suara</button>}
+    {!host && entered && audioBlocked && sound && <button className="bxl-unmute" onClick={e => { e.stopPropagation(); void unlockAudio(); }}><Volume2 size={16}/> Tap to unmute</button>}
     {banner && <div className="bxl-banner" key={banner.id}><Gift size={18}/><div><b>{banner.name}</b><small>{banner.body}</small></div></div>}
     {mega && <div className="bxl-coinrain" key={`rain-${mega.id}`} aria-hidden>{Array.from({ length: 22 }, (_, i) => <i key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 7) * 0.18}s`, animationDuration: `${1.6 + (i % 5) * 0.25}s` }}>🪙</i>)}</div>}
     {mega && <div className="bxl-mega" key={mega.id} aria-hidden><span>{giftInfo(mega.body).emoji}</span><b>{mega.name}</b><small>{mega.body}</small></div>}
@@ -673,15 +673,15 @@ function StudioIngress({ liveId }: { liveId: string }) {
   const load = async (reset = false) => {
     setBusy(true); setErr(null);
     try { const r = await getBixtokStudioIngress({ data: { liveId, reset } }); if (r.ok) setInfo({ server: r.server, streamKey: r.streamKey }); else setErr(r.error); }
-    catch { setErr('Gagal membuat Stream Key. Coba lagi.'); } finally { setBusy(false); }
+    catch { setErr('Failed to generate Stream Key. Try again.'); } finally { setBusy(false); }
   };
   return <div className="mt-4 rounded-xl border border-border/60 p-3">
     <h4 className="text-sm font-bold">🎬 Studio: OBS / PRISM Live Studio</h4>
-    <p className="mt-1 text-xs opacity-70">Siaran kualitas studio dari aplikasi OBS (PC) atau PRISM (HP). Di aplikasi pilih "Custom RTMP", tempel Server dan Stream Key di bawah, lalu mulai streaming. Matikan kamera di sini agar video tidak dobel.</p>
+    <p className="mt-1 text-xs opacity-70">Broadcast in studio quality from OBS (PC) or PRISM (mobile) app. In the app, select "Custom RTMP", paste the Server and Stream Key below, then start streaming. Turn off the camera here to avoid duplicate video.</p>
     {!info ? <button type="button" className="bxl-btn mt-2 w-full" disabled={busy} onClick={() => { void load(); }}>{busy ? 'Menyiapkan…' : 'Buat Stream Key'}</button> : <div className="mt-2 grid gap-2 text-xs">
       <div><b>Server</b><div className="flex gap-2"><code className="flex-1 truncate">{info.server}</code><button type="button" aria-label="Copy server" onClick={() => { void copyText(info.server); }}><Copy size={14}/></button></div></div>
       <div><b>Stream Key</b> <small className="opacity-60">(rahasia, jangan dibagikan)</small><div className="flex gap-2"><code className="flex-1 truncate">{show ? info.streamKey : '••••••••••••'}</code><button type="button" onClick={() => setShow(v => !v)}>{show ? 'Hide' : 'Show'}</button><button type="button" aria-label="Copy key" onClick={() => { void copyText(info.streamKey); }}><Copy size={14}/></button></div></div>
-      <button type="button" className="bxl-btn ghost" disabled={busy} onClick={() => { void load(true); }}>Ganti Stream Key</button>
+      <button type="button" className="bxl-btn ghost" disabled={busy} onClick={() => { void load(true); }}>Change Stream Key</button>
     </div>}
     {err && <p className="mt-2 text-xs text-destructive">{err}</p>}
   </div>;

@@ -20,20 +20,20 @@ export function AdminAgency() {
   const field = (k: 'national' | 'city', f: keyof AgencyTier, label: string) => <label className="text-[11px] text-muted-foreground">{label}<input type="number" className={num} value={Number(cfg[k][f] ?? 0)} onChange={e => setTier(k, f, Number(e.target.value))}/></label>;
   return <section className="mt-8 grid max-w-3xl gap-4 rounded-xl border border-border p-4">
     <h2 className="font-display text-xl font-black">PRESALE KEAGENAN (Negara / Kota)</h2>
-    <div className="flex items-center justify-between"><span className="text-sm font-bold">Program {cfg.enabled ? 'BUKA' : 'TUTUP'}</span><Switch checked={cfg.enabled} onCheckedChange={v => setCfg({ ...cfg, enabled: v })}/></div>
+    <div className="flex items-center justify-between"><span className="text-sm font-bold">Program {cfg.enabled ? 'OPEN' : 'CLOSE'}</span><Switch checked={cfg.enabled} onCheckedChange={v => setCfg({ ...cfg, enabled: v })}/></div>
     {(['national', 'city'] as const).map(k => <div key={k} className="rounded-lg border border-border p-3">
       <div className="flex items-center justify-between"><b className="text-sm">{k === 'national' ? 'National Sovereign Partner' : 'City Custody Hub'}</b><Switch checked={cfg[k].enabled} onCheckedChange={v => setTier(k, 'enabled', v)}/></div>
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {field(k, 'minUsd', 'Min USD')}{field(k, 'maxUsd', 'Max USD')}{field(k, 'overridePct', 'Override %')}{k === 'national' ? field(k, 'perCountry', 'Slot / negara') : field(k, 'perCity', 'Slot / kota')}
       </div>
     </div>)}
-    <Button onClick={save} className="rounded-full">Simpan pengaturan keagenan</Button>
+    <Button onClick={save} className="rounded-full">Save agency settings</Button>
     {msg && <p className="text-sm text-chart-3">{msg}</p>}
     <h3 className="font-bold">Pengajuan ({apps.data?.length ?? 0})</h3>
     <div className="grid gap-2">{(apps.data ?? []).map(a => <div key={a.id} className="rounded-lg border border-border p-3 text-xs">
       <div className="flex flex-wrap justify-between gap-2"><b>{a.tier === 'national' ? 'National' : 'City'} · {a.country}{a.city ? ` · ${a.city}` : ''}</b><span className="uppercase">{a.status}</span></div>
       <p className="numeric text-muted-foreground">${Number(a.commitment_usd).toLocaleString()} · {a.contact}{a.license_no ? ` · ${a.license_no}` : ''}</p>
-      <div className="mt-2 flex gap-2">{a.status === 'pending' && <><Button size="sm" onClick={() => review(a.id, 'approved')}>Setujui</Button><Button size="sm" variant="outline" onClick={() => review(a.id, 'rejected')}>Tolak</Button></>}{a.status === 'approved' && <Button size="sm" variant="destructive" onClick={() => review(a.id, 'revoked')}>Cabut lisensi</Button>}</div>
+      <div className="mt-2 flex gap-2">{a.status === 'pending' && <><Button size="sm" onClick={() => review(a.id, 'approved')}>Setujui</Button><Button size="sm" variant="outline" onClick={() => review(a.id, 'rejected')}>Reject</Button></>}{a.status === 'approved' && <Button size="sm" variant="destructive" onClick={() => review(a.id, 'revoked')}>Cabut lisensi</Button>}</div>
     </div>)}</div>
   </section>;
 }

@@ -30,5 +30,5 @@ export function InteractionComfort() {
     return () => document.removeEventListener('pointerdown', pressed);
   }, [config?.readiness.touchEffectsEnabled]);
   if (pathname !== '/' || !scrolled) return null;
-  return <Button size="icon" variant="outline" aria-label="Kembali ke atas" title="Kembali ke atas" className="home-scroll-top fixed left-3 z-40 size-11 rounded-full border-chart-3/50 bg-card text-chart-3 shadow-lg" onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}><ArrowUp/></Button>;
+  return <Button size="icon" variant="outline" aria-label="Back to top" title="Back to top" className="home-scroll-top fixed left-3 z-40 size-11 rounded-full border-chart-3/50 bg-card text-chart-3 shadow-lg" onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}><ArrowUp/></Button>;
 }

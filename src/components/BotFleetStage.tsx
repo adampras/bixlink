@@ -13,7 +13,7 @@ export function BotFleetStage({ value, onPick, onClose, inline }: { value: Bixtr
   return <div className={inline ? 'fleet-stage fleet-inline' : 'fleet-stage'} {...(inline ? { 'aria-label': 'Neural Bot Arsenal' } : { role: 'dialog', 'aria-modal': true, 'aria-label': 'Neural Bot Arsenal' })}>
     <header className="fleet-head">
       <div><p>QUANTUM MATRIX · AUTONOMOUS FLEET</p><h2>NEURAL BOT <span>ARSENAL</span></h2></div>
-      {onClose && <button type="button" onClick={onClose} aria-label="Tutup"><X size={20}/></button>}
+      {onClose && <button type="button" onClick={onClose} aria-label="Close"><X size={20}/></button>}
     </header>
     <div className="fleet-list">
       {BIXTRADE_STRATEGIES.map(s => { const pz = BOT_PERSONA[s.key]; const on = value === s.key; return <article key={s.key} data-variant={pz.variant} className={`fleet-card ${on ? 'is-on' : ''}`}>
@@ -22,10 +22,10 @@ export function BotFleetStage({ value, onPick, onClose, inline }: { value: Bixtr
           <b>{pz.name}</b><span>{s.name}</span>
           <ul>{(TRAITS[s.key] ?? [s.pairs]).map(t => <li key={t}>{t}</li>)}</ul>
           <em>Risiko {s.risk}</em>
-          <button type="button" onClick={() => { navigator.vibrate?.([14, 30, 14]); onPick(s.key); }}>{on ? <><Check size={15}/> Bot aktif</> : 'Pilih bot ini'}</button>
+          <button type="button" onClick={() => { navigator.vibrate?.([14, 30, 14]); onPick(s.key); }}>{on ? <><Check size={15}/> Active bot</> : 'Select this bot'}</button>
         </div>
       </article>; })}
     </div>
-    <p className="fleet-note">Memilih bot hanya menentukan strategi untuk request Anda berikutnya; hasil tidak dijamin dan saldo tidak berubah.</p>
+    <p className="fleet-note">Selecting a bot only determines the strategy for your next request; results are not guaranteed and balances do not change.</p>
   </div>;
 }

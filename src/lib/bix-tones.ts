@@ -53,7 +53,7 @@ export const RINGTONES = [
   { id: 'harp', name: 'Elegance Harp' },
   { id: 'classic', name: 'Digital Classic VIP' },
   { id: 'neon', name: 'Neon Future Pulse' },
-  { id: 'device', name: 'Nada dari perangkat saya' },
+  { id: 'device', name: 'Ringtone from my device' },
 ] as const;
 const RKEY = 'bixcall-ring-id';
 export const getRingId = () => { try { return localStorage.getItem(RKEY) || 'lux'; } catch { return 'lux'; } };

@@ -15,7 +15,7 @@ export function AdminStakingControls({ onMessage }: { onMessage: (message: strin
     <div role="group" aria-label="Staking controls" className="grid grid-cols-2 gap-2 border-b border-border pb-4 sm:grid-cols-4">
       {tab('daily', <Shuffle size={16}/>, 'Profit harian')}
       {tab('packages', <SlidersHorizontal size={16}/>, 'Edit paket')}
-      {tab('market', <LineChart size={16}/>, 'Harga & chart')}
+      {tab('market', <LineChart size={16}/>, 'Price & chart')}
       {tab('skin', <Gem size={16}/>, 'Desain jaringan')}
     </div>
     {view === 'market' ? <AdminMarketTab onMessage={onMessage}/> : view === 'daily' ? <YieldControlPanel market={false}/> : view === 'skin' ? <AdminStakingSkin onMessage={onMessage}/> : <AdminDurationPackages onMessage={onMessage}/>}

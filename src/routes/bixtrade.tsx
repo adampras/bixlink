@@ -114,7 +114,7 @@ function BixtradePage() {
   const pending = reqs.filter(r => r.status === 'pending').length;
   const mood = bixtradeBotMood({ capital, routes: profitable.length, lastExecAt: fundExecs[0]?.executed_at, now: Date.now() });
   const top = profitable[0];
-  const statusText = mood === 'sleep' ? 'Bot siaga — aktif otomatis setelah deposit disetujui.' : mood === 'trade' ? `Eksekusi otomatis tercatat${fundExecs[0] ? ` (${Number(fundExecs[0].net_usd) >= 0 ? '+' : ''}${Number(fundExecs[0].net_usd).toFixed(4)} USDT)` : ''}.` : top ? `Menemukan selisih ${top.net.toFixed(2)}% pada ${top.pair} (${top.buy} → ${top.sell}).` : 'Memindai peluang harga di 6 bursa…';
+  const statusText = mood === 'sleep' ? 'Bot on standby — automatically active after deposit is approved.' : mood === 'trade' ? `Eksekusi otomatis tercatat${fundExecs[0] ? ` (${Number(fundExecs[0].net_usd) >= 0 ? '+' : ''}${Number(fundExecs[0].net_usd).toFixed(4)} USDT)` : ''}.` : top ? `Menemukan selisih ${top.net.toFixed(2)}% pada ${top.pair} (${top.buy} → ${top.sell}).` : 'Memindai peluang harga di 6 bursa…';
 
   const submit = async () => {
     if (!cfg) return;

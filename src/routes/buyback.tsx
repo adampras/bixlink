@@ -26,7 +26,7 @@ const METHODS = [
   { id: 'telegram', label: 'Telegram', icon: Send, ph: '@username' },
   { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, ph: '+628123456789' },
 ] as const;
-const SRC: [string, string][] = [['staking_profit', 'Profit staking'], ['network_bonus', 'Bonus jaringan'], ['vip_reward', 'VIP'], ['swap_bought', 'Beli swap'], ['allocation', 'Alokasi admin'], ['transfer_in', 'Transfer masuk'], ['p2p_net', 'P2P net']];
+const SRC: [string, string][] = [['staking_profit', 'Profit staking'], ['network_bonus', 'Bonus jaringan'], ['vip_reward', 'VIP'], ['swap_bought', 'Swap buy'], ['allocation', 'Alokasi admin'], ['transfer_in', 'Incoming transfer'], ['p2p_net', 'P2P net']];
 
 function BuybackPage() {
   const { user } = useMember();
@@ -47,10 +47,10 @@ function BuybackPage() {
   };
   const act = async (id: string, approve: boolean) => {
     const note = approve ? '' : (window.prompt('Alasan reject (mis. sumber BIX bukan dari staking real):') ?? '');
-    if (approve && !window.confirm('Beli BIX ini di $0.25? USDT langsung masuk ke saldo member.')) return;
+    if (approve && !window.confirm('Buy this BIX at $0.25? USDT goes directly to member balance.')) return;
     setBusy(true);
-    try { await rev({ data: { id, approve, note } }); toast.success(approve ? 'Disetujui' : 'Ditolak, BIX dikembalikan'); await qc.invalidateQueries({ queryKey: ['buyback'] }); }
-    catch (e) { toast.error(e instanceof Error ? e.message : 'Gagal'); } finally { setBusy(false); }
+    try { await rev({ data: { id, approve, note } }); toast.success(approve ? 'Approved' : 'Rejected, BIX refunded'); await qc.invalidateQueries({ queryKey: ['buyback'] }); }
+    catch (e) { toast.error(e instanceof Error ? e.message : 'Failed'); } finally { setBusy(false); }
   };
   const d = q.data; const m = METHODS.find(x => x.id === method) ?? METHODS[0];
   const pending = (d?.queue ?? []).filter(r => r.status === 'pending');
@@ -80,10 +80,10 @@ function BuybackPage() {
         return <div key={r.id} className={`rounded-xl border bg-card p-3 text-xs ${r.status === 'pending' ? (ok ? 'border-chart-2' : 'border-destructive') : 'border-border opacity-70'}`}>
           <div className="flex flex-wrap items-center justify-between gap-2"><b className="numeric text-base">{number(Number(r.amount_in))} BIX → {money(Number(r.amount_out))}</b><span className="text-muted-foreground">{dateTime(r.created_at)}</span></div>
           <p className="text-muted-foreground">{r.username} · {r.code} · {r.detail?.contact_method}: <span className="font-mono text-foreground">{r.detail?.contact_value}</span></p>
-          <p className={`mt-1 font-bold ${ok ? 'text-chart-2' : 'text-destructive'}`}>{s['is_clone'] ? '⚠️ AKUN CLONE' : ok ? '✓ Sumber staking real cukup' : '⚠️ Sumber non-staking melebihi jumlah jual'}</p>
+          <p className={`mt-1 font-bold ${ok ? 'text-chart-2' : 'text-destructive'}`}>{s['is_clone'] ? '⚠️ CLONE ACCOUNT' : ok ? '✓ Sumber staking real cukup' : '⚠️ Non-staking source exceeds sell amount'}</p>
           <div className="mt-1 grid grid-cols-2 gap-x-3 text-muted-foreground">{SRC.map(([k, l]) => <span key={k}>{l}: <b className="numeric text-foreground">{number(Number(s[k] ?? 0))}</b></span>)}<span>Deposit real: <b className="numeric text-foreground">{money(Number(s['real_deposit_usd'] ?? 0))}</b></span></div>
-          {r.status === 'pending' ? <div className="mt-2 flex gap-2"><Button size="sm" disabled={busy || Number(r.amount_in) < DEV_BUYBACK_MINIMUM_BIX} onClick={() => act(r.id, true)}><Check/>Beli</Button><Button size="sm" variant="destructive" disabled={busy} onClick={() => act(r.id, false)}><X/>Reject</Button></div> : <p className="mt-1 uppercase">{r.status}{r.detail?.review_note ? ` · ${r.detail.review_note}` : ''}</p>}
+          {r.status === 'pending' ? <div className="mt-2 flex gap-2"><Button size="sm" disabled={busy || Number(r.amount_in) < DEV_BUYBACK_MINIMUM_BIX} onClick={() => act(r.id, true)}><Check/>Buy</Button><Button size="sm" variant="destructive" disabled={busy} onClick={() => act(r.id, false)}><X/>Reject</Button></div> : <p className="mt-1 uppercase">{r.status}{r.detail?.review_note ? ` · ${r.detail.review_note}` : ''}</p>}
         </div>; })}
-      {!d.queue.length && <p className="text-sm text-muted-foreground">Belum ada pengajuan.</p>}</div></section>}
+      {!d.queue.length && <p className="text-sm text-muted-foreground">No submissions yet.</p>}</div></section>}
   </main>;
 }

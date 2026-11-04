@@ -14,13 +14,13 @@ import { dateTime } from '@/lib/bixlink';
 
 type AvailabilityKey = 'legalEnabled' | 'kycEnabled' | 'readinessEnabled' | 'homeOverviewEnabled' | 'homeHoloEnabled' | 'marketEnabled' | 'footerEnabled' | 'liveActivityEnabled' | 'heroAnimEnabled' | 'presaleStageEnabled' | 'touchEffectsEnabled' | 'loanEnabled';
 const controls: { key: AvailabilityKey; label: string; detail: string }[] = [
-  { key: 'touchEffectsEnabled', label: 'Efek sentuh premium', detail: 'Kilau tepi dan respons tekan halus pada tombol. Mengikuti preferensi kurangi animasi perangkat.' },
-  { key: 'loanEnabled', label: 'Akun pinjaman leader', detail: 'Buka/tutup program akun pinjaman bersyarat (maks $1.000) di Profile dan FOX AI.' },
+  { key: 'touchEffectsEnabled', label: 'Efek sentuh premium', detail: 'Edge glow and subtle press response on buttons. Follows device reduce animation preference.' },
+  { key: 'loanEnabled', label: 'Leader loan account', detail: 'Enable/disable conditional loan account program (max $1,000) in Profile and FOX AI.' },
   { key: 'legalEnabled', label: 'Legal & About pages', detail: 'Terms, Privacy, Risk Disclosure, About & Support.' },
   { key: 'kycEnabled', label: 'Optional identity check', detail: 'Identity submissions in Settings and Withdraw.' },
   { key: 'readinessEnabled', label: 'Readiness information', detail: 'Additional footer information about the project.' },
   { key: 'homeOverviewEnabled', label: 'HOME top overview', detail: 'Recorded staking value, Deposit/Withdraw/Swap buttons and the 3 stat cards at the top of HOME.' },
-  { key: 'homeHoloEnabled', label: 'Kotak Hologram FOX (HOME)', detail: 'Kotak hologram reaktor FOX di atas chart Internal Market BIX pada HOME.' },
+  { key: 'homeHoloEnabled', label: 'Kotak Hologram FOX (HOME)', detail: 'FOX reactor hologram box above the BIX Internal Market chart on HOME.' },
   { key: 'marketEnabled', label: 'Market & Updates', detail: 'Major coin prices and published owner announcements.' },
   { key: 'liveActivityEnabled', label: 'Live Global Activity', detail: 'Floating notices of community interest from 100 countries (labelled simulation; real ledger events marked).' },
   { key: 'heroAnimEnabled', label: 'Animated hero background', detail: 'Neural payment grid animation behind the landing page.' },
@@ -91,7 +91,7 @@ export function AdminWalletAppearance({ initial, onMessage, onSaved }: { initial
       setFlags(next);
       await onSaved();
       await qc.invalidateQueries({ queryKey: ['bix-public-config'] });
-      onMessage('Warna Wallet dan animasi tersimpan.');
+      onMessage('Wallet colors and animations saved.');
     } catch (e) { onMessage(e instanceof Error ? e.message : 'Could not save appearance.'); }
     finally { setBusy(false); }
   }}/>;
@@ -101,12 +101,12 @@ function WalletLook({ flags, busy, onSave }: { flags: Readiness; busy: boolean; 
   const colors = flags.walletColors ?? [];
   const anims = [['animGlow', 'Gold crypto coins'], ['animShimmer', 'Payment network'], ['animFloat', 'Market chart']] as const;
   return <div className="mt-8 border-y border-border py-6">
-    <h3 className="font-display text-lg font-bold">Model kotak saldo Wallet</h3>
+    <h3 className="font-display text-lg font-bold">Wallet balance box style</h3>
     <p className="mt-1 text-xs text-muted-foreground">ON = kartu metal Sovereign. OFF = desain lama (Classic Vault).</p>
     <Button size="sm" variant="outline" disabled={busy} aria-pressed={flags.walletCard === true} className={`mt-3 ${flags.walletCard ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'}`} onClick={() => onSave({ ...flags, walletCard: !flags.walletCard })}>Sovereign Metal Card · {flags.walletCard ? 'ON' : 'OFF'}</Button>
-    {flags.walletCard && <><p className="mt-4 text-xs text-muted-foreground">Model kotak saldo:</p><div className="mt-2 grid grid-cols-2 gap-2">{([['metal','Sovereign Metal Pass'],['elite','Futuristic Elite Card']] as const).map(([id,label]) => { const on = (flags.walletCardModel ?? 'metal') === id; return <Button key={id} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, walletCardModel: id })}>{label}</Button>; })}</div></>}
+    {flags.walletCard && <><p className="mt-4 text-xs text-muted-foreground">Balance box style:</p><div className="mt-2 grid grid-cols-2 gap-2">{([['metal','Sovereign Metal Pass'],['elite','Futuristic Elite Card']] as const).map(([id,label]) => { const on = (flags.walletCardModel ?? 'metal') === id; return <Button key={id} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, walletCardModel: id })}>{label}</Button>; })}</div></>}
     {flags.walletCard && <><p className="mt-4 text-xs text-muted-foreground">Warna solid Sovereign Card:</p><div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">{([['onyx','Obsidian Onyx'],['gold','Royal Gold'],['sapphire','Deep Sapphire'],['emerald','Imperial Emerald'],['ruby','Crimson Ruby']] as const).map(([id,label]) => { const on = (flags.walletCardColor ?? 'onyx') === id; return <Button key={id} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, walletCardColor: id })}><span className="sov-swatch" data-sov-color={id} aria-hidden/>{label}</Button>; })}</div></>}
-    <h3 className="mt-6 font-display text-lg font-bold">5 warna kotak saldo Wallet</h3>
+    <h3 className="mt-6 font-display text-lg font-bold">5 Wallet balance box colors</h3>
     <p className="mt-1 text-xs text-muted-foreground">Only the Wallet balance box changes. 1 color on = fixed. 2–5 on = changes automatically every 24 hours.</p>
     <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">{WALLET_SKINS.map(skin => { const on = colors.includes(skin.id); return <Button key={skin.id} size="sm" variant="outline" disabled={busy} aria-pressed={on} className={on ? 'border-chart-2 text-chart-2' : 'text-muted-foreground'} onClick={() => onSave({ ...flags, walletColors: on ? colors.filter(c => c !== skin.id) : [...colors, skin.id] })}><span className="wallet-swatch" data-skin={skin.id} aria-hidden/>{skin.label} · {on ? 'ON' : 'OFF'}</Button>; })}</div>
     <h3 className="mt-6 font-display text-lg font-bold">Animasi kotak Wallet · ON / OFF</h3>

@@ -6,8 +6,8 @@ import { money, number } from '@/lib/bixlink';
 type Report = Awaited<ReturnType<typeof getAdminReport>>;
 
 const PERIODS = [
-  { key: 'day', label: 'Hari ini' },
-  { key: 'month', label: 'Bulan ini' },
+  { key: 'day', label: 'Today' },
+  { key: 'month', label: 'This month' },
   { key: 'total', label: 'Total' },
 ] as const;
 
@@ -32,7 +32,7 @@ export function AdminReports({ onMessage }: { onMessage: (msg: string) => void }
         {PERIODS.map(p => <span key={p.key} className="text-right">{p.label}</span>)}
       </div>
       <Row label="Staking USDT (nilai)" values={report.stakingUsd} format={v => money(v)} />
-      <Row label="Staking USDT (jumlah)" values={report.stakingCount} format={v => number(v)} />
+      <Row label="USDT Staking (amount)" values={report.stakingCount} format={v => number(v)} />
       <Row label="Staking BIX" values={report.stakingBix} format={v => `${number(v)} BIX`} />
       <Row label="Bonus referral BIX" values={report.referralBix} format={v => `${number(v)} BIX`} />
       <Row label="Bonus jaringan USDT" values={report.networkUsdt} format={v => money(v)} />

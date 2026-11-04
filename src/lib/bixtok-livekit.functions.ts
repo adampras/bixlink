@@ -38,7 +38,7 @@ export const getBixtokStudioIngress = createServerFn({ method: 'POST' })
     const url = process.env['LIVEKIT_URL'];
     const key = process.env['LIVEKIT_API_KEY'];
     const secret = process.env['LIVEKIT_API_SECRET'];
-    if (!url || !key || !secret) return { ok: false as const, error: 'Layanan siaran belum dikonfigurasi.' };
+    if (!url || !key || !secret) return { ok: false as const, error: 'Broadcast service is not configured.' };
     const { data: live } = await context.supabase.from('bixtok_lives').select('id, host_id, status').eq('id', data.liveId).maybeSingle();
     if (!live || live.status !== 'live') throw new Error('LIVE not active');
     if (live.host_id !== context.userId) throw new Error('Only the host can get a stream key');
@@ -54,6 +54,6 @@ export const getBixtokStudioIngress = createServerFn({ method: 'POST' })
       return { ok: true as const, server: ing.url ?? '', streamKey: ing.streamKey ?? '' };
     } catch (e) {
       console.error('ingress', e);
-      return { ok: false as const, error: 'Stream Key belum tersedia. Fitur RTMP perlu diaktifkan di paket layanan siaran.' };
+      return { ok: false as const, error: 'Stream Key is not available yet. The RTMP feature must be enabled in the broadcast service package.' };
     }
   });

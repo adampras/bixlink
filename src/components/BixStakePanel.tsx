@@ -60,7 +60,7 @@ export function BixStakePanel({ bixPrice }: { bixPrice: number }) {
     setBusy(true); setMsg('');
     try {
       await stakeBix({ data: { amount: amt, days } });
-      setMsg(`Staking berhasil — ${number(amt)} BIX. Profit di riwayat adalah proyeksi, bukan saldo yang dapat dibelanjakan.`);
+      setMsg(`Staking successful — ${number(amt)} BIX. Profit in history is a projection, not a spendable balance.`);
       await qc.invalidateQueries();
       await q.refetch();
       setHistoryJump(true);

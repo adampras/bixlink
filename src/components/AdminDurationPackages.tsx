@@ -23,21 +23,21 @@ function Editor({ pkg, index, onSave }: { pkg: Row; index: number; onSave: (m: s
       await save({ data: { id: pkg.id, price, apys: dailyMapToApys(daily), enabled } });
       await Promise.all([qc.invalidateQueries({ queryKey: ['duration-package-editor'] }), qc.invalidateQueries({ queryKey: ['bix-public-config'] }), qc.invalidateQueries({ queryKey: ['bix-public-packages'] })]);
       onSave(`${pkg.id} disimpan — ${enabled ? 'OPEN' : 'CLOSED'}.`); txFeedback.success('Paket disimpan', `${pkg.id} profit harian diperbarui.`);
-    } catch (error) { onSave(error instanceof Error ? error.message : 'Could not save package.'); txFeedback.fail('Gagal menyimpan paket', error); }
+    } catch (error) { onSave(error instanceof Error ? error.message : 'Could not save package.'); txFeedback.fail('Failed to save package', error); }
     finally { setBusy(false); }
   }}>
     <header className="duration-package-head"><h3 className="text-xl font-bold">{pkg.id}</h3><label className="flex items-center gap-2 text-xs font-bold"><Switch aria-label={`${pkg.id} availability`} checked={enabled} onCheckedChange={setEnabled} disabled={busy}/>{enabled ? 'OPEN' : 'CLOSED'}</label></header>
     <div className="duration-package-body space-y-4">
       <label className="block text-xs font-bold">Nilai paket (USDT)<input aria-label={`${pkg.id} amount`} className="form-input mt-2" type="number" required min="0.01" max="10000000" step="0.01" value={price} onChange={e => setPrice(Number(e.target.value))}/></label>
       <div className="grid grid-cols-2 gap-3">{PACKAGE_DURATIONS.map(d => { const v = daily[String(d)] ?? DAILY_MIN; return <label key={d} className="text-xs font-bold">{d} hari · profit % / hari<input aria-label={`${pkg.id} ${d}D daily profit`} className="form-input mt-1" type="number" min={DAILY_MIN} max={DAILY_MAX} step={DAILY_STEP} required value={v} onChange={e => setDaily(c => ({ ...c, [String(d)]: Number(e.target.value) }))} onBlur={() => setDaily(c => ({ ...c, [String(d)]: cleanDaily(v) }))}/><span className="mt-1 block font-normal text-muted-foreground">≈ ${(price * cleanDaily(v) / 100).toFixed(2)} / hari</span></label>; })}</div>
-      <Button className="duration-stake w-full" type="submit" disabled={busy}><Save size={16}/>{busy ? 'Menyimpan…' : 'Simpan paket'}</Button>
+      <Button className="duration-stake w-full" type="submit" disabled={busy}><Save size={16}/>{busy ? 'Menyimpan…' : 'Save package'}</Button>
     </div>
   </form>;
 }
 export function AdminDurationPackages({ onMessage }: { onMessage: (m: string) => void }) {
   const load = useServerFn(getEditablePackages);
   const query = useQuery({ queryKey: ['duration-package-editor'], queryFn: () => load() });
-  return <section className="mt-8"><h2 className="font-display text-2xl font-bold">Paket staking</h2><p className="mt-2 text-sm text-muted-foreground">Isi profit harian flat per durasi: 0,5%–1,2% per hari (kelipatan 0,05%). Member melihat angka yang sama persis. Perubahan hanya berlaku untuk staking baru.</p>
+  return <section className="mt-8"><h2 className="font-display text-2xl font-bold">Paket staking</h2><p className="mt-2 text-sm text-muted-foreground">Enter flat daily profit per duration: 0.5%–1.2% per day (increments of 0.05%). Members see the exact same rate. Changes only apply to new staking.</p>
     {query.isPending ? <p className="mt-6">Loading packages…</p> : query.isError ? <div role="alert" className="mt-6 text-destructive">Could not load packages.<Button variant="outline" className="ml-3" onClick={() => query.refetch()}>Retry</Button></div> : <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">{query.data.map((pkg, i) => <Editor key={`${pkg.id}:${JSON.stringify(pkg.duration_apys)}:${pkg.enabled}:${pkg.price_usd}`} pkg={pkg} index={i} onSave={onMessage}/>)}</div>}
   </section>;
 }

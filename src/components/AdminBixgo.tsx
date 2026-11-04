@@ -12,13 +12,13 @@ export function AdminBixgo({ initial, onMessage, onSaved }: { initial?: unknown;
   const [busy, setBusy] = useState(false);
   const save = useServerFn(updateSetting);
   useEffect(() => { setS(readBixgo(initial)); }, [initial]);
-  const submit = async (v: BixgoSettings) => { setBusy(true); setS(v); try { await save({ data: { key: 'bixgo', value: v } }); onMessage('Pengaturan BIXGO disimpan.'); onSaved?.(); } catch (e) { onMessage(e instanceof Error ? e.message : 'Gagal menyimpan BIXGO'); } finally { setBusy(false); } };
+  const submit = async (v: BixgoSettings) => { setBusy(true); setS(v); try { await save({ data: { key: 'bixgo', value: v } }); onMessage('BIXGO settings saved.'); onSaved?.(); } catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save BIXGO'); } finally { setBusy(false); } };
   const svc = (k: BixgoService, f: 'baseIdr' | 'perKmIdr', v: number) => setS({ ...s, services: { ...s.services, [k]: { ...s.services[k], [f]: v } } });
   const num = (k: 'commissionPct' | 'bixDiscountPct' | 'usdtIdr', label: string) => <label className="text-xs">{label}<input className="form-input mt-1" type="number" value={s[k]} onChange={e => setS({ ...s, [k]: Number(e.target.value) })}/></label>;
   return <AdminFold title="BIXGO Super-App" badge={s.enabled ? 'Terbuka' : 'Under reconstruction'}>
     <div className="space-y-3 text-sm">
-      <label className="flex items-center justify-between"><b>Buka halaman BIXGO</b><Switch checked={s.enabled} disabled={busy} onCheckedChange={v => submit({ ...s, enabled: v })}/></label>
-      <label className="block text-xs">Pesan saat ditutup<input className="form-input mt-1" value={s.notice} maxLength={240} onChange={e => setS({ ...s, notice: e.target.value })}/></label>
+      <label className="flex items-center justify-between"><b>Open BIXGO page</b><Switch checked={s.enabled} disabled={busy} onCheckedChange={v => submit({ ...s, enabled: v })}/></label>
+      <label className="block text-xs">Message when closed<input className="form-input mt-1" value={s.notice} maxLength={240} onChange={e => setS({ ...s, notice: e.target.value })}/></label>
       <div className="grid grid-cols-3 gap-2">{num('commissionPct', 'Komisi (%)')}{num('bixDiscountPct', 'Diskon BIX (%)')}{num('usdtIdr', 'Kurs 1 USDT (Rp)')}</div>
       {BIXGO_SERVICES.map(x => <div key={x.key} className="rounded-xl border border-border p-2">
         <label className="flex items-center justify-between"><b>{x.name}</b><Switch checked={s.services[x.key].enabled} disabled={busy} onCheckedChange={v => submit({ ...s, services: { ...s.services, [x.key]: { ...s.services[x.key], enabled: v } } })}/></label>
@@ -26,7 +26,7 @@ export function AdminBixgo({ initial, onMessage, onSaved }: { initial?: unknown;
       </div>)}
       <AdminFranchise s={s} setS={setS}/>
       <AdminPpob s={s} setS={setS}/>
-      <Button className="w-full" disabled={busy} onClick={() => submit(s)}>Simpan BIXGO</Button>
+      <Button className="w-full" disabled={busy} onClick={() => submit(s)}>Save BIXGO</Button>
     </div>
   </AdminFold>;
 }

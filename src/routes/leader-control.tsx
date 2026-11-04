@@ -38,7 +38,7 @@ function Page() {
       <Link to="/profile" className="inline-flex items-center gap-1 text-xs text-muted-foreground"><ArrowLeft size={14}/> Profil</Link>
       <h1 className="font-display text-xl font-black text-primary">Kontrol Leader & Loan</h1>
       {owner1.isLoading ? <p className="text-sm text-muted-foreground">Memeriksa akses…</p>
-        : !owner1.data ? <p className="rounded-xl border border-border p-4 text-sm">Halaman ini khusus Owner 1.</p>
+        : !owner1.data ? <p className="rounded-xl border border-border p-4 text-sm">This page is exclusively for Owner 1.</p>
         : <Control/>}
     </div>
   </MemberGate></BixShell>;
@@ -50,7 +50,7 @@ function Control() {
   const [tab, setTab] = useState<Tab>('leader');
   const tabs: { id: Tab; label: string; Icon: typeof Crown }[] = [
     { id: 'leader', label: 'Leader 3×', Icon: Crown }, { id: 'loan', label: 'Loan 5×', Icon: Landmark },
-    { id: 'none', label: 'Belum ambil', Icon: UserPlus }, { id: 'packages', label: 'Paket loan', Icon: Landmark }, { id: 'hub', label: 'Menu HUB', Icon: LayoutGrid }, { id: 'withdraw', label: 'Tarik USDT virtual', Icon: Wallet }, { id: 'challenge', label: 'Challenge 1000', Icon: Trophy }, { id: 'wdm', label: 'WD Matching', Icon: Wallet },
+    { id: 'none', label: 'Not claimed yet', Icon: UserPlus }, { id: 'packages', label: 'Paket loan', Icon: Landmark }, { id: 'hub', label: 'Menu HUB', Icon: LayoutGrid }, { id: 'withdraw', label: 'Withdraw virtual USDT', Icon: Wallet }, { id: 'challenge', label: 'Challenge 1000', Icon: Trophy }, { id: 'wdm', label: 'WD Matching', Icon: Wallet },
   ];
   return <>
     <div className="flex gap-2 overflow-x-auto pb-1">{tabs.map(t => <button key={t.id} onClick={() => setTab(t.id)} className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${tab === t.id ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground'}`}><t.Icon size={13}/>{t.label}</button>)}</div>
@@ -71,15 +71,15 @@ function Roster({ kind }: { kind: 'leader' | 'loan' }) {
   const rows = (q.data?.leaders ?? []).filter(l => kind === 'loan' ? (l.support_kind === 'loan' || !!l.loan_package_id) : !(l.support_kind === 'loan' || !!l.loan_package_id));
   const act = async (id: string, status: 'approved' | 'rejected', cur: number, req: boolean) => {
     setMsg('');
-    try { await review({ data: { userId: id, status, virtualUsd: Number(edit[id] ?? cur), requireTurnover: req } }); setMsg('Tersimpan.'); qc.invalidateQueries({ queryKey: ['owner-leaders'] }); }
-    catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal menyimpan'); }
+    try { await review({ data: { userId: id, status, virtualUsd: Number(edit[id] ?? cur), requireTurnover: req } }); setMsg('Saved.'); qc.invalidateQueries({ queryKey: ['owner-leaders'] }); }
+    catch (e) { setMsg(e instanceof Error ? e.message : 'Failed to save'); }
   };
   if (q.isLoading) return <p className="text-sm text-muted-foreground">Memuat…</p>;
   if (q.error) return <p className="text-sm text-destructive">{(q.error as Error).message}</p>;
   return <div className="space-y-2">
-    <p className="text-xs text-muted-foreground">{kind === 'leader' ? 'Target 3× dari omset staking riil pribadi.' : 'Target 5× dari omset staking riil tim L1.'} Kunci 360 hari. Hangus otomatis bila dalam 30 hari omset riil kurang dari 10% nilai paket. Akun virtual, clone dan loan lain tidak dihitung.</p>
+    <p className="text-xs text-muted-foreground">{kind === 'leader' ? 'Target 3× of personal real staking turnover.' : 'Target 5× of L1 team real staking turnover.'} Kunci 360 hari. Hangus otomatis bila dalam 30 hari omset riil kurang dari 10% nilai paket. Akun virtual, clone dan loan lain tidak dihitung.</p>
     {msg && <p className="text-xs text-primary">{msg}</p>}
-    {rows.length === 0 && <p className="rounded-xl border border-border p-4 text-sm text-muted-foreground">Belum ada akun.</p>}
+    {rows.length === 0 && <p className="rounded-xl border border-border p-4 text-sm text-muted-foreground">No accounts yet.</p>}
     {rows.map(l => {
       const s = l.stats; const base = Number(s?.base ?? l.virtual_usd); const mult = kind === 'leader' ? 3 : 5;
       const done = kind === 'leader' ? Number(s?.own_stake ?? 0) : Number(s?.turnover ?? 0); const target = base * mult;
@@ -94,8 +94,8 @@ function Roster({ kind }: { kind: 'leader' | 'loan' }) {
         {l.status === 'approved' && l.require_turnover && <Expiry30 userId={l.user_id}/>}
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Input className="h-8 w-28 text-xs" inputMode="decimal" value={edit[l.user_id] ?? String(l.virtual_usd)} onChange={e => setEdit(v => ({ ...v, [l.user_id]: e.target.value }))} aria-label="Nilai paket USD"/>
-          <Button size="sm" onClick={() => act(l.user_id, 'approved', l.virtual_usd, l.require_turnover)}>Simpan / Setujui</Button>
-          <Button size="sm" variant="outline" onClick={() => act(l.user_id, 'rejected', l.virtual_usd, l.require_turnover)}>Tolak</Button>
+          <Button size="sm" onClick={() => act(l.user_id, 'approved', l.virtual_usd, l.require_turnover)}>Save / Approve</Button>
+          <Button size="sm" variant="outline" onClick={() => act(l.user_id, 'rejected', l.virtual_usd, l.require_turnover)}>Reject</Button>
         </div>
         <AccessSwitch userId={l.user_id} value={(l as { owner_access?: string }).owner_access ?? 'normal'} onDone={m => { setMsg(m); qc.invalidateQueries({ queryKey: ['owner-leaders'] }); }}/>
       </div>;
@@ -105,16 +105,16 @@ function Roster({ kind }: { kind: 'leader' | 'loan' }) {
 
 const ACCESS = [
   { v: 'normal', label: 'Normal', hint: 'Aturan target berlaku' },
-  { v: 'open', label: 'Buka', hint: 'Bebas semua syarat' },
-  { v: 'closed', label: 'Tutup', hint: 'Bekukan WD & transfer' },
+  { v: 'open', label: 'Open', hint: 'Exempt from all requirements' },
+  { v: 'closed', label: 'Close', hint: 'Bekukan WD & transfer' },
 ] as const;
 
 function AccessSwitch({ userId, value, onDone }: { userId: string; value: string; onDone: (m: string) => void }) {
   const save = useServerFn(setLeaderAccess); const [busy, setBusy] = useState(false);
   return <div className="mt-2 rounded-xl border border-border p-2">
-    <div className="text-[10px] font-black tracking-widest text-muted-foreground">AKSES AKUN BERSPONSOR · OWNER 1</div>
-    <div className="mt-1.5 grid grid-cols-3 gap-1.5" role="radiogroup" aria-label="Akses akun bersponsor">{ACCESS.map(a => <button key={a.v} type="button" role="radio" aria-checked={value === a.v} disabled={busy}
-      onClick={async () => { if (value === a.v) return; if (a.v !== 'normal' && !confirm(`${a.label} akun ini? ${a.hint}.`)) return; setBusy(true); try { await save({ data: { userId, access: a.v } }); onDone(`Akses diubah ke ${a.label}.`); } catch (e) { onDone(e instanceof Error ? e.message : 'Gagal mengubah akses.'); } finally { setBusy(false); } }}
+    <div className="text-[10px] font-black tracking-widest text-muted-foreground">SPONSORED ACCOUNT ACCESS · OWNER 1</div>
+    <div className="mt-1.5 grid grid-cols-3 gap-1.5" role="radiogroup" aria-label="Sponsored account access">{ACCESS.map(a => <button key={a.v} type="button" role="radio" aria-checked={value === a.v} disabled={busy}
+      onClick={async () => { if (value === a.v) return; if (a.v !== 'normal' && !confirm(`${a.label} this account? ${a.hint}.`)) return; setBusy(true); try { await save({ data: { userId, access: a.v } }); onDone(`Access changed to ${a.label}.`); } catch (e) { onDone(e instanceof Error ? e.message : 'Failed to change access.'); } finally { setBusy(false); } }}
       className={`rounded-lg border px-2 py-1.5 text-left text-[11px] font-bold ${value === a.v ? (a.v === 'closed' ? 'border-destructive bg-destructive/15 text-destructive' : a.v === 'open' ? 'border-chart-2 bg-chart-2/15 text-chart-2' : 'border-primary bg-primary/15 text-primary') : 'border-border text-muted-foreground'}`}>
       {a.label}<span className="block text-[9px] font-medium opacity-80">{a.hint}</span></button>)}</div>
   </div>;
@@ -125,7 +125,7 @@ function Candidates() {
   const q = useQuery({ queryKey: ['owner-leader-candidates'], queryFn: () => load() });
   const rows = (q.data?.members ?? []).filter(m => !f || `${m.username} ${m.full_name}`.toLowerCase().includes(f.toLowerCase()));
   return <div className="space-y-2">
-    <Input placeholder="Cari username…" value={f} onChange={e => setF(e.target.value)}/>
+    <Input placeholder="Search username…" value={f} onChange={e => setF(e.target.value)}/>
     <p className="text-xs text-muted-foreground">{rows.length} member belum mengambil paket leader maupun loan. Tambahkan lewat Admin panel → Leader.</p>
     {q.isLoading && <p className="text-sm text-muted-foreground">Memuat…</p>}
     <div className="divide-y divide-border rounded-2xl border border-border">{rows.slice(0, 100).map(m => <div key={m.user_id} className="flex justify-between px-3 py-2 text-sm"><span className="truncate">{m.username || m.user_id.slice(0, 8)}</span><span className="truncate text-xs text-muted-foreground">{m.full_name}</span></div>)}</div>
@@ -139,20 +139,20 @@ function Packages() {
   useEffect(() => { if (q.data) setCfg(q.data); }, [q.data]);
   if (!cfg) return <p className="text-sm text-muted-foreground">{q.error ? (q.error as Error).message : 'Memuat…'}</p>;
   const set = (i: number, p: Partial<LoanConfig['packages'][number]>) => setCfg({ packages: cfg.packages.map((r, j) => j === i ? { ...r, ...p } : r) });
-  const remove = (i: number) => { if (cfg.packages.length > 1 && confirm(`Hapus paket ${cfg.packages[i]?.id}?`)) setCfg({ packages: cfg.packages.filter((_, j) => j !== i) }); };
+  const remove = (i: number) => { if (cfg.packages.length > 1 && confirm(`Delete package ${cfg.packages[i]?.id}?`)) setCfg({ packages: cfg.packages.filter((_, j) => j !== i) }); };
   const add = () => setCfg({ packages: [...cfg.packages, { id: `PAKET${cfg.packages.length + 1}`, usd: 100, enabled: true, quota: 10 }] });
   return <div className="space-y-2">
-    <p className="text-xs text-muted-foreground">Semua paket: 360 hari · target 5× · popup member langsung mengikuti perubahan setelah disimpan. Paket yang sudah diklaim member tetap berjalan.</p>
+    <p className="text-xs text-muted-foreground">All packages: 360 days · 5× target · member popups immediately reflect changes after saving. Packages already claimed by members remain active.</p>
     {cfg.packages.map((p, i) => <div key={i} className="flex flex-wrap items-end gap-2 rounded-2xl border border-border bg-card/70 p-3">
       <label className="text-[10px] text-muted-foreground">Nama<Input className="h-8 w-32 uppercase" value={p.id} onChange={e => set(i, { id: e.target.value.toUpperCase() })}/></label>
       <label className="text-[10px] text-muted-foreground">Nilai USD<Input className="h-8 w-28" inputMode="decimal" value={p.usd} onChange={e => set(i, { usd: Number(e.target.value) || 0 })}/></label>
       <label className="text-[10px] text-muted-foreground">Kuota sponsor<Input className="h-8 w-20" inputMode="numeric" value={p.quota} onChange={e => set(i, { quota: Number(e.target.value) || 1 })}/></label>
-      <label className="flex h-8 items-center gap-2 text-xs"><Switch checked={p.enabled} onCheckedChange={v => set(i, { enabled: v })}/>{p.enabled ? 'Buka' : 'Tutup'}</label>
-      <Button size="sm" variant="outline" className="h-8 text-destructive" disabled={cfg.packages.length <= 1} onClick={() => remove(i)}>Hapus</Button>
+      <label className="flex h-8 items-center gap-2 text-xs"><Switch checked={p.enabled} onCheckedChange={v => set(i, { enabled: v })}/>{p.enabled ? 'Open' : 'Close'}</label>
+      <Button size="sm" variant="outline" className="h-8 text-destructive" disabled={cfg.packages.length <= 1} onClick={() => remove(i)}>Delete</Button>
     </div>)}
-    <Button variant="outline" onClick={add} disabled={cfg.packages.length >= 20}>+ Tambah paket</Button>
+    <Button variant="outline" onClick={add} disabled={cfg.packages.length >= 20}>+ Add package</Button>
     {msg && <p className="text-xs text-primary">{msg}</p>}
-    <Button onClick={async () => { setMsg(''); try { const r = await save({ data: cfg }); setCfg(r); qc.invalidateQueries({ queryKey: ['loan-packages'] }); qc.invalidateQueries({ queryKey: ['loan-packages-member'] }); setMsg('Paket loan tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } }}>Simpan paket loan</Button>
+    <Button onClick={async () => { setMsg(''); try { const r = await save({ data: cfg }); setCfg(r); qc.invalidateQueries({ queryKey: ['loan-packages'] }); qc.invalidateQueries({ queryKey: ['loan-packages-member'] }); setMsg('Paket loan tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } }}>Save loan package</Button>
   </div>;
 }
 
@@ -161,10 +161,10 @@ function HubToggles() {
   const [cfg, setCfg] = useState<Record<string, boolean>>({}); const [msg, setMsg] = useState('');
   useEffect(() => { setCfg(data?.readiness.dockHub ?? {}); }, [data?.readiness.dockHub]);
   return <div className="space-y-2">
-    <p className="text-xs text-muted-foreground">Pilih menu yang tampil di tombol HUB (navigasi bawah ponsel).</p>
+    <p className="text-xs text-muted-foreground">Select menus shown on the HUB button (mobile bottom navigation).</p>
     <div className="grid gap-2 sm:grid-cols-2">{HUB_ITEMS.map(it => <label key={it.id} className="flex items-center justify-between rounded-xl border border-border bg-card/70 px-3 py-2 text-sm"><span>{it.label} <small className="text-muted-foreground">{it.note}</small></span><Switch checked={hubVisible(cfg, it.id)} onCheckedChange={v => setCfg(c => ({ ...c, [it.id]: v }))}/></label>)}</div>
     {msg && <p className="text-xs text-primary">{msg}</p>}
-    <Button onClick={async () => { setMsg(''); try { await save({ data: { dockHub: cfg } }); qc.invalidateQueries({ queryKey: ['bix-public-config'] }); setMsg('Menu HUB tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } }}>Simpan menu HUB</Button>
+    <Button onClick={async () => { setMsg(''); try { await save({ data: { dockHub: cfg } }); qc.invalidateQueries({ queryKey: ['bix-public-config'] }); setMsg('Menu HUB tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } }}>Save HUB menu</Button>
   </div>;
 }
 
@@ -176,28 +176,28 @@ function VusdtWithdraw() {
   const rows = (q.data ?? []).filter(r => !f || `${r.username} ${r.code}`.toLowerCase().includes(f.toLowerCase()));
   const pull = async (r: Recipient, max: number, full: boolean) => {
     const v = full ? max : Number(amt[r.user_id]);
-    if (!v || v <= 0) return setMsg('Isi nominal penarikan.');
-    if (!confirm(`Tarik ${usd(v)} USDT virtual dari ${r.username || r.code}?`)) return;
+    if (!v || v <= 0) return setMsg('Enter withdrawal amount.');
+    if (!confirm(`Withdraw ${usd(v)} virtual USDT from ${r.username || r.code}?`)) return;
     setMsg('');
     const { error } = await supabase.rpc('bix_vusdt_clawback' as never, { p_user: r.user_id, p_amount: Math.round(v * 100) / 100, p_note: 'Owner 1' } as never);
     if (error) return setMsg(error.message);
-    setMsg(`Berhasil menarik ${usd(v)}.`); setAmt(a => ({ ...a, [r.user_id]: '' })); qc.invalidateQueries({ queryKey: ['vusdt-recipients'] }); qc.invalidateQueries({ queryKey: ['owner-leaders'] });
+    setMsg(`Successfully withdrew ${usd(v)}.`); setAmt(a => ({ ...a, [r.user_id]: '' })); qc.invalidateQueries({ queryKey: ['vusdt-recipients'] }); qc.invalidateQueries({ queryKey: ['owner-leaders'] });
   };
   return <div className="space-y-2">
-    <p className="text-xs text-muted-foreground">Tarik saldo USDT virtual dari member/leader yang menerima transfer Owner 1. Nominal bebas, maksimal sisa saldo virtual yang belum dipakai staking.</p>
-    <Input placeholder="Cari username / kode…" value={f} onChange={e => setF(e.target.value)}/>
+    <p className="text-xs text-muted-foreground">Withdraw virtual USDT balance from members/leaders who received Owner 1 transfers. Any amount up to the remaining virtual balance not used for staking.</p>
+    <Input placeholder="Search username / code…" value={f} onChange={e => setF(e.target.value)}/>
     {msg && <p className="text-xs text-primary">{msg}</p>}
     {q.isLoading && <p className="text-sm text-muted-foreground">Memuat…</p>}
     {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
-    {rows.length === 0 && !q.isLoading && <p className="rounded-xl border border-border p-4 text-sm text-muted-foreground">Belum ada penerima.</p>}
+    {rows.length === 0 && !q.isLoading && <p className="rounded-xl border border-border p-4 text-sm text-muted-foreground">No recipients yet.</p>}
     {rows.map(r => { const max = Math.max(0, Math.min(Number(r.transfer_balance) + Number(r.leader_virtual), Number(r.wallet_balance)));
       return <div key={r.user_id} className="rounded-2xl border border-border bg-card/70 p-3">
         <div className="flex justify-between gap-2"><div className="min-w-0"><div className="truncate text-sm font-bold">{r.username || r.code || r.user_id.slice(0, 8)}</div><div className="text-[11px] text-muted-foreground">{r.code}{r.kind ? ` · ${r.kind === 'loan' ? 'Loan' : 'Leader'}` : ''} · diterima {usd(r.received)}</div></div>
-          <div className="text-right"><div className="text-sm font-black text-primary">{usd(max)}</div><div className="text-[10px] text-muted-foreground">bisa ditarik</div></div></div>
+          <div className="text-right"><div className="text-sm font-black text-primary">{usd(max)}</div><div className="text-[10px] text-muted-foreground">withdrawable</div></div></div>
         <div className="mt-2 flex flex-wrap gap-2">
-          <Input className="h-8 w-28 text-xs" inputMode="decimal" placeholder="Nominal" value={amt[r.user_id] ?? ''} onChange={e => setAmt(a => ({ ...a, [r.user_id]: e.target.value }))}/>
-          <Button size="sm" disabled={max <= 0} onClick={() => pull(r, max, false)}>Tarik</Button>
-          <Button size="sm" variant="outline" disabled={max <= 0} onClick={() => pull(r, max, true)}>Tarik semua</Button>
+          <Input className="h-8 w-28 text-xs" inputMode="decimal" placeholder="Amount" value={amt[r.user_id] ?? ''} onChange={e => setAmt(a => ({ ...a, [r.user_id]: e.target.value }))}/>
+          <Button size="sm" disabled={max <= 0} onClick={() => pull(r, max, false)}>Withdraw</Button>
+          <Button size="sm" variant="outline" disabled={max <= 0} onClick={() => pull(r, max, true)}>Withdraw all</Button>
         </div>
       </div>; })}
   </div>;
@@ -208,7 +208,7 @@ function Expiry30({ userId }: { userId: string }) {
   const d = q.data; if (!d) return null;
   const met = Number(d.achieved) >= Number(d.required);
   const days = Math.ceil((new Date(d.deadline).getTime() - Date.now()) / 86400000);
-  const label = d.expired_at ? 'HANGUS' : met ? 'Syarat 10% tercapai' : days > 0 ? `${days} hari lagi` : 'Menunggu proses hangus';
+  const label = d.expired_at ? 'HANGUS' : met ? 'Syarat 10% tercapai' : days > 0 ? `${days} days left` : 'Awaiting expiration process';
   return <div className={`mt-2 rounded-lg border px-2 py-1 text-[11px] ${d.expired_at || (!met && days <= 0) ? 'border-destructive/50 text-destructive' : met ? 'border-chart-2/40 text-chart-2' : 'border-border text-muted-foreground'}`}>
     Batas 30 hari: omset {usd(d.achieved)} / min {usd(d.required)} (10%) · <b>{label}</b>
   </div>;

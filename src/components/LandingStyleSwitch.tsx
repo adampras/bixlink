@@ -20,15 +20,15 @@ export function LandingStyleSwitch() {
     try {
       await save({ data: { key: 'readiness', value: { ...defaultReadiness, ...cfg.readiness, landingTradeStyle: !on } as unknown as Record<string, unknown> } });
       await qc.invalidateQueries({ queryKey: ['bix-public-config'] });
-      setNote(!on ? 'Landing gaya BIXTRADE aktif.' : 'Landing kembali standar.');
-    } catch (e) { setNote(e instanceof Error ? e.message : 'Gagal menyimpan.'); }
+      setNote(!on ? 'BIXTRADE-style landing active.' : 'Landing reverted to standard.');
+    } catch (e) { setNote(e instanceof Error ? e.message : 'Failed to save.'); }
     setBusy(false);
   };
   return <div className="rounded-2xl border border-border bg-card p-3">
     <div className="flex items-center gap-3">
       <span className="profile-action-icon profile-action-icon--admin"><Cpu /></span>
-      <div className="min-w-0 flex-1"><b className="block text-sm">Landing gaya BIXTRADE</b><small className="text-xs text-muted-foreground">{on ? 'BUKA · beranda tampil gaya BIXTRADE' : 'TUTUP · beranda standar BIXLINK'}</small></div>
-      <button type="button" role="switch" aria-checked={on} aria-label="Buka / tutup landing gaya BIXTRADE" disabled={busy || !cfg} onClick={() => void toggle()}
+      <div className="min-w-0 flex-1"><b className="block text-sm">Landing gaya BIXTRADE</b><small className="text-xs text-muted-foreground">{on ? 'OPEN · homepage displays BIXTRADE style' : 'CLOSE · standard BIXLINK homepage'}</small></div>
+      <button type="button" role="switch" aria-checked={on} aria-label="Open / close BIXTRADE-style landing" disabled={busy || !cfg} onClick={() => void toggle()}
         className={`relative h-7 w-12 shrink-0 rounded-full border border-border transition-colors ${on ? 'bg-chart-2' : 'bg-muted'}`}>
         <span className={`absolute top-0.5 size-5 rounded-full bg-foreground transition-all ${on ? 'left-6' : 'left-0.5'}`} />
       </button>

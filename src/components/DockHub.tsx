@@ -57,7 +57,7 @@ export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, bool
     </button>
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="bottom" className="hub-midnight max-h-[80vh] overflow-y-auto rounded-t-3xl pb-8" style={drag ? { transform: `translateY(${drag}px)`, transition: 'none' } : { transition: 'transform .35s cubic-bezier(.2,.9,.3,1.2)' }}>
-        <div className="touch-none -mx-6 -mt-6 cursor-grab px-6 pt-6 pb-1" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} aria-label="Geser ke bawah untuk menutup HUB">
+        <div className="touch-none -mx-6 -mt-6 cursor-grab px-6 pt-6 pb-1" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} aria-label="Swipe down to close HUB">
         <div className="hub-grabber" aria-hidden/>
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest">BIX HUB</SheetTitle></SheetHeader>
         </div>

@@ -36,7 +36,7 @@ type Tier = { stake: number; chat: boolean; voice: boolean; video: boolean; vip:
 type Thread = { peer: string; name: string; body: string; at: string; mine: boolean; unread: number; online?: boolean };
 type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null; delivered_at?: string | null; reactions?: Record<string, string>; pinned_at?: string | null; kind?: string; media_path?: string | null; meta?: { amount?: number; note?: string | null; name?: string; size?: number; mime?: string; status?: string } | null; reply_to?: string | null; reply_body?: string | null; forwarded?: boolean; deleted_at?: string | null; hidden_by?: string[] };
 type PeerState = { online?: boolean; typing?: boolean; last_seen?: string | null };
-const seenText = (s: PeerState) => s.typing ? 'sedang mengetik…' : s.online ? 'online' : s.last_seen ? `terakhir dilihat ${new Date(s.last_seen).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'ENCRYPTED CHAT';
+const seenText = (s: PeerState) => s.typing ? 'typing…' : s.online ? 'online' : s.last_seen ? `terakhir dilihat ${new Date(s.last_seen).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'ENCRYPTED CHAT';
 const urlCache = new Map<string, string>();
 const REACTS = ['👍', '❤️', '😂', '😮', '🙏', '🔥'];
 const fmtSize = (n = 0) => n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
@@ -55,19 +55,19 @@ function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'p
   if (m.kind === 'request') {
     const st = m.meta?.status ?? 'open'; const mine = m.sender_id === me;
     return <span className={`comm-reqcard is-${st}`}><em>🧾 TAGIHAN BIX</em><b>{fmtBix(m.meta?.amount)} BIX</b>{m.meta?.note && <small>{m.meta.note}</small>}
-      {st === 'open' ? (mine ? <span className="comm-req-act"><i>Menunggu pembayaran</i><button type="button" onClick={() => onAct(m, 'cancel')}>Batalkan</button></span>
-        : <span className="comm-req-act"><button type="button" className="is-pay" onClick={() => onAct(m, 'pay')}>Bayar Sekarang</button><button type="button" onClick={() => onAct(m, 'decline')}>Tolak</button></span>)
-        : <i className="comm-req-st">{st === 'paid' ? '✓ Lunas via BIX PAY' : st === 'declined' ? 'Ditolak' : 'Dibatalkan'}</i>}
+      {st === 'open' ? (mine ? <span className="comm-req-act"><i>Waiting for payment</i><button type="button" onClick={() => onAct(m, 'cancel')}>Batalkan</button></span>
+        : <span className="comm-req-act"><button type="button" className="is-pay" onClick={() => onAct(m, 'pay')}>Pay Now</button><button type="button" onClick={() => onAct(m, 'decline')}>Reject</button></span>)
+        : <i className="comm-req-st">{st === 'paid' ? '✓ Lunas via BIX PAY' : st === 'declined' ? 'Rejected' : 'Dibatalkan'}</i>}
     </span>;
   }
   if (!url) return <span className="comm-media-wait">Memuat…</span>;
-  if (m.kind === 'image') return <a href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Foto chat" className="comm-img" loading="lazy"/></a>;
+  if (m.kind === 'image') return <a href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Chat photo" className="comm-img" loading="lazy"/></a>;
   if (m.kind === 'file' && (m.meta?.mime ?? '').startsWith('video/')) return <video src={url} controls playsInline preload="metadata" className="comm-img"/>;
   if (m.kind === 'file') return <a className="comm-filecard" href={url} target="_blank" rel="noopener noreferrer"><i>{fileIcon(m.meta?.name)}</i><span><b>{m.meta?.name ?? 'Dokumen'}</b><small>{fmtSize(m.meta?.size)} · Unduh</small></span></a>;
   return <VoiceNote url={url}/>;
 }
-const PERMS = [['all', 'Semua member'], ['friends', 'Saling follow'], ['network', 'Tim jaringan'], ['none', 'Tidak menerima']] as const;
-const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLER · Suara', video: 'PRO · Video HD', vip: '👑 VIP CALLER' };
+const PERMS = [['all', 'All members'], ['friends', 'Saling follow'], ['network', 'Tim jaringan'], ['none', 'Not accepting']] as const;
+const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLER · Voice', video: 'PRO · Video HD', vip: '👑 VIP CALLER' };
 
 function CallPage() {
   const { user, ready } = useMember();
@@ -93,7 +93,7 @@ function CallInner() {
 
   if (chatWith) return <ChatRoom me={me} peer={chatWith} tier={tier} onBack={() => setChatWith(null)}/>;
   const open = (id: string, name: string) => setChatWith({ id, name });
-  const TITLE: Record<CommTab, string> = { chat: 'CHAT', updates: 'PEMBARUAN', call: 'PANGGILAN', community: 'KOMUNITAS', setting: 'PENGATURAN' };
+  const TITLE: Record<CommTab, string> = { chat: 'CHAT', updates: 'UPDATES', call: 'CALLS', community: 'COMMUNITY', setting: 'SETTINGS' };
   const view: CommTab = tab;
 
   return <main className="mx-auto max-w-xl px-4 py-5">
@@ -110,7 +110,7 @@ function CallInner() {
 
 function CommMenu() {
   const [o, setO] = useState(false);
-  const go = [['chat', 'Chat'], ['updates', 'Pembaruan · Status'], ['community', 'Komunitas'], ['call', 'Panggilan'], ['setting', 'Pengaturan']] as const;
+  const go = [['chat', 'Chat'], ['updates', 'Updates · Status'], ['community', 'Community'], ['call', 'Calls'], ['setting', 'Settings']] as const;
   return <span className="comm-kebab"><button type="button" aria-label="Menu" onClick={() => setO(v => !v)}><MoreVertical size={18}/></button>
     {o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }
@@ -134,15 +134,15 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
   return <section className={bar ? 'bc-wrap' : 'comm-card'}>
     {!bar && <h3 className="comm-h">Lacak member</h3>}
     <div className={bar ? 'bc-bar' : 'comm-search'}>{bar ? <span className="bc-logo" aria-label="BIX CALL"><svg viewBox="0 0 40 40" width="40" height="40" aria-hidden><defs><linearGradient id="bcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#FFF1A8"/><stop offset=".5" stopColor="#FFD700"/><stop offset="1" stopColor="#B8860B"/></linearGradient></defs><circle cx="20" cy="20" r="18.5" fill="#07050c" stroke="url(#bcg)" strokeWidth="1.4"/><path d="M28 9.5a13 13 0 0 1 3.6 6.5M30.5 6.5a17 17 0 0 1 4.6 8.5" fill="none" stroke="#A855F7" strokeWidth="1.6" strokeLinecap="round"/><text x="19" y="25.5" textAnchor="middle" fontSize="14" fontWeight="900" fontFamily="system-ui,sans-serif" letterSpacing="-.5" fill="url(#bcg)">BC</text></svg><i/></span> : <Search size={15}/>}<input value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => e.key === 'Enter' && void find()} placeholder={bar ? "Cari BIX-ID, @username, no. WA…" : "BIX-ID, @username atau no. WA"}/>
-      {q && <button type="button" className="comm-clear" aria-label="Hapus" onClick={() => { setQ(''); setFound(undefined); }}>✕</button>}
-      <button onClick={() => void find()} disabled={busy} aria-label="Cari">{busy ? '…' : bar ? <Search size={15}/> : 'Cari'}</button></div>
+      {q && <button type="button" className="comm-clear" aria-label="Delete" onClick={() => { setQ(''); setFound(undefined); }}>✕</button>}
+      <button onClick={() => void find()} disabled={busy} aria-label="Search">{busy ? '…' : bar ? <Search size={15}/> : 'Cari'}</button></div>
     {(!bar || q) && <div className="comm-chips"><span>BIX-ID</span><span>@Username</span><span>No. WA</span>
       {recent.map(r => <button key={r} onClick={() => void find(r)}>↺ {r}</button>)}</div>}
-    {found === null && <p className="mt-2 text-xs text-muted-foreground">Member tidak ditemukan. Nomor WA hanya bisa dilacak jika pemiliknya mengaktifkan tombol WhatsApp.</p>}
+    {found === null && <p className="mt-2 text-xs text-muted-foreground">Member not found. WA number can only be tracked if the owner enables the WhatsApp button.</p>}
     {found && <div className="comm-peer"><BixAvatar userId={found.user_id} name={found.name}/>
       <span className="min-w-0 flex-1"><b className="block truncate">@{found.name}</b>{found.status_text && <em className="comm-statusline">{found.status_text}</em>}
         <span className="comm-meta">{found.code && <button onClick={() => copy(found.code!)}>{found.code} ⧉</button>}{found.whatsapp && <i>WA terhubung</i>}{found.via && <small>via {VIA[found.via]}</small>}</span></span>
-      {found.user_id === me ? <small>Akun Anda</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
+      {found.user_id === me ? <small>Your account</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
   </section>;
 }
 
@@ -150,12 +150,12 @@ function ActionButtons({ peerId, name, tier, canCall, onChat }: { peerId: string
   const [hint, setHint] = useState('');
   const call = (k: 'voice' | 'video') => {
     if (!tier?.[k]) { setHint(`Butuh staking aktif $${tier?.min[k] ?? '-'} untuk ${k === 'voice' ? 'panggilan suara' : 'video call'}`); setTimeout(() => setHint(''), 3500); return; }
-    if (!canCall) { setHint('Member ini tidak menerima panggilan dari Anda'); setTimeout(() => setHint(''), 3500); return; }
+    if (!canCall) { setHint('This member does not accept calls from you'); setTimeout(() => setHint(''), 3500); return; }
     startBixCall(peerId, name, k);
   };
   return <span className="comm-actions">
     <button aria-label="Chat" onClick={() => onChat(peerId, name)}><MessageCircle size={15}/></button>
-    <button aria-label="Panggilan suara" className={tier?.voice ? '' : 'is-locked'} onClick={() => call('voice')}>{tier?.voice ? <Phone size={15}/> : <Lock size={13}/>}</button>
+    <button aria-label="Voice call" className={tier?.voice ? '' : 'is-locked'} onClick={() => call('voice')}>{tier?.voice ? <Phone size={15}/> : <Lock size={13}/>}</button>
     <button aria-label="Video call" className={tier?.video ? '' : 'is-locked'} onClick={() => call('video')}>{tier?.video ? <Video size={15}/> : <Lock size={13}/>}</button>
     {hint && <em className="comm-hint">{hint} · <Link to="/stake">Staking</Link></em>}
   </span>;
@@ -168,12 +168,12 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
     void load(); const t = setInterval(() => void load(), 6000); return () => clearInterval(t);
   }, []);
   return <>
-    {tier && !tier.chat && <p className="comm-lock"><Lock size={13}/>{tier.chat_enabled ? `BIX CHAT terbuka mulai staking $${tier.min.chat}.` : 'BIX CHAT sedang ditutup Admin.'}</p>}
+    {tier && !tier.chat && <p className="comm-lock"><Lock size={13}/>{tier.chat_enabled ? `BIX CHAT terbuka mulai staking $${tier.min.chat}.` : 'BIX CHAT is currently closed by Admin.'}</p>}
     <StoryBar me={me} myName="Saya"/>
     <section className="comm-card"><h3 className="comm-h">Percakapan</h3>
-      {threads === null ? <p className="text-xs text-muted-foreground">Memuat…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada chat. Cari member di atas untuk mulai mengobrol.</p> :
+      {threads === null ? <p className="text-xs text-muted-foreground">Memuat…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">No chats yet. Search for members above to start chatting.</p> :
         <ul className="comm-list">{threads.map(t => <li key={t.peer}><button onClick={() => onOpen(t.peer, t.name)}><BixAvatar userId={t.peer} name={t.name} online={t.online}/>
-          <span className="min-w-0 flex-1 text-left"><b className="block truncate text-sm">@{t.name}</b><small className="block truncate text-muted-foreground">{t.mine ? 'Anda: ' : ''}{t.body}</small></span>
+          <span className="min-w-0 flex-1 text-left"><b className="block truncate text-sm">@{t.name}</b><small className="block truncate text-muted-foreground">{t.mine ? 'You: ' : ''}{t.body}</small></span>
           <span className="text-right"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></button></li>)}</ul>}
     </section>
   </>;
@@ -190,11 +190,11 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
   const [pad, setPad] = useState(false);
   return <>
     {pad && <Dialpad me={me} tier={tier} onChat={onChat}/>}
-    <button type="button" className={`comm-fab${pad ? ' is-open' : ''}`} aria-label={pad ? 'Tutup papan panggil' : 'Buka papan panggil'} onClick={() => setPad(v => !v)}>{pad ? <X size={22}/> : <Phone size={22}/>}</button>
-    <section className="comm-card"><h3 className="comm-h">Riwayat panggilan</h3>
-      {hist.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada panggilan.</p> : <ul className="comm-list">{hist.map(h => <li key={h.id} className="comm-row">
+    <button type="button" className={`comm-fab${pad ? ' is-open' : ''}`} aria-label={pad ? 'Close dial pad' : 'Open dial pad'} onClick={() => setPad(v => !v)}>{pad ? <X size={22}/> : <Phone size={22}/>}</button>
+    <section className="comm-card"><h3 className="comm-h">Call history</h3>
+      {hist.length === 0 ? <p className="text-xs text-muted-foreground">No calls yet.</p> : <ul className="comm-list">{hist.map(h => <li key={h.id} className="comm-row">
         <span className={`comm-dir ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.caller_id === me ? '↗' : '↙'}</span>
-        <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{h.peer}</b><small className="text-muted-foreground"><em className={`comm-hbadge ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.status === 'missed' ? 'Tak terjawab' : h.status === 'declined' ? 'Ditolak' : h.caller_id === me ? 'Keluar' : 'Masuk'}</em> {h.kind === 'video' ? 'Video' : 'Suara'} · {new Date(h.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></span>
+        <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{h.peer}</b><small className="text-muted-foreground"><em className={`comm-hbadge ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.status === 'missed' ? 'Tak terjawab' : h.status === 'declined' ? 'Rejected' : h.caller_id === me ? 'Leave' : 'Join'}</em> {h.kind === 'video' ? 'Video' : 'Voice'} · {new Date(h.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></span>
         <ActionButtons peerId={h.peerId} name={h.peer} tier={tier} canCall={h.canCall} onChat={onChat}/></li>)}</ul>}
     </section>
   </>;
@@ -213,23 +213,23 @@ function Dialpad({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
     setFound((data as Found | null) ?? null);
   };
   return <section className="comm-card comm-dial">
-    <h3 className="comm-h">Papan panggil</h3>
-    <div className="comm-dial-num"><input value={num} onChange={e => { setNum(e.target.value.slice(0, 20)); setFound(undefined); }} inputMode="tel" placeholder="BIX-ID atau no. WA"/>
-      {num && <button type="button" aria-label="Hapus angka" onClick={() => { setNum(n => n.slice(0, -1)); setFound(undefined); }}>⌫</button>}</div>
+    <h3 className="comm-h">Dial pad</h3>
+    <div className="comm-dial-num"><input value={num} onChange={e => { setNum(e.target.value.slice(0, 20)); setFound(undefined); }} inputMode="tel" placeholder="BIX-ID or WA number"/>
+      {num && <button type="button" aria-label="Delete digit" onClick={() => { setNum(n => n.slice(0, -1)); setFound(undefined); }}>⌫</button>}</div>
     <div className="comm-dial-pad">{PAD.map(k => <button key={k} type="button" onClick={() => press(k)}><b>{k}</b><small>{SUB[k] ?? ''}</small></button>)}</div>
-    <button type="button" className="comm-dial-go" onClick={() => void find()} disabled={busy || num.trim().length < 3}><Phone size={18}/>{busy ? 'Mencari…' : 'Cari & hubungi'}</button>
-    {found === null && <p className="mt-2 text-center text-xs text-muted-foreground">Member tidak ditemukan.</p>}
+    <button type="button" className="comm-dial-go" onClick={() => void find()} disabled={busy || num.trim().length < 3}><Phone size={18}/>{busy ? 'Mencari…' : 'Search & call'}</button>
+    {found === null && <p className="mt-2 text-center text-xs text-muted-foreground">Member not found.</p>}
     {found && <div className="comm-peer"><BixAvatar userId={found.user_id} name={found.name}/><b className="min-w-0 flex-1 truncate">@{found.name}</b>
-      {found.user_id === me ? <small>Akun Anda</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
+      {found.user_id === me ? <small>Your account</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
   </section>;
 }
 
 function TierLadder({ tier }: { tier: Tier | null }) {
   if (!tier) return null;
-  const steps = [['chat', MessageCircle, 'Chat', tier.min.chat], ['voice', Phone, 'Suara', tier.min.voice], ['video', Video, 'Video HD', tier.min.video], ['vip', Crown, 'VIP', tier.min.vip]] as const;
+  const steps = [['chat', MessageCircle, 'Chat', tier.min.chat], ['voice', Phone, 'Voice', tier.min.voice], ['video', Video, 'Video HD', tier.min.video], ['vip', Crown, 'VIP', tier.min.vip]] as const;
   return <section className="comm-card"><h3 className="comm-h">Fasilitas paket Anda · staking ${Number(tier.stake).toFixed(0)}</h3>
     <div className="comm-ladder">{steps.map(([k, I, l, m]) => <div key={k} className={tier[k] ? 'is-on' : ''}><I size={16}/><b>{l}</b><small>{Number(m) > 0 ? `$${m}+` : 'Gratis'}</small>{!tier[k] && <Lock size={10} className="comm-ladder-lock"/>}</div>)}</div>
-    {!tier.vip && <Link to="/stake" className="comm-upgrade">Naikkan paket staking untuk membuka fasilitas berikutnya →</Link>}
+    {!tier.vip && <Link to="/stake" className="comm-upgrade">Upgrade staking package to unlock the next features →</Link>}
   </section>;
 }
 
@@ -246,20 +246,20 @@ function PrivacyTab({ tier }: { tier: Tier | null }) {
   const save = async () => {
     const { error } = await supabase.rpc('bix_call_settings_save' as never, { p_permission: perm, p_whatsapp: wa, p_public: pub } as never);
     try { navigator.vibrate?.(15); } catch { /* optional */ }
-    setMsg(error ? error.message : 'Pengaturan tersimpan'); setTimeout(() => setMsg(''), 3000);
+    setMsg(error ? error.message : 'Settings saved'); setTimeout(() => setMsg(''), 3000);
   };
   return <>
     <TierLadder tier={tier}/>
     <section className="comm-card">
-      <h3 className="comm-h">Siapa yang boleh menghubungi saya</h3>
+      <h3 className="comm-h">Who can contact me</h3>
       <div className="comm-perms">{PERMS.map(([v, l]) => <button key={v} onClick={() => setPerm(v)} className={perm === v ? 'is-on' : ''}>{l}</button>)}</div>
       <h3 className="comm-h mt-4">Nomor HP / WhatsApp</h3>
       <input value={wa} onChange={e => setWa(e.target.value)} inputMode="tel" placeholder="+628123456789" className="comm-input"/>
-      <label className="comm-check"><input type="checkbox" checked={pub} onChange={e => setPub(e.target.checked)}/>Tampilkan tombol WhatsApp ke penelepon</label>
+      <label className="comm-check"><input type="checkbox" checked={pub} onChange={e => setPub(e.target.checked)}/>Show WhatsApp button to callers</label>
       <RingSetting/>
-      <button onClick={() => void save()} className="comm-save">Simpan</button>
+      <button onClick={() => void save()} className="comm-save">Save</button>
       {msg && <p className="mt-2 text-center text-xs">{msg}</p>}
-      <p className="mt-3 flex items-start gap-1.5 text-[10px] text-muted-foreground"><ShieldCheck size={12} className="mt-0.5 shrink-0"/>Chat dan panggilan tersambung lewat akun BIXLINK; nomor Anda tidak pernah dibagikan kecuali Anda mengaktifkan tombol WhatsApp.</p>
+      <p className="mt-3 flex items-start gap-1.5 text-[10px] text-muted-foreground"><ShieldCheck size={12} className="mt-0.5 shrink-0"/>Chats and calls connect through your BIXLINK account; your number is never shared unless you enable the WhatsApp button.</p>
     </section>
   </>;
 }
@@ -275,22 +275,22 @@ function RingSetting() {
   const test = (rid = id) => { stopRef.current?.(); const stop = startChosenRingtone(rid); stopRef.current = stop; setTimeout(() => { stop(); if (stopRef.current === stop) stopRef.current = null; }, 4000); };
   const pick = (rid: string) => { if (rid === 'device' && !dev) { fileRef.current?.click(); return; } setId(rid); setRingId(rid); test(rid); };
   const upload = async (f: File) => {
-    if (!f.type.startsWith('audio/')) { setNote('Pilih file audio (MP3, M4A, WAV, OGG).'); return; }
+    if (!f.type.startsWith('audio/')) { setNote('Select an audio file (MP3, M4A, WAV, OGG).'); return; }
     if (f.size > 8 * 1024 * 1024) { setNote('Maksimal 8 MB.'); return; }
-    await saveDeviceRingtone(f); setDev(f.name); setId('device'); setRingId('device'); setNote('Nada dering tersimpan di HP ini'); test('device');
+    await saveDeviceRingtone(f); setDev(f.name); setId('device'); setRingId('device'); setNote('Ringtone saved on this phone'); test('device');
   };
   return <><h3 className="comm-h mt-4">Nada dering BIX CALL</h3>
     <div className="comm-ring"><input type="range" min={0} max={1} step={0.1} value={v} aria-label="Volume nada dering" onChange={e => { const n = Number(e.target.value); setV(n); setRingVolume(n); }}/>
       <span>{v === 0 ? 'Senyap' : `${Math.round(v * 100)}%`}</span><button type="button" onClick={() => test()}>▶ Tes</button></div>
     <div className="comm-ring-list">{RINGTONES.map(r => <button key={r.id} type="button" className={id === r.id ? 'is-on' : ''} onClick={() => pick(r.id)}>
       <span>{r.id === 'device' ? `📱 ${dev ? dev : r.name}` : `🔔 ${r.name}`}</span><small>{id === r.id ? '✓ Dipakai' : '▶'}</small></button>)}</div>
-    <div className="comm-ring mt-2"><button type="button" onClick={() => fileRef.current?.click()}>📁 {dev ? 'Ganti nada dari HP' : 'Pilih nada dari HP'}</button>
-      {dev && <button type="button" onClick={() => { void clearDeviceRingtone(); setDev(''); if (id === 'device') { setId('lux'); setRingId('lux'); } }}>Hapus</button>}</div>
+    <div className="comm-ring mt-2"><button type="button" onClick={() => fileRef.current?.click()}>📁 {dev ? 'Change tone from phone' : 'Select tone from phone'}</button>
+      {dev && <button type="button" onClick={() => { void clearDeviceRingtone(); setDev(''); if (id === 'device') { setId('lux'); setRingId('lux'); } }}>Delete</button>}</div>
     <input ref={fileRef} type="file" accept="audio/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void upload(f); }}/>
     {note && <p className="mt-1 text-center text-[10px] text-muted-foreground">{note}</p>}</>;
 }
 
-const QUICK = ['Halo! 👋', 'Bisa telepon sekarang?', 'Sebentar ya', 'Siap 👍', 'Cek BIX PAY 🪙', 'Terima kasih 🙏'];
+const QUICK = ['Halo! 👋', 'Can you talk now?', 'Sebentar ya', 'Siap 👍', 'Cek BIX PAY 🪙', 'Thank you 🙏'];
 function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; name: string }; tier: Tier | null; onBack: () => void }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [text, setText] = useState('');
@@ -378,14 +378,14 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       r.onstop = () => { stream.getTracks().forEach(t => t.stop()); rec.current = null; setRecording(false);
         if (Date.now() - t0 < 700) return; const type = r.mimeType || 'audio/webm'; void upload(new Blob(chunks, { type }), 'voice', type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm'); };
       r.start(); rec.current = r; setRecording(true); setTimeout(() => { if (rec.current === r) r.stop(); }, 120000);
-    } catch { fail('Izin mikrofon ditolak'); }
+    } catch { fail('Microphone permission denied'); }
   };
   const [payOpen, setPayOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [amt, setAmt] = useState('');
   const [note, setNote] = useState('');
   const pay = async () => {
-    const a = Number(amt); if (!(a > 0)) return fail('Masukkan jumlah BIX');
+    const a = Number(amt); if (!(a > 0)) return fail('Enter BIX amount');
     setBusy(true);
     const { data, error } = await supabase.rpc('bix_chat_pay' as never, { p_to: peer.id, p_amount: a, p_note: note } as never);
     setBusy(false);
@@ -400,16 +400,16 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     if (error) return fail(error.message);
     const p = (data as { path?: string | null } | null)?.path;
     if (p) void supabase.storage.from('bix-chat').remove([p]);
-    setMsgs(list => everyone ? list.map(x => x.id === m.id ? { ...x, deleted_at: new Date().toISOString(), body: 'Pesan dihapus', kind: 'text', media_path: null } : x) : list.filter(x => x.id !== m.id));
+    setMsgs(list => everyone ? list.map(x => x.id === m.id ? { ...x, deleted_at: new Date().toISOString(), body: 'Message deleted', kind: 'text', media_path: null } : x) : list.filter(x => x.id !== m.id));
   };
   const forward = async (m: Msg, to: { id: string; name: string }) => {
     setFwd(null);
     if (m.kind === 'image' || m.kind === 'voice') {
-      if (!m.media_path) return fail('Lampiran tidak tersedia');
+      if (!m.media_path) return fail('Attachment unavailable');
       setBusy(true);
       const dl = await supabase.storage.from('bix-chat').download(m.media_path);
       setBusy(false);
-      if (dl.error || !dl.data) return fail('Gagal mengambil lampiran');
+      if (dl.error || !dl.data) return fail('Failed to load attachment');
       const ext = (m.media_path.split('.').pop() || 'bin').slice(0, 5);
       if (await upload(dl.data, m.kind, ext, to.id, true)) toastOk(`Diteruskan ke @${to.name}`);
       return;
@@ -444,7 +444,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     await upload(b, 'image', b === f ? (f.name.split('.').pop() || 'jpg').toLowerCase().slice(0, 5) : 'jpg');
   };
   const request = async () => {
-    const a = Number(amt); if (!(a > 0)) return fail('Masukkan jumlah BIX');
+    const a = Number(amt); if (!(a > 0)) return fail('Enter BIX amount');
     setBusy(true);
     const { data, error } = await supabase.rpc('bix_chat_request' as never, { p_to: peer.id, p_amount: a, p_note: note } as never);
     setBusy(false);
@@ -452,7 +452,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     setPayOpen(false); setAmt(''); setNote(''); added(data);
   };
   const reqAct = async (m: Msg, a: 'pay' | 'decline' | 'cancel') => {
-    if (a === 'pay' && !window.confirm(`Bayar ${fmtBix(m.meta?.amount)} BIX ke @${name} lewat BIX PAY?`)) return;
+    if (a === 'pay' && !window.confirm(`Pay ${fmtBix(m.meta?.amount)} BIX to @${name} via BIX PAY?`)) return;
     setBusy(true);
     const { data, error } = await supabase.rpc('bix_chat_request_act' as never, { p_id: m.id, p_action: a } as never);
     setBusy(false);
@@ -487,7 +487,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
 
   return <main ref={roomRef} className="comm-room is-full mx-auto max-w-xl">
     <header className="comm-room-head">
-      <button onClick={onBack} aria-label="Kembali"><ArrowLeft size={18}/></button>
+      <button onClick={onBack} aria-label="Back"><ArrowLeft size={18}/></button>
       <BixAvatar userId={peer.id} name={name} online={state.online}/>
       <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small>{peerCard?.status_text && <em className="comm-statusline">{peerCard.status_text}</em>}</span>
       <ActionButtons peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>

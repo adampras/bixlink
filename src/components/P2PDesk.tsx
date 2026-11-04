@@ -60,10 +60,10 @@ export function P2PDesk({ userId, refPrice }: { userId?: string | undefined; ref
   return <div className="p2p-desk grid gap-4">
     <P2PStats pulse={pulse.data ?? null} asks={asks} bids={bids} refPrice={refPrice} />
     <div className="p2p-boxes">
-      <button className="p2p-box is-buy" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowUpRight size={22} /><b>BELI BIX</b><small>Bayar USDT · escrow</small></button>
-      <button className="p2p-box is-sell" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowDownRight size={22} /><b>JUAL BIX</b><small>Terima USDT · escrow</small></button>
-      <button className="p2p-box" onClick={() => { buzz(); setMode('DESK'); }}><Activity size={20} /><b>PASANG HARGA</b><small>Iklan merchant sendiri</small></button>
-      <Link to="/buyback" className="p2p-box"><Zap size={20} /><b>JUAL CEPAT</b><small>Dev buyback</small></Link>
+      <button className="p2p-box is-buy" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowUpRight size={22} /><b>BUY BIX</b><small>Bayar USDT · escrow</small></button>
+      <button className="p2p-box is-sell" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowDownRight size={22} /><b>SELL BIX</b><small>Receive USDT · escrow</small></button>
+      <button className="p2p-box" onClick={() => { buzz(); setMode('DESK'); }}><Activity size={20} /><b>SET PRICE</b><small>Iklan merchant sendiri</small></button>
+      <Link to="/buyback" className="p2p-box"><Zap size={20} /><b>FAST SELL</b><small>Dev buyback</small></Link>
     </div>
     <P2PLiveFeed real={pulse.data?.recent ?? []} fresh={fresh} />
     <div role="tablist" aria-label="Trading mode" className="p2p-modes">
@@ -140,15 +140,15 @@ function P2PLiveFeed({ real, fresh }: { real: Fill[]; fresh: Set<string> }) {
   const rows = [...real.map(f => ({ ...f, demo: false as const })), ...demoFeed(now, 12)]
     .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 12);
   return <section className="p2p-panel p2p-feed" aria-label="Live trades">
-    <div className="mb-2 flex items-center justify-between"><h3 className="text-sm font-bold">Transaksi Langsung 24 Jam</h3><span className="p2p-live"><i />LIVE</span></div>
+    <div className="mb-2 flex items-center justify-between"><h3 className="text-sm font-bold">24-Hour Direct Transactions</h3><span className="p2p-live"><i />LIVE</span></div>
     <ul>{rows.map(f => <li key={f.id} className={`${fresh.has(f.id) || f.id === `demo-${Math.floor(now / DEMO_POOL.stepMs)}` ? 'is-fresh' : ''}`}>
-      <b className={f.side === 'BUY' ? 'text-chart-2' : 'text-destructive'}>{f.side === 'BUY' ? '▲ BELI' : '▼ JUAL'}</b>
+      <b className={f.side === 'BUY' ? 'text-chart-2' : 'text-destructive'}>{f.side === 'BUY' ? '▲ BUY' : '▼ SELL'}</b>
       <span className="truncate">{f.who}</span>
       <span className="numeric">{number(Number(f.bix))} BIX</span>
       <span className="numeric">${Number(f.price).toFixed(4)}</span>
       <em className={f.demo ? 'is-demo' : 'is-real'}>{f.demo ? 'AMM POOL' : 'P2P ESCROW ✓'}</em>
     </li>)}</ul>
-    <p className="mt-2 text-[10px] text-muted-foreground">AMM POOL = likuiditas protokol otomatis (simulasi, tidak memindahkan saldo member). P2P ESCROW = transaksi member tercatat di ledger internal. Tombol Beli/Jual Anda selalu masuk ke P2P ESCROW.</p>
+    <p className="mt-2 text-[10px] text-muted-foreground">AMM POOL = automated protocol liquidity (simulated, does not move member balances). P2P ESCROW = member transactions recorded in internal ledger. Your Buy/Sell buttons always route to P2P ESCROW.</p>
   </section>;
 }
 

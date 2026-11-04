@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import type { BixtradeBotMood, BixtradeStrategy } from '@/lib/bixtrade';
 
 const LABEL: Record<BixtradeBotMood, string> = {
-  sleep: 'Standby · tambah modal',
+  sleep: 'Standby · add capital',
   scan: 'Memindai 6 bursa',
   hunt: 'Rute profit terkunci',
   trade: 'Eksekusi otomatis',

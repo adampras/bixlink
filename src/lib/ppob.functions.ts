@@ -14,7 +14,7 @@ function creds() {
 async function call(path: string, body: Record<string, unknown>) {
   const r = await fetch(`${API}/${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const j = await r.json().catch(() => null) as any;
-  if (!r.ok || !j) { console.error('digiflazz', path, r.status, j); throw new Error('Provider PPOB tidak merespons'); }
+  if (!r.ok || !j) { console.error('digiflazz', path, r.status, j); throw new Error('PPOB provider is not responding'); }
   return j.data;
 }
 async function bixgoCfg(supabase: any) {
@@ -32,7 +32,7 @@ export const ppobStatus = createServerFn({ method: 'POST' }).middleware([require
     const c = creds();
     if (!c) return { configured: false, balance: null as number | null, error: null as string | null };
     try { const d = await call('cek-saldo', { cmd: 'deposit', username: c.user, sign: md5(c.user + c.key + 'depo') }); return { configured: true, balance: Number(d?.deposit ?? 0), error: null }; }
-    catch (e) { return { configured: true, balance: null, error: e instanceof Error ? e.message : 'Gagal cek saldo' }; }
+    catch (e) { return { configured: true, balance: null, error: e instanceof Error ? e.message : 'Failed to check balance' }; }
   });
 
 const CATS = ['Pulsa', 'Data', 'PLN', 'E-Money', 'Games'] as const;
@@ -54,7 +54,7 @@ export const ppobOwnerTransaction = createServerFn({ method: 'POST' }).middlewar
   .handler(async ({ data, context }) => {
     await owner(context.supabase);
     const cfg = await bixgoCfg(context.supabase);
-    const c = creds(); if (!c) throw new Error('Kunci API PPOB belum diisi');
+    const c = creds(); if (!c) throw new Error('PPOB API key is not set');
     const ref = 'BG' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase();
     const d = await call('transaction', { username: c.user, buyer_sku_code: data.sku, customer_no: data.customerNo, ref_id: ref, sign: md5(c.user + c.key + ref), ...(cfg.ppob?.live ? {} : { testing: true }) });
     return { ref, live: !!cfg.ppob?.live, status: String(d?.status ?? 'Unknown'), message: String(d?.message ?? ''), sn: String(d?.sn ?? ''), price: Number(d?.price ?? 0) };

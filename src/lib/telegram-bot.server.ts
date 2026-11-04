@@ -17,7 +17,7 @@ export async function tg(method: string, body: unknown) {
 
 const reply = (chat: number | string, text: string, markup?: unknown) => tg('sendMessage', { chat_id: chat, text, parse_mode: 'HTML', disable_web_page_preview: true, ...(markup ? { reply_markup: markup } : {}) });
 
-export const reviewButtons = (id: string) => ({ inline_keyboard: [[{ text: '✅ Setujui', callback_data: `ap:${id}` }, { text: '❌ Tolak', callback_data: `rj:${id}` }]] });
+export const reviewButtons = (id: string) => ({ inline_keyboard: [[{ text: '✅ Setujui', callback_data: `ap:${id}` }, { text: '❌ Reject', callback_data: `rj:${id}` }]] });
 
 async function cloneIds(admin: any): Promise<Set<string>> {
   const { data } = await admin.from('bix_clone_accounts').select('user_id');
@@ -43,19 +43,19 @@ async function summary(admin: any) {
   const stakers = new Set(act.map((s: any) => s.user_id));
   return [
     '<b>📊 RINGKASAN BIXLINK</b>',
-    `Member: <b>${members.length}</b> (baru hari ini ${newToday})`,
-    `Sudah deposit: <b>${depositors.size}</b> · Belum deposit: <b>${members.length - depositors.size}</b>`,
-    `Deposit disetujui: <b>${money(sum(dep))}</b> (${dep.length} trx)`,
-    `Withdraw disetujui: <b>${money(sum(wd))}</b> (${wd.length} trx)`,
-    `Menunggu review: ${pendDep} deposit · ${pendWd} withdraw`,
+    `Members: <b>${members.length}</b> (new today ${newToday})`,
+    `Deposited: <b>${depositors.size}</b> · Not deposited: <b>${members.length - depositors.size}</b>`,
+    `Approved deposits: <b>${money(sum(dep))}</b> (${dep.length} txs)`,
+    `Approved withdrawals: <b>${money(sum(wd))}</b> (${wd.length} txs)`,
+    `Pending review: ${pendDep} deposits · ${pendWd} withdrawals`,
     `Staking aktif: <b>${act.length}</b> posisi · ${stakers.size} member · ${money(act.reduce((s: number, r: any) => s + Number(r.amount_usd ?? 0), 0))}`,
-    '<i>Akun clone/support tidak dihitung.</i>',
+    '<i>Clone/support accounts are not counted.</i>',
   ].join('\n');
 }
 
 async function pending(admin: any, chat: number): Promise<unknown> {
   const { data } = await admin.from('wallet_transactions').select('id,user_id,type,amount_usd,network,tx_hash,created_at').in('type', ['deposit', 'withdraw']).eq('status', 'pending').order('created_at').limit(10);
-  if (!data?.length) return reply(chat, 'Tidak ada transaksi menunggu review.');
+  if (!data?.length) return reply(chat, 'No transactions pending review.');
   for (const t of data) {
     const { data: p } = await admin.from('profiles').select('username').eq('user_id', t.user_id).maybeSingle();
     await reply(chat, `<b>${t.type === 'deposit' ? '🟢 DEPOSIT' : '🟡 WITHDRAW'}</b> · ${esc(p?.username ?? '-')}\nJumlah: <b>${money(t.amount_usd)}</b>${t.network ? `\nJaringan: ${esc(t.network)}` : ''}${t.tx_hash ? `\nTxID: <code>${esc(t.tx_hash)}</code>` : ''}`, reviewButtons(t.id));
@@ -65,12 +65,12 @@ async function pending(admin: any, chat: number): Promise<unknown> {
 
 async function member(admin: any, q: string) {
   const term = q.trim();
-  if (!term) return 'Format: /member KODE atau username';
+  if (!term) return 'Format: /member CODE or username';
   let uid: string | null = null;
   const { data: rc } = await admin.from('referral_codes').select('user_id,code,referred_by').ilike('code', term).maybeSingle();
   if (rc) uid = rc.user_id;
   if (!uid) { const { data: p } = await admin.from('profiles').select('user_id').ilike('username', term).maybeSingle(); uid = p?.user_id ?? null; }
-  if (!uid) return 'Member tidak ditemukan.';
+  if (!uid) return 'Member not found.';
   const [{ data: p }, { data: code }, { data: tx }, { data: st }, clones] = await Promise.all([
     admin.from('profiles').select('username,full_name,created_at').eq('user_id', uid).maybeSingle(),
     admin.from('referral_codes').select('code,referred_by').eq('user_id', uid).maybeSingle(),
@@ -88,7 +88,7 @@ async function member(admin: any, q: string) {
     `Tipe: ${clones.has(uid) ? 'Clone/support' : 'Organik'}`,
     `Bergabung: ${new Date(p?.created_at ?? Date.now()).toLocaleDateString('id-ID')}`,
     `Deposit: ${money(dep)} · Withdraw: ${money(wd)}`,
-    `Stake aktif: ${(st ?? []).length} · ${money((st ?? []).reduce((s: number, r: any) => s + Number(r.amount_usd ?? 0), 0))}`,
+    `Active stake: ${(st ?? []).length} · ${money((st ?? []).reduce((s: number, r: any) => s + Number(r.amount_usd ?? 0), 0))}`,
   ].join('\n');
 }
 
@@ -100,7 +100,7 @@ async function toggle(admin: any, which: 'loan' | 'register', arg: string) {
   if (!on && !off) return `Status ${which === 'loan' ? 'akun pinjaman' : 'pendaftaran'}: <b>${cur ? 'ON' : 'OFF'}</b>\nGunakan: on / off`;
   if (which === 'loan') v.loanEnabled = on; else v.modules = { ...(v.modules ?? {}), register: on };
   const { error } = await admin.from('app_settings').upsert({ key: 'readiness', value: v }, { onConflict: 'key' });
-  if (error) return `Gagal: ${esc(error.message)}`;
+  if (error) return `Failed: ${esc(error.message)}`;
   return `✅ ${which === 'loan' ? 'Akun pinjaman' : 'Pendaftaran'} sekarang <b>${on ? 'ON' : 'OFF'}</b>`;
 }
 
@@ -108,32 +108,32 @@ export async function loanQuotaText(admin: any, sponsorId: string) {
   const { data } = await admin.rpc('bix_loan_quota', { p_sponsor: sponsorId });
   const q = (data?.quota ?? []) as { price: number; max: number; used: number }[];
   const lines = q.map(r => `  • $${Number(r.price).toLocaleString('en-US')}: ${r.used}/${r.max} ${r.used >= r.max ? '(PENUH)' : `(Tersedia ${r.max - r.used})`}`);
-  return `${data?.sponsor_is_loan ? '' : '<i>Sponsor bukan akun loan — kuota tidak berlaku.</i>\n'}📊 Kuota direct level 1:\n${lines.join('\n')}`;
+  return `${data?.sponsor_is_loan ? '' : '<i>Sponsor is not a loan account — quota does not apply.</i>\n'}📊 Kuota direct level 1:\n${lines.join('\n')}`;
 }
 
 async function loanQuota(admin: any, q: string) {
   const term = q.trim();
-  if (!term) return 'Format: /loan_kuota KODE';
+  if (!term) return 'Format: /loan_kuota CODE';
   const { data: rc } = await admin.from('referral_codes').select('user_id,code').ilike('code', term).maybeSingle();
-  if (!rc) return 'Kode tidak ditemukan.';
+  if (!rc) return 'Code not found.';
   return `<b>🎟️ KUOTA LOAN · ${esc(rc.code)}</b>\n${await loanQuotaText(admin, rc.user_id)}`;
 }
 
-const HELP = ['<b>🦊 BIXLINK Command Center</b>', '/ringkasan — laporan lengkap', '/pending — antrean deposit & withdraw (dengan tombol)', '/member KODE — detail member', '/saklar_loan on|off — akun pinjaman', '/saklar_daftar on|off — pendaftaran member', '/loan_kuota KODE — sisa kuota sponsor loan', '/growth_status — scoped queue & event status', '/flash_event on 24h|off — community event (Owner 2 excluded)', '/freeze_withdraw on|off — pause withdrawal requests (Owner 2 excluded)'].join('\n');
+const HELP = ['<b>🦊 BIXLINK Command Center</b>', '/ringkasan — full report', '/pending — deposit & withdraw queue (with buttons)', '/member CODE — member details', '/saklar_loan on|off — loan account', '/saklar_daftar on|off — member registration', '/loan_kuota CODE — remaining loan sponsor quota', '/growth_status — scoped queue & event status', '/flash_event on 24h|off — community event (Owner 2 excluded)', '/freeze_withdraw on|off — pause withdrawal requests (Owner 2 excluded)'].join('\n');
 
 export async function handleUpdate(admin: any, update: any) {
   const owner = String(process.env['TELEGRAM_CHAT_ID'] ?? '');
   if (update.callback_query) {
     const cq = update.callback_query;
     const chat = String(cq.message?.chat?.id ?? '');
-    if (!owner || chat !== owner) { await tg('answerCallbackQuery', { callback_query_id: cq.id, text: 'Tidak diizinkan' }); return; }
+    if (!owner || chat !== owner) { await tg('answerCallbackQuery', { callback_query_id: cq.id, text: 'Unauthorized' }); return; }
     const m = /^(ap|rj):([0-9a-f-]{36})$/.exec(String(cq.data ?? ''));
     if (!m) return;
     const status = m[1] === 'ap' ? 'approved' : 'rejected';
     const { data: changed, error: reviewError } = await admin.from('wallet_transactions').update({ status, reviewed_at: new Date().toISOString() }).eq('id', m[2]).eq('status', 'pending').in('type', ['deposit', 'withdraw']).select('id,type,amount_usd').maybeSingle();
     if (reviewError) { await tg('answerCallbackQuery', { callback_query_id: cq.id, text: 'Review blocked. Check Growth & Safety withdrawal pause.', show_alert: true }); return; }
     if (changed) await admin.from('deposit_intents').update({ status: 'reviewed' }).eq('claim_tx_id', m[2]).eq('status', 'pending');
-    const msg = changed ? `${status === 'approved' ? '✅ Disetujui' : '❌ Ditolak'} · ${changed.type} ${money(changed.amount_usd)}` : 'Sudah direview sebelumnya.';
+    const msg = changed ? `${status === 'approved' ? '✅ Approved' : '❌ Rejected'} · ${changed.type} ${money(changed.amount_usd)}` : 'Already reviewed previously.';
     await tg('answerCallbackQuery', { callback_query_id: cq.id, text: msg });
     await tg('editMessageReplyMarkup', { chat_id: cq.message.chat.id, message_id: cq.message.message_id, reply_markup: { inline_keyboard: [] } });
     await reply(cq.message.chat.id, msg);

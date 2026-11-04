@@ -27,11 +27,11 @@ export function CommunityTab({ render }: { render: (id: string, name: string) =>
       </div>
     </section>
     <section className="comm-card">
-      <h3 className="comm-h"><Users size={13} className="mr-1 inline"/>Kontak tim jaringan</h3>
-      <div className="comm-search"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari nama atau BIX-ID tim"/>{q && <button type="button" className="comm-clear" aria-label="Hapus" onClick={() => setQ('')}>✕</button>}</div>
+      <h3 className="comm-h"><Users size={13} className="mr-1 inline"/>Network team contacts</h3>
+      <div className="comm-search"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Search team name or BIX-ID"/>{q && <button type="button" className="comm-clear" aria-label="Delete" onClick={() => setQ('')}>✕</button>}</div>
       {gens.length > 1 && <div className="comm-chips"><button type="button" className={gen == null ? 'is-on' : ''} onClick={() => setGen(null)}>Semua</button>{gens.map(g => <button type="button" key={g} className={gen === g ? 'is-on' : ''} onClick={() => setGen(g)}>G{g}</button>)}</div>}
-      {tree.length === 0 ? <p className="mt-2 text-xs text-muted-foreground">Belum ada anggota tim. Bagikan link referral Anda dari halaman Network.</p>
-        : list.length === 0 ? <p className="mt-2 text-xs text-muted-foreground">Tidak ada yang cocok.</p>
+      {tree.length === 0 ? <p className="mt-2 text-xs text-muted-foreground">No team members yet. Share your referral link from the Network page.</p>
+        : list.length === 0 ? <p className="mt-2 text-xs text-muted-foreground">No matches found.</p>
         : <ul className="comm-list mt-2">{list.slice(0, limit).map(n => <li key={n.user_id} className="comm-row">
           <span className="comm-ava">{label(n).slice(0, 1).toUpperCase()}</span>
           <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{label(n)}</b><small className="text-muted-foreground">{n.member_code ?? 'Member'} · G{n.depth}</small></span>
@@ -45,7 +45,7 @@ export function CommunityTab({ render }: { render: (id: string, name: string) =>
 export function NotifyCard() {
   const [perm, setPerm] = useState('default');
   useEffect(() => { setPerm(typeof Notification === 'undefined' ? 'unsupported' : Notification.permission); }, []);
-  const txt = perm === 'granted' ? 'Aktif — chat & panggilan muncul walau BIXLINK ditutup.' : perm === 'denied' ? 'Diblokir di pengaturan browser/HP. Izinkan notifikasi untuk situs ini.' : perm === 'unsupported' ? 'Perangkat ini belum mendukung notifikasi.' : 'Belum aktif.';
+  const txt = perm === 'granted' ? 'Active — chats & calls appear even when BIXLINK is closed.' : perm === 'denied' ? 'Blocked in browser/device settings. Allow notifications for this site.' : perm === 'unsupported' ? 'This device does not support notifications yet.' : 'Not active yet.';
   return <section className="comm-card comm-notify">
     <span className={`comm-notify-ic is-${perm}`}><Bell size={16}/></span>
     <span className="min-w-0 flex-1"><b className="block text-sm">Notifikasi BIX CALL</b><small className="text-muted-foreground">{txt}</small></span>

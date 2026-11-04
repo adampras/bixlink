@@ -17,7 +17,7 @@ export async function sendAll(html: string, t: NotifyToggles, markup?: unknown) 
   if (t.telegram && tg && chat) {
     try {
       const r = await fetch(`https://api.telegram.org/bot${tg}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chat, text: html, parse_mode: 'HTML', disable_web_page_preview: true, ...(markup ? { reply_markup: markup } : {}) }) });
-      out['telegram'] = r.ok ? 'ok' : `gagal (${r.status})`;
+      out['telegram'] = r.ok ? 'ok' : `failed (${r.status})`;
       if (!r.ok) console.error('telegram', r.status, await r.text());
     } catch (e) { out['telegram'] = 'gagal'; console.error(e); }
   }
@@ -27,7 +27,7 @@ export async function sendAll(html: string, t: NotifyToggles, markup?: unknown) 
       const text = html.replace(/<b>|<\/b>/g, '*').replace(/<\/?code>/g, '`').replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
       const body = new URLSearchParams({ target, message: text });
       const r = await fetch('https://api.fonnte.com/send', { method: 'POST', headers: { Authorization: wa }, body });
-      out['whatsapp'] = r.ok ? 'ok' : `gagal (${r.status})`;
+      out['whatsapp'] = r.ok ? 'ok' : `failed (${r.status})`;
       if (!r.ok) console.error('whatsapp', r.status, await r.text());
     } catch (e) { out['whatsapp'] = 'gagal'; console.error(e); }
   }
@@ -53,8 +53,8 @@ export async function dispatchWalletAlerts(admin: any) {
   for (const tx of rows ?? []) {
     const events: { key: string; title: string }[] = [];
     const isDep = tx.type === 'deposit';
-    if ((isDep ? t.deposit : t.withdraw) && tx.created_at >= since) events.push({ key: `${tx.id}:new`, title: isDep ? '🟢 DEPOSIT MASUK' : '🟡 PENGAJUAN WITHDRAW' });
-    if (t.review && tx.status !== 'pending') events.push({ key: `${tx.id}:${tx.status}`, title: tx.status === 'approved' ? (isDep ? '✅ DEPOSIT DIKONFIRMASI' : '🔵 WITHDRAW DISETUJUI') : `❌ ${isDep ? 'DEPOSIT' : 'WITHDRAW'} DITOLAK` });
+    if ((isDep ? t.deposit : t.withdraw) && tx.created_at >= since) events.push({ key: `${tx.id}:new`, title: isDep ? '🟢 INCOMING DEPOSIT' : '🟡 PENGAJUAN WITHDRAW' });
+    if (t.review && tx.status !== 'pending') events.push({ key: `${tx.id}:${tx.status}`, title: tx.status === 'approved' ? (isDep ? '✅ DEPOSIT DIKONFIRMASI' : '🔵 WITHDRAWAL APPROVED') : `❌ ${isDep ? 'DEPOSIT' : 'WITHDRAW'} DITOLAK` });
     if (!events.length) continue;
     const { data: p } = await admin.from('profiles').select('username,full_name').eq('user_id', tx.user_id).maybeSingle();
     for (const ev of events) {
@@ -63,7 +63,7 @@ export async function dispatchWalletAlerts(admin: any) {
       const lines = [
         `<b>${ev.title}</b> · BIXLINK`,
         `Member: <b>${esc(p?.username ?? '-')}</b>${p?.full_name ? ` (${esc(p.full_name)})` : ''}`,
-        `Jumlah: <b>${money(tx.amount_usd)}</b>${tx.fee_usd ? ` · Fee ${money(tx.fee_usd)} · Bersih ${money(tx.net_usd)}` : ''}`,
+        `Amount: <b>${money(tx.amount_usd)}</b>${tx.fee_usd ? ` · Fee ${money(tx.fee_usd)} · Bersih ${money(tx.net_usd)}` : ''}`,
         tx.network ? `Jaringan: ${esc(String(tx.network))}` : '',
         tx.address ? `Alamat: <code>${esc(String(tx.address))}</code>` : '',
         tx.tx_hash ? `TxID: <code>${esc(String(tx.tx_hash))}</code>` : '',

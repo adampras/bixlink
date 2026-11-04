@@ -35,7 +35,7 @@ export const notifyBixPush = createServerFn({ method: 'POST' })
     } else {
       const { data: c } = await context.supabase.from('bix_calls').select('caller_id, callee_id, kind, status, created_at').eq('id', data.id).maybeSingle();
       if (!c || c.caller_id !== context.userId || c.status !== 'ringing' || Date.now() - new Date(c.created_at).getTime() > 60000) return { sent: 0 };
-      to = c.callee_id; payload = { type: 'call', body: c.kind === 'video' ? '📹 Video call masuk — ketuk untuk menjawab' : '📞 Panggilan suara masuk — ketuk untuk menjawab', tag: `call-${data.id}`, url: '/call' };
+      to = c.callee_id; payload = { type: 'call', body: c.kind === 'video' ? '📹 Incoming video call — tap to answer' : '📞 Incoming voice call — tap to answer', tag: `call-${data.id}`, url: '/call' };
     }
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { data: prof } = await supabaseAdmin.from('profiles').select('username, full_name').eq('user_id', context.userId).maybeSingle();

@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 
 const PUBLIC = [
   { to: '/', label: 'Home', k: 'beranda landing' },
-  { to: '/auth', label: 'Sign in', k: 'login masuk akun' },
-  { to: '/register', label: 'Register', k: 'daftar akun baru' },
+  { to: '/auth', label: 'Sign in', k: 'login to account' },
+  { to: '/register', label: 'Register', k: 'register new account' },
   { to: '/whitepaper', label: 'Whitepaper', k: 'tokenomics dokumen 21m' },
   { to: '/about', label: 'About', k: 'tentang' },
   { to: '/risk', label: 'Risk disclosure', k: 'risiko' },
@@ -14,17 +14,17 @@ const PUBLIC = [
   { to: '/privacy', label: 'Privacy', k: 'privasi' },
 ] as const;
 const MEMBER = [
-  { to: '/wallet', label: 'Wallet', k: 'dompet saldo deposit withdraw' },
+  { to: '/wallet', label: 'Wallet', k: 'wallet balance deposit withdraw' },
   { to: '/stake', label: 'Stake', k: 'staking paket' },
   { to: '/profit', label: 'Profit', k: 'keuntungan' },
   { to: '/boost', label: 'Boost APY', k: 'booster tier' },
   { to: '/network', label: 'Network', k: 'jaringan referral tim' },
   { to: '/presale', label: 'Presale & Sovereign', k: 'genesis 100000' },
-  { to: '/market', label: 'Market & Updates', k: 'pasar harga' },
+  { to: '/market', label: 'Market & Updates', k: 'price market' },
   { to: '/nft-marketplace', label: 'NFT Marketplace', k: 'toko merchandise shop' },
   { to: '/arena', label: 'Fox Arena', k: 'game quest' },
-  { to: '/pay', label: 'BIX PAY', k: 'transfer kirim' },
-  { to: '/profile', label: 'Profile', k: 'profil akun' },
+  { to: '/pay', label: 'BIX PAY', k: 'transfer send' },
+  { to: '/profile', label: 'Profile', k: 'account profile' },
   { to: '/settings', label: 'Settings', k: 'pengaturan' },
 ] as const;
 
