@@ -6010,6 +6010,6 @@ img, video, svg { -webkit-user-drag: none; user-drag: none; }
 input, textarea, select, [contenteditable="true"], .allow-select, .allow-select *,
 code, pre, .numeric.select-all, .select-all, .select-text, [data-copyable], [data-copyable] *,
 .chat-bubble, .chat-bubble *, [class*="msg-bubble"], [class*="msg-bubble"] *,
-.break-all, .font-mono {
+.break-all, .font-mono, [class*="ref-link"], [class*="referral"] [class*="code"], [class*="member-code"] {
   -webkit-user-select: text; user-select: text; -webkit-touch-callout: default;
 }
