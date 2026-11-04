@@ -6143,3 +6143,27 @@ code, pre, .numeric.select-all, .select-all, .select-text, [data-copyable], [dat
 .nx-hist-filter b{color:var(--chart-3)}
 .wallet-actions--inside:has(> :nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
 .stake-calc-range{accent-color:var(--chart-3);height:28px}
+
+/* Stake package picker — crisp obsidian, gold hairline, no muddy backgrounds */
+.stake-pick { margin: 0 0 1.25rem; padding: 12px; border-radius: 16px; border: 1px solid color-mix(in oklab, var(--chart-3) 45%, transparent); background: color-mix(in oklab, var(--background) 92%, var(--card)); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--chart-3) 25%, transparent); }
+.stake-pick-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0 2px 8px; }
+.stake-pick-head span { font-size: 11px; font-weight: 800; letter-spacing: .18em; color: var(--chart-3); }
+.stake-pick-head em { font-style: normal; font-size: 10px; color: var(--muted-foreground); }
+.stake-pick-chips { display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 4px; }
+.stake-pick-chips::-webkit-scrollbar { display: none; }
+.stake-pick-chip { flex: 0 0 auto; scroll-snap-align: center; min-width: 68px; min-height: 44px; padding: 6px 10px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--foreground); display: flex; flex-direction: column; align-items: center; line-height: 1.1; transition: transform .15s, background .2s; }
+.stake-pick-chip b { font-size: 14px; font-weight: 800; }
+.stake-pick-chip small { font-size: 9px; color: var(--muted-foreground); letter-spacing: .06em; }
+.stake-pick-chip[aria-selected="true"] { background: linear-gradient(135deg, oklch(.9 .12 90), oklch(.74 .15 75)); border-color: transparent; color: var(--background); box-shadow: 0 6px 16px -8px oklch(.8 .15 85); }
+.stake-pick-chip[aria-selected="true"] small { color: var(--background); opacity: .8; }
+.stake-pick-chip:active { transform: scale(.95); }
+.stake-pick-stage { position: relative; margin-top: 10px; touch-action: pan-y; }
+.stake-pick-stage .auric-card::after { display: none; }
+.stake-pick-arrow { position: absolute; top: 34px; z-index: 3; width: 32px; height: 32px; border-radius: 999px; display: grid; place-items: center; border: 1px solid color-mix(in oklab, var(--chart-3) 50%, transparent); background: var(--background); color: var(--chart-3); }
+.stake-pick-arrow.is-left { left: -6px; } .stake-pick-arrow.is-right { right: -6px; }
+.stake-pick-dots { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
+.stake-pick-dots i { width: 6px; height: 6px; border-radius: 99px; background: var(--border); transition: width .2s, background .2s; }
+.stake-pick-dots i.on { width: 18px; background: var(--chart-3); }
+/* sharpen stake header: drop muddy watermark/gradient */
+.stake-compact .stake-lux-head { background: var(--background) !important; }
+.stake-compact .stake-lux-head::after { display: none; }
