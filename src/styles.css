@@ -6013,3 +6013,61 @@ code, pre, .numeric.select-all, .select-all, .select-text, [data-copyable], [dat
 .break-all, .font-mono, [class*="ref-link"], [class*="referral"] [class*="code"], [class*="member-code"] {
   -webkit-user-select: text; user-select: text; -webkit-touch-callout: default;
 }
+
+/* ===== P2P live trading desk ===== */
+.p2p-panel { border: 1px solid color-mix(in oklab, var(--border) 80%, transparent); background: linear-gradient(160deg, color-mix(in oklab, var(--card) 96%, var(--chart-3) 4%), var(--card)); border-radius: 1.1rem; padding: 1rem; }
+.p2p-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+@media (min-width: 768px) { .p2p-stats { grid-template-columns: 1.4fr 1fr 1fr 1fr; } }
+.p2p-stat { border: 1px solid color-mix(in oklab, var(--border) 70%, transparent); background: var(--card); border-radius: .9rem; padding: .65rem .8rem; display: grid; gap: .1rem; min-width: 0; }
+.p2p-stat span { font-size: .6rem; letter-spacing: .14em; color: var(--muted-foreground); font-weight: 700; }
+.p2p-stat b { font-size: 1rem; display: inline-flex; align-items: center; gap: .2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p2p-stat small { font-size: .65rem; color: var(--muted-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p2p-stat--main { grid-column: span 2; border-color: color-mix(in oklab, var(--chart-3) 45%, transparent); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--chart-3) 10%, transparent), 0 10px 30px -18px var(--chart-3); }
+.p2p-stat--main b { font-size: 1.6rem; }
+@media (min-width: 768px) { .p2p-stat--main { grid-column: auto; } }
+.p2p-escrow { grid-column: 1 / -1; display: flex; align-items: center; gap: .4rem; font-size: .68rem; color: var(--muted-foreground); padding: .1rem .2rem; }
+.p2p-escrow svg { color: var(--chart-2); flex-shrink: 0; }
+.p2p-live { margin-left: auto; display: inline-flex; align-items: center; gap: .3rem; font-weight: 800; letter-spacing: .14em; color: var(--chart-2); }
+.p2p-live i { width: .45rem; height: .45rem; border-radius: 999px; background: var(--chart-2); animation: p2pPulse 1.6s ease-in-out infinite; }
+@keyframes p2pPulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in oklab, var(--chart-2) 60%, transparent); } 50% { opacity: .55; box-shadow: 0 0 0 5px transparent; } }
+.p2p-ticker { overflow: hidden; border-block: 1px solid color-mix(in oklab, var(--border) 70%, transparent); background: color-mix(in oklab, var(--card) 85%, transparent); border-radius: .7rem; mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+.p2p-ticker--empty { display: flex; align-items: center; gap: .4rem; padding: .55rem .8rem; font-size: .72rem; color: var(--muted-foreground); mask-image: none; }
+.p2p-ticker-track { display: flex; width: max-content; animation: p2pTicker 40s linear infinite; }
+.p2p-ticker:hover .p2p-ticker-track { animation-play-state: paused; }
+@keyframes p2pTicker { to { transform: translateX(-50%); } }
+.p2p-tick { display: inline-flex; align-items: center; gap: .3rem; padding: .55rem 1rem; font-size: .72rem; white-space: nowrap; border-right: 1px solid color-mix(in oklab, var(--border) 60%, transparent); }
+.p2p-tick em { font-style: normal; color: var(--muted-foreground); font-size: .65rem; }
+.p2p-tick.is-fresh, .p2p-card.is-fresh { animation: p2pFlash 1.6s ease-out; }
+@keyframes p2pFlash { 0% { background-color: color-mix(in oklab, var(--chart-3) 28%, transparent); } 100% { background-color: transparent; } }
+.p2p-modes, .p2p-side, .p2p-filter { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: .3rem; padding: .25rem; border-radius: .9rem; background: color-mix(in oklab, var(--muted) 60%, transparent); }
+.p2p-modes button, .p2p-side button, .p2p-filter button { min-height: 2.6rem; border-radius: .7rem; font-size: .8rem; font-weight: 700; color: var(--muted-foreground); display: inline-flex; align-items: center; justify-content: center; gap: .35rem; transition: background .2s, color .2s; }
+.p2p-modes button.is-on, .p2p-filter button.is-on { background: var(--card); color: var(--chart-3); box-shadow: 0 4px 14px -8px var(--chart-3); }
+.p2p-side button.is-on.is-buy { background: var(--chart-2); color: var(--background); }
+.p2p-side button.is-on.is-sell { background: var(--destructive); color: var(--destructive-foreground, var(--background)); }
+.p2p-express { max-width: 32rem; width: 100%; margin-inline: auto; }
+.p2p-amount { display: grid; gap: .3rem; margin-top: .6rem; font-size: .7rem; color: var(--muted-foreground); }
+.p2p-amount input { width: 100%; background: transparent; border: 1px solid var(--border); border-radius: .9rem; padding: .7rem .9rem; font-size: 1.6rem; font-weight: 800; color: var(--foreground); font-variant-numeric: tabular-nums; }
+.p2p-amount input:focus { outline: none; border-color: var(--chart-3); }
+.p2p-quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; margin-top: .5rem; }
+.p2p-quick button { min-height: 2.3rem; border: 1px solid var(--border); border-radius: .6rem; font-size: .75rem; font-weight: 700; }
+.p2p-quick button:disabled { opacity: .4; }
+.p2p-quote { margin-top: .8rem; border-radius: .9rem; padding: .7rem .85rem; background: color-mix(in oklab, var(--muted) 45%, transparent); display: grid; gap: .3rem; }
+.p2p-quote div { display: flex; justify-content: space-between; font-size: .8rem; }
+.p2p-quote span { color: var(--muted-foreground); }
+.p2p-quote small { font-size: .65rem; color: var(--muted-foreground); }
+.p2p-quote--empty { font-size: .75rem; color: var(--muted-foreground); }
+.p2p-go { width: 100%; margin-top: .8rem; min-height: 3rem; font-weight: 800; letter-spacing: .02em; }
+.p2p-card-row .p2p-go { width: auto; margin-top: 0; min-height: 2.3rem; padding-inline: 1.2rem; }
+.p2p-go.is-buy { background: var(--chart-2); color: var(--background); }
+.p2p-go.is-sell { background: var(--destructive); color: var(--destructive-foreground, var(--background)); }
+.p2p-card { position: relative; overflow: hidden; border: 1px solid color-mix(in oklab, var(--border) 70%, transparent); border-radius: .9rem; padding: .7rem .8rem; display: grid; gap: .5rem; }
+.p2p-depth { position: absolute; inset-block: 0; right: 0; pointer-events: none; opacity: .14; }
+.p2p-depth.is-ask { background: var(--destructive); }
+.p2p-depth.is-bid { background: var(--chart-2); }
+.p2p-merchant { position: relative; display: flex; align-items: center; gap: .55rem; }
+.p2p-merchant b { font-size: .8rem; }
+.p2p-merchant small, .p2p-card-row small { display: block; font-size: .65rem; color: var(--muted-foreground); }
+.p2p-avatar { width: 2rem; height: 2rem; border-radius: 999px; display: grid; place-items: center; font-size: .7rem; font-weight: 800; background: color-mix(in oklab, var(--chart-3) 22%, var(--card)); color: var(--chart-3); flex-shrink: 0; }
+.p2p-card-row { position: relative; display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.p2p-buyback { display: flex; align-items: center; justify-content: space-between; border: 1px solid color-mix(in oklab, var(--chart-3) 55%, transparent); border-radius: 1rem; padding: .75rem 1rem; font-size: .8rem; font-weight: 800; color: var(--chart-3); background: var(--card); }
+@media (prefers-reduced-motion: reduce) { .p2p-ticker-track, .p2p-live i, .p2p-tick.is-fresh, .p2p-card.is-fresh { animation: none; } .p2p-ticker { overflow-x: auto; } }
