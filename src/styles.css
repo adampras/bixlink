@@ -6240,3 +6240,31 @@ html.comm-room-open,html.comm-room-open body{overflow:hidden;overscroll-behavior
 .ltx-fleet { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
 .ltx-note { margin-top:10px; font-size:10px; color:var(--muted-foreground); }
 @media (max-width:640px) { .ltx-hero { grid-template-columns:1fr; } .ltx-grid { grid-template-columns:repeat(2,1fr); } .fleet-card { grid-template-columns:96px 1fr; } }
+.fleet-stage.fleet-inline { position:relative; inset:auto; z-index:auto; margin:12px -16px 0; min-height:calc(100dvh - 140px); border-radius:22px; padding:18px 16px 24px; border:1px solid rgb(255 215 0 / .18); }
+.lci { position:relative; max-width:1100px; margin:0 auto; padding:0 0 12px; color:#fff; background:#07060c; }
+.lci-bar { position:sticky; top:0; z-index:30; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:#07060c; border-bottom:1px solid rgb(255 215 0 / .15); }
+.lci-bar b { font-size:26px; letter-spacing:.02em; } .lci-bar b span { color:#FFD700; }
+.lci-burger { width:46px; height:46px; display:grid; place-items:center; border-radius:12px; background:rgb(255 255 255 / .08); border:1px solid rgb(255 215 0 / .25); color:#FFD700; }
+.lci-drawer-wrap { position:fixed; inset:0; z-index:95; background:rgb(0 0 0 / .7); display:flex; justify-content:flex-end; }
+.lci-drawer { width:min(84vw,360px); height:100%; overflow-y:auto; background:#0b0912; border-left:1px solid rgb(255 215 0 / .25); padding:calc(env(safe-area-inset-top) + 80px) 20px 24px; display:flex; flex-direction:column; }
+.lci-row { display:flex; align-items:center; justify-content:space-between; padding:18px 6px; font-size:18px; color:#fff; border-bottom:1px solid rgb(255 255 255 / .06); text-align:left; }
+.lci-row svg { transition:transform .2s; color:#FFD700; }
+.lci-sub { display:grid; padding:4px 0 8px 16px; } .lci-sub a { padding:10px 6px; color:rgb(255 255 255 / .75); font-size:15px; } .lci-sub a:hover { color:#FFD700; }
+.lci-auth { display:grid; gap:10px; margin-top:22px; padding-top:22px; border-top:1px solid rgb(255 255 255 / .1); }
+.lci-ghost,.lci-go { display:block; text-align:center; padding:13px; border-radius:12px; font-weight:700; }
+.lci-ghost { border:1px solid rgb(255 255 255 / .25); color:#fff; }
+.lci-go { background:linear-gradient(135deg,#FFD700,#e0a800); color:#120c00; }
+.lci-notice { display:flex; gap:12px; align-items:flex-start; margin:0; padding:14px 18px; background:linear-gradient(90deg,#1a1033,#120a24); border-bottom:1px solid rgb(168 85 247 / .35); }
+.lci-notice > svg { flex:none; color:#FFD700; margin-top:2px; } .lci-notice div { flex:1; display:grid; gap:8px; } .lci-notice b { font-size:15px; }
+.lci-notice a { justify-self:start; display:inline-flex; gap:6px; align-items:center; padding:7px 14px; border-radius:10px; background:#fff; color:#1a1033; font-size:13px; font-weight:700; }
+.lci-notice button { color:#fff; }
+.lci-hero { text-align:center; padding:44px 22px 30px; }
+.lci-hero h1 { font-size:clamp(30px,8vw,52px); line-height:1.15; font-weight:800; } .lci-hero h1 span { color:#FFD700; }
+.lci-line { display:block; width:80px; height:5px; margin:22px auto; border-radius:3px; background:linear-gradient(90deg,#A855F7,#FFD700); }
+.lci-hero p { max-width:520px; margin:0 auto; font-size:17px; line-height:1.6; color:rgb(255 255 255 / .82); }
+.lci-cta { display:inline-block; margin-top:26px; padding:14px 36px; border-radius:999px; font-size:17px; }
+.lci-hero small { display:block; margin-top:14px; color:rgb(255 255 255 / .55); font-size:12px; }
+.lci-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; padding:0 16px; }
+.lci-card { display:grid; gap:6px; padding:16px; border-radius:16px; background:#0f0c18; border:1px solid rgb(255 215 0 / .14); }
+.lci-card svg { color:#A855F7; } .lci-card b { font-size:15px; } .lci-card span { font-size:12px; line-height:1.45; color:rgb(255 255 255 / .7); } .lci-card em { font-style:normal; font-size:12px; color:#FFD700; display:inline-flex; gap:4px; align-items:center; }
+.lci-note { display:flex; gap:6px; align-items:center; justify-content:center; margin:16px; font-size:11px; color:rgb(255 255 255 / .55); text-align:center; }
