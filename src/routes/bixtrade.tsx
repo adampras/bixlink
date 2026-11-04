@@ -53,6 +53,7 @@ function BixtradePage() {
   const [logFilter, setLogFilter] = useState<'all' | 'win' | 'scratch'>('all');
   const [receipt, setReceipt] = useState<Exec | null>(null);
   const [menu, setMenu] = useState(false);
+  const [menu, setMenu] = useState(false);
   useEffect(() => { void supabase.rpc('is_bix_admin').then(({ data }) => setIsAdmin(data === true)); }, [uid]);
   const audio = useRef<AudioContext | null>(null);
   useEffect(() => { setSound(localStorage.getItem('bixtrade-sound') === '1'); }, []);
