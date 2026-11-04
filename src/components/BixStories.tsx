@@ -4,6 +4,7 @@ import { Camera, Eye, Plus, Trash2, Type, Video as VideoIcon, X } from 'lucide-r
 import { supabase } from '@/integrations/supabase/client';
 import { BixAvatar, useSignedUrl } from '@/components/BixAvatar';
 import { invalidateCard, saveStatus } from '@/lib/bix-avatar';
+import { compressImage } from '@/lib/bix-image';
 
 export type Story = { id: string; kind: 'text' | 'photo' | 'video'; media_path: string | null; caption: string | null; bg: string; created_at: string; viewed: boolean; views?: number | null };
 export type StoryGroup = { user_id: string; name: string; avatar_path: string | null; mine: boolean; unseen: boolean; stories: Story[] };
@@ -184,7 +185,8 @@ function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: '
         if (!file) throw new Error('Pilih media terlebih dulu');
         const ext = (file.name.split('.').pop() || (mode === 'photo' ? 'jpg' : 'mp4')).toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5);
         path = `${me}/${crypto.randomUUID()}.${ext}`;
-        const up = await supabase.storage.from('bix-stories').upload(path, file, { contentType: file.type, upsert: false });
+        const body = mode === 'photo' ? await compressImage(file) : file;
+        const up = await supabase.storage.from('bix-stories').upload(path, body, { contentType: body.type || file.type, upsert: false });
         if (up.error) throw new Error(up.error.message);
       }
       const { error } = await supabase.rpc('bix_story_post' as never, { p_kind: mode, p_path: path, p_caption: text, p_bg: bg } as never);
