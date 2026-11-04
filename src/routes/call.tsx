@@ -319,6 +319,15 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me, peer.id]);
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [msgs.length]);
+  // Full-screen room that tracks the visible area, so the keyboard never pushes the page up.
+  const roomRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const vv = window.visualViewport; const el = roomRef.current;
+    document.documentElement.classList.add('comm-room-open');
+    const fit = () => { if (!el) return; const h = vv?.height ?? window.innerHeight; el.style.height = `${h}px`; el.style.transform = `translateY(${vv?.offsetTop ?? 0}px)`; window.scrollTo(0, 0); end.current?.scrollIntoView({ block: 'end' }); };
+    fit(); vv?.addEventListener('resize', fit); vv?.addEventListener('scroll', fit);
+    return () => { vv?.removeEventListener('resize', fit); vv?.removeEventListener('scroll', fit); document.documentElement.classList.remove('comm-room-open'); };
+  }, []);
 
   const onType = (v: string) => {
     setText(v);
@@ -468,7 +477,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   const pinned = msgs.find(x => x.pinned_at && !x.deleted_at);
   const jump = (id: string) => document.getElementById(`msg-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  return <main className="comm-room mx-auto max-w-xl">
+  return <main ref={roomRef} className="comm-room is-full mx-auto max-w-xl">
     <header className="comm-room-head">
       <button onClick={onBack} aria-label="Kembali"><ArrowLeft size={18}/></button>
       <BixAvatar userId={peer.id} name={name} online={state.online}/>
