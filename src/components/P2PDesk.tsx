@@ -38,8 +38,12 @@ export function P2PDesk({ userId }: { userId?: string | undefined }) {
   useEffect(() => {
     const ids = [...(book.data ?? []).map(o => o.id), ...(pulse.data?.recent ?? []).map(f => f.id)];
     if (!ids.length) return;
-    if (seen.current) { const n = new Set(ids.filter(i => !seen.current!.has(i))); if (n.size) { setFresh(n); const t = setTimeout(() => setFresh(new Set()), 1800); seen.current = new Set(ids); return () => clearTimeout(t); } }
-    seen.current = new Set(ids);
+    const prev = seen.current; seen.current = new Set(ids);
+    if (!prev) return;
+    const n = new Set(ids.filter(i => !prev.has(i)));
+    if (!n.size) return;
+    setFresh(n); const t = setTimeout(() => setFresh(new Set()), 1800);
+    return () => clearTimeout(t);
   }, [book.data, pulse.data]);
 
   const refresh = () => { qc.invalidateQueries({ queryKey: ['p2p-book'] }); qc.invalidateQueries({ queryKey: ['p2p-pulse'] }); qc.invalidateQueries({ queryKey: ['p2p-bal', userId] }); };
