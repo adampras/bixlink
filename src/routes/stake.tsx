@@ -70,8 +70,8 @@ function StakePage() {
       </dl></GlowSurface>
       
       {skin.data && <InstitutionalStakeHeader active={activeStakes.length} principal={activeStakes.reduce((n, s) => n + Number(s.amount_usd), 0)} live={liveTotal} perDay={perDay}/>}
-      <StakeCalculator packages={cfg?.packages ?? []} onPick={setChosen}/>
-      <StakePackageLayouts packages={cfg?.packages ?? []} layout={skin.data ? 'institutional' : cfg?.boosterVisual.stakeLayout} onStake={setChosen}/>
+      {skin.data ? <StakePackageLayouts packages={cfg?.packages ?? []} layout="institutional" onStake={setChosen}/> : <StakeCalculator packages={cfg?.packages ?? []} onPick={setChosen}/>}
+      {false && <StakePackageLayouts packages={cfg?.packages ?? []} layout={skin.data ? 'institutional' : cfg?.boosterVisual.stakeLayout} onStake={setChosen}/>
       <div ref={historyRef} tabIndex={-1} className="staking-history-anchor mt-12 flex items-end justify-between gap-4"><div><div className="eyebrow">ACTIVITY</div><h2 className="mt-2 font-display text-2xl font-black">My requests</h2></div><div className="flex items-center gap-2"><span className="numeric text-xs text-muted-foreground">{data?.stakes.length ?? 0} total</span><Button variant="outline" size="icon" aria-label={requestsVisible ? "Hide my requests" : "Show my requests"} aria-expanded={requestsVisible} aria-controls="stake-requests" onClick={() => setRequestsVisible(current => !current)}>{requestsVisible ? <ChevronUp/> : <ChevronDown/>}</Button></div></div>
       <div id="stake-requests" hidden={!requestsVisible} className="mt-4 space-y-3">{(data?.stakes ?? []).map(s => {
         const started = s.activated_at ? new Date(s.activated_at).getTime() : null;

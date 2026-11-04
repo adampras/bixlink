@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
-import { Calculator, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { money, type Package } from '@/lib/bixlink';
+import { useMemo, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { DurationPackageCard } from '@/components/DurationPackageCard';
+import { number, type Package } from '@/lib/bixlink';
 
 /** Picks the largest open package whose price fits the chosen amount. */
 export function fitPackage(packages: Package[], amount: number): Package | null {
@@ -11,19 +11,33 @@ export function fitPackage(packages: Package[], amount: number): Package | null 
   return pick ?? open[0] ?? null;
 }
 
+/** Simple package picker: tap a price chip or swipe the card left/right. */
 export function StakeCalculator({ packages, onPick }: { packages: Package[]; onPick: (p: Package) => void }) {
-  const prices = useMemo(() => [...new Set(packages.filter(p => p.enabled !== false && !p.retired).map(p => p.price_usd))].sort((a, b) => a - b), [packages]);
-  const [idx, setIdx] = useState(Math.min(2, Math.max(0, prices.length - 1)));
-  if (!prices.length) return null;
-  const amount = prices[Math.min(idx, prices.length - 1)] ?? 0;
-  const pkg = fitPackage(packages, amount);
-  const daily = pkg ? (pkg.price_usd * pkg.apy) / 100 / 365 : 0;
-  return <section aria-label="Kalkulator simulasi" className="stake-calc auric-card mb-5 rounded-2xl border p-4">
-    <div className="flex items-center justify-between gap-2"><span className="eyebrow flex items-center gap-1"><Calculator size={12}/> SIMULASI INSTAN</span>{pkg && <span className="stake-lux-chip">{pkg.id}</span>}</div>
-    <div className="mt-2 flex items-end justify-between gap-2"><b className="numeric font-display text-3xl font-black text-chart-3">{money(amount, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</b><span className="text-[11px] text-muted-foreground">{pkg?.lock_days ?? 0} hari · {pkg?.apy ?? 0}%/thn</span></div>
-    <input type="range" aria-label="Pilih nominal" className="stake-calc-range mt-3 w-full" min={0} max={prices.length - 1} step={1} value={Math.min(idx, prices.length - 1)} onChange={e => setIdx(Number(e.target.value))}/>
-    <div className="mt-3 grid grid-cols-3 gap-2 text-center">{[['Per hari', daily], ['Per 30 hari', daily * 30], [`${pkg?.lock_days ?? 0} hari`, daily * (pkg?.lock_days ?? 0)]].map(([l, v]) => <div key={l as string} className="rounded-xl border border-border bg-card/60 p-2"><span className="block text-[10px] text-muted-foreground">{l}</span><b className="numeric text-sm text-chart-2">{money(v as number)}</b></div>)}</div>
-    <p className="mt-2 text-[10px] text-muted-foreground">Proyeksi saja, bukan jaminan hasil. Imbal hasil mengikuti aturan paket.</p>
-    {pkg && <Button className="mt-3 w-full rounded-full" onClick={() => onPick(pkg)}><Sparkles size={15}/> Aktifkan {pkg.id}</Button>}
+  const list = useMemo(() => packages.filter(p => p.enabled !== false && !p.retired), [packages]);
+  const [idx, setIdx] = useState(0);
+  const startX = useRef<number | null>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  if (!list.length) return null;
+  const i = Math.min(idx, list.length - 1);
+  const go = (n: number) => {
+    const next = (n + list.length) % list.length;
+    setIdx(next);
+    stripRef.current?.children[next]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  };
+  return <section aria-label="Pilih paket staking" className="stake-pick">
+    <div className="stake-pick-head"><span>PILIH PAKET</span><em>Ketuk nominal atau geser kartu</em></div>
+    <div ref={stripRef} role="tablist" aria-label="Nominal paket" className="stake-pick-chips">
+      {list.map((p, n) => <button key={p.id} type="button" role="tab" aria-selected={n === i} onClick={() => go(n)} className="stake-pick-chip">
+        <b className="numeric">${number(Number(p.price_usd), { maximumFractionDigits: 0 })}</b><small>{p.id}</small>
+      </button>)}
+    </div>
+    <div className="stake-pick-stage"
+      onTouchStart={e => { startX.current = e.touches[0]?.clientX ?? null; }}
+      onTouchEnd={e => { const s = startX.current; const x = e.changedTouches[0]?.clientX; startX.current = null; if (s == null || x == null) return; const d = x - s; if (Math.abs(d) > 50) go(i + (d < 0 ? 1 : -1)); }}>
+      <button type="button" aria-label="Paket sebelumnya" className="stake-pick-arrow is-left" onClick={() => go(i - 1)}><ChevronLeft size={18}/></button>
+      <div className="auric-stake"><div className="auric-card is-active"><DurationPackageCard key={list[i]!.id} pkg={list[i]!} index={i} onStake={onPick}/></div></div>
+      <button type="button" aria-label="Paket berikutnya" className="stake-pick-arrow is-right" onClick={() => go(i + 1)}><ChevronRight size={18}/></button>
+    </div>
+    <div className="stake-pick-dots" aria-hidden>{list.map((p, n) => <i key={p.id} className={n === i ? 'on' : ''}/>)}</div>
   </section>;
 }
