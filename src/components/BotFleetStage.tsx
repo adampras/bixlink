@@ -9,11 +9,11 @@ const TRAITS: Record<BixtradeStrategy, string[]> = {
 };
 
 /** Full-screen standalone stage for choosing the BIXTRADE bot; selection only, no funds move. */
-export function BotFleetStage({ value, onPick, onClose }: { value: BixtradeStrategy; onPick: (s: BixtradeStrategy) => void; onClose: () => void }) {
-  return <div className="fleet-stage" role="dialog" aria-modal="true" aria-label="Neural Bot Arsenal">
+export function BotFleetStage({ value, onPick, onClose, inline }: { value: BixtradeStrategy; onPick: (s: BixtradeStrategy) => void; onClose?: () => void; inline?: boolean }) {
+  return <div className={inline ? 'fleet-stage fleet-inline' : 'fleet-stage'} {...(inline ? { 'aria-label': 'Neural Bot Arsenal' } : { role: 'dialog', 'aria-modal': true, 'aria-label': 'Neural Bot Arsenal' })}>
     <header className="fleet-head">
       <div><p>QUANTUM MATRIX · AUTONOMOUS FLEET</p><h2>NEURAL BOT <span>ARSENAL</span></h2></div>
-      <button type="button" onClick={onClose} aria-label="Tutup"><X size={20}/></button>
+      {onClose && <button type="button" onClick={onClose} aria-label="Tutup"><X size={20}/></button>}
     </header>
     <div className="fleet-list">
       {BIXTRADE_STRATEGIES.map(s => { const pz = BOT_PERSONA[s.key]; const on = value === s.key; return <article key={s.key} data-variant={pz.variant} className={`fleet-card ${on ? 'is-on' : ''}`}>

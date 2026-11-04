@@ -48,7 +48,7 @@ function BixtradePage() {
   const [execs, setExecs] = useState<Exec[]>([]);
   const runCycle = useServerFn(runBixtradeCycle);
   const getPrices = useServerFn(getBixtradePrices);
-  const [tab, setTab] = useState<'cockpit' | 'radar' | 'ai' | 'logs'>('cockpit');
+  const [tab, setTab] = useState<'cockpit' | 'bots' | 'radar' | 'ai' | 'logs'>('cockpit');
   const [isAdmin, setIsAdmin] = useState(false);
   const [pairFilter, setPairFilter] = useState('ALL');
   const [logFilter, setLogFilter] = useState<'all' | 'win' | 'scratch'>('all');
@@ -188,7 +188,7 @@ function BixtradePage() {
       <button type="button" className={funding === 'virtual' ? 'is-on' : ''} onClick={() => setFunding('virtual')}><i/> Neural AI Pool<small>Protocol allocation</small></button>
     </div>
     <nav className="arb-tabs mt-3" aria-label="BIXTrade sections">
-      {([['cockpit', Cpu, 'Cockpit'], ['radar', Radar, 'Radar'], ['ai', BarChart3, 'AI'], ['logs', Activity, 'Logs']] as const).map(([k, Icon, l]) => <button key={k} type="button" onClick={() => setTab(k)} className={tab === k ? 'is-on' : ''}><Icon size={15}/>{l}</button>)}
+      {([['cockpit', Cpu, 'Cockpit'], ['bots', Network, 'Bot'], ['radar', Radar, 'Radar'], ['ai', BarChart3, 'AI'], ['logs', Activity, 'Logs']] as const).map(([k, Icon, l]) => <button key={k} type="button" onClick={() => setTab(k)} className={tab === k ? 'is-on' : ''}><Icon size={15}/>{l}</button>)}
     </nav>
     {stream.length > 0 && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ AI SCAN · {s}</span>)}</div></div>}
 
@@ -214,8 +214,7 @@ function BixtradePage() {
         <Button variant={mode === 'withdraw' ? 'default' : 'outline'} onClick={() => setMode('withdraw')} disabled={!cfg.withdrawOpen}><ArrowUpFromLine size={15}/> Withdraw</Button>
       </div>
       <div className="mt-3 grid gap-2">
-        <div className="flex items-center justify-between"><p className="text-[11px] text-muted-foreground">Strategy · <b className="text-foreground">{BOT_PERSONA[strategy].name}</b></p><button type="button" className="fleet-open" onClick={() => setFleet(true)}>Buka Bot Arsenal ⤢</button></div>
-        <div className="arb-botpick">{BIXTRADE_STRATEGIES.map(s => { const pz = BOT_PERSONA[s.key]; return <button key={s.key} type="button" aria-pressed={strategy === s.key} onClick={() => { navigator.vibrate?.(12); setStrategy(s.key); }} data-variant={pz.variant} className={`arb-botcard ${strategy === s.key ? 'is-on' : ''}`}><BixtradeBot3D mini mood={strategy === s.key ? (mood === 'sleep' ? 'scan' : mood) : 'scan'} strategy={s.key}/><b>{pz.name}</b><span>{s.name}</span><span>{s.pairs}</span><em>Risk {s.risk}</em></button>; })}</div>
+        <div className="flex items-center justify-between"><p className="text-[11px] text-muted-foreground">Strategy · <b className="text-foreground">{BOT_PERSONA[strategy].name}</b></p><button type="button" className="fleet-open" onClick={() => { setTab('bots'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Ganti bot ⤢</button></div>
         <label className="mt-1 text-[11px] text-muted-foreground">Amount (USDT) {mode === 'deposit' ? `· ${cfg.minAlloc}–${cfg.maxAlloc}` : `· min ${cfg.minWithdraw} · fee ${cfg.withdrawFeePct}%`}
           <input className="form-input mt-1" type="number" inputMode="decimal" value={reqAmt} onChange={e => setReqAmt(e.target.value)} placeholder="0.00"/></label>
         <div className="arb-chips">{[100, 500, 1000, 5000].map(v => <button key={v} type="button" onClick={() => setReqAmt(String(v))}>${v.toLocaleString()}</button>)}
@@ -230,6 +229,8 @@ function BixtradePage() {
     <BixtradePlan cfg={cfg}/>
 
     </>}
+
+    {tab === 'bots' && <BotFleetStage inline value={strategy} onPick={k => { setStrategy(k); setTab('cockpit'); setTimeout(() => document.getElementById('arb-wallet')?.scrollIntoView({ behavior: 'smooth' }), 60); }}/>}
 
     {tab === 'radar' && <>
     <div className="arb-chips mt-4">{['ALL', 'BTC', 'ETH', 'SOL', 'BNB'].map(k => <button key={k} type="button" className={pairFilter === k ? 'is-on' : ''} onClick={() => setPairFilter(k)}>{k}</button>)}</div>
