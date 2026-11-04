@@ -18,7 +18,7 @@ import { isBlockedByMaintenance } from '@/lib/site-control';
 import { TxFeedbackHost } from '@/components/TxFeedback';
 import { MarketTicker } from '@/components/TradingFlair';
 import { createPortal } from 'react-dom';
-import { Sun, Moon, MessageCircle, Phone, Users, Settings } from 'lucide-react';
+import { Sun, Moon, MessageCircle, Phone, Users, Settings, CircleDot } from 'lucide-react';
 import { SiteSearch } from '@/components/SiteSearch';
 import { SitePopup } from '@/components/SitePopup';
 import { MemberWelcome } from '@/components/MemberWelcome';
