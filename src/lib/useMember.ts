@@ -1,3 +1,4 @@
+import { toEnglish } from '@/lib/legacy-english';
 import { useEffect, useSyncExternalStore } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
@@ -133,7 +134,7 @@ export function usePublicConfig() {
         unstake: (settings['unstake'] ?? { tiers: [{ days: 30, pct: 20 }, { days: 60, pct: 15 }, { days: 90, pct: 10 }, { days: 180, pct: 8 }, { days: 360, pct: 5 }] }) as { tiers: { days: number; pct: number }[] },
         bixMarket: (settings['bix_market'] ?? { priceUsd: 0.84291 }) as { priceUsd: number; movement?: unknown },
         referrals: (settings['referrals'] ?? { direct: 10, levels: [12, 6, 3, 2, 1], rewardPlus: 5, minimumDirect: 3, splitUsdt: 70, splitBix: 30 }) as { direct: number; levels: number[]; rewardPlus: number; minimumDirect: number; splitUsdt: number; splitBix: number; bixDirectEnabled?: boolean; bixDirectPct?: number },
-        landingContent: (settings['landing_content'] ?? defaultLandingContent) as LandingContent,
+        landingContent: toEnglish(settings['landing_content'] ?? defaultLandingContent) as LandingContent,
         marketingPlan: marketingSchema.safeParse(settings['marketing_plan']).success ? marketingSchema.parse(settings['marketing_plan']) : defaultMarketing(),
         readiness: { ...defaultReadiness, ...settings['readiness'] } as Readiness,
       };
