@@ -6268,3 +6268,24 @@ html.comm-room-open,html.comm-room-open body{overflow:hidden;overscroll-behavior
 .lci-card { display:grid; gap:6px; padding:16px; border-radius:16px; background:#0f0c18; border:1px solid rgb(255 215 0 / .14); }
 .lci-card svg { color:#A855F7; } .lci-card b { font-size:15px; } .lci-card span { font-size:12px; line-height:1.45; color:rgb(255 255 255 / .7); } .lci-card em { font-style:normal; font-size:12px; color:#FFD700; display:inline-flex; gap:4px; align-items:center; }
 .lci-note { display:flex; gap:6px; align-items:center; justify-content:center; margin:16px; font-size:11px; color:rgb(255 255 255 / .55); text-align:center; }
+
+/* Landing hero strip-3 menu */
+.lx-anchor{scroll-margin-top:84px}
+.lhm-trigger{position:absolute;top:14px;right:14px;z-index:5;display:grid;place-items:center;width:44px;height:44px;border-radius:14px;border:1px solid rgb(255 215 0/.45);background:rgb(8 6 15/.72);color:#FFD700;backdrop-filter:blur(8px);box-shadow:0 0 18px rgb(168 85 247/.25)}
+.lhm-backdrop{position:fixed;inset:0;z-index:80;background:rgb(0 0 0/.82);backdrop-filter:blur(6px);display:flex;justify-content:flex-end}
+.lhm-panel{width:min(360px,88vw);height:100%;overflow-y:auto;background:#08060f;border-left:1px solid rgb(255 215 0/.25);padding:18px 18px calc(18px + env(safe-area-inset-bottom));color:#fff;display:flex;flex-direction:column;gap:14px;animation:lhmIn .22s ease-out}
+@keyframes lhmIn{from{transform:translateX(30px);opacity:0}}
+.lhm-panel header{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid rgb(255 215 0/.18)}
+.lhm-panel header b{font-size:20px;letter-spacing:.08em}.lhm-panel header b span{color:#FFD700}
+.lhm-panel header button{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;border:1px solid rgb(255 255 255/.15);color:#fff}
+.lhm-group{border-bottom:1px solid rgb(255 255 255/.08)}
+.lhm-group>button{width:100%;display:flex;justify-content:space-between;align-items:center;padding:14px 2px;font-weight:700;font-size:15px;color:#fff}
+.lhm-group.is-open>button{color:#FFD700}.lhm-group.is-open>button svg{transform:rotate(180deg)}
+.lhm-group ul{padding:0 0 10px 10px;border-left:2px solid rgb(168 85 247/.5);margin-left:4px}
+.lhm-group li button{width:100%;display:flex;justify-content:space-between;padding:10px 6px;font-size:14px;color:rgb(255 255 255/.85)}
+.lhm-group li button span{color:#A855F7}
+.lhm-cta{display:grid;gap:10px;margin-top:auto}
+.lhm-cta a{text-align:center;padding:13px;border-radius:14px;font-weight:800;letter-spacing:.06em}
+.lhm-cta a:first-child{background:linear-gradient(135deg,#FFD700,#e8b923);color:#08060f}
+.lhm-cta a:last-child{border:1px solid rgb(255 215 0/.45);color:#FFD700}
+.lhm-panel>p{font-size:11px;color:rgb(255 255 255/.55);text-align:center}
