@@ -36,7 +36,7 @@ export function StoryBar({ me, myName, list: asList }: { me: string; myName: str
     <h3>Status</h3>
     <button type="button" className="bx-upd-row" onClick={() => mineIdx >= 0 ? setView(mineIdx) : setCompose('text')}>
       <span className="bx-upd-me"><BixAvatar userId={me} name={myName} className="bx-story-ava" story={mineIdx >= 0 ? 'seen' : null}/><i onClick={e => { e.stopPropagation(); setCompose('text'); }}><Plus size={13}/></i></span>
-      <span><b>{mineIdx >= 0 ? 'Status saya' : 'Tambah Status'}</b><small>{mineIdx >= 0 ? `${list[mineIdx].stories.length} pembaruan · ketuk untuk lihat` : 'Akan hilang setelah 24 jam'}</small></span>
+      <span><b>{mineIdx >= 0 ? 'Status saya' : 'Tambah Status'}</b><small>{mineIdx >= 0 ? `${list[mineIdx]?.stories.length ?? 0} pembaruan · ketuk untuk lihat` : 'Akan hilang setelah 24 jam'}</small></span>
     </button>
     <p className="bx-upd-label">Pembaruan terkini</p>
     {groups === null ? <p className="bx-stories-empty">Memuat…</p> : others.length === 0 ? <p className="bx-stories-empty">Status dari kontak chat, tim jaringan, dan teman saling follow muncul di sini selama 24 jam.</p>
