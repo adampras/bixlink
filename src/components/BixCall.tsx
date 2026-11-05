@@ -326,7 +326,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       setCam(false); return;
     }
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
-      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'maintain-framerate', videoEncoding: { maxBitrate: saver ? 900_000 : 2_600_000, maxFramerate: res.frameRate, priority: 'high' } as never,
+      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'maintain-framerate', videoEncoding: { maxBitrate: saver ? 800_000 : 1_800_000, maxFramerate: res.frameRate, priority: 'medium' } as never,
         videoSimulcastLayers: [{ width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 800_000, maxFramerate: 30 } }] as never });
     const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
     setCam(on);
