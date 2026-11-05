@@ -216,6 +216,21 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     audioBox.current?.querySelectorAll('audio').forEach(a => void a.play().catch(() => {}));
     setAudioBlocked(false);
   };
+  // One-way-audio watchdog: every 2 s make sure each remote voice track has a playing element.
+  useEffect(() => {
+    if (link !== 'on') return;
+    const heal = () => {
+      const r = roomRef.current, box = audioBox.current; if (!r || !box) return;
+      r.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => {
+        const tr = pub.track as RemoteTrack | undefined; if (!tr || tr.kind !== Track.Kind.Audio) return;
+        const el = box.querySelector(`audio[data-sid="${tr.sid}"]`) as HTMLAudioElement | null;
+        if (!el || !el.srcObject) attachAudio(tr); else if (el.paused) void el.play().catch(() => setAudioBlocked(true));
+      }));
+    };
+    const vis = () => { if (!document.hidden) { void roomRef.current?.startAudio().catch(() => {}); heal(); } };
+    const t = setInterval(heal, 2000); document.addEventListener('visibilitychange', vis);
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', vis); };
+  }, [link]); // eslint-disable-line react-hooks/exhaustive-deps
   // Remote voice level: drives the waveform and the "Ruang Dekat" half-duplex duck.
   useEffect(() => {
     if (link !== 'on') return;
@@ -258,15 +273,17 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         room = new Room({ adaptiveStream: false, dynacast: true });
         roomRef.current = room;
         room.on(RoomEvent.TrackSubscribed, (t: RemoteTrack) => {
-          if (t.kind === Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); if (backV.current) t.attach(backV.current); setRemoteVideo(true); }
+          if (t.kind === Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); setRemoteVideo(true); }
           if (t.kind === Track.Kind.Audio) attachAudio(t);
         });
         room.on(RoomEvent.AudioPlaybackStatusChanged, () => setAudioBlocked(!room?.canPlaybackAudio));
         // Remote camera on/off mid-call (voice → video upgrade without redialing).
         room.on(RoomEvent.TrackMuted, (pub, p) => { if (!p.isLocal && pub.kind === Track.Kind.Video) setRemoteVideo(false); });
         room.on(RoomEvent.TrackUnmuted, (pub, p) => { if (!p.isLocal && pub.kind === Track.Kind.Video) setRemoteVideo(true); });
-        room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach().forEach(e => e.remove()); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
+        room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach().forEach(e => { if (e.tagName === 'AUDIO') e.remove(); }); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
         room.on(RoomEvent.ParticipantDisconnected, () => onEnd());
+        // After a network hiccup, re-bind every remote track so neither side goes silent/black.
+        room.on(RoomEvent.Reconnected, () => { void room?.startAudio().catch(() => {}); room?.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { const tr = pub.track as RemoteTrack | undefined; if (!tr) return; if (tr.kind === Track.Kind.Audio) attachAudio(tr); else if (remoteV.current) tr.attach(remoteV.current); })); });
         room.on(RoomEvent.ConnectionQualityChanged, (q, p) => { if (p.isLocal) setQuality(String(q) as 'excellent' | 'good' | 'poor' | 'unknown'); });
         await room.connect(res.url, res.token);
         void room.startAudio().catch(() => {});
@@ -274,7 +291,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         // Native mic track: keeps the phone's hardware echo canceller linked to the call output (a WebAudio-processed track breaks it → echo/howl).
         if (cancelled) return;
-        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, audioPreset: { maxBitrate: 48000 } });
+        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 40000, priority: 'high' } } as never);
         if (call.kind === 'video') await startCam(room, true);
         if (!cancelled) setLink('on');
       } catch { if (!cancelled) setLink('fail'); }
@@ -309,7 +326,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       setCam(false); return;
     }
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
-      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 900_000 : 2_600_000, maxFramerate: res.frameRate, priority: 'high' } as never,
+      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'maintain-framerate', videoEncoding: { maxBitrate: saver ? 900_000 : 2_600_000, maxFramerate: res.frameRate, priority: 'high' } as never,
         videoSimulcastLayers: [{ width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 800_000, maxFramerate: 30 } }] as never });
     const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
     setCam(on);
