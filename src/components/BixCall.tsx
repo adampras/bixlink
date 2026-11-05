@@ -201,8 +201,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const [audioBlocked, setAudioBlocked] = useState(false);
   /** Remote volume: earpiece mode is softer; loudspeaker is full; lowered while a howl is detected. */
   const applyVolume = () => {
-    const base = loudRef.current ? 0.85 : 1;
-    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? base * 0.75 : base; });
+    // Full volume in every mode (video calls run on the loudspeaker and need the most headroom).
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? 0.8 : 1; });
   };
   const attachAudio = (t: RemoteTrack) => {
     const box = audioBox.current; if (!box) return;

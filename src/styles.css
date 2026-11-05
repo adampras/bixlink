@@ -6368,3 +6368,17 @@ body[data-bc-theme=toska] .bc-grid6 button:not(.end):not(.off){background:linear
 body[data-bc-theme=toska] .bc-ctl4 button.shield{color:#5eead4;border-color:#2dd4bf;box-shadow:0 0 14px rgb(45 212 191 / .4)}
 body[data-bc-theme=toska] .bixcall-ctl{background:linear-gradient(180deg,rgb(10 22 21 / .92),rgb(3 8 7 / .95))}
 @media (max-width:360px){.bc-grid6 button{width:56px;height:56px}}
+
+/* BIX CALL voice layout: avatar never collides with the control card */
+.bixcall:not(.is-video) .bixcall-center{margin-top:clamp(24px,8vh,90px)}
+.bixcall:not(.is-video) .bixcall-av{width:min(44vw,34vh,190px);height:min(44vw,34vh,190px)}
+.bixcall:not(.is-video) .bixcall-av b{font-size:min(16vw,64px)}
+/* Compose: toska attach + voice-record buttons */
+body[data-bc-theme=toska] .comm-compose{border:1px solid rgb(45 212 191 / .35)}
+body[data-bc-theme=toska] .comm-compose input{background:transparent!important;border:0}
+body[data-bc-theme=toska] .comm-compose button{background:linear-gradient(145deg,#2dd4bf,#0d9488);color:#021412;box-shadow:0 0 12px rgb(45 212 191 / .35)}
+body[data-bc-theme=toska] .comm-compose .bc-plus{background:rgb(45 212 191 / .1);color:#5eead4;border:1px solid rgb(45 212 191 / .5);box-shadow:none}
+body[data-bc-theme=toska] .bc-menu{border-color:rgb(45 212 191 / .35)}
+body[data-bc-theme=toska] .bc-menu svg{color:#5eead4}
+body[data-bc-theme=toska] .comm-compose button.is-rec{background:#e11d48!important;color:#fff}
+body[data-bc-theme=toska] .comm-rec{color:#fda4af}
