@@ -6324,3 +6324,14 @@ body[data-bc-theme=toska] .bixcall-av{border-color:#2dd4bf;box-shadow:0 0 0 6px 
 body[data-bc-theme=toska] .bixcall-av b{color:#5eead4}
 body[data-bc-theme=toska] .bixcall-ctl{border-color:rgb(45 212 191 / .4)}
 body[data-bc-theme=toska] .bixcall-pip{border-color:#2dd4bf;box-shadow:0 10px 30px rgb(0 0 0 / .55),0 0 0 3px rgb(45 212 191 / .25)}
+
+/* Auth/Register toska pass */
+.auth-vault { --toska: oklch(0.78 0.14 178); padding-top: 22px !important; }
+@media (max-width: 480px) { .auth-vault { padding: 20px 16px !important; } }
+.auth-back { position: absolute; top: 12px; left: 12px; z-index: 2; display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 800; color: var(--toska); border: 1px solid color-mix(in oklch, var(--toska) 40%, transparent); background: color-mix(in oklch, var(--background) 60%, transparent); backdrop-filter: blur(8px); }
+.auth-toska-link { display: inline-flex; align-items: center; border-radius: 999px; padding: 6px 14px; font-weight: 800; font-size: 13px; color: var(--background); background: linear-gradient(120deg, var(--toska), oklch(0.68 0.13 190)); box-shadow: 0 8px 22px -12px var(--toska); }
+.auth-toska-text { color: var(--toska); }
+.auth-vault .auth-badge { color: var(--toska); border-color: color-mix(in oklch, var(--toska) 40%, transparent); background: color-mix(in oklch, var(--toska) 10%, transparent); }
+.auth-vault .auth-badge span { background: var(--toska); box-shadow: 0 0 8px var(--toska); }
+.auth-vault .form-input:focus { border-color: var(--toska) !important; box-shadow: 0 0 0 3px color-mix(in oklch, var(--toska) 22%, transparent) !important; }
+.auth-vault button[type="submit"], .auth-vault form > button:last-child { background: linear-gradient(120deg, var(--toska), oklch(0.62 0.12 195)) !important; }
