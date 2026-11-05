@@ -6382,3 +6382,28 @@ body[data-bc-theme=toska] .bc-menu{border-color:rgb(45 212 191 / .35)}
 body[data-bc-theme=toska] .bc-menu svg{color:#5eead4}
 body[data-bc-theme=toska] .comm-compose button.is-rec{background:#e11d48!important;color:#fff}
 body[data-bc-theme=toska] .comm-rec{color:#fda4af}
+
+/* BIX CALL · GROUP (education groups, toska) */
+.bx-grp{display:grid;gap:12px;--tk:oklch(0.78 0.14 178)}
+.bx-grp-card{display:grid;gap:8px;padding:14px;border-radius:18px;border:1px solid color-mix(in oklab,var(--tk) 35%,transparent);background:color-mix(in oklab,var(--tk) 6%,var(--card))}
+.bx-grp-head{display:flex;align-items:center;gap:8px;color:var(--tk)}.bx-grp-head b{color:var(--foreground)}.bx-grp-head small{margin-left:auto;font-size:11px;color:var(--muted-foreground)}
+.bx-grp-row{display:flex;gap:8px}.bx-grp-row input{flex:1}
+.bx-grp-btn{border-radius:999px;padding:.6rem 1rem;font-weight:800;font-size:.82rem;background:var(--tk);color:oklch(0.16 0.02 180)}
+.bx-grp-btn.is-alt{background:transparent;border:1px solid var(--tk);color:var(--tk)}.bx-grp-btn:disabled{opacity:.4}
+.bx-grp-msg{font-size:12px;color:var(--destructive)}.bx-grp-empty{font-size:12px;color:var(--muted-foreground);text-align:center;padding:16px}
+.bx-grp-list{display:grid;gap:8px}.bx-grp-list button{width:100%;display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--border);text-align:left}
+.bx-grp-av{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;background:color-mix(in oklab,var(--tk) 18%,transparent);color:var(--tk)}
+.bx-grp-meta{min-width:0;display:grid}.bx-grp-meta b{font-size:14px}.bx-grp-meta small{font-size:11px;color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bx-grp-live{margin-left:auto;display:flex;align-items:center;gap:4px;font-style:normal;font-size:10px;font-weight:800;color:#fff;background:#e11d48;padding:3px 8px;border-radius:999px}
+.bx-grp-room{--tk:oklch(0.78 0.14 178);display:flex;flex-direction:column;gap:10px;min-height:calc(100dvh - 200px)}
+.bx-grp-room header{display:flex;align-items:center;gap:10px}.bx-grp-room header div{flex:1;display:grid}.bx-grp-room header small{font-size:11px;color:var(--muted-foreground)}
+.bx-grp-room header button{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--border);color:var(--tk)}
+.bx-grp-livebar{display:flex;align-items:center;justify-content:center;gap:8px;padding:.7rem;border-radius:14px;font-weight:800;border:1px solid var(--tk);color:var(--tk)}
+.bx-grp-livebar.is-on{background:var(--tk);color:oklch(0.16 0.02 180);animation:bxGrpPulse 1.8s ease-in-out infinite}
+@keyframes bxGrpPulse{50%{box-shadow:0 0 0 6px color-mix(in oklab,var(--tk) 25%,transparent)}}
+.bx-grp-feed{flex:1;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.bx-grp-msg-row{max-width:82%;align-self:flex-start;padding:8px 12px;border-radius:14px 14px 14px 4px;background:var(--card);border:1px solid var(--border)}
+.bx-grp-msg-row.is-me{align-self:flex-end;border-radius:14px 14px 4px 14px;background:color-mix(in oklab,var(--tk) 22%,var(--card));border-color:color-mix(in oklab,var(--tk) 40%,transparent)}
+.bx-grp-msg-row i{font-style:normal;font-size:11px;font-weight:800;color:var(--tk)}.bx-grp-msg-row p{font-size:14px;white-space:pre-wrap;word-break:break-word}.bx-grp-msg-row small{display:block;text-align:right;font-size:10px;color:var(--muted-foreground)}
+.bx-grp-compose{position:sticky;bottom:84px;display:flex;gap:8px}.bx-grp-compose input{flex:1}
+.bx-grp-compose button{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tk);color:oklch(0.16 0.02 180)}.bx-grp-compose button:disabled{opacity:.4}
