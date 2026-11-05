@@ -51,7 +51,7 @@ export function BixGroupMeeting({ me, tier }: { me: string; tier: Tier }) {
   </section>;
 }
 
-function MeetingStage({ code, me, onLeave }: { code: string; me: string; onLeave: () => void }) {
+export function MeetingStage({ code, me, onLeave }: { code: string; me: string; onLeave: () => void }) {
   const getToken = useServerFn(getBixRoomToken);
   const roomRef = useRef<Room | null>(null); const shield = useRef<VoiceShield | null>(null);
   const [info, setInfo] = useState<{ title: string; isHost: boolean; id: string; video: boolean } | null>(null);
