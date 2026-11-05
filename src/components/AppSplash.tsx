@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import logo from '@/assets/bixlink-logo-gold.webp';
-import splashWebm from '@/assets/bixlink-splash.webm.asset.json';
-import splashMp4 from '@/assets/bixlink-splash.mp4.asset.json';
-import splashPoster from '@/assets/bixlink-splash-poster.jpg.asset.json';
 import { usePublicConfig } from '@/lib/useMember';
 import { splashDuration } from '@/lib/splash-settings';
 
@@ -23,6 +20,7 @@ export function AppSplash() {
     startedThisLoad = true;
     try { window.sessionStorage.setItem('bixlink-splash-seen', '1'); } catch { /* In-memory guard covers this load. */ }
     setVisible(true);
+    const buzz = window.setTimeout(() => { try { navigator.vibrate?.([12, 40, 18]); } catch { /* unsupported */ } }, 2300);
     const duration = splashDuration(config?.splash);
     const leaveTimer = window.setTimeout(() => setLeaving(true), Math.max(duration - 180, 120));
     const removeTimer = window.setTimeout(() => {
@@ -30,6 +28,7 @@ export function AppSplash() {
     }, duration);
 
     return () => {
+      window.clearTimeout(buzz);
       window.clearTimeout(leaveTimer);
       window.clearTimeout(removeTimer);
     };
@@ -55,26 +54,12 @@ export function AppSplash() {
     >
       {showVideo ? (
         <>
-          <video
-            ref={videoRef}
-            className="app-splash__video"
-            poster={splashPoster.url}
-            muted
-            playsInline
-            autoPlay
-            preload="auto"
-            aria-hidden="true"
-            onError={() => setVideoFailed(true)}
-          >
-            <source src={splashWebm.url} type="video/webm" />
-            <source src={splashMp4.url} type="video/mp4" />
-          </video>
           <div className="app-splash__scrim" aria-hidden="true" />
           <div className="aix-stage" aria-hidden="true">
             <i className="aix-flare" />
             <div className="aix-warp">{[0,1,2,3,4,5].map((n) => <i key={n} style={{ animationDelay: `${n * 0.18}s` }} />)}</div>
             <div className="aix-orbit"><i /><i /><i /></div>
-            <div className="aix-emblem"><i className="aix-burst" /><img src={logo} width={120} height={120} alt="" /></div>
+            <div className="aix-emblem"><i className="aix-burst" /><img src={logo} width={120} height={120} alt="" /><i className="aix-eyes"><b /><b /></i></div>
           </div>
           <div className="app-splash__caption">
             <span className="splash-word aix-letters" aria-label="BIXLINK">{'BIXLINK'.split('').map((c, i) => <b key={i} style={{ animationDelay: `${2.1 + i * 0.08}s` }}>{c}</b>)}</span>
