@@ -291,7 +291,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         // Native mic track: keeps the phone's hardware echo canceller linked to the call output (a WebAudio-processed track breaks it → echo/howl).
         if (cancelled) return;
-        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 40000, priority: 'high' } } as never);
+        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 48000, priority: 'high' } } as never);
         if (call.kind === 'video') await startCam(room, true);
         if (!cancelled) setLink('on');
       } catch { if (!cancelled) setLink('fail'); }
@@ -413,6 +413,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       <span>{live && link === 'on' ? `SOVEREIGN ENCRYPTED • 48 kHz ${anyVideo ? 'HD VIDEO' : 'HD VOICE'}` : 'BIX CALL • SOVEREIGN ENCRYPTED'}</span>
       {live && link === 'on' && <em className={`bc-q is-${quality}`} aria-label={`Kualitas jaringan: ${quality === 'excellent' ? 'sangat baik' : quality === 'good' ? 'baik' : quality === 'poor' ? 'lemah' : 'mengukur'}`}><i/><i/><i/></em>}
     </header>
+    {!showVideo && <div className="bc-wa-top"><b>@{call.peerName}</b><small>{statusText}</small></div>}
     {!showVideo && <div className="bixcall-center">
       <div className={`bixcall-av${ringing && call.role === 'callee' ? ' is-buzz' : ''} is-${call.offline ? 'offline' : live && link === 'on' ? 'talking' : ringing ? (call.role === 'caller' ? phase : 'ringing') : 'idle'}`} style={live && link === 'on' ? { ['--lvl' as string]: Math.min(1, level * 3) } : undefined}>
         <span className="bixcall-av-ring" aria-hidden="true"/><span className="bixcall-av-ring r2" aria-hidden="true"/>
@@ -437,10 +438,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
         <button className="end" aria-label="Batalkan" onClick={onEnd}><PhoneOff/></button>
       </>}
-      {live && <div className="bc-ctl4" onPointerDown={askTilt}>
-        <label><button aria-label={mic ? 'Bisukan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button><span>{mic ? 'Mikrofon' : 'Bisu'}</span></label>
+      {live && <div className="bc-ctl4 bc-grid6" onPointerDown={askTilt}>
         <label><button aria-label={loud ? 'Speaker active' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={speaker}>{loud ? <Volume2/> : <Ear/>}</button><span>{loud ? 'Speaker' : 'Telinga'}</span></label>
-        <label><button aria-label={cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} className={cam ? 'shield' : ''} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>{cam ? 'Video aktif' : 'Video'}</span></label>
+        <label><button aria-label={cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} className={cam ? 'shield' : ''} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>Video</span></label>
+        <label><button aria-label={mic ? 'Senyapkan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button><span>Senyapkan</span></label>
+        <label><button aria-label="Chat" onClick={openChat}><MessageCircle/></button><span>Chat</span></label>
+        <label><button aria-label="Balik kamera" disabled={!cam} className={cam ? '' : 'dim'} onClick={() => void flip()}><SwitchCamera/></button><span>Balik</span></label>
         <label><button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button><span>Akhiri</span></label>
       </div>}
       {call.offline ? <>
