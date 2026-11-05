@@ -6336,3 +6336,35 @@ body[data-bc-theme=toska] .bixcall-pip{border-color:#2dd4bf;box-shadow:0 10px 30
 .auth-vault .form-input:focus { border-color: var(--toska) !important; box-shadow: 0 0 0 3px color-mix(in oklch, var(--toska) 22%, transparent) !important; }
 .auth-vault button[type="submit"], .auth-vault form > button:last-child { background: linear-gradient(120deg, var(--toska), oklch(0.62 0.12 195)) !important; }
 .auth-vault { padding-top: 48px !important; }
+
+/* === BIX CALL polish: round story add, WA-style call, toska everywhere === */
+.bx-story-add{box-sizing:border-box!important;width:22px!important;height:22px!important;min-width:22px!important;max-width:22px!important;min-height:22px!important;max-height:22px!important;aspect-ratio:1/1!important;padding:0!important;border-radius:9999px!important;flex:none!important;line-height:0!important;top:2rem!important}
+body[data-bc-theme=toska] .bx-story-add{background:linear-gradient(145deg,#99f6e4,#2dd4bf 55%,#0f766e)!important;color:#021412!important;border-color:#030807!important}
+body[data-bc-theme=toska] .bx-story-ava{border-color:rgb(45 212 191 / .55);background:radial-gradient(circle at 30% 30%,#0f4f4a,#030807 72%);color:#5eead4}
+body[data-bc-theme=toska] .bixcall-page .bx-stories,body[data-bc-theme=toska] .bixcall-page section.bx-stories{background:linear-gradient(160deg,rgb(10 26 25 / .9),rgb(4 10 9 / .92));border-color:rgb(45 212 191 / .25)}
+body[data-bc-theme=toska] .bixcall-page .comm-subhead,body[data-bc-theme=toska] .bixcall-page h1,body[data-bc-theme=toska] .bixcall-page h2{color:#5eead4}
+body[data-bc-theme=toska] .bixcall-page .comm-peer b,body[data-bc-theme=toska] .bixcall-page .comm-peer strong{color:#f0fdfa}
+body[data-bc-theme=toska] .bixcall-page .comm-badge,body[data-bc-theme=toska] .bixcall-page [class*=unread]{background:linear-gradient(135deg,#2dd4bf,#0d9488)!important;color:#021412!important}
+body[data-bc-theme=toska] .bixcall-page [class*=avatar],body[data-bc-theme=toska] .bixcall-page .bx-ava{border-color:rgb(45 212 191 / .6)}
+body[data-bc-theme=toska] .bixcall-page nav{border-color:rgb(45 212 191 / .35)!important;background:linear-gradient(160deg,rgb(8 22 21 / .96),rgb(3 8 7 / .96))!important}
+body[data-bc-theme=toska] .bixcall-page nav [aria-current=page],body[data-bc-theme=toska] .bixcall-page nav .active{color:#5eead4!important}
+body[data-bc-theme=toska] .bixcall-page input{caret-color:#2dd4bf}
+
+/* WhatsApp-style voice call */
+.bixcall:not(.is-video) .bixcall-head,.bixcall:not(.is-video) .bixcall-status{display:none}
+.bc-wa-top{position:relative;z-index:2;margin-top:max(22px,env(safe-area-inset-top));text-align:center;display:flex;flex-direction:column;gap:4px}
+.bc-wa-top b{font-size:22px;font-weight:700;color:#f8fafc}
+.bc-wa-top small{font-size:15px;color:rgb(226 232 240 / .72);letter-spacing:.03em}
+.bixcall:not(.is-video) .bixcall-center{margin-top:16vh}
+.bixcall:not(.is-video) .bixcall-center h2,.bixcall:not(.is-video) .bixcall-center>p{display:none}
+.bixcall:not(.is-video) .bixcall-av{width:min(56vw,230px);height:min(56vw,230px)}
+.bixcall-ctl:has(.bc-grid6){left:12px;right:12px;padding:22px 10px 18px;border-radius:32px;justify-content:center}
+.bixcall-ctl>.bc-ctl4.bc-grid6{display:grid;grid-template-columns:repeat(3,1fr);row-gap:18px;column-gap:6px;width:100%}
+.bc-grid6 button{width:64px;height:64px}
+.bc-grid6 button.dim{opacity:.45}
+.bc-grid6 span{font-size:13px;font-weight:600;color:#e2e8f0}
+.bc-grid6 button.end{background:#e11d48;border:0;box-shadow:0 6px 18px rgb(225 29 72 / .4)}
+body[data-bc-theme=toska] .bc-grid6 button:not(.end):not(.off){background:linear-gradient(160deg,rgb(20 40 38 / .95),rgb(6 14 13 / .95));border-color:rgb(45 212 191 / .25)}
+body[data-bc-theme=toska] .bc-ctl4 button.shield{color:#5eead4;border-color:#2dd4bf;box-shadow:0 0 14px rgb(45 212 191 / .4)}
+body[data-bc-theme=toska] .bixcall-ctl{background:linear-gradient(180deg,rgb(10 22 21 / .92),rgb(3 8 7 / .95))}
+@media (max-width:360px){.bc-grid6 button{width:56px;height:56px}}
