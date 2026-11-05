@@ -291,7 +291,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         // Native mic track: keeps the phone's hardware echo canceller linked to the call output (a WebAudio-processed track breaks it → echo/howl).
         if (cancelled) return;
-        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 40000, priority: 'high' } } as never);
+        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 48000, priority: 'high' } } as never);
         if (call.kind === 'video') await startCam(room, true);
         if (!cancelled) setLink('on');
       } catch { if (!cancelled) setLink('fail'); }
