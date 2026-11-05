@@ -26,10 +26,20 @@ export function PowerSaver() {
     const sel = '.robot-stage,.robot-fox,.hero-fox,.robot-core,.robot-ring-one,.robot-ring-two,.pulse-dot,.terminal-live,.tokenomics-donut';
     const seen = new WeakSet<Element>();
     const scan = () => document.querySelectorAll(sel).forEach(el => { if (!seen.has(el)) { seen.add(el); io?.observe(el); } });
-    scan();
-    const mo = new MutationObserver(() => scan());
-    mo.observe(document.body, { childList: true, subtree: true });
-    return () => { document.removeEventListener('visibilitychange', vis); io?.disconnect(); mo.disconnect(); };
+    let mo: MutationObserver | null = null;
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      scan();
+      mo = new MutationObserver(() => scan());
+      mo.observe(document.body, { childList: true, subtree: true });
+    };
+    // Toggling a class on a server-rendered node before React finishes hydrating makes
+    // hydration compare a className it never rendered, so wait until the tree is hydrated.
+    const ric = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+    const handle = ric ? ric(start, { timeout: 600 }) : window.setTimeout(start, 300);
+    return () => { document.removeEventListener('visibilitychange', vis); io?.disconnect(); mo?.disconnect(); window.clearTimeout(handle); };
   }, []);
   return null;
 }
