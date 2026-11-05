@@ -13,7 +13,7 @@ export type VoiceShield = {
 /** Gate thresholds (dBFS). Shield on: a soft voice at the mouth (~-40 dB) and normal speech (~-22..-15 dB) pass; crowd babble / a nearby speaker (~-45 dB and below, after OS noise suppression) is cut. */
 export const GATE_DB = { shield: -42, normal: -50 } as const;
 /** Gate tuning: hold ~600 ms after the last word so soft word endings are not chopped; a soft floor keeps breaths/quiet tails natural instead of dead silence. */
-export const GATE_TUNE = { holdTicks: 12, hysteresisDb: 5, floor: 0.07 } as const;
+export const GATE_TUNE = { holdTicks: 12, hysteresisDb: 5, floor: 0.05 } as const;
 
 /** One 50 ms gate step: returns the next hold counter and the gain target (before duck/howl). Pure so it can be tested with simulated noisy rooms. */
 export function gateStep(db: number, hold: number, shield = true): { hold: number; gain: number } {
@@ -36,8 +36,8 @@ export async function openVoiceShield(onHowl?: (howling: boolean) => void): Prom
   const wake = () => { if (ctx.state !== 'running') void ctx.resume().catch(() => {}); };
   wake(); const wakeT = setInterval(wake, 1000);
   const src = ctx.createMediaStreamSource(raw);
-  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 110; hp.Q.value = 0.7;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 7800; lp.Q.value = 0.7;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 120; hp.Q.value = 0.7;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 7200; lp.Q.value = 0.7;
   const notches = HOWL_BANDS.map(f => { const n = ctx.createBiquadFilter(); n.type = 'peaking'; n.frequency.value = f; n.Q.value = 6; n.gain.value = 0; return n; });
   const comp = ctx.createDynamicsCompressor();
   comp.threshold.value = -26; comp.knee.value = 14; comp.ratio.value = 2.8; comp.attack.value = 0.004; comp.release.value = 0.2;

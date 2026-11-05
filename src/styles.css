@@ -6295,3 +6295,4 @@ html[data-low-power='1'] .bixcall-wave, html[data-low-power='1'] .bixtok-gift-fx
 html[data-app-hidden='1'] .bixcall-wave * { animation-play-state: paused !important; }
 .text-muted-foreground { color: color-mix(in oklab, var(--foreground) 78%, transparent); }
 body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.bixcall-remote,.bixcall-pip{transform:translateZ(0);contain:paint}
