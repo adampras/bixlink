@@ -6441,3 +6441,5 @@ body[data-bc-theme=toska] .comm-rec{color:#fda4af}
 @keyframes aix-breathe { 50% { transform: scale(1.05); filter: drop-shadow(0 0 28px color-mix(in srgb, var(--splash-gold) 80%, transparent)) drop-shadow(0 0 60px color-mix(in srgb, #A855F7 55%, transparent)) } }
 @keyframes aix-letter { from { opacity: 0; transform: translateY(14px) scale(2.2); filter: blur(6px) } to { opacity: 1; transform: none; filter: none } }
 @media (prefers-reduced-motion: reduce) { .aix-stage { display: none } .aix-letters b { animation: none; opacity: 1 } }
+.aix-letters b { color: var(--splash-gold); -webkit-text-fill-color: currentColor; background: linear-gradient(to bottom, var(--splash-highlight), var(--splash-gold) 55%, var(--splash-deep-gold)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none; }
+.aix-stage { z-index: 1; } .app-splash__caption, .app-splash__skip { z-index: 2; }
