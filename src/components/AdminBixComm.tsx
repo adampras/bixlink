@@ -1,3 +1,4 @@
+import { resolveBixCallTheme, applyBixCallTheme, type BixCallTheme } from '@/lib/bix-call-theme';
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,24 +37,25 @@ export function AdminBixComm({ onMessage }: { onMessage: (m: string) => void }) 
   </section></>;
 }
 
-/** Owner switch: Black Matcha Lux colour model for BIX CALL (stored in bixtok_config.features.call_matcha). */
+/** Owner selector: BIX CALL colour model (stored in bixtok_config.features.call_theme). */
 function MatchaToggle({ onMessage }: { onMessage: (m: string) => void }) {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ['admin-bix-call-theme'], queryFn: async () => {
     const { data, error } = await supabase.from('bixtok_config').select('features').eq('id', 1).single();
-    if (error) throw error; return ((data as { features?: Record<string, boolean> }).features ?? {}) as Record<string, boolean>;
+    if (error) throw error; return ((data as { features?: Record<string, unknown> }).features ?? {}) as Record<string, unknown>;
   } });
-  const on = q.data?.['call_matcha'] === true;
-  async function toggle() {
-    const { error } = await supabase.from('bixtok_config').update({ features: { ...(q.data ?? {}), call_matcha: !on }, updated_at: new Date().toISOString() } as never).eq('id', 1);
+  const cur = resolveBixCallTheme(q.data);
+  async function pick(t: BixCallTheme) {
+    const { error } = await supabase.from('bixtok_config').update({ features: { ...(q.data ?? {}), call_theme: t, call_matcha: t === 'matcha' }, updated_at: new Date().toISOString() } as never).eq('id', 1);
     if (error) return onMessage(error.message);
-    onMessage(!on ? 'BIX CALL Black Matcha Lux theme ACTIVE.' : 'BIX CALL theme reset to Obsidian Gold-Purple.');
-    try { localStorage.setItem('bixcall-theme', !on ? 'matcha' : 'default'); } catch { /* ignore */ }
+    applyBixCallTheme(t);
+    onMessage(`BIX CALL theme: ${t === 'toska' ? 'Cyber-Toska Obsidian' : t === 'matcha' ? 'Black Matcha Lux' : 'Obsidian Gold-Purple'} ACTIVE.`);
     await qc.invalidateQueries({ queryKey: ['admin-bix-call-theme'] });
   }
   if (!q.data) return null;
-  return <section className="mt-6 flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
-    <div><strong className="text-sm">BIX CALL · Tema Black Matcha Lux</strong><p className="text-xs text-muted-foreground">Obsidian black, glossy matcha green, and orange accents for the entire BIX CALL screen.</p></div>
-    <button type="button" role="switch" aria-checked={on} aria-label="Tema Black Matcha Lux" onClick={() => void toggle()} className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${on ? 'bg-primary' : 'bg-muted'}`}><span className={`absolute top-0.5 h-5 w-5 rounded-full bg-background transition-all ${on ? 'left-[22px]' : 'left-0.5'}`}/></button>
+  const opts: [BixCallTheme, string][] = [['default', 'Gold-Purple'], ['matcha', 'Black Matcha'], ['toska', 'Cyber-Toska']];
+  return <section className="mt-6 rounded-xl border border-border bg-card p-4">
+    <strong className="text-sm">BIX CALL · Colour theme</strong><p className="text-xs text-muted-foreground">Applies to the whole BIX CALL screen: chats, keyboard bar, and call view.</p>
+    <div className="mt-3 grid grid-cols-3 gap-2" role="radiogroup" aria-label="BIX CALL theme">{opts.map(([v, l]) => <button key={v} type="button" role="radio" aria-checked={cur === v} onClick={() => void pick(v)} className={`rounded-lg border px-2 py-2 text-xs font-bold ${cur === v ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-muted'}`}>{l}</button>)}</div>
   </section>;
 }

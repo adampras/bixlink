@@ -6296,3 +6296,31 @@ html[data-app-hidden='1'] .bixcall-wave * { animation-play-state: paused !import
 .text-muted-foreground { color: color-mix(in oklab, var(--foreground) 78%, transparent); }
 body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 .bixcall-remote,.bixcall-pip{transform:translateZ(0);contain:paint}
+
+/* BIX CALL — Cyber-Toska Obsidian (owner theme) */
+body[data-bc-theme=toska] .bixcall-page{--bct:#2dd4bf;--bct2:#0f766e;--bctg:#ffd700;background:radial-gradient(120% 60% at 50% 0%,rgb(20 184 166 / .22),transparent 60%),radial-gradient(80% 40% at 100% 100%,rgb(34 211 238 / .08),transparent 60%),#030807}
+body[data-bc-theme=toska] .bixcall-page .bc-wrap{background:linear-gradient(180deg,rgb(3 8 7 / .95),rgb(3 8 7 / .6))}
+body[data-bc-theme=toska] .bc-bar{background:linear-gradient(160deg,rgb(8 22 21 / .95),rgb(3 8 7 / .95));border-color:rgb(45 212 191 / .4);box-shadow:inset 0 1px 0 rgb(94 234 212 / .25),0 0 20px rgb(45 212 191 / .14)}
+body[data-bc-theme=toska] .bc-bar>button,body[data-bc-theme=toska] .comm-subhead{color:#5eead4}
+body[data-bc-theme=toska] .bc-bar>button{background:rgb(45 212 191 / .1);border-color:rgb(45 212 191 / .35)}
+body[data-bc-theme=toska] .bc-logo{box-shadow:0 0 14px rgb(45 212 191 / .5)}
+body[data-bc-theme=toska] .bixcall-page .comm-card{background:linear-gradient(160deg,rgb(10 26 25 / .9),rgb(4 10 9 / .92));border-color:rgb(45 212 191 / .22);box-shadow:inset 0 1px 0 rgb(255 255 255 / .05),0 10px 30px rgb(0 0 0 / .4)}
+body[data-bc-theme=toska] .bixcall-page .comm-h{color:#ccfbf1}
+body[data-bc-theme=toska] .bixcall-page .comm-badge{background:linear-gradient(135deg,#2dd4bf,#0d9488);color:#021412}
+body[data-bc-theme=toska] .bixcall-page .comm-chips span,body[data-bc-theme=toska] .bixcall-page .comm-chips button{border-color:rgb(45 212 191 / .3);color:#ccfbf1}
+body[data-bc-theme=toska] .comm-msgs p{background:rgb(15 23 22 / .82);border:1px solid rgb(94 234 212 / .14);color:#e6fffb;backdrop-filter:blur(8px)}
+body[data-bc-theme=toska] .comm-msgs p.is-me{background:linear-gradient(145deg,#0f766e,#115e59);border-color:rgb(94 234 212 / .45);color:#f0fdfa;box-shadow:0 4px 14px rgb(13 148 136 / .25)}
+body[data-bc-theme=toska] .comm-msgs p small{color:rgb(204 251 241 / .7)}
+body[data-bc-theme=toska] .comm-tick.is-read{color:#67e8f9}
+body[data-bc-theme=toska] .comm-compose{background:rgb(3 8 7 / .94);border-top:1px solid rgb(45 212 191 / .25)}
+body[data-bc-theme=toska] .comm-compose input,body[data-bc-theme=toska] .comm-compose textarea{background:rgb(10 26 25 / .9);border-color:rgb(45 212 191 / .3);color:#f0fdfa}
+body[data-bc-theme=toska] .comm-compose button[type=submit]{background:linear-gradient(145deg,#2dd4bf,#0d9488);color:#021412;border-color:#5eead4}
+body[data-bc-theme=toska] .comm-quick button{border-color:rgb(45 212 191 / .3);color:#99f6e4;background:rgb(45 212 191 / .08)}
+body[data-bc-theme=toska] .comm-status.is-online i{background:#2dd4bf;box-shadow:0 0 8px #2dd4bf}
+body[data-bc-theme=toska] .bixcall{background:radial-gradient(90% 55% at 50% 22%,rgb(15 118 110 / .5),transparent 65%),radial-gradient(70% 40% at 50% 100%,rgb(255 215 0 / .1),transparent 70%),#020706}
+body[data-bc-theme=toska] .bixcall-head{border-color:rgb(45 212 191 / .5);box-shadow:0 0 18px rgb(45 212 191 / .3)}
+body[data-bc-theme=toska] .bixcall-head span{color:#5eead4}
+body[data-bc-theme=toska] .bixcall-av{border-color:#2dd4bf;box-shadow:0 0 0 6px rgb(45 212 191 / .16),0 0 40px rgb(45 212 191 / .25)}
+body[data-bc-theme=toska] .bixcall-av b{color:#5eead4}
+body[data-bc-theme=toska] .bixcall-ctl{border-color:rgb(45 212 191 / .4)}
+body[data-bc-theme=toska] .bixcall-pip{border-color:#2dd4bf;box-shadow:0 10px 30px rgb(0 0 0 / .55),0 0 0 3px rgb(45 212 191 / .25)}
