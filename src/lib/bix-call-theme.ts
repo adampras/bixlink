@@ -15,7 +15,7 @@ export const applyBixCallTheme = (t: BixCallTheme) => {
 };
 let loaded = false;
 export function syncBixCallTheme() {
-  try { const s = localStorage.getItem(KEY); document.body.dataset['bcTheme'] = s === 'matcha' || s === 'default' ? (s === 'default' ? '' : s) : 'toska'; if (s === 'default') delete document.body.dataset['bcTheme']; } catch { /* ignore */ }
+  try { const s = localStorage.getItem(KEY); if (s === 'default') delete document.body.dataset['bcTheme']; else document.body.dataset['bcTheme'] = s === 'matcha' ? 'matcha' : 'toska'; } catch { /* ignore */ }
   if (loaded) return; loaded = true;
   void supabase.from('bixtok_config').select('features').eq('id', 1).maybeSingle().then(({ data }) => {
     applyBixCallTheme(resolveBixCallTheme((data as { features?: Record<string, unknown> } | null)?.features));

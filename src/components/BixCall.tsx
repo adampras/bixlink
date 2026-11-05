@@ -413,6 +413,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       <span>{live && link === 'on' ? `SOVEREIGN ENCRYPTED • 48 kHz ${anyVideo ? 'HD VIDEO' : 'HD VOICE'}` : 'BIX CALL • SOVEREIGN ENCRYPTED'}</span>
       {live && link === 'on' && <em className={`bc-q is-${quality}`} aria-label={`Kualitas jaringan: ${quality === 'excellent' ? 'sangat baik' : quality === 'good' ? 'baik' : quality === 'poor' ? 'lemah' : 'mengukur'}`}><i/><i/><i/></em>}
     </header>
+    {!showVideo && <div className="bc-wa-top"><b>@{call.peerName}</b><small>{statusText}</small></div>}
     {!showVideo && <div className="bixcall-center">
       <div className={`bixcall-av${ringing && call.role === 'callee' ? ' is-buzz' : ''} is-${call.offline ? 'offline' : live && link === 'on' ? 'talking' : ringing ? (call.role === 'caller' ? phase : 'ringing') : 'idle'}`} style={live && link === 'on' ? { ['--lvl' as string]: Math.min(1, level * 3) } : undefined}>
         <span className="bixcall-av-ring" aria-hidden="true"/><span className="bixcall-av-ring r2" aria-hidden="true"/>
