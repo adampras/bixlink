@@ -349,6 +349,94 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_group_members: {
+        Row: {
+          group_id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "bix_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bix_group_messages: {
+        Row: {
+          body: string
+          created_at: string
+          group_id: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          group_id: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_group_messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "bix_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bix_groups: {
+        Row: {
+          about: string
+          code: string
+          created_at: string
+          id: string
+          live_code: string | null
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          about?: string
+          code: string
+          created_at?: string
+          id?: string
+          live_code?: string | null
+          name: string
+          owner_id: string
+        }
+        Update: {
+          about?: string
+          code?: string
+          created_at?: string
+          id?: string
+          live_code?: string | null
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
       bix_growth_control: {
         Row: {
           activity_enabled: boolean
@@ -3361,6 +3449,18 @@ export type Database = {
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_find_user_by_email: { Args: { p_email: string }; Returns: string }
       bix_grant_welcome: { Args: { p_user: string }; Returns: undefined }
+      bix_group_feed: {
+        Args: { p_group: string }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          name: string
+          sender_id: string
+        }[]
+      }
+      bix_group_is_member: { Args: { _g: string }; Returns: boolean }
+      bix_group_join: { Args: { p_code: string }; Returns: string }
       bix_growth_excluded: { Args: { p_user: string }; Returns: boolean }
       bix_growth_radar: { Args: never; Returns: Json }
       bix_growth_scope_report: { Args: never; Returns: Json }
