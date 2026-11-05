@@ -63,10 +63,10 @@ function StakePage() {
         <h1 className="section-title stake-lux-title w-full text-center !text-2xl !tracking-wide sm:!text-5xl">STAKING PACKAGE <span>CRYPTO</span></h1>
         
       </div>
-      <GlowSurface className="mt-3 mb-6 rounded-xl sm:mb-8"><dl aria-label="Staking summary" className="hud-scan grid grid-cols-3 divide-x divide-border overflow-hidden rounded-xl border border-border bg-card/70 sm:mb-8">
+      <GlowSurface className="mt-3 mb-6 rounded-xl sm:mb-8"><dl aria-label="Staking summary" className="hud-scan grid grid-cols-3 sm:mb-8">
         <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">BIX supply</dt><dd className="mt-1 font-display text-xs font-bold text-chart-3 sm:text-lg"><Odometer value="21M BIX"/></dd></div>
-        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 sm:text-lg"><Odometer value={money(bal.data ?? 0)}/></dd></div>
-        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 break-all font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
+        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 font-display text-[11px] font-bold leading-4 sm:text-lg"><Odometer value={money(bal.data ?? 0)}/></dd></div>
+        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
       </dl></GlowSurface>
       
       {skin.data && <InstitutionalStakeHeader active={activeStakes.length} principal={activeStakes.reduce((n, s) => n + Number(s.amount_usd), 0)} live={liveTotal} perDay={perDay}/>}

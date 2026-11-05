@@ -6503,3 +6503,21 @@ html .site-shell .obsidian-page .wallet-summary, html .site-shell .obsidian-page
 .network-explorer .nx-pills span { background: transparent !important; border-color: var(--obs-line) !important; color: var(--obs-muted) !important; }
 .network-explorer .nx-pills span.on { border-color: var(--obs-gold-line) !important; color: var(--obs-gold) !important; }
 .network-explorer .bg-card\/40 { background: transparent !important; }
+
+/* Lux numeric polish: solid, unbroken figures + distinct cards (Stake / Network / Wallet) */
+:is(.obsidian-page,.stake-compact,.network-explorer) :is(.numeric,dd,.stake-metric dd,.nx-mini dd) {
+  font-family: 'Sora', var(--font-display), sans-serif !important;
+  font-variant-numeric: tabular-nums lining-nums !important;
+  font-feature-settings: "tnum" 1 !important;
+  background: none !important; -webkit-background-clip: initial !important; background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important; animation: none !important;
+  letter-spacing: -.005em !important; word-break: keep-all !important; overflow-wrap: normal !important; white-space: nowrap;
+}
+.stake-compact dl.hud-scan { display: grid; gap: 8px; border: 0 !important; background: transparent !important; overflow: visible !important; }
+.stake-compact dl.hud-scan > .stake-metric { border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent) !important; border-radius: 14px; background: linear-gradient(180deg, color-mix(in oklab, var(--foreground) 5%, transparent), transparent), var(--background); box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 8%, transparent); padding: 12px 6px !important; }
+.stake-compact dl.hud-scan > .stake-metric dd { font-size: clamp(11px, 3.3vw, 18px) !important; overflow: hidden; text-overflow: ellipsis; }
+.stake-compact dl.hud-scan > .stake-metric dt { letter-spacing: .08em; }
+.network-explorer .nx-mini > div { border-color: color-mix(in oklab, var(--foreground) 12%, transparent) !important; border-radius: 14px !important; padding: 12px 14px !important; box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 8%, transparent), 0 6px 18px -12px oklch(0 0 0 / 80%); }
+.network-explorer .nx-mini dt { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.network-explorer .nx-mini dd { margin-top: 4px; font-size: clamp(15px, 4.6vw, 19px) !important; }
+.network-explorer { padding-bottom: 120px; }
