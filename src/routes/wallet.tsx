@@ -100,7 +100,7 @@ function WalletPage() {
   useEffect(() => { const sync = () => setHidden(localStorage.getItem('bixlink-hide-balance') === 'on'); window.addEventListener('bixlink-preferences', sync); return () => window.removeEventListener('bixlink-preferences', sync); }, []);
   const toggleHidden = () => { const next = !hidden; setHidden(next); localStorage.setItem('bixlink-hide-balance', next ? 'on' : 'off'); window.dispatchEvent(new Event('bixlink-preferences')); };
   const maskNum = (text: string) => hidden ? '••••••' : text;
-  return <BixShell><main className="mx-auto max-w-5xl px-5 py-10 md:px-8">
+  return <BixShell><main className="obsidian-page mx-auto max-w-5xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="WALLET">
       <div data-sov-color={cfg?.readiness.walletCard ? (cfg?.readiness.walletCardColor ?? 'onyx') : undefined} data-wallet-skin={cfg?.readiness.walletCard ? undefined : pickWalletSkin(cfg?.readiness.walletColors)} className={`wallet-summary wallet-vault auric-card relative overflow-hidden rounded-[20px] border p-6${cfg?.readiness.walletCard ? ' wallet-sovereign' : ''}${cfg?.readiness.walletCard && cfg?.readiness.walletCardModel === 'elite' ? ' wallet-elite' : ''}`}>
         {cfg?.readiness.walletCard ? <><span className="sov-sheen" aria-hidden/>{cfg?.readiness.walletCardModel === 'elite' && <><span className="elite-grid" aria-hidden/><span className="elite-orbs" aria-hidden><i/><i/></span></>}</> : <WalletFinanceMotion settings={cfg?.readiness}/>}
