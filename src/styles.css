@@ -6445,3 +6445,10 @@ body[data-bc-theme=toska] .comm-rec{color:#fda4af}
 .aix-stage { z-index: 1; } .app-splash__caption, .app-splash__skip { z-index: 2; }
 .app-splash .aix-stage *, .app-splash .aix-letters b { animation-play-state: running !important; }
 .aix-emblem img { border-radius: 50%; object-fit: cover; border: 2px solid color-mix(in srgb, var(--splash-gold) 70%, transparent); box-shadow: 0 0 0 6px color-mix(in srgb, #A855F7 18%, transparent), 0 0 46px color-mix(in srgb, var(--splash-gold) 55%, transparent); }
+/* Pure obsidian opening (no video) */
+.app-splash, .app-splash--video { background: #000; }
+.aix-eyes { position: absolute; inset: 0; pointer-events: none; }
+.aix-eyes b { position: absolute; top: 44%; width: 9%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #fff 0 20%, #2dd4bf 45%, transparent 72%); box-shadow: 0 0 14px #FFD700, 0 0 26px #2dd4bf; opacity: 0; animation: aix-eye 1.6s ease-out 2.3s both; }
+.aix-eyes b:first-child { left: 36%; } .aix-eyes b:last-child { right: 36%; }
+@keyframes aix-eye { 0% { opacity: 0; transform: scale(.3) } 25% { opacity: 1; transform: scale(1.5) } 100% { opacity: .55; transform: scale(1) } }
+@media (prefers-reduced-motion: reduce) { .aix-eyes b { animation: none; opacity: .5; } }
