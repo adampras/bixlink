@@ -6444,3 +6444,4 @@ body[data-bc-theme=toska] .comm-rec{color:#fda4af}
 .aix-letters b { color: var(--splash-gold); -webkit-text-fill-color: currentColor; background: linear-gradient(to bottom, var(--splash-highlight), var(--splash-gold) 55%, var(--splash-deep-gold)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none; }
 .aix-stage { z-index: 1; } .app-splash__caption, .app-splash__skip { z-index: 2; }
 .app-splash .aix-stage *, .app-splash .aix-letters b { animation-play-state: running !important; }
+.aix-emblem img { border-radius: 50%; object-fit: cover; border: 2px solid color-mix(in srgb, var(--splash-gold) 70%, transparent); box-shadow: 0 0 0 6px color-mix(in srgb, #A855F7 18%, transparent), 0 0 46px color-mix(in srgb, var(--splash-gold) 55%, transparent); }
