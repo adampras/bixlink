@@ -201,8 +201,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const [audioBlocked, setAudioBlocked] = useState(false);
   /** Remote volume: earpiece mode is softer; loudspeaker is full; lowered while a howl is detected. */
   const applyVolume = () => {
-    const base = loudRef.current ? 0.85 : 1;
-    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? base * 0.75 : base; });
+    // Full volume in every mode (video calls run on the loudspeaker and need the most headroom).
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? 0.8 : 1; });
   };
   const attachAudio = (t: RemoteTrack) => {
     const box = audioBox.current; if (!box) return;
@@ -326,7 +326,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       setCam(false); return;
     }
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
-      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'maintain-framerate', videoEncoding: { maxBitrate: saver ? 900_000 : 2_600_000, maxFramerate: res.frameRate, priority: 'high' } as never,
+      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'maintain-framerate', videoEncoding: { maxBitrate: saver ? 800_000 : 1_800_000, maxFramerate: res.frameRate, priority: 'medium' } as never,
         videoSimulcastLayers: [{ width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 800_000, maxFramerate: 30 } }] as never });
     const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
     setCam(on);
