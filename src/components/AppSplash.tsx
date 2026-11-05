@@ -70,8 +70,14 @@ export function AppSplash() {
             <source src={splashMp4.url} type="video/mp4" />
           </video>
           <div className="app-splash__scrim" aria-hidden="true" />
+          <div className="aix-stage" aria-hidden="true">
+            <i className="aix-flare" />
+            <div className="aix-warp">{[0,1,2,3,4,5].map((n) => <i key={n} style={{ animationDelay: `${n * 0.18}s` }} />)}</div>
+            <div className="aix-orbit"><i /><i /><i /></div>
+            <div className="aix-emblem"><i className="aix-burst" /><img src={logo} width={120} height={120} alt="" /></div>
+          </div>
           <div className="app-splash__caption">
-            <span className="splash-word">BIXLINK</span>
+            <span className="splash-word aix-letters" aria-label="BIXLINK">{'BIXLINK'.split('').map((c, i) => <b key={i} style={{ animationDelay: `${2.1 + i * 0.08}s` }}>{c}</b>)}</span>
             <small className="splash-sub">GLOBAL CRYPTO ECOSYSTEM</small>
           </div>
         </>

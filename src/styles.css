@@ -6417,3 +6417,31 @@ body[data-bc-theme=toska] .comm-rec{color:#fda4af}
 .app-splash__skip { position: absolute; top: max(18px, calc(env(safe-area-inset-top) + 12px)); right: 16px; min-height: 40px; padding: 0 16px; border: 1px solid color-mix(in srgb, var(--splash-gold) 26%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--splash-background) 55%, transparent); color: color-mix(in srgb, var(--splash-foreground) 72%, transparent); font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; backdrop-filter: blur(6px); }
 .app-splash__skip:hover, .app-splash__skip:focus-visible { color: var(--splash-gold); border-color: color-mix(in srgb, var(--splash-gold) 60%, transparent); background: color-mix(in srgb, var(--splash-background) 55%, transparent); }
 @media (prefers-reduced-motion: reduce) { .app-splash__video { display: none; } .app-splash__caption { animation: none; } }
+
+/* AIX-style cinematic layer over the splash video, official fox emblem */
+.aix-stage { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; overflow: hidden; }
+.aix-flare { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--splash-highlight); box-shadow: 0 0 40px 18px color-mix(in srgb, var(--splash-gold) 70%, transparent), 0 0 120px 60px color-mix(in srgb, #A855F7 35%, transparent); animation: aix-flare 1.4s var(--ease) both; }
+.aix-warp { position: absolute; inset: 0; display: grid; place-items: center; }
+.aix-warp i { position: absolute; width: 40vmin; aspect-ratio: 1; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--splash-gold) 55%, transparent); box-shadow: 0 0 24px color-mix(in srgb, #A855F7 45%, transparent), inset 0 0 18px color-mix(in srgb, var(--splash-gold) 30%, transparent); opacity: 0; animation: aix-warp 1.3s ease-in 0.8s both; }
+.aix-orbit { position: absolute; width: min(78vw, 340px); aspect-ratio: 1; opacity: 0; animation: aix-in .6s var(--ease) 1.7s both; }
+.aix-orbit i { position: absolute; inset: 0; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--splash-gold) 40%, transparent); transform: rotateX(70deg) rotateZ(0deg); animation: aix-spin 6s linear infinite; }
+.aix-orbit i:nth-child(2) { inset: 8%; border-color: color-mix(in srgb, #A855F7 50%, transparent); transform: rotateY(68deg); animation-duration: 8s; animation-direction: reverse; }
+.aix-orbit i:nth-child(3) { inset: -6%; border-style: dashed; border-color: color-mix(in srgb, var(--splash-gold) 22%, transparent); transform: rotateZ(0); animation-duration: 14s; }
+.aix-emblem { position: relative; width: min(34vw, 140px); aspect-ratio: 1; display: grid; place-items: center; margin-top: -8vh; opacity: 0; animation: aix-emblem .9s cubic-bezier(.2,1.4,.4,1) 1.75s both; }
+.aix-emblem img { position: relative; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 18px color-mix(in srgb, var(--splash-gold) 60%, transparent)) drop-shadow(0 0 40px color-mix(in srgb, #A855F7 40%, transparent)); animation: aix-breathe 2.4s ease-in-out 2.7s infinite; }
+.aix-burst { position: absolute; inset: -60%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--splash-highlight) 80%, transparent) 0%, color-mix(in srgb, var(--splash-gold) 40%, transparent) 25%, transparent 60%); animation: aix-burst 1s ease-out 1.75s both; }
+.aix-letters { display: inline-flex; gap: .02em; }
+.aix-letters b { display: inline-block; font: inherit; opacity: 0; animation: aix-letter .55s cubic-bezier(.2,1.3,.4,1) both; }
+@keyframes aix-flare { 0% { transform: scale(0); opacity: 0 } 40% { transform: scale(1.6); opacity: 1 } 100% { transform: scale(0.2); opacity: 0 } }
+@keyframes aix-warp { 0% { transform: scale(.05); opacity: 0 } 30% { opacity: .9 } 100% { transform: scale(3.2); opacity: 0 } }
+@keyframes aix-in { from { opacity: 0; transform: scale(.6) } to { opacity: 1; transform: scale(1) } }
+@keyframes aix-spin { to { rotate: 360deg } }
+@keyframes aix-emblem { from { opacity: 0; transform: scale(.2) translateZ(0) } to { opacity: 1; transform: scale(1) } }
+@keyframes aix-burst { 0% { transform: scale(.2); opacity: 1 } 100% { transform: scale(1.6); opacity: 0 } }
+@keyframes aix-breathe { 50% { transform: scale(1.05); filter: drop-shadow(0 0 28px color-mix(in srgb, var(--splash-gold) 80%, transparent)) drop-shadow(0 0 60px color-mix(in srgb, #A855F7 55%, transparent)) } }
+@keyframes aix-letter { from { opacity: 0; transform: translateY(14px) scale(2.2); filter: blur(6px) } to { opacity: 1; transform: none; filter: none } }
+@media (prefers-reduced-motion: reduce) { .aix-stage { display: none } .aix-letters b { animation: none; opacity: 1 } }
+.aix-letters b { color: var(--splash-gold); -webkit-text-fill-color: currentColor; background: linear-gradient(to bottom, var(--splash-highlight), var(--splash-gold) 55%, var(--splash-deep-gold)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none; }
+.aix-stage { z-index: 1; } .app-splash__caption, .app-splash__skip { z-index: 2; }
+.app-splash .aix-stage *, .app-splash .aix-letters b { animation-play-state: running !important; }
+.aix-emblem img { border-radius: 50%; object-fit: cover; border: 2px solid color-mix(in srgb, var(--splash-gold) 70%, transparent); box-shadow: 0 0 0 6px color-mix(in srgb, #A855F7 18%, transparent), 0 0 46px color-mix(in srgb, var(--splash-gold) 55%, transparent); }
