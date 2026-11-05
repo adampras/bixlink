@@ -81,16 +81,17 @@ function ProfilePage() {
         <Button asChild variant="outline"><Link to="/nft-marketplace"><span className="profile-action-icon"><ShoppingBag/></span><span>BIXLINK Marketplace</span><ChevronRight className="profile-action-arrow"/></Link></Button>
         {reviewer.data && <Button asChild variant="outline"><Link to="/review"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>ADMIN PANEL BIX <small>Deposit &amp; withdrawal review only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
         <Button asChild variant="outline"><Link to="/arena"><span className="profile-action-icon"><Swords/></span><span>Fox Arena <small>Daily missions and leaderboard</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
-      </section><div className="eyebrow mt-6">SECURITY &amp; ACCOUNT</div><section className="profile-actions">
+      </section>      {data?.isAdmin && <><div className="eyebrow mt-6">OWNER CONTROL</div><section className="profile-actions">
+        {<Button asChild variant="outline"><Link to="/admin"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Admin panel <small>Owner only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
+        {<LandingStyleSwitch/>}
+        {<NetworkTracker/>}
+        {<SovereignWalletSwitch/>}
+        {<Button asChild variant="outline"><Link to="/leader-control"><span className="profile-action-icon profile-action-icon--admin"><Crown/></span><span>Leader &amp; Loan control <small>3× personal · 5× team · HUB menu</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
+        {<Button asChild variant="outline"><Link to="/owner-desk"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Owner Desk <small>WD & omset real</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
+      </section></>}<div className="eyebrow mt-6">SECURITY &amp; ACCOUNT</div><section className="profile-actions">
         <Button asChild variant="outline"><Link to="/settings"><span className="profile-action-icon"><Settings/></span><span>Settings <small>Language, notifications and security</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>
         {!walletOnly && <Button variant="outline" onClick={async () => { if (!user?.email) return; const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` }); setNotice(error ? error.message : 'Password reset email sent.'); }}><span className="profile-action-icon"><KeyRound/></span><span>Change password</span><ChevronRight className="profile-action-arrow"/></Button>}
-        {data?.isAdmin && <Button asChild variant="outline"><Link to="/admin"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Admin panel <small>Owner only</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
-        {data?.isAdmin && <LandingStyleSwitch/>}
-        {data?.isAdmin && <NetworkTracker/>}
-        {data?.isAdmin && <SovereignWalletSwitch/>}
-        {data?.isAdmin && <Button asChild variant="outline"><Link to="/leader-control"><span className="profile-action-icon profile-action-icon--admin"><Crown/></span><span>Leader &amp; Loan control <small>3× personal · 5× team · HUB menu</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
         {!data?.isAdmin && <InstallAppButton/>}
-        {data?.isAdmin && <Button asChild variant="outline"><Link to="/owner-desk"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Owner Desk <small>WD & omset real</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
         <Button variant="outline" className="profile-signout" onClick={signOut}><span className="profile-action-icon"><LogOut/></span><span>Sign out</span></Button>
       </section>
       {notice && <p role="status" className="mt-5 text-chart-2">{notice}</p>}
