@@ -259,6 +259,16 @@ export const updateSetting = createServerFn({ method: 'POST' }).middleware([requ
       const movement = mv ? { ...mv, lower: Number((price * .9).toFixed(6)), upper: Number((price * 1.1).toFixed(6)), base: price, startedAt: now, pausedAt: mv.enabled ? null : now } : undefined;
       data.value = { ...prev, priceUsd: price, ...(movement ? { movement } : {}) };
     }
+    if (data.key === 'readiness') {
+      // ON/OFF switches send a possibly stale readiness snapshot; merge it with the stored row and keep the
+      // project theme, which only updatePresentationTheme may change.
+      const { data: current, error: readError } = await context.supabase.from('app_settings').select('value').eq('key', 'readiness').maybeSingle();
+      if (readError) throw readError;
+      const prev = (current?.value && typeof current.value === 'object' && !Array.isArray(current.value) ? current.value : {}) as Record<string, unknown>;
+      const merged: Record<string, unknown> = { ...prev, ...data.value };
+      if (prev['presentationTheme'] !== undefined) merged['presentationTheme'] = prev['presentationTheme']; else delete merged['presentationTheme'];
+      data.value = merged;
+    }
     const { error } = access === 'reviewer'
       ? await context.supabase.rpc('bix_reviewer_update_setting', { p_key: data.key, p_value: data.value as Json })
       : await context.supabase.from('app_settings').upsert({ key: data.key, value: data.value as Json });
