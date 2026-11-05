@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { usePublicConfig } from '@/lib/useMember';
 import { updateSetting } from '@/lib/bixlink.functions';
 import { splashSettingsSchema } from '@/lib/splash-settings';
-import video from '@/assets/booster-orbital.webm.asset.json';
-import poster from '@/assets/booster-orbital-poster.jpg.asset.json';
+import video from '@/assets/bixlink-splash.webm.asset.json';
+import videoFallback from '@/assets/bixlink-splash.mp4.asset.json';
+import poster from '@/assets/bixlink-splash-poster.jpg.asset.json';
 
 export function AdminSplash({ onMessage }: { onMessage: (message: string) => void }) {
   const { data: config } = usePublicConfig();
