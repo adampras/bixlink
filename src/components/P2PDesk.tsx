@@ -1,3 +1,4 @@
+import { P2PFleetDesk } from "@/components/P2PFleetDesk";
 import { DepthVisualizer } from '@/components/TechSuite';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -58,6 +59,7 @@ export function P2PDesk({ userId, refPrice }: { userId?: string | undefined; ref
   const doTake = async () => { if (!take) return; const n = Number(takeAmt); if (!(n > 0) || n > Number(take.remaining_bix)) { toast.error('Enter an amount up to the offer size'); return; } if (await run(() => supabase.rpc('bix_p2p_take', { p_offer: take.id, p_amount: n }), 'Trade completed · settled in the internal ledger')) setTake(null); };
 
   return <div className="p2p-desk grid gap-4">
+    <P2PFleetDesk />
     <P2PStats pulse={pulse.data ?? null} asks={asks} bids={bids} refPrice={refPrice} />
     <div className="p2p-boxes">
       <button className="p2p-box is-buy" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowUpRight size={22} /><b>BUY BIX</b><small>Bayar USDT · escrow</small></button>

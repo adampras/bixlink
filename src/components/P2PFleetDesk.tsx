@@ -28,7 +28,7 @@ export function P2PFleetDesk() {
   };
   const est = pick ? Math.floor((Number(usdt) || 0) / pick.price * 100) / 100 : 0;
 
-  return <section className="rounded-2xl border border-[hsl(var(--primary)/.3)] bg-card p-4 grid gap-3" aria-label="Official Desk">
+  return <section className="rounded-2xl border border-primary/30 bg-card p-4 grid gap-3" aria-label="Official Desk">
     <header className="flex items-center justify-between gap-2">
       <div><b className="text-sm tracking-wide">OFFICIAL DESK · BUY BIX WITH USDT</b><p className="text-[11px] text-muted-foreground">BIXLINK liquidity merchants · pay USDT BEP-20 · auto-credit after on-chain check</p></div>
       <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-primary/15 text-primary">{d.merchants.length} ONLINE</span>
