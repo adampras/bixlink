@@ -6,7 +6,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { getMyWallet } from '@/lib/bixlink.functions';
-import { Home, Wallet, Layers, Zap, User, Network, LogIn, ShieldCheck, Lock, BadgeCheck, Bell, CheckCheck, ChevronDown, TrendingUp, ClipboardCheck, Crown } from 'lucide-react';
+import { Home, Wallet, Layers, Zap, User, Network, LogIn, ShieldCheck, Lock, BadgeCheck, Bell, CheckCheck, ChevronDown, TrendingUp, ClipboardCheck, Crown, GraduationCap } from 'lucide-react';
 import { useMember, usePublicConfig, useReviewerAccess } from '@/lib/useMember';
 import { usePresaleStatus, presaleOpen } from '@/components/PresaleEntry';
 import headerLogo from '@/assets/bixlink-logo-gold.webp';
