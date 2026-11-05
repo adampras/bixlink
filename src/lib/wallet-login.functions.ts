@@ -1,5 +1,4 @@
 import { createServerFn } from '@tanstack/react-start';
-import { getRequest } from '@tanstack/react-start/server';
 import { z } from 'zod';
 import { verifyMessage } from 'viem';
 import { createClient } from '@supabase/supabase-js';
@@ -8,7 +7,8 @@ import { WALLET_CHALLENGE_TTL_MS, normalizeWalletAddress, walletProofMessage, wa
 
 const addressSchema = z.object({ address: z.string().regex(/^0x[0-9a-fA-F]{40}$/) });
 const proofSchema = z.object({ id: z.string().uuid(), signature: z.string().regex(/^0x[0-9a-fA-F]{130}$/) });
-function origin() {
+async function origin() {
+  const { getRequest } = await import('@tanstack/react-start/server');
   const request = getRequest();
   const value = request.headers.get('origin');
   if (!value || !/^https?:\/\//.test(value)) throw new Error('Open BIXLINK directly to sign in with your wallet.');
@@ -29,7 +29,7 @@ async function issue(address: string, purpose: 'link' | 'login', userId: string 
   if (rateError || (count ?? 0) >= 5) throw new Error('Please wait five minutes before requesting another wallet signature.');
   const id = crypto.randomUUID();
   const expires = new Date(Date.now() + WALLET_CHALLENGE_TTL_MS).toISOString();
-  const site = origin();
+  const site = await origin();
   const message = walletProofMessage(site, address, id, purpose, expires);
   const { error } = await admin.from('bix_wallet_challenges').insert({ id, address: normalized, purpose, user_id: userId, origin: site, message, expires_at: expires, referral_code: referralCode ?? null });
   if (error) throw new Error('Could not prepare wallet verification.');
@@ -37,7 +37,7 @@ async function issue(address: string, purpose: 'link' | 'login', userId: string 
 }
 async function consume(id: string, signature: string, purpose: 'link' | 'login', userId: string | null) {
   const admin = await enabled();
-  const { data, error } = await admin.rpc('bix_consume_wallet_challenge', { p_id: id, p_purpose: purpose, p_origin: origin(), ...(userId ? { p_user_id: userId } : {}) });
+  const { data, error } = await admin.rpc('bix_consume_wallet_challenge', { p_id: id, p_purpose: purpose, p_origin: await origin(), ...(userId ? { p_user_id: userId } : {}) });
   const challenge = data?.[0];
   if (error || !challenge) throw new Error('Wallet signature expired or was already used. Please try again.');
   const valid = await verifyMessage({ address: normalizeWalletAddress(challenge.address), message: challenge.message, signature: signature as `0x${string}` });

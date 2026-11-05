@@ -72,7 +72,7 @@ function ProfilePage() {
       </section>
       <ConditionalLeaderInfo/>
       <section id="bixp" className="mt-6 scroll-mt-20 rounded-2xl border border-chart-3/40 bg-card p-5"><div className="flex items-center justify-between gap-3"><div><div className="eyebrow">BIXP · ECOSYSTEM POINTS</div><b className="numeric mt-1 block font-display text-2xl text-chart-3">{bixp ? Number(bixp.totalVbix).toFixed(2) : '—'} <small className="text-sm text-muted-foreground">BIXP</small></b></div><Button asChild size="sm"><Link to="/arena">Earn BIXP</Link></Button></div><div className="arena-cap mt-3"><i style={{ width: `${bixp ? (bixp.cap > 0 ? Math.min(100, Number(bixp.questVbix) / bixp.cap * 100) : 100) : 0}%` }}/></div><p className="mt-2 text-[11px] text-muted-foreground">Free promotional points. Not on-chain BIX; conversion only if the owner opens it.</p></section>
-      {orders.length > 0 && (() => { const pick = orders.find(o => o.id === openProof) ?? orders[0]!; const total = orders.reduce((s, o) => s + Number(o.package_usd), 0); return <section className="mt-6 rounded-2xl border border-chart-3/40 bg-card p-4">
+      {orders.length > 0 && !data?.isAdmin && (() => { const pick = orders.find(o => o.id === openProof) ?? orders[0]!; const total = orders.reduce((s, o) => s + Number(o.package_usd), 0); return <section className="mt-6 rounded-2xl border border-chart-3/40 bg-card p-4">
         <div className="flex items-center justify-between gap-3"><div className="min-w-0"><div className="eyebrow">GENESIS VAULT</div><p className="mt-1 text-xs text-muted-foreground">{orders.length} certificates · <span className="numeric">${number(total)}</span></p></div><Gem size={18} className="shrink-0 text-chart-3"/></div>
         <div className="mx-auto mt-3 max-w-[260px]">{Number(pick.package_usd) >= 100000 ? <SovereignPlaque serial={pick.serial ?? 1} strategy={pick.strategy ?? 'standard'} bix={Number(pick.bix_amount)} holder={user?.email ?? 'Member'}/> : <GenesisCertificate usd={Number(pick.package_usd)} serial={pick.serial} strategy={pick.strategy} bix={Number(pick.bix_amount)}/>}</div>
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1">{orders.map(o => <button key={o.id} type="button" onClick={() => setOpenProof(o.id)} className={`numeric shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold ${o.id === pick.id ? 'border-chart-3 bg-chart-3/10 text-chart-3' : 'border-border text-muted-foreground'}`}>#GEN-{String(o.serial ?? 0).padStart(4, '0')} · ${number(Number(o.package_usd))}</button>)}</div>
@@ -89,7 +89,7 @@ function ProfilePage() {
         {data?.isAdmin && <NetworkTracker/>}
         {data?.isAdmin && <SovereignWalletSwitch/>}
         {data?.isAdmin && <Button asChild variant="outline"><Link to="/leader-control"><span className="profile-action-icon profile-action-icon--admin"><Crown/></span><span>Leader &amp; Loan control <small>3× personal · 5× team · HUB menu</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
-        <InstallAppButton/>
+        {!data?.isAdmin && <InstallAppButton/>}
         {data?.isAdmin && <Button asChild variant="outline"><Link to="/owner-desk"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Owner Desk <small>WD & omset real</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
         <Button variant="outline" className="profile-signout" onClick={signOut}><span className="profile-action-icon"><LogOut/></span><span>Sign out</span></Button>
       </section>
