@@ -141,8 +141,24 @@ async function memberWallets(context: { supabase: any; userId: string }): Promis
   const { data: role } = await context.supabase.from('user_roles').select('role').eq('user_id', context.userId).eq('role', 'reviewer').maybeSingle();
   if (role) return [];
   const { data: row } = await context.supabase.from('app_settings').select('value').eq('key', 'deposit_wallets').maybeSingle();
-  return ((row?.value as { wallets?: DepositWallet[] } | null)?.wallets ?? []);
+  return stickyRotation(((row?.value as { wallets?: DepositWallet[] } | null)?.wallets ?? []), context.userId);
 }
+
+/** Address rotation: several enabled wallets on the same network+mode collapse to ONE stable wallet per member (hash of user id). */
+export function stickyRotation(wallets: DepositWallet[], userId: string): DepositWallet[] {
+  let h = 0; for (const c of userId) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const groups = new Map<string, DepositWallet[]>();
+  const out: DepositWallet[] = [];
+  for (const w of wallets) {
+    if (!w.enabled || !w.address) { out.push(w); continue; }
+    const k = `${w.network}|${w.asset ?? 'USDT'}|${w.mode ?? 'both'}`;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k)!.push(w);
+  }
+  for (const g of groups.values()) out.push(g[h % g.length]);
+  return out;
+}
+export async function memberWalletsFor(context: { supabase: any; userId: string }) { return memberWallets(context); }
 export const getMyDepositWallets = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) =>
   (await memberWallets(context)).filter(w => w.enabled && w.address));
 
