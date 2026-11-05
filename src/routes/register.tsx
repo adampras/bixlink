@@ -29,7 +29,7 @@ function RegisterPage() {
   const [country, setCountry] = useState('ID'); const [phone, setPhone] = useState('');
   const { ref, target } = Route.useSearch();
   useEffect(() => { if (target === 'presale') window.localStorage.setItem('bixlink-target', 'presale'); }, [target]);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); const [confirm, setConfirm] = useState('');
   useEffect(() => { const incoming = ref || window.localStorage.getItem('bixlink-ref') || ''; if (/^BIX-\d{6}$/i.test(incoming)) { const normalized = incoming.toUpperCase(); setReferral(normalized); window.localStorage.setItem('bixlink-ref', normalized); } }, [ref]);
   const dial = DIAL_COUNTRIES.find(c => c.iso === country) ?? DIAL_COUNTRIES[0]!;
   const [pickerOpen, setPickerOpen] = useState(false); const [query, setQuery] = useState(''); const [detected, setDetected] = useState('ID');
@@ -48,16 +48,17 @@ function RegisterPage() {
       if (!free) throw new Error('That username is already taken.');
       if (code) window.localStorage.setItem('bixlink-ref', code); else window.localStorage.removeItem('bixlink-ref');
       if (!passwordValid(password)) throw new Error(PASSWORD_HINT);
+      if (password !== confirm) throw new Error('Passwords do not match.');
       const created = await createManualAccount(() => supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth?verified=1`, data: { full_name: fullName.trim().slice(0, 80), username: uname, whatsapp, whatsapp_country: dial.iso } } }), () => supabase.auth.signOut());
       window.localStorage.setItem(LOGIN_IDENTIFIER_KEY, uname);
       setDone({ username: uname, email: email.trim(), whatsapp, referral: code, verify: created.confirmationRequired }); setCooldown(60);
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
   const label = 'block text-xs font-bold text-muted-foreground';
-  return <BixShell><main id="member-access" className="auth-vault-page mx-auto flex min-h-[75vh] max-w-md flex-col justify-center px-5 py-10"><VaultStardust/><Link to="/" className="relative z-10 mb-3 inline-flex items-center gap-1.5 self-start rounded-full border border-chart-3/30 bg-card/50 px-3 py-1.5 text-xs font-bold text-chart-3 backdrop-blur-md">← Back to HOME</Link><div className="auth-vault">
+  return <BixShell><main id="member-access" className="auth-vault-page mx-auto flex min-h-[75vh] max-w-md flex-col justify-center px-5 py-10"><VaultStardust/><div className="auth-vault"><Link to="/" className="auth-back" aria-label="Back to HOME">← HOME</Link>
     <div className="flex items-center justify-center gap-2.5"><img src="https://bixlink.com/__l5e/assets-v1/c62ecff6-c5d1-4235-8e7a-e49c0c2b7039/fox-icon-512.png" alt="" className="h-9 w-9 rounded-full border border-chart-3/40"/><div className="text-left"><div className="text-lg font-black leading-none tracking-wide">BIX<span className="text-chart-3">LINK</span></div><div className="mt-1 text-[9px] font-bold tracking-[0.2em] text-muted-foreground">CREATE MEMBER ACCOUNT</div></div></div>
     <nav className="auth-tabs mt-5" aria-label="Account"><Link to="/auth">SIGN IN</Link><Link to="/register" data-active="true">REGISTER</Link></nav>
-    <form onSubmit={submit} className="mt-6 space-y-3.5" aria-label="Create BIXLINK account">
+    <form onSubmit={submit} className="mt-5 space-y-3" aria-label="Create BIXLINK account">
       <label className={label}>FULL NAME<input required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={e => setFullName(e.target.value)} className="form-input mt-1.5" placeholder="Your full name"/></label>
       <label className={label}>USERNAME<input required pattern="[A-Za-z0-9_.]{3,24}" maxLength={24} autoComplete="username" value={username} onChange={e => setUsername(e.target.value)} className="form-input mt-1.5" placeholder="3–24 letters or numbers"/></label>
       <div className={label}><span id="wa-label">WHATSAPP NUMBER</span><div className="relative mt-1.5 grid grid-cols-[6.75rem_minmax(0,1fr)] gap-2">
@@ -69,7 +70,8 @@ function RegisterPage() {
         </div>}
       </div></div>
       <label className={label}>EMAIL<input required type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="form-input mt-1.5" placeholder="you@example.com"/></label>
-      <label className={label}>PASSWORD<div className="relative mt-1.5"><input required minLength={6} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} className="form-input pr-12" placeholder="••••••••"/><Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(v => !v)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div></label>
+      <div className="grid grid-cols-2 gap-2.5"><label className={label}>PASSWORD<div className="relative mt-1.5"><input required minLength={6} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} className="form-input pr-10" placeholder="••••••••"/><Button type="button" variant="ghost" size="icon" className="absolute right-0.5 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(v => !v)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div></label><label className={label}>CONFIRM<div className="relative mt-1.5"><input required minLength={6} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} className="form-input pr-10" placeholder="••••••••"/><Button type="button" variant="ghost" size="icon" className="absolute right-0.5 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(v => !v)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div></label></div>
+      {confirm.length > 0 && <p aria-live="polite" className={`text-[11px] font-bold ${confirm === password ? 'auth-toska-text' : 'text-destructive'}`}>{confirm === password ? 'Passwords match ✓' : 'Passwords do not match'}</p>}
       {password.length > 0 && <div className="pw-rules" aria-live="polite"><span className={password.length >= 8 ? 'is-ok' : ''}>8+ characters</span><span className={/[A-Z]/.test(password) && /[a-z]/.test(password) ? 'is-ok' : ''}>Upper & lower case</span><span className={/\d/.test(password) ? 'is-ok' : ''}>One number</span><span className={/[^A-Za-z0-9]/.test(password) && !/\s/.test(password) ? 'is-ok' : ''}>One symbol</span></div>}
       <label className={label}><span className="flex justify-between">REFERRAL CODE<span className="text-[9px] opacity-70">OPTIONAL</span></span><input maxLength={10} value={referral} onChange={e => setReferral(e.target.value.toUpperCase())} className="form-input mt-1.5 font-mono tracking-widest" placeholder="BIX-123456"/></label>
       {notice && <p role="status" className="text-sm text-chart-2">{notice}</p>}
@@ -78,7 +80,7 @@ function RegisterPage() {
     <div className="my-5 text-center text-[10px] font-bold tracking-widest text-muted-foreground">OR</div>
     <Button type="button" variant="outline" className="h-12 w-full rounded-full border-border bg-card" onClick={async () => { const r = await lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/auth` }); if (r.error) setNotice(r.error.message); else if (!r.redirected) window.location.assign('/'); }}>Register with Google</Button>
     <WalletSignIn/>
-    <p className="mt-6 text-center text-sm text-muted-foreground">Already have an account? <Link to="/auth" className="font-bold text-chart-2">Sign in</Link></p>
+    <p className="mt-6 text-center text-sm text-muted-foreground">Already have an account? <Link to="/auth" className="auth-toska-link">Sign in →</Link></p>
   </div></main>
   <Dialog open={!!done} onOpenChange={() => {}}><DialogContent className="max-w-sm border-chart-3/40 bg-card" onInteractOutside={e => e.preventDefault()}>
     <DialogHeader><DialogTitle className="text-center text-xl font-black tracking-wide">{done?.verify ? 'VERIFY YOUR EMAIL' : 'ACCOUNT CREATED'}</DialogTitle><DialogDescription className="text-center">{done?.verify ? <>We sent an activation link to <b className="text-foreground">{done.email}</b>. Open it to activate your account, then sign in. Check your Inbox and Spam folder.</> : 'Save your login details, then sign in manually with your password.'}</DialogDescription></DialogHeader>
