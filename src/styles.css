@@ -6407,3 +6407,12 @@ body[data-bc-theme=toska] .comm-rec{color:#fda4af}
 .bx-grp-msg-row i{font-style:normal;font-size:11px;font-weight:800;color:var(--tk)}.bx-grp-msg-row p{font-size:14px;white-space:pre-wrap;word-break:break-word}.bx-grp-msg-row small{display:block;text-align:right;font-size:10px;color:var(--muted-foreground)}
 .bx-grp-compose{position:sticky;bottom:84px;display:flex;gap:8px}.bx-grp-compose input{flex:1}
 .bx-grp-compose button{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tk);color:oklch(0.16 0.02 180)}.bx-grp-compose button:disabled{opacity:.4}
+
+/* Splash video (uploaded video 1) */
+.app-splash--video { background: var(--splash-background); }
+.app-splash__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: var(--splash-background); }
+.app-splash__scrim { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(125% 95% at 50% 42%, transparent 42%, color-mix(in srgb, var(--splash-background) 70%, transparent) 100%), linear-gradient(to top, color-mix(in srgb, var(--splash-background) 90%, transparent) 0%, transparent 40%); }
+.app-splash__caption { position: absolute; left: 0; right: 0; bottom: max(56px, calc(env(safe-area-inset-bottom) + 40px)); display: grid; justify-items: center; gap: 10px; text-align: center; animation: splash-rise 520ms var(--ease) both; }
+.app-splash__skip { position: absolute; top: max(18px, calc(env(safe-area-inset-top) + 12px)); right: 16px; min-height: 40px; padding: 0 16px; border: 1px solid color-mix(in srgb, var(--splash-gold) 26%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--splash-background) 55%, transparent); color: color-mix(in srgb, var(--splash-foreground) 72%, transparent); font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; backdrop-filter: blur(6px); }
+.app-splash__skip:hover, .app-splash__skip:focus-visible { color: var(--splash-gold); border-color: color-mix(in srgb, var(--splash-gold) 60%, transparent); background: color-mix(in srgb, var(--splash-background) 55%, transparent); }
+@media (prefers-reduced-motion: reduce) { .app-splash__video { display: none; } .app-splash__caption { animation: none; } }
