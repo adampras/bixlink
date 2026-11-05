@@ -6521,3 +6521,22 @@ html .site-shell .obsidian-page .wallet-summary, html .site-shell .obsidian-page
 .network-explorer .nx-mini dt { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
 .network-explorer .nx-mini dd { margin-top: 4px; font-size: clamp(15px, 4.6vw, 19px) !important; }
 .network-explorer { padding-bottom: 120px; }
+
+/* Stake picker arrows below card, never over package name */
+.stake-pick-nav { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:10px; }
+.stake-pick-nav .stake-pick-arrow { position:static; }
+.stake-pick-nav .stake-pick-dots { margin-top:0; }
+
+/* Profit page: Obsidian Titanium, minimal withdraw */
+.profit-page .profit-metric, .profit-page .profit-position, .profit-page .profit-empty { background: var(--obs-card) !important; border:1px solid var(--obs-line) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important; backdrop-filter:none !important; }
+.profit-page .profit-metric > svg { color: var(--obs-gold) !important; }
+.profit-page .profit-metric > span, .profit-page .profit-metric > small, .profit-page .text-muted-foreground { color: var(--obs-muted) !important; }
+.profit-page .profit-metric > strong { color: var(--obs-ink) !important; font-variant-numeric: tabular-nums; }
+.profit-page .profit-metric--total > strong { color: var(--obs-gold) !important; }
+.profit-page .text-chart-2 { color: var(--obs-mint) !important; }
+.profit-page .text-chart-3, .profit-page .text-primary { color: var(--obs-gold) !important; }
+.profit-page .profit-withdraw { background: var(--obs-card) !important; border:1px solid var(--obs-line) !important; box-shadow:none !important; padding:14px; border-radius:16px; }
+.profit-page .profit-withdraw__amounts div { background: rgba(255,255,255,.02) !important; border-color: var(--obs-line) !important; }
+.profit-page .profit-withdraw__amounts b { color: var(--obs-ink) !important; }
+.profit-page .profit-withdraw__btn { min-height:42px; padding:0 18px; font-family:inherit; font-size:13px; font-weight:700; letter-spacing:.06em; color: var(--obs-gold) !important; background: transparent !important; border:1px solid var(--obs-gold-line); box-shadow:none !important; }
+.profit-page .profit-withdraw__btn:hover:not(:disabled) { transform:none; background: rgba(245,208,97,.08) !important; }
