@@ -155,7 +155,7 @@ export function stickyRotation(wallets: DepositWallet[], userId: string): Deposi
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k)!.push(w);
   }
-  for (const g of groups.values()) out.push(g[h % g.length]);
+  for (const g of groups.values()) out.push(g[h % g.length]!);
   return out;
 }
 export async function memberWalletsFor(context: { supabase: any; userId: string }) { return memberWallets(context); }
