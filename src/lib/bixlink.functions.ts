@@ -89,10 +89,11 @@ export const createReferral = createServerFn({ method: 'POST' }).middleware([req
 });
 
 export const bootstrapOwner = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const { getRequestHeader } = await import('@tanstack/react-start/server');
-  const token = getRequestHeader('authorization')?.replace(/^Bearer /, '');
-  if (!token) return { owner: false };
+  const { getRequest } = await import('@tanstack/react-start/server');
+  const token = getRequest()?.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
+  if (!token) { console.error('[bootstrapOwner] missing bearer'); return { owner: false }; }
   const { data: identity, error: identityError } = await context.supabase.auth.getUser(token);
+  if (identityError) console.error('[bootstrapOwner] getUser failed', identityError);
   if (identityError || identity.user?.id !== context.userId || identity.user.email?.toLowerCase() !== 'bixdevpras@gmail.com' || !identity.user.email_confirmed_at) return { owner: false };
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
   const { error } = await supabaseAdmin.from('user_roles').upsert({ user_id: context.userId, role: 'admin' }, { onConflict: 'user_id,role' });
