@@ -437,10 +437,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
         <button className="end" aria-label="Batalkan" onClick={onEnd}><PhoneOff/></button>
       </>}
-      {live && <div className="bc-ctl4" onPointerDown={askTilt}>
-        <label><button aria-label={mic ? 'Bisukan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button><span>{mic ? 'Mikrofon' : 'Bisu'}</span></label>
+      {live && <div className="bc-ctl4 bc-grid6" onPointerDown={askTilt}>
         <label><button aria-label={loud ? 'Speaker active' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={speaker}>{loud ? <Volume2/> : <Ear/>}</button><span>{loud ? 'Speaker' : 'Telinga'}</span></label>
-        <label><button aria-label={cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} className={cam ? 'shield' : ''} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>{cam ? 'Video aktif' : 'Video'}</span></label>
+        <label><button aria-label={cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} className={cam ? 'shield' : ''} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>Video</span></label>
+        <label><button aria-label={mic ? 'Senyapkan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button><span>Senyapkan</span></label>
+        <label><button aria-label="Chat" onClick={openChat}><MessageCircle/></button><span>Chat</span></label>
+        <label><button aria-label="Balik kamera" disabled={!cam} className={cam ? '' : 'dim'} onClick={() => void flip()}><SwitchCamera/></button><span>Balik</span></label>
         <label><button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button><span>Akhiri</span></label>
       </div>}
       {call.offline ? <>
