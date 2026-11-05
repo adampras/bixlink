@@ -26,7 +26,7 @@ import { RecordedActivity } from '@/components/GrowthExperience';
 import { HighlightsHub } from '@/components/HighlightsHub';
 import { isLandingClosedFor } from '@/lib/site-control';
 import { LandingClosed } from '@/components/LandingClosed';
-import { HoloReactor, Odometer, GlowSurface } from '@/components/FuturisticCore';
+import { Odometer } from '@/components/FuturisticCore';
 import { EcosystemRail } from '@/components/EcosystemRail';
 import { LandingTradeStyle } from '@/components/LandingTradeStyle';
 
