@@ -6335,3 +6335,4 @@ body[data-bc-theme=toska] .bixcall-pip{border-color:#2dd4bf;box-shadow:0 10px 30
 .auth-vault .auth-badge span { background: var(--toska); box-shadow: 0 0 8px var(--toska); }
 .auth-vault .form-input:focus { border-color: var(--toska) !important; box-shadow: 0 0 0 3px color-mix(in oklch, var(--toska) 22%, transparent) !important; }
 .auth-vault button[type="submit"], .auth-vault form > button:last-child { background: linear-gradient(120deg, var(--toska), oklch(0.62 0.12 195)) !important; }
+.auth-vault { padding-top: 48px !important; }
