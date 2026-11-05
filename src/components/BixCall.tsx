@@ -270,7 +270,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       try {
         const res = await getBixCallToken({ data: { callId: call.id } });
         if (!res.ok || cancelled) { setLink('fail'); return; }
-        room = new Room({ adaptiveStream: false, dynacast: true });
+        room = new Room({ adaptiveStream: false, dynacast: true, webAudioMix: false, audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }, publishDefaults: { dtx: false, red: true, stopMicTrackOnMute: false } } as never);
         roomRef.current = room;
         room.on(RoomEvent.TrackSubscribed, (t: RemoteTrack) => {
           if (t.kind === Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); setRemoteVideo(true); }
@@ -291,7 +291,10 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         // Native mic track: keeps the phone's hardware echo canceller linked to the call output (a WebAudio-processed track breaks it → echo/howl).
         if (cancelled) return;
-        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 48000, priority: 'high' } } as never);
+        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 64000, priority: 'high' } } as never);
+        // Lock the phone's own echo canceller / noise suppressor / high-pass on (Chrome flags), so loudspeaker video calls stay echo-free.
+        { const mt = room.localParticipant.getTrackPublication(Track.Source.Microphone)?.track?.mediaStreamTrack;
+          void mt?.applyConstraints({ echoCancellation: true, noiseSuppression: true, autoGainControl: true, googEchoCancellation: true, googEchoCancellation2: true, googNoiseSuppression: true, googNoiseSuppression2: true, googHighpassFilter: true, googAutoGainControl: true, googAutoGainControl2: true, googTypingNoiseDetection: true } as never).catch(() => {}); }
         if (call.kind === 'video') await startCam(room, true);
         if (!cancelled) setLink('on');
       } catch { if (!cancelled) setLink('fail'); }
