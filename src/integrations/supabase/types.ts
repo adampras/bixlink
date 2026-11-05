@@ -301,6 +301,54 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_fleet_orders: {
+        Row: {
+          address: string
+          bix: number
+          created_at: string
+          credited_at: string | null
+          id: string
+          merchant: string
+          note: string | null
+          price: number
+          status: string
+          tx_hash: string
+          usdt: number
+          user_id: string
+          wallet_code: string
+        }
+        Insert: {
+          address: string
+          bix?: number
+          created_at?: string
+          credited_at?: string | null
+          id?: string
+          merchant: string
+          note?: string | null
+          price: number
+          status?: string
+          tx_hash: string
+          usdt?: number
+          user_id: string
+          wallet_code: string
+        }
+        Update: {
+          address?: string
+          bix?: number
+          created_at?: string
+          credited_at?: string | null
+          id?: string
+          merchant?: string
+          note?: string | null
+          price?: number
+          status?: string
+          tx_hash?: string
+          usdt?: number
+          user_id?: string
+          wallet_code?: string
+        }
+        Relationships: []
+      }
       bix_growth_control: {
         Row: {
           activity_enabled: boolean
