@@ -30,7 +30,9 @@ export const defaultBixGold = (): BixGoldSettings => ({
 export function readBixGold(v: unknown): BixGoldSettings {
   const base = defaultBixGold();
   const r = bixGoldSchema.partial().safeParse(v);
-  return r.success ? { ...base, ...r.data } : base;
+  if (!r.success) return base;
+  const clean = Object.fromEntries(Object.entries(r.data).filter(([, v]) => v !== undefined));
+  return { ...base, ...clean } as BixGoldSettings;
 }
 
 /** Package price in USD = grams × reference price per gram. */
