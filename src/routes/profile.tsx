@@ -87,6 +87,7 @@ function ProfilePage() {
         {<NetworkTracker/>}
         {<SovereignWalletSwitch/>}
         {<Button asChild variant="outline"><Link to="/leader-control"><span className="profile-action-icon profile-action-icon--admin"><Crown/></span><span>Leader &amp; Loan control <small>3× personal · 5× team · HUB menu</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
+        {<Button asChild variant="outline"><Link to="/bixtrade"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>BIXTrade operator <small>Deposit, withdraw &amp; plan (hidden from public)</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
         {<Button asChild variant="outline"><Link to="/owner-desk"><span className="profile-action-icon profile-action-icon--admin"><Shield/></span><span>Owner Desk <small>WD & omset real</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>}
       </section></>}<div className="eyebrow mt-6">SECURITY &amp; ACCOUNT</div><section className="profile-actions">
         <Button asChild variant="outline"><Link to="/settings"><span className="profile-action-icon"><Settings/></span><span>Settings <small>Language, notifications and security</small></span><ChevronRight className="profile-action-arrow"/></Link></Button>

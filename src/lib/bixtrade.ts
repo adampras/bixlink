@@ -11,6 +11,7 @@ export type BixtradeStrategy = typeof BIXTRADE_STRATEGIES[number]['key'];
 
 export const bixtradeSettingsSchema = z.object({
   enabled: z.boolean(),
+  showcaseOnly: z.boolean(),
   minDailyPct: z.number().min(0).max(5),
   maxDailyPct: z.number().min(0).max(5),
   winRate: z.number().min(50).max(99),
@@ -50,7 +51,7 @@ export const bixtradeSettingsSchema = z.object({
 
 export type BixtradeSettings = z.infer<typeof bixtradeSettingsSchema>;
 
-export const BIXTRADE_DEFAULTS: BixtradeSettings = { enabled: false, minDailyPct: 0.3, maxDailyPct: 0.8, winRate: 92, minAlloc: 100, maxAlloc: 50_000, notice: '', depositOpen: true, withdrawOpen: true, minWithdraw: 20, withdrawFeePct: 2, lockDays: 7,
+export const BIXTRADE_DEFAULTS: BixtradeSettings = { enabled: false, showcaseOnly: true, minDailyPct: 0.3, maxDailyPct: 0.8, winRate: 92, minAlloc: 100, maxAlloc: 50_000, notice: '', depositOpen: true, withdrawOpen: true, minWithdraw: 20, withdrawFeePct: 2, lockDays: 7,
   planEnabled: true, memberSharePct: 70, companySharePct: 20, affiliateSharePct: 10,
   matchingEnabled: true, matchL1: 5, matchL2: 3, matchL3: 2,
   sponsorBonusEnabled: false, sponsorBonusPct: 2,
