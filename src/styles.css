@@ -6754,3 +6754,20 @@ html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explore
 
 /* BIXGO green hero artwork — fades into the gradient */
 .bixgo-green-art { mask-image: linear-gradient(90deg, transparent, #000 45%); opacity: .9; }
+
+/* ===== STAKING hero title: platinum white -> 24K gold lettering ===== */
+.stake-compact h1.stake-lux-title {
+  background: linear-gradient(100deg, #ffffff 0%, #f9f4e6 20%, #f7cf5a 56%, #e3b23f 80%, #b8860b 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent !important;
+  filter: drop-shadow(0 0 16px rgba(247, 207, 90, .3));
+}
+.stake-compact h1.stake-lux-title span { color: transparent !important; text-shadow: none; }
+html[data-color-mode="light"] .stake-compact h1.stake-lux-title {
+  background: linear-gradient(100deg, #14201f 0%, #6b5216 42%, #c9a227 74%, #8a6a1f 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent !important;
+  filter: none;
+}
+html[data-color-mode="light"] .stake-compact h1.stake-lux-title span { color: transparent !important; }
+@media (prefers-reduced-motion: reduce) { .stake-compact h1.stake-lux-title { filter: none; } }
