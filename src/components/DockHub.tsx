@@ -44,11 +44,20 @@ export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, bool
     const body = <>{!compact && BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<span className="hub-emblem" style={{ animationDelay: `${(n % 4) * -0.9}s` }}><Icon size={20} strokeWidth={1.7}/></span><div className="text-xs font-black">{i.label}</div>{!compact && <div className="mt-0.5 text-[10px] text-muted-foreground">{i.note}</div>}</>;
     return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => pick(i.id)} className={cls}>{body}</a> : <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={cls}>{body}</Link>;
   };
+  // Sheet follows the finger and parks where released; it only sinks once pulled past ~60% of its height (or a hard flick).
   const [drag, setDrag] = useState(0);
-  const start = useRef<{ y: number; t: number } | null>(null);
-  const onDown = (e: React.PointerEvent) => { start.current = { y: e.clientY, t: Date.now() }; (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId); };
-  const onMove = (e: React.PointerEvent) => { if (start.current) setDrag(Math.max(0, e.clientY - start.current.y)); };
-  const onUp = (e: React.PointerEvent) => { const s0 = start.current; start.current = null; if (!s0) return; const dy = e.clientY - s0.y; const v = dy / Math.max(1, Date.now() - s0.t); if (dy > 80 || v > 0.6) { try { navigator.vibrate?.(10); } catch { /* unsupported */ } setOpen(false); } setDrag(0); };
+  const [moving, setMoving] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const start = useRef<{ y: number; t: number; base: number; lastY: number; lastT: number } | null>(null);
+  const onDown = (e: React.PointerEvent) => { const now = Date.now(); start.current = { y: e.clientY, t: now, base: drag, lastY: e.clientY, lastT: now }; setMoving(true); (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId); };
+  const onMove = (e: React.PointerEvent) => { const s = start.current; if (!s) return; const raw = s.base + e.clientY - s.y; setDrag(raw < 0 ? raw * 0.25 : raw); s.lastY = e.clientY; s.lastT = Date.now(); };
+  const onUp = (e: React.PointerEvent) => {
+    const s0 = start.current; start.current = null; setMoving(false); if (!s0) return;
+    const h = sheetRef.current?.offsetHeight ?? 600; const pos = s0.base + e.clientY - s0.y;
+    const v = (e.clientY - s0.lastY) / Math.max(1, Date.now() - s0.lastT + 16);
+    if (pos > h * 0.6 || (v > 1.4 && pos > 40)) { try { navigator.vibrate?.(12); } catch { /* unsupported */ } setDrag(h); setTimeout(() => setOpen(false), 220); return; }
+    setDrag(Math.max(0, pos));
+  };
   useEffect(() => { if (!open) setDrag(0); }, [open]);
   const recentItems = recent.map(id => items.find(i => i.id === id)).filter((i): i is typeof items[number] => !!i);
   return <>
@@ -56,7 +65,7 @@ export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, bool
       <LayoutGrid size={19} className="shrink-0"/><span>HUB</span>
     </button>
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="bottom" className="hub-midnight max-h-[80vh] overflow-y-auto rounded-t-3xl pb-8" style={drag ? { transform: `translateY(${drag}px)`, transition: 'none' } : { transition: 'transform .35s cubic-bezier(.2,.9,.3,1.2)' }}>
+      <SheetContent side="bottom" ref={sheetRef} className="hub-midnight max-h-[80vh] overflow-y-auto rounded-t-3xl pb-8" style={{ transform: drag ? `translateY(${drag}px)` : undefined, transition: moving ? 'none' : 'transform .32s cubic-bezier(.22,1,.36,1)', opacity: drag > 0 ? Math.max(0.55, 1 - drag / 1400) : 1 }}>
         <div className="touch-none -mx-6 -mt-6 cursor-grab px-6 pt-6 pb-1" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} aria-label="Swipe down to close HUB">
         <div className="hub-grabber" aria-hidden/>
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest">BIX HUB</SheetTitle></SheetHeader>

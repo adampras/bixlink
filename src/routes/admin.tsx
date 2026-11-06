@@ -22,6 +22,7 @@ import { AdminLandingContent } from '@/components/AdminLandingContent';
 import { AdminPopups } from '@/components/AdminPopups';
 import { AdminBixVault } from '@/components/AdminBixVault';
 import { AdminBixToken } from '@/components/AdminBixToken';
+import { AdminHubMenu } from '@/components/AdminHubMenu';
 import { AdminReadiness } from '@/components/AdminReadiness';
 import { AdminNotify } from '@/components/AdminNotify';
 import { AdminReviewers, AdminTurnover } from '@/components/AdminReviewers';
@@ -117,6 +118,7 @@ function Admin() {
     {tab === 'Desain & Tampilan' && <AdminWorkspace label="Desain & Tampilan" panels={[
       { title: 'Tema & Wallet', content: <AdminAppearance initialReadiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/> },
       { title: 'Visibilitas & Updates', content: <AdminReadiness initial={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} onMessage={setMessage} onSaved={refresh}/> },
+      { title: 'Menu HUB', content: <AdminHubMenu/> },
       { title: 'Splash', content: <AdminSplash onMessage={setMessage}/> },
       { title: 'Banner & Pop-up', content: <AdminPopups content={data?.settings.find(s => s.key === 'landing_content')?.value as LandingContent | undefined} onMessage={setMessage} onSaved={refresh}/> },
       { title: 'Booster', content: <AdminBoosterVisual initialVisual={((data?.settings.find(s=>s.key==='booster_visual')?.value as {visual?: BoosterVisual} | undefined)?.visual ?? 'video')} enabled={Boolean((data?.settings.find(s=>s.key==='booster')?.value as {enabled?: boolean})?.enabled)} onMessage={setMessage} onSaved={refresh}/> },
