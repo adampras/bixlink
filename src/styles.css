@@ -6649,3 +6649,25 @@ html[data-color-mode="light"] .profit-page .profit-withdraw__amounts div { backg
 .stake-compact .lux-ledger-total b { font-size: 16px !important; font-weight: 800; }
 .stake-compact .duration-option, .stake-compact .duration-stake, .stake-compact .stake-mode button { font-family: 'Sora', sans-serif !important; font-weight: 700; letter-spacing: .04em; }
 .stake-compact .duration-risk, .stake-compact .text-muted-foreground { font-family: 'Manrope', sans-serif; }
+
+/* Unified typography: every page follows the active Appearance theme fonts. */
+.site-shell { font-family: var(--font-sans) !important; }
+.site-shell :is(h1,h2,h3,.font-display,.section-title) { font-family: var(--font-display) !important; }
+.site-shell :is(.numeric,dd,strong,b,.duration-price,.lux-ledger b,.wallet-balance,.profit-metric > strong) {
+  font-family: var(--font-display) !important; font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum" 1, "lnum" 1, "zero" 0 !important; letter-spacing: 0 !important;
+}
+.site-shell :is(dt,label,small,.eyebrow,.duration-label,.lux-ledger span) { font-family: var(--font-sans) !important; }
+
+/* Staking: Champagne Platinum & Cyber Emerald — no yellow. */
+.stake-compact { --stk-ink:#f8fafc; --stk-muted:#a8b3c4; --stk-plat:#e5e7eb; --stk-line:rgba(226,232,240,.22); --stk-line-on:rgba(241,245,249,.7); --stk-emerald:#34d399; --obs-gold:#e5e7eb; --obs-gold-line:rgba(226,232,240,.24); --tier-color:#cbd5e1; --tier-ink:#0b0f16; }
+html[data-color-mode="light"] .stake-compact { --stk-ink:#0f172a; --stk-muted:#475569; --stk-plat:#334155; --stk-line:#cbd5e1; --stk-line-on:#334155; --stk-emerald:#047857; --obs-gold:#334155; --obs-gold-line:#cbd5e1; --tier-color:#334155; --tier-ink:#fff; }
+.stake-compact :is(.text-chart-3,.stake-lux-title span,.duration-price,.lux-ledger b,.stake-request strong) { color: var(--stk-ink) !important; -webkit-text-fill-color: currentColor !important; text-shadow: none !important; }
+.stake-compact :is(.text-chart-2,.duration-yield dd,.lux-ledger-total b,.duration-apy) { color: var(--stk-emerald) !important; }
+.stake-compact :is(dt,.duration-label,.lux-ledger span,.text-muted-foreground,.duration-risk) { color: var(--stk-muted) !important; }
+.stake-compact :is(.duration-package,.stake-metric,.lux-ledger > div,.duration-option,.stake-pick-chip,.stake-request,.stake-mode) { border-color: var(--stk-line) !important; }
+.stake-compact .duration-package-head { background: linear-gradient(110deg, rgba(226,232,240,.08), transparent) !important; border-bottom: 1px solid var(--stk-line) !important; }
+.stake-compact .duration-package-head p { color: var(--stk-muted) !important; }
+.stake-compact :is(.duration-option[aria-pressed="true"],.stake-pick-chip[aria-selected="true"],.stake-mode button[aria-pressed="true"]) { background: rgba(226,232,240,.1) !important; border-color: var(--stk-line-on) !important; color: var(--stk-ink) !important; }
+.stake-compact .duration-stake { background: linear-gradient(135deg,#f1f5f9,#94a3b8) !important; color:#0b0f16 !important; border:0 !important; box-shadow:none !important; }
+html[data-color-mode="light"] .stake-compact .duration-stake { background: linear-gradient(135deg,#1e293b,#475569) !important; color:#fff !important; }
+.stake-compact .stake-pick-dots i.on { background: var(--stk-plat) !important; }
