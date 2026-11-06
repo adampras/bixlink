@@ -35,7 +35,7 @@ export const bixgoSettingsSchema = z.object({
   bixDiscountPct: z.number().min(0).max(50),
   usdtIdr: z.number().positive().max(1_000_000),
   services: z.object({ ride: svc, car: svc, food: svc, send: svc, mart: svc }).strict(),
-  franchises: z.array(franchiseSchema).max(100).optional(),
+  franchises: z.array(franchiseSchema).max(400).optional(),
   ppob: z.object({ enabled: z.boolean(), live: z.boolean(), marginIdr: z.number().min(0).max(100_000) }).strict().optional(),
   /** Per-city fare multiplier and minimum fare (IDR), owner-managed. */
   cityPricing: z.record(z.string().max(40), z.object({ mult: z.number().min(0.1).max(10), minIdr: z.number().min(0).max(10_000_000) }).strict()).optional(),

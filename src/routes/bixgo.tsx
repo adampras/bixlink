@@ -12,6 +12,7 @@ import { BixgoBills } from '@/components/BixgoBills';
 import { BixgoHero } from '@/components/BixgoHero';
 import { BixgoPassport } from '@/components/BixgoPassport';
 import { BixgoTravel } from '@/components/BixgoTravel';
+import { REGION_PROVINCES } from '@/lib/bixgo-regions';
 import { GLOBAL_CITIES, GLOBAL_CURRENCIES, cryptoEquivalent, formatMoney, readCurrency, saveCurrency, type GlobalCurrency } from '@/lib/bixgo-global';
 import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
 
@@ -78,7 +79,7 @@ function BixgoPage() {
   const [view, setView] = useState<BixgoView>('home');
   const [sub, setSub] = useState<null | 'ride' | 'car' | 'bills' | 'travel'>(null);
   const [cur, setCur] = useState<GlobalCurrency>('USD');
-  const [city, setCity] = useState<string>(GLOBAL_CITIES[0].id);
+  const [city, setCity] = useState<string>('makassar');
   useEffect(() => { setCur(readCurrency()); }, []);
   const pickCur = (c: GlobalCurrency) => { setCur(c); saveCurrency(c); };
   const { user } = useMember();
@@ -129,7 +130,7 @@ function BixgoPage() {
     {!cfg.enabled && isAdmin && <p className="border-b border-accent/40 bg-accent/20 px-3 py-2 text-[11px]">Admin 1 preview · Under Reconstruction (only visible to you)</p>}
     {!sub && <div className="sticky top-0 z-10 flex items-center gap-2 overflow-x-auto border-b border-border bg-background/90 px-3 py-2 backdrop-blur">
       <span className="shrink-0 rounded-full border border-primary/50 px-2 py-0.5 text-[10px] font-bold tracking-widest text-primary">GLOBAL</span>
-      <select aria-label="City" value={city} onChange={e => { setCity(e.target.value); const c = GLOBAL_CITIES.find(x => x.id === e.target.value); if (c) pickCur(c.cur); }} className="shrink-0 rounded-full border border-border bg-card px-2 py-1 text-[11px]">{GLOBAL_CITIES.map(c => <option key={c.id} value={c.id}>{c.city}, {c.country}</option>)}</select>
+      <select aria-label="City" value={city} onChange={e => { setCity(e.target.value); const c = GLOBAL_CITIES.find(x => x.id === e.target.value); if (c) pickCur(c.cur); }} className="shrink-0 rounded-full border border-border bg-card px-2 py-1 text-[11px]">{(['ID', 'MY'] as const).map(cc => REGION_PROVINCES.filter(r => r.cc === cc).map(r => <optgroup key={r.province} label={`${cc === 'ID' ? '🇮🇩' : '🇲🇾'} ${r.province}`}>{GLOBAL_CITIES.filter(c => c.province === r.province).map(c => <option key={c.id} value={c.id}>{c.city}, {c.cc}</option>)}</optgroup>))}</select>
       <div className="flex shrink-0 gap-1">{GLOBAL_CURRENCIES.map(c => <button key={c.code} onClick={() => pickCur(c.code)} className={`rounded-full border px-2 py-1 text-[11px] ${cur === c.code ? 'border-primary bg-primary/15 font-bold' : 'border-border'}`}>{c.code}</button>)}</div>
     </div>}
     {sub === 'travel' && <BixgoTravel cur={cur} usdtIdr={cfg.usdtIdr} onBack={() => setSub(null)}/>}
