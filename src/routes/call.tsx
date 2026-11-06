@@ -14,7 +14,13 @@ import { BixAvatar, useBixCard } from '@/components/BixAvatar';
 import { StoryBar } from '@/components/BixStories';
 import { pushNotify } from '@/lib/bix-push';
 import { compressImage } from '@/lib/bix-image';
-import { Camera, MoreVertical } from 'lucide-react';
+import { Camera, MoreVertical, QrCode, ScanLine, UserPlus, Trash2 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import { QrScanner } from '@/components/QrScanner';
+import { useServerFn } from '@tanstack/react-start';
+import { useQuery } from '@tanstack/react-query';
+import { getBixPay } from '@/lib/bixlink.functions';
+import { CONTACTS_EVENT, addContact, readContacts, removeContact, parseBixId, type BixContact } from '@/lib/bix-contacts';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
 
 export const Route = createFileRoute('/call')({
@@ -98,21 +104,25 @@ function CallInner() {
   const view: CommTab = tab;
 
   return <main className="mx-auto max-w-xl px-4 py-5">
-    <FindMember bar me={me} tier={tier} onChat={open}/>
-    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}<CommMenu/></div>
+    <div className="bc-head">
+      <div className="bc-head__search"><FindMember bar me={me} tier={tier} onChat={open}/></div>
+      <ContactQr/>
+      <CommMenu/>
+    </div>
+    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
 
-    {view === 'chat' && <ChatTab me={me} tier={tier} onOpen={open}/>}
+    {view === 'chat' && <><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
     {view === 'group' && <BixGroups me={me}/>}
     {view === 'updates' && <StoryBar me={me} myName="Saya" list/>}
     {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
     {view === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
-    {view === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/></>}
+    {view === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
   </main>;
 }
 
 function CommMenu() {
   const [o, setO] = useState(false);
-  const go = [['chat', 'Chat'], ['group', 'Group · Education'], ['updates', 'Updates · Status'], ['community', 'Community'], ['call', 'Calls'], ['setting', 'Settings']] as const;
+  const go = [['chat', 'Chat'], ['group', 'Group · Education'], ['updates', 'Updates · Status'], ['call', 'Calls'], ['setting', 'Settings · Community']] as const;
   return <span className="comm-kebab"><button type="button" aria-label="Menu" onClick={() => setO(v => !v)}><MoreVertical size={18}/></button>
     {o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }
@@ -553,4 +563,47 @@ function ForwardSheet({ me, msg, onPick, onClose }: { me: string; msg: Msg; onPi
       <ul className="comm-fwd-list">{threads.filter(t => t.peer !== me).map(t => <li key={t.peer}><button type="button" onClick={() => onPick({ id: t.peer, name: t.name })}><span className={`comm-ava${t.online ? ' is-online' : ''}`}>{t.name.slice(0, 1).toUpperCase()}</span><b>@{t.name}</b></button></li>)}</ul>}
     <button type="button" className="ghost" onClick={onClose}>Batal</button>
   </div></div>;
+}
+
+/** My BIX-ID QR + scanner: scanning another member's QR saves them straight into this device's contacts. */
+function ContactQr() {
+  const [open, setOpen] = useState(false);
+  const [scan, setScan] = useState(false);
+  const [msg, setMsg] = useState('');
+  const load = useServerFn(getBixPay);
+  const mine = useQuery({ queryKey: ['bix-pay'], queryFn: () => load(), enabled: open });
+  const code = mine.data?.code ?? '';
+  const saveFrom = async (raw: string) => {
+    setScan(false); const id = parseBixId(raw);
+    if (!id) { setMsg('QR ini bukan BIX-ID member.'); return; }
+    const { data } = await supabase.rpc('bix_call_find' as never, { p_query: id } as never);
+    const f = data as { user_id: string; name: string } | null;
+    if (!f) { setMsg(`${id} tidak ditemukan.`); return; }
+    if (id === code) { setMsg('Itu BIX-ID Anda sendiri.'); return; }
+    addContact({ id: f.user_id, name: f.name, code: id }); try { navigator.vibrate?.(20); } catch { /* optional */ }
+    setMsg(`@${f.name} (${id}) tersimpan di kontak.`);
+  };
+  return <>
+    <button type="button" className="bc-qr-btn" aria-label="QR kontak BIX-ID" onClick={() => { setMsg(''); setOpen(true); }}><QrCode size={18}/></button>
+    {open && <div className="fixed inset-0 z-50 grid place-items-center bg-background/90 p-4 backdrop-blur" onClick={() => setOpen(false)}>
+      <div role="dialog" aria-label="QR kontak" className="bc-qr-card" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between"><b className="font-display text-sm tracking-widest">BIX CALL · QR KONTAK</b><button type="button" aria-label="Close" onClick={() => setOpen(false)}><X size={18}/></button></div>
+        <div className="pay-qr-plate mt-4">{code ? <QRCodeSVG value={code} size={200} level="M" marginSize={0}/> : <div className="grid size-[200px] place-items-center text-xs text-muted-foreground">Memuat…</div>}</div>
+        <p className="numeric mt-3 text-center text-lg font-black text-chart-3">{code || '—'}</p>
+        <p className="mt-1 text-center text-[11px] text-muted-foreground">Member lain memindai QR ini untuk menyimpan BIX-ID Anda sebagai kontak.</p>
+        <button type="button" className="bc-qr-scan mt-4" onClick={() => setScan(true)}><ScanLine size={16}/> Pindai & simpan kontak</button>
+        {msg && <p role="status" className="mt-3 text-center text-xs text-chart-2">{msg}</p>}
+      </div></div>}
+    {scan && <QrScanner title="Pindai QR BIX-ID" hint="Arahkan kamera ke QR BIX-ID member" onClose={() => setScan(false)} onResult={raw => void saveFrom(raw)}/>}
+  </>;
+}
+
+function SavedContacts({ onChat }: { onChat: (id: string, name: string) => void }) {
+  const [list, setList] = useState<BixContact[]>([]);
+  useEffect(() => { const r = () => setList(readContacts()); r(); window.addEventListener(CONTACTS_EVENT, r); return () => window.removeEventListener(CONTACTS_EVENT, r); }, []);
+  if (!list.length) return null;
+  return <section className="comm-card"><h3 className="comm-h"><UserPlus size={13} className="mr-1 inline"/>Kontak tersimpan</h3>
+    {list.map(c => <div key={c.id} className="comm-peer"><BixAvatar userId={c.id} name={c.name}/><span className="min-w-0 flex-1"><b className="block truncate">@{c.name}</b><span className="comm-meta"><small className="numeric">{c.code}</small></span></span>
+      <span className="comm-actions"><button aria-label="Chat" onClick={() => onChat(c.id, c.name)}><MessageCircle size={15}/></button><button aria-label="Hapus kontak" onClick={() => removeContact(c.id)}><Trash2 size={14}/></button></span></div>)}
+  </section>;
 }

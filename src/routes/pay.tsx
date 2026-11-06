@@ -11,6 +11,7 @@ import { getBixPay, lookupBixPay, sendBixPay } from '@/lib/bixlink.functions';
 import { ScanLine, QrCode, Lock, ArrowUpRight, ArrowDownLeft, Copy, ShieldCheck, ArrowLeft, X, ImageUp } from 'lucide-react';
 import { dateTime, number } from '@/lib/bixlink';
 import { confirmPin, txFeedback } from '@/components/TxFeedback';
+import { QrScanner as Scanner } from '@/components/QrScanner';
 
 export const Route = createFileRoute('/pay')({
   head: () => ({ meta: [{ title: 'BIX PAY — BIXLINK' }, { name: 'description', content: 'Scan a QR code to pay other BIXLINK members in BIX.' }, { property: 'og:title', content: 'BIX PAY — BIXLINK' }, { property: 'og:description', content: 'Member-to-member BIX payments by QR scan.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
@@ -29,34 +30,6 @@ const parse = (raw: string): Payload | null => {
     return { code: code.toUpperCase(), amount, note: url.searchParams.get('note') ?? undefined };
   } catch { return null; }
 };
-
-function Scanner({ onResult, onClose }: { onResult: (v: string) => void; onClose: () => void }) {
-  const ref = useRef<any>(null);
-  const [err, setErr] = useState('');
-  useEffect(() => {
-    let stopped = false;
-    import('html5-qrcode').then(({ Html5Qrcode }) => {
-      if (stopped) return;
-      const s = new Html5Qrcode('bix-scanner'); ref.current = s;
-      s.start({ facingMode: 'environment' }, { fps: 12, qrbox: (w: number, h: number) => { const m = Math.floor(Math.min(w, h) * 0.7); return { width: m, height: m }; } }, text => { s.stop().catch(() => {}); ref.current = null; navigator.vibrate?.(30); onResult(text); }, () => {})
-        .catch(() => setErr('Camera unavailable. Choose a QR image from your gallery or enter the code manually.'));
-    });
-    return () => { stopped = true; ref.current?.stop().catch(() => {}); };
-  }, [onResult]);
-  useEffect(() => { const prev = document.body.style.overflow; document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = prev; }; }, []);
-  return <div className="qr-full" role="dialog" aria-label="Scan BIX PAY QR">
-    <div id="bix-scanner" className="qr-full__cam"/>
-    <div className="qr-full__mask" aria-hidden><div className="qr-full__frame"><i/><i/><i/><i/><span className="qr-full__laser"/></div></div>
-    <div className="qr-full__top"><b className="font-display">Scan BIX PAY QR</b><button type="button" onClick={onClose} aria-label="Close" className="qr-full__x"><X size={20}/></button></div>
-    <div className="qr-full__bottom">
-      <p className="qr-full__hint">{err || 'Point the camera at a member\'s BIX PAY QR'}</p>
-      <label className="qr-full__gallery"><ImageUp size={16}/> Choose QR from gallery
-        <input type="file" accept="image/*" className="hidden" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; setErr(''); try { await ref.current?.stop().catch(() => {}); ref.current = null; const { Html5Qrcode } = await import('html5-qrcode'); const reader = new Html5Qrcode('bix-file-reader'); const text = await reader.scanFile(file, false); reader.clear(); onResult(text); } catch { setErr('No QR code found in that image. Try a clearer screenshot.'); } e.target.value = ''; }}/>
-      </label>
-    </div>
-    <div id="bix-file-reader" className="hidden"/>
-  </div>;
-}
 
 function PayPage() {
   const { user, ready } = useMember();
@@ -92,12 +65,9 @@ function PayPage() {
     setBusy(false);
   };
 
-  return <BixShell><main className="mx-auto max-w-3xl px-5 py-10 md:px-8">
+  return <BixShell><main className="mx-auto max-w-3xl px-5 pt-3 pb-10 md:px-8 md:pt-6">
     <MemberGate ready={ready} signedIn={!!user} title="BIX PAY">
-      <Link to="/wallet" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"><ArrowLeft size={14}/> Wallet</Link>
-      <div className="mt-3 flex flex-wrap items-end justify-between gap-3"><div><div className="eyebrow"><ScanLine size={14}/> BIX UTILITY</div><h1 className="section-title">BIX <span>PAY</span></h1></div>{!enabled && <span className="inline-flex items-center gap-1 rounded-full border border-chart-3 bg-chart-3/10 px-3 py-1 text-xs font-bold text-chart-3"><Lock size={12}/> Coming soon</span>}</div>
-
-      {(() => { const [whole, frac] = number(Number(data?.bixBalance ?? 0), { maximumFractionDigits: 8 }).split('.'); return <div className="hubx-hero mt-5"><span className="hubx-hero__label">BIX BALANCE</span><div className="hubx-hero__num numeric"><b>{whole}</b>{frac && <small>.{frac}</small>}<em>BIX</em></div><button type="button" className="hubx-chip numeric" onClick={() => { if (data?.code) { navigator.clipboard.writeText(data.code); setMsg('Member code copied.'); } }}>{data?.code ?? '—'}<Copy size={11}/></button></div>; })()}
+      {(() => { const [whole, frac] = number(Number(data?.bixBalance ?? 0), { maximumFractionDigits: 8 }).split('.'); return <div className="hubx-hero pay-hero"><div className="pay-hero__top"><Link to="/wallet" aria-label="Back to Wallet" className="pay-hero__back"><ArrowLeft size={15}/></Link><b className="pay-hero__title font-display">BIX <span>PAY</span></b>{!enabled ? <span className="pay-hero__soon"><Lock size={11}/> Soon</span> : <span className="pay-hero__tag"><ScanLine size={11}/> UTILITY</span>}</div><span className="hubx-hero__label">BIX BALANCE</span><div className="hubx-hero__num numeric"><b>{whole}</b>{frac && <small>.{frac}</small>}<em>BIX</em></div><button type="button" className="hubx-chip numeric" onClick={() => { if (data?.code) { navigator.clipboard.writeText(data.code); setMsg('Member code copied.'); } }}>{data?.code ?? '—'}<Copy size={11}/></button></div>; })()}
 
       <div className="hubx-tabs mt-4">{(['pay', 'receive'] as const).map(t => <button key={t} onClick={() => setTab(t)} className={tab === t ? 'is-on' : ''}>{t === 'pay' ? <><ArrowUpRight size={14}/> Pay</> : <><ArrowDownLeft size={14}/> Receive</>}</button>)}</div>
 
