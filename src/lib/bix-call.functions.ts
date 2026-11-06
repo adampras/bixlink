@@ -34,7 +34,9 @@ export const getBixRoomToken = createServerFn({ method: 'POST' })
     const key = process.env['LIVEKIT_API_KEY'];
     const secret = process.env['LIVEKIT_API_SECRET'];
     if (!url || !key || !secret) throw new Error('Call server not ready');
-    const { data: room } = await context.supabase.from('bix_call_rooms').select('id, host_id, title, video, status').eq('code', data.code).maybeSingle();
+    // Room code is the join secret: look it up server-side after auth (rooms are not listable by everyone).
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: room } = await supabaseAdmin.from('bix_call_rooms').select('id, host_id, title, video, status').eq('code', data.code).maybeSingle();
     if (!room || room.status !== 'open') throw new Error('Room not found or already closed');
     const { data: tier } = await context.supabase.rpc('bix_comm_me' as never);
     const t = tier as { voice?: boolean; video?: boolean } | null;
