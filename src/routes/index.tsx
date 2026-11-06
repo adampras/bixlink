@@ -64,6 +64,7 @@ function Home() {
   const landingView = !user || (landing === 1 && !!cfg?.isAdmin);
   const [showLanding, setShowLanding] = useState(false);
   if (!user && cfg && isLandingClosedFor(cfg.siteControl, cfg.isAdmin, false)) return <BixShell><LandingClosed message={cfg.siteControl.landingMessage}/></BixShell>;
+  if (!user && !ready && landing !== 1) return <div className="eco-portal" aria-hidden/>;
   if (!user && ready && !showLanding && landing !== 1) return <EcosystemPortal onLanding={() => { setShowLanding(true); window.scrollTo(0, 0); }}/>;
   if (landingView) return <BixShell>{cfg?.siteControl.landingClosed && <div className="bg-primary px-4 py-2 text-center text-xs font-semibold text-primary-foreground">Admin preview — landing is currently closed to the public</div>}{rd?.liveActivityEnabled !== false && <RecordedActivity/>}<div className="mx-auto max-w-7xl px-5 pt-4 md:px-8"><HighlightsHub/></div><div className="hub-divider" aria-hidden/>{rd?.landingTradeStyle && <LandingTradeStyle bixPrice={cfg?.bixMarket.priceUsd}/>}<div className="relative"><LandingExperience {...(cfg ? { packages: cfg.packages, booster: cfg.booster.enabled, bixPrice: cfg.bixMarket.priceUsd, content: cfg.landingContent } : {})}/></div></BixShell>;
   return <BixShell><MarketTicker/><MemberGate ready={ready} signedIn={!!user} title="HOME"><main>
