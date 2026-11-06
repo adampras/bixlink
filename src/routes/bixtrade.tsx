@@ -54,6 +54,7 @@ function BixtradePage() {
   const [logFilter, setLogFilter] = useState<'all' | 'win' | 'scratch'>('all');
   const [receipt, setReceipt] = useState<Exec | null>(null);
   const [menu, setMenu] = useState(false);
+  const [publicView, setPublicView] = useState(true);
   useEffect(() => { void supabase.rpc('is_bix_admin').then(({ data }) => setIsAdmin(data === true)); }, [uid]);
   const audio = useRef<AudioContext | null>(null);
   useEffect(() => { setSound(localStorage.getItem('bixtrade-sound') === '1'); }, []);
@@ -150,7 +151,7 @@ function BixtradePage() {
     </section>
   </main></BixShell>;
 
-  const showcase = cfg.showcaseOnly && !isAdmin;
+  const showcase = cfg.showcaseOnly && (!isAdmin || publicView);
   const proj = projectBixtrade(cfg, amount, days);
   const n = Number(reqAmt) || 0;
   const go = (t: typeof tab, f?: 'real' | 'virtual', anchor?: string) => { setTab(t); if (f) setFunding(f); setMenu(false); setTimeout(() => (anchor ? document.getElementById(anchor) : document.querySelector('.arb-tabs'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); };
@@ -170,6 +171,10 @@ function BixtradePage() {
       {MENU.map(g => <details key={g.title} open={g.title === 'Trading Engine'}><summary>{g.title}<ChevronDown size={16}/></summary>{g.items.map(([l, fn]) => <button key={l} type="button" onClick={fn}>{l}</button>)}</details>)}
       <div className="arb-drawer-cta">{!showcase && <Button className="w-full" onClick={() => { setMode('deposit'); go('cockpit', 'real', 'arb-wallet'); }}>Request Deposit Bot</Button>}<Button asChild variant="outline" className="w-full"><Link to="/dashboard">← Kembali ke BIXLINK</Link></Button></div>
     </nav></div>}
+    {isAdmin && cfg.showcaseOnly && <div className="arb-card mb-3 flex items-center justify-between gap-2 py-2 text-xs">
+      <span><b>{publicView ? 'Public view' : 'Operator console'}</b> · only you see this switch</span>
+      <Button size="sm" variant="outline" onClick={() => setPublicView(v => !v)}>{publicView ? 'Open operator console' : 'Show public view'}</Button>
+    </div>}
     <section className="arb-ai-hero">
       <div className="arb-ai-copy">
         <p className="shop-eyebrow">AI QUANT ENGINE</p>
