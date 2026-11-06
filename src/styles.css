@@ -6738,3 +6738,16 @@ html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explore
   .stake-compact .duration-stake { min-height: 50px; }
   .stake-compact .duration-package-action { padding-right: 0; }
 }
+
+/* BIXGO hero — BIXLINK obsidian + gold + teal identity */
+.bixgo-hero { background: linear-gradient(160deg, #070b10, #0d141d 60%, #0a1712); border: 1px solid rgba(46,230,197,.35); box-shadow: inset 0 1px 0 rgba(247,207,90,.45), 0 0 28px -10px rgba(46,230,197,.55); color: #f3f6f8; }
+.bixgo-hero .text-muted-foreground { color: #9fb3b8; }
+.bixgo-hero-grid { opacity: .18; background-image: linear-gradient(rgba(46,230,197,.4) 1px, transparent 1px), linear-gradient(90deg, rgba(46,230,197,.4) 1px, transparent 1px); background-size: 22px 22px; mask-image: radial-gradient(circle at 80% 0%, #000, transparent 70%); }
+.bixgo-hero-gold { background: linear-gradient(90deg, #ffe9a3, #f7cf5a, #f59e0b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bixgo-hero-logo { filter: drop-shadow(0 0 10px rgba(247,207,90,.55)); }
+.bixgo-hero-dot { background: #2ee6c5; box-shadow: 0 0 8px #2ee6c5; animation: bixgo-pulse 1.6s ease-in-out infinite; }
+.bixgo-hero-chip { border: 1px solid rgba(46,230,197,.3); background: rgba(12,20,26,.7); color: #f3f6f8; }
+.bixgo-hero-chip.is-on { border-color: #f7cf5a; color: #ffe9a3; box-shadow: 0 0 12px -4px #f7cf5a; }
+.bixgo-hero-panel { background: rgba(12,20,26,.82); border: 1px solid rgba(247,207,90,.4); }
+@keyframes bixgo-pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .bixgo-hero-dot { animation: none; } }
