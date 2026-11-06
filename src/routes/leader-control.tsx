@@ -16,6 +16,7 @@ import { getAdminLeaders, getLeaderCandidates, reviewLeader, setLeaderAccess, up
 import { getLoanPackages, saveLoanPackages } from '@/lib/loan-packages.functions';
 import { type LoanConfig } from '@/lib/loan-packages';
 import { HUB_ITEMS, hubVisible } from '@/lib/dock-hub';
+import { AdminHubMenu } from '@/components/AdminHubMenu';
 
 export const Route = createFileRoute('/leader-control')({
   head: () => ({ meta: [
@@ -57,7 +58,7 @@ function Control() {
     {(tab === 'leader' || tab === 'loan') && <Roster kind={tab}/>}
     {tab === 'none' && <Candidates/>}
     {tab === 'packages' && <Packages/>}
-    {tab === 'hub' && <HubToggles/>}
+    {tab === 'hub' && <AdminHubMenu/>}
     {tab === 'withdraw' && <VusdtWithdraw/>}
     {tab === 'challenge' && <ChallengeReview/>}
     {tab === 'wdm' && <WdMatchingPanel/>}
@@ -153,18 +154,6 @@ function Packages() {
     <Button variant="outline" onClick={add} disabled={cfg.packages.length >= 20}>+ Add package</Button>
     {msg && <p className="text-xs text-primary">{msg}</p>}
     <Button onClick={async () => { setMsg(''); try { const r = await save({ data: cfg }); setCfg(r); qc.invalidateQueries({ queryKey: ['loan-packages'] }); qc.invalidateQueries({ queryKey: ['loan-packages-member'] }); setMsg('Paket loan tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } }}>Save loan package</Button>
-  </div>;
-}
-
-export function HubToggles() {
-  const { data } = usePublicConfig(); const save = useServerFn(updateDockHub); const qc = useQueryClient();
-  const [cfg, setCfg] = useState<Record<string, boolean>>({}); const [msg, setMsg] = useState('');
-  useEffect(() => { setCfg(data?.readiness.dockHub ?? {}); }, [data?.readiness.dockHub]);
-  return <div className="space-y-2">
-    <p className="text-xs text-muted-foreground">Select menus shown on the HUB button (mobile bottom navigation).</p>
-    <div className="grid gap-2 sm:grid-cols-2">{HUB_ITEMS.map(it => <label key={it.id} className="flex items-center justify-between rounded-xl border border-border bg-card/70 px-3 py-2 text-sm"><span>{it.label} <small className="text-muted-foreground">{it.note}</small></span><Switch checked={hubVisible(cfg, it.id)} onCheckedChange={v => setCfg(c => ({ ...c, [it.id]: v }))}/></label>)}</div>
-    {msg && <p className="text-xs text-primary">{msg}</p>}
-    <Button onClick={async () => { setMsg(''); try { await save({ data: { dockHub: cfg } }); qc.invalidateQueries({ queryKey: ['bix-public-config'] }); setMsg('Menu HUB tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } }}>Save HUB menu</Button>
   </div>;
 }
 
