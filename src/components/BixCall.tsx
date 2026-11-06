@@ -336,7 +336,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   };
   const toggleCam = async () => {
     // Voice calls never touch the camera, so the browser camera indicator never appears.
-    const r = roomRef.current; if (!r || call.kind === 'voice') return;
+    const r = roomRef.current; if (!r) return;
     try { await startCam(r, !cam, front ? 'user' : 'environment'); } catch { setCam(false); }
   };
   // (Re)attach the local camera whenever its preview element appears or moves (pip ⇄ big).
@@ -410,7 +410,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Show in full' : 'Penuhi layar'}>{fill ? '⤡ Sudut lega' : '⤢ Layar penuh'}</button>}
     <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>
     {audioBlocked && live && <button type="button" className="bc-pill is-chat" style={{ position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 5 }} onClick={unlockAudio}><Volume2 size={16}/> Tap for sound</button>}
-    {live && link === 'on' && remoteVideo && !cam && call.kind === 'video' && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
+    {live && link === 'on' && remoteVideo && !cam && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
     {live && cam && <button type="button" className="bixcall-flip" aria-label="Flip camera" onClick={() => void flip()}><SwitchCamera size={18}/></button>}
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
@@ -444,7 +444,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       </>}
       {live && <div className="bc-ctl4 bc-grid6" onPointerDown={askTilt}>
         <label><button aria-label={loud ? 'Speaker active' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={speaker}>{loud ? <Volume2/> : <Ear/>}</button><span>{loud ? 'Speaker' : 'Telinga'}</span></label>
-        <label><button aria-label={call.kind === 'voice' ? 'Voice call — camera locked' : cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} disabled={call.kind === 'voice'} className={call.kind === 'voice' ? 'dim' : cam ? 'shield' : ''} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>{call.kind === 'voice' ? 'Voice only' : 'Video'}</span></label>
+        <label><button aria-label={cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} className={cam ? 'shield' : ''} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>Video</span></label>
         <label><button aria-label={mic ? 'Senyapkan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button><span>Senyapkan</span></label>
         <label><button aria-label="Chat" onClick={openChat}><MessageCircle/></button><span>Chat</span></label>
         <label><button aria-label="Balik kamera" disabled={!cam} className={cam ? '' : 'dim'} onClick={() => void flip()}><SwitchCamera/></button><span>Balik</span></label>
