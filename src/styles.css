@@ -6587,3 +6587,18 @@ html .site-shell .obsidian-page .wallet-summary:not([data-wallet-skin]):not([dat
 .wallet-back-ids dd button { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; font-weight: 800; font-size: 14px; font-variant-numeric: tabular-nums; letter-spacing: .04em; word-break: break-all; text-align: left; }
 .wallet-back-hint { font-size: 10px; opacity: .7; }
 @media (prefers-reduced-motion: reduce) { .wallet-flip-inner { transition: none; } }
+
+/* Mastercard card: fx under balance, actions inside, admin colors win */
+.wallet-face--front .wallet-fx-grid { margin-top: 6px !important; }
+.wallet-face--front { justify-content: flex-start !important; gap: 4px; }
+.wallet-actions--card { margin-top: auto !important; padding-top: 10px !important; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; border-top: 1px solid color-mix(in oklab, currentColor 18%, transparent); }
+.wallet-actions--card .wallet-action { min-height: 0 !important; padding: 6px 4px !important; display: flex; align-items: center; justify-content: center; gap: 5px; border-radius: 10px !important; font-size: 10px; letter-spacing: .06em; background: oklch(0 0 0 / 22%) !important; border: 1px solid color-mix(in oklab, currentColor 22%, transparent) !important; color: inherit !important; }
+.wallet-actions--card .wallet-action > span { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 999px; padding: 0 !important; color: inherit !important; border-color: color-mix(in oklab, currentColor 35%, transparent) !important; }
+.wallet-actions--card .wallet-action svg { width: 12px; height: 12px; }
+.wallet-actions--card .wallet-action b { color: inherit !important; }
+html .site-shell .wallet-summary.wallet-sovereign[data-sov-color="onyx"] { background: linear-gradient(135deg, oklch(0.2 0.01 80), oklch(0.1 0.005 80) 55%, oklch(0.22 0.02 85)) !important; }
+html .site-shell .wallet-summary.wallet-sovereign[data-sov-color="gold"] { background: linear-gradient(135deg, oklch(0.62 0.11 80), oklch(0.45 0.09 70) 55%, oklch(0.68 0.12 85)) !important; }
+html .site-shell .wallet-summary.wallet-sovereign[data-sov-color="sapphire"] { background: linear-gradient(135deg, oklch(0.36 0.1 260), oklch(0.22 0.07 262) 55%, oklch(0.4 0.11 255)) !important; }
+html .site-shell .wallet-summary.wallet-sovereign[data-sov-color="emerald"] { background: linear-gradient(135deg, oklch(0.4 0.09 160), oklch(0.24 0.06 162) 55%, oklch(0.44 0.1 158)) !important; }
+html .site-shell .wallet-summary.wallet-sovereign[data-sov-color="ruby"] { background: linear-gradient(135deg, oklch(0.4 0.13 18), oklch(0.24 0.09 15) 55%, oklch(0.44 0.14 20)) !important; }
+html .site-shell .obsidian-page .wallet-summary[data-wallet-skin] { background: linear-gradient(135deg, var(--skin-a), var(--skin-b)) !important; }
