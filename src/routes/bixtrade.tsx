@@ -115,7 +115,8 @@ function BixtradePage() {
     o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.2);
   }, [tick]); // eslint-disable-line react-hooks/exhaustive-deps
   const pending = reqs.filter(r => r.status === 'pending').length;
-  const mood = bixtradeBotMood({ capital, routes: profitable.length, lastExecAt: fundExecs[0]?.executed_at, now: Date.now() });
+  const lastAt = fundExecs[0] ? new Date(fundExecs[0].executed_at).getTime() : 0;
+  const mood = showcaseOn ? (Date.now() - lastAt < 8000 ? 'trade' : profitable.length ? 'hunt' : 'scan') : bixtradeBotMood({ capital, routes: profitable.length, lastExecAt: fundExecs[0]?.executed_at, now: Date.now() });
   const top = profitable[0];
   const statusText = mood === 'sleep' ? 'Bot on standby — automatically active after deposit is approved.' : mood === 'trade' ? `Eksekusi otomatis tercatat${fundExecs[0] ? ` (${Number(fundExecs[0].net_usd) >= 0 ? '+' : ''}${Number(fundExecs[0].net_usd).toFixed(4)} USDT)` : ''}.` : top ? `Menemukan selisih ${top.net.toFixed(2)}% pada ${top.pair} (${top.buy} → ${top.sell}).` : 'Memindai peluang harga di 6 bursa…';
 
