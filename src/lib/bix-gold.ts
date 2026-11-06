@@ -3,6 +3,7 @@ import { z } from 'zod';
 const pct = z.number().min(0).max(100);
 export const bixGoldSchema = z.object({
   enabled: z.boolean(),
+  autoPrice: z.boolean(),
   priceUsdPerGram: z.number().positive().max(100_000),
   usdIdr: z.number().positive().max(1_000_000),
   usdMyr: z.number().positive().max(1_000),
@@ -18,7 +19,7 @@ export const bixGoldSchema = z.object({
 export type BixGoldSettings = z.infer<typeof bixGoldSchema>;
 
 export const defaultBixGold = (): BixGoldSettings => ({
-  enabled: false, priceUsdPerGram: 0, usdIdr: 16000, usdMyr: 4.4,
+  enabled: false, autoPrice: true, priceUsdPerGram: 0, usdIdr: 16000, usdMyr: 4.4,
   packages: [['Micro Gold', 0.1], ['Gold 1g', 1], ['Gold Bar 5g', 5], ['Platinum Bar 10g', 10], ['Sovereign Vault 50g', 50]].map(([name, grams]) => ({ name: String(name), grams: Number(grams), enabled: true })),
   sponsorPct: 0, levels: Array(10).fill(0),
   yieldPlans: [30, 90, 180, 360].map(days => ({ days, monthlyPct: 0, enabled: false })),
