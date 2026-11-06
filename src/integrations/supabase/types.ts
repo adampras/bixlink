@@ -3409,6 +3409,7 @@ export type Database = {
           usdt_balance: number
         }[]
       }
+      bix_avatar_in_use: { Args: { p_name: string }; Returns: boolean }
       bix_balance_ledger: { Args: { p_user: string }; Returns: Json }
       bix_bixtrade_usdt_delta: { Args: { p_user: string }; Returns: number }
       bix_booster_withdraw_config: { Args: never; Returns: Json }
@@ -3807,6 +3808,10 @@ export type Database = {
         Args: { p_key: string; p_value: Json }
         Returns: undefined
       }
+      bix_room_visible: {
+        Args: { p_code: string; p_host: string }
+        Returns: boolean
+      }
       bix_season_close: { Args: { p_season: string }; Returns: number }
       bix_set_stake_compound: {
         Args: { p_on: boolean; p_stake: string }
@@ -3943,6 +3948,7 @@ export type Database = {
           total: number
         }[]
       }
+      bixtok_media_published: { Args: { p_name: string }; Returns: boolean }
       bixtok_my_earnings: { Args: never; Returns: Json }
       bixtok_my_stake_usd: { Args: never; Returns: number }
       bixtok_official_add: {
