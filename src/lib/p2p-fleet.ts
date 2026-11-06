@@ -18,7 +18,7 @@ export function fleetMerchants(cfg: FleetConfig, now = Date.now()): FleetMerchan
     const name = `${A[Math.floor(r() * A.length)]} ${B[Math.floor(r() * B.length)]} #${String(i + 1).padStart(2, '0')}`;
     const hr = rnd(i * 104729 + hour);
     const price = Number((cfg.minPrice + hr() * (cfg.maxPrice - cfg.minPrice)).toFixed(4));
-    out.push({ name, price, stockBix: Math.round(2000 + hr() * 48000), fills: Math.round(40 + r() * 900) });
+    out.push({ name, price, stockBix: Math.round(800 + hr() * 2700), fills: Math.round(12 + r() * 56) });
   }
   const order = rnd(hour);
   return out.map(m => ({ m, k: order() })).sort((a, b) => a.k - b.k).slice(0, active).map(x => x.m).sort((a, b) => a.price - b.price);
