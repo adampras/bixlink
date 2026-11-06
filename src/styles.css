@@ -6456,7 +6456,7 @@ body[data-bc-theme=toska] .comm-rec{color:#fda4af}
 /* ===== Obsidian Titanium: Wallet / Staking / Network ===== */
 :root { --obs-bg:#050508; --obs-card:#0a0a11; --obs-card-2:#0e0e17; --obs-line:rgba(255,255,255,.08); --obs-gold-line:rgba(245,208,97,.28); --obs-ink:#f8fafc; --obs-muted:#94a3b8; --obs-gold:#f5d061; --obs-mint:#5eead4; }
 :is(.obsidian-page,.stake-compact,.network-explorer) { --tier-color: var(--obs-gold); --tier-ink: #0a0a11; }
-:is(.obsidian-page,.stake-compact,.network-explorer) :is(.auric-card,.wallet-tile,.vault-swap,.wallet-quick,.wallet-fold,.tx-row,.stake-request,.stake-lux-head,.hud-scan,.duration-package,.duration-package-body,.stake-pick,.nx-root-compact,.nx-matrix,.nx-plan,.nx-focus,.network-stat,.network-tree-panel,.rounded-2xl.border,.rounded-xl.border) {
+:is(.obsidian-page,.stake-compact,.network-explorer) :is(.auric-card:not(.wallet-summary),.wallet-tile,.vault-swap,.wallet-quick,.wallet-fold,.tx-row,.stake-request,.stake-lux-head,.hud-scan,.duration-package,.duration-package-body,.stake-pick,.nx-root-compact,.nx-matrix,.nx-plan,.nx-focus,.network-stat,.network-tree-panel,.rounded-2xl.border,.rounded-xl.border) {
   background: var(--obs-card) !important; border-color: var(--obs-line) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 10px 28px -18px rgba(0,0,0,.9) !important; backdrop-filter: none !important; }
 :is(.obsidian-page,.stake-compact,.network-explorer) .auric-card::after, .obsidian-page .wallet-vault::after, .obsidian-page .vault-swap::after { display: none !important; }
 :is(.obsidian-page,.stake-compact,.network-explorer) :is(.numeric,strong,dd) { font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
@@ -6465,14 +6465,14 @@ body[data-bc-theme=toska] .comm-rec{color:#fda4af}
 :is(.obsidian-page,.stake-compact,.network-explorer) :is(.text-chart-2) { color: var(--obs-mint) !important; }
 
 /* Wallet hero card: one obsidian vault, no rainbow skins */
-html .site-shell .obsidian-page .wallet-summary, html .site-shell .obsidian-page .wallet-summary[data-wallet-skin], html .obsidian-page .wallet-summary[data-wallet-skin] {
+html .site-shell .obsidian-page .wallet-summary:not([data-wallet-skin]):not([data-sov-color]) {
   background: radial-gradient(120% 80% at 100% 0%, rgba(245,208,97,.07), transparent 55%), linear-gradient(160deg, #0d0d15, #050508) !important;
   border: 1px solid var(--obs-gold-line) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 20px 40px -24px rgba(0,0,0,.95) !important; }
-.obsidian-page .wallet-summary[data-wallet-skin] :is(b,strong,span,p,div,svg) { color: inherit !important; }
-.obsidian-page .wallet-summary strong { color: var(--obs-ink) !important; text-shadow: none !important; }
-.obsidian-page .wallet-summary .text-muted-foreground { color: var(--obs-muted) !important; }
+.obsidian-page .wallet-summary:not([data-wallet-skin]):not([data-sov-color]) :is(b,strong,span,p,div,svg) { color: inherit !important; }
+.obsidian-page .wallet-summary:not([data-wallet-skin]):not([data-sov-color]) strong { color: var(--obs-ink) !important; text-shadow: none !important; }
+.obsidian-page .wallet-summary:not([data-wallet-skin]):not([data-sov-color]) .text-muted-foreground { color: var(--obs-muted) !important; }
 .obsidian-page .wallet-finance-motion { opacity: .25; }
-.obsidian-page .wallet-fx-grid > div, .obsidian-page .vault-pill { background: rgba(255,255,255,.035) !important; border: 1px solid var(--obs-line) !important; color: var(--obs-ink) !important; }
+.obsidian-page .wallet-summary:not([data-wallet-skin]):not([data-sov-color]) :is(.wallet-fx-grid > div,.vault-pill) { background: rgba(255,255,255,.035) !important; border: 1px solid var(--obs-line) !important; color: var(--obs-ink) !important; }
 .obsidian-page .wallet-action { background: var(--obs-card-2) !important; border: 1px solid var(--obs-line) !important; color: var(--obs-ink) !important; box-shadow: none !important; }
 .obsidian-page .wallet-action > span { background: transparent !important; border: 1px solid var(--obs-gold-line) !important; color: var(--obs-gold) !important; }
 .obsidian-page .wallet-tile :is(.wallet-tile-icon) { background: transparent !important; color: var(--obs-gold) !important; border: 1px solid var(--obs-gold-line) !important; }
@@ -6544,7 +6544,7 @@ html .site-shell .obsidian-page .wallet-summary, html .site-shell .obsidian-page
 /* ===== Obsidian Lift: lighter layers + champagne edges + tidy numbers ===== */
 :root { --obs-card:#12151c; --obs-card-2:#171b24; --obs-line:rgba(226,232,240,.16); --obs-gold-line:rgba(252,211,77,.45); }
 :is(.obsidian-page,.stake-compact,.network-explorer) { background: radial-gradient(120% 60% at 50% 0%, #10131a, #07080a 70%); }
-:is(.obsidian-page,.stake-compact,.network-explorer) :is(.auric-card,.wallet-tile,.vault-swap,.wallet-quick,.wallet-fold,.stake-request,.stake-lux-head,.hud-scan,.duration-package,.stake-pick,.nx-root-compact,.nx-matrix,.nx-plan,.nx-focus,.network-stat,.network-tree-panel,.rounded-2xl.border,.rounded-xl.border) {
+:is(.obsidian-page,.stake-compact,.network-explorer) :is(.auric-card:not(.wallet-summary),.wallet-tile,.vault-swap,.wallet-quick,.wallet-fold,.stake-request,.stake-lux-head,.hud-scan,.duration-package,.stake-pick,.nx-root-compact,.nx-matrix,.nx-plan,.nx-focus,.network-stat,.network-tree-panel,.rounded-2xl.border,.rounded-xl.border) {
   background: linear-gradient(180deg, #161a23, #0f1218) !important;
   border: 1px solid var(--obs-gold-line) !important;
   box-shadow: inset 0 1px 0 rgba(255,236,170,.22), 0 0 0 1px rgba(0,0,0,.4), 0 14px 30px -20px rgba(0,0,0,.95) !important; }
@@ -6563,3 +6563,22 @@ html .site-shell .obsidian-page .wallet-summary, html .site-shell .obsidian-page
 @media (min-width: 768px) { .stake-list { grid-template-columns: repeat(2, minmax(0,1fr)); } }
 .stake-list-item { margin: 0 !important; }
 .stake-compact .stake-pick { padding: 12px 10px; }
+
+/* Wallet 3D flip card: front balance, back QR + IDs (both faces keep admin skin) */
+.wallet-flip { perspective: 1200px; }
+.wallet-flip-inner { position: relative; display: grid; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+.wallet-flip.is-flipped .wallet-flip-inner { transform: rotateY(180deg); }
+.wallet-flip-inner > .wallet-face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.wallet-flip-inner > .wallet-face--back { transform: rotateY(180deg); position: relative; overflow: hidden; }
+.wallet-flip:not(.is-flipped) .wallet-face--back, .wallet-flip.is-flipped .wallet-face:not(.wallet-face--back) { pointer-events: none; }
+.wallet-flip-btn { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; border: 1px solid color-mix(in oklab, currentColor 35%, transparent); background: color-mix(in oklab, currentColor 8%, transparent); color: inherit; }
+.wallet-flip-btn--front { position: absolute; top: 58px; right: 12px; z-index: 3 !important; }
+.wallet-back-body { display: flex; flex-direction: column; gap: 12px; height: 100%; justify-content: center; }
+.wallet-back-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.wallet-back-grid { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.wallet-back-qr { display: grid; place-items: center; padding: 8px; border-radius: 12px; background: oklch(0.99 0 0); color: oklch(0.15 0 0) !important; min-width: 128px; min-height: 128px; }
+.wallet-back-ids { display: grid; gap: 8px; min-width: 0; }
+.wallet-back-ids dt { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+.wallet-back-ids dd button { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; font-weight: 800; font-size: 14px; font-variant-numeric: tabular-nums; letter-spacing: .04em; word-break: break-all; text-align: left; }
+.wallet-back-hint { font-size: 10px; opacity: .7; }
+@media (prefers-reduced-motion: reduce) { .wallet-flip-inner { transition: none; } }
