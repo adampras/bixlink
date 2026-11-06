@@ -6,20 +6,24 @@ import { BIXGO_SERVICES, DEFAULT_CITY_PRICING, type BixgoSettings } from '@/lib/
 import { GLOBAL_CITIES, formatMoney } from '@/lib/bixgo-global';
 import { TRAVEL_CATALOG } from '@/lib/bixgo-global';
 
-type Booking = { id: string; user_id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; pay_method: string; status: string; driver_name: string; driver_phone: string; plate: string; operator_note: string; created_at: string };
+type Booking = { id: string; user_id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; pay_method: string; status: string; driver_name: string; driver_phone: string; plate: string; operator_note: string; created_at: string; driver_user_id?: string | null };
+type License = { id: string; user_id: string; full_name: string; phone: string; city: string; vehicle_type: string; vehicle_model: string; plate: string; mode: string; status: string; online: boolean; operator_note: string; created_at: string };
 const STATUS = ['pending', 'assigned', 'in_transit', 'completed', 'cancelled'] as const;
 const LABEL: Record<string, string> = { pending: 'Waiting', assigned: 'Driver assigned', in_transit: 'In transit', completed: 'Completed', cancelled: 'Cancelled' };
 
 /** Owner console: dispatch member booking requests, manage per-city pricing, read per-city history. Bookings are requests only — no payment is taken here. */
 export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings; setS: (v: BixgoSettings) => void; onSave: (v: BixgoSettings) => void; busy: boolean }) {
-  const [tab, setTab] = useState<'dispatch' | 'pricing' | 'history'>('dispatch');
+  const [tab, setTab] = useState<'dispatch' | 'drivers' | 'pricing' | 'history'>('dispatch');
   const [rows, setRows] = useState<Booking[]>([]);
   const [city, setCity] = useState('all');
   const [status, setStatus] = useState('all');
   const [edit, setEdit] = useState<Record<string, Partial<Booking>>>({});
   const [msg, setMsg] = useState('');
+  const [lics, setLics] = useState<License[]>([]);
+  const loadLic = async () => { const { data } = await supabase.from('bixgo_driver_licenses').select('*').order('created_at', { ascending: false }).limit(300); setLics((data ?? []) as License[]); };
+  const review = async (l: License, st: string) => { const { error } = await supabase.from('bixgo_driver_licenses').update({ status: st, online: st === 'approved' ? l.online : false, updated_at: new Date().toISOString() }).eq('id', l.id); setMsg(error ? error.message : `${l.full_name} → ${st}`); void loadLic(); };
   const load = async () => { const { data, error } = await supabase.from('bixgo_bookings').select('*').order('created_at', { ascending: false }).limit(300); if (error) setMsg(error.message); else setRows((data ?? []) as Booking[]); };
-  useEffect(() => { void load(); const t = setInterval(() => void load(), 20_000); return () => clearInterval(t); }, []);
+  useEffect(() => { void loadLic(); void load(); const t = setInterval(() => void load(), 20_000); return () => clearInterval(t); }, []);
   const money = (n: number) => formatMoney(n, 'USD', s.usdtIdr);
   const update = async (b: Booking, patch: Partial<Booking>) => {
     const { error } = await supabase.from('bixgo_bookings').update({ ...patch, updated_at: new Date().toISOString() }).eq('id', b.id);
@@ -33,7 +37,7 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
 
   return <AdminFold title="BIXGO Operator Console" badge={`${live.length} live`}>
     <div className="space-y-3 text-xs">
-      <div className="grid grid-cols-3 gap-1">{([['dispatch', 'Live Dispatch'], ['pricing', 'City Pricing'], ['history', 'City History']] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`rounded-full border px-2 py-2 font-bold ${tab === k ? 'border-primary bg-primary/15 text-primary' : 'border-border'}`}>{l}</button>)}</div>
+      <div className="grid grid-cols-4 gap-1">{([['dispatch', 'Dispatch'], ['drivers', `Drivers (${lics.filter(l => l.status === 'pending').length})`], ['pricing', 'City Pricing'], ['history', 'City History']] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`rounded-full border px-2 py-2 font-bold ${tab === k ? 'border-primary bg-primary/15 text-primary' : 'border-border'}`}>{l}</button>)}</div>
       {msg && <p className="rounded-lg border border-border px-2 py-1 text-muted-foreground">{msg}</p>}
 
       {tab === 'dispatch' && <div className="space-y-2">
@@ -42,13 +46,24 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
           <div className="flex justify-between"><b>{GLOBAL_CITIES.find(c => c.id === b.city)?.city ?? b.city} · {b.vehicle || b.service}</b><span className="rounded-full border border-primary/40 px-2 text-primary">{LABEL[b.status]}</span></div>
           <p className="text-muted-foreground">{b.pickup} → {b.dropoff} · {Number(b.km).toFixed(1)} km · {money(Number(b.total_idr))} · {b.pay_method}</p>
           <p className="text-muted-foreground">{new Date(b.created_at).toLocaleString()} · #{b.id.slice(0, 8)}</p>
+          {b.status === 'pending' && <select className="form-input mt-1" value="" onChange={ev => { const l = lics.find(x => x.user_id === ev.target.value); if (l) setEdit({ ...edit, [b.id]: { ...edit[b.id], driver_name: l.full_name, driver_phone: l.phone, plate: l.plate, driver_user_id: ev.target.value } as Partial<Booking> }); }}><option value="">Pick licensed driver…</option>{lics.filter(l => l.status === 'approved').sort((a, z) => Number(z.online) - Number(a.online)).map(l => <option key={l.id} value={l.user_id}>{l.online ? '● ' : '○ '}{l.full_name} · {l.vehicle_type} · {l.city}</option>)}</select>}
           <div className="mt-1 grid grid-cols-3 gap-1">{(['driver_name', 'driver_phone', 'plate'] as const).map(k => <input key={k} className="form-input" placeholder={k === 'driver_name' ? 'Driver' : k === 'driver_phone' ? 'Phone' : 'Plate'} value={e[k]} maxLength={40} onChange={ev => setEdit({ ...edit, [b.id]: { ...edit[b.id], [k]: ev.target.value } })}/>)}</div>
           <div className="mt-1 flex flex-wrap gap-1">
-            {b.status === 'pending' && <Button size="sm" disabled={!e.driver_name.trim()} onClick={() => update(b, { status: 'assigned', driver_name: e.driver_name.trim(), driver_phone: e.driver_phone.trim(), plate: e.plate.trim() })}>Assign driver</Button>}
+            {b.status === 'pending' && <Button size="sm" disabled={!e.driver_name.trim()} onClick={() => update(b, { status: 'assigned', driver_name: e.driver_name.trim(), driver_phone: e.driver_phone.trim(), plate: e.plate.trim(), ...(e.driver_user_id ? { driver_user_id: e.driver_user_id } : {}) })}>Assign driver</Button>}
             {b.status === 'assigned' && <Button size="sm" onClick={() => update(b, { status: 'in_transit' })}>Start trip</Button>}
             {b.status === 'in_transit' && <Button size="sm" onClick={() => update(b, { status: 'completed' })}>Complete</Button>}
             <Button size="sm" variant="outline" onClick={() => update(b, { status: 'cancelled' })}>Cancel</Button>
           </div></div>; })}
+      </div>}
+
+      {tab === 'drivers' && <div className="space-y-2">
+        <p className="text-muted-foreground">Driver-Partner license applications (Pro Navigator and above). Approval lets the member go online and be assigned bookings. No license fee is collected here.</p>
+        {!lics.length && <p className="rounded-xl border border-border p-3 text-center text-muted-foreground">No applications yet.</p>}
+        {lics.map(l => <div key={l.id} className="rounded-xl border border-border p-2">
+          <div className="flex justify-between"><b>{l.full_name} · {l.vehicle_type}</b><span className="font-bold uppercase text-primary">{l.status}{l.online ? ' · online' : ''}</span></div>
+          <p className="text-muted-foreground">{l.vehicle_model} · {l.plate} · {l.phone} · {GLOBAL_CITIES.find(c => c.id === l.city)?.city ?? l.city} · {l.mode === 'fleet' ? 'Fleet driver' : 'Self-driving'}</p>
+          <div className="mt-1 flex flex-wrap gap-1">{l.status !== 'approved' && <Button size="sm" onClick={() => review(l, 'approved')}>Approve</Button>}{l.status === 'pending' && <Button size="sm" variant="outline" onClick={() => review(l, 'rejected')}>Reject</Button>}{l.status === 'approved' && <Button size="sm" variant="outline" onClick={() => review(l, 'suspended')}>Suspend</Button>}</div>
+        </div>)}
       </div>}
 
       {tab === 'pricing' && <div className="space-y-2">

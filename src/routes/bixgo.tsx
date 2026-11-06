@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { BixgoRideBooking } from '@/components/BixgoRideBooking';
 import { BixgoBills } from '@/components/BixgoBills';
 import { BixgoHero } from '@/components/BixgoHero';
+import { BixgoPassport } from '@/components/BixgoPassport';
 import { BixgoTravel } from '@/components/BixgoTravel';
 import { GLOBAL_CITIES, GLOBAL_CURRENCIES, cryptoEquivalent, formatMoney, readCurrency, saveCurrency, type GlobalCurrency } from '@/lib/bixgo-global';
 import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
@@ -138,7 +139,8 @@ function BixgoPage() {
     {view === 'home' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
     {view === 'home' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
     {view === 'inbox' && <BixgoInbox/>}
-    {view === 'account' && <BixgoAccount name={memberName} balance="View balance" onBack={() => go('home')} onSoon={soon}/>}
+    {view === 'account' && <><BixgoPassport cur={cur} usdtIdr={cfg.usdtIdr} city={city}/><BixgoAccount name={memberName} balance="View balance" onBack={() => go('home')} onSoon={soon}/></>}
+    {view === 'home' && <BixgoPassport cur={cur} usdtIdr={cfg.usdtIdr} city={city}/>}
     {(view === 'order' || view === 'activity') && <main className="px-4 pb-6 pt-4">
     <section className="flex items-center gap-3">
       <button aria-label="Back" onClick={() => go('home')}><ArrowLeft className="h-6 w-6"/></button>

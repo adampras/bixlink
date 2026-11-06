@@ -9,13 +9,13 @@ import { getDevicePosition, reverseGeocode, roadRoute, searchPlaces, type Place 
 const BixgoLiveMap = lazy(() => import('@/components/BixgoLiveMap'));
 type Opt = { name: string; svc: 'ride' | 'car'; mult: number; seats: number; tag?: string };
 const OPTS: Opt[] = [
-  { name: 'Car Standard', svc: 'car', mult: 1, seats: 4 },
-  { name: 'Car Hemat', svc: 'car', mult: 0.95, seats: 4, tag: 'Hemat' },
-  { name: 'Car Plus', svc: 'car', mult: 1.22, seats: 6 },
-  { name: 'Bike Standard', svc: 'ride', mult: 1, seats: 1 },
-  { name: 'Bike Hemat', svc: 'ride', mult: 0.9, seats: 1, tag: 'Hemat' },
+  { name: 'BIX Urban', svc: 'car', mult: 1, seats: 4 },
+  { name: 'BIX Executive', svc: 'car', mult: 1.45, seats: 4, tag: 'Premium sedan' },
+  { name: 'BIX Black', svc: 'car', mult: 2.1, seats: 6, tag: 'Luxury SUV · VIP' },
+  { name: 'BIX Moto', svc: 'ride', mult: 1, seats: 1 },
+  { name: 'BIX Moto Saver', svc: 'ride', mult: 0.9, seats: 1, tag: 'Saver' },
 ];
-const PAYS = ['QRIS', 'BIX PAY', 'Tunai'];
+const PAYS = ['USDT', 'BIX Token', 'Cash'];
 
 /** Pickup + vehicle selection on a real map with device GPS and real road distance. Booking itself is still a preview: no driver dispatch or payment. */
 export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'USD', city = '' }: { cfg: BixgoSettings; cur?: GlobalCurrency; city?: string; start: 'ride' | 'car'; onBack: () => void; onBooked: (o: { svc: 'ride' | 'car'; from: string; to: string; total: number; pay: string; name: string }) => void }) {
@@ -78,8 +78,8 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
         </form>}
       </header>
       {results.length > 0 && <div className="absolute inset-x-3 top-16 z-[500] max-h-60 overflow-y-auto rounded-2xl bg-background shadow-xl">{results.map(r => <button key={`${r.lat},${r.lng}`} onClick={() => choose(r)} className="flex w-full items-start gap-2 border-b border-border px-3 py-2.5 text-left"><MapPin className="mt-0.5 h-4 w-4 text-primary"/><span><b className="block text-sm">{r.name}</b><span className="text-[11px] text-muted-foreground">{r.detail}</span></span></button>)}</div>}
-      {route && <span className="absolute left-1/2 top-16 z-[400] -translate-x-1/2 rounded-full bg-background/90 px-3 py-1 text-[11px] font-bold shadow">{route.min != null ? `${route.min} mnt · ` : ''}{km.toFixed(1)} km{route.road ? '' : ' (perkiraan)'}</span>}
-      <button aria-label="Lokasi saya" onClick={() => void locate()} className="absolute bottom-6 right-3 z-[500] grid h-11 w-11 place-items-center rounded-full bg-background shadow-lg">{busy === 'gps' ? <Loader2 className="h-5 w-5 animate-spin"/> : <Crosshair className="h-5 w-5 text-primary"/>}</button>
+      {route && <span className="absolute left-1/2 top-16 z-[400] -translate-x-1/2 rounded-full bg-background/90 px-3 py-1 text-[11px] font-bold shadow">{route.min != null ? `${route.min} min · ` : ''}{km.toFixed(1)} km{route.road ? '' : ' (estimate)'}</span>}
+      <button aria-label="My location" onClick={() => void locate()} className="absolute bottom-6 right-3 z-[500] grid h-11 w-11 place-items-center rounded-full bg-background shadow-lg">{busy === 'gps' ? <Loader2 className="h-5 w-5 animate-spin"/> : <Crosshair className="h-5 w-5 text-primary"/>}</button>
     </div>
 
     {stage === 'pickup' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-4 pt-3">
@@ -87,10 +87,10 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
       {err && <p className="mb-2 rounded-xl bg-destructive/15 px-3 py-2 text-xs text-destructive">{err}</p>}
       {(['from', 'to'] as const).map(k => { const p = k === 'from' ? from : to; return <button key={k} onClick={() => setActive(k)} className={`mb-2 flex w-full items-start gap-3 rounded-2xl border-2 p-3 text-left ${active === k ? 'border-primary bg-primary/5' : 'border-border'}`}>
         <MapPin className={`mt-0.5 h-5 w-5 ${k === 'from' ? 'text-primary' : 'text-destructive'}`}/>
-        <span className="min-w-0 flex-1"><span className="text-[10px] font-bold uppercase text-muted-foreground">{k === 'from' ? 'Jemput' : 'Tujuan'}</span><b className="block truncate text-sm">{p?.name ?? (k === 'from' ? 'Mendeteksi GPS…' : 'Cari alamat atau ketuk peta')}</b>{p && <span className="block truncate text-xs text-muted-foreground">{p.detail}</span>}</span>
+        <span className="min-w-0 flex-1"><span className="text-[10px] font-bold uppercase text-muted-foreground">{k === 'from' ? 'Pickup' : 'Destination'}</span><b className="block truncate text-sm">{p?.name ?? (k === 'from' ? 'Detecting GPS…' : 'Search an address or tap the map')}</b>{p && <span className="block truncate text-xs text-muted-foreground">{p.detail}</span>}</span>
       </button>; })}
-      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Store className="h-3.5 w-3.5"/>{branch ? `Dilayani BIXGO ${branch.city}${branch.partner ? ' · ' + branch.partner : ''}` : 'Belum ada cabang franchise di area ini'}</p>
-      <button disabled={!from || !to || busy === 'route'} onClick={() => setStage('choose')} className="mt-4 w-full rounded-full bg-primary py-3.5 text-base font-bold text-primary-foreground disabled:opacity-40">{busy === 'route' ? 'Menghitung rute…' : 'Continue to select vehicle'}</button>
+      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Store className="h-3.5 w-3.5"/>{branch ? `Served by BIXGO ${branch.city}${branch.partner ? ' · ' + branch.partner : ''}` : 'No city franchise in this area yet'}</p>
+      <button disabled={!from || !to || busy === 'route'} onClick={() => setStage('choose')} className="mt-4 w-full rounded-full bg-primary py-3.5 text-base font-bold text-primary-foreground disabled:opacity-40">{busy === 'route' ? 'Calculating route…' : 'Continue to select vehicle'}</button>
     </section>}
 
     {stage === 'choose' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-3 pt-3">
@@ -98,13 +98,14 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
       <p className="mb-2 truncate px-1 text-xs text-muted-foreground">{from?.name} → {to?.name} · {km.toFixed(1)} km</p>
       {OPTS.filter(o => cfg.services[o.svc].enabled).map(o => { const i = OPTS.indexOf(o); const p = price(o); const I = o.svc === 'car' ? CarFront : Bike; const on = i === sel; return <button key={o.name} onClick={() => setSel(i)} className={`mb-1 flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition ${on ? 'border-primary bg-primary/5' : 'border-transparent'}`}>
         <span className={`grid place-items-center rounded-2xl bg-card ${on ? 'h-16 w-20' : 'h-12 w-14'}`}><I className={`${on ? 'h-10 w-10' : 'h-7 w-7'} text-primary`}/></span>
-        <span className="flex-1"><b className="block text-sm">{o.name}</b><span className="flex items-center gap-1 text-xs text-muted-foreground">±{eta(o)} mnt • <Users className="h-3 w-3"/>{o.seats}</span>
-          <span className={`mt-1 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] ${on ? 'border-primary/40 bg-primary/15 text-primary' : 'border-border'}`}>{o.svc === 'car' ? `${o.seats} kursi` : 'Bike'}{on && <Info className="h-3 w-3"/>}</span></span>
+        <span className="flex-1"><b className="block text-sm">{o.name}</b><span className="flex items-center gap-1 text-xs text-muted-foreground">±{eta(o)} min • <Users className="h-3 w-3"/>{o.seats}</span>
+          <span className={`mt-1 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] ${on ? 'border-primary/40 bg-primary/15 text-primary' : 'border-border'}`}>{o.svc === 'car' ? `${o.seats} seats` : 'Bike'}{on && <Info className="h-3 w-3"/>}</span></span>
         <span className="text-right"><b className={`block text-sm ${p.final < p.base ? 'text-primary' : ''}`}>{idr(p.final)}</b>{p.final < p.base && <s className="text-[11px] text-muted-foreground">{idr(p.base)}</s>}{o.tag && <span className="block text-[10px] text-primary">{o.tag}</span>}</span>
       </button>; })}
+      <div className="mt-2 flex flex-wrap gap-1 text-[10px]">{['Vetted Executive Drivers', 'Real-time GPS Route', 'USDT / BIX Settlement'].map(b => <span key={b} className="rounded-full border border-primary/40 px-2 py-0.5 text-primary">✓ {b}</span>)}</div>
       <div className="mt-2 rounded-2xl border border-border p-3 text-[11px] text-muted-foreground">
-        <b className="text-foreground">Pembagian komisi {cfg.commissionPct}% ({idr(commission)})</b>
-        <p>{branch ? `Franchise ${branch.city} ${idr(split.franchise)} · Pusat ${idr(split.platform)} · Pool ${idr(split.pool)}` : `BIXGO Center ${idr(split.platform)} (no branch)`}</p>
+        <b className="text-foreground">Commission split {cfg.commissionPct}% ({idr(commission)})</b>
+        <p>{branch ? `Franchise ${branch.city} ${idr(split.franchise)} · Center ${idr(split.platform)} · Pool ${idr(split.pool)}` : `BIXGO Center ${idr(split.platform)} (no branch)`}</p>
       </div>
     </section>}
 
@@ -121,7 +122,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
         <MoreHorizontal className="ml-2 h-5 w-5"/>
       </div>
       <div className="mt-2 flex gap-2">
-        <button aria-label="Jadwalkan" className="grid h-12 w-14 place-items-center rounded-full bg-card"><CalendarClock className="h-5 w-5"/></button>
+        <button aria-label="Schedule" className="grid h-12 w-14 place-items-center rounded-full bg-card"><CalendarClock className="h-5 w-5"/></button>
         <button disabled={busy === 'book'} onClick={async () => { const total = Math.round(price(cur).final); setBusy('book'); const { data: u } = await supabase.auth.getUser(); if (u.user) { const { data, error } = await supabase.from('bixgo_bookings').insert({ city, service: cur.svc, vehicle: cur.name, pickup: (from?.name ?? '').slice(0, 200), dropoff: (to?.name ?? '').slice(0, 200), km: +km.toFixed(2), total_idr: total, pay_method: PAYS[pay]! }).select('id').single(); if (error) { setErr(error.message); setBusy(null); return; } setRef(data.id.slice(0, 8).toUpperCase()); } setBusy(null); onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total, pay: PAYS[pay]!, name: cur.name }); setStage('booked'); }} className="flex-1 rounded-full bg-primary py-3 text-base font-bold text-primary-foreground">Book {cur.name}</button>
       </div>
     </footer>}
