@@ -6572,7 +6572,12 @@ html .site-shell .obsidian-page .wallet-summary:not([data-wallet-skin]):not([dat
 .wallet-flip-inner > .wallet-face--back { transform: rotateY(180deg); position: relative; overflow: hidden; }
 .wallet-flip:not(.is-flipped) .wallet-face--back, .wallet-flip.is-flipped .wallet-face:not(.wallet-face--back) { pointer-events: none; }
 .wallet-flip-btn { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; border: 1px solid color-mix(in oklab, currentColor 35%, transparent); background: color-mix(in oklab, currentColor 8%, transparent); color: inherit; }
-.wallet-flip-btn--front { position: absolute; top: 58px; right: 12px; z-index: 3 !important; }
+.wallet-flip { max-width: 440px; margin-inline: auto; }
+.wallet-flip-inner > .wallet-face { aspect-ratio: 1.586 / 1; display: flex; flex-direction: column; justify-content: space-between; }
+.wallet-face--front .wallet-balance-block { padding-right: 0; margin-top: 0; }
+.wallet-face--front .wallet-fx-grid { margin-top: auto; }
+.wallet-flip-btn { position: relative; z-index: 3; }
+.wallet-actions--dock { max-width: 440px; margin: 14px auto 0; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
 .wallet-back-body { display: flex; flex-direction: column; gap: 12px; height: 100%; justify-content: center; }
 .wallet-back-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
 .wallet-back-grid { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
