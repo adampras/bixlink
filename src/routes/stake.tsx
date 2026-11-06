@@ -13,6 +13,7 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { requestStake, unstakeStake } from '@/lib/bixlink.functions';
 import { date, money, number, type Package } from '@/lib/bixlink';
 import { CheckCircle2, ChevronDown, ChevronUp, Clock3, LockKeyhole, ShieldCheck, X, XCircle, Zap } from 'lucide-react';
+import { Odometer, GlowSurface } from '@/components/FuturisticCore';
 import { StakeCalculator } from '@/components/StakeCalculator';
 import { StakeConfirmation } from '@/components/StakeConfirmation';
 import { revealStakingHistory } from '@/lib/interaction-comfort';
@@ -56,18 +57,17 @@ function StakePage() {
   const activeStakes = (data?.stakes ?? []).filter(s => s.status === 'active');
   const liveTotal = activeStakes.reduce((n, s) => n + liveOf(s), 0);
   const perDay = activeStakes.reduce((n, s) => n + Number(s.amount_usd) * Number(s.apy) / 100 / 365, 0);
-  return <BixShell><main className="stake-reference mx-auto max-w-7xl px-4 py-4 md:px-8 md:py-8">
+  return <BixShell><main className="stake-compact mx-auto max-w-7xl px-5 py-3 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="STAKE">
-      <div className="stake-lux-head text-center">
-        <h1 className="section-title stake-lux-title w-full text-center">STAKING PACKAGE <span>CRYPTO</span></h1>
+      <div className="stake-lux-head auric-card text-center">
+        <h1 className="section-title stake-lux-title w-full text-center !text-2xl !tracking-wide sm:!text-5xl">STAKING PACKAGE <span>CRYPTO</span></h1>
         
       </div>
-      <dl aria-label="Staking summary" className="stake-summary">
-        <div className="stake-metric"><dt>BIX supply</dt><dd>21M BIX</dd></div>
-        <div className="stake-metric"><dt>Balance</dt><dd title={`Virtual USDT · ${money(bal.data ?? 0)}`}>{money(bal.data ?? 0)}</dd></div>
-        <div className="stake-metric"><dt>Live profit</dt><dd title={`Display-only projection · $${liveTotal.toFixed(6)}`}>${liveTotal.toFixed(6)}</dd></div>
-      </dl>
-      <p className="stake-summary-note">Virtual USDT balance · Live profit is a projection, not spendable funds.</p>
+      <GlowSurface className="mt-3 mb-6 rounded-xl sm:mb-8"><dl aria-label="Staking summary" className="hud-scan grid grid-cols-3 sm:mb-8">
+        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">BIX supply</dt><dd className="mt-1 font-display text-xs font-bold text-chart-3 sm:text-lg"><Odometer value="21M BIX"/></dd></div>
+        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Balance</dt><dd title={money(bal.data ?? 0)} className="numeric mt-1 font-display text-[11px] font-bold leading-4 sm:text-lg"><Odometer value={money(bal.data ?? 0)}/></dd></div>
+        <div className="min-w-0 stake-metric px-2 py-3 text-center sm:px-4"><dt className="text-[9px] font-semibold uppercase text-muted-foreground sm:text-xs">Live profit</dt><dd title={`$${liveTotal.toFixed(6)}`} className="numeric mt-1 font-display text-[11px] font-bold leading-4 text-chart-2 sm:text-lg">${liveTotal.toFixed(6)}</dd></div>
+      </dl></GlowSurface>
       
       {skin.data && <InstitutionalStakeHeader active={activeStakes.length} principal={activeStakes.reduce((n, s) => n + Number(s.amount_usd), 0)} live={liveTotal} perDay={perDay}/>}
       {skin.data ? <StakePackageLayouts packages={cfg?.packages ?? []} layout="institutional" onStake={setChosen}/> : <StakeCalculator packages={cfg?.packages ?? []} onPick={setChosen}/>}
