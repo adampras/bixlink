@@ -6726,3 +6726,15 @@ html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explore
 html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-price,.stake-lux-price,.lux-ledger-total b,.profit-metric--total strong){ color:#a16207 !important; text-shadow:none; }
 html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-apy,.duration-yield dd,.profit-metric--daily strong,.profit-metric--usdt strong){ color:#0f766e !important; }
 
+
+/* Staking mobile comfort (360–412px) */
+@media (max-width: 430px) {
+  .stake-compact { padding-bottom: 7.5rem !important; padding-inline: 0.85rem !important; }
+  .stake-compact .hud-scan > div { min-width: 0; padding-inline: 0.4rem !important; }
+  .stake-compact .hud-scan dd { font-size: 0.8rem !important; overflow-wrap: anywhere; line-height: 1.2; }
+  .stake-compact .hud-scan dt { font-size: 9px !important; letter-spacing: .08em; }
+  .stake-compact .duration-options { display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px !important; }
+  .stake-compact .duration-option { min-height: 44px !important; padding-inline: 0 !important; font-size: 12px !important; }
+  .stake-compact .duration-stake { min-height: 50px; }
+  .stake-compact .duration-package-action { padding-right: 0; }
+}
