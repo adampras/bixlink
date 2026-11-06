@@ -6751,3 +6751,6 @@ html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explore
 .bixgo-hero-panel { background: rgba(12,20,26,.82); border: 1px solid rgba(247,207,90,.4); }
 @keyframes bixgo-pulse { 50% { opacity: .35; } }
 @media (prefers-reduced-motion: reduce) { .bixgo-hero-dot { animation: none; } }
+
+/* BIXGO green hero artwork — fades into the gradient */
+.bixgo-green-art { mask-image: linear-gradient(90deg, transparent, #000 45%); opacity: .9; }

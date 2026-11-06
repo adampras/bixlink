@@ -20,6 +20,7 @@ import m5 from '@/assets/bixgo/m5.jpg';
 import m6 from '@/assets/bixgo/m6.jpg';
 import m7 from '@/assets/bixgo/m7.jpg';
 import promo from '@/assets/bixgo/promo.jpg';
+import heroImg from '@/assets/bixgo/hero-mobility.jpg';
 
 export type BixgoView = 'home' | 'order' | 'activity' | 'inbox' | 'account';
 
@@ -53,9 +54,12 @@ export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<B
           <Link to="/" aria-label="Kembali" className="grid h-9 w-9 place-items-center rounded-full bg-background/25 backdrop-blur"><ArrowLeft className="h-5 w-5"/></Link>
           <span className="rounded-full bg-background/25 px-3 py-1 text-[11px] font-bold tracking-widest">BIXGO</span>
         </div>
-        <h1 className="mt-4 text-2xl font-black leading-tight">Where are you going today?</h1>
-        <p className="text-xs opacity-90">Ride · Food · Send · Mart in one app</p>
-        <span className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-background/10"/>
+        <img src={heroImg} alt="" width={1024} height={768} className="bixgo-green-art pointer-events-none absolute inset-y-0 right-0 h-full w-[68%] object-cover"/>
+        <div className="relative max-w-[62%]">
+          <h1 className="mt-4 text-2xl font-black leading-tight">Where are you going today?</h1>
+          <p className="text-xs opacity-90">Ride · Food · Send · Mart in one app</p>
+          <div className="mt-3 flex flex-wrap gap-1.5 text-[10px] font-bold"><span className="rounded-full bg-background/25 px-2 py-0.5 backdrop-blur">● 24/7 Dispatch</span><span className="rounded-full bg-background/25 px-2 py-0.5 backdrop-blur">ID · MY</span></div>
+        </div>
       </div>
       <label className="mt-3 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5">
         <Search className="h-4 w-4 text-muted-foreground"/>
