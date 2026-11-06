@@ -397,7 +397,7 @@ function EngineBacktest() {
   return <section className="arb-card mt-4">
     <div className="flex items-center justify-between gap-2"><h2 className="flex items-center gap-2 font-display text-lg font-bold"><BarChart3 size={18} className="text-chart-3"/> Engine track · {days.length} days</h2><span className="rounded-full border border-border px-2 py-0.5 text-[9px] font-bold tracking-wider text-chart-3">SIMULATION</span></div>
     <p className="text-[11px] text-muted-foreground">Reference vault {fmt(BT_VAULT)} USDT · since {new Date(BT_START).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-    <div className="arb-chips mt-3">{[['ALL', 'All'], ...months.map(([k]) => [k, label(k)])].map(([k, l]) => <button key={k} type="button" className={month === k ? 'is-on' : ''} onClick={() => setMonth(k)}>{l}</button>)}</div>
+    <div className="arb-chips mt-3">{([['ALL', 'All'], ...months.map(([k]) => [k, label(k)])] as [string, string][]).map(([k, l]) => <button key={k} type="button" className={month === k ? 'is-on' : ''} onClick={() => setMonth(k)}>{l}</button>)}</div>
     <div className="mt-3 grid grid-cols-3 gap-2 text-center">
       <div className="arb-stat"><p>Routes</p><b>{routes.toLocaleString()}</b></div>
       <div className="arb-stat"><p>Volume</p><b>{fmt(vol)}</b></div>
