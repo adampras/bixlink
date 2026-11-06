@@ -12,7 +12,7 @@ export const getGoldSpot = createServerFn({ method: 'GET' }).handler(async (): P
       fetch('https://api.gold-api.com/price/XAU').then(r => r.json() as Promise<{ price?: number; updatedAt?: string }>),
       fetch('https://open.er-api.com/v6/latest/USD').then(r => r.json() as Promise<{ rates?: Record<string, number> }>),
     ]);
-    const oz = Number(g.price), idr = Number(fx.rates?.IDR), myr = Number(fx.rates?.MYR);
+    const oz = Number(g.price), idr = Number(fx.rates?.['IDR']), myr = Number(fx.rates?.['MYR']);
     if (!(oz > 0 && idr > 0 && myr > 0)) return cache?.v ?? null;
     const v = { usdPerGram: Math.round((oz / TROY_OZ_G) * 100) / 100, usdIdr: idr, usdMyr: myr, updatedAt: g.updatedAt ?? new Date().toISOString() };
     cache = { at: Date.now(), v };
