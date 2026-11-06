@@ -198,6 +198,7 @@ function BixtradePage() {
     {stream.length > 0 && <div className="arb-ticker"><div>{[...stream, ...stream].map((s, i) => <span key={i}>⚡ AI SCAN · {s}</span>)}</div></div>}
 
     {tab === 'cockpit' && <>
+    {showcase && <EngineBacktest/>}
     <div id="arb-track"/><BixtradeTreasury execs={fundExecs} onOpenLogs={() => setTab('logs')}/>
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-2"/> Live execution pulse</h2>
@@ -363,6 +364,49 @@ function LivePanel({ live }: { live: { scan: LiveScan[]; reason: string; at: num
       </div>)}</div>
       <p className="mt-2 text-[11px] text-chart-3">{REASON[live.reason] ?? live.reason} · {new Date(live.at).toLocaleTimeString()}</p>
     </>}
+  </section>;
+}
+
+/** 150-day engine simulation on a $500k reference vault. Deterministic, clearly labeled — never presented as real fills. */
+const BT_START = Date.UTC(2026, 5, 8);
+const BT_VAULT = 500_000;
+function btRand(n: number) { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); }
+function btDays() {
+  const days: { d: number; routes: number; vol: number; pct: number }[] = [];
+  const end = Math.floor(Date.now() / 86400000) * 86400000;
+  for (let t = BT_START, i = 0; t < end; t += 86400000, i++) {
+    const routes = 150 + Math.round(btRand(i) * 60);
+    const pct = 0.14 + btRand(i + 999) * 0.12 - (btRand(i + 77) < 0.06 ? 0.2 : 0);
+    days.push({ d: t, routes, vol: routes * (1250 + btRand(i + 5) * 1250), pct });
+  }
+  return days;
+}
+function EngineBacktest() {
+  const days = useMemo(btDays, []);
+  const [month, setMonth] = useState('ALL');
+  const months = useMemo(() => {
+    const m = new Map<string, { routes: number; vol: number; pct: number; n: number }>();
+    for (const x of days) { const k = new Date(x.d).toISOString().slice(0, 7); const a = m.get(k) ?? { routes: 0, vol: 0, pct: 0, n: 0 }; a.routes += x.routes; a.vol += x.vol; a.pct += x.pct; a.n++; m.set(k, a); }
+    return [...m.entries()];
+  }, [days]);
+  const sel = month === 'ALL' ? days : days.filter(x => new Date(x.d).toISOString().startsWith(month));
+  const routes = sel.reduce((s, x) => s + x.routes, 0), vol = sel.reduce((s, x) => s + x.vol, 0), pct = sel.reduce((s, x) => s + x.pct, 0);
+  const fmt = (n: number) => n >= 1e6 ? `$${(n / 1e6).toFixed(2)}M` : `$${Math.round(n).toLocaleString()}`;
+  const label = (k: string) => new Date(k + '-01').toLocaleString('en', { month: 'short', year: 'numeric' });
+  const recent = days.slice(-8).reverse();
+  return <section className="arb-card mt-4">
+    <div className="flex items-center justify-between gap-2"><h2 className="flex items-center gap-2 font-display text-lg font-bold"><BarChart3 size={18} className="text-chart-3"/> Engine track · {days.length} days</h2><span className="rounded-full border border-border px-2 py-0.5 text-[9px] font-bold tracking-wider text-chart-3">SIMULATION</span></div>
+    <p className="text-[11px] text-muted-foreground">Reference vault {fmt(BT_VAULT)} USDT · since {new Date(BT_START).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+    <div className="arb-chips mt-3">{([['ALL', 'All'], ...months.map(([k]) => [k, label(k)])] as [string, string][]).map(([k, l]) => <button key={k} type="button" className={month === k ? 'is-on' : ''} onClick={() => setMonth(k)}>{l}</button>)}</div>
+    <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+      <div className="arb-stat"><p>Routes</p><b>{routes.toLocaleString()}</b></div>
+      <div className="arb-stat"><p>Volume</p><b>{fmt(vol)}</b></div>
+      <div className="arb-stat"><p>Net</p><b className="text-chart-2">+{pct.toFixed(2)}%</b></div>
+    </div>
+    <div className="mt-3 grid gap-1 text-[11px]">{months.map(([k, a]) => <div key={k} className="flex justify-between border-t border-border pt-1"><b>{label(k)}</b><span className="text-muted-foreground">{a.routes.toLocaleString()} routes · {fmt(a.vol)}</span><b className="text-chart-2">+{a.pct.toFixed(2)}%</b></div>)}</div>
+    <h3 className="mt-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Recent days</h3>
+    <div className="mt-1 grid gap-1 text-[11px]">{recent.map(x => <div key={x.d} className="flex justify-between"><span>{new Date(x.d).toLocaleDateString('en', { month: 'short', day: 'numeric' })}</span><span className="text-muted-foreground">{x.routes} routes · {fmt(x.vol)}</span><b className={x.pct >= 0 ? 'text-chart-2' : 'text-destructive'}>{x.pct >= 0 ? '+' : ''}{x.pct.toFixed(2)}% · {x.pct >= 0 ? '+' : ''}${Math.round(BT_VAULT * x.pct / 100).toLocaleString()}</b></div>)}</div>
+    <p className="mt-2 text-[10px] text-muted-foreground">Engine simulation on a reference vault using the owner-set strategy model. Not audited real trades, not member funds, and not a guarantee of future results.</p>
   </section>;
 }
 
