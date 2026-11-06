@@ -11,6 +11,7 @@ export const HUB_ITEMS = [
   { id: 'pay', to: '/pay', label: 'BIX PAY', note: 'Transfer', group: 'Wallet & Payments' },
   { id: 'vault', to: '/consortium-vault', label: 'Consortium', note: '5 nations', group: 'Wallet & Payments' },
   { id: 'bixgo', to: '/bixgo', label: 'BIXGO', note: 'Ride · Food · Send', group: 'Ecosystem' },
+  { id: 'gold', to: '/gold', label: 'BIX GOLD', note: 'Gold · Gram savings', group: 'Ecosystem' },
   { id: 'bixtok', to: '/bixtok', label: 'BIXTOK', note: 'Video & LIVE', group: 'Ecosystem' },
   { id: 'call', to: '/call', label: 'BIX CALL', note: 'Voice & Video', group: 'Ecosystem' },
   { id: 'nft', to: '/nft-marketplace', label: 'NFT & Shop', note: 'Marketplace', group: 'Ecosystem' },

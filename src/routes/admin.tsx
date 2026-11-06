@@ -57,6 +57,7 @@ import { AdminSiteControl } from '@/components/AdminSiteControl';
 import type { SiteControl } from '@/lib/site-control';
 import type { LandingContent } from '@/components/LandingExperience';
 import { AdminMarketing } from '@/components/AdminMarketing';
+import { AdminBixGold } from '@/components/AdminBixGold';
 import { AdminGrowth } from '@/components/AdminGrowth';
 import type { MarketingPlan } from '@/lib/marketing';
 
@@ -67,7 +68,7 @@ const ADMIN_GROUPS: AdminGroup[] = [
   { title: '2 · Cash & Wallets', tone: 'cyan', hint: 'Deposit, withdraw, BIX PAY, laporan', tabs: [['Wallet','wallet deposit link wallet bix pay transfer swap telegram notifications recovery deposit onchain approve txid'],['Reports','laporan transfer']] },
   { title: '3 · Staking & Yield', tone: 'emerald', hint: 'APY, paket, permintaan stake', tabs: [['Staking','apy profit yield paket durasi'],['Stakes','unstake approve request history']] },
   { title: '4 · Members & Network', tone: 'rose', hint: 'User, audit deposit, leader, loan, kuota', tabs: [['Users','member ban owner 2 omset audit real deposit loan kuota'],['Referrals','bonus komisi sponsor'],['Leadership & Team','team leader vip clones create loan account']] },
-  { title: '5 · Market & Presale', tone: 'violet', hint: 'BIX price, presale, materials', tabs: [['Presale','price stage strategy'],['Market','bix market price'],['Marketing','pdf video materi']] },
+  { title: '5 · Market & Presale', tone: 'violet', hint: 'BIX price, presale, materials', tabs: [['Presale','price stage strategy'],['Market','bix market price'],['Marketing','pdf video materi'],['BIX GOLD','emas gold gram marketing plan bonus sponsor level yield cetak rank']] },
   { title: '6 · Appearance & Ecosystem', tone: 'slate', hint: 'Tema, landing, game, NFT, toko, arsip', tabs: [['Desain & Tampilan','theme wallet splash popup banner booster visuals announcements'],['Landing','konten hero sponsor sosial'],['Arena','fox game quest bixp'],['BIXTOK','video live saweran gift'],['Mining','vbix'],['NFT','sertifikat kartu'],['Marketplace','shop katalog toko'],['Token','bep20 kontrak smart contract arsip'],['RWA','income source sumber arsip']] },
 ];
 let adminVerified = false;
@@ -129,6 +130,7 @@ function Admin() {
      {tab === 'Referrals' && <AdminReferrals initial={data?.settings.find(s => s.key === 'referrals')?.value as Record<string, unknown> | undefined} onSaved={refresh} onMessage={setMessage}/>}
      {tab === 'Referrals' && <AdminNetworkEditor onMessage={setMessage}/>}
      {tab === 'Reports' && <AdminReports onMessage={setMessage}/>}
+     {tab === 'BIX GOLD' && <AdminBixGold initial={data?.settings.find(s=>s.key==='bix_gold')?.value} onMessage={setMessage} onSaved={refresh}/>}
      {tab === 'Marketing' && <AdminMarketing initial={data?.settings.find(s=>s.key==='marketing_plan')?.value as unknown as MarketingPlan | undefined} onMessage={setMessage}/>}
      {tab === 'Presale' && <AdminPresale onMessage={setMessage}/>}
      {tab === 'Marketplace' && <AdminWorkspace label="Marketplace" panels={[
