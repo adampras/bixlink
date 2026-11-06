@@ -10,8 +10,8 @@ const BixgoLiveMap = lazy(() => import('@/components/BixgoLiveMap'));
 type Opt = { name: string; svc: 'ride' | 'car'; mult: number; seats: number; tag?: string };
 const OPTS: Opt[] = [
   { name: 'BIX Urban', svc: 'car', mult: 1, seats: 4 },
-  { name: 'BIX Executive', svc: 'car', mult: 1.45, seats: 4, tag: 'Premium sedan' },
-  { name: 'BIX Black', svc: 'car', mult: 2.1, seats: 6, tag: 'Luxury SUV · VIP' },
+  { name: 'BIX Executive', svc: 'car', mult: 1.6, seats: 6, tag: 'Innova Zenix · Premium' },
+  { name: 'BIX Black', svc: 'car', mult: 3.5, seats: 6, tag: 'Alphard · Camry · EV · VIP' },
   { name: 'BIX Moto', svc: 'ride', mult: 1, seats: 1 },
   { name: 'BIX Moto Saver', svc: 'ride', mult: 0.9, seats: 1, tag: 'Saver' },
 ];

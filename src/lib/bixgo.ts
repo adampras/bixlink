@@ -1,3 +1,4 @@
+import { REGION_CITIES } from './bixgo-regions';
 import { z } from 'zod';
 
 /** BIXGO super-app catalog. Presentation-only fare simulator: no booking, payment or driver dispatch happens. */
@@ -34,16 +35,15 @@ export const bixgoSettingsSchema = z.object({
   bixDiscountPct: z.number().min(0).max(50),
   usdtIdr: z.number().positive().max(1_000_000),
   services: z.object({ ride: svc, car: svc, food: svc, send: svc, mart: svc }).strict(),
-  franchises: z.array(franchiseSchema).max(100).optional(),
+  franchises: z.array(franchiseSchema).max(400).optional(),
   ppob: z.object({ enabled: z.boolean(), live: z.boolean(), marginIdr: z.number().min(0).max(100_000) }).strict().optional(),
   /** Per-city fare multiplier and minimum fare (IDR), owner-managed. */
   cityPricing: z.record(z.string().max(40), z.object({ mult: z.number().min(0.1).max(10), minIdr: z.number().min(0).max(10_000_000) }).strict()).optional(),
 }).strict();
 
-export const DEFAULT_CITY_PRICING: Record<string, { mult: number; minIdr: number }> = {
-  dubai: { mult: 1.8, minIdr: 120_000 }, singapore: { mult: 1.7, minIdr: 110_000 }, london: { mult: 2.2, minIdr: 160_000 },
-  tokyo: { mult: 2, minIdr: 140_000 }, bali: { mult: 1.1, minIdr: 25_000 }, makassar: { mult: 1, minIdr: 10_000 },
-};
+export const DEFAULT_CITY_PRICING: Record<string, { mult: number; minIdr: number }> = Object.fromEntries(
+  REGION_CITIES.map(c => [c.id, { mult: c.mult, minIdr: Math.round(10_000 * c.mult / 1000) * 1000 }]),
+);
 
 /** Apply the city multiplier and minimum fare to an IDR amount. */
 export function cityFare(s: BixgoSettings, city: string, idr: number) {
@@ -52,20 +52,15 @@ export function cityFare(s: BixgoSettings, city: string, idr: number) {
 }
 export type BixgoSettings = z.infer<typeof bixgoSettingsSchema>;
 
-export const DEFAULT_FRANCHISES: BixgoFranchise[] = [
-  { id: 'makassar', city: 'Makassar', partner: '', enabled: true, lat: -5.1477, lng: 119.4327, radiusKm: 30, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
-  { id: 'dubai', city: 'Dubai', partner: '', enabled: true, lat: 25.2048, lng: 55.2708, radiusKm: 40, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
-  { id: 'singapore', city: 'Singapore', partner: '', enabled: true, lat: 1.3521, lng: 103.8198, radiusKm: 30, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
-  { id: 'london', city: 'London', partner: '', enabled: true, lat: 51.5072, lng: -0.1276, radiusKm: 40, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
-  { id: 'tokyo', city: 'Tokyo', partner: '', enabled: true, lat: 35.6762, lng: 139.6503, radiusKm: 40, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
-  { id: 'bali', city: 'Bali', partner: '', enabled: true, lat: -8.4095, lng: 115.1889, radiusKm: 50, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
-];
+export const DEFAULT_FRANCHISES: BixgoFranchise[] = REGION_CITIES.map(c => ({
+  id: c.id, city: c.city, partner: '', enabled: true, lat: c.lat, lng: c.lng, radiusKm: 30, franchisePct: 46.67, platformPct: 33.33, poolPct: 20,
+}));
 
 export const BIXGO_DEFAULTS: BixgoSettings = {
   enabled: false, notice: '', commissionPct: 15, bixDiscountPct: 10, usdtIdr: 16_000,
   services: {
-    ride: { enabled: true, baseIdr: 8_000, perKmIdr: 2_500 },
-    car: { enabled: true, baseIdr: 15_000, perKmIdr: 4_500 },
+    ride: { enabled: true, baseIdr: 10_000, perKmIdr: 2_800 },
+    car: { enabled: true, baseIdr: 18_000, perKmIdr: 5_500 },
     food: { enabled: true, baseIdr: 9_000, perKmIdr: 2_000 },
     send: { enabled: true, baseIdr: 10_000, perKmIdr: 2_500 },
     mart: { enabled: true, baseIdr: 9_000, perKmIdr: 2_000 },

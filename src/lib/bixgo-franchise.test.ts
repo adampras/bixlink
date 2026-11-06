@@ -14,7 +14,7 @@ describe('BIXGO franchise', () => {
   });
   it('finds Makassar branch within radius only', () => {
     expect(franchiseFor(BIXGO_DEFAULTS, { lat: -5.15, lng: 119.43 })?.city).toBe('Makassar');
-    expect(franchiseFor(BIXGO_DEFAULTS, { lat: -6.2, lng: 106.8 })).toBeNull();
+    expect(franchiseFor(BIXGO_DEFAULTS, { lat: 25.2, lng: 55.27 })).toBeNull();
   });
   it('haversine Makassar–Jakarta ≈ 1420 km', () => {
     expect(Math.round(haversineKm({ lat: -5.1477, lng: 119.4327 }, { lat: -6.2, lng: 106.816 }) / 10)).toBeGreaterThan(138);
