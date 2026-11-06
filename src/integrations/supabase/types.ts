@@ -2078,6 +2078,7 @@ export type Database = {
           created_at: string
           driver_name: string
           driver_phone: string
+          driver_user_id: string | null
           dropoff: string
           id: string
           km: number
@@ -2097,6 +2098,7 @@ export type Database = {
           created_at?: string
           driver_name?: string
           driver_phone?: string
+          driver_user_id?: string | null
           dropoff?: string
           id?: string
           km?: number
@@ -2116,6 +2118,7 @@ export type Database = {
           created_at?: string
           driver_name?: string
           driver_phone?: string
+          driver_user_id?: string | null
           dropoff?: string
           id?: string
           km?: number
@@ -2129,6 +2132,57 @@ export type Database = {
           updated_at?: string
           user_id?: string
           vehicle?: string
+        }
+        Relationships: []
+      }
+      bixgo_driver_licenses: {
+        Row: {
+          city: string
+          created_at: string
+          full_name: string
+          id: string
+          mode: string
+          online: boolean
+          operator_note: string
+          phone: string
+          plate: string
+          status: string
+          updated_at: string
+          user_id: string
+          vehicle_model: string
+          vehicle_type: string
+        }
+        Insert: {
+          city?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          mode?: string
+          online?: boolean
+          operator_note?: string
+          phone?: string
+          plate?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vehicle_model?: string
+          vehicle_type?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          mode?: string
+          online?: boolean
+          operator_note?: string
+          phone?: string
+          plate?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vehicle_model?: string
+          vehicle_type?: string
         }
         Relationships: []
       }
@@ -3852,6 +3906,7 @@ export type Database = {
         Returns: undefined
       }
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
+      bixgo_driver_set_online: { Args: { p_online: boolean }; Returns: boolean }
       bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_can_bypass: { Args: never; Returns: boolean }

@@ -1086,6 +1086,13 @@
       "when": 1793948516576,
       "tag": "0154_bixgo_bookings",
       "breakpoints": true
+    },
+    {
+      "idx": 155,
+      "version": "7",
+      "when": 1793949640976,
+      "tag": "0155_bixgo_driver_licenses",
+      "breakpoints": true
     }
   ]
 }
