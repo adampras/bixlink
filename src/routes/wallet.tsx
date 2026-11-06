@@ -20,8 +20,9 @@ import { dateTime, money, number } from '@/lib/bixlink';
 import { confirmPin, getFiatCodes, txFeedback } from '@/components/TxFeedback';
 import { pickWalletSkin } from '@/lib/wallet-skin';
 import { WalletFinanceMotion } from '@/components/WalletFinanceMotion';
-import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, CheckCircle2, Clock, Eye, EyeOff, Send } from 'lucide-react';
+import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowLeftRight, Lock, Inbox, CheckCircle2, Clock, Eye, EyeOff, Send, RotateCw } from 'lucide-react';
 import { CoinMark, networkName } from '@/components/deposit/CoinBadge';
+import { WalletCardBack } from '@/components/WalletCardBack';
 import { DepositFlightScanner } from '@/components/DepositFlightScanner';
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
@@ -43,6 +44,7 @@ function WalletPage() {
   const qc = useQueryClient(); const isAdmin = !!useMember().data?.isAdmin;
   const { data } = useQuery({ queryKey: ['my-wallet', user?.id], queryFn: () => fetchWallet(), enabled: !!user });
   const fiat = useQuery({ queryKey: ['wallet-fiat-rates'], queryFn: () => fetchFiat(), staleTime: 3_600_000 });
+  const [flipped, setFlipped] = useState(false);
   const [modal, setModal] = useState<'deposit' | 'withdraw' | null>(null);
   const [depMode, setDepMode] = useState<'copy' | 'qr'>('copy');
   const [amount, setAmount] = useState(''); const [field, setField] = useState('');
@@ -102,8 +104,10 @@ function WalletPage() {
   const maskNum = (text: string) => hidden ? '••••••' : text;
   return <BixShell><main className="obsidian-page mx-auto max-w-5xl px-5 py-10 md:px-8">
     <MemberGate ready={ready} signedIn={!!user} title="WALLET">
-      <div data-sov-color={cfg?.readiness.walletCard ? (cfg?.readiness.walletCardColor ?? 'onyx') : undefined} data-wallet-skin={cfg?.readiness.walletCard ? undefined : pickWalletSkin(cfg?.readiness.walletColors)} className={`wallet-summary wallet-vault auric-card relative overflow-hidden rounded-[20px] border p-6${cfg?.readiness.walletCard ? ' wallet-sovereign' : ''}${cfg?.readiness.walletCard && cfg?.readiness.walletCardModel === 'elite' ? ' wallet-elite' : ''}`}>
+      <div className={`wallet-flip${flipped ? ' is-flipped' : ''}`}><div className="wallet-flip-inner">
+      <div data-sov-color={cfg?.readiness.walletCard ? (cfg?.readiness.walletCardColor ?? 'onyx') : undefined} data-wallet-skin={cfg?.readiness.walletCard ? undefined : pickWalletSkin(cfg?.readiness.walletColors)} className={`wallet-face wallet-summary wallet-vault auric-card relative overflow-hidden rounded-[20px] border p-6${cfg?.readiness.walletCard ? ' wallet-sovereign' : ''}${cfg?.readiness.walletCard && cfg?.readiness.walletCardModel === 'elite' ? ' wallet-elite' : ''}`}>
         {cfg?.readiness.walletCard ? <><span className="sov-sheen" aria-hidden/>{cfg?.readiness.walletCardModel === 'elite' && <><span className="elite-grid" aria-hidden/><span className="elite-orbs" aria-hidden><i/><i/></span></>}</> : <WalletFinanceMotion settings={cfg?.readiness}/>}
+        <button type="button" className="wallet-flip-btn wallet-flip-btn--front" aria-label="Show QR and member ID" onClick={() => setFlipped(true)}><RotateCw size={14}/></button>
         <div className="wallet-balance-block">
           <div className="flex items-center justify-between gap-2"><div className="flex min-w-0 items-center gap-2 text-xs tracking-[.14em] uppercase text-muted-foreground"><Wallet size={14}/> Available balance<Button type="button" size="icon" variant="ghost" className="vault-pill! size-7 rounded-full" aria-label={hidden ? 'Show balance' : 'Hide balance'} aria-pressed={hidden} title={hidden ? 'Show balance' : 'Hide balance'} onClick={toggleHidden}>{hidden ? <Eye size={14}/> : <EyeOff size={14}/>}</Button></div>{cfg?.readiness.walletCard && <span className="wallet-mc wallet-mc--inline" aria-hidden><i/><i/></span>}</div>
           <strong className="numeric mt-1 block break-all text-[28px] leading-tight font-black text-foreground md:text-[34px]">{hidden ? '••••••••' : <><AnimatedNumber value={data?.balance ?? 0}/> USDT</>}</strong>
@@ -112,6 +116,10 @@ function WalletPage() {
         <p className="mt-2 text-[10px] text-foreground/70">Display-only USD reference conversions. Rates may be delayed.</p></>}
         <div className="wallet-actions wallet-actions--inside"><button type="button" className="wallet-action wallet-action--in" onClick={() => setModal('deposit')}><span><ArrowDownToLine size={18}/></span><b>Deposit</b></button><button type="button" className="wallet-action wallet-action--out" onClick={() => setModal('withdraw')}><span><ArrowUpFromLine size={18}/></span><b>Withdraw</b></button><Link to="/pay" className="wallet-action wallet-action--in"><span><QrCode size={18}/></span><b>BIX PAY</b></Link></div>
       </div>
+      <div data-sov-color={cfg?.readiness.walletCard ? (cfg?.readiness.walletCardColor ?? 'onyx') : undefined} data-wallet-skin={cfg?.readiness.walletCard ? undefined : pickWalletSkin(cfg?.readiness.walletColors)} className={`wallet-face wallet-face--back wallet-summary wallet-vault auric-card overflow-hidden rounded-[20px] border p-6${cfg?.readiness.walletCard ? ' wallet-sovereign' : ''}${cfg?.readiness.walletCard && cfg?.readiness.walletCardModel === 'elite' ? ' wallet-elite' : ''}`} aria-hidden={!flipped}>
+        <WalletCardBack userId={user?.id} onFlip={() => setFlipped(false)}/>
+      </div>
+      </div></div>
       {Number(data?.balance ?? 0) === 0 && <section aria-label="Quick start" className="wallet-quick auric-card mt-4 rounded-2xl border p-4"><div className="eyebrow">GET STARTED IN 3 STEPS</div><ol className="mt-2 grid grid-cols-3 gap-2 text-center text-[11px]">{['Select network & copy address', 'Send USDT from exchange', 'Aktifkan paket staking'].map((s, i) => <li key={s} className="rounded-xl border border-border bg-card/60 p-2"><b className="mx-auto mb-1 grid h-6 w-6 place-items-center rounded-full bg-chart-3 text-[11px] text-background">{i + 1}</b>{s}</li>)}</ol><Button className="mt-3 w-full rounded-full" onClick={() => setModal('deposit')}><ArrowDownToLine size={16}/> Start First Deposit</Button></section>}
       <div className="mt-4 grid grid-cols-2 gap-3">
         <Link to="/pay" className="wallet-tile wallet-tile--pay wallet-tile--square"><span className={`wallet-tile-status${cfg?.bixPay.enabled ? ' is-open' : ''}`}><i/>{cfg?.bixPay.enabled ? 'LIVE' : 'OFF'}</span><span className="wallet-tile-icon"><QrCode size={24}/></span><b className="wallet-tile-title">BIX PAY</b><span className="wallet-tile-sub">QR Pay · BIX</span></Link>
