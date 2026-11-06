@@ -5,8 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatMoney, GLOBAL_CITIES, type GlobalCurrency } from '@/lib/bixgo-global';
 import { DRIVER_SHARE_PCT, driverEarning, nextTier, tierFor } from '@/lib/bixgo-tier';
 import { BixgoDriverJobs } from '@/components/BixgoDriverJobs';
+import { BixgoDriverRates } from '@/components/BixgoDriverRates';
 
-type License = { status: string; online: boolean; vehicle_type: string; vehicle_model: string; plate: string; city: string; operator_note: string; mode: string };
+type License = { status: string; online: boolean; vehicle_type: string; vehicle_model: string; plate: string; city: string; operator_note: string; mode: string; rate_adj_pct?: number; accept_cash?: boolean; accept_bix?: boolean };
 const VEHICLES = [['moto', 'BIX Moto'], ['urban', 'BIX Urban'], ['executive', 'BIX Executive'], ['black', 'BIX Black']] as const;
 
 /** Member BIXGO Passport: tier from active staking, own trip stats, and the Driver-Partner license / Driver Mode. */
@@ -75,7 +76,8 @@ export function BixgoPassport({ cur, usdtIdr, city }: { cur: GlobalCurrency; usd
         {lic.status === 'pending' && <p className="text-muted-foreground">Your application is waiting for operator review.</p>}
         {lic.status === 'approved' && <>
           <button disabled={busy} onClick={() => void toggle()} className={`flex w-full items-center justify-center gap-2 rounded-full py-3 font-bold ${lic.online ? 'bg-primary text-primary-foreground' : 'border border-primary text-primary'}`}><Power className="h-4 w-4"/>{lic.online ? 'Driver Mode ON — receiving orders' : 'Go online'}</button>
-          <BixgoDriverJobs online={lic.online}/>
+          <BixgoDriverRates key={`${lic.rate_adj_pct}-${lic.accept_cash}-${lic.accept_bix}`} adj={Number(lic.rate_adj_pct ?? 0)} cash={lic.accept_cash ?? true} bix={lic.accept_bix ?? true} onSaved={() => void load()}/>
+          <BixgoDriverJobs online={lic.online} adj={Number(lic.rate_adj_pct ?? 0)}/>
         </>}
       </div>}
     </div>

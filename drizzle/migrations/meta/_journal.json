@@ -1128,6 +1128,20 @@
       "when": 1793974215721,
       "tag": "0160_bix_group_add_member",
       "breakpoints": true
+    },
+    {
+      "idx": 161,
+      "version": "7",
+      "when": 1793978204408,
+      "tag": "0161_bixgo_driver_rates_bix_cash",
+      "breakpoints": true
+    },
+    {
+      "idx": 162,
+      "version": "7",
+      "when": 1793978277759,
+      "tag": "0162_bixgo_rpc_guard_flag",
+      "breakpoints": true
     }
   ]
 }

@@ -2077,16 +2077,21 @@ export type Database = {
           city: string
           completed_at: string | null
           created_at: string
+          driver_bix: number
           driver_name: string
           driver_phone: string
           driver_usdt: number
           driver_user_id: string | null
           dropoff: string
+          fare_bix: number
+          fare_idr: number
           fare_usdt: number
+          gas_bix: number
           held_at: string | null
           id: string
           km: number
           operator_note: string
+          owner_bix: number
           owner_usdt: number
           owner_user_id: string | null
           pay_method: string
@@ -2103,16 +2108,21 @@ export type Database = {
           city?: string
           completed_at?: string | null
           created_at?: string
+          driver_bix?: number
           driver_name?: string
           driver_phone?: string
           driver_usdt?: number
           driver_user_id?: string | null
           dropoff?: string
+          fare_bix?: number
+          fare_idr?: number
           fare_usdt?: number
+          gas_bix?: number
           held_at?: string | null
           id?: string
           km?: number
           operator_note?: string
+          owner_bix?: number
           owner_usdt?: number
           owner_user_id?: string | null
           pay_method?: string
@@ -2129,16 +2139,21 @@ export type Database = {
           city?: string
           completed_at?: string | null
           created_at?: string
+          driver_bix?: number
           driver_name?: string
           driver_phone?: string
           driver_usdt?: number
           driver_user_id?: string | null
           dropoff?: string
+          fare_bix?: number
+          fare_idr?: number
           fare_usdt?: number
+          gas_bix?: number
           held_at?: string | null
           id?: string
           km?: number
           operator_note?: string
+          owner_bix?: number
           owner_usdt?: number
           owner_user_id?: string | null
           pay_method?: string
@@ -2155,6 +2170,8 @@ export type Database = {
       }
       bixgo_driver_licenses: {
         Row: {
+          accept_bix: boolean
+          accept_cash: boolean
           city: string
           created_at: string
           full_name: string
@@ -2164,6 +2181,7 @@ export type Database = {
           operator_note: string
           phone: string
           plate: string
+          rate_adj_pct: number
           status: string
           updated_at: string
           user_id: string
@@ -2171,6 +2189,8 @@ export type Database = {
           vehicle_type: string
         }
         Insert: {
+          accept_bix?: boolean
+          accept_cash?: boolean
           city?: string
           created_at?: string
           full_name?: string
@@ -2180,6 +2200,7 @@ export type Database = {
           operator_note?: string
           phone?: string
           plate?: string
+          rate_adj_pct?: number
           status?: string
           updated_at?: string
           user_id?: string
@@ -2187,6 +2208,8 @@ export type Database = {
           vehicle_type?: string
         }
         Update: {
+          accept_bix?: boolean
+          accept_cash?: boolean
           city?: string
           created_at?: string
           full_name?: string
@@ -2196,6 +2219,7 @@ export type Database = {
           operator_note?: string
           phone?: string
           plate?: string
+          rate_adj_pct?: number
           status?: string
           updated_at?: string
           user_id?: string
@@ -3429,6 +3453,7 @@ export type Database = {
       }
       bix_avatar_in_use: { Args: { p_name: string }; Returns: boolean }
       bix_balance_ledger: { Args: { p_user: string }; Returns: Json }
+      bix_bixgo_bix_delta: { Args: { p_user: string }; Returns: number }
       bix_bixgo_usdt_delta: { Args: { p_user: string }; Returns: number }
       bix_bixtrade_usdt_delta: { Args: { p_user: string }; Returns: number }
       bix_booster_withdraw_config: { Args: never; Returns: Json }
@@ -3935,6 +3960,7 @@ export type Database = {
         Returns: undefined
       }
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
+      bixgo_bix_balance_internal: { Args: { p_user: string }; Returns: number }
       bixgo_driver_accept: { Args: { p_id: string }; Returns: Json }
       bixgo_driver_advance: {
         Args: { p_id: string; p_status: string }
@@ -3942,6 +3968,10 @@ export type Database = {
       }
       bixgo_driver_jobs: { Args: never; Returns: Json }
       bixgo_driver_set_online: { Args: { p_online: boolean }; Returns: boolean }
+      bixgo_driver_set_rates: {
+        Args: { p_adj: number; p_bix: boolean; p_cash: boolean }
+        Returns: undefined
+      }
       bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_can_bypass: { Args: never; Returns: boolean }
