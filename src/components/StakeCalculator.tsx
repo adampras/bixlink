@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, LayoutList, RectangleHorizontal } from 'lucide-react';
 import { DurationPackageCard } from '@/components/DurationPackageCard';
 import { number, type Package } from '@/lib/bixlink';
+import { Button } from '@/components/ui/button';
 
 /** Picks the largest open package whose price fits the chosen amount. */
 export function fitPackage(packages: Package[], amount: number): Package | null {
@@ -20,6 +21,8 @@ export function StakeCalculator({ packages, onPick }: { packages: Package[]; onP
   const stripRef = useRef<HTMLDivElement>(null);
   if (!list.length) return null;
   const i = Math.min(idx, list.length - 1);
+  const current = list[i];
+  if (!current) return null;
   const go = (n: number) => {
     const next = (n + list.length) % list.length;
     setIdx(next);
@@ -29,27 +32,27 @@ export function StakeCalculator({ packages, onPick }: { packages: Package[]; onP
     <div className="stake-pick-head">
       <span>SELECT PACKAGE</span>
       <div role="group" aria-label="View mode" className="stake-mode">
-        <button type="button" aria-pressed={mode === 'list'} onClick={() => setMode('list')}><LayoutList size={13}/>All</button>
-        <button type="button" aria-pressed={mode === 'focus'} onClick={() => setMode('focus')}><RectangleHorizontal size={13}/>Focus</button>
+        <Button variant="ghost" type="button" aria-pressed={mode === 'list'} onClick={() => setMode('list')}><LayoutList size={16}/>All</Button>
+        <Button variant="ghost" type="button" aria-pressed={mode === 'focus'} onClick={() => setMode('focus')}><RectangleHorizontal size={16}/>Focus</Button>
       </div>
     </div>
     {mode === 'list' ? <div className="stake-list">
-      {list.map((p, n) => <div key={p.id} className="auric-stake stake-list-item"><div className="auric-card is-active"><DurationPackageCard pkg={p} index={n} onStake={onPick}/></div></div>)}
+      {list.map((p, n) => <DurationPackageCard key={p.id} pkg={p} index={n} onStake={onPick}/>)}
     </div> : <>
       <div ref={stripRef} role="tablist" aria-label="Package amount" className="stake-pick-chips">
-        {list.map((p, n) => <button key={p.id} type="button" role="tab" aria-selected={n === i} onClick={() => go(n)} className="stake-pick-chip">
+        {list.map((p, n) => <Button variant="ghost" key={p.id} type="button" role="tab" aria-selected={n === i} onClick={() => go(n)} className="stake-pick-chip">
           <b className="numeric">${number(Number(p.price_usd), { maximumFractionDigits: 0 })}</b><small>{p.id}</small>
-        </button>)}
+        </Button>)}
       </div>
       <div className="stake-pick-stage"
         onTouchStart={e => { startX.current = e.touches[0]?.clientX ?? null; }}
         onTouchEnd={e => { const s = startX.current; const x = e.changedTouches[0]?.clientX; startX.current = null; if (s == null || x == null) return; const d = x - s; if (Math.abs(d) > 50) go(i + (d < 0 ? 1 : -1)); }}>
-        <div className="auric-stake"><div className="auric-card is-active"><DurationPackageCard key={list[i]!.id} pkg={list[i]!} index={i} onStake={onPick}/></div></div>
+        <DurationPackageCard key={current.id} pkg={current} index={i} onStake={onPick}/>
       </div>
       <div className="stake-pick-nav">
-        <button type="button" aria-label="Previous package" className="stake-pick-arrow" onClick={() => go(i - 1)}><ChevronLeft size={18}/></button>
+        <Button variant="outline" type="button" aria-label="Previous package" className="stake-pick-arrow" onClick={() => go(i - 1)}><ChevronLeft size={18}/></Button>
         <div className="stake-pick-dots" aria-hidden>{list.map((p, n) => <i key={p.id} className={n === i ? 'on' : ''}/>)}</div>
-        <button type="button" aria-label="Next package" className="stake-pick-arrow" onClick={() => go(i + 1)}><ChevronRight size={18}/></button>
+        <Button variant="outline" type="button" aria-label="Next package" className="stake-pick-arrow" onClick={() => go(i + 1)}><ChevronRight size={18}/></Button>
       </div>
     </>}
   </section>;

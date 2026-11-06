@@ -59,3 +59,4 @@
 - BIXGO uses real OSM map/GPS/OSRM distance in the browser (Leaflet lazy-loaded); city franchises live in the bixgo setting as commission-split references; PPOB goes through Digiflazz server functions with owner-only transactions until a member payment rule exists.
 - BIX COMM: tiers (bixtok_config) enforced in RPCs via bix_comm_tier, UI lock is a hint; presence via polled bix_chat_sync RPC, no public channels.
 - A global `[role="dialog"]` rule caps height at 92dvh, so any full-screen fixed overlay that uses role="dialog" must restate its own max-height/overflow — the splash does.
+- Scope the staking reference skin under `.stake-reference` with local semantic tokens; keep shared package logic and Appearance fonts so legacy cross-page overrides cannot retheme the new layout.
