@@ -6775,3 +6775,26 @@ html[data-color-mode="light"] .stake-compact h1.stake-lux-title span {
   text-shadow: none;
 }
 @media (prefers-reduced-motion: reduce) { .stake-compact h1.stake-lux-title { filter: none; } }
+
+/* BIX PAY: title inside hero card */
+.pay-hero__top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pay-hero__back{display:grid;place-items:center;width:30px;height:30px;border-radius:999px;border:1px solid color-mix(in oklab,var(--chart-2) 35%,transparent);color:var(--muted-foreground)}
+.pay-hero__title{font-size:1.15rem;font-weight:900;letter-spacing:.04em;color:var(--foreground)}
+.pay-hero__title span{color:var(--chart-2)}
+.pay-hero__tag,.pay-hero__soon{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:800;letter-spacing:.14em;padding:3px 9px;border-radius:999px;border:1px solid color-mix(in oklab,var(--chart-2) 40%,transparent);color:var(--chart-2)}
+.pay-hero__soon{border-color:var(--chart-3);color:var(--chart-3)}
+
+/* Staking HUD: drop nested frame, single clean panel with hairline dividers */
+.stake-compact .fx-glow:has(> dl.hud-scan){border:0 !important;box-shadow:none !important;background:transparent !important}
+.stake-compact dl.hud-scan{gap:0 !important;border:1px solid color-mix(in oklab,var(--chart-2) 30%,transparent) !important;border-radius:16px !important;background:linear-gradient(180deg,color-mix(in oklab,var(--foreground) 4%,transparent),transparent),var(--card) !important;overflow:hidden !important;box-shadow:inset 0 1px 0 color-mix(in oklab,var(--chart-3) 30%,transparent) !important}
+html .stake-compact dl.hud-scan > .stake-metric{border:0 !important;border-radius:0 !important;background:transparent !important;box-shadow:none !important;backdrop-filter:none !important}
+html .stake-compact dl.hud-scan > .stake-metric + .stake-metric{border-left:1px solid color-mix(in oklab,var(--foreground) 10%,transparent) !important}
+
+/* BIX CALL header: search + QR + menu side by side */
+.bc-head{display:flex;align-items:flex-start;gap:8px}
+.bc-head__search{flex:1;min-width:0}
+.bc-head .comm-kebab,.bc-qr-btn{flex-shrink:0;margin-top:6px}
+.bc-qr-btn{display:grid;place-items:center;width:40px;height:40px;border-radius:999px;border:1px solid color-mix(in oklab,var(--chart-3) 45%,transparent);color:var(--chart-3);background:color-mix(in oklab,var(--card) 85%,transparent)}
+.bc-qr-card{width:100%;max-width:340px;border-radius:22px;padding:20px;border:1px solid color-mix(in oklab,var(--chart-3) 40%,transparent);background:var(--card)}
+.bc-qr-card .pay-qr-plate{display:grid;place-items:center}
+.bc-qr-scan{display:flex;width:100%;align-items:center;justify-content:center;gap:8px;min-height:44px;border-radius:999px;background:var(--chart-2);color:var(--background);font-weight:800}
