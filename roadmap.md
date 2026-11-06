@@ -1,4 +1,4 @@
-- [ ] Apply reference Deep Teal staking design and verify signed-in All/Focus, durations, confirmation and mobile readability without moving funds.
+- [x] Apply reference Deep Teal staking design; signed-in All/Focus, existing 360D account restriction, confirmation/cancel and mobile/desktop dark/light readability verified; three package calculation tests passed, no funds moved.
 - [x] Add staking detail confirmation and authoritative pending/receipt states, shared automatic wallet staking notifications, scoped matcha/orange polish and independent manifest-only wallet installation; signed-in confirmation/cancel and 24 wallet staking records verified at phone/desktop sizes, tests passed; no funds moved.
 - [ ] Verify actual staking submission/completion and physical wallet home-screen installation — waits on owner-authorized financial transaction and phone installation; in-app notifications only, not background push.
 - [x] Lock vUSDT sending to verified Owner 1 across both wallets, shared RPC and insert guard; non-owner RPC rejection and signed-in Owner 1 form verified without moving funds.
