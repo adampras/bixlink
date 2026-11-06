@@ -24,11 +24,11 @@ import promo from '@/assets/bixgo/promo.jpg';
 export type BixgoView = 'home' | 'order' | 'activity' | 'inbox' | 'account';
 
 const TILES: { label: string; img: string; svc?: BixgoService }[] = [
-  { label: 'Motor', img: icRide, svc: 'ride' }, { label: 'Makanan', img: icFood, svc: 'food' },
+  { label: 'Bike', img: icRide, svc: 'ride' }, { label: 'Food', img: icFood, svc: 'food' },
   { label: 'Express', img: icSend, svc: 'send' }, { label: 'Jastip', img: icJastip },
-  { label: 'Dine Out', img: icDine }, { label: 'Mobil', img: icCar, svc: 'car' },
-  { label: 'Belanja', img: icMart, svc: 'mart' }, { label: 'Pulsa & bills', img: icBills },
-  { label: 'Dana Tunai', img: icCash }, { label: 'Kesehatan', img: icHealth },
+  { label: 'Dine Out', img: icDine }, { label: 'Car', img: icCar, svc: 'car' },
+  { label: 'Mart', img: icMart, svc: 'mart' }, { label: 'Pulsa & bills', img: icBills },
+  { label: 'Travel & eSIM', img: icCash }, { label: 'Health', img: icHealth },
 ];
 
 type Card = { img: string; name: string; promo?: string; ad?: boolean; rating?: number; km?: number; kind: 'food' | 'mart'; svc: BixgoService; brand?: boolean };

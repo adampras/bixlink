@@ -9,12 +9,14 @@ import { ArrowLeft, Bike, Car, CheckCircle2, Construction, History, MapPin, Minu
 import { toast } from 'sonner';
 import { BixgoRideBooking } from '@/components/BixgoRideBooking';
 import { BixgoBills } from '@/components/BixgoBills';
+import { BixgoTravel } from '@/components/BixgoTravel';
+import { GLOBAL_CITIES, GLOBAL_CURRENCIES, cryptoEquivalent, formatMoney, readCurrency, saveCurrency, type GlobalCurrency } from '@/lib/bixgo-global';
 import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
 
 export const Route = createFileRoute('/bixgo')({
   head: () => ({ meta: [
     { title: 'BIXGO — Rides, Food & Courier | BIXLINK' },
-    { name: 'description', content: 'BIXGO super-app preview: BIXRide, BIXCar, BIXFood, BIXSend and BIXMart with fare estimates in IDR, USDT and BIX.' },
+    { name: 'description', content: 'BIXGO super-app preview: BIXRide, BIXCar, BIXFood, BIXSend and BIXMart with global fare estimates in USD, EUR, AED, SGD, USDT and BIX.' },
     { property: 'og:title', content: 'BIXGO — BIXLINK super-app' },
     { property: 'og:description', content: 'Ride, car, food, courier and grocery fare estimates inside the BIXLINK ecosystem.' },
     { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' },
@@ -23,24 +25,25 @@ export const Route = createFileRoute('/bixgo')({
 });
 
 const ICON = { ride: Bike, car: Car, food: UtensilsCrossed, send: Package, mart: ShoppingBasket } as const;
-const idr = (n: number) => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+let fmt = (n: number) => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+const idr = (n: number) => fmt(n);
 type Step = 'form' | 'search' | 'track' | 'done';
 type Item = { id: string; name: string; price: number; store: string };
 const CATALOG: Record<'food' | 'mart', Item[]> = {
   food: [
-    { id: 'f1', name: 'Nasi Goreng Spesial', price: 28000, store: 'Warung Nusantara' },
-    { id: 'f2', name: 'Ayam Geprek', price: 22000, store: 'Geprek Juara' },
-    { id: 'f3', name: 'Mie Ayam Bakso', price: 20000, store: 'Mie Pak Kumis' },
-    { id: 'f4', name: 'Es Kopi Susu', price: 18000, store: 'Kopi Fox' },
+    { id: 'f1', name: 'Wagyu Burger Deluxe', price: 224000, store: 'Fox Burger Global' },
+    { id: 'f2', name: 'Salmon Poke Bowl', price: 192000, store: 'Marina Kitchen' },
+    { id: 'f3', name: 'Nasi Goreng Signature', price: 96000, store: 'Nusantara Lounge' },
+    { id: 'f4', name: 'Iced Flat White', price: 72000, store: 'Kopi Fox' },
   ],
   mart: [
-    { id: 'm1', name: 'Beras 5 kg', price: 72000, store: 'BIXMart Hub' },
-    { id: 'm2', name: 'Minyak Goreng 2 L', price: 38000, store: 'BIXMart Hub' },
-    { id: 'm3', name: 'Telur 1 kg', price: 29000, store: 'BIXMart Hub' },
-    { id: 'm4', name: 'Air Mineral 12×600ml', price: 42000, store: 'BIXMart Hub' },
+    { id: 'm1', name: 'Travel Essentials Kit', price: 352000, store: 'BIXMart Global' },
+    { id: 'm2', name: 'Fresh Fruit Box', price: 288000, store: 'BIXMart Global' },
+    { id: 'm3', name: 'Sparkling Water ×12', price: 160000, store: 'BIXMart Global' },
+    { id: 'm4', name: 'Power Bank 20,000 mAh', price: 480000, store: 'BIXMart Global' },
   ],
 };
-const TIERS = { ride: [['Standard', 1], ['Comfort', 1.25]], car: [['Economy', 1], ['Premium', 1.4], ['XL 6-seat', 1.6]] } as const;
+const TIERS = { ride: [['Standard', 1], ['Comfort', 1.25]], car: [['Economy', 1], ['Executive', 1.8], ['BIX Black', 2.4], ['Airport XL', 2]] } as const;
 const SIZES = [['Small ≤5 kg', 1], ['Medium ≤20 kg', 1.3], ['Large ≤50 kg', 1.7]] as const;
 const STAGES: Record<BixgoService, string[]> = {
   ride: ['Partner assigned', 'Heading to pickup', 'On the trip', 'Arrived'],
@@ -71,7 +74,11 @@ function BixgoPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [tab, setTab] = useState<'order' | 'history'>('order');
   const [view, setView] = useState<BixgoView>('home');
-  const [sub, setSub] = useState<null | 'ride' | 'car' | 'bills'>(null);
+  const [sub, setSub] = useState<null | 'ride' | 'car' | 'bills' | 'travel'>(null);
+  const [cur, setCur] = useState<GlobalCurrency>('USD');
+  const [city, setCity] = useState<string>(GLOBAL_CITIES[0].id);
+  useEffect(() => { setCur(readCurrency()); }, []);
+  const pickCur = (c: GlobalCurrency) => { setCur(c); saveCurrency(c); };
   const { user } = useMember();
 
   useEffect(() => { void supabase.from('app_settings').select('value').eq('key', 'bixgo').maybeSingle().then(({ data }) => setCfg(readBixgo(data?.value))); }, []);
@@ -89,6 +96,7 @@ function BixgoPage() {
     <p className="mt-2 text-sm text-muted-foreground">{cfg.notice || 'BIXGO rides, food and courier services are being prepared. Please check back soon.'}</p>
     <Button asChild className="mt-5"><Link to="/dashboard">Back to dashboard</Link></Button></section></main></BixShell>;
 
+  fmt = (n: number) => formatMoney(n, cur, cfg.usdtIdr);
   const meta = BIXGO_SERVICES.find(s => s.key === svc)!;
   const shop = svc === 'food' || svc === 'mart';
   const catalog = shop ? CATALOG[svc] : [];
@@ -110,13 +118,19 @@ function BixgoPage() {
   const pos = step === 'track' ? 10 + stage * 27 : 9;
 
   const enabledSet = new Set(list.map(s => s.key));
-  const soon = (l: string) => l === 'Pulsa & bills' ? setSub('bills') : toast(`${l} — coming soon to BIXGO`);
+  const soon = (l: string) => l === 'Pulsa & bills' ? setSub('bills') : l === 'Travel & eSIM' ? setSub('travel') : toast(`${l} — coming soon to BIXGO`);
   const pick = (s: BixgoService) => { if (s === 'ride' || s === 'car') { setSub(s); return; } setSvc(s); setTier(0); setCart({}); setStep('form'); setView('order'); setTab('order'); };
   const go = (v: BixgoView) => { setView(v); if (v === 'activity') setTab('history'); if (v === 'order') setTab('order'); };
   const memberName = user?.email?.split('@')[0] || 'Member BIXLINK';
 
   return <div className="bixgo-grab fixed inset-0 z-[60] overflow-y-auto"><div className="mx-auto min-h-full max-w-xl">
     {!cfg.enabled && isAdmin && <p className="border-b border-accent/40 bg-accent/20 px-3 py-2 text-[11px]">Admin 1 preview · Under Reconstruction (only visible to you)</p>}
+    {!sub && <div className="sticky top-0 z-10 flex items-center gap-2 overflow-x-auto border-b border-border bg-background/90 px-3 py-2 backdrop-blur">
+      <span className="shrink-0 rounded-full border border-primary/50 px-2 py-0.5 text-[10px] font-bold tracking-widest text-primary">GLOBAL</span>
+      <select aria-label="City" value={city} onChange={e => { setCity(e.target.value); const c = GLOBAL_CITIES.find(x => x.id === e.target.value); if (c) pickCur(c.cur); }} className="shrink-0 rounded-full border border-border bg-card px-2 py-1 text-[11px]">{GLOBAL_CITIES.map(c => <option key={c.id} value={c.id}>{c.city}, {c.country}</option>)}</select>
+      <div className="flex shrink-0 gap-1">{GLOBAL_CURRENCIES.map(c => <button key={c.code} onClick={() => pickCur(c.code)} className={`rounded-full border px-2 py-1 text-[11px] ${cur === c.code ? 'border-primary bg-primary/15 font-bold' : 'border-border'}`}>{c.code}</button>)}</div>
+    </div>}
+    {sub === 'travel' && <BixgoTravel cur={cur} usdtIdr={cfg.usdtIdr} onBack={() => setSub(null)}/>}
     {sub === 'bills' && <BixgoBills onBack={() => setSub(null)}/>}
     {(sub === 'ride' || sub === 'car') && <BixgoRideBooking cfg={cfg} start={sub} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
     {!sub && <>
@@ -172,6 +186,7 @@ function BixgoPage() {
         {shop && <div className="flex justify-between"><span>Service fee</span><span>{idr(service)}</span></div>}
         {payBix && <div className="flex justify-between text-primary"><span>BIX discount</span><span>−{idr(discount)}</span></div>}
         <div className="flex justify-between border-t border-border pt-1 text-sm"><b>Total</b><b>{idr(total)}</b></div>
+        <div className="flex justify-between text-[11px] text-muted-foreground"><span>Crypto equivalent</span><span className="tabular-nums">{cryptoEquivalent(total, cfg.usdtIdr).usdt} USDT · {cryptoEquivalent(total, cfg.usdtIdr).bix} BIX</span></div>
         <div className="flex justify-between text-muted-foreground"><span>≈ USDT</span><span>{usdt} USDT</span></div>
       </div>
 

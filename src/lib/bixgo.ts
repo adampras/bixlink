@@ -41,6 +41,11 @@ export type BixgoSettings = z.infer<typeof bixgoSettingsSchema>;
 
 export const DEFAULT_FRANCHISES: BixgoFranchise[] = [
   { id: 'makassar', city: 'Makassar', partner: '', enabled: true, lat: -5.1477, lng: 119.4327, radiusKm: 30, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
+  { id: 'dubai', city: 'Dubai', partner: '', enabled: true, lat: 25.2048, lng: 55.2708, radiusKm: 40, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
+  { id: 'singapore', city: 'Singapore', partner: '', enabled: true, lat: 1.3521, lng: 103.8198, radiusKm: 30, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
+  { id: 'london', city: 'London', partner: '', enabled: true, lat: 51.5072, lng: -0.1276, radiusKm: 40, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
+  { id: 'tokyo', city: 'Tokyo', partner: '', enabled: true, lat: 35.6762, lng: 139.6503, radiusKm: 40, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
+  { id: 'bali', city: 'Bali', partner: '', enabled: true, lat: -8.4095, lng: 115.1889, radiusKm: 50, franchisePct: 46.67, platformPct: 33.33, poolPct: 20 },
 ];
 
 export const BIXGO_DEFAULTS: BixgoSettings = {
