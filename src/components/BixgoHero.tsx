@@ -7,7 +7,7 @@ import { cityFare, bixgoFare, type BixgoSettings } from '@/lib/bixgo';
 
 /** BIXGO hero in the BIXLINK obsidian / gold / teal identity: city switcher, currency and a live sample fare. */
 export function BixgoHero({ cfg, city, cur, onCity, onCur, isAdmin }: { cfg: BixgoSettings; city: string; cur: GlobalCurrency; onCity: (id: string) => void; onCur: (c: GlobalCurrency) => void; isAdmin: boolean }) {
-  const c = GLOBAL_CITIES.find(x => x.id === city) ?? GLOBAL_CITIES[0];
+  const c = GLOBAL_CITIES.find(x => x.id === city) ?? GLOBAL_CITIES[0]!;
   const sample = cityFare(cfg, city, bixgoFare(cfg, 'car', 10).idr * 1.8);
   return <section className="bixgo-hero relative mx-3 mt-3 overflow-hidden rounded-3xl p-4">
     <div className="bixgo-hero-grid pointer-events-none absolute inset-0"/>
@@ -21,7 +21,7 @@ export function BixgoHero({ cfg, city, cur, onCity, onCur, isAdmin }: { cfg: Bix
     </div>
     <h1 className="relative mt-4 font-display text-2xl font-black leading-tight">Move anywhere.<br/><span className="bixgo-hero-gold">Pay in BIX.</span></h1>
     <p className="relative mt-1 text-xs text-muted-foreground">Executive rides, airport transfers and travel eSIM for BIXLINK members in {c.city}, {c.province} · {c.country}.</p>
-    <div className="no-scrollbar relative mt-3 flex gap-1.5 overflow-x-auto">{[c, ...FEATURED_CITY_IDS.filter(id => id !== c.id).map(id => GLOBAL_CITIES.find(g => g.id === id)!)].filter(Boolean).map(x => <button key={x.id} onClick={() => onCity(x.id)} className={`bixgo-hero-chip shrink-0 rounded-full px-3 py-1.5 text-[11px] ${x.id === city ? 'is-on font-bold' : ''}`}>{x.city}</button>)}</div>
+    <div className="no-scrollbar relative mt-3 flex gap-1.5 overflow-x-auto">{[c, ...FEATURED_CITY_IDS.filter(id => id !== c.id).map(id => GLOBAL_CITIES.find(g => g.id === id)!)].filter((g): g is NonNullable<typeof g> => !!g).map(x => <button key={x.id} onClick={() => onCity(x.id)} className={`bixgo-hero-chip shrink-0 rounded-full px-3 py-1.5 text-[11px] ${x.id === city ? 'is-on font-bold' : ''}`}>{x.city}</button>)}</div>
     <div className="relative mt-3 grid grid-cols-[1fr_auto] items-end gap-2 rounded-2xl bixgo-hero-panel p-3">
       <div><p className="text-[10px] uppercase tracking-wider text-muted-foreground">BIX Black · 10 km · {c.city}</p><p className="bixgo-hero-gold font-display text-xl font-black tabular-nums">{formatMoney(sample, cur, cfg.usdtIdr)}</p></div>
       <div className="flex gap-1">{GLOBAL_CURRENCIES.map(x => <button key={x.code} onClick={() => onCur(x.code)} className={`bixgo-hero-chip rounded-md px-1.5 py-1 text-[10px] ${cur === x.code ? 'is-on font-bold' : ''}`}>{x.code}</button>)}</div>
