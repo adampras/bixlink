@@ -100,8 +100,10 @@ function BixtradePage() {
   const stream = useMemo(() => rows.filter(r => r.net > 0).map(r => `${r.pair} ${r.buy} → ${r.sell} +${r.net.toFixed(2)}%`), [rows]);
 
   const fundReqs = reqs.filter(r => (r.funding ?? 'real') === funding);
-  const capital = botCapital(fundReqs);
-  const fundExecs = execs.filter(x => x.funding === funding);
+  const capital = cfg?.showcaseOnly && (!isAdmin || publicView) ? BT_VAULT : botCapital(fundReqs);
+  const showcaseOn = !!cfg?.showcaseOnly && (!isAdmin || publicView);
+  const simExecs = useMemo(() => showcaseOn ? engineStream(prices, Math.floor(Date.now() / 30000)) : [], [showcaseOn, prices, tick]); // eslint-disable-line react-hooks/exhaustive-deps
+  const fundExecs = showcaseOn ? simExecs : execs.filter(x => x.funding === funding);
   const logExecs = fundExecs.filter(x => logFilter === 'all' || (logFilter === 'win' ? Number(x.net_usd) > 0 : Number(x.net_usd) <= 0));
   const realized = fundExecs.reduce((a, x) => a + Number(x.net_usd), 0);
   const profitable = rows.filter(r => r.net > 0);
@@ -199,7 +201,7 @@ function BixtradePage() {
 
     {tab === 'cockpit' && <>
     {showcase && <EngineBacktest/>}
-    <div id="arb-track"/><BixtradeTreasury execs={fundExecs} onOpenLogs={() => setTab('logs')}/>
+    <div id="arb-track"/><BixtradeTreasury simulated={showcase} execs={fundExecs} onOpenLogs={() => setTab('logs')}/>
     <section className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><Zap size={18} className="text-chart-2"/> Live execution pulse</h2>
       <div className="mt-3 grid gap-2">{fundExecs.slice(0, 3).map((x, i) => <button type="button" key={x.id} style={{ animationDelay: `${i * 60}ms` }} onClick={() => setReceipt(x)} className="arb-pulse-row text-left"><i/><span><b>{x.pair}</b> {x.buy_venue} → {x.sell_venue}<br/><span className="text-muted-foreground">{Number(x.notional_usd).toFixed(2)} USDT · {new Date(x.executed_at).toLocaleTimeString()}</span></span><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)}</b></button>)}
@@ -282,7 +284,7 @@ function BixtradePage() {
       <div className="arb-chips mt-2">{(['all', 'win', 'scratch'] as const).map(k => <button key={k} type="button" className={logFilter === k ? 'is-on' : ''} onClick={() => setLogFilter(k)}>{k === 'all' ? 'All' : k === 'win' ? 'Profit' : 'Scratch / loss'}</button>)}</div>
       <p className="mt-2 text-[11px] text-muted-foreground">Total recorded: <b className={realized >= 0 ? 'text-chart-2' : 'text-destructive'}>{realized.toFixed(4)} USDT</b> — a performance record, not added to your wallet. Tap a trade for its receipt.</p>
       <div className="mt-3 grid gap-2">{logExecs.length ? logExecs.map(x => <button type="button" key={x.id} onClick={() => setReceipt(x)} className="arb-log-row">
-        <div className="flex justify-between"><b>{x.pair}{x.source === 'live_quotes' && <span className="arb-badge is-approved ml-1">LIVE</span>}</b><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)} USDT</b></div>
+        <div className="flex justify-between"><b>{x.pair}{x.source === 'live_quotes' && <span className="arb-badge is-approved ml-1">LIVE</span>}{x.source === 'simulation' && <span className="arb-badge ml-1">SIM</span>}</b><b className={Number(x.net_usd) >= 0 ? 'text-chart-2' : 'text-destructive'}>{Number(x.net_usd) >= 0 ? '+' : ''}{Number(x.net_usd).toFixed(4)} USDT</b></div>
         <div className="text-muted-foreground">{x.buy_venue} → {x.sell_venue} · {new Date(x.executed_at).toLocaleTimeString()}</div>
       </button>) : <p className="text-xs text-muted-foreground">No executions yet. They start within 5 minutes after a deposit is approved.</p>}</div>
     </details>
@@ -300,7 +302,7 @@ function BixtradePage() {
       <p className="shop-eyebrow">EXECUTION RECEIPT</p>
       <h3 className="font-display text-xl font-bold">{receipt.pair}</h3>
       <p className="font-mono text-[10px] text-muted-foreground">{receipt.ref}</p>
-      <dl>{([['Leg 1 · Buy', `${receipt.buy_venue} @ ${Number(receipt.buy_price).toFixed(4)}`], ['Leg 2 · Sell', `${receipt.sell_venue} @ ${Number(receipt.sell_price).toFixed(4)}`], ['Quantity', Number(receipt.qty).toFixed(6)], ['Size', `${Number(receipt.notional_usd).toFixed(2)} USDT`], ['Taker fees (2 legs)', `${Number(receipt.fee_usd).toFixed(4)} USDT`], ['Net result', `${Number(receipt.net_usd).toFixed(4)} USDT`], ['Latency', `${receipt.latency_ms} ms`], ['Time', new Date(receipt.executed_at).toLocaleString()], ['Funding', receipt.funding === 'virtual' ? 'Neural AI Pool (protocol allocation)' : 'Live Asset Engine record'], ['Price source', receipt.source === 'live_quotes' ? 'Live exchange quotes' : 'Engine record']] as const).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+      <dl>{([['Leg 1 · Buy', `${receipt.buy_venue} @ ${Number(receipt.buy_price).toFixed(4)}`], ['Leg 2 · Sell', `${receipt.sell_venue} @ ${Number(receipt.sell_price).toFixed(4)}`], ['Quantity', Number(receipt.qty).toFixed(6)], ['Size', `${Number(receipt.notional_usd).toFixed(2)} USDT`], ['Taker fees (2 legs)', `${Number(receipt.fee_usd).toFixed(4)} USDT`], ['Net result', `${Number(receipt.net_usd).toFixed(4)} USDT`], ['Latency', `${receipt.latency_ms} ms`], ['Time', new Date(receipt.executed_at).toLocaleString()], ['Funding', receipt.funding === 'virtual' ? 'Neural AI Pool (protocol allocation)' : 'Live Asset Engine record'], ['Price source', receipt.source === 'live_quotes' ? 'Live exchange quotes' : receipt.source === 'simulation' ? 'Engine simulation (reference vault)' : 'Engine record']] as const).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
       <p className="mt-2 text-[10px] text-muted-foreground">Recorded performance entry; no external exchange order and no automatic wallet credit.</p>
       <Button className="mt-3 w-full" onClick={() => setReceipt(null)}>Close</Button>
     </div></div>}
@@ -421,4 +423,22 @@ function EngineHud() {
   const items: [string, string][] = [['24h scanned', `$${vol.toLocaleString()}`], ['Routes', String(routes)], ['Latency', `${Math.round(22 + r(3) * 26)}ms`], ['Engine', '99.9%']];
   return <section className="mt-2 grid grid-cols-4 gap-2">{items.map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
     <p className="col-span-4 text-[10px] text-muted-foreground">Autonomous engine telemetry · ticket size $150–$1,850 · net 0.09–0.32% per route after fees. Reference display, not an offer or guaranteed return.</p></section>;
+}
+
+/** Public engine stream on the $500k reference vault: deterministic per 30 s slot, built on live reference prices, labeled SIMULATION. */
+function engineStream(prices: Record<string, number>, slot: number): Exec[] {
+  const out: Exec[] = [];
+  for (let k = 0; k < 40; k++) {
+    const n = slot - k * 1.3;
+    const r = (j: number) => btRand(Math.floor(n) * 31 + j);
+    const pair = BIXTRADE_PAIRS[Math.floor(r(1) * BIXTRADE_PAIRS.length)];
+    const ref = prices[pair] || ({ BTCUSDT: 68000, ETHUSDT: 3400, SOLUSDT: 160, BNBUSDT: 600 } as Record<string, number>)[pair] || 100;
+    const v = Math.floor(r(2) * BIXTRADE_VENUES.length);
+    const notional = 1250 + r(3) * 3250;
+    const netPct = r(4) < 0.04 ? -0.02 : 0.09 + r(5) * 0.23;
+    const buy = ref * (1 - r(6) * 0.001);
+    const fee = notional * 0.002;
+    out.push({ id: `sim-${Math.floor(n)}`, ref: `SIM-${pair.slice(0, 3)}-${Math.floor(n).toString(36).toUpperCase()}`, funding: 'real', pair: pair.replace('USDT', '/USDT'), buy_venue: BIXTRADE_VENUES[v], sell_venue: BIXTRADE_VENUES[(v + 1 + Math.floor(r(7) * 4)) % BIXTRADE_VENUES.length], buy_price: buy, sell_price: buy * (1 + (netPct + 0.2) / 100), qty: notional / buy, notional_usd: notional, fee_usd: fee, net_usd: notional * netPct / 100, latency_ms: 18 + Math.round(r(8) * 27), executed_at: new Date(Math.floor(n) * 30000).toISOString(), source: 'simulation' });
+  }
+  return out;
 }

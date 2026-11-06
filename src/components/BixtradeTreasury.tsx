@@ -1,7 +1,7 @@
 type Exec = { net_usd: number; notional_usd: number; executed_at: string; buy_venue: string; sell_venue: string; source?: string };
 
 /** Track record built only from recorded execution rows — no generated figures. */
-export function BixtradeTreasury({ execs: rawExecs, onOpenLogs }: { execs?: Exec[] | null; onOpenLogs?: () => void }) {
+export function BixtradeTreasury({ execs: rawExecs, onOpenLogs, simulated }: { execs?: Exec[] | null; onOpenLogs?: () => void; simulated?: boolean }) {
   const execs = Array.isArray(rawExecs) ? rawExecs : [];
   const total = execs.reduce((a, x) => a + Number(x.net_usd), 0);
   const volume = execs.reduce((a, x) => a + Number(x.notional_usd), 0);
@@ -11,7 +11,7 @@ export function BixtradeTreasury({ execs: rawExecs, onOpenLogs }: { execs?: Exec
   return <section className="arb-card mt-4">
     <div className="flex items-center justify-between gap-2">
       <p className="shop-eyebrow">TRACK RECORD</p>
-      <span className="arb-badge is-approved">DATA TERCATAT ✓</span>
+      {simulated ? <span className="arb-badge">SIMULATION · $500K VAULT</span> : <span className="arb-badge is-approved">DATA TERCATAT ✓</span>}
     </div>
     <b className={`mt-1 block font-display text-3xl ${total >= 0 ? 'text-chart-2' : 'text-destructive'}`}>{total >= 0 ? '+' : ''}{total.toFixed(4)} USDT</b>
     <p className="text-[11px] text-muted-foreground">Hasil bersih dari {execs.length} eksekusi tercatat · volume {volume.toLocaleString('en-US', { maximumFractionDigits: 2 })} USDT</p>
@@ -20,6 +20,6 @@ export function BixtradeTreasury({ execs: rawExecs, onOpenLogs }: { execs?: Exec
     </div>
     <p className="mt-3 text-[11px]">{last ? <>Last: <b>{new Date(last.executed_at).toLocaleString()}</b> · {last.buy_venue} → {last.sell_venue}</> : 'No executions recorded yet.'}</p>
     {onOpenLogs && execs.length > 0 && <button type="button" onClick={onOpenLogs} className="mt-2 text-xs font-bold text-chart-3 underline">View all receipts →</button>}
-    <p className="mt-3 text-[10px] text-muted-foreground">Every figure is calculated directly from your execution records using public exchange prices. This is a performance record, not automatically credited to your wallet; past performance does not guarantee future results.</p>
+    <p className="mt-3 text-[10px] text-muted-foreground">{simulated ? 'Engine simulation on a $500,000 reference vault using live reference prices. Not real fills or member funds, and not a guarantee. ' : ''}Every figure is calculated directly from your execution records using public exchange prices. This is a performance record, not automatically credited to your wallet; past performance does not guarantee future results.</p>
   </section>;
 }
