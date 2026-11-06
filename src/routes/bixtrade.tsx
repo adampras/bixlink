@@ -431,14 +431,14 @@ function engineStream(prices: Record<string, number>, slot: number): Exec[] {
   for (let k = 0; k < 40; k++) {
     const n = slot - k * 1.3;
     const r = (j: number) => btRand(Math.floor(n) * 31 + j);
-    const pair = BIXTRADE_PAIRS[Math.floor(r(1) * BIXTRADE_PAIRS.length)];
+    const pair: string = BIXTRADE_PAIRS[Math.floor(r(1) * BIXTRADE_PAIRS.length)] ?? 'BTCUSDT';
     const ref = prices[pair] || ({ BTCUSDT: 68000, ETHUSDT: 3400, SOLUSDT: 160, BNBUSDT: 600 } as Record<string, number>)[pair] || 100;
     const v = Math.floor(r(2) * BIXTRADE_VENUES.length);
     const notional = 1250 + r(3) * 3250;
     const netPct = r(4) < 0.04 ? -0.02 : 0.09 + r(5) * 0.23;
     const buy = ref * (1 - r(6) * 0.001);
     const fee = notional * 0.002;
-    out.push({ id: `sim-${Math.floor(n)}`, ref: `SIM-${pair.slice(0, 3)}-${Math.floor(n).toString(36).toUpperCase()}`, funding: 'real', pair: pair.replace('USDT', '/USDT'), buy_venue: BIXTRADE_VENUES[v], sell_venue: BIXTRADE_VENUES[(v + 1 + Math.floor(r(7) * 4)) % BIXTRADE_VENUES.length], buy_price: buy, sell_price: buy * (1 + (netPct + 0.2) / 100), qty: notional / buy, notional_usd: notional, fee_usd: fee, net_usd: notional * netPct / 100, latency_ms: 18 + Math.round(r(8) * 27), executed_at: new Date(Math.floor(n) * 30000).toISOString(), source: 'simulation' });
+    out.push({ id: `sim-${Math.floor(n)}`, ref: `SIM-${pair.slice(0, 3)}-${Math.floor(n).toString(36).toUpperCase()}`, funding: 'real', pair: pair.replace('USDT', '/USDT'), buy_venue: BIXTRADE_VENUES[v] ?? 'Binance', sell_venue: BIXTRADE_VENUES[(v + 1 + Math.floor(r(7) * 4)) % BIXTRADE_VENUES.length] ?? 'Bybit', buy_price: buy, sell_price: buy * (1 + (netPct + 0.2) / 100), qty: notional / buy, notional_usd: notional, fee_usd: fee, net_usd: notional * netPct / 100, latency_ms: 18 + Math.round(r(8) * 27), executed_at: new Date(Math.floor(n) * 30000).toISOString(), source: 'simulation' });
   }
   return out;
 }
