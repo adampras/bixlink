@@ -2075,14 +2075,20 @@ export type Database = {
       bixgo_bookings: {
         Row: {
           city: string
+          completed_at: string | null
           created_at: string
           driver_name: string
           driver_phone: string
+          driver_usdt: number
           driver_user_id: string | null
           dropoff: string
+          fare_usdt: number
+          held_at: string | null
           id: string
           km: number
           operator_note: string
+          owner_usdt: number
+          owner_user_id: string | null
           pay_method: string
           pickup: string
           plate: string
@@ -2095,14 +2101,20 @@ export type Database = {
         }
         Insert: {
           city?: string
+          completed_at?: string | null
           created_at?: string
           driver_name?: string
           driver_phone?: string
+          driver_usdt?: number
           driver_user_id?: string | null
           dropoff?: string
+          fare_usdt?: number
+          held_at?: string | null
           id?: string
           km?: number
           operator_note?: string
+          owner_usdt?: number
+          owner_user_id?: string | null
           pay_method?: string
           pickup?: string
           plate?: string
@@ -2115,14 +2127,20 @@ export type Database = {
         }
         Update: {
           city?: string
+          completed_at?: string | null
           created_at?: string
           driver_name?: string
           driver_phone?: string
+          driver_usdt?: number
           driver_user_id?: string | null
           dropoff?: string
+          fare_usdt?: number
+          held_at?: string | null
           id?: string
           km?: number
           operator_note?: string
+          owner_usdt?: number
+          owner_user_id?: string | null
           pay_method?: string
           pickup?: string
           plate?: string
@@ -3411,6 +3429,7 @@ export type Database = {
       }
       bix_avatar_in_use: { Args: { p_name: string }; Returns: boolean }
       bix_balance_ledger: { Args: { p_user: string }; Returns: Json }
+      bix_bixgo_usdt_delta: { Args: { p_user: string }; Returns: number }
       bix_bixtrade_usdt_delta: { Args: { p_user: string }; Returns: number }
       bix_booster_withdraw_config: { Args: never; Returns: Json }
       bix_buyback_request: {
@@ -3897,6 +3916,7 @@ export type Database = {
         Returns: string
       }
       bix_wallet_balance: { Args: { p_user: string }; Returns: number }
+      bix_wallet_balance_internal: { Args: { p_user: string }; Returns: number }
       bix_wd_matching_config: { Args: never; Returns: Json }
       bix_wd_matching_save: { Args: { p_config: Json }; Returns: Json }
       bix_withdraw_stake_profit: {
@@ -3911,6 +3931,12 @@ export type Database = {
         Returns: undefined
       }
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
+      bixgo_driver_accept: { Args: { p_id: string }; Returns: Json }
+      bixgo_driver_advance: {
+        Args: { p_id: string; p_status: string }
+        Returns: Json
+      }
+      bixgo_driver_jobs: { Args: never; Returns: Json }
       bixgo_driver_set_online: { Args: { p_online: boolean }; Returns: boolean }
       bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
