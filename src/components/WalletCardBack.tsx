@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { getBixPay } from '@/lib/bixlink.functions';
 
 /** Back face of the wallet balance card: personal BIX PAY QR, member code and account ID. */
-export function WalletCardBack({ userId, onFlip }: { userId?: string; onFlip: () => void }) {
+export function WalletCardBack({ userId, onFlip }: { userId?: string | undefined; onFlip: () => void }) {
   const fetchPay = useServerFn(getBixPay);
   const { data } = useQuery({ queryKey: ['bix-pay', userId], queryFn: () => fetchPay(), enabled: !!userId, staleTime: 60_000 });
   const [copied, setCopied] = useState('');
