@@ -45,6 +45,8 @@ export function AdminBixtrade({ initial, onMessage, onSaved }: { initial?: unkno
     <div className="mt-4 grid gap-4 text-xs">
       <label className="flex items-center justify-between gap-3"><span><b>Open BIXTrade page</b><br/><span className="text-muted-foreground">When closed, members see “Under Reconstruction”.</span></span>
         <Switch checked={s.enabled} disabled={busy} onCheckedChange={v => submit({ ...s, enabled: v })}/></label>
+      <label className="flex items-center justify-between gap-3"><span><b>Public showcase only</b><br/><span className="text-muted-foreground">Members see only the AI bot engine; deposit, withdraw and plan stay hidden (kept here).</span></span>
+        <Switch checked={s.showcaseOnly} disabled={busy} onCheckedChange={v => submit({ ...s, showcaseOnly: v })}/></label>
       {sw('depositOpen', 'Enable bot deposit')}
       {sw('withdrawOpen', 'Enable bot withdrawal')}
       <div className="grid gap-3 sm:grid-cols-2">

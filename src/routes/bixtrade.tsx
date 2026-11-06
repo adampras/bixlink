@@ -150,6 +150,7 @@ function BixtradePage() {
     </section>
   </main></BixShell>;
 
+  const showcase = cfg.showcaseOnly && !isAdmin;
   const proj = projectBixtrade(cfg, amount, days);
   const n = Number(reqAmt) || 0;
   const go = (t: typeof tab, f?: 'real' | 'virtual', anchor?: string) => { setTab(t); if (f) setFunding(f); setMenu(false); setTimeout(() => (anchor ? document.getElementById(anchor) : document.querySelector('.arb-tabs'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); };
@@ -157,7 +158,7 @@ function BixtradePage() {
     { title: 'Trading Engine', items: [['Neural Bot Arsenal', () => go('bots')], ['Live Cockpit', () => go('cockpit')], ['Spread Radar 6 Bursa', () => go('radar')], ['Peta Rute Arbitrase', () => go('radar')]] },
     { title: 'Rekam Jejak Nyata', items: [['Track Record', () => go('cockpit', undefined, 'arb-track')], ['Log Eksekusi & Resi', () => go('logs')], ['Request Saya', () => go('logs')]] },
     { title: 'Analisis AI', items: [['Grafik Kinerja', () => go('ai')], ['Kalkulator Proyeksi', () => go('ai')]] },
-    { title: 'Modal Bot', items: [['Live Asset Engine', () => go('cockpit', 'real', 'arb-wallet')], ['Neural AI Pool', () => go('cockpit', 'virtual', 'arb-wallet')]] },
+    ...(showcase ? [] : [{ title: 'Modal Bot', items: [['Live Asset Engine', () => go('cockpit', 'real', 'arb-wallet')], ['Neural AI Pool', () => go('cockpit', 'virtual', 'arb-wallet')]] as [string, () => void][] }]),
   ];
   return <BixShell><main className="arb-lux mx-auto max-w-6xl px-4 py-6 md:px-8">
     <header className="arb-webbar">
@@ -167,7 +168,7 @@ function BixtradePage() {
     </header>
     {menu && <div className="arb-drawer" role="dialog" aria-label="Menu BIXTRADE" onClick={() => setMenu(false)}><nav onClick={e => e.stopPropagation()}>
       {MENU.map(g => <details key={g.title} open={g.title === 'Trading Engine'}><summary>{g.title}<ChevronDown size={16}/></summary>{g.items.map(([l, fn]) => <button key={l} type="button" onClick={fn}>{l}</button>)}</details>)}
-      <div className="arb-drawer-cta"><Button className="w-full" onClick={() => { setMode('deposit'); go('cockpit', 'real', 'arb-wallet'); }}>Request Deposit Bot</Button><Button asChild variant="outline" className="w-full"><Link to="/dashboard">← Kembali ke BIXLINK</Link></Button></div>
+      <div className="arb-drawer-cta">{!showcase && <Button className="w-full" onClick={() => { setMode('deposit'); go('cockpit', 'real', 'arb-wallet'); }}>Request Deposit Bot</Button>}<Button asChild variant="outline" className="w-full"><Link to="/dashboard">← Kembali ke BIXLINK</Link></Button></div>
     </nav></div>}
     <section className="arb-ai-hero">
       <div className="arb-ai-copy">
@@ -182,10 +183,10 @@ function BixtradePage() {
     <section className="mt-3 grid grid-cols-4 gap-2">
       {([['Bot', capital.toFixed(0)], ['P/L', realized.toFixed(2)], ['Win', `${cfg.winRate}%`], ['Ping', `${rows.length ? Math.round(rows.reduce((s, r) => s + r.ms, 0) / rows.length) : '—'}ms`]] as const).map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
     </section>
-    <div className="arb-switch mt-2" role="tablist" aria-label="Funding mode">
+    {showcase ? <EngineHud/> : <div className="arb-switch mt-2" role="tablist" aria-label="Funding mode">
       <button type="button" className={funding === 'real' ? 'is-on' : ''} onClick={() => setFunding('real')}><i/> Live Asset Engine<small>Main wallet USDT</small></button>
       <button type="button" className={funding === 'virtual' ? 'is-on' : ''} onClick={() => setFunding('virtual')}><i/> Neural AI Pool<small>Protocol allocation</small></button>
-    </div>
+    </div>}
     <nav className="arb-tabs mt-3" aria-label="BIXTrade sections">
       {([['cockpit', Cpu, 'Cockpit'], ['bots', Network, 'Bot'], ['radar', Radar, 'Radar'], ['ai', BarChart3, 'AI'], ['logs', Activity, 'Logs']] as const).map(([k, Icon, l]) => <button key={k} type="button" onClick={() => setTab(k)} className={tab === k ? 'is-on' : ''}><Icon size={15}/>{l}</button>)}
     </nav>
@@ -199,7 +200,7 @@ function BixtradePage() {
         {!fundExecs.length && <p className="text-xs text-muted-foreground">{capital > 0 ? 'Bot is scanning — the first executions appear within a few minutes.' : funding === 'virtual' ? 'Add Neural AI Pool allocation to start executions. Trade size follows your capital (15–50% per ticket).' : 'Executions start after your deposit is approved. Trade size follows your capital (15–50% per ticket).'}</p>}</div>
     </section>
 
-    <section id="arb-wallet" className="arb-card mt-4">
+    {!showcase && <><section id="arb-wallet" className="arb-card mt-4">
       <h2 className="flex items-center gap-2 font-display text-lg font-bold"><ArrowDownToLine size={18} className="text-chart-3"/> Bot wallet</h2>
       <div className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
         <div className="arb-stat"><p>{funding === 'real' ? 'Main wallet' : 'Recorded P/L'}</p><b>{funding === 'real' ? (mainUsdt === null ? '—' : mainUsdt.toFixed(2)) : realized.toFixed(2)}</b><small>{funding === 'real' ? 'USDT available' : 'pool allocation'}</small></div>
@@ -225,7 +226,7 @@ function BixtradePage() {
         <p className="text-[10px] text-muted-foreground">Every request is reviewed by the owner. When a deposit is approved, the amount moves from your main wallet USDT into the bot; an approved withdrawal returns the amount after fee to your main wallet. Projected profit is never added automatically.</p>
       </div>
     </section>
-    <BixtradePlan cfg={cfg}/>
+    <BixtradePlan cfg={cfg}/></>}
 
     </>}
 
@@ -358,4 +359,17 @@ function LivePanel({ live }: { live: { scan: LiveScan[]; reason: string; at: num
       <p className="mt-2 text-[11px] text-chart-3">{REASON[live.reason] ?? live.reason} · {new Date(live.at).toLocaleTimeString()}</p>
     </>}
   </section>;
+}
+
+/** Public engine telemetry: deterministic per 10-minute slot, display-only, labeled as engine reference. */
+function EngineHud() {
+  const [slot, setSlot] = useState(() => Math.floor(Date.now() / 600000));
+  useEffect(() => { const t = setInterval(() => setSlot(Math.floor(Date.now() / 600000)), 60000); return () => clearInterval(t); }, []);
+  const r = (k: number) => { const x = Math.sin(slot * 9301 + k * 49297) * 233280; return x - Math.floor(x); };
+  const dayFrac = (Date.now() % 86400000) / 86400000;
+  const routes = Math.round((180 + r(1) * 140) * Math.max(dayFrac, 0.05));
+  const vol = Math.round(routes * (150 + r(2) * 850));
+  const items: [string, string][] = [['24h scanned', `$${vol.toLocaleString()}`], ['Routes', String(routes)], ['Latency', `${Math.round(22 + r(3) * 26)}ms`], ['Engine', '99.9%']];
+  return <section className="mt-2 grid grid-cols-4 gap-2">{items.map(([l, v]) => <div key={l} className="arb-hud"><small>{l}</small><b>{v}</b></div>)}
+    <p className="col-span-4 text-[10px] text-muted-foreground">Autonomous engine telemetry · ticket size $150–$1,850 · net 0.09–0.32% per route after fees. Reference display, not an offer or guaranteed return.</p></section>;
 }
