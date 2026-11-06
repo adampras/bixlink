@@ -106,7 +106,7 @@ function CallInner() {
   return <main className="mx-auto max-w-xl px-4 py-5">
     <div className="bc-head">
       <div className="bc-head__search"><FindMember bar me={me} tier={tier} onChat={open}/></div>
-      <ContactQr onChat={open}/>
+      <ContactQr/>
       <CommMenu/>
     </div>
     <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
@@ -566,7 +566,7 @@ function ForwardSheet({ me, msg, onPick, onClose }: { me: string; msg: Msg; onPi
 }
 
 /** My BIX-ID QR + scanner: scanning another member's QR saves them straight into this device's contacts. */
-function ContactQr({ onChat }: { onChat: (id: string, name: string) => void }) {
+function ContactQr() {
   const [open, setOpen] = useState(false);
   const [scan, setScan] = useState(false);
   const [msg, setMsg] = useState('');
@@ -596,7 +596,6 @@ function ContactQr({ onChat }: { onChat: (id: string, name: string) => void }) {
       </div></div>}
     {scan && <QrScanner title="Pindai QR BIX-ID" hint="Arahkan kamera ke QR BIX-ID member" onClose={() => setScan(false)} onResult={raw => void saveFrom(raw)}/>}
   </>;
-  void onChat;
 }
 
 function SavedContacts({ onChat }: { onChat: (id: string, name: string) => void }) {
