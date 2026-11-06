@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { AdminFold } from '@/components/AdminNavigation';
 import { AdminFranchise, AdminPpob } from '@/components/AdminBixgoExtras';
+import { AdminBixgoConsole } from '@/components/AdminBixgoConsole';
 
 export function AdminBixgo({ initial, onMessage, onSaved }: { initial?: unknown; onMessage: (m: string) => void; onSaved?: () => void }) {
   const [s, setS] = useState<BixgoSettings>(() => readBixgo(initial));
@@ -15,7 +16,7 @@ export function AdminBixgo({ initial, onMessage, onSaved }: { initial?: unknown;
   const submit = async (v: BixgoSettings) => { setBusy(true); setS(v); try { await save({ data: { key: 'bixgo', value: v } }); onMessage('BIXGO settings saved.'); onSaved?.(); } catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save BIXGO'); } finally { setBusy(false); } };
   const svc = (k: BixgoService, f: 'baseIdr' | 'perKmIdr', v: number) => setS({ ...s, services: { ...s.services, [k]: { ...s.services[k], [f]: v } } });
   const num = (k: 'commissionPct' | 'bixDiscountPct' | 'usdtIdr', label: string) => <label className="text-xs">{label}<input className="form-input mt-1" type="number" value={s[k]} onChange={e => setS({ ...s, [k]: Number(e.target.value) })}/></label>;
-  return <AdminFold title="BIXGO Super-App" badge={s.enabled ? 'Terbuka' : 'Under reconstruction'}>
+  return <><AdminBixgoConsole s={s} setS={setS} onSave={v => void submit(v)} busy={busy}/><AdminFold title="BIXGO Super-App" badge={s.enabled ? 'Terbuka' : 'Under reconstruction'}>
     <div className="space-y-3 text-sm">
       <label className="flex items-center justify-between"><b>Open BIXGO page</b><Switch checked={s.enabled} disabled={busy} onCheckedChange={v => submit({ ...s, enabled: v })}/></label>
       <label className="block text-xs">Message when closed<input className="form-input mt-1" value={s.notice} maxLength={240} onChange={e => setS({ ...s, notice: e.target.value })}/></label>
@@ -28,5 +29,5 @@ export function AdminBixgo({ initial, onMessage, onSaved }: { initial?: unknown;
       <AdminPpob s={s} setS={setS}/>
       <Button className="w-full" disabled={busy} onClick={() => submit(s)}>Save BIXGO</Button>
     </div>
-  </AdminFold>;
+  </AdminFold></>;
 }
