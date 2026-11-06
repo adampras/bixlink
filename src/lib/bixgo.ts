@@ -36,7 +36,20 @@ export const bixgoSettingsSchema = z.object({
   services: z.object({ ride: svc, car: svc, food: svc, send: svc, mart: svc }).strict(),
   franchises: z.array(franchiseSchema).max(100).optional(),
   ppob: z.object({ enabled: z.boolean(), live: z.boolean(), marginIdr: z.number().min(0).max(100_000) }).strict().optional(),
+  /** Per-city fare multiplier and minimum fare (IDR), owner-managed. */
+  cityPricing: z.record(z.string().max(40), z.object({ mult: z.number().min(0.1).max(10), minIdr: z.number().min(0).max(10_000_000) }).strict()).optional(),
 }).strict();
+
+export const DEFAULT_CITY_PRICING: Record<string, { mult: number; minIdr: number }> = {
+  dubai: { mult: 1.8, minIdr: 120_000 }, singapore: { mult: 1.7, minIdr: 110_000 }, london: { mult: 2.2, minIdr: 160_000 },
+  tokyo: { mult: 2, minIdr: 140_000 }, bali: { mult: 1.1, minIdr: 25_000 }, makassar: { mult: 1, minIdr: 10_000 },
+};
+
+/** Apply the city multiplier and minimum fare to an IDR amount. */
+export function cityFare(s: BixgoSettings, city: string, idr: number) {
+  const p = (s.cityPricing ?? DEFAULT_CITY_PRICING)[city];
+  return p ? Math.max(p.minIdr, Math.round(idr * p.mult)) : idr;
+}
 export type BixgoSettings = z.infer<typeof bixgoSettingsSchema>;
 
 export const DEFAULT_FRANCHISES: BixgoFranchise[] = [
@@ -59,6 +72,7 @@ export const BIXGO_DEFAULTS: BixgoSettings = {
   },
   franchises: DEFAULT_FRANCHISES,
   ppob: { enabled: false, live: false, marginIdr: 1_000 },
+  cityPricing: DEFAULT_CITY_PRICING,
 };
 
 export function readBixgo(v: unknown): BixgoSettings {
