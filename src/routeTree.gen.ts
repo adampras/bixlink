@@ -25,6 +25,7 @@ import { Route as CallRouteImport } from './routes/call'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as ConsortiumVaultRouteImport } from './routes/consortium-vault'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as GoldRouteImport } from './routes/gold'
 import { Route as LeaderControlRouteImport } from './routes/leader-control'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as MarketingRouteImport } from './routes/marketing'
@@ -138,6 +139,11 @@ const ConsortiumVaultRoute = ConsortiumVaultRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoldRoute = GoldRouteImport.update({
+  id: '/gold',
+  path: '/gold',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderControlRoute = LeaderControlRouteImport.update({
@@ -330,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/coming-soon': typeof ComingSoonRoute
   '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
+  '/gold': typeof GoldRoute
   '/leader-control': typeof LeaderControlRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
@@ -382,6 +389,7 @@ export interface FileRoutesByTo {
   '/coming-soon': typeof ComingSoonRoute
   '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
+  '/gold': typeof GoldRoute
   '/leader-control': typeof LeaderControlRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
@@ -435,6 +443,7 @@ export interface FileRoutesById {
   '/coming-soon': typeof ComingSoonRoute
   '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
+  '/gold': typeof GoldRoute
   '/leader-control': typeof LeaderControlRoute
   '/market': typeof MarketRoute
   '/marketing': typeof MarketingRoute
@@ -489,6 +498,7 @@ export interface FileRouteTypes {
     | '/coming-soon'
     | '/consortium-vault'
     | '/dashboard'
+    | '/gold'
     | '/leader-control'
     | '/market'
     | '/marketing'
@@ -541,6 +551,7 @@ export interface FileRouteTypes {
     | '/coming-soon'
     | '/consortium-vault'
     | '/dashboard'
+    | '/gold'
     | '/leader-control'
     | '/market'
     | '/marketing'
@@ -593,6 +604,7 @@ export interface FileRouteTypes {
     | '/coming-soon'
     | '/consortium-vault'
     | '/dashboard'
+    | '/gold'
     | '/leader-control'
     | '/market'
     | '/marketing'
@@ -646,6 +658,7 @@ export interface RootRouteChildren {
   ComingSoonRoute: typeof ComingSoonRoute
   ConsortiumVaultRoute: typeof ConsortiumVaultRoute
   DashboardRoute: typeof DashboardRoute
+  GoldRoute: typeof GoldRoute
   LeaderControlRoute: typeof LeaderControlRoute
   MarketRoute: typeof MarketRoute
   MarketingRoute: typeof MarketingRoute
@@ -794,6 +807,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gold': {
+      id: '/gold'
+      path: '/gold'
+      fullPath: '/gold'
+      preLoaderRoute: typeof GoldRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leader-control': {
@@ -1054,6 +1074,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComingSoonRoute: ComingSoonRoute,
   ConsortiumVaultRoute: ConsortiumVaultRoute,
   DashboardRoute: DashboardRoute,
+  GoldRoute: GoldRoute,
   LeaderControlRoute: LeaderControlRoute,
   MarketRoute: MarketRoute,
   MarketingRoute: MarketingRoute,

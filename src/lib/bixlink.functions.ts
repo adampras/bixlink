@@ -1,4 +1,5 @@
 import { bixgoSettingsSchema } from '@/lib/bixgo';
+import { bixGoldSchema } from '@/lib/bix-gold';
 import { bixtradeSettingsSchema } from '@/lib/bixtrade';
 import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
@@ -220,11 +221,12 @@ export const setPackageEnabled = createServerFn({ method: 'POST' }).middleware([
   });
 
 export const updateSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token' | 'booster_withdraw' | 'mining' | 'mining_visibility' | 'mining_conversion' | 'splash' | 'member_shop' | 'vip_tiers' | 'bixtrade' | 'bixgo'; value: Record<string, unknown> }) => {
-    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token','booster_withdraw','mining','mining_visibility','mining_conversion','splash','member_shop','vip_tiers','bixtrade','bixgo']), value: z.record(z.string(), z.unknown()) }).parse(data);
+  .inputValidator((data: { key: 'booster' | 'booster_visual' | 'referrals' | 'wallet' | 'swap' | 'bix_market' | 'bix_pay' | 'landing_content' | 'usdt_transfer' | 'unstake' | 'readiness' | 'bix_token' | 'booster_withdraw' | 'mining' | 'mining_visibility' | 'mining_conversion' | 'splash' | 'member_shop' | 'vip_tiers' | 'bixtrade' | 'bixgo' | 'bix_gold'; value: Record<string, unknown> }) => {
+    const parsed = z.object({ key: z.enum(['booster','booster_visual','referrals','wallet','swap','bix_market','bix_pay','landing_content','usdt_transfer','unstake','readiness','bix_token','booster_withdraw','mining','mining_visibility','mining_conversion','splash','member_shop','vip_tiers','bixtrade','bixgo','bix_gold']), value: z.record(z.string(), z.unknown()) }).parse(data);
     if (parsed.key === 'vip_tiers') parsed.value = z.object({ tiers: z.array(z.object({ level: z.number().int().min(1).max(10), targetUsd: z.number().positive().max(1_000_000_000), rewardBix: z.number().positive().max(10_000_000) }).strict()).min(1).max(10).refine(t => new Set(t.map(x => x.level)).size === t.length, 'Each VIP level must be unique') }).strict().parse(parsed.value);
     if (parsed.key === 'bixtrade') parsed.value = bixtradeSettingsSchema.parse(parsed.value);
     if (parsed.key === 'bixgo') parsed.value = bixgoSettingsSchema.parse(parsed.value);
+    if (parsed.key === 'bix_gold') parsed.value = bixGoldSchema.parse(parsed.value);
     if (parsed.key === 'mining_conversion') parsed.value = miningConversionSchema.parse(parsed.value);
     if (parsed.key === 'splash') parsed.value = splashSettingsSchema.parse(parsed.value);
     if (parsed.key === 'mining_visibility') parsed.value = miningVisibilitySchema.parse(parsed.value);

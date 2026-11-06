@@ -1,0 +1,1 @@
+CREATE POLICY "Public bix gold settings" ON public.app_settings FOR SELECT TO anon, authenticated USING (key = 'bix_gold');
