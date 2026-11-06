@@ -78,6 +78,9 @@ export const BIXGO_DEFAULTS: BixgoSettings = {
 export function readBixgo(v: unknown): BixgoSettings {
   const o = (v && typeof v === 'object' ? v : {}) as Partial<BixgoSettings>;
   const merged = { ...BIXGO_DEFAULTS, ...o, services: { ...BIXGO_DEFAULTS.services, ...(o.services ?? {}) }, ppob: { ...BIXGO_DEFAULTS.ppob!, ...(o.ppob ?? {}) } };
+  const have = new Set((merged.franchises ?? []).map(f => f.id));
+  merged.franchises = [...(merged.franchises ?? []), ...DEFAULT_FRANCHISES.filter(f => !have.has(f.id))];
+  merged.cityPricing = { ...DEFAULT_CITY_PRICING, ...(o.cityPricing ?? {}) };
   const r = bixgoSettingsSchema.safeParse(merged);
   return r.success ? r.data : BIXGO_DEFAULTS;
 }
