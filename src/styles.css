@@ -6661,3 +6661,67 @@ html[data-color-mode="light"] .profit-page .profit-withdraw__amounts div { backg
 
 /* Restored: champagne gold edges + mint profit across Stake/Wallet/Profit/Network */
 :is(.stake-compact,.obsidian-page,.network-explorer,.profit-page) { --obs-gold:#f5c451; --obs-gold-line:rgba(245,196,81,.45); }
+
+/* ===== Toska Neon + Gold Sovereign (final unified skin: Wallet/Stake/Network/Profit) ===== */
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page){
+  --tg-bg:#070b10; --tg-card:rgba(12,20,26,.82); --tg-card-2:rgba(16,28,34,.9);
+  --tg-teal:#2ee6c5; --tg-teal-soft:rgba(46,230,197,.38); --tg-gold:#f7cf5a; --tg-gold-hi:#ffe9a3; --tg-gold-line:rgba(247,207,90,.5);
+  --tg-text:#f3f6f8; --tg-muted:#9fb3b8;
+  font-family:var(--font-sans) !important; color:var(--tg-text);
+}
+html:not([data-color-mode="light"]) :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page){
+  background:radial-gradient(120% 60% at 50% 0%,rgba(46,230,197,.08),transparent 60%),radial-gradient(90% 50% at 100% 100%,rgba(247,207,90,.06),transparent 60%),var(--tg-bg) !important;
+}
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(h1,h2,h3,.font-display,.stake-lux-title,.stake-lux-name,.duration-package h3){
+  font-family:var(--font-display) !important; font-weight:800; letter-spacing:-.01em;
+}
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.numeric,dd,b,strong,.duration-price,.stake-lux-price,.stake-pool-value){
+  font-family:var(--font-display) !important; font-variant-numeric:tabular-nums lining-nums; letter-spacing:0;
+}
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(dt,.duration-label,.stake-metric dt,.lux-ledger span){
+  font-family:var(--font-sans) !important; font-size:10.5px !important; font-weight:700; letter-spacing:.1em !important; text-transform:uppercase; color:var(--tg-muted) !important;
+}
+/* cards: glass + neon teal edge + gold top line */
+html:not([data-color-mode="light"]) :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-package,.stake-metric,.lux-ledger,.profit-metric,.profit-withdraw,.network-metric,.network-card,.glass-card,.terminal-card,.rounded-2xl.border,.rounded-xl.border):not(.wallet-summary):not(.wallet-summary *){
+  background:linear-gradient(180deg,var(--tg-card-2),var(--tg-card)) !important;
+  border:1px solid var(--tg-teal-soft) !important;
+  box-shadow:inset 0 1px 0 var(--tg-gold-line),0 0 0 1px rgba(46,230,197,.06),0 0 18px -6px rgba(46,230,197,.45),0 14px 30px -18px rgba(0,0,0,.8) !important;
+  backdrop-filter:blur(10px);
+}
+html:not([data-color-mode="light"]) :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-package,.profit-metric--total,.profit-withdraw){
+  border-color:var(--tg-gold-line) !important;
+  box-shadow:inset 0 1px 0 rgba(255,233,163,.35),0 0 22px -8px rgba(247,207,90,.5),0 14px 30px -18px rgba(0,0,0,.8) !important;
+}
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-package,.stake-metric,.profit-metric){ transition:box-shadow .25s,border-color .25s; }
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-package,.stake-metric,.profit-metric):active{ border-color:var(--tg-teal) !important; }
+/* number colors: white main, gold headline values, teal yields */
+html:not([data-color-mode="light"]) :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(dd,b,strong):not(.wallet-summary *){ color:var(--tg-text); }
+html:not([data-color-mode="light"]) :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-price,.stake-lux-price,.lux-ledger-total b,.profit-metric--total strong,.stake-pool-value){
+  color:var(--tg-gold) !important; text-shadow:0 0 14px rgba(247,207,90,.35);
+}
+html:not([data-color-mode="light"]) :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-apy,.duration-yield dd,.profit-metric--daily strong,.profit-metric--usdt strong,.text-chart-2){
+  color:var(--tg-teal) !important;
+}
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) .stake-lux-title,
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) h1{
+  background:linear-gradient(100deg,var(--tg-gold-hi),var(--tg-gold) 45%,var(--tg-teal));
+  -webkit-background-clip:text; background-clip:text; color:transparent !important;
+}
+/* buttons */
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-stake,.profit-withdraw button[type="submit"]){
+  background:linear-gradient(135deg,var(--tg-gold-hi),var(--tg-gold) 55%,#d9a521) !important; color:#14100a !important;
+  border:0 !important; font-family:var(--font-display) !important; font-weight:800; box-shadow:0 0 18px -4px rgba(247,207,90,.6) !important;
+}
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-option,.stake-mode button,.stake-pick-chip){
+  border:1px solid var(--tg-teal-soft) !important; font-family:var(--font-display) !important;
+}
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-option[aria-pressed="true"],.duration-option[data-active="true"],.stake-mode button[aria-pressed="true"],.stake-pick-chip[aria-pressed="true"]){
+  background:rgba(46,230,197,.14) !important; border-color:var(--tg-teal) !important; color:var(--tg-teal) !important; box-shadow:0 0 12px -2px rgba(46,230,197,.55) !important;
+}
+/* light mode: pearl titanium */
+html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page){ background:linear-gradient(180deg,#f7fbfa,#eef3f2) !important; --tg-text:#0f1a1d; --tg-muted:#4b6066; }
+html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-package,.stake-metric,.lux-ledger,.profit-metric,.profit-withdraw):not(.wallet-summary){
+  background:#fff !important; border:1px solid rgba(13,148,136,.4) !important; box-shadow:inset 0 2px 0 rgba(202,138,4,.45),0 8px 20px -14px rgba(13,60,60,.35) !important;
+}
+html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-price,.stake-lux-price,.lux-ledger-total b,.profit-metric--total strong){ color:#a16207 !important; text-shadow:none; }
+html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(.duration-apy,.duration-yield dd,.profit-metric--daily strong,.profit-metric--usdt strong){ color:#0f766e !important; }
