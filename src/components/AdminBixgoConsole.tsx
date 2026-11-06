@@ -52,6 +52,7 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
             {b.status === 'pending' && <Button size="sm" disabled={!e.driver_name.trim()} onClick={() => update(b, { status: 'assigned', driver_name: e.driver_name.trim(), driver_phone: e.driver_phone.trim(), plate: e.plate.trim(), ...(e.driver_user_id ? { driver_user_id: e.driver_user_id } : {}) })}>Assign driver</Button>}
             {b.status === 'assigned' && <Button size="sm" onClick={() => update(b, { status: 'in_transit' })}>Start trip</Button>}
             {b.status === 'in_transit' && <Button size="sm" onClick={() => update(b, { status: 'completed' })}>Complete</Button>}
+            {e.driver_phone?.trim() && <Button size="sm" variant="outline" asChild><a target="_blank" rel="noopener noreferrer" href={`https://wa.me/${e.driver_phone.replace(/\D/g, '').replace(/^0/, '62')}?text=${encodeURIComponent(`BIXGO dispatch #${b.id.slice(0, 8)}\nCity: ${GLOBAL_CITIES.find(c => c.id === b.city)?.city ?? b.city}\nService: ${b.vehicle || b.service}\nPickup: ${b.pickup}\nDrop-off: ${b.dropoff}\nDistance: ${Number(b.km).toFixed(1)} km\nFare: ${money(Number(b.total_idr))} (${b.pay_method})\nPlease confirm / Mohon konfirmasi.`)}`}>WhatsApp driver</a></Button>}
             <Button size="sm" variant="outline" onClick={() => update(b, { status: 'cancelled' })}>Cancel</Button>
           </div></div>; })}
       </div>}
