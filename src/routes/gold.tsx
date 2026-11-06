@@ -39,8 +39,8 @@ function GoldPage() {
   }, []);
   if (!s) return <main className="min-h-screen p-6 text-muted-foreground">Loading…</main>;
   const raw = s;
-  const live = raw.autoPrice && spot;
-  s = live ? { ...raw, priceUsdPerGram: spot.usdPerGram, usdIdr: spot.usdIdr, usdMyr: spot.usdMyr } : raw;
+  const live = raw.autoPrice && spot ? spot : null;
+  s = live ? { ...raw, priceUsdPerGram: live.usdPerGram, usdIdr: live.usdIdr, usdMyr: live.usdMyr } : raw;
   const usd = goldPackageUsd(grams, s);
   return <main className="mx-auto min-h-screen max-w-3xl space-y-6 px-4 pb-28 pt-5">
     <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="size-4"/>Back</Link>
@@ -60,7 +60,7 @@ function GoldPage() {
       <div className="mt-5 grid grid-cols-3 gap-2 text-center tabular-nums">
         {[['USD/g', fmt(s.priceUsdPerGram, 'USD')], ['IDR/g', fmt(s.priceUsdPerGram * s.usdIdr, 'IDR', 0)], ['MYR/g', fmt(s.priceUsdPerGram * s.usdMyr, 'MYR')]].map(([k, v]) => <div key={k} className="rounded-2xl border border-border p-3"><span className="block text-[10px] text-muted-foreground">{k}</span><strong className="text-sm">{s.priceUsdPerGram ? v : '—'}</strong></div>)}
       </div>
-      <p className="mt-2 text-[10px] text-muted-foreground">{live ? `Live spot 24K · auto-updated daily · ${new Date(spot.updatedAt).toLocaleString()}` : 'Owner reference price'}</p>
+      <p className="mt-2 text-[10px] text-muted-foreground">{live ? `Live spot 24K · auto-updated daily · ${new Date(live.updatedAt).toLocaleString()}` : 'Owner reference price'}</p>
       </div>
     </section>
 
