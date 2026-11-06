@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router';
-import { QrCode, Wallet, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
+import { QrCode, Wallet, ShieldCheck, ChevronDown } from 'lucide-react';
+import { BixgoRegionPicker } from '@/components/BixgoRegionPicker';
 import logo from '@/assets/bixlink-logo-gold.webp';
 import { FEATURED_CITY_IDS } from '@/lib/bixgo-regions';
 import { GLOBAL_CITIES, GLOBAL_CURRENCIES, formatMoney, type GlobalCurrency } from '@/lib/bixgo-global';
@@ -8,6 +10,7 @@ import { cityFare, bixgoFare, type BixgoSettings } from '@/lib/bixgo';
 /** BIXGO hero in the BIXLINK obsidian / gold / teal identity: city switcher, currency and a live sample fare. */
 export function BixgoHero({ cfg, city, cur, onCity, onCur, isAdmin }: { cfg: BixgoSettings; city: string; cur: GlobalCurrency; onCity: (id: string) => void; onCur: (c: GlobalCurrency) => void; isAdmin: boolean }) {
   const c = GLOBAL_CITIES.find(x => x.id === city) ?? GLOBAL_CITIES[0]!;
+  const [pick, setPick] = useState(false);
   const sample = cityFare(cfg, city, bixgoFare(cfg, 'car', 10).idr * 1.8);
   return <section className="bixgo-hero relative mx-3 mt-3 overflow-hidden rounded-3xl p-4">
     <div className="bixgo-hero-grid pointer-events-none absolute inset-0"/>
@@ -21,7 +24,13 @@ export function BixgoHero({ cfg, city, cur, onCity, onCur, isAdmin }: { cfg: Bix
     </div>
     <h1 className="relative mt-4 font-display text-2xl font-black leading-tight">Move anywhere.<br/><span className="bixgo-hero-gold">Pay in BIX.</span></h1>
     <p className="relative mt-1 text-xs text-muted-foreground">Executive rides, airport transfers and travel eSIM for BIXLINK members in {c.city}, {c.province} · {c.country}.</p>
-    <div className="no-scrollbar relative mt-3 flex gap-1.5 overflow-x-auto">{[c, ...FEATURED_CITY_IDS.filter(id => id !== c.id).map(id => GLOBAL_CITIES.find(g => g.id === id)!)].filter((g): g is NonNullable<typeof g> => !!g).map(x => <button key={x.id} onClick={() => onCity(x.id)} className={`bixgo-hero-chip shrink-0 rounded-full px-3 py-1.5 text-[11px] ${x.id === city ? 'is-on font-bold' : ''}`}>{x.city}</button>)}</div>
+    <button onClick={() => setPick(true)} className="bixgo-hero-chip is-on relative mt-3 flex w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-left">
+      <span className="text-xl">{c.cc === 'MY' ? '🇲🇾' : '🇮🇩'}</span>
+      <span className="min-w-0 flex-1"><span className="block text-[10px] uppercase tracking-widest text-muted-foreground">Country · Province · City</span><b className="block truncate text-sm">{c.country} · {c.province} · {c.city}</b></span>
+      <ChevronDown className="h-4 w-4"/>
+    </button>
+    {pick && <BixgoRegionPicker city={city} onCity={onCity} onClose={() => setPick(false)}/>}
+    <div className="no-scrollbar relative mt-2 flex gap-1.5 overflow-x-auto">{[c, ...FEATURED_CITY_IDS.filter(id => id !== c.id).map(id => GLOBAL_CITIES.find(g => g.id === id)!)].filter((g): g is NonNullable<typeof g> => !!g).map(x => <button key={x.id} onClick={() => onCity(x.id)} className={`bixgo-hero-chip shrink-0 rounded-full px-3 py-1.5 text-[11px] ${x.id === city ? 'is-on font-bold' : ''}`}>{x.city}</button>)}</div>
     <div className="relative mt-3 grid grid-cols-[1fr_auto] items-end gap-2 rounded-2xl bixgo-hero-panel p-3">
       <div><p className="text-[10px] uppercase tracking-wider text-muted-foreground">BIX Black · 10 km · {c.city}</p><p className="bixgo-hero-gold font-display text-xl font-black tabular-nums">{formatMoney(sample, cur, cfg.usdtIdr)}</p></div>
       <div className="flex gap-1">{GLOBAL_CURRENCIES.map(x => <button key={x.code} onClick={() => onCur(x.code)} className={`bixgo-hero-chip rounded-md px-1.5 py-1 text-[10px] ${cur === x.code ? 'is-on font-bold' : ''}`}>{x.code}</button>)}</div>
