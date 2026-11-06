@@ -9,6 +9,7 @@ import { ArrowLeft, Bike, Car, CheckCircle2, Construction, History, MapPin, Minu
 import { toast } from 'sonner';
 import { BixgoRideBooking } from '@/components/BixgoRideBooking';
 import { BixgoBills } from '@/components/BixgoBills';
+import { BixgoHero } from '@/components/BixgoHero';
 import { BixgoTravel } from '@/components/BixgoTravel';
 import { GLOBAL_CITIES, GLOBAL_CURRENCIES, cryptoEquivalent, formatMoney, readCurrency, saveCurrency, type GlobalCurrency } from '@/lib/bixgo-global';
 import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
@@ -132,8 +133,9 @@ function BixgoPage() {
     </div>}
     {sub === 'travel' && <BixgoTravel cur={cur} usdtIdr={cfg.usdtIdr} onBack={() => setSub(null)}/>}
     {sub === 'bills' && <BixgoBills onBack={() => setSub(null)}/>}
-    {(sub === 'ride' || sub === 'car') && <BixgoRideBooking cfg={cfg} start={sub} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
+    {(sub === 'ride' || sub === 'car') && <BixgoRideBooking cfg={cfg} start={sub} cur={cur} city={city} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
     {!sub && <>
+    {view === 'home' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
     {view === 'home' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
     {view === 'inbox' && <BixgoInbox/>}
     {view === 'account' && <BixgoAccount name={memberName} balance="View balance" onBack={() => go('home')} onSoon={soon}/>}

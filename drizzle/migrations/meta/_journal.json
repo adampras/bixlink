@@ -1079,6 +1079,13 @@
       "when": 1793884248666,
       "tag": "0153_bix_groups",
       "breakpoints": true
+    },
+    {
+      "idx": 154,
+      "version": "7",
+      "when": 1793948516576,
+      "tag": "0154_bixgo_bookings",
+      "breakpoints": true
     }
   ]
 }

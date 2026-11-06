@@ -1,11 +1,12 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { ClientOnly } from '@tanstack/react-router';
 import { ArrowLeft, Bike, CalendarClock, CarFront, CheckCircle2, Crosshair, Info, Loader2, MapPin, MoreHorizontal, Search, Store, Users } from 'lucide-react';
-import { bixgoFare, franchiseFor, haversineKm, splitCommission, type BixgoSettings } from '@/lib/bixgo';
+import { supabase } from '@/integrations/supabase/client';
+import { formatMoney, cryptoEquivalent, type GlobalCurrency } from '@/lib/bixgo-global';
+import { bixgoFare, cityFare, franchiseFor, haversineKm, splitCommission, type BixgoSettings } from '@/lib/bixgo';
 import { getDevicePosition, reverseGeocode, roadRoute, searchPlaces, type Place } from '@/lib/geo';
 
 const BixgoLiveMap = lazy(() => import('@/components/BixgoLiveMap'));
-const idr = (n: number) => 'Rp' + Math.round(n).toLocaleString('id-ID');
 type Opt = { name: string; svc: 'ride' | 'car'; mult: number; seats: number; tag?: string };
 const OPTS: Opt[] = [
   { name: 'Car Standard', svc: 'car', mult: 1, seats: 4 },
@@ -17,7 +18,7 @@ const OPTS: Opt[] = [
 const PAYS = ['QRIS', 'BIX PAY', 'Tunai'];
 
 /** Pickup + vehicle selection on a real map with device GPS and real road distance. Booking itself is still a preview: no driver dispatch or payment. */
-export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoSettings; start: 'ride' | 'car'; onBack: () => void; onBooked: (o: { svc: 'ride' | 'car'; from: string; to: string; total: number; pay: string; name: string }) => void }) {
+export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'USD', city = '' }: { cfg: BixgoSettings; cur?: GlobalCurrency; city?: string; start: 'ride' | 'car'; onBack: () => void; onBooked: (o: { svc: 'ride' | 'car'; from: string; to: string; total: number; pay: string; name: string }) => void }) {
   const [stage, setStage] = useState<'pickup' | 'choose' | 'booked'>('pickup');
   const [active, setActive] = useState<'from' | 'to'>('from');
   const [from, setFrom] = useState<Place | null>(null);
@@ -29,6 +30,8 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoS
   const [route, setRoute] = useState<{ km: number; min: number | null; path: [number, number][] | null; road: boolean } | null>(null);
   const [sel, setSel] = useState(OPTS.findIndex(o => o.svc === start));
   const [pay, setPay] = useState(0);
+  const idr = (n: number) => formatMoney(n, money, cfg.usdtIdr);
+  const [ref, setRef] = useState('');
 
   const locate = async () => {
     setBusy('gps'); setErr('');
@@ -53,7 +56,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoS
 
   const km = route?.km ?? 0;
   const branch = from ? franchiseFor(cfg, from) : null;
-  const price = (o: Opt) => { const base = bixgoFare(cfg, o.svc, km).idr * o.mult; const disc = pay === 1 ? base * cfg.bixDiscountPct / 100 : 0; return { base, final: base - disc }; };
+  const price = (o: Opt) => { const base = cityFare(cfg, city, bixgoFare(cfg, o.svc, km).idr * o.mult); const disc = pay === 1 ? base * cfg.bixDiscountPct / 100 : 0; return { base, final: base - disc }; };
   const eta = (o: Opt) => route?.min != null ? Math.round(route.min * (o.svc === 'ride' ? 0.85 : 1)) : bixgoFare(cfg, o.svc, km).etaMin;
   const cur = OPTS[sel]!;
   const commission = Math.round(price(cur).final * cfg.commissionPct / 100);
@@ -106,9 +109,9 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoS
     </section>}
 
     {stage === 'booked' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-4 pt-5 text-center">
-      <CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">Pesanan demo dibuat</h2>
-      <p className="text-sm text-muted-foreground">{cur.name} · {from?.name} → {to?.name}</p><p className="mt-1 text-xl font-black">{idr(price(cur).final)}</p>
-      <p className="mt-2 text-[11px] text-muted-foreground">Real location & distance, but booking is still in preview — no driver dispatched and no payment.</p>
+      <CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">{ref ? `Booking request #${ref} sent` : 'Demo booking created'}</h2>
+      <p className="text-sm text-muted-foreground">{cur.name} · {from?.name} → {to?.name}</p><p className="mt-1 text-xl font-black">{idr(price(cur).final)}</p><p className="text-[11px] text-muted-foreground tabular-nums">≈ {cryptoEquivalent(price(cur).final, cfg.usdtIdr).usdt} USDT · {cryptoEquivalent(price(cur).final, cfg.usdtIdr).bix} BIX</p>
+      <p className="mt-2 text-[11px] text-muted-foreground">{ref ? 'The BIXGO operator will assign a driver. No payment is taken in the app; pay the driver directly.' : 'Sign in to send a real request to the operator. Nothing was charged.'}</p>
       <button onClick={onBack} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground">Back to Home</button>
     </section>}
 
@@ -119,7 +122,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked }: { cfg: BixgoS
       </div>
       <div className="mt-2 flex gap-2">
         <button aria-label="Jadwalkan" className="grid h-12 w-14 place-items-center rounded-full bg-card"><CalendarClock className="h-5 w-5"/></button>
-        <button onClick={() => { onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total: Math.round(price(cur).final), pay: PAYS[pay]!, name: cur.name }); setStage('booked'); }} className="flex-1 rounded-full bg-primary py-3 text-base font-bold text-primary-foreground">Pesan {cur.name}</button>
+        <button disabled={busy === 'book'} onClick={async () => { const total = Math.round(price(cur).final); setBusy('book'); const { data: u } = await supabase.auth.getUser(); if (u.user) { const { data, error } = await supabase.from('bixgo_bookings').insert({ city, service: cur.svc, vehicle: cur.name, pickup: (from?.name ?? '').slice(0, 200), dropoff: (to?.name ?? '').slice(0, 200), km: +km.toFixed(2), total_idr: total, pay_method: PAYS[pay]! }).select('id').single(); if (error) { setErr(error.message); setBusy(null); return; } setRef(data.id.slice(0, 8).toUpperCase()); } setBusy(null); onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total, pay: PAYS[pay]!, name: cur.name }); setStage('booked'); }} className="flex-1 rounded-full bg-primary py-3 text-base font-bold text-primary-foreground">Book {cur.name}</button>
       </div>
     </footer>}
   </div>;
