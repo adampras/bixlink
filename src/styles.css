@@ -6883,3 +6883,29 @@ html .stake-compact dl.hud-scan > .stake-metric + .stake-metric{border-left:1px 
 @keyframes ecoRingIn{from{opacity:0;scale:.4}to{opacity:1;scale:1}}
 @keyframes ecoSheen{0%,100%{background-position:0 0}50%{background-position:100% 0}}
 @media (prefers-reduced-motion:reduce){.eco-warp,.eco-flare{display:none}}
+
+/* BIX CALL signed-out gate — full-screen cyber obsidian */
+.bcg{position:relative;min-height:100dvh;display:grid;place-items:center;padding:72px 18px 40px;overflow:hidden;color:#f0fdfa;background:radial-gradient(90% 55% at 50% 18%,rgb(20 184 166 / .28),transparent 62%),radial-gradient(70% 45% at 85% 100%,rgb(255 215 0 / .1),transparent 65%),radial-gradient(60% 40% at 0% 80%,rgb(168 85 247 / .12),transparent 65%),#030807}
+.bcg-stars{position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20% 30%,#ccfbf1 50%,transparent),radial-gradient(1px 1px at 70% 15%,#fff 50%,transparent),radial-gradient(1.5px 1.5px at 85% 60%,#5eead4 50%,transparent),radial-gradient(1px 1px at 35% 80%,#ffd700 50%,transparent),radial-gradient(1px 1px at 55% 45%,#fff 50%,transparent);opacity:.55;animation:bcgTw 6s ease-in-out infinite alternate}
+@keyframes bcgTw{to{opacity:.2}}
+.bcg-wave{position:absolute;left:0;right:0;bottom:8%;height:90px;display:flex;align-items:center;justify-content:center;gap:5px;opacity:.28;pointer-events:none}
+.bcg-wave i{width:3px;border-radius:3px;background:linear-gradient(#5eead4,#ffd700);animation:bcgWave 1.3s ease-in-out infinite alternate}
+@keyframes bcgWave{from{transform:scaleY(.3)}to{transform:scaleY(1)}}
+.bcg-back{position:absolute;top:18px;left:16px;z-index:3;display:inline-flex;gap:6px;align-items:center;padding:8px 14px;border-radius:999px;font-size:12px;letter-spacing:.08em;color:#ccfbf1;background:rgb(8 22 21 / .6);border:1px solid rgb(45 212 191 / .3);backdrop-filter:blur(12px)}
+.bcg-card{position:relative;z-index:2;width:100%;max-width:24rem;text-align:center;padding:28px 22px 24px;border-radius:28px;background:linear-gradient(160deg,rgb(10 26 25 / .72),rgb(3 8 7 / .82));border:1px solid rgb(45 212 191 / .28);box-shadow:inset 0 1px 0 rgb(255 215 0 / .25),0 30px 80px rgb(0 0 0 / .6),0 0 60px rgb(45 212 191 / .12);backdrop-filter:blur(18px);animation:bcgIn 1.2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes bcgIn{from{opacity:0;transform:translateY(24px) scale(.96);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+.bcg-orb{position:relative;width:150px;height:150px;margin:-4px auto 10px;display:grid;place-items:center}
+.bcg-orb img{width:128px;height:128px;object-fit:contain;filter:drop-shadow(0 12px 30px rgb(45 212 191 / .45));animation:bcgFloat 5s ease-in-out infinite}
+@keyframes bcgFloat{50%{transform:translateY(-8px) rotate(2deg)}}
+.bcg-ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgb(94 234 212 / .45);border-top-color:#ffd700;animation:bcgSpin 9s linear infinite}
+.bcg-ring-2{inset:14px;border-color:rgb(255 215 0 / .25);border-bottom-color:#5eead4;animation-duration:6s;animation-direction:reverse}
+@keyframes bcgSpin{to{transform:rotate(360deg)}}
+.bcg-title{font-size:2.4rem;font-weight:800;letter-spacing:.06em;line-height:1;background:linear-gradient(100deg,#99f6e4,#2dd4bf 40%,#ffd700 75%,#fff3b0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bcg-sub{margin:10px auto 0;max-width:19rem;font-size:13.5px;line-height:1.5;color:rgb(204 251 241 / .75)}
+.bcg-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:16px 0 20px}
+.bcg-chips span{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;font-size:11px;color:#ccfbf1;background:rgb(45 212 191 / .08);border:1px solid rgb(45 212 191 / .28)}
+.bcg-cta,.bcg-ghost{display:block;width:100%;padding:13px;border-radius:999px;font-weight:700;letter-spacing:.06em;font-size:14px}
+.bcg-cta{color:#1a1200;background:linear-gradient(135deg,#fff3b0,#ffd700 45%,#c9a227);box-shadow:0 10px 30px rgb(255 215 0 / .3),inset 0 1px 0 #fff8}
+.bcg-ghost{margin-top:10px;color:#ccfbf1;background:rgb(255 255 255 / .03);border:1px solid rgb(45 212 191 / .35)}
+.bcg-note{display:block;margin-top:14px;font-size:11px;color:rgb(204 251 241 / .5)}
+@media (prefers-reduced-motion:reduce){.bcg *,.bcg{animation:none!important}}

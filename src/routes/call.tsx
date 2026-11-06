@@ -3,6 +3,7 @@ const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 's
 import { useEffect, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
+import callGateImg from '@/assets/eco/call.png';
 import { startBixCall } from '@/components/BixCall';
 import { BixGroupMeeting } from '@/components/BixGroupMeeting';
 import { BixGroups } from '@/components/BixGroups';
@@ -78,9 +79,27 @@ const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLE
 
 function CallPage() {
   const { user, ready } = useMember();
+  if (ready && !user) return <BixCallGate/>;
   return <BixShell><div className="bixcall-page">
     <MemberGate ready={ready} signedIn={!!user} title="BIX CALL"><CallInner/></MemberGate>
   </div></BixShell>;
+}
+
+function BixCallGate() {
+  return <main className="bcg" aria-label="BIX CALL sign in">
+    <div className="bcg-stars" aria-hidden/>
+    <div className="bcg-wave" aria-hidden>{Array.from({ length: 28 }, (_, n) => <i key={n} style={{ animationDelay: `${(n % 7) * 0.18}s`, height: `${18 + ((n * 37) % 60)}%` }}/>)}</div>
+    <Link to="/" className="bcg-back"><ArrowLeft className="size-4"/>Ecosystem</Link>
+    <section className="bcg-card">
+      <div className="bcg-orb"><i className="bcg-ring"/><i className="bcg-ring bcg-ring-2"/><img src={callGateImg} alt="" width={816} height={816}/></div>
+      <h1 className="bcg-title">BIX CALL</h1>
+      <p className="bcg-sub">Encrypted voice &amp; HD video — private, crystal-clear, community-powered.</p>
+      <div className="bcg-chips"><span><ShieldCheck className="size-3.5"/>Encrypted</span><span><Mic className="size-3.5"/>Studio Voice</span><span><Video className="size-3.5"/>HD Video</span></div>
+      <Link to="/register" className="bcg-cta">Join BIX CALL free</Link>
+      <Link to="/auth" className="bcg-ghost">Sign in</Link>
+      <small className="bcg-note">No deposit needed — just chat and call.</small>
+    </section>
+  </main>;
 }
 
 function CallInner() {
