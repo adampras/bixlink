@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { formatMoney, GLOBAL_CITIES, type GlobalCurrency } from '@/lib/bixgo-global';
 import { DRIVER_SHARE_PCT, driverEarning, nextTier, tierFor } from '@/lib/bixgo-tier';
+import { BixgoDriverJobs } from '@/components/BixgoDriverJobs';
 
 type License = { status: string; online: boolean; vehicle_type: string; vehicle_model: string; plate: string; city: string; operator_note: string; mode: string };
 const VEHICLES = [['moto', 'BIX Moto'], ['urban', 'BIX Urban'], ['executive', 'BIX Executive'], ['black', 'BIX Black']] as const;
@@ -62,7 +63,7 @@ export function BixgoPassport({ cur, usdtIdr, city }: { cur: GlobalCurrency; usd
       <h3 className="flex items-center gap-2 text-sm font-black"><ShieldCheck className="h-4 w-4 text-primary"/>Driver-Partner License</h3>
       {!lic && !tier.driverLicense && <p className="mt-2 text-muted-foreground">Available from Pro Navigator (active staking of $100 or more). Licensed drivers keep {DRIVER_SHARE_PCT}% of each completed fare.</p>}
       {!lic && tier.driverLicense && <div className="mt-2 space-y-2">
-        <p className="text-muted-foreground">Drive yourself or register a fleet driver. You keep {DRIVER_SHARE_PCT}% of completed fares; fares are paid by passengers directly until in-app settlement is enabled.</p>
+        <p className="text-muted-foreground">Drive yourself or register a fleet driver. You keep {DRIVER_SHARE_PCT}% of completed fares; fares are held from the passenger's USDT wallet and settled to you on completion.</p>
         <div className="grid grid-cols-2 gap-1">{VEHICLES.map(([k, l]) => <button key={k} onClick={() => setForm({ ...form, vehicle_type: k })} className={`flex items-center justify-center gap-1 rounded-xl border py-2 ${form.vehicle_type === k ? 'border-primary bg-primary/15 font-bold' : 'border-border'}`}>{k === 'moto' ? <Bike className="h-4 w-4"/> : <CarFront className="h-4 w-4"/>}{l}</button>)}</div>
         <div className="grid grid-cols-2 gap-1">{([['self', 'I drive'], ['fleet', 'Fleet driver']] as const).map(([k, l]) => <button key={k} onClick={() => setForm({ ...form, mode: k })} className={`rounded-xl border py-2 ${form.mode === k ? 'border-primary bg-primary/15 font-bold' : 'border-border'}`}>{l}</button>)}</div>
         {(['full_name', 'phone', 'vehicle_model', 'plate'] as const).map(k => <input key={k} className="form-input" maxLength={80} placeholder={{ full_name: 'Driver full name', phone: 'Phone / WhatsApp', vehicle_model: 'Vehicle model (e.g. Honda Vario)', plate: 'Plate number' }[k]} value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })}/>)}
@@ -74,8 +75,7 @@ export function BixgoPassport({ cur, usdtIdr, city }: { cur: GlobalCurrency; usd
         {lic.status === 'pending' && <p className="text-muted-foreground">Your application is waiting for operator review.</p>}
         {lic.status === 'approved' && <>
           <button disabled={busy} onClick={() => void toggle()} className={`flex w-full items-center justify-center gap-2 rounded-full py-3 font-bold ${lic.online ? 'bg-primary text-primary-foreground' : 'border border-primary text-primary'}`}><Power className="h-4 w-4"/>{lic.online ? 'Driver Mode ON — receiving orders' : 'Go online'}</button>
-          <div className="grid grid-cols-2 gap-2 text-center tabular-nums"><div className="rounded-xl border border-border p-2"><b className="block text-base">{earn.n}</b><span className="text-[10px] text-muted-foreground">Completed trips</span></div><div className="rounded-xl border border-border p-2"><b className="block text-base">{money(driverEarning(earn.fare))}</b><span className="text-[10px] text-muted-foreground">Your {DRIVER_SHARE_PCT}% share</span></div></div>
-          <p className="text-[10px] text-muted-foreground">Earnings are a record of completed fares, not a wallet balance.</p>
+          <BixgoDriverJobs online={lic.online}/>
         </>}
       </div>}
     </div>

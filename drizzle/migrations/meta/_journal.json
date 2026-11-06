@@ -1107,6 +1107,13 @@
       "when": 1793956856717,
       "tag": "0157_bix_gold_public_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 158,
+      "version": "7",
+      "when": 1793958334089,
+      "tag": "0158_bixgo_driver_settlement",
+      "breakpoints": true
     }
   ]
 }
