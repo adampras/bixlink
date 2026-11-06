@@ -6735,6 +6735,7 @@ html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explore
   --stake-muted: oklch(.76 .025 185);
   --stake-mint: oklch(.79 .15 175);
   --stake-cyan: oklch(.68 .12 196);
+  --stake-active: oklch(.79 .15 175);
   --stake-edge: oklch(.75 .12 179 / 55%);
   --stake-rule: oklch(.75 .06 180 / 22%);
   --stake-gold: oklch(.83 .15 88);
@@ -6770,7 +6771,7 @@ html .site-shell .stake-reference .stake-lux-head { padding: 20px 8px; border: 1
 html .site-shell .stake-reference .stake-lux-title { font-size: 23px; line-height: 1.3; color: var(--stake-ink); background: none; font-weight: 800; }
 html .site-shell .stake-reference .stake-lux-title span { color: var(--stake-mint); }
 .stake-reference .stake-summary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-top: 16px; }
-html .site-shell .stake-reference .stake-metric { min-width: 0; min-height: 88px; display: flex; flex-direction: column; justify-content: center; padding: 12px 4px; text-align: center; border: 1px solid var(--stake-edge); border-radius: 8px; background: linear-gradient(130deg,var(--stake-cyan),var(--stake-mint)); box-shadow: var(--stake-glow); }
+html .site-shell .stake-reference .stake-metric { min-width: 0; min-height: 88px; display: flex; flex-direction: column; justify-content: center; padding: 12px 4px; text-align: center; border: 1px solid var(--stake-edge); border-radius: 8px; background: linear-gradient(130deg,var(--stake-cyan),var(--stake-active)); box-shadow: var(--stake-glow); }
 html .site-shell .stake-reference .stake-metric :is(dt,dd) { color: var(--stake-gold-ink); }
 .stake-reference .stake-metric dt { font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .stake-reference .stake-metric dd { font-size: 13px; font-weight: 800; margin-top: 7px; line-height: 1.3; overflow-wrap: anywhere; }
@@ -6780,7 +6781,7 @@ html .site-shell .stake-reference .stake-pick { padding: 0; border: 0; border-ra
 .stake-reference .stake-pick-head > span { min-width: 0; font-size: 11px; color: var(--stake-ink); letter-spacing: 0; }
 .stake-reference .stake-mode { padding: 3px; background: var(--stake-surface); border: 1px solid var(--stake-edge); border-radius: 8px; }
 .stake-reference .stake-mode button { min-height: 40px; padding: 0 11px; color: var(--stake-ink); border-radius: 5px; font-size: 12px; }
-.stake-reference .stake-mode button[aria-pressed="true"] { color: var(--stake-gold-ink); background: linear-gradient(130deg,var(--stake-cyan),var(--stake-mint)); box-shadow: var(--stake-glow); }
+.stake-reference .stake-mode button[aria-pressed="true"] { color: var(--stake-gold-ink); background: linear-gradient(130deg,var(--stake-cyan),var(--stake-active)); box-shadow: var(--stake-glow); }
 .stake-reference .stake-list { gap: 20px; }
 html .site-shell .stake-reference .duration-package { background: var(--stake-surface); color: var(--stake-ink); border: 1px solid var(--stake-edge) !important; border-radius: 8px; box-shadow: inset 0 1px 0 var(--stake-highlight), var(--stake-glow); }
 html .site-shell .stake-reference .duration-package::after { display: none; }
@@ -6792,7 +6793,7 @@ html .site-shell .stake-reference .duration-price { background: linear-gradient(
 html .site-shell .stake-reference .duration-label { font-size: 11px; color: var(--stake-ink); }
 .stake-reference .duration-options { gap: 6px; margin-top: 12px; }
 html .site-shell .stake-reference .duration-option { height: 46px; font-size: 12px; color: var(--stake-ink) !important; background: var(--stake-surface); border: 1px solid var(--stake-edge); border-radius: 6px; box-shadow: none; }
-html .site-shell .stake-reference .duration-option[aria-pressed="true"] { color: var(--stake-gold-ink) !important; background: linear-gradient(130deg,var(--stake-cyan),var(--stake-mint)) !important; border-color: var(--stake-mint) !important; box-shadow: var(--stake-glow); }
+html .site-shell .stake-reference .duration-option[aria-pressed="true"] { color: var(--stake-gold-ink) !important; background: linear-gradient(130deg,var(--stake-cyan),var(--stake-active)) !important; border-color: var(--stake-mint) !important; box-shadow: var(--stake-glow); }
 .stake-reference :is(.duration-yield,.lux-horizon) { display: none; }
 html .site-shell .stake-reference .lux-ledger { display: block; background: transparent; border: 0; border-block: 1px solid var(--stake-edge); border-radius: 0; box-shadow: none; padding: 0; margin-top: 18px; }
 .stake-reference .lux-ledger > i { display: none; }
