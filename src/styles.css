@@ -6602,3 +6602,37 @@ html .site-shell .wallet-summary.wallet-sovereign[data-sov-color="sapphire"] { b
 html .site-shell .wallet-summary.wallet-sovereign[data-sov-color="emerald"] { background: linear-gradient(135deg, oklch(0.4 0.09 160), oklch(0.24 0.06 162) 55%, oklch(0.44 0.1 158)) !important; }
 html .site-shell .wallet-summary.wallet-sovereign[data-sov-color="ruby"] { background: linear-gradient(135deg, oklch(0.4 0.13 18), oklch(0.24 0.09 15) 55%, oklch(0.44 0.14 20)) !important; }
 html .site-shell .obsidian-page .wallet-summary[data-wallet-skin] { background: linear-gradient(135deg, var(--skin-a), var(--skin-b)) !important; }
+
+/* ===== Obsidian Slate (dark) + Alabaster Pearl (light): Wallet / Stake / Network / Profit ===== */
+:root { --obs-card:#141824; --obs-card-2:#1a2030; --obs-line:rgba(226,232,240,.18); --obs-gold-line:rgba(245,208,97,.42); }
+:is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) { background: radial-gradient(120% 60% at 50% 0%, #121722, #090b10 72%); }
+.profit-page :is(.profit-metric,.profit-withdraw,.profit-position,.profit-empty),
+.network-explorer :is(.nx-root-compact,.nx-tabs,.nx-mini > div,.nx-matrix,.nx-plan,.nx-focus,.network-stat,.network-tree-panel,article,li.rounded-xl,.rounded-lg.border) {
+  background: linear-gradient(180deg,#171c29,#10141d) !important;
+  border: 1px solid var(--obs-gold-line) !important; border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255,236,170,.2), 0 0 0 1px rgba(0,0,0,.35), 0 12px 26px -18px rgba(0,0,0,.9) !important; }
+.profit-page .profit-metric--usdt { border-color: rgba(94,234,212,.5) !important; }
+.profit-page .profit-metric--daily { border-color: rgba(94,234,212,.35) !important; }
+.profit-page .profit-withdraw__amounts div { border: 1px solid var(--obs-line) !important; border-radius: 10px; }
+.network-explorer .nx-tabs button[aria-selected="true"] { box-shadow: inset 0 0 0 1px var(--obs-gold) !important; }
+.stake-compact .stake-lux-title { color: #f8fafc !important; }
+
+/* Light mode: same layouts, pearl surfaces, dark ink */
+html[data-color-mode="light"] { --obs-card:#ffffff; --obs-card-2:#f8fafc; --obs-line:#e2e8f0; --obs-gold-line:rgba(180,83,9,.32); --obs-ink:#0f172a; --obs-muted:#64748b; --obs-gold:#b45309; --obs-mint:#0d9488; }
+html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) { background: radial-gradient(120% 60% at 50% 0%, #fffaf0, #f8fafc 72%) !important; color: #0f172a; }
+html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explorer) :is(.auric-card:not(.wallet-summary),.wallet-tile,.vault-swap,.wallet-quick,.wallet-fold,.stake-request,.stake-lux-head,.hud-scan,.duration-package,.stake-pick,.nx-root-compact,.nx-matrix,.nx-plan,.nx-focus,.network-stat,.network-tree-panel,.rounded-2xl.border,.rounded-xl.border,.tx-row),
+html[data-color-mode="light"] .profit-page :is(.profit-metric,.profit-withdraw,.profit-position,.profit-empty),
+html[data-color-mode="light"] .network-explorer :is(.nx-tabs,.nx-mini > div,article,li.rounded-xl,.rounded-lg.border),
+html[data-color-mode="light"] .stake-compact dl.hud-scan > .stake-metric {
+  background: #ffffff !important; border: 1px solid var(--obs-gold-line) !important;
+  box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(15,23,42,.06), 0 10px 24px -16px rgba(120,80,20,.25) !important; color: #0f172a; }
+html[data-color-mode="light"] .stake-compact .duration-package-head { background: linear-gradient(160deg,#fffdf7,#f8f3e6) !important; color: #0f172a !important; border-bottom: 1px solid var(--obs-line); }
+html[data-color-mode="light"] .stake-compact :is(.stake-lux-title,.duration-price,.lux-ledger b,.hud-scan dd,.nx-mini dd) { color: #0f172a !important; }
+html[data-color-mode="light"] .stake-compact .stake-lux-title span { color: var(--obs-gold) !important; }
+html[data-color-mode="light"] .stake-compact :is(.duration-option,.stake-pick-chip) { background: #f1f5f9 !important; color: #475569 !important; border-color: var(--obs-line) !important; }
+html[data-color-mode="light"] .stake-compact .duration-option[aria-pressed="true"] { background: #fff7e6 !important; color: var(--obs-gold) !important; border-color: var(--obs-gold) !important; }
+html[data-color-mode="light"] .stake-compact .lux-ledger { background: #f8fafc !important; }
+html[data-color-mode="light"] .stake-mode { background: #f1f5f9; }
+html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(strong,dd,b,h1,h2,h3):not([class*="text-chart"]):not(.wallet-summary *) { color: #0f172a; }
+html[data-color-mode="light"] .obsidian-page .wallet-action { background: #fff !important; color: #0f172a !important; }
+html[data-color-mode="light"] .profit-page .profit-withdraw__amounts div { background: #f8fafc !important; }
