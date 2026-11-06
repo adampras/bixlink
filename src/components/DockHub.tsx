@@ -65,7 +65,7 @@ export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, bool
       <LayoutGrid size={19} className="shrink-0"/><span>HUB</span>
     </button>
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="bottom" className="hub-midnight max-h-[80vh] overflow-y-auto rounded-t-3xl pb-8" style={drag ? { transform: `translateY(${drag}px)`, transition: 'none' } : { transition: 'transform .35s cubic-bezier(.2,.9,.3,1.2)' }}>
+      <SheetContent side="bottom" ref={sheetRef} className="hub-midnight max-h-[80vh] overflow-y-auto rounded-t-3xl pb-8" style={{ transform: drag ? `translateY(${drag}px)` : undefined, transition: moving ? 'none' : 'transform .32s cubic-bezier(.22,1,.36,1)', opacity: drag > 0 ? Math.max(0.55, 1 - drag / 1400) : 1 }}>
         <div className="touch-none -mx-6 -mt-6 cursor-grab px-6 pt-6 pb-1" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} aria-label="Swipe down to close HUB">
         <div className="hub-grabber" aria-hidden/>
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest">BIX HUB</SheetTitle></SheetHeader>
