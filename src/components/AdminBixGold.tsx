@@ -27,6 +27,7 @@ export function AdminBixGold({ initial, onMessage, onSaved }: { initial?: unknow
     <p className="text-sm text-muted-foreground">All values are presentation references shown on the BIX GOLD page. Nothing here credits balances or pays bonuses automatically.</p>
 
     <AdminFold title="1 · Gold reference price" tone="gold" defaultOpen>
+      <label className="mt-4 flex items-center gap-2 text-sm"><Switch checked={s.autoPrice} onCheckedChange={v => set('autoPrice', v)}/>Auto daily market price (live spot + FX). Off = use manual values below.</label>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <N label="USD per gram" value={s.priceUsdPerGram} onChange={v => set('priceUsdPerGram', v)}/>
         <N label="1 USD = IDR" value={s.usdIdr} onChange={v => set('usdIdr', v)}/>
