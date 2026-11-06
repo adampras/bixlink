@@ -156,7 +156,7 @@ function Packages() {
   </div>;
 }
 
-function HubToggles() {
+export function HubToggles() {
   const { data } = usePublicConfig(); const save = useServerFn(updateDockHub); const qc = useQueryClient();
   const [cfg, setCfg] = useState<Record<string, boolean>>({}); const [msg, setMsg] = useState('');
   useEffect(() => { setCfg(data?.readiness.dockHub ?? {}); }, [data?.readiness.dockHub]);
