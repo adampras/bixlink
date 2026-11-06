@@ -6935,3 +6935,35 @@ html .stake-compact dl.hud-scan > .stake-metric + .stake-metric{border-left:1px 
 .bixcall-page .comm-subhead{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 10px}
 .bixcall-page .comm-subhead b{font-size:13px;letter-spacing:.22em;background:linear-gradient(90deg,#5eead4,#FFD700);-webkit-background-clip:text;background-clip:text;color:transparent}
 @media (max-width:380px){.bixcall-page .comm-actions>button{width:28px;height:28px}}
+
+/* === BIX CALL member chat themes (bg / font / wallpaper) === */
+.bc-theme-l{margin:12px 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+.bc-theme-row{display:flex;flex-wrap:wrap;gap:6px}
+.bc-theme-row>button{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;font-size:12px;border:1px solid rgb(94 234 212 / .2);background:rgb(255 255 255 / .03)}
+.bc-theme-row>button[aria-pressed=true]{border-color:#FFD700;box-shadow:0 0 12px -3px #FFD700;color:#FFD700}
+.bc-theme-row>button>i{width:14px;height:14px;border-radius:50%;border:1px solid rgb(255 255 255 / .3)}
+.bc-theme-row.is-wall>button{flex-direction:column;border-radius:14px;padding:6px;width:calc(33% - 4px)}
+.bc-wall-prev{display:block;width:100%;height:44px;border-radius:10px;background-color:#05070a}
+.bx-grp-leave{display:flex;align-items:center;gap:6px;margin:6px 0;padding:8px 12px;border-radius:12px;font-size:12px;color:#fb7185;border:1px solid rgb(251 113 133 / .35);background:rgb(251 113 133 / .06)}
+.bx-grp-add{margin:6px 0}.bx-grp-add .bx-grp-btn{display:inline-flex;align-items:center;gap:4px}
+.bx-grp-msg.is-ok{color:#34d399}
+/* wallpapers */
+.bc-wall-circuit,body[data-bc-chat-wall=circuit] :is(.comm-msgs,.bx-grp-feed){background-image:linear-gradient(rgb(45 212 191 / .07) 1px,transparent 1px),linear-gradient(90deg,rgb(45 212 191 / .07) 1px,transparent 1px),radial-gradient(circle at 20px 20px,rgb(45 212 191 / .35) 2px,transparent 3px);background-size:40px 40px}
+.bc-wall-hex,body[data-bc-chat-wall=hex] :is(.comm-msgs,.bx-grp-feed){background-image:radial-gradient(circle,rgb(255 215 0 / .16) 1.5px,transparent 2px),linear-gradient(60deg,transparent 48%,rgb(255 215 0 / .07) 50%,transparent 52%),linear-gradient(-60deg,transparent 48%,rgb(255 215 0 / .07) 50%,transparent 52%);background-size:28px 28px}
+.bc-wall-grid,body[data-bc-chat-wall=grid] :is(.comm-msgs,.bx-grp-feed){background-image:linear-gradient(rgb(168 85 247 / .12) 1px,transparent 1px),linear-gradient(90deg,rgb(168 85 247 / .12) 1px,transparent 1px);background-size:22px 22px}
+.bc-wall-cosmos,body[data-bc-chat-wall=cosmos] :is(.comm-msgs,.bx-grp-feed){background-image:radial-gradient(1px 1px at 10% 20%,#fff,transparent),radial-gradient(1.5px 1.5px at 70% 40%,#FFD700,transparent),radial-gradient(1px 1px at 40% 80%,#5eead4,transparent),radial-gradient(ellipse at 80% 10%,rgb(168 85 247 / .25),transparent 60%),radial-gradient(ellipse at 10% 90%,rgb(45 212 191 / .2),transparent 60%);background-size:120px 120px,160px 160px,90px 90px,100% 100%,100% 100%}
+.bc-wall-waves,body[data-bc-chat-wall=waves] :is(.comm-msgs,.bx-grp-feed){background-image:repeating-radial-gradient(circle at 0 100%,transparent 0 18px,rgb(45 212 191 / .08) 19px 20px)}
+body[data-bc-chat-wall]:not([data-bc-chat-wall=none]) :is(.comm-msgs,.bx-grp-feed){border-radius:18px;padding:10px}
+/* background colours */
+body[data-bc-chat-bg=toska] .bixcall-page{background:radial-gradient(ellipse at top,#0b4a42,#031a17 60%)}
+body[data-bc-chat-bg=matcha] .bixcall-page{background:radial-gradient(ellipse at top,#2c4a1a,#0a1406 60%)}
+body[data-bc-chat-bg=gold] .bixcall-page{background:radial-gradient(ellipse at top,#4a3608,#120c02 60%)}
+body[data-bc-chat-bg=purple] .bixcall-page{background:radial-gradient(ellipse at top,#3b1470,#0b0418 60%)}
+body[data-bc-chat-bg=pearl] .bixcall-page{background:linear-gradient(180deg,#f6f8f7,#e3ebe8);color:#0b1513}
+body[data-bc-chat-bg=pearl] .bixcall-page :is(.comm-card,.bc-head){background:rgb(255 255 255 / .85);color:#0b1513}
+body[data-bc-chat-bg=pearl] .bixcall-page .comm-list b{color:#0b1513}
+/* font models */
+body[data-bc-chat-font=tech] .bixcall-page{font-family:ui-monospace,'JetBrains Mono',Menlo,monospace;letter-spacing:-.01em}
+body[data-bc-chat-font=lux] .bixcall-page{font-family:'Cormorant Garamond',Georgia,serif;letter-spacing:.01em}
+body[data-bc-chat-font=grotesk] .bixcall-page{font-family:'Space Grotesk','Arial Narrow',system-ui,sans-serif;letter-spacing:.02em}
+.bc-font-tech{font-family:ui-monospace,Menlo,monospace}.bc-font-lux{font-family:Georgia,serif}.bc-font-grotesk{font-family:'Arial Narrow',sans-serif}

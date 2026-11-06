@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting'];
+const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting', 'newgroup'];
 import { useEffect, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
@@ -22,6 +22,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { useQuery } from '@tanstack/react-query';
 import { getBixPay } from '@/lib/bixlink.functions';
 import { CONTACTS_EVENT, addContact, readContacts, removeContact, parseBixId, type BixContact } from '@/lib/bix-contacts';
+import { ChatThemePicker } from '@/components/ChatThemePicker';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
 
 export const Route = createFileRoute('/call')({
@@ -35,7 +36,7 @@ export const Route = createFileRoute('/call')({
   },
   component: CallPage,
 });
-type CommTab = 'chat' | 'group' | 'updates' | 'call' | 'community' | 'setting';
+type CommTab = 'chat' | 'group' | 'updates' | 'call' | 'community' | 'setting' | 'newgroup';
 type CallSearch = { tab?: CommTab; chat?: string; n?: string };
 
 type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call: boolean; avatar_path?: string | null; status_text?: string | null };
@@ -119,7 +120,7 @@ function CallInner() {
 
   if (chatWith) return <ChatRoom me={me} peer={chatWith} tier={tier} onBack={() => setChatWith(null)}/>;
   const open = (id: string, name: string) => setChatWith({ id, name });
-  const TITLE: Record<CommTab, string> = { chat: 'CHAT', group: 'GROUP', updates: 'UPDATES', call: 'CALLS', community: 'COMMUNITY', setting: 'SETTINGS' };
+  const TITLE: Record<CommTab, string> = { chat: 'CHAT', group: 'GROUP', updates: 'UPDATES', call: 'CALLS', community: 'COMMUNITY', setting: 'SETTINGS', newgroup: 'NEW GROUP' };
   const view: CommTab = tab;
 
   return <main className="mx-auto max-w-xl px-4 py-5">
@@ -132,16 +133,17 @@ function CallInner() {
 
     {view === 'chat' && <><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
     {view === 'group' && <BixGroups me={me}/>}
+    {view === 'newgroup' && <BixGroups me={me} createOnly/>}
     {view === 'updates' && <StoryBar me={me} myName="Saya" list/>}
     {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
     {view === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
-    {view === 'setting' && <><NotifyCard/><PrivacyTab tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
+    {view === 'setting' && <><ChatThemePicker/><NotifyCard/><PrivacyTab tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
   </main>;
 }
 
 function CommMenu() {
   const [o, setO] = useState(false);
-  const go = [['chat', 'Chat'], ['group', 'Group · Education'], ['updates', 'Updates · Status'], ['call', 'Calls'], ['setting', 'Settings · Community']] as const;
+  const go = [['chat', 'Chat'], ['group', 'Group · Education'], ['newgroup', '+ New Group'], ['updates', 'Updates · Status'], ['call', 'Calls'], ['setting', 'Settings · Community']] as const;
   return <span className="comm-kebab"><button type="button" aria-label="Menu" onClick={() => setO(v => !v)}><MoreVertical size={18}/></button>
     {o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }

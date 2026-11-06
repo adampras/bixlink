@@ -1121,6 +1121,13 @@
       "when": 1793973546005,
       "tag": "0159_bixtok_official_live_visible_all",
       "breakpoints": true
+    },
+    {
+      "idx": 160,
+      "version": "7",
+      "when": 1793974215721,
+      "tag": "0160_bix_group_add_member",
+      "breakpoints": true
     }
   ]
 }

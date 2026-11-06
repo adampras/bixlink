@@ -3583,6 +3583,10 @@ export type Database = {
       bix_feature_enabled: { Args: { p_feature: string }; Returns: boolean }
       bix_find_user_by_email: { Args: { p_email: string }; Returns: string }
       bix_grant_welcome: { Args: { p_user: string }; Returns: undefined }
+      bix_group_add_member: {
+        Args: { p_group: string; p_query: string }
+        Returns: string
+      }
       bix_group_feed: {
         Args: { p_group: string }
         Returns: {
