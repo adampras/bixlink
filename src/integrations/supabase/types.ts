@@ -2072,6 +2072,66 @@ export type Database = {
         }
         Relationships: []
       }
+      bixgo_bookings: {
+        Row: {
+          city: string
+          created_at: string
+          driver_name: string
+          driver_phone: string
+          dropoff: string
+          id: string
+          km: number
+          operator_note: string
+          pay_method: string
+          pickup: string
+          plate: string
+          service: string
+          status: string
+          total_idr: number
+          updated_at: string
+          user_id: string
+          vehicle: string
+        }
+        Insert: {
+          city?: string
+          created_at?: string
+          driver_name?: string
+          driver_phone?: string
+          dropoff?: string
+          id?: string
+          km?: number
+          operator_note?: string
+          pay_method?: string
+          pickup?: string
+          plate?: string
+          service: string
+          status?: string
+          total_idr?: number
+          updated_at?: string
+          user_id?: string
+          vehicle?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          driver_name?: string
+          driver_phone?: string
+          dropoff?: string
+          id?: string
+          km?: number
+          operator_note?: string
+          pay_method?: string
+          pickup?: string
+          plate?: string
+          service?: string
+          status?: string
+          total_idr?: number
+          updated_at?: string
+          user_id?: string
+          vehicle?: string
+        }
+        Relationships: []
+      }
       bixtok_comments: {
         Row: {
           author_name: string
