@@ -4,7 +4,7 @@ const pct = z.number().min(0).max(100);
 export const bixGoldSchema = z.object({
   enabled: z.boolean(),
   autoPrice: z.boolean(),
-  priceUsdPerGram: z.number().positive().max(100_000),
+  priceUsdPerGram: z.number().min(0).max(100_000),
   usdIdr: z.number().positive().max(1_000_000),
   usdMyr: z.number().positive().max(1_000),
   packages: z.array(z.object({ name: z.string().trim().min(1).max(40), grams: z.number().positive().max(10_000), enabled: z.boolean() }).strict()).max(10),
