@@ -6636,3 +6636,16 @@ html[data-color-mode="light"] .stake-mode { background: #f1f5f9; }
 html[data-color-mode="light"] :is(.obsidian-page,.stake-compact,.network-explorer,.profit-page) :is(strong,dd,b,h1,h2,h3):not([class*="text-chart"]):not(.wallet-summary *) { color: #0f172a; }
 html[data-color-mode="light"] .obsidian-page .wallet-action { background: #fff !important; color: #0f172a !important; }
 html[data-color-mode="light"] .profit-page .profit-withdraw__amounts div { background: #f8fafc !important; }
+
+/* ===== Staking unified type: Sora for titles/figures, Manrope for labels, one tabular numeral style ===== */
+.stake-compact, .stake-compact .duration-package, .stake-compact .duration-package .form-input { font-family: 'Manrope', sans-serif !important; letter-spacing: 0; }
+.stake-compact :is(h1,h2,h3,.font-display,.stake-lux-title,.stake-lux-name,.duration-package h3) { font-family: 'Sora', sans-serif !important; font-weight: 800; letter-spacing: -.01em; }
+.stake-compact :is(.numeric,dd,b,strong,.duration-price,.duration-apy,.lux-ledger b,.stake-pick-chip b,.stake-pool-value,.stake-lux-price) {
+  font-family: 'Sora', sans-serif !important; font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum" 1, "lnum" 1, "zero" 0 !important; letter-spacing: 0 !important; background: none; -webkit-text-fill-color: currentColor; }
+.stake-compact :is(dt,.duration-label,.duration-yield dt,.lux-ledger span,.stake-pick-head span,.duration-package-head p,.stake-metric dt) { font-family: 'Manrope', sans-serif !important; font-size: 10px !important; font-weight: 700; letter-spacing: .1em !important; text-transform: uppercase; }
+.stake-compact .duration-package h3 { font-size: 1.35rem !important; }
+.stake-compact .duration-price { font-size: 1.15rem !important; font-weight: 800; }
+.stake-compact .duration-yield dd, .stake-compact .lux-ledger b { font-size: 13px !important; font-weight: 700; }
+.stake-compact .lux-ledger-total b { font-size: 16px !important; font-weight: 800; }
+.stake-compact .duration-option, .stake-compact .duration-stake, .stake-compact .stake-mode button { font-family: 'Sora', sans-serif !important; font-weight: 700; letter-spacing: .04em; }
+.stake-compact .duration-risk, .stake-compact .text-muted-foreground { font-family: 'Manrope', sans-serif; }
