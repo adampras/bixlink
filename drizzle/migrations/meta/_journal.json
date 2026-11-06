@@ -1100,6 +1100,13 @@
       "when": 1793953654047,
       "tag": "0156_tighten_social_read_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 157,
+      "version": "7",
+      "when": 1793956856717,
+      "tag": "0157_bix_gold_public_settings",
+      "breakpoints": true
     }
   ]
 }
