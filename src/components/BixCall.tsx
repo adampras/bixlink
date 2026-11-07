@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, Ear, X } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, X } from 'lucide-react';
 import { syncBixCallTheme } from '@/lib/bix-call-theme';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
 import { supabase } from '@/integrations/supabase/client';
@@ -210,8 +210,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const applyVolume = () => {
     // Full volume in every mode (video calls run on the loudspeaker and need the most headroom).
     // Echo-safe levels: earpiece softer, loudspeaker below max so the phone's echo canceller can keep up; lower further on howl.
-    const base = loudRef.current ? 0.9 : 0.8;
-    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? base * 0.45 : base; });
+    const base = loudRef.current ? 1 : 0.3;
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? 0.02 : base; });
   };
   const attachAudio = (t: RemoteTrack) => {
     const box = audioBox.current; if (!box) return;
@@ -254,11 +254,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       const me = r.localParticipant.audioLevel ?? 0;
       // Only very loud, sustained overlap (~1.5 s) counts as a loop, so normal two-way talk is never muted.
       // Loop detector: loud overlap for ~0.6 s = phones feeding each other; hold the duck ~2 s after it stops.
-      if (me > 0.12 && m > 0.12) both = Math.min(20, both + 1); else both = Math.max(0, both - 1);
-      if (both >= 4) quiet = 14; else if (quiet > 0) quiet--;
+      if (me > 0.08 && m > 0.08) both = Math.min(20, both + 1); else both = Math.max(0, both - 1);
+      if (both >= 3) quiet = 16; else if (quiet > 0) quiet--;
       const h = quiet > 0;
-      const base = loudRef.current ? 0.9 : 0.8;
-      const vol = h ? base * 0.2 : base;
+      const base = loudRef.current ? 1 : 0.3;
+      const vol = h ? 0.02 : base;
       if (h !== howlRef.current) { howlRef.current = h; setHowl(h); }
       if (micLowRef.current) { micLowRef.current = false; setMicLow(false); }
       setMyLevel(me);
@@ -313,7 +313,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         // Native mic track: keeps the phone's hardware echo canceller linked to the call output (a WebAudio-processed track breaks it → echo/howl).
         if (cancelled) return;
-        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 96000, priority: 'high' } } as never);
+        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: false, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 96000, priority: 'high' } } as never);
         // Lock the phone's own echo canceller / noise suppressor / high-pass on (Chrome flags), so loudspeaker video calls stay echo-free.
         { const mt = room.localParticipant.getTrackPublication(Track.Source.Microphone)?.track?.mediaStreamTrack;
           if (mt && 'contentHint' in mt) mt.contentHint = 'speech';
@@ -497,7 +497,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         <button className="end" aria-label="Batalkan" onClick={onEnd}><PhoneOff/></button>
       </>}
       {live && <div className="bc-ctl4 bc-grid6" onPointerDown={askTilt}>
-        <label><button aria-label={loud ? 'Speaker active' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={speaker}>{loud ? <Volume2/> : <Ear/>}</button><span>{loud ? 'Speaker' : 'Telinga'}</span></label>
+        <label><button aria-label={loud ? 'Speaker active' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={speaker}>{loud ? <Volume2/> : <VolumeX/>}</button><span>{loud ? 'Speaker On' : 'Speaker Off'}</span></label>
         <label><button aria-label={cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} className={cam ? 'shield' : ''} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>Video</span></label>
         <label><button aria-label={mic ? 'Senyapkan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button><span>Senyapkan</span></label>
         <label><button aria-label="Chat" onClick={openChat}><MessageCircle/></button><span>Chat</span></label>
