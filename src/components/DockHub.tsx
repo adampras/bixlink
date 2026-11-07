@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type UIEvent } from 'react';
 import { Link } from '@tanstack/react-router';
-import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, UserRound, Bot, Bike, WalletCards, PhoneCall, type LucideIcon } from 'lucide-react';
+import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, UserRound, Settings2, Bot, Bike, WalletCards, PhoneCall, type LucideIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { HUB_GROUPS, HUB_ITEMS, hubVisible } from '@/lib/dock-hub';
+import { HUB_GROUPS, HUB_ITEMS, hubVisible, hubOrdered } from '@/lib/dock-hub';
 
-const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: Bike, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards, call: PhoneCall };
+const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: Bike, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards, call: PhoneCall, settings: Settings2 };
 /** Category look: swipe rows for long groups, fixed grids for short ones. */
 const GROUP_STYLE: Record<string, { tone: string; swipe: boolean }> = {
   'Trading & Finance': { tone: 'gold', swipe: true },
@@ -27,11 +27,11 @@ function SwipeRow({ children, count }: { children: React.ReactNode; count: numbe
 }
 
 /** Mobile dock HUB (replaces HOME): opens owner-selected shortcuts. */
-export function DockHub({ path, cfg }: { path: string; cfg?: Record<string, boolean> | undefined }) {
+export function DockHub({ path, cfg, order }: { path: string; cfg?: Record<string, boolean> | undefined; order?: string[] }) {
   const [open, setOpen] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   useEffect(() => { if (open) { try { setRecent(JSON.parse(localStorage.getItem(RECENT_KEY) || '[]')); } catch { setRecent([]); } } }, [open]);
-  const items = HUB_ITEMS.filter(i => hubVisible(cfg, i.id));
+  const items = hubOrdered(HUB_ITEMS, order).filter(i => hubVisible(cfg, i.id));
   const on = open || items.some(i => i.to === path && !['/stake', '/wallet', '/profit', '/network'].includes(i.to));
   const pick = (id: string) => {
     try { navigator.vibrate?.(8); } catch { /* unsupported */ }
