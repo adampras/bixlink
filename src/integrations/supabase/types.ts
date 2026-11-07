@@ -301,6 +301,27 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_deposit_quota_routes: {
+        Row: {
+          created_at: string
+          created_by: string
+          max_direct: number
+          sponsor_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          max_direct?: number
+          sponsor_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          max_direct?: number
+          sponsor_id?: string
+        }
+        Relationships: []
+      }
       bix_fleet_orders: {
         Row: {
           address: string
@@ -3595,6 +3616,11 @@ export type Database = {
         Returns: Json
       }
       bix_deposit_owner: { Args: { p_user: string }; Returns: string }
+      bix_deposit_quota_list: { Args: never; Returns: Json }
+      bix_deposit_quota_set: {
+        Args: { p_code: string; p_max: number; p_on: boolean }
+        Returns: Json
+      }
       bix_edit_duration_package: {
         Args: {
           p_apys: Json
@@ -3810,6 +3836,10 @@ export type Database = {
         Returns: Json
       }
       bix_quest_status: { Args: never; Returns: Json }
+      bix_quota_overflow: {
+        Args: { p_child: string; p_parent: string }
+        Returns: boolean
+      }
       bix_referral_tree: {
         Args: never
         Returns: {

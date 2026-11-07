@@ -183,3 +183,17 @@ export const setOwner1DepositLock = createServerFn({ method: 'POST' }).middlewar
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export type QuotaRoute = { code: string | null; username: string | null; max_direct: number; created_at: string; directs: { code: string | null; username: string | null; routed: boolean }[] };
+export const getDepositQuotaRoutes = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data, error } = await context.supabase.rpc('bix_deposit_quota_list');
+  if (error) throw new Error(error.message);
+  return (data ?? []) as QuotaRoute[];
+});
+export const setDepositQuotaRoute = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { code: string; max: number; on: boolean }) => z.object({ code: z.string().trim().min(2).max(60), max: z.number().int().min(0).max(10000), on: z.boolean() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.rpc('bix_deposit_quota_set', { p_code: data.code, p_max: data.max, p_on: data.on });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

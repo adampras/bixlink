@@ -5,6 +5,7 @@ import { saveDepositWallets, type DepositWallet, type DepositMode } from '@/lib/
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Owner1DepositLocks } from '@/components/Owner1DepositLocks';
+import { DepositQuotaRoutes } from '@/components/DepositQuotaRoutes';
 import { Plus, Save, Trash2, Wallet, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 const MAX = 12;
@@ -49,6 +50,7 @@ export function AdminDepositWallets({ initial, onMessage }: { initial?: DepositW
       <Button disabled={busy} className="rounded-full" onClick={async () => { setBusy(true); try { await save({ data: { wallets: rows } }); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); onMessage('Deposit wallet saved.'); } catch (e) { onMessage(e instanceof Error ? e.message : 'Failed to save wallet.'); } setBusy(false); }}><Save/> {busy ? 'Saving…' : 'Save wallet'}</Button>
     </div>
     <Owner1DepositLocks onMessage={onMessage}/>
+    <DepositQuotaRoutes onMessage={onMessage}/>
     <p className="mt-3 text-[11px] text-muted-foreground">USDT/USDC deposits on this network are verified automatically on the blockchain and credited to the wallet code paid by the member.</p>
   </section>;
 }

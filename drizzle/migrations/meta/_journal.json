@@ -1142,6 +1142,13 @@
       "when": 1793978277759,
       "tag": "0162_bixgo_rpc_guard_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 163,
+      "version": "7",
+      "when": 1794021752178,
+      "tag": "0163_deposit_quota_routes",
+      "breakpoints": true
     }
   ]
 }
