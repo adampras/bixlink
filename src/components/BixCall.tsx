@@ -236,13 +236,22 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   // Remote voice level: drives the waveform and the "Ruang Dekat" half-duplex duck.
   useEffect(() => {
     if (link !== 'on') return;
-    let hang = 0;
+    let hang = 0, both = 0;
     const t = setInterval(() => {
       const r = roomRef.current; if (!r) return;
       let m = 0; r.remoteParticipants.forEach(p => { m = Math.max(m, p.audioLevel ?? 0); });
       if (!ear) setLevel(m);
       if (m > 0.04) hang = 4; else if (hang > 0) hang--;
       voiceRef.current?.setDuck(nearRef.current && hang > 0);
+      // Anti-feedback: when both sides are loud at once (phones close together loop each other), duck playback.
+      const me = r.localParticipant.audioLevel ?? 0;
+      if (me > 0.08 && m > 0.08) both++; else both = Math.max(0, both - 1);
+      const h = both >= 5; // ~750 ms of simultaneous loud audio = feedback loop
+      const talk = me > 0.06;
+      const base = loudRef.current ? 0.85 : 0.6;
+      const vol = h ? base * 0.3 : talk ? base * 0.55 : base;
+      if (h !== howlRef.current) { howlRef.current = h; setHowl(h); }
+      audioBox.current?.querySelectorAll('audio').forEach(a => { if (Math.abs(a.volume - vol) > 0.02) a.volume = vol; });
     }, 150);
     return () => clearInterval(t);
   }, [link, ear]);
@@ -296,7 +305,9 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 96000, priority: 'high' } } as never);
         // Lock the phone's own echo canceller / noise suppressor / high-pass on (Chrome flags), so loudspeaker video calls stay echo-free.
         { const mt = room.localParticipant.getTrackPublication(Track.Source.Microphone)?.track?.mediaStreamTrack;
-          if (mt && 'contentHint' in mt) mt.contentHint = 'speech'; }
+          if (mt && 'contentHint' in mt) mt.contentHint = 'speech';
+          // Background filter: ask the OS for voice isolation + strong noise suppression (ignored where unsupported).
+          void mt?.applyConstraints({ echoCancellation: true, noiseSuppression: true, autoGainControl: false, voiceIsolation: true } as MediaTrackConstraints).catch(() => {}); }
         if (call.kind === 'video') await startCam(room, true);
         if (!cancelled) setLink('on');
       } catch { if (!cancelled) setLink('fail'); }
