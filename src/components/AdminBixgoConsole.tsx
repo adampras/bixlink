@@ -5,8 +5,10 @@ import { AdminFold } from '@/components/AdminNavigation';
 import { BIXGO_SERVICES, DEFAULT_CITY_PRICING, type BixgoSettings } from '@/lib/bixgo';
 import { GLOBAL_CITIES, formatMoney } from '@/lib/bixgo-global';
 import { TRAVEL_CATALOG } from '@/lib/bixgo-global';
+import { BixgoCancelDialog } from '@/components/BixgoCancelDialog';
+import { canCancelTrip } from '@/lib/bixgo-trip';
 
-type Booking = { id: string; user_id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; pay_method: string; status: string; driver_name: string; driver_phone: string; plate: string; operator_note: string; created_at: string; driver_user_id?: string | null };
+type Booking = { id: string; user_id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; pay_method: string; status: string; driver_name: string; driver_phone: string; plate: string; operator_note: string; created_at: string; driver_user_id?: string | null; cancel_reason?: string | null; cancel_note?: string | null };
 type License = { id: string; user_id: string; full_name: string; phone: string; city: string; vehicle_type: string; vehicle_model: string; plate: string; mode: string; status: string; online: boolean; operator_note: string; created_at: string };
 const STATUS = ['pending', 'assigned', 'in_transit', 'completed', 'cancelled'] as const;
 const LABEL: Record<string, string> = { pending: 'Waiting', assigned: 'Driver assigned', in_transit: 'In transit', completed: 'Completed', cancelled: 'Cancelled' };
@@ -19,6 +21,7 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
   const [status, setStatus] = useState('all');
   const [edit, setEdit] = useState<Record<string, Partial<Booking>>>({});
   const [msg, setMsg] = useState('');
+  const [cancelId, setCancelId] = useState<string | null>(null);
   const [lics, setLics] = useState<License[]>([]);
   const loadLic = async () => { const { data } = await supabase.from('bixgo_driver_licenses').select('*').order('created_at', { ascending: false }).limit(300); setLics((data ?? []) as License[]); };
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -42,6 +45,7 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
   const setP = (id: string, k: 'mult' | 'minIdr', v: number) => setS({ ...s, cityPricing: { ...pricing, [id]: { ...(pricing[id] ?? { mult: 1, minIdr: 0 }), [k]: v } } });
 
   return <AdminFold title="BIXGO Operator Console" badge={`${live.length} live`}>
+    {cancelId && <BixgoCancelDialog id={cancelId} role="rider" open onClose={() => setCancelId(null)} onDone={() => void load()}/>}
     <div className="space-y-3 text-xs">
       <div className="grid grid-cols-4 gap-1">{([['dispatch', 'Dispatch'], ['drivers', `Drivers (${lics.filter(l => l.status === 'pending').length})`], ['pricing', 'City Pricing'], ['history', 'City History']] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`rounded-full border px-2 py-2 font-bold ${tab === k ? 'border-primary bg-primary/15 text-primary' : 'border-border'}`}>{l}</button>)}</div>
       {msg && <p className="rounded-lg border border-border px-2 py-1 text-muted-foreground">{msg}</p>}
@@ -59,7 +63,7 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
             {b.status === 'assigned' && <Button size="sm" onClick={() => update(b, { status: 'in_transit' })}>Start trip</Button>}
             {b.status === 'in_transit' && <Button size="sm" onClick={() => update(b, { status: 'completed' })}>Complete</Button>}
             {e.driver_phone?.trim() && <Button size="sm" variant="outline" asChild><a target="_blank" rel="noopener noreferrer" href={`https://wa.me/${e.driver_phone.replace(/\D/g, '').replace(/^0/, '62')}?text=${encodeURIComponent(`BIXGO dispatch #${b.id.slice(0, 8)}\nCity: ${GLOBAL_CITIES.find(c => c.id === b.city)?.city ?? b.city}\nService: ${b.vehicle || b.service}\nPickup: ${b.pickup}\nDrop-off: ${b.dropoff}\nDistance: ${Number(b.km).toFixed(1)} km\nFare: ${money(Number(b.total_idr))} (${b.pay_method})\nPlease confirm / Mohon konfirmasi.`)}`}>WhatsApp driver</a></Button>}
-            <Button size="sm" variant="outline" onClick={() => update(b, { status: 'cancelled' })}>Cancel</Button>
+            {canCancelTrip(b.status) && <Button size="sm" variant="outline" onClick={() => setCancelId(b.id)}>Cancel</Button>}
           </div></div>; })}
       </div>}
 
@@ -95,7 +99,7 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
         <div className="grid grid-cols-2 gap-1">{summary.filter(x => hit(x.c) && (q.trim() || x.n > 0)).slice(0, 12).map(x => <div key={x.c.id} className="rounded-xl border border-border p-2"><b>{x.c.city}</b><p className="text-muted-foreground">{x.n} bookings · {x.done} done</p><p>Gross {money(x.gross)}</p><p className="text-muted-foreground">Commission {money(x.comm)} · Franchise {money(x.fr)}</p></div>)}</div>
         <div className="flex gap-1"><select className="form-input" value={city} onChange={e => setCity(e.target.value)}><option value="all">All cities</option>{GLOBAL_CITIES.map(c => <option key={c.id} value={c.id}>{c.city}</option>)}</select>
           <select className="form-input" value={status} onChange={e => setStatus(e.target.value)}><option value="all">All status</option>{STATUS.map(x => <option key={x} value={x}>{LABEL[x]}</option>)}</select></div>
-        {filtered.slice(0, 80).map(b => <div key={b.id} className="flex justify-between gap-2 border-b border-border py-1"><span className="min-w-0 truncate">{new Date(b.created_at).toLocaleDateString()} · {b.city} · {b.vehicle || BIXGO_SERVICES.find(x => x.key === b.service)?.name} · {LABEL[b.status]}</span><b className="shrink-0">{money(Number(b.total_idr))}</b></div>)}
+        {filtered.slice(0, 80).map(b => <div key={b.id} className="flex justify-between gap-2 border-b border-border py-1"><span className="min-w-0">{new Date(b.created_at).toLocaleDateString()} · {b.city} · {b.vehicle || BIXGO_SERVICES.find(x => x.key === b.service)?.name} · {LABEL[b.status]}{b.cancel_reason && <span className="block break-words text-muted-foreground">{b.cancel_reason}{b.cancel_note ? ` · ${b.cancel_note}` : ''}</span>}</span><b className="shrink-0">{money(Number(b.total_idr))}</b></div>)}
         {!filtered.length && <p className="text-center text-muted-foreground">No bookings for this filter.</p>}
       </div>}
       <p className="text-[10px] text-muted-foreground">Bookings are member requests. No payment is captured; settle fares with the driver outside the app until a payment rule exists.</p>

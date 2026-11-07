@@ -14,6 +14,9 @@ export function jobChime() {
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { payKind, type PayKind } from '@/lib/bixgo-pay';
+import { Button } from '@/components/ui/button';
+import { BixgoCancelDialog } from '@/components/BixgoCancelDialog';
+import { BixgoDriverLocation } from '@/components/BixgoDriverLocation';
 import { BixgoEarnings } from '@/components/BixgoEarnings';
 import { earningsTotals } from '@/lib/bixgo-earnings';
 
@@ -31,6 +34,7 @@ export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean
   const [open, setOpen] = useState<Job[]>([]);
   const [mine, setMine] = useState<Job[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [cancelId, setCancelId] = useState<string | null>(null);
   const [pax, setPax] = useState<Record<string, string>>({});
   const seen = useRef(new Set<string>());
   const primed = useRef(false);
@@ -41,7 +45,7 @@ export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean
     if (d.rating) onRating?.(d.rating);
     const nextOpen = d.open ?? [];
     const fresh = nextOpen.filter(j => !seen.current.has(j.id));
-    if (primed.current && fresh.length && online) { jobChime(); navigator.vibrate?.([300, 120, 300, 120, 300]); toast.success(`New order · ${fresh[0]!.pickup}`); }
+    if (primed.current && fresh.length && online) { jobChime(); navigator.vibrate?.([300, 120, 300, 120, 300]); toast.success(`New order · ${fresh[0]?.pickup}`); }
     nextOpen.forEach(j => seen.current.add(j.id)); primed.current = true;
     setOpen(nextOpen); setMine(d.mine ?? []);
     const act = (d.mine ?? []).filter(j => j.status === 'assigned' || j.status === 'in_transit').map(j => j.id);
@@ -62,7 +66,7 @@ export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean
   const earned = totals.usdt;
   const earnedBix = totals.bix;
   const Btn = ({ id, onClick, children, ghost }: { id: string; onClick: () => void; children: React.ReactNode; ghost?: boolean }) =>
-    <button disabled={busy === id} onClick={onClick} className={`flex flex-1 items-center justify-center gap-1 rounded-full py-2 text-xs font-bold ${ghost ? 'border border-border text-muted-foreground' : 'bg-primary text-primary-foreground'}`}>{busy === id ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : children}</button>;
+    <Button disabled={busy === id} onClick={onClick} className={`flex flex-1 items-center justify-center gap-1 rounded-full py-2 text-xs font-bold ${ghost ? 'border border-border text-muted-foreground' : 'bg-primary text-primary-foreground'}`}>{busy === id ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : children}</Button>;
   const Pay = ({ j }: { j: Job }) => { const k = payKind(j.pay_method); return <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wide ${k === 'cash' ? 'border-destructive/50 text-destructive' : 'border-primary/50 text-primary'}`}>{BADGE[k]}</span>; };
   const Route = ({ j }: { j: Job }) => <div className="space-y-1 text-[11px]">
     <p className="flex gap-1"><MapPin className="h-3.5 w-3.5 shrink-0 text-primary"/>{j.pickup}</p>
@@ -79,17 +83,19 @@ export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean
       <div className="rounded-xl border border-border p-2"><b className="block text-sm">{done.length}</b><span className="text-[10px] text-muted-foreground">Completed</span></div>
     </div>
 
+    {active.length > 0 && <BixgoDriverLocation ids={active.map(j => j.id)}/>}
+    {cancelId && <BixgoCancelDialog id={cancelId} role="driver" open onClose={() => setCancelId(null)} onDone={() => void load()}/>}
     {active.map(j => <div key={j.id} className="space-y-2 rounded-2xl border border-primary/40 bg-primary/5 p-3">
       <p className="flex items-center justify-between gap-2 text-xs font-bold"><span>{j.status === 'assigned' ? 'Go to pickup' : 'On trip'}</span><Pay j={j}/><span className="tabular-nums text-primary">{amount(j)}</span></p>
       {payKind(j.pay_method) === 'cash' && <p className="text-[10px] text-muted-foreground">Fee paid: {bixf(j.gas_bix ?? 0)}. Collect {rp(j.fare_idr ?? j.total_idr)} cash from the passenger.</p>}
       <Route j={j}/>
       <a href={nav(j.status === 'assigned' ? j.pickup : j.dropoff)} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1 rounded-full border border-primary py-2 text-xs font-bold text-primary"><Navigation className="h-3.5 w-3.5"/>Voice navigation</a>
       {pax[j.id] && <div className="flex gap-2">
-        <button onClick={() => startBixCall(pax[j.id]!, 'Passenger', 'voice')} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary/15 py-2 text-xs font-bold text-primary"><Phone className="h-3.5 w-3.5"/>Call passenger</button>
-        <Link to="/call" search={{ chat: pax[j.id]!, n: 'Passenger' }} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary/15 py-2 text-xs font-bold text-primary"><MessageCircle className="h-3.5 w-3.5"/>Chat</Link>
+        <button onClick={() => startBixCall(pax[j.id] ?? '', 'Passenger', 'voice')} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary/15 py-2 text-xs font-bold text-primary"><Phone className="h-3.5 w-3.5"/>Call passenger</button>
+        <Link to="/call" search={{ chat: pax[j.id] ?? '', n: 'Passenger' }} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary/15 py-2 text-xs font-bold text-primary"><MessageCircle className="h-3.5 w-3.5"/>Chat</Link>
       </div>}
       <div className="flex gap-2">
-        {j.status === 'assigned' && <><Btn id={j.id} onClick={() => void advance(j.id, 'in_transit', 'Trip started')}><Play className="h-3.5 w-3.5"/>Start trip</Btn><Btn ghost id={j.id} onClick={() => void advance(j.id, 'cancelled', 'Order released · amounts returned')}><X className="h-3.5 w-3.5"/>Release</Btn></>}
+        {j.status === 'assigned' && <><Btn id={j.id} onClick={() => void advance(j.id, 'in_transit', 'Trip started')}><Play className="h-3.5 w-3.5"/>Start trip</Btn><Btn ghost id={j.id} onClick={() => setCancelId(j.id)}><X className="h-3.5 w-3.5"/>Release</Btn></>}
         {j.status === 'in_transit' && <Btn id={j.id} onClick={() => void advance(j.id, 'completed', 'Trip completed')}><CheckCircle2 className="h-3.5 w-3.5"/>Confirm completed</Btn>}
       </div>
     </div>)}
@@ -105,6 +111,6 @@ export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean
       </div>; })}</div>
     </div>
     <BixgoEarnings trips={mine}/>
-    <p className="text-[10px] text-muted-foreground">USDT/BIX orders hold the passenger's fare; on completion 85% goes to you and 15% to BIXLINK. Cash orders take the BIXLINK fee from your BIX balance when you accept. Releasing an order returns everything held.</p>
+    <p className="text-[10px] text-muted-foreground">USDT/BIX orders hold the passenger's fare; on completion 85% goes to you and 15% to BIXLINK. Cash orders take the BIXLINK fee from your BIX balance when you accept. Cancelling before the trip starts releases held amounts and records your reason.</p>
   </div>;
 }

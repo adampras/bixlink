@@ -2095,15 +2095,24 @@ export type Database = {
       }
       bixgo_bookings: {
         Row: {
+          cancel_note: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           city: string
           completed_at: string | null
           created_at: string
           driver_bix: number
+          driver_lat: number | null
+          driver_lng: number | null
+          driver_location_at: string | null
           driver_name: string
           driver_phone: string
           driver_usdt: number
           driver_user_id: string | null
           dropoff: string
+          dropoff_lat: number | null
+          dropoff_lng: number | null
           fare_bix: number
           fare_idr: number
           fare_usdt: number
@@ -2117,6 +2126,8 @@ export type Database = {
           owner_user_id: string | null
           pay_method: string
           pickup: string
+          pickup_lat: number | null
+          pickup_lng: number | null
           pickup_note: string
           plate: string
           rating: number | null
@@ -2135,15 +2146,24 @@ export type Database = {
           vehicle: string
         }
         Insert: {
+          cancel_note?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           city?: string
           completed_at?: string | null
           created_at?: string
           driver_bix?: number
+          driver_lat?: number | null
+          driver_lng?: number | null
+          driver_location_at?: string | null
           driver_name?: string
           driver_phone?: string
           driver_usdt?: number
           driver_user_id?: string | null
           dropoff?: string
+          dropoff_lat?: number | null
+          dropoff_lng?: number | null
           fare_bix?: number
           fare_idr?: number
           fare_usdt?: number
@@ -2157,6 +2177,8 @@ export type Database = {
           owner_user_id?: string | null
           pay_method?: string
           pickup?: string
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           pickup_note?: string
           plate?: string
           rating?: number | null
@@ -2175,15 +2197,24 @@ export type Database = {
           vehicle?: string
         }
         Update: {
+          cancel_note?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           city?: string
           completed_at?: string | null
           created_at?: string
           driver_bix?: number
+          driver_lat?: number | null
+          driver_lng?: number | null
+          driver_location_at?: string | null
           driver_name?: string
           driver_phone?: string
           driver_usdt?: number
           driver_user_id?: string | null
           dropoff?: string
+          dropoff_lat?: number | null
+          dropoff_lng?: number | null
           fare_bix?: number
           fare_idr?: number
           fare_usdt?: number
@@ -2197,6 +2228,8 @@ export type Database = {
           owner_user_id?: string | null
           pay_method?: string
           pickup?: string
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           pickup_note?: string
           plate?: string
           rating?: number | null
@@ -4078,12 +4111,20 @@ export type Database = {
       }
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
       bixgo_bix_balance_internal: { Args: { p_user: string }; Returns: number }
+      bixgo_cancel_trip: {
+        Args: { p_id: string; p_note?: string; p_reason: string }
+        Returns: Json
+      }
       bixgo_driver_accept: { Args: { p_id: string }; Returns: Json }
       bixgo_driver_advance: {
         Args: { p_id: string; p_status: string }
         Returns: Json
       }
       bixgo_driver_jobs: { Args: never; Returns: Json }
+      bixgo_driver_location: {
+        Args: { p_id: string; p_lat: number; p_lng: number }
+        Returns: undefined
+      }
       bixgo_driver_reapply: {
         Args: {
           p_city: string
@@ -4113,6 +4154,7 @@ export type Database = {
         Returns: undefined
       }
       bixgo_ref_stats: { Args: never; Returns: Json }
+      bixgo_trip_driver: { Args: { p_id: string }; Returns: Json }
       bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_can_bypass: { Args: never; Returns: boolean }

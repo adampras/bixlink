@@ -60,3 +60,5 @@
 - BIXGO earnings views and CSV share recorded-trip helpers; keep cash collections and prepaid BIX fees separate, and derive deductions from recorded fare minus driver receipt rather than the owner remainder after referrals.
 - BIX COMM: tiers (bixtok_config) enforced in RPCs via bix_comm_tier, UI lock is a hint; presence via polled bix_chat_sync RPC, no public channels.
 - A global `[role="dialog"]` rule caps height at 92dvh, so any full-screen fixed overlay that uses role="dialog" must restate its own max-height/overflow — the splash does.
+
+- BIXGO cancellations use a row-locked reasoned RPC before trip start, releasing derived holds without extra refund credits; GPS writes are assigned-driver-only and floating maps must label stale data.
