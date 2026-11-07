@@ -7,6 +7,7 @@ import { DRIVER_SHARE_PCT, driverEarning, nextTier, tierFor } from '@/lib/bixgo-
 import { BixgoDriverJobs } from '@/components/BixgoDriverJobs';
 import { BixgoDriverRates } from '@/components/BixgoDriverRates';
 import { BixgoDriverReady } from '@/components/BixgoDriverReady';
+import { BixgoCitySwitch, BixgoInvite } from '@/components/BixgoInvite';
 
 type License = { status: string; online: boolean; vehicle_type: string; vehicle_model: string; plate: string; city: string; operator_note: string; mode: string; rate_adj_pct?: number; accept_cash?: boolean; accept_bix?: boolean };
 const VEHICLES = [['moto', 'BIX Moto'], ['urban', 'BIX Urban'], ['executive', 'BIX Executive'], ['black', 'BIX Black']] as const;
@@ -92,6 +93,7 @@ export function BixgoPassport({ cur, usdtIdr, city }: { cur: GlobalCurrency; usd
         {lic.status === 'pending' && <p className="text-muted-foreground">Your application is waiting for operator review.</p>}
         {lic.status === 'approved' && <>
           <BixgoDriverReady lic={lic} uid={uid} rating={rating}/>
+          <BixgoCitySwitch city={lic.city} onChange={() => void load()}/>
           <button disabled={busy} onClick={() => void toggle()} className={`flex w-full items-center justify-center gap-2 rounded-full py-3 font-bold ${lic.online ? 'bg-primary text-primary-foreground' : 'border border-primary text-primary'}`}><Power className="h-4 w-4"/>{lic.online ? 'Driver Mode ON — receiving orders' : 'Go online'}</button>
           <BixgoDriverRates key={`${lic.rate_adj_pct}-${lic.accept_cash}-${lic.accept_bix}`} adj={Number(lic.rate_adj_pct ?? 0)} cash={lic.accept_cash ?? true} bix={lic.accept_bix ?? true} onSaved={() => void load()}/>
           <BixgoDriverJobs online={lic.online} adj={Number(lic.rate_adj_pct ?? 0)} onRating={setRating}/>

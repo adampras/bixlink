@@ -1,3 +1,4 @@
+import { BixgoInvite } from '@/components/BixgoInvite';
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
@@ -151,6 +152,7 @@ function BixgoPage() {
     {view === 'home' && mode === 'rider' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
     {((view === 'home' && mode === 'rider') || view === 'activity') && <BixgoActiveTrip/>}
     {view === 'home' && mode === 'rider' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
+    {view === 'home' && <BixgoInvite/>}
     {view === 'inbox' && <BixgoInbox/>}
     {view === 'account' && <><BixgoAccount name={memberName} balance="View balance" onBack={() => go('home')} onSoon={soon}/></>}
     {(view === 'order' || view === 'activity') && <main className="px-4 pb-6 pt-4">

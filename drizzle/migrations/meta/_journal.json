@@ -1184,6 +1184,13 @@
       "when": 1794049784410,
       "tag": "0168_bixgo_jastip",
       "breakpoints": true
+    },
+    {
+      "idx": 169,
+      "version": "7",
+      "when": 1794051814634,
+      "tag": "0169_bixgo_referral_plan_city",
+      "breakpoints": true
     }
   ]
 }

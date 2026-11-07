@@ -2121,6 +2121,12 @@ export type Database = {
           plate: string
           rating: number | null
           rating_note: string
+          ref_driver_bix: number
+          ref_driver_usdt: number
+          ref_driver_user: string | null
+          ref_rider_bix: number
+          ref_rider_usdt: number
+          ref_rider_user: string | null
           service: string
           status: string
           total_idr: number
@@ -2155,6 +2161,12 @@ export type Database = {
           plate?: string
           rating?: number | null
           rating_note?: string
+          ref_driver_bix?: number
+          ref_driver_usdt?: number
+          ref_driver_user?: string | null
+          ref_rider_bix?: number
+          ref_rider_usdt?: number
+          ref_rider_user?: string | null
           service: string
           status?: string
           total_idr?: number
@@ -2189,6 +2201,12 @@ export type Database = {
           plate?: string
           rating?: number | null
           rating_note?: string
+          ref_driver_bix?: number
+          ref_driver_usdt?: number
+          ref_driver_user?: string | null
+          ref_rider_bix?: number
+          ref_rider_usdt?: number
+          ref_rider_user?: string | null
           service?: string
           status?: string
           total_idr?: number
@@ -4078,6 +4096,7 @@ export type Database = {
         }
         Returns: string
       }
+      bixgo_driver_set_city: { Args: { p_city: string }; Returns: undefined }
       bixgo_driver_set_online: { Args: { p_online: boolean }; Returns: boolean }
       bixgo_driver_set_rates: {
         Args: { p_adj: number; p_bix: boolean; p_cash: boolean }
@@ -4093,6 +4112,7 @@ export type Database = {
         Args: { p_id: string; p_note: string; p_rating: number }
         Returns: undefined
       }
+      bixgo_ref_stats: { Args: never; Returns: Json }
       bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_can_bypass: { Args: never; Returns: boolean }
