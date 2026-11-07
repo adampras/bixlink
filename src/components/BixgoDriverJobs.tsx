@@ -14,6 +14,8 @@ export function jobChime() {
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { payKind, type PayKind } from '@/lib/bixgo-pay';
+import { BixgoEarnings } from '@/components/BixgoEarnings';
+import { earningsTotals } from '@/lib/bixgo-earnings';
 
 type Job = { id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; fare_idr?: number; pay_method?: string; status: string; fare_usdt: number; driver_usdt: number; fare_bix?: number; driver_bix?: number; gas_bix?: number; created_at: string; completed_at?: string | null; pickup_note?: string; rating?: number | null; rating_note?: string; owner_usdt?: number; owner_bix?: number };
 const SVC: Record<string, string> = { ride: 'Ride', car: 'Car', food: 'Food', send: 'Send', mart: 'Mart' };
@@ -26,7 +28,6 @@ const BADGE: Record<PayKind, string> = { usdt: 'USDT · Auto hold', bix: 'BIX To
 
 /** Driver order desk: accept open trips, start, complete. USDT/BIX fares settle 85% to driver; cash trips charge the company fee in BIX on accept. */
 export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean; adj?: number; onRating?: (r: { avg: number | null; n: number }) => void }) {
-  const [range, setRange] = useState<'today' | 'week' | 'all'>('week');
   const [open, setOpen] = useState<Job[]>([]);
   const [mine, setMine] = useState<Job[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
@@ -57,8 +58,9 @@ export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean
 
   const active = mine.filter(j => j.status === 'assigned' || j.status === 'in_transit');
   const done = mine.filter(j => j.status === 'completed');
-  const earned = done.reduce((a, j) => a + Number(j.driver_usdt), 0);
-  const earnedBix = done.reduce((a, j) => a + Number(j.driver_bix ?? 0), 0);
+  const totals = earningsTotals(done);
+  const earned = totals.usdt;
+  const earnedBix = totals.bix;
   const Btn = ({ id, onClick, children, ghost }: { id: string; onClick: () => void; children: React.ReactNode; ghost?: boolean }) =>
     <button disabled={busy === id} onClick={onClick} className={`flex flex-1 items-center justify-center gap-1 rounded-full py-2 text-xs font-bold ${ghost ? 'border border-border text-muted-foreground' : 'bg-primary text-primary-foreground'}`}>{busy === id ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : children}</button>;
   const Pay = ({ j }: { j: Job }) => { const k = payKind(j.pay_method); return <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wide ${k === 'cash' ? 'border-destructive/50 text-destructive' : 'border-primary/50 text-primary'}`}>{BADGE[k]}</span>; };
@@ -72,8 +74,8 @@ export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean
 
   return <div className="space-y-3">
     <div className="grid grid-cols-3 gap-2 text-center tabular-nums">
-      <div className="rounded-xl border border-primary/30 p-2"><b className="block text-sm text-primary">{usdt(earned)}</b><span className="text-[10px] text-muted-foreground">USDT earned (85%)</span></div>
-      <div className="rounded-xl border border-primary/30 p-2"><b className="block text-sm text-primary">{bixf(earnedBix)}</b><span className="text-[10px] text-muted-foreground">BIX earned (85%)</span></div>
+      <div className="rounded-xl border border-primary/30 p-2"><b className="block text-sm text-primary">{usdt(earned)}</b><span className="text-[10px] text-muted-foreground">USDT received</span></div>
+      <div className="rounded-xl border border-primary/30 p-2"><b className="block text-sm text-primary">{bixf(earnedBix)}</b><span className="text-[10px] text-muted-foreground">BIX received</span></div>
       <div className="rounded-xl border border-border p-2"><b className="block text-sm">{done.length}</b><span className="text-[10px] text-muted-foreground">Completed</span></div>
     </div>
 
@@ -102,24 +104,7 @@ export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean
         <Btn id={j.id} onClick={() => void accept(j)}>Accept order</Btn>
       </div>; })}</div>
     </div>
-    <div className="rounded-2xl border border-border p-3">
-      <div className="flex items-center justify-between"><h4 className="text-xs font-black">Earnings slip</h4>
-        <div className="flex gap-1">{(['today', 'week', 'all'] as const).map(r => <button key={r} onClick={() => setRange(r)} className={`rounded-full border px-2 py-0.5 text-[10px] ${range === r ? 'border-primary bg-primary/15 font-bold' : 'border-border'}`}>{r === 'today' ? 'Today' : r === 'week' ? '7 days' : 'All'}</button>)}</div></div>
-      {(() => {
-        const since = range === 'today' ? new Date(new Date().toDateString()).getTime() : range === 'week' ? Date.now() - 7 * 864e5 : 0;
-        const rows = done.filter(j => new Date(j.completed_at ?? j.created_at).getTime() >= since);
-        if (!rows.length) return <p className="mt-2 text-[11px] text-muted-foreground">No completed trips in this period.</p>;
-        return <ul className="mt-2 space-y-2">{rows.map(j => { const k = payKind(j.pay_method); const gross = k === 'bix' ? bixf(j.fare_bix ?? 0) : k === 'cash' ? rp(j.fare_idr ?? j.total_idr) : usdt(j.fare_usdt);
-          const fee = k === 'bix' ? bixf(j.owner_bix ?? 0) : k === 'cash' ? bixf(j.gas_bix ?? 0) : usdt(j.owner_usdt ?? 0);
-          const net = k === 'bix' ? bixf(j.driver_bix ?? 0) : k === 'cash' ? `${rp(j.fare_idr ?? j.total_idr)} cash` : usdt(j.driver_usdt);
-          return <li key={j.id} className="rounded-xl border border-border p-2 text-[10px] tabular-nums">
-            <p className="flex justify-between font-bold"><span>{SVC[j.service] ?? j.service} · #{j.id.slice(0, 6).toUpperCase()}</span><span>{new Date(j.completed_at ?? j.created_at).toLocaleString()}</span></p>
-            <p className="truncate text-muted-foreground">{j.pickup} → {j.dropoff} · {Number(j.km).toFixed(1)} km</p>
-            <div className="mt-1 grid grid-cols-3 gap-1 text-center"><span>Fare<b className="block">{gross}</b></span><span>Fee 15%<b className="block text-muted-foreground">{fee}</b></span><span>You (85%)<b className="block text-primary">{net}</b></span></div>
-            {j.rating && <p className="mt-1 text-primary">{'★'.repeat(j.rating)}{j.rating_note ? ` · “${j.rating_note}”` : ''}</p>}
-          </li>; })}</ul>;
-      })()}
-    </div>
+    <BixgoEarnings trips={mine}/>
     <p className="text-[10px] text-muted-foreground">USDT/BIX orders hold the passenger's fare; on completion 85% goes to you and 15% to BIXLINK. Cash orders take the BIXLINK fee from your BIX balance when you accept. Releasing an order returns everything held.</p>
   </div>;
 }

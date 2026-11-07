@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeft, Bell, Briefcase, ChevronRight, ClipboardList, Home, MessageSquare, Plus, ScanLine, Search, Star, User, ShoppingBasket, Utensils } from 'lucide-react';
+import { ArrowLeft, Bell, Briefcase, ChevronRight, ClipboardList, Home, MessageSquare, Plus, ScanLine, Search, Star, User, ShoppingBasket, Utensils, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import type { BixgoService } from '@/lib/bixgo';
 import icRide from '@/assets/bixgo/ic-ride.png';
 import icFood from '@/assets/bixgo/ic-food.png';
@@ -21,12 +22,12 @@ import promo from '@/assets/bixgo/promo.jpg';
 
 export type BixgoView = 'home' | 'order' | 'activity' | 'inbox' | 'account';
 
-const TILES: { label: string; img: string; svc?: BixgoService }[] = [
-  { label: 'Bike', img: icRide, svc: 'ride' }, { label: 'Food', img: icFood, svc: 'food' },
-  { label: 'Express', img: icSend, svc: 'send' }, { label: 'Jastip', img: icJastip },
-  { label: 'Car', img: icCar, svc: 'car' },
-  { label: 'Mart', img: icMart, svc: 'mart' }, { label: 'Pulsa & bills', img: icBills },
-  { label: 'Travel & eSIM', img: icCash },
+const TILES: { label: string; img: string; svc?: BixgoService; keywords: string }[] = [
+  { label: 'Bike', img: icRide, svc: 'ride', keywords: 'bixride motor ojek ride transport' }, { label: 'Food', img: icFood, svc: 'food', keywords: 'bixfood makanan makan delivery' },
+  { label: 'Express', img: icSend, svc: 'send', keywords: 'bixsend kirim paket kurir send' }, { label: 'Jastip', img: icJastip, keywords: 'titip belanja shopping' },
+  { label: 'Car', img: icCar, svc: 'car', keywords: 'bixcar mobil taxi taksi transport' },
+  { label: 'Mart', img: icMart, svc: 'mart', keywords: 'bixmart groceries belanja toko' }, { label: 'Pulsa & bills', img: icBills, keywords: 'tagihan ppob listrik data' },
+  { label: 'Travel & eSIM', img: icCash, keywords: 'hotel perjalanan liburan roaming' },
 ];
 
 type Card = { img: string; name: string; promo?: string; ad?: boolean; rating?: number; km?: number; kind: 'food' | 'mart'; svc: BixgoService; brand?: boolean };
@@ -43,21 +44,25 @@ const FEED: Card[] = [
 
 export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<BixgoService>; balance: string; onPick: (s: BixgoService) => void; onSoon: (label: string) => void }) {
   const [q, setQ] = useState('');
-  const feed = FEED.filter(c => !q || c.name.toLowerCase().includes(q.toLowerCase()));
+  const query = q.trim().toLowerCase();
+  const tiles = TILES.filter(t => !query || `${t.label} ${t.keywords}`.toLowerCase().includes(query));
+  const feed = FEED.filter(c => !query || `${c.name} ${c.kind} ${c.svc}`.toLowerCase().includes(query));
   return <>
     <header className="px-3 pt-3">
-      <label className="mt-3 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5">
+      <div className="mt-3 flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1">
         <Search className="h-4 w-4 text-muted-foreground"/>
-        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search food, shopping, or services" className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"/>
-      </label>
+        <input aria-label="Search BIXGO" type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Motor, car, food, Jastip…" className="min-w-0 w-full bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"/>
+        {q && <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" aria-label="Clear search" title="Clear search" onClick={() => setQ('')}><X/></Button>}
+      </div>
     </header>
     <section className="no-scrollbar overflow-x-auto px-2 pt-4">
       <div className="grid grid-cols-4 gap-y-3">
-        {TILES.map(t => <button key={t.label} onClick={() => t.svc && enabled.has(t.svc) ? onPick(t.svc) : onSoon(t.label)} className="flex flex-col items-center gap-1 text-center active:scale-95 transition">
+        {tiles.map(t => <Button variant="ghost" key={t.label} onClick={() => t.svc && enabled.has(t.svc) ? onPick(t.svc) : onSoon(t.label)} className="h-auto min-w-0 flex-col gap-1 px-1 py-2 text-center active:scale-95 transition">
           <img src={t.img} alt="" width={56} height={56} className="h-14 w-14 object-contain drop-shadow-md"/>
-          <span className="text-[12px] font-semibold leading-tight">{t.label}</span>
-        </button>)}
+          <span className="whitespace-normal text-[12px] font-semibold leading-tight">{t.label}</span>
+        </Button>)}
       </div>
+      {query && <p role="status" className="mt-2 px-2 text-xs text-muted-foreground">{tiles.length + feed.length ? `${tiles.length} services · ${feed.length} preview listings` : 'No matches. Try motor, car, food, or Jastip.'}</p>}
     </section>
     <section className="no-scrollbar mt-4 flex gap-2 overflow-x-auto px-3">
       <Link to="/wallet" className="min-w-[132px] rounded-2xl border border-border bg-card px-3 py-2.5"><p className="text-[11px] text-muted-foreground">Balance</p><p className="flex items-center justify-between text-sm font-bold">{balance}<span className="ml-2 inline-block h-5 w-5 rounded-full border-4" style={{ borderColor: 'var(--bixgo-wallet)' }}/></p></Link>

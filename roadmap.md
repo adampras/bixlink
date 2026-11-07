@@ -169,3 +169,4 @@
 - [ ] Confirm BNB login on physical TokenPocket/Trust/MetaMask/Bitget wallets — waits on owner device testing; injected-provider flow is verified.
 - [x] Enable signature-verified wallet auto-registration with wallet username and optional name/WhatsApp/recovery email; mobile/desktop registration, profile save and repeat same-account login verified, 12 tests passed, no automatic reward rows or roles. Physical wallet and real-email confirmation delivery remain owner-device checks.
 - [x] Deposit route builder: Model 1 quota L6+ preview, Model 2 free ID + downline
+- [x] Continue BIXGO: quick service search and driver earnings slips with period totals, payment filters, trip detail and CSV export; settlement unchanged. Ten tests pass; desktop/mobile search, Jastip entry and authenticated approved-driver filters checked. Actual-trip receipt/export awaits an authorized completed trip; no financial records created.
