@@ -27,7 +27,7 @@ function SwipeRow({ children, count }: { children: React.ReactNode; count: numbe
 }
 
 /** Mobile dock HUB (replaces HOME): opens owner-selected shortcuts. */
-export function DockHub({ path, cfg, order }: { path: string; cfg?: Record<string, boolean> | undefined; order?: string[] }) {
+export function DockHub({ path, cfg, order }: { path: string; cfg?: Record<string, boolean> | undefined; order?: string[] | undefined }) {
   const [open, setOpen] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   useEffect(() => { if (open) { try { setRecent(JSON.parse(localStorage.getItem(RECENT_KEY) || '[]')); } catch { setRecent([]); } } }, [open]);
