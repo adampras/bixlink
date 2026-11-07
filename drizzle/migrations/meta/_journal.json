@@ -1170,6 +1170,13 @@
       "when": 1794043785450,
       "tag": "0166_bixgo_driver_reapply",
       "breakpoints": true
+    },
+    {
+      "idx": 167,
+      "version": "7",
+      "when": 1794045714852,
+      "tag": "0167_bixgo_driver_ready",
+      "breakpoints": true
     }
   ]
 }

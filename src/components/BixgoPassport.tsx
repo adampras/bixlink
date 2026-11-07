@@ -6,6 +6,7 @@ import { formatMoney, GLOBAL_CITIES, type GlobalCurrency } from '@/lib/bixgo-glo
 import { DRIVER_SHARE_PCT, driverEarning, nextTier, tierFor } from '@/lib/bixgo-tier';
 import { BixgoDriverJobs } from '@/components/BixgoDriverJobs';
 import { BixgoDriverRates } from '@/components/BixgoDriverRates';
+import { BixgoDriverReady } from '@/components/BixgoDriverReady';
 
 type License = { status: string; online: boolean; vehicle_type: string; vehicle_model: string; plate: string; city: string; operator_note: string; mode: string; rate_adj_pct?: number; accept_cash?: boolean; accept_bix?: boolean };
 const VEHICLES = [['moto', 'BIX Moto'], ['urban', 'BIX Urban'], ['executive', 'BIX Executive'], ['black', 'BIX Black']] as const;
@@ -19,6 +20,7 @@ export function BixgoPassport({ cur, usdtIdr, city }: { cur: GlobalCurrency; usd
   const [earn, setEarn] = useState({ n: 0, fare: 0 });
   const [form, setForm] = useState({ full_name: '', phone: '', vehicle_type: 'moto', vehicle_model: '', plate: '', mode: 'self' });
   const [busy, setBusy] = useState(false);
+  const [rating, setRating] = useState<{ avg: number | null; n: number }>({ avg: null, n: 0 });
   const money = (n: number) => formatMoney(n, cur, usdtIdr);
 
   const load = async () => {
@@ -89,9 +91,10 @@ export function BixgoPassport({ cur, usdtIdr, city }: { cur: GlobalCurrency; usd
         {lic.operator_note && lic.status !== 'rejected' && lic.status !== 'suspended' && <p className="text-muted-foreground">Operator: {lic.operator_note}</p>}
         {lic.status === 'pending' && <p className="text-muted-foreground">Your application is waiting for operator review.</p>}
         {lic.status === 'approved' && <>
+          <BixgoDriverReady lic={lic} uid={uid} rating={rating}/>
           <button disabled={busy} onClick={() => void toggle()} className={`flex w-full items-center justify-center gap-2 rounded-full py-3 font-bold ${lic.online ? 'bg-primary text-primary-foreground' : 'border border-primary text-primary'}`}><Power className="h-4 w-4"/>{lic.online ? 'Driver Mode ON — receiving orders' : 'Go online'}</button>
           <BixgoDriverRates key={`${lic.rate_adj_pct}-${lic.accept_cash}-${lic.accept_bix}`} adj={Number(lic.rate_adj_pct ?? 0)} cash={lic.accept_cash ?? true} bix={lic.accept_bix ?? true} onSaved={() => void load()}/>
-          <BixgoDriverJobs online={lic.online} adj={Number(lic.rate_adj_pct ?? 0)}/>
+          <BixgoDriverJobs online={lic.online} adj={Number(lic.rate_adj_pct ?? 0)} onRating={setRating}/>
         </>}
       </div>}
     </div>

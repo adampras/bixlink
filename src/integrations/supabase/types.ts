@@ -2117,7 +2117,10 @@ export type Database = {
           owner_user_id: string | null
           pay_method: string
           pickup: string
+          pickup_note: string
           plate: string
+          rating: number | null
+          rating_note: string
           service: string
           status: string
           total_idr: number
@@ -2148,7 +2151,10 @@ export type Database = {
           owner_user_id?: string | null
           pay_method?: string
           pickup?: string
+          pickup_note?: string
           plate?: string
+          rating?: number | null
+          rating_note?: string
           service: string
           status?: string
           total_idr?: number
@@ -2179,7 +2185,10 @@ export type Database = {
           owner_user_id?: string | null
           pay_method?: string
           pickup?: string
+          pickup_note?: string
           plate?: string
+          rating?: number | null
+          rating_note?: string
           service?: string
           status?: string
           total_idr?: number
@@ -4021,6 +4030,10 @@ export type Database = {
         Returns: undefined
       }
       bixgo_passenger_cancel: { Args: { p_id: string }; Returns: undefined }
+      bixgo_rate_trip: {
+        Args: { p_id: string; p_note: string; p_rating: number }
+        Returns: undefined
+      }
       bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_can_bypass: { Args: never; Returns: boolean }

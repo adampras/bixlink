@@ -27,6 +27,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
   const [results, setResults] = useState<Place[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState('');
+  const [landmark, setLandmark] = useState('');
   const [route, setRoute] = useState<{ km: number; min: number | null; path: [number, number][] | null; road: boolean } | null>(null);
   const [sel, setSel] = useState(OPTS.findIndex(o => o.svc === start));
   const [pay, setPay] = useState(0);
@@ -121,9 +122,10 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
         <button onClick={() => setPay(p => (p + 1) % PAYS.length)} className="flex flex-1 items-center gap-2 font-bold"><span className="rounded-md bg-foreground px-1.5 text-[10px] text-background">{PAYS[pay]}</span>{PAYS[pay]}{pay === 1 && <span className="text-[10px] text-primary">−{cfg.bixDiscountPct}%</span>}</button>
         <MoreHorizontal className="ml-2 h-5 w-5"/>
       </div>
+      <input value={landmark} maxLength={120} onChange={e => setLandmark(e.target.value)} placeholder="Pickup landmark (e.g. in front of the black gate)" className="mt-2 w-full rounded-full border border-border bg-card px-4 py-2 text-xs outline-none"/>
       <div className="mt-2 flex gap-2">
         <button aria-label="Schedule" className="grid h-12 w-14 place-items-center rounded-full bg-card"><CalendarClock className="h-5 w-5"/></button>
-        <button disabled={busy === 'book'} onClick={async () => { const total = Math.round(price(cur).final); setBusy('book'); const { data: u } = await supabase.auth.getUser(); if (u.user) { const { data, error } = await supabase.from('bixgo_bookings').insert({ city, service: cur.svc, vehicle: cur.name, pickup: (from?.name ?? '').slice(0, 200), dropoff: (to?.name ?? '').slice(0, 200), km: +km.toFixed(2), total_idr: total, pay_method: PAYS[pay]! }).select('id').single(); if (error) { setErr(error.message); setBusy(null); return; } setRef(data.id.slice(0, 8).toUpperCase()); } setBusy(null); onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total, pay: PAYS[pay]!, name: cur.name }); setStage('booked'); }} className="flex-1 rounded-full bg-primary py-3 text-base font-bold text-primary-foreground">Book {cur.name}</button>
+        <button disabled={busy === 'book'} onClick={async () => { const total = Math.round(price(cur).final); setBusy('book'); const { data: u } = await supabase.auth.getUser(); if (u.user) { const { data, error } = await supabase.from('bixgo_bookings').insert({ city, service: cur.svc, vehicle: cur.name, pickup: (from?.name ?? '').slice(0, 200), dropoff: (to?.name ?? '').slice(0, 200), km: +km.toFixed(2), total_idr: total, pay_method: PAYS[pay]!, pickup_note: landmark.trim().slice(0, 120) }).select('id').single(); if (error) { setErr(error.message); setBusy(null); return; } setRef(data.id.slice(0, 8).toUpperCase()); } setBusy(null); onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total, pay: PAYS[pay]!, name: cur.name }); setStage('booked'); }} className="flex-1 rounded-full bg-primary py-3 text-base font-bold text-primary-foreground">Book {cur.name}</button>
       </div>
     </footer>}
   </div>;

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { CarFront, Loader2, MessageCircle, Phone, Radar, X, CheckCircle2, Navigation } from 'lucide-react';
+import { CarFront, Loader2, MessageCircle, Phone, Radar, X, CheckCircle2, Navigation, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { startBixCall } from '@/components/BixCall';
 
-type Trip = { id: string; status: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; pay_method: string | null; driver_name: string; plate: string; driver_user_id: string | null; created_at: string };
+type Trip = { id: string; status: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; pay_method: string | null; driver_name: string; plate: string; driver_user_id: string | null; created_at: string; rating?: number | null };
 
 const STEPS = ['pending', 'assigned', 'in_transit', 'completed'] as const;
 const LABEL: Record<string, string> = { pending: 'Searching for a driver…', assigned: 'Driver is on the way', in_transit: 'On the trip', completed: 'Trip completed', cancelled: 'Cancelled' };
@@ -16,9 +16,11 @@ export function BixgoActiveTrip() {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [busy, setBusy] = useState(false);
   const last = useRef('');
+  const [stars, setStars] = useState(0);
+  const [review, setReview] = useState('');
   const load = async () => {
     const { data: u } = await supabase.auth.getUser(); if (!u.user) return;
-    const { data } = await supabase.from('bixgo_bookings').select('id,status,vehicle,pickup,dropoff,km,total_idr,pay_method,driver_name,plate,driver_user_id,created_at,completed_at')
+    const { data } = await supabase.from('bixgo_bookings').select('id,status,vehicle,pickup,dropoff,km,total_idr,pay_method,driver_name,plate,driver_user_id,created_at,completed_at,rating')
       .eq('user_id', u.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
     const t = data as (Trip & { completed_at: string | null }) | null;
     const fresh = t && (['pending', 'assigned', 'in_transit'].includes(t.status) || (t.status === 'completed' && t.completed_at && Date.now() - new Date(t.completed_at).getTime() < 30 * 60_000));
@@ -30,6 +32,7 @@ export function BixgoActiveTrip() {
   if (!trip) return null;
   const idx = STEPS.indexOf(trip.status as typeof STEPS[number]);
   const name = trip.driver_name || 'Driver';
+  const rate = async () => { setBusy(true); const { error } = await supabase.rpc('bixgo_rate_trip', { p_id: trip.id, p_rating: stars, p_note: review }); setBusy(false); if (error) toast.error(error.message); else { toast.success('Rating sent'); void load(); } };
   const cancel = async () => { setBusy(true); const { error } = await supabase.rpc('bixgo_passenger_cancel', { p_id: trip.id }); setBusy(false); if (error) toast.error(error.message); else { toast.success('Request cancelled'); void load(); } };
 
   return <section className="bixgo-trip mx-3 my-3 rounded-3xl border border-primary/40 bg-card/90 p-4 shadow-lg backdrop-blur" aria-label="Active trip">
@@ -57,6 +60,14 @@ export function BixgoActiveTrip() {
       </>}
       {trip.status === 'pending' && <button disabled={busy} onClick={() => void cancel()} className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-destructive/50 py-2.5 text-sm font-bold text-destructive">{busy ? <Loader2 className="h-4 w-4 animate-spin"/> : <X className="h-4 w-4"/>}Cancel request</button>}
     </div>
+    {trip.status === 'completed' && trip.driver_user_id && <div className="mt-3 rounded-2xl border border-primary/30 p-3 text-center">
+      {trip.rating ? <p className="text-xs font-bold text-primary">Thanks! You rated {'★'.repeat(trip.rating)}</p> : <>
+        <p className="text-xs font-bold">Rate {name}</p>
+        <div className="mt-1 flex justify-center gap-1">{[1, 2, 3, 4, 5].map(r => <button key={r} aria-label={`${r} stars`} onClick={() => setStars(r)}><Star className={`h-7 w-7 ${stars >= r ? 'fill-primary text-primary' : 'text-muted-foreground'}`}/></button>)}</div>
+        <input value={review} maxLength={200} onChange={e => setReview(e.target.value)} placeholder="Short feedback (optional)" className="form-input mt-2 text-xs"/>
+        <button disabled={!stars || busy} onClick={() => void rate()} className="mt-2 w-full rounded-full bg-primary py-2 text-xs font-bold text-primary-foreground disabled:opacity-50">Send rating</button>
+      </>}
+    </div>}
     <p className="mt-2 text-[10px] text-muted-foreground">Calls and chats go through BIX CALL — your phone number stays private.</p>
   </section>;
 }

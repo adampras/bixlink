@@ -117,6 +117,14 @@ function BixgoPage() {
   const canOrder = from.trim() && to.trim() && (!shop || items.length > 0);
   const add = (id: string, d: number) => setCart(c => { const n = Math.max(0, (c[id] ?? 0) + d); const x = { ...c, [id]: n }; if (!n) delete x[id]; return x; });
   const reset = () => { setStep('form'); setFrom(''); setTo(''); setCart({}); setNote(''); };
+  const dispatch = async () => {
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) { setStep('search'); return; }
+    const detail = [note.trim(), items.map(i => `${cart[i.id]}× ${i.name}`).join(', ')].filter(Boolean).join(' · ').slice(0, 120);
+    const { error } = await supabase.from('bixgo_bookings').insert({ city, service: svc, vehicle: meta.name, pickup: from.trim().slice(0, 200), dropoff: to.trim().slice(0, 200), km, total_idr: total, pay_method: payBix ? 'BIX Token' : 'Cash', pickup_note: detail });
+    if (error) { toast.error(error.message); return; }
+    toast.success(`${meta.name} request sent to BIX Moto drivers in your city`); reset(); go('home');
+  };
   const finish = () => { persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc, from, to, total, pay: payBix ? 'BIX' : 'IDR/USDT' }, ...orders]); setStep('done'); };
   const rate = (r: number) => { const [first, ...rest] = orders; if (first) persist([{ ...first, rating: r }, ...rest]); };
   const pos = step === 'track' ? 10 + stage * 27 : 9;
@@ -197,7 +205,8 @@ function BixgoPage() {
         <div className="flex justify-between text-muted-foreground"><span>≈ USDT</span><span>{usdt} USDT</span></div>
       </div>
 
-      {step === 'form' && <Button className="mt-3 w-full" disabled={!canOrder} onClick={() => setStep('search')}>{shop ? `Order ${meta.name}` : `Find ${meta.name} partner`}</Button>}
+      {step === 'form' && <Button className="mt-3 w-full" disabled={!canOrder} onClick={() => void dispatch()}>{shop ? `Order ${meta.name}` : `Find ${meta.name} partner`}</Button>}
+      {step === 'form' && <p className="mt-2 text-center text-[10px] text-muted-foreground">Signed-in orders go to real BIX Moto drivers. Pay the driver in cash, or with BIX (held on accept).</p>}
       {step === 'search' && <div className="mt-3 animate-pulse rounded-2xl border border-border p-3 text-center text-sm">Searching nearby partners…</div>}
       {step === 'track' && <div className="mt-3 rounded-2xl border border-primary/40 p-3 text-xs">
         <p className="text-sm font-semibold">{partner} · demo partner ★4.9</p>
