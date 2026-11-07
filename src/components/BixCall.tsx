@@ -202,7 +202,9 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   /** Remote volume: earpiece mode is softer; loudspeaker is full; lowered while a howl is detected. */
   const applyVolume = () => {
     // Full volume in every mode (video calls run on the loudspeaker and need the most headroom).
-    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? 0.8 : 1; });
+    // Echo-safe levels: earpiece softer, loudspeaker below max so the phone's echo canceller can keep up; lower further on howl.
+    const base = loudRef.current ? 0.85 : 0.6;
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? base * 0.6 : base; });
   };
   const attachAudio = (t: RemoteTrack) => {
     const box = audioBox.current; if (!box) return;
@@ -294,7 +296,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 96000, priority: 'high' } } as never);
         // Lock the phone's own echo canceller / noise suppressor / high-pass on (Chrome flags), so loudspeaker video calls stay echo-free.
         { const mt = room.localParticipant.getTrackPublication(Track.Source.Microphone)?.track?.mediaStreamTrack;
-          void mt?.applyConstraints({ echoCancellation: true, noiseSuppression: true, autoGainControl: true, googEchoCancellation: true, googEchoCancellation2: true, googNoiseSuppression: true, googNoiseSuppression2: true, googHighpassFilter: true, googAutoGainControl: true, googAutoGainControl2: true, googTypingNoiseDetection: true } as never).catch(() => {}); }
+          if (mt && 'contentHint' in mt) mt.contentHint = 'speech'; }
         if (call.kind === 'video') await startCam(room, true);
         if (!cancelled) setLink('on');
       } catch { if (!cancelled) setLink('fail'); }
@@ -356,9 +358,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     if (n === loudRef.current) return;
     setLoud(n); loudRef.current = n;
     void roomRef.current?.startAudio().catch(() => {});
-    let sinkId = '';
-    if (n) { try { const outs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audiooutput'); sinkId = outs.find(d => /speaker|pengeras/i.test(d.label))?.deviceId ?? ''; } catch { /* unsupported */ } }
-    audioBox.current?.querySelectorAll('audio').forEach(a => { const s = a as HTMLAudioElement & { setSinkId?: (id: string) => Promise<void> }; void s.setSinkId?.(sinkId).catch(() => {}); void a.play().catch(() => {}); });
+    // Keep the default output device: switching sinkId detaches the playback from the phone's echo canceller reference (→ echo).
+    audioBox.current?.querySelectorAll('audio').forEach(a => { void a.play().catch(() => {}); });
     applyVolume();
   };
   // Auto loudspeaker: video on → speaker; voice call follows the phone (laid flat = speaker, at the ear = earpiece).
