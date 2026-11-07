@@ -196,6 +196,13 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     await supabase.rpc('bix_chat_send' as never, { p_to: call.peerId, p_body: text, p_reply: null } as never);
     onDecline();
   };
+  const [micLow, setMicLow] = useState(false);
+  const micLowRef = useRef(false);
+  const micRef = useRef(true); micRef.current = mic;
+  const [myLevel, setMyLevel] = useState(0);
+  const [studio, setStudio] = useState(true);
+  const [split, setSplit] = useState(false);
+  const [vh, setVh] = useState(0);
   const [loud, setLoud] = useState(false);
   const loudRef = useRef(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
@@ -236,7 +243,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   // Remote voice level: drives the waveform and the "Ruang Dekat" half-duplex duck.
   useEffect(() => {
     if (link !== 'on') return;
-    let hang = 0, both = 0;
+    let hang = 0, both = 0, quiet = 0;
     const t = setInterval(() => {
       const r = roomRef.current; if (!r) return;
       let m = 0; r.remoteParticipants.forEach(p => { m = Math.max(m, p.audioLevel ?? 0); });
@@ -251,6 +258,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       const base = loudRef.current ? 0.9 : 0.8;
       const vol = h ? base * 0.45 : base;
       if (h !== howlRef.current) { howlRef.current = h; setHowl(h); }
+      // Smart voice hint: mic on but almost silent for ~8 s while the peer is quiet too.
+      if (micRef.current && me < 0.006 && m < 0.02) quiet++; else quiet = 0;
+      const low = quiet >= 53;
+      if (low !== micLowRef.current) { micLowRef.current = low; setMicLow(low); }
+      setMyLevel(me);
       audioBox.current?.querySelectorAll('audio').forEach(a => { if (Math.abs(a.volume - vol) > 0.02) a.volume = vol; });
     }, 150);
     return () => clearInterval(t);
@@ -320,6 +332,18 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   }, [live, call.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { if (!live) return; const t = setInterval(() => setSecs(s => s + 1), 1000); return () => clearInterval(t); }, [live]);
+  // Auto-hide controls during video after 5 s of no touch; any tap brings them back.
+  useEffect(() => {
+    if (!(live && remoteVideo) || hideUi) return;
+    const t = setTimeout(() => setHideUi(true), 5000);
+    return () => clearTimeout(t);
+  }, [live, remoteVideo, hideUi, cam, split, studio]);
+  // Real received resolution for the HD badge.
+  useEffect(() => {
+    if (!remoteVideo) { setVh(0); return; }
+    const t = setInterval(() => setVh(remoteV.current?.videoHeight ?? 0), 2000);
+    return () => clearInterval(t);
+  }, [remoteVideo]);
 
   const toggleMic = async () => {
     const n = !mic; setMic(n);
@@ -403,7 +427,15 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const dragPip = (e: React.PointerEvent) => {
     const sx = e.clientX - pip.x, sy = e.clientY - pip.y, ox = e.clientX, oy = e.clientY; let moved = false;
     const move = (m: PointerEvent) => { if (Math.abs(m.clientX - ox) + Math.abs(m.clientY - oy) > 8) moved = true; if (moved) setPip({ x: m.clientX - sx, y: m.clientY - sy }); };
-    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); if (!moved) { setSwapped(v => !v); try { navigator.vibrate?.(12); } catch { /* unsupported */ } } };
+    const up = (u: PointerEvent) => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up);
+      if (moved) {
+        // Magnetic snap to the nearest corner (pip rests top-right at 0,0).
+        const W = window.innerWidth, H = window.innerHeight;
+        const left = u.clientX < W / 2, bottom = u.clientY > H / 2;
+        setPip({ x: left ? -(W - 96 - 28) : 0, y: bottom ? Math.max(0, H - 150 - 80 - 220) : 0 });
+        try { navigator.vibrate?.(8); } catch { /* unsupported */ }
+      }
+      if (!moved) { setSwapped(v => !v); try { navigator.vibrate?.(12); } catch { /* unsupported */ } } };
     window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
   };
 
@@ -415,11 +447,19 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const wa = call.whatsapp?.replace(/[^0-9]/g, '');
 
   const showVideo = live && remoteVideo;
-  const sw = swapped && showVideo && cam;
-  return <div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}`} role="dialog" aria-label="BIX CALL" onPointerDownCapture={() => { if (live) unlockAudio(); }}>
+  const sw = swapped && showVideo && cam && !split;
+  const isSplit = split && showVideo && cam;
+  const hdLabel = vh >= 700 ? 'HD 720p' : vh >= 460 ? 'SD 480p' : vh > 0 ? `${vh}p` : '';
+  return <div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}${isSplit ? ' is-split' : ''}${studio ? ' is-studio' : ''}`} style={{ ['--me' as string]: Math.min(1, myLevel * 4), ['--lvl' as string]: Math.min(1, level * 3) }} role="dialog" aria-label="BIX CALL" onPointerDownCapture={() => { if (live) unlockAudio(); }}>
     <video ref={backV} className={`bixcall-back${showVideo && !fill ? " on" : ""}`} autoPlay playsInline muted aria-hidden="true"/>
     <video ref={remoteV} className={sw ? 'bixcall-pip is-peer' : `bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} style={sw ? { transform: `translate(${pip.x}px, ${pip.y}px)` } : undefined} onPointerDown={sw ? dragPip : undefined} autoPlay playsInline onClick={() => { if (showVideo && !sw) setHideUi(v => !v); }} onDoubleClick={() => { if (!sw) setFill(v => !v); }}/>
     {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Show in full' : 'Penuhi layar'}>{fill ? '⤡ Sudut lega' : '⤢ Layar penuh'}</button>}
+    {live && link === 'on' && cam && <div className="bc-vtools">
+      <button type="button" aria-pressed={studio} className={studio ? 'on' : ''} onClick={() => setStudio(v => !v)}>✦ Studio</button>
+      {showVideo && <button type="button" aria-pressed={split} className={split ? 'on' : ''} onClick={() => setSplit(v => !v)}>◫ Split</button>}
+    </div>}
+    {live && link === 'on' && <div className="bc-telemetry" aria-label="Call quality"><i className={`is-${quality}`}/>{hdLabel || (anyVideo ? 'HD' : 'HD VOICE')} · Opus 48k</div>}
+    {micLow && live && link === 'on' && <div className="bc-mic-hint" role="status">Your voice is too quiet: bring the mic closer or check it is not covered</div>}
     <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>
     {audioBlocked && live && <button type="button" className="bc-pill is-chat" style={{ position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 5 }} onClick={unlockAudio}><Volume2 size={16}/> Tap for sound</button>}
     {live && link === 'on' && remoteVideo && !cam && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
@@ -442,7 +482,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     </div>}
     <div className="bixcall-status"><i className={dot}/>{statusText}</div>
     {howl && live && <div className="bc-howl" role="status">Echo is automatically reduced</div>}
-    {cam && live && <video ref={localV} className={sw ? 'bixcall-remote on bixcall-self-big' : 'bixcall-pip'} style={sw ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})` }} onPointerDown={sw ? undefined : dragPip} onClick={() => { if (sw) setHideUi(v => !v); }} autoPlay playsInline muted/>}
+    {cam && live && <video ref={localV} className={sw ? 'bixcall-remote on bixcall-self-big' : isSplit ? 'bixcall-split-self' : 'bixcall-pip bc-self-glow'} style={sw || isSplit ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})`, transition: 'transform .16s ease-out' }} onPointerDown={sw || isSplit ? undefined : dragPip} onClick={() => { if (sw) setHideUi(v => !v); }} autoPlay playsInline muted/>}
     <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}`}>
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Sorry, I am busy right now. I will call you back.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Decline with message</button>}
