@@ -4003,6 +4003,18 @@ export type Database = {
         Returns: Json
       }
       bixgo_driver_jobs: { Args: never; Returns: Json }
+      bixgo_driver_reapply: {
+        Args: {
+          p_city: string
+          p_full_name: string
+          p_mode: string
+          p_phone: string
+          p_plate: string
+          p_vehicle_model: string
+          p_vehicle_type: string
+        }
+        Returns: string
+      }
       bixgo_driver_set_online: { Args: { p_online: boolean }; Returns: boolean }
       bixgo_driver_set_rates: {
         Args: { p_adj: number; p_bix: boolean; p_cash: boolean }

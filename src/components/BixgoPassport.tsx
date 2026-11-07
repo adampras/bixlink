@@ -44,6 +44,13 @@ export function BixgoPassport({ cur, usdtIdr, city }: { cur: GlobalCurrency; usd
     const { error } = await supabase.from('bixgo_driver_licenses').insert({ ...form, city, full_name: form.full_name.trim().slice(0, 80), phone: form.phone.trim().slice(0, 30), plate: form.plate.trim().slice(0, 20), vehicle_model: form.vehicle_model.trim().slice(0, 60) });
     setBusy(false); if (error) toast.error(error.message); else { toast.success('License application sent for review'); void load(); }
   };
+  const [redo, setRedo] = useState(false);
+  const startRedo = () => { if (!lic) return; const l = lic as License & { full_name?: string; phone?: string }; setForm({ full_name: l.full_name ?? '', phone: l.phone ?? '', vehicle_type: l.vehicle_type, vehicle_model: l.vehicle_model, plate: l.plate, mode: l.mode || 'self' }); setRedo(true); };
+  const reapply = async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc('bixgo_driver_reapply', { p_full_name: form.full_name, p_phone: form.phone, p_vehicle_type: form.vehicle_type, p_vehicle_model: form.vehicle_model, p_plate: form.plate, p_mode: form.mode, p_city: city });
+    setBusy(false); if (error) toast.error(error.message); else { toast.success('Application resubmitted for review'); setRedo(false); void load(); }
+  };
   const toggle = async () => { if (!lic) return; setBusy(true); const { error } = await supabase.rpc('bixgo_driver_set_online', { p_online: !lic.online }); setBusy(false); if (error) toast.error(error.message); else void load(); };
 
   if (!uid) return <section className="mx-4 mt-3 rounded-3xl border border-primary/30 bg-card p-4 text-xs text-muted-foreground">Sign in to open your BIXGO Passport and Driver Mode.</section>;
@@ -63,16 +70,23 @@ export function BixgoPassport({ cur, usdtIdr, city }: { cur: GlobalCurrency; usd
     <div className="rounded-3xl border border-border bg-card p-4 text-xs">
       <h3 className="flex items-center gap-2 text-sm font-black"><ShieldCheck className="h-4 w-4 text-primary"/>Driver-Partner License</h3>
       {!lic && !tier.driverLicense && <p className="mt-2 text-muted-foreground">Available from Pro Navigator (active staking of $100 or more). Licensed drivers keep {DRIVER_SHARE_PCT}% of each completed fare.</p>}
-      {!lic && tier.driverLicense && <div className="mt-2 space-y-2">
+      {((!lic && tier.driverLicense) || redo) && <div className="mt-2 space-y-2">
         <p className="text-muted-foreground">Drive yourself or register a fleet driver. You keep {DRIVER_SHARE_PCT}% of completed fares; fares are held from the passenger's USDT wallet and settled to you on completion.</p>
         <div className="grid grid-cols-2 gap-1">{VEHICLES.map(([k, l]) => <button key={k} onClick={() => setForm({ ...form, vehicle_type: k })} className={`flex items-center justify-center gap-1 rounded-xl border py-2 ${form.vehicle_type === k ? 'border-primary bg-primary/15 font-bold' : 'border-border'}`}>{k === 'moto' ? <Bike className="h-4 w-4"/> : <CarFront className="h-4 w-4"/>}{l}</button>)}</div>
         <div className="grid grid-cols-2 gap-1">{([['self', 'I drive'], ['fleet', 'Fleet driver']] as const).map(([k, l]) => <button key={k} onClick={() => setForm({ ...form, mode: k })} className={`rounded-xl border py-2 ${form.mode === k ? 'border-primary bg-primary/15 font-bold' : 'border-border'}`}>{l}</button>)}</div>
         {(['full_name', 'phone', 'vehicle_model', 'plate'] as const).map(k => <input key={k} className="form-input" maxLength={80} placeholder={{ full_name: 'Driver full name', phone: 'Phone / WhatsApp', vehicle_model: 'Vehicle model (e.g. Honda Vario)', plate: 'Plate number' }[k]} value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })}/>)}
-        <button disabled={busy} onClick={() => void apply()} className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-50">{busy ? <Loader2 className="mx-auto h-4 w-4 animate-spin"/> : `Apply in ${GLOBAL_CITIES.find(c => c.id === city)?.city ?? 'my city'}`}</button>
+        <button disabled={busy} onClick={() => void (redo ? reapply() : apply())} className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-50">{busy ? <Loader2 className="mx-auto h-4 w-4 animate-spin"/> : redo ? 'Resubmit application' : `Apply in ${GLOBAL_CITIES.find(c => c.id === city)?.city ?? 'my city'}`}</button>
+        {redo && <button onClick={() => setRedo(false)} className="w-full rounded-full border border-border py-2 text-muted-foreground">Cancel</button>}
       </div>}
-      {lic && <div className="mt-2 space-y-2">
+      {lic && !redo && <div className="mt-2 space-y-2">
         <p><b>{VEHICLES.find(v => v[0] === lic.vehicle_type)?.[1]}</b> · {lic.vehicle_model} · {lic.plate} · <span className="font-bold uppercase text-primary">{lic.status}</span></p>
-        {lic.operator_note && <p className="text-muted-foreground">Operator: {lic.operator_note}</p>}
+        {lic.status === 'rejected' && <div className="rounded-2xl border border-destructive/50 bg-destructive/10 p-3">
+          <b className="block text-destructive">Application not approved yet</b>
+          <p className="mt-1">{lic.operator_note ? `Reason: ${lic.operator_note}` : 'The operator did not add a reason. Please check your details and try again.'}</p>
+          <button onClick={startRedo} className="mt-2 w-full rounded-full bg-primary py-2.5 font-bold text-primary-foreground">Fix &amp; resubmit</button>
+        </div>}
+        {lic.status === 'suspended' && <p className="rounded-2xl border border-destructive/50 bg-destructive/10 p-3">Your driver license is suspended{lic.operator_note ? `: ${lic.operator_note}` : '.'} Contact the operator to reactivate.</p>}
+        {lic.operator_note && lic.status !== 'rejected' && lic.status !== 'suspended' && <p className="text-muted-foreground">Operator: {lic.operator_note}</p>}
         {lic.status === 'pending' && <p className="text-muted-foreground">Your application is waiting for operator review.</p>}
         {lic.status === 'approved' && <>
           <button disabled={busy} onClick={() => void toggle()} className={`flex w-full items-center justify-center gap-2 rounded-full py-3 font-bold ${lic.online ? 'bg-primary text-primary-foreground' : 'border border-primary text-primary'}`}><Power className="h-4 w-4"/>{lic.online ? 'Driver Mode ON — receiving orders' : 'Go online'}</button>
