@@ -8,6 +8,7 @@ import { BIXGO_SERVICES, bixgoFare, readBixgo, type BixgoService, type BixgoSett
 import { ArrowLeft, Bike, Car, CheckCircle2, Construction, History, MapPin, Minus, Navigation, Package, Plus, ShoppingBasket, Star, UtensilsCrossed } from 'lucide-react';
 import { toast } from 'sonner';
 import { BixgoRideBooking } from '@/components/BixgoRideBooking';
+import { BixgoActiveTrip } from '@/components/BixgoActiveTrip';
 import { BixgoBills } from '@/components/BixgoBills';
 import { BixgoHero } from '@/components/BixgoHero';
 import { BixgoPassport } from '@/components/BixgoPassport';
@@ -138,6 +139,7 @@ function BixgoPage() {
     {(sub === 'ride' || sub === 'car') && <BixgoRideBooking cfg={cfg} start={sub} cur={cur} city={city} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
     {!sub && <>
     {view === 'home' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
+    {(view === 'home' || view === 'activity') && <BixgoActiveTrip/>}
     {view === 'home' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
     {view === 'inbox' && <BixgoInbox/>}
     {view === 'account' && <><BixgoPassport cur={cur} usdtIdr={cfg.usdtIdr} city={city}/><BixgoAccount name={memberName} balance="View balance" onBack={() => go('home')} onSoon={soon}/></>}

@@ -1,5 +1,16 @@
-import { useCallback, useEffect, useState } from 'react';
-import { CheckCircle2, Loader2, MapPin, Navigation, Play, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from '@tanstack/react-router';
+import { CheckCircle2, Loader2, MapPin, MessageCircle, Navigation, Phone, Play, X } from 'lucide-react';
+import { startBixCall } from '@/components/BixCall';
+
+/** Three-note radar chime for a new order (Web Audio, no downloads). */
+function jobChime() {
+  try {
+    const c = new AudioContext();
+    [880, 1175, 1568].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + i * 0.18; o.frequency.value = f; g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.4); });
+    setTimeout(() => void c.close(), 1500);
+  } catch { /* audio unavailable */ }
+}
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { payKind, type PayKind } from '@/lib/bixgo-pay';
@@ -17,12 +28,21 @@ export function BixgoDriverJobs({ online, adj = 0 }: { online: boolean; adj?: nu
   const [open, setOpen] = useState<Job[]>([]);
   const [mine, setMine] = useState<Job[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [pax, setPax] = useState<Record<string, string>>({});
+  const seen = useRef(new Set<string>());
+  const primed = useRef(false);
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('bixgo_driver_jobs');
     if (error) return;
     const d = data as { open: Job[]; mine: Job[] };
-    setOpen(d.open ?? []); setMine(d.mine ?? []);
-  }, []);
+    const nextOpen = d.open ?? [];
+    const fresh = nextOpen.filter(j => !seen.current.has(j.id));
+    if (primed.current && fresh.length && online) { jobChime(); navigator.vibrate?.([300, 120, 300, 120, 300]); toast.success(`New order · ${fresh[0]!.pickup}`); }
+    nextOpen.forEach(j => seen.current.add(j.id)); primed.current = true;
+    setOpen(nextOpen); setMine(d.mine ?? []);
+    const act = (d.mine ?? []).filter(j => j.status === 'assigned' || j.status === 'in_transit').map(j => j.id);
+    if (act.length) { const { data: rows } = await supabase.from('bixgo_bookings').select('id,user_id').in('id', act); setPax(Object.fromEntries((rows ?? []).map(r => [r.id, r.user_id]))); }
+  }, [online]);
   useEffect(() => { void load(); const t = setInterval(() => void load(), 10_000); return () => clearInterval(t); }, [load, online]);
 
   const act = async (id: string, fn: () => PromiseLike<{ error: { message: string } | null }>, ok: string) => {
@@ -58,6 +78,10 @@ export function BixgoDriverJobs({ online, adj = 0 }: { online: boolean; adj?: nu
       {payKind(j.pay_method) === 'cash' && <p className="text-[10px] text-muted-foreground">Fee paid: {bixf(j.gas_bix ?? 0)}. Collect {rp(j.fare_idr ?? j.total_idr)} cash from the passenger.</p>}
       <Route j={j}/>
       <a href={nav(j.status === 'assigned' ? j.pickup : j.dropoff)} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1 rounded-full border border-primary py-2 text-xs font-bold text-primary"><Navigation className="h-3.5 w-3.5"/>Voice navigation</a>
+      {pax[j.id] && <div className="flex gap-2">
+        <button onClick={() => startBixCall(pax[j.id]!, 'Passenger', 'voice')} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary/15 py-2 text-xs font-bold text-primary"><Phone className="h-3.5 w-3.5"/>Call passenger</button>
+        <Link to="/call" search={{ chat: pax[j.id]!, n: 'Passenger' }} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary/15 py-2 text-xs font-bold text-primary"><MessageCircle className="h-3.5 w-3.5"/>Chat</Link>
+      </div>}
       <div className="flex gap-2">
         {j.status === 'assigned' && <><Btn id={j.id} onClick={() => void advance(j.id, 'in_transit', 'Trip started')}><Play className="h-3.5 w-3.5"/>Start trip</Btn><Btn ghost id={j.id} onClick={() => void advance(j.id, 'cancelled', 'Order released · amounts returned')}><X className="h-3.5 w-3.5"/>Release</Btn></>}
         {j.status === 'in_transit' && <Btn id={j.id} onClick={() => void advance(j.id, 'completed', 'Trip completed')}><CheckCircle2 className="h-3.5 w-3.5"/>Confirm completed</Btn>}

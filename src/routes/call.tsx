@@ -326,6 +326,8 @@ function RingSetting() {
 const QUICK = ['Halo! 👋', 'Can you talk now?', 'Sebentar ya', 'Siap 👍', 'Cek BIX PAY 🪙', 'Thank you 🙏'];
 function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; name: string }; tier: Tier | null; onBack: () => void }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [calls, setCalls] = useState<Row[]>([]);
+  const tick = useRef(0);
   const [text, setText] = useState('');
   const [err, setErr] = useState('');
   const [canCall, setCanCall] = useState(false);
@@ -351,6 +353,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       const { data } = await supabase.from('bix_messages' as never).select('*').or(`and(sender_id.eq.${me},recipient_id.eq.${peer.id}),and(sender_id.eq.${peer.id},recipient_id.eq.${me})`).order('created_at', { ascending: false }).limit(80);
       setMsgs(((data as Msg[] | null) ?? []).filter(m => !(m.hidden_by ?? []).includes(me)).reverse());
       void supabase.rpc('bix_chat_read' as never, { p_peer: peer.id } as never);
+      if (++tick.current % 5 === 1) { const { data: cl } = await supabase.from('bix_calls' as never).select('id,caller_id,callee_id,kind,status,created_at').or(`and(caller_id.eq.${me},callee_id.eq.${peer.id}),and(caller_id.eq.${peer.id},callee_id.eq.${me})`).order('created_at', { ascending: false }).limit(30); setCalls((cl as Row[] | null) ?? []); }
     };
     if (!me) return;
     void load(); void sync(false);
@@ -528,7 +531,13 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     {pinned && <button type="button" className="comm-pinbar" onClick={() => jump(pinned.id)}><b>📌 Disematkan</b><span>{pinned.body}</span></button>}
     <div className="comm-msgs">
       {msgs.length === 0 && <p className="text-center text-xs text-muted-foreground">Mulai percakapan dengan @{name}</p>}
-      {msgs.map(m => {
+      {[...msgs.map(m => ({ at: m.created_at, m, c: null as Row | null })), ...calls.map(c => ({ at: c.created_at, m: null as Msg | null, c }))].sort((a, b) => a.at.localeCompare(b.at)).map(({ m, c }) => {
+        if (c) { const out = c.caller_id === me; const missed = ['missed', 'declined', 'cancelled', 'ringing'].includes(c.status); return <div key={`call-${c.id}`} className={`comm-calllog ${missed ? 'is-missed' : ''}`}>
+          <span>{c.kind === 'video' ? <Video size={14}/> : <Phone size={14}/>}{missed ? (out ? 'Panggilan tidak dijawab' : 'Panggilan tak terjawab') : out ? 'Panggilan keluar' : 'Panggilan masuk'} · {c.kind === 'video' ? 'Video' : 'Suara'}</span>
+          <small>{new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+          <button type="button" aria-label="Panggil balik" onClick={() => startBixCall(peer.id, name, c.kind === 'video' ? 'video' : 'voice')}>Panggil balik</button>
+        </div>; }
+        if (!m) return null;
         const mine = m.sender_id === me;
         const q = m.reply_to ? findMsg(m.reply_to) : undefined;
         return <p key={m.id} id={`msg-${m.id}`} onDoubleClick={() => { if (!m.deleted_at && !locked) void react(m, '❤️'); }} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
@@ -563,7 +572,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     {replyTo && <div className="comm-replybar"><span><b>↩ Membalas {replyTo.sender_id === me ? 'diri sendiri' : `@${name}`}</b>{replyTo.body}</span><button type="button" aria-label="Batal balas" onClick={() => setReplyTo(null)}>✕</button></div>}
     {!locked && !recording && !replyTo && <div className="comm-quick">{QUICK.map(q => <button key={q} type="button" onClick={() => onType(text ? `${text} ${q}` : q)}>{q}</button>)}</div>}
     <form className="comm-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
-      <span className="bc-plus-wrap"><button type="button" aria-label="Lampiran" className="bc-plus" onClick={() => setMenuOpen(v => !v)} disabled={locked}>+</button>
+      <span className="bc-plus-wrap"><button type="button" aria-label="Lampiran" className="bc-plus" onClick={() => setMenuOpen(v => !v)} disabled={locked}>+</button><button type="button" aria-label="BIX PAY" className="bc-plus bc-pay-quick" onClick={() => setPayOpen(v => !v)} disabled={locked}><Coins size={16}/></button>
         {menuOpen && <span className="bc-menu" role="menu"><button type="button" onClick={() => { setMenuOpen(false); setPayOpen(true); }}><Coins size={15}/>BIX PAY</button><button type="button" disabled={busy} onClick={() => { setMenuOpen(false); fileRef.current?.click(); }}><ImagePlus size={15}/>Galeri</button><button type="button" disabled={busy} onClick={() => { setMenuOpen(false); camRef.current?.click(); }}><Camera size={15}/>Kamera</button><button type="button" disabled={busy} onClick={() => { setMenuOpen(false); docRef.current?.click(); }}><Paperclip size={15}/>Dokumen</button></span>}</span>
       <input ref={fileRef} type="file" accept="image/*,video/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>
       <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>

@@ -1156,6 +1156,13 @@
       "when": 1794027513550,
       "tag": "0164_deposit_route_smart_preview",
       "breakpoints": true
+    },
+    {
+      "idx": 165,
+      "version": "7",
+      "when": 1794029874151,
+      "tag": "0165_bixgo_passenger_cancel",
+      "breakpoints": true
     }
   ]
 }

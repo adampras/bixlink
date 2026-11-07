@@ -4008,6 +4008,7 @@ export type Database = {
         Args: { p_adj: number; p_bix: boolean; p_cash: boolean }
         Returns: undefined
       }
+      bixgo_passenger_cancel: { Args: { p_id: string }; Returns: undefined }
       bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_can_bypass: { Args: never; Returns: boolean }
