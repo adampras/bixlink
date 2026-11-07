@@ -253,15 +253,14 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       // Anti-feedback: when both sides are loud at once (phones close together loop each other), duck playback.
       const me = r.localParticipant.audioLevel ?? 0;
       // Only very loud, sustained overlap (~1.5 s) counts as a loop, so normal two-way talk is never muted.
-      if (me > 0.18 && m > 0.18) both++; else both = Math.max(0, both - 1);
-      const h = both >= 7;
+      // Loop detector: loud overlap for ~0.6 s = phones feeding each other; hold the duck ~2 s after it stops.
+      if (me > 0.12 && m > 0.12) both = Math.min(20, both + 1); else both = Math.max(0, both - 1);
+      if (both >= 4) quiet = 14; else if (quiet > 0) quiet--;
+      const h = quiet > 0;
       const base = loudRef.current ? 0.9 : 0.8;
-      const vol = h ? base * 0.45 : base;
+      const vol = h ? base * 0.2 : base;
       if (h !== howlRef.current) { howlRef.current = h; setHowl(h); }
-      // Smart voice hint: mic on but almost silent for ~8 s while the peer is quiet too.
-      if (micRef.current && me < 0.006 && m < 0.02) quiet++; else quiet = 0;
-      const low = quiet >= 53;
-      if (low !== micLowRef.current) { micLowRef.current = low; setMicLow(low); }
+      if (micLowRef.current) { micLowRef.current = false; setMicLow(false); }
       setMyLevel(me);
       audioBox.current?.querySelectorAll('audio').forEach(a => { if (Math.abs(a.volume - vol) > 0.02) a.volume = vol; });
     }, 150);
@@ -366,9 +365,13 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       setCam(false); return;
     }
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
-      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 900_000 : 2_500_000, maxFramerate: res.frameRate, priority: 'high' } as never,
-        videoSimulcastLayers: [{ width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 800_000, maxFramerate: 30 } }] as never });
-    const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
+      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 1_000_000 : 3_000_000, maxFramerate: res.frameRate, priority: 'high' } as never,
+        videoSimulcastLayers: [
+          { width: 320, height: 180, resolution: { width: 320, height: 180, frameRate: 20 }, encoding: { maxBitrate: 250_000, maxFramerate: 20 } },
+          { width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 900_000, maxFramerate: 30 } },
+        ] as never });
+    // 'motion' keeps frames smooth and low-latency instead of stalling to hold detail.
+    const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'motion';
     setCam(on);
   };
   const toggleCam = async () => {
@@ -459,7 +462,6 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       {showVideo && <button type="button" aria-pressed={split} className={split ? 'on' : ''} onClick={() => setSplit(v => !v)}>◫ Split</button>}
     </div>}
     {live && link === 'on' && <div className="bc-telemetry" aria-label="Call quality"><i className={`is-${quality}`}/>{hdLabel || (anyVideo ? 'HD' : 'HD VOICE')} · Opus 48k</div>}
-    {micLow && live && link === 'on' && <div className="bc-mic-hint" role="status">Your voice is too quiet: bring the mic closer or check it is not covered</div>}
     <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>
     {audioBlocked && live && <button type="button" className="bc-pill is-chat" style={{ position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 5 }} onClick={unlockAudio}><Volume2 size={16}/> Tap for sound</button>}
     {live && link === 'on' && remoteVideo && !cam && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
