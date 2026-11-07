@@ -40,5 +40,8 @@ export function BixgoHero({ cfg, city, cur, onCity, onCur, isAdmin }: { cfg: Bix
       <Link to="/wallet" className="bixgo-hero-chip flex items-center justify-center gap-1 rounded-xl py-2"><QrCode className="h-4 w-4"/>BIX PAY</Link>
       <span className="bixgo-hero-chip flex items-center justify-center gap-1 rounded-xl py-2"><ShieldCheck className="h-4 w-4"/>Verified</span>
     </div>
+    <div className="no-scrollbar relative mt-3 flex gap-1.5 overflow-x-auto text-[10px] font-semibold">
+      {['Tarif per km lebih hemat', `Diskon ${cfg.bixDiscountPct}% bayar BIX`, 'Tanpa tarif lonjakan', 'Driver terima 85%', 'Telepon & chat privat', 'Lacak perjalanan live'].map(t => <span key={t} className="bixgo-hero-chip shrink-0 rounded-full px-2.5 py-1">✦ {t}</span>)}
+    </div>
   </section>;
 }

@@ -57,13 +57,14 @@ export const DEFAULT_FRANCHISES: BixgoFranchise[] = REGION_CITIES.map(c => ({
 }));
 
 export const BIXGO_DEFAULTS: BixgoSettings = {
-  enabled: false, notice: '', commissionPct: 15, bixDiscountPct: 10, usdtIdr: 16_000,
+  enabled: true, notice: '', commissionPct: 15, bixDiscountPct: 10, usdtIdr: 16_000,
+  // Set slightly below typical Gojek/Grab zone rates (~Rp2,500/km bike, ~Rp4,000+/km car).
   services: {
-    ride: { enabled: true, baseIdr: 10_000, perKmIdr: 2_800 },
-    car: { enabled: true, baseIdr: 18_000, perKmIdr: 5_500 },
-    food: { enabled: true, baseIdr: 9_000, perKmIdr: 2_000 },
-    send: { enabled: true, baseIdr: 10_000, perKmIdr: 2_500 },
-    mart: { enabled: true, baseIdr: 9_000, perKmIdr: 2_000 },
+    ride: { enabled: true, baseIdr: 9_000, perKmIdr: 2_300 },
+    car: { enabled: true, baseIdr: 15_000, perKmIdr: 3_800 },
+    food: { enabled: true, baseIdr: 8_000, perKmIdr: 1_800 },
+    send: { enabled: true, baseIdr: 9_000, perKmIdr: 2_200 },
+    mart: { enabled: true, baseIdr: 8_000, perKmIdr: 1_800 },
   },
   franchises: DEFAULT_FRANCHISES,
   ppob: { enabled: false, live: false, marginIdr: 1_000 },

@@ -32,6 +32,9 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
   const filtered = rows.filter(r => (city === 'all' || r.city === city) && (status === 'all' || r.status === status));
   const live = rows.filter(r => r.status === 'pending' || r.status === 'assigned' || r.status === 'in_transit');
   const summary = useMemo(() => GLOBAL_CITIES.map(c => { const done = rows.filter(r => r.city === c.id && r.status === 'completed'); const gross = done.reduce((a, r) => a + Number(r.total_idr), 0); const f = s.franchises?.find(x => x.id === c.id); const comm = gross * s.commissionPct / 100; return { c, n: rows.filter(r => r.city === c.id).length, done: done.length, gross, comm, fr: comm * (f?.franchisePct ?? 0) / 100 }; }), [rows, s]);
+  const [q, setQ] = useState('');
+  const hit = (c: (typeof GLOBAL_CITIES)[number]) => { const t = q.trim().toLowerCase(); return !t || `${c.city} ${c.country} ${(c as { province?: string }).province ?? ''}`.toLowerCase().includes(t); };
+  const match = q.trim() ? GLOBAL_CITIES.filter(hit).slice(0, 20) : [];
   const pricing = s.cityPricing ?? DEFAULT_CITY_PRICING;
   const setP = (id: string, k: 'mult' | 'minIdr', v: number) => setS({ ...s, cityPricing: { ...pricing, [id]: { ...(pricing[id] ?? { mult: 1, minIdr: 0 }), [k]: v } } });
 
@@ -69,7 +72,9 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
 
       {tab === 'pricing' && <div className="space-y-2">
         <p className="text-muted-foreground">Base fare × city multiplier, never below the city minimum. Base/per-km fares per service are set below in BIXGO Super-App.</p>
-        {GLOBAL_CITIES.map(c => <div key={c.id} className="grid grid-cols-[1fr_80px_110px] items-end gap-2 rounded-xl border border-border p-2">
+        <input className="form-input" placeholder={`Cari kota / provinsi (${GLOBAL_CITIES.length})`} value={q} onChange={e => setQ(e.target.value)}/>
+        {!match.length && <p className="text-center text-muted-foreground">Tidak ditemukan.</p>}
+        {match.map(c => <div key={c.id} className="grid grid-cols-[1fr_80px_110px] items-end gap-2 rounded-xl border border-border p-2">
           <b>{c.city}<span className="block font-normal text-muted-foreground">{c.country}</span></b>
           <label>× Mult<input className="form-input mt-1" type="number" step="0.1" value={pricing[c.id]?.mult ?? 1} onChange={e => setP(c.id, 'mult', Number(e.target.value))}/></label>
           <label>Min (Rp)<input className="form-input mt-1" type="number" value={pricing[c.id]?.minIdr ?? 0} onChange={e => setP(c.id, 'minIdr', Number(e.target.value))}/></label>
@@ -79,7 +84,8 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
       </div>}
 
       {tab === 'history' && <div className="space-y-2">
-        <div className="grid grid-cols-2 gap-1">{summary.map(x => <div key={x.c.id} className="rounded-xl border border-border p-2"><b>{x.c.city}</b><p className="text-muted-foreground">{x.n} bookings · {x.done} done</p><p>Gross {money(x.gross)}</p><p className="text-muted-foreground">Commission {money(x.comm)} · Franchise {money(x.fr)}</p></div>)}</div>
+        <input className="form-input" placeholder="Cari kota / provinsi" value={q} onChange={e => setQ(e.target.value)}/>
+        <div className="grid grid-cols-2 gap-1">{summary.filter(x => hit(x.c) && (q.trim() || x.n > 0)).slice(0, 12).map(x => <div key={x.c.id} className="rounded-xl border border-border p-2"><b>{x.c.city}</b><p className="text-muted-foreground">{x.n} bookings · {x.done} done</p><p>Gross {money(x.gross)}</p><p className="text-muted-foreground">Commission {money(x.comm)} · Franchise {money(x.fr)}</p></div>)}</div>
         <div className="flex gap-1"><select className="form-input" value={city} onChange={e => setCity(e.target.value)}><option value="all">All cities</option>{GLOBAL_CITIES.map(c => <option key={c.id} value={c.id}>{c.city}</option>)}</select>
           <select className="form-input" value={status} onChange={e => setStatus(e.target.value)}><option value="all">All status</option>{STATUS.map(x => <option key={x} value={x}>{LABEL[x]}</option>)}</select></div>
         {filtered.slice(0, 80).map(b => <div key={b.id} className="flex justify-between gap-2 border-b border-border py-1"><span className="min-w-0 truncate">{new Date(b.created_at).toLocaleDateString()} · {b.city} · {b.vehicle || BIXGO_SERVICES.find(x => x.key === b.service)?.name} · {LABEL[b.status]}</span><b className="shrink-0">{money(Number(b.total_idr))}</b></div>)}
