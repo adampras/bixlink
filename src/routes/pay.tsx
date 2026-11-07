@@ -47,7 +47,7 @@ function PayPage() {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const qrUrl = data?.code ? `${origin}/pay?to=${data.code}${Number(reqAmount) > 0 ? `&amount=${Number(reqAmount)}` : ''}${reqNote ? `&note=${encodeURIComponent(reqNote.slice(0, 120))}` : ''}` : '';
 
-  useEffect(() => { const p = parse(window.location.href); if (p) { setCode(p.code); if (p.amount) setAmount(String(p.amount)); if (p.note) setNote(p.note); } }, []);
+  useEffect(() => { const held = sessionStorage.getItem('bixgo_scan'); sessionStorage.removeItem('bixgo_scan'); const p = parse(held || window.location.href); if (p) { setCode(p.code); if (p.amount) setAmount(String(p.amount)); if (p.note) setNote(p.note); } }, []);
 
   const gate = () => { if (!enabled) { setMsg('Coming soon — BIX PAY is not open yet.'); return false; } return true; };
   const review = async () => {

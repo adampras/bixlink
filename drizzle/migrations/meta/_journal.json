@@ -1177,6 +1177,13 @@
       "when": 1794045714852,
       "tag": "0167_bixgo_driver_ready",
       "breakpoints": true
+    },
+    {
+      "idx": 168,
+      "version": "7",
+      "when": 1794049784410,
+      "tag": "0168_bixgo_jastip",
+      "breakpoints": true
     }
   ]
 }

@@ -2258,6 +2258,60 @@ export type Database = {
         }
         Relationships: []
       }
+      bixgo_jastip_requests: {
+        Row: {
+          city: string
+          created_at: string
+          driver_user_id: string | null
+          dropoff: string
+          fee_idr: number
+          id: string
+          item: string
+          item_budget_idr: number
+          note: string | null
+          pay_method: string
+          qty: number
+          status: string
+          store: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          driver_user_id?: string | null
+          dropoff: string
+          fee_idr?: number
+          id?: string
+          item: string
+          item_budget_idr?: number
+          note?: string | null
+          pay_method?: string
+          qty?: number
+          status?: string
+          store: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          driver_user_id?: string | null
+          dropoff?: string
+          fee_idr?: number
+          id?: string
+          item?: string
+          item_budget_idr?: number
+          note?: string | null
+          pay_method?: string
+          qty?: number
+          status?: string
+          store?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bixtok_comments: {
         Row: {
           author_name: string
@@ -4027,6 +4081,11 @@ export type Database = {
       bixgo_driver_set_online: { Args: { p_online: boolean }; Returns: boolean }
       bixgo_driver_set_rates: {
         Args: { p_adj: number; p_bix: boolean; p_cash: boolean }
+        Returns: undefined
+      }
+      bixgo_jastip_cancel: { Args: { _id: string }; Returns: undefined }
+      bixgo_jastip_set_status: {
+        Args: { _id: string; _status: string }
         Returns: undefined
       }
       bixgo_passenger_cancel: { Args: { p_id: string }; Returns: undefined }

@@ -6,12 +6,10 @@ import icRide from '@/assets/bixgo/ic-ride.png';
 import icFood from '@/assets/bixgo/ic-food.png';
 import icSend from '@/assets/bixgo/ic-send.png';
 import icJastip from '@/assets/bixgo/ic-jastip.png';
-import icDine from '@/assets/bixgo/ic-dine.png';
 import icCar from '@/assets/bixgo/ic-car.png';
 import icMart from '@/assets/bixgo/ic-mart.png';
 import icBills from '@/assets/bixgo/ic-bills.png';
 import icCash from '@/assets/bixgo/ic-cash.png';
-import icHealth from '@/assets/bixgo/ic-health.png';
 import m1 from '@/assets/bixgo/m1.jpg';
 import m2 from '@/assets/bixgo/m2.jpg';
 import m3 from '@/assets/bixgo/m3.jpg';
@@ -20,16 +18,15 @@ import m5 from '@/assets/bixgo/m5.jpg';
 import m6 from '@/assets/bixgo/m6.jpg';
 import m7 from '@/assets/bixgo/m7.jpg';
 import promo from '@/assets/bixgo/promo.jpg';
-import heroImg from '@/assets/bixgo/hero-mobility.jpg';
 
 export type BixgoView = 'home' | 'order' | 'activity' | 'inbox' | 'account';
 
 const TILES: { label: string; img: string; svc?: BixgoService }[] = [
   { label: 'Bike', img: icRide, svc: 'ride' }, { label: 'Food', img: icFood, svc: 'food' },
   { label: 'Express', img: icSend, svc: 'send' }, { label: 'Jastip', img: icJastip },
-  { label: 'Dine Out', img: icDine }, { label: 'Car', img: icCar, svc: 'car' },
+  { label: 'Car', img: icCar, svc: 'car' },
   { label: 'Mart', img: icMart, svc: 'mart' }, { label: 'Pulsa & bills', img: icBills },
-  { label: 'Travel & eSIM', img: icCash }, { label: 'Health', img: icHealth },
+  { label: 'Travel & eSIM', img: icCash },
 ];
 
 type Card = { img: string; name: string; promo?: string; ad?: boolean; rating?: number; km?: number; kind: 'food' | 'mart'; svc: BixgoService; brand?: boolean };
@@ -49,32 +46,19 @@ export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<B
   const feed = FEED.filter(c => !q || c.name.toLowerCase().includes(q.toLowerCase()));
   return <>
     <header className="px-3 pt-3">
-      <div className="relative overflow-hidden rounded-3xl p-4 text-primary-foreground shadow-lg" style={{ background: 'var(--bixgo-header)' }}>
-        <div className="flex items-center gap-3">
-          <Link to="/" aria-label="Kembali" className="grid h-9 w-9 place-items-center rounded-full bg-background/25 backdrop-blur"><ArrowLeft className="h-5 w-5"/></Link>
-          <span className="rounded-full bg-background/25 px-3 py-1 text-[11px] font-bold tracking-widest">BIXGO</span>
-        </div>
-        <img src={heroImg} alt="" width={1024} height={768} className="bixgo-green-art pointer-events-none absolute inset-y-0 right-0 h-full w-[68%] object-cover"/>
-        <div className="relative max-w-[62%]">
-          <h1 className="mt-4 text-2xl font-black leading-tight">Where are you going today?</h1>
-          <p className="text-xs opacity-90">Ride · Food · Send · Mart in one app</p>
-          <div className="mt-3 flex flex-wrap gap-1.5 text-[10px] font-bold"><span className="rounded-full bg-background/25 px-2 py-0.5 backdrop-blur">● 24/7 Dispatch</span><span className="rounded-full bg-background/25 px-2 py-0.5 backdrop-blur">ID · MY</span></div>
-        </div>
-      </div>
       <label className="mt-3 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5">
         <Search className="h-4 w-4 text-muted-foreground"/>
         <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search food, shopping, or services" className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"/>
       </label>
     </header>
     <section className="no-scrollbar overflow-x-auto px-2 pt-4">
-      <div className="grid w-max grid-flow-col grid-rows-2 gap-x-1 gap-y-3">
-        {TILES.map(t => <button key={t.label} onClick={() => t.svc && enabled.has(t.svc) ? onPick(t.svc) : onSoon(t.label)} className="flex w-[78px] flex-col items-center gap-1 text-center active:scale-95 transition">
+      <div className="grid grid-cols-4 gap-y-3">
+        {TILES.map(t => <button key={t.label} onClick={() => t.svc && enabled.has(t.svc) ? onPick(t.svc) : onSoon(t.label)} className="flex flex-col items-center gap-1 text-center active:scale-95 transition">
           <img src={t.img} alt="" width={56} height={56} className="h-14 w-14 object-contain drop-shadow-md"/>
           <span className="text-[12px] font-semibold leading-tight">{t.label}</span>
         </button>)}
       </div>
     </section>
-    <div className="mt-3 flex justify-center gap-1"><span className="h-1 w-5 rounded-full bg-foreground"/><span className="h-1 w-1 rounded-full bg-muted-foreground"/></div>
     <section className="no-scrollbar mt-4 flex gap-2 overflow-x-auto px-3">
       <Link to="/wallet" className="min-w-[132px] rounded-2xl border border-border bg-card px-3 py-2.5"><p className="text-[11px] text-muted-foreground">Balance</p><p className="flex items-center justify-between text-sm font-bold">{balance}<span className="ml-2 inline-block h-5 w-5 rounded-full border-4" style={{ borderColor: 'var(--bixgo-wallet)' }}/></p></Link>
       <Link to="/wallet" className="min-w-[160px] rounded-2xl border border-border bg-card px-3 py-2.5"><p className="text-[11px] text-muted-foreground">Top Up</p><p className="flex items-center justify-between text-sm font-bold">in BIX Wallet<Plus className="ml-2 h-5 w-5 rounded bg-primary p-0.5 text-primary-foreground"/></p></Link>
@@ -114,32 +98,26 @@ export function BixgoAccount({ name, balance, onBack, onSoon }: { name: string; 
     <div className="px-4 pt-3"><button aria-label="Back" onClick={onBack}><ArrowLeft className="h-6 w-6"/></button></div>
     <div className="mx-4 mt-3 rounded-3xl bg-card p-4 shadow-sm">
       <div className="flex items-center gap-3"><span className="grid h-14 w-14 place-items-center rounded-full bg-primary text-primary-foreground"><User className="h-8 w-8"/></span><b className="flex-1 text-lg">{name}</b><Link to="/profile" className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary">Profile</Link></div>
-      <button onClick={() => onSoon('BIXGO VIP')} className="mt-3 w-full rounded-full border border-border px-3 py-1.5 text-left text-xs font-semibold">✦ Join BIXGO Unlimited</button>
     </div>
     <div className="no-scrollbar mt-3 flex gap-3 overflow-x-auto px-4">
       <div className="min-w-[150px] rounded-2xl border border-border bg-card p-3"><div className="flex justify-between"><span className="inline-block h-8 w-8 rounded-full border-[6px]" style={{ borderColor: 'var(--bixgo-wallet)' }}/><span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold">Utama</span></div><p className="mt-3 font-bold">BIX Wallet</p><p className="text-sm text-muted-foreground">{balance}</p></div>
       <Link to="/pay" className="min-w-[150px] rounded-2xl p-3 text-primary-foreground" style={{ background: 'var(--bixgo-header)' }}><p className="mt-11 font-bold">BIX PAY</p><p className="text-sm opacity-90">Bayar & transfer</p></Link>
-      <button onClick={() => onSoon('Add method')} className="min-w-[120px] rounded-2xl border border-border bg-card p-3 text-left"><Plus className="h-6 w-6 text-primary"/><p className="mt-6 text-sm font-bold">Add method</p></button>
-    </div>
-    <div className="mx-4 mt-3 space-y-2">
-      <button onClick={() => onSoon('Family Account')} className="flex w-full items-center justify-between rounded-2xl bg-card p-4 text-sm font-semibold">Open a BIXGO Family account<User className="h-6 w-6 text-primary"/></button>
-      <button onClick={() => onSoon('BIXGO for Business')} className="flex w-full items-center justify-between rounded-2xl bg-card p-4 text-sm font-semibold">View BIXGO for Business<Briefcase className="h-6 w-6 text-accent"/></button>
     </div>
     <div className="mt-5 px-4">
       <h3 className="text-xl font-black">Lebih banyak keuntungan</h3>
-      <Row label="BIXGO Rewards" right="0 BIXP"/><Row label="Langganan"/><Row label="Tantangan" to="/arena"/>
+      <Row label="Tantangan" to="/arena"/>
       <h3 className="mt-5 text-xl font-black">Umum</h3>
-      <Row label="Favorit"/><Row label="Preferensi makanan" badge/><Row label="Metode Pembayaran" to="/wallet"/><Row label="Settings" to="/settings"/><Row label="Security settings" to="/settings"/><Row label="Bahasa" to="/settings"/><Row label="Saved Places"/><Row label="Calendars" badge/>
+      <Row label="Metode Pembayaran" to="/wallet"/><Row label="Settings" to="/settings"/><Row label="Bahasa" to="/settings"/>
       <h3 className="mt-5 text-xl font-black">Help</h3>
-      <Row label="Help Center"/>
+      <Row label="Help via BIX CALL" to="/call"/>
     </div>
   </section>;
 }
 
-export function BixgoBottomNav({ view, setView, inbox }: { view: BixgoView; setView: (v: BixgoView) => void; inbox: number }) {
+export function BixgoBottomNav({ view, setView, inbox, onScan }: { view: BixgoView; setView: (v: BixgoView) => void; inbox: number; onScan: () => void }) {
   const tabs: [BixgoView, string, typeof Home][] = [['home', 'Home', Home], ['order', 'Scan', ScanLine], ['activity', 'Aktivitas', ClipboardList], ['inbox', 'Inbox', MessageSquare], ['account', 'Account', User]];
   return <nav className="sticky bottom-0 z-20 grid grid-cols-5 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-    {tabs.map(([k, l, I]) => <button key={k} onClick={() => setView(k)} className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] ${view === k ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
+    {tabs.map(([k, l, I]) => <button key={k} onClick={() => k === 'order' ? onScan() : setView(k)} className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] ${view === k ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
       <I className={`h-5 w-5 ${view === k ? 'fill-primary/20' : ''}`}/>{l}
       {k === 'inbox' && inbox > 0 && <span className="absolute right-[22%] top-1 grid h-4 w-4 place-items-center rounded-full text-[9px] font-bold text-primary-foreground" style={{ background: 'var(--bixgo-alert)' }}>{inbox}</span>}
     </button>)}

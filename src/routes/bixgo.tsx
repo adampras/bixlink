@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,8 +13,9 @@ import { BixgoBills } from '@/components/BixgoBills';
 import { BixgoHero } from '@/components/BixgoHero';
 import { BixgoPassport } from '@/components/BixgoPassport';
 import { BixgoTravel } from '@/components/BixgoTravel';
-import { REGION_PROVINCES } from '@/lib/bixgo-regions';
-import { GLOBAL_CITIES, GLOBAL_CURRENCIES, cryptoEquivalent, formatMoney, readCurrency, saveCurrency, type GlobalCurrency } from '@/lib/bixgo-global';
+import { BixgoJastip } from '@/components/BixgoJastip';
+import { QrScanner } from '@/components/QrScanner';
+import { GLOBAL_CITIES, cryptoEquivalent, formatMoney, readCurrency, saveCurrency, type GlobalCurrency } from '@/lib/bixgo-global';
 import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
 
 export const Route = createFileRoute('/bixgo')({
@@ -78,7 +79,10 @@ function BixgoPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [tab, setTab] = useState<'order' | 'history'>('order');
   const [view, setView] = useState<BixgoView>('home');
-  const [sub, setSub] = useState<null | 'ride' | 'car' | 'bills' | 'travel'>(null);
+  const [sub, setSub] = useState<null | 'ride' | 'car' | 'bills' | 'travel' | 'jastip'>(null);
+  const [mode, setMode] = useState<'rider' | 'driver'>('rider');
+  const [scan, setScan] = useState(false);
+  const navigate = useNavigate();
   const [cur, setCur] = useState<GlobalCurrency>('USD');
   const [city, setCity] = useState<string>('makassar');
   useEffect(() => { setCur(readCurrency()); }, []);
@@ -130,28 +134,25 @@ function BixgoPage() {
   const pos = step === 'track' ? 10 + stage * 27 : 9;
 
   const enabledSet = new Set(list.map(s => s.key));
-  const soon = (l: string) => l === 'Pulsa & bills' ? setSub('bills') : l === 'Travel & eSIM' ? setSub('travel') : toast(`${l} — coming soon to BIXGO`);
+  const soon = (l: string) => l === 'Pulsa & bills' ? setSub('bills') : l === 'Travel & eSIM' ? setSub('travel') : l === 'Jastip' ? setSub('jastip') : toast(`${l} — coming soon to BIXGO`);
   const pick = (s: BixgoService) => { if (s === 'ride' || s === 'car') { setSub(s); return; } setSvc(s); setTier(0); setCart({}); setStep('form'); setView('order'); setTab('order'); };
   const go = (v: BixgoView) => { setView(v); if (v === 'activity') setTab('history'); if (v === 'order') setTab('order'); };
   const memberName = user?.email?.split('@')[0] || 'Member BIXLINK';
 
   return <div className="bixgo-grab fixed inset-0 z-[60] overflow-y-auto"><div className="mx-auto min-h-full max-w-xl">
     {!cfg.enabled && isAdmin && <p className="border-b border-accent/40 bg-accent/20 px-3 py-2 text-[11px]">Admin 1 preview · Under Reconstruction (only visible to you)</p>}
-    {!sub && <div className="sticky top-0 z-10 flex items-center gap-2 overflow-x-auto border-b border-border bg-background/90 px-3 py-2 backdrop-blur">
-      <span className="shrink-0 rounded-full border border-primary/50 px-2 py-0.5 text-[10px] font-bold tracking-widest text-primary">GLOBAL</span>
-      <select aria-label="City" value={city} onChange={e => { setCity(e.target.value); const c = GLOBAL_CITIES.find(x => x.id === e.target.value); if (c) pickCur(c.cur); }} className="shrink-0 rounded-full border border-border bg-card px-2 py-1 text-[11px]">{(['ID', 'MY'] as const).map(cc => REGION_PROVINCES.filter(r => r.cc === cc).map(r => <optgroup key={r.province} label={`${cc === 'ID' ? '🇮🇩' : '🇲🇾'} ${r.province}`}>{GLOBAL_CITIES.filter(c => c.province === r.province).map(c => <option key={c.id} value={c.id}>{c.city}, {c.cc}</option>)}</optgroup>))}</select>
-      <div className="flex shrink-0 gap-1">{GLOBAL_CURRENCIES.map(c => <button key={c.code} onClick={() => pickCur(c.code)} className={`rounded-full border px-2 py-1 text-[11px] ${cur === c.code ? 'border-primary bg-primary/15 font-bold' : 'border-border'}`}>{c.code}</button>)}</div>
-    </div>}
     {sub === 'travel' && <BixgoTravel cur={cur} usdtIdr={cfg.usdtIdr} onBack={() => setSub(null)}/>}
+    {sub === 'jastip' && <BixgoJastip city={city} isAdmin={isAdmin} onBack={() => setSub(null)}/>}
     {sub === 'bills' && <BixgoBills onBack={() => setSub(null)}/>}
     {(sub === 'ride' || sub === 'car') && <BixgoRideBooking cfg={cfg} start={sub} cur={cur} city={city} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
     {!sub && <>
-    {view === 'home' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
-    {(view === 'home' || view === 'activity') && <BixgoActiveTrip/>}
-    {view === 'home' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
+    {view === 'home' && <div className="sticky top-0 z-10 bg-background/90 px-3 pt-3 pb-2 backdrop-blur"><div role="tablist" aria-label="BIXGO mode" className="grid grid-cols-2 rounded-full border border-primary/40 bg-card p-1 text-xs font-bold">{([['rider', 'Saya Penumpang'], ['driver', 'Saya Driver']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={mode === k} onClick={() => setMode(k)} className={`rounded-full py-2 transition ${mode === k ? 'bg-primary text-primary-foreground shadow-[0_0_18px_-6px_var(--primary)]' : 'text-muted-foreground'}`}>{l}</button>)}</div></div>}
+    {view === 'home' && mode === 'driver' && <BixgoPassport cur={cur} usdtIdr={cfg.usdtIdr} city={city}/>}
+    {view === 'home' && mode === 'rider' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
+    {((view === 'home' && mode === 'rider') || view === 'activity') && <BixgoActiveTrip/>}
+    {view === 'home' && mode === 'rider' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
     {view === 'inbox' && <BixgoInbox/>}
-    {view === 'account' && <><BixgoPassport cur={cur} usdtIdr={cfg.usdtIdr} city={city}/><BixgoAccount name={memberName} balance="View balance" onBack={() => go('home')} onSoon={soon}/></>}
-    {view === 'home' && <BixgoPassport cur={cur} usdtIdr={cfg.usdtIdr} city={city}/>}
+    {view === 'account' && <><BixgoAccount name={memberName} balance="View balance" onBack={() => go('home')} onSoon={soon}/></>}
     {(view === 'order' || view === 'activity') && <main className="px-4 pb-6 pt-4">
     <section className="flex items-center gap-3">
       <button aria-label="Back" onClick={() => go('home')}><ArrowLeft className="h-6 w-6"/></button>
@@ -225,7 +226,8 @@ function BixgoPage() {
     </section></>}
     <p className="mt-4 text-center text-[10px] text-muted-foreground">BIXGO is in preview. Fares are estimates; no booking, payment or dispatch is performed.</p>
     </main>}
-    <BixgoBottomNav view={view} setView={go} inbox={3}/>
+    <BixgoBottomNav view={view} setView={go} inbox={3} onScan={() => setScan(true)}/>
+    {scan && <QrScanner title="Scan BIX PAY / Driver QR" hint="Point the camera at a driver's or member's BIX PAY QR" onClose={() => setScan(false)} onResult={raw => { setScan(false); sessionStorage.setItem('bixgo_scan', raw); void navigate({ to: '/pay' }); }}/>}
     </>}
   </div></div>;
 }
