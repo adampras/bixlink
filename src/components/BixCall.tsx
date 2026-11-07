@@ -200,7 +200,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const micLowRef = useRef(false);
   const micRef = useRef(true); micRef.current = mic;
   const [myLevel, setMyLevel] = useState(0);
-  const [studio, setStudio] = useState(true);
+  const [studio, setStudio] = useState(false);
   const [split, setSplit] = useState(false);
   const [vh, setVh] = useState(0);
   const [loud, setLoud] = useState(false);
@@ -365,13 +365,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       setCam(false); return;
     }
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
-      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 1_000_000 : 3_000_000, maxFramerate: res.frameRate, priority: 'high' } as never,
+      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 1_500_000 : 4_000_000, maxFramerate: res.frameRate, priority: 'high' } as never,
         videoSimulcastLayers: [
-          { width: 320, height: 180, resolution: { width: 320, height: 180, frameRate: 20 }, encoding: { maxBitrate: 250_000, maxFramerate: 20 } },
-          { width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 900_000, maxFramerate: 30 } },
+          { width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 1_200_000, maxFramerate: 30 } },
         ] as never });
     // 'motion' keeps frames smooth and low-latency instead of stalling to hold detail.
-    const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'motion';
+    const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
     setCam(on);
   };
   const toggleCam = async () => {
@@ -388,7 +387,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const pub = roomRef.current?.localParticipant.getTrackPublication(Track.Source.Camera);
     const tr = pub?.track as unknown as { restartTrack?: (o: object) => Promise<void> } | undefined;
     const nf = !front; setFront(nf);
-    await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment' }).catch(() => {});
+    await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment', resolution: { width: 1280, height: 720, frameRate: 30 } }).catch(() => {});
   };
   const manualAt = useRef(0);
   const speaker = () => { manualAt.current = Date.now(); void route(!loud); };
@@ -425,7 +424,9 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const D = (globalThis as { DeviceOrientationEvent?: { requestPermission?: () => Promise<string> } }).DeviceOrientationEvent;
     void D?.requestPermission?.().catch(() => {});
   };
-  const openChat = () => { onClose(); void router.navigate({ to: '/call', search: { chat: call.peerId } as never }); };
+  const [mini, setMini] = useState(false);
+  // During a live call the chat opens behind a minimised call — the room stays connected.
+  const openChat = () => { if (live) setMini(true); else onClose(); void router.navigate({ to: '/call', search: { chat: call.peerId } as never }); };
 
   const dragPip = (e: React.PointerEvent) => {
     const sx = e.clientX - pip.x, sy = e.clientY - pip.y, ox = e.clientX, oy = e.clientY; let moved = false;
@@ -452,20 +453,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const showVideo = live && remoteVideo;
   const sw = swapped && showVideo && cam && !split;
   const isSplit = split && showVideo && cam;
-  const hdLabel = vh >= 700 ? 'HD 720p' : vh >= 460 ? 'SD 480p' : vh > 0 ? `${vh}p` : '';
-  return <div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}${isSplit ? ' is-split' : ''}${studio ? ' is-studio' : ''}`} style={{ ['--me' as string]: Math.min(1, myLevel * 4), ['--lvl' as string]: Math.min(1, level * 3) }} role="dialog" aria-label="BIX CALL" onPointerDownCapture={() => { if (live) unlockAudio(); }}>
+  return <>{mini && <button type="button" className="bc-pill is-chat" style={{ position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 2147483000 }} onClick={() => setMini(false)}><Phone size={16}/> Kembali ke panggilan · {fmt(secs)}</button>}<div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}${isSplit ? ' is-split' : ''}${studio ? ' is-studio' : ''}`} style={{ ['--me' as string]: Math.min(1, myLevel * 4), ['--lvl' as string]: Math.min(1, level * 3), ...(mini ? { transform: 'translateY(120%)', pointerEvents: 'none', opacity: 0 } : {}) }} role="dialog" aria-label="BIX CALL" onPointerDownCapture={() => { if (live) unlockAudio(); }}>
     <video ref={backV} className={`bixcall-back${showVideo && !fill ? " on" : ""}`} autoPlay playsInline muted aria-hidden="true"/>
     <video ref={remoteV} className={sw ? 'bixcall-pip is-peer' : `bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} style={sw ? { transform: `translate(${pip.x}px, ${pip.y}px)` } : undefined} onPointerDown={sw ? dragPip : undefined} autoPlay playsInline onClick={() => { if (showVideo && !sw) setHideUi(v => !v); }} onDoubleClick={() => { if (!sw) setFill(v => !v); }}/>
-    {showVideo && <button type="button" className="bixcall-fit" onClick={() => setFill(v => !v)} aria-label={fill ? 'Show in full' : 'Penuhi layar'}>{fill ? '⤡ Sudut lega' : '⤢ Layar penuh'}</button>}
-    {live && link === 'on' && cam && <div className="bc-vtools">
-      <button type="button" aria-pressed={studio} className={studio ? 'on' : ''} onClick={() => setStudio(v => !v)}>✦ Studio</button>
-      {showVideo && <button type="button" aria-pressed={split} className={split ? 'on' : ''} onClick={() => setSplit(v => !v)}>◫ Split</button>}
-    </div>}
-    {live && link === 'on' && <div className="bc-telemetry" aria-label="Call quality"><i className={`is-${quality}`}/>{hdLabel || (anyVideo ? 'HD' : 'HD VOICE')} · Opus 48k</div>}
     <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>
     {audioBlocked && live && <button type="button" className="bc-pill is-chat" style={{ position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 5 }} onClick={unlockAudio}><Volume2 size={16}/> Tap for sound</button>}
     {live && link === 'on' && remoteVideo && !cam && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
-    {live && cam && <button type="button" className="bixcall-flip" aria-label="Flip camera" onClick={() => void flip()}><SwitchCamera size={18}/></button>}
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
       <span>{live && link === 'on' ? `SOVEREIGN ENCRYPTED • 48 kHz ${anyVideo ? 'HD VIDEO' : 'HD VOICE'}` : 'BIX CALL • SOVEREIGN ENCRYPTED'}</span>
@@ -510,7 +503,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         <button type="button" className="bc-pill is-close" onClick={onClose}><X size={16}/> Close</button>
       </> : done && wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
     </footer>
-  </div>;
+  </div></>;
 }
 
 /** Small voice + video buttons for any member card. */
