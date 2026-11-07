@@ -3621,6 +3621,10 @@ export type Database = {
         Args: { p_code: string; p_max: number; p_on: boolean }
         Returns: Json
       }
+      bix_deposit_route_preview: {
+        Args: { p_max: number; p_q: string }
+        Returns: Json
+      }
       bix_edit_duration_package: {
         Args: {
           p_apys: Json
@@ -3868,6 +3872,7 @@ export type Database = {
         }[]
       }
       bix_requires_360: { Args: { p_user: string }; Returns: boolean }
+      bix_resolve_member: { Args: { p_q: string }; Returns: string }
       bix_review_referral_bonus: {
         Args: { p_approve: boolean; p_bonus: string }
         Returns: undefined
@@ -3943,6 +3948,7 @@ export type Database = {
       bix_studio_spend: { Args: { p_feature: string }; Returns: Json }
       bix_studio_status: { Args: never; Returns: Json }
       bix_team_sales_usd: { Args: { p_user: string }; Returns: number }
+      bix_team_size: { Args: { p_root: string }; Returns: number }
       bix_unreal_bonus_bix: {
         Args: { p_before: string; p_user: string }
         Returns: number

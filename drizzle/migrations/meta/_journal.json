@@ -1149,6 +1149,13 @@
       "when": 1794021752178,
       "tag": "0163_deposit_quota_routes",
       "breakpoints": true
+    },
+    {
+      "idx": 164,
+      "version": "7",
+      "when": 1794027513550,
+      "tag": "0164_deposit_route_smart_preview",
+      "breakpoints": true
     }
   ]
 }

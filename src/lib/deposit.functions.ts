@@ -174,7 +174,7 @@ export const getOwnerRevenue = createServerFn({ method: 'GET' }).middleware([req
 export const getOwner1DepositLocks = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { data, error } = await context.supabase.rpc('bix_deposit_lock_list');
   if (error) throw new Error(error.message);
-  return (data ?? []) as { code: string | null; username: string | null; created_at: string }[];
+  return (data ?? []) as { code: string | null; username: string | null; created_at: string; team?: number }[];
 });
 export const setOwner1DepositLock = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((d: { code: string; lock: boolean }) => z.object({ code: z.string().trim().min(2).max(60), lock: z.boolean() }).parse(d))
@@ -196,4 +196,13 @@ export const setDepositQuotaRoute = createServerFn({ method: 'POST' }).middlewar
     const { error } = await context.supabase.rpc('bix_deposit_quota_set', { p_code: data.code, p_max: data.max, p_on: data.on });
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+export type RoutePreview = { found: false } | { found: true; code: string | null; username: string | null; name: string | null; email: string | null; sponsor: string | null; team: number; locked: boolean; quota: number | null; directs: { rn: number; code: string | null; username: string | null; team: number; routed: boolean }[] };
+export const previewDepositRoute = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { q: string; max: number }) => z.object({ q: z.string().trim().min(1).max(120), max: z.number().int().min(0).max(10000) }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: r, error } = await context.supabase.rpc('bix_deposit_route_preview', { p_q: data.q, p_max: data.max });
+    if (error) throw new Error(error.message);
+    return r as RoutePreview;
   });
