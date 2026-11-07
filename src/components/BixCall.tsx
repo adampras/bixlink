@@ -425,6 +425,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     void D?.requestPermission?.().catch(() => {});
   };
   const [mini, setMini] = useState(false);
+  useEffect(() => { const c = document.documentElement.classList; if (mini) c.add('bc-incall-mini'); else c.remove('bc-incall-mini'); return () => c.remove('bc-incall-mini'); }, [mini]);
   // During a live call the chat opens behind a minimised call — the room stays connected.
   const openChat = () => { if (live) setMini(true); else onClose(); void router.navigate({ to: '/call', search: { chat: call.peerId } as never }); };
 
@@ -453,7 +454,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const showVideo = live && remoteVideo;
   const sw = swapped && showVideo && cam && !split;
   const isSplit = split && showVideo && cam;
-  return <>{mini && <button type="button" className="bc-pill is-chat" style={{ position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 2147483000 }} onClick={() => setMini(false)}><Phone size={16}/> Kembali ke panggilan · {fmt(secs)}</button>}<div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}${isSplit ? ' is-split' : ''}${studio ? ' is-studio' : ''}`} style={{ ['--me' as string]: Math.min(1, myLevel * 4), ['--lvl' as string]: Math.min(1, level * 3), ...(mini ? { transform: 'translateY(120%)', pointerEvents: 'none', opacity: 0 } : {}) }} role="dialog" aria-label="BIX CALL" onPointerDownCapture={() => { if (live) unlockAudio(); }}>
+  return <>{mini && <button type="button" className="bc-incall-bar" onClick={() => setMini(false)} aria-label="Kembali ke panggilan"><i/><Phone size={14}/><span>Panggilan aktif · @{call.peerName}</span><b>{fmt(secs)}</b><em>Ketuk untuk kembali</em></button>}<div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}${isSplit ? ' is-split' : ''}${studio ? ' is-studio' : ''}`} style={{ ['--me' as string]: Math.min(1, myLevel * 4), ['--lvl' as string]: Math.min(1, level * 3), ...(mini ? { transform: 'translateY(120%)', pointerEvents: 'none', opacity: 0 } : {}) }} role="dialog" aria-label="BIX CALL" onPointerDownCapture={() => { if (live) unlockAudio(); }}>
     <video ref={backV} className={`bixcall-back${showVideo && !fill ? " on" : ""}`} autoPlay playsInline muted aria-hidden="true"/>
     <video ref={remoteV} className={sw ? 'bixcall-pip is-peer' : `bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} style={sw ? { transform: `translate(${pip.x}px, ${pip.y}px)` } : undefined} onPointerDown={sw ? dragPip : undefined} autoPlay playsInline onClick={() => { if (showVideo && !sw) setHideUi(v => !v); }} onDoubleClick={() => { if (!sw) setFill(v => !v); }}/>
     <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>

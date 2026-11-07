@@ -388,6 +388,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     const r = replyTo; setReplyTo(null);
     const { data, error } = await supabase.rpc('bix_chat_send' as never, { p_to: peer.id, p_body: b, p_reply: r?.id ?? null } as never);
     if (error) { fail(error.message); setText(b); setReplyTo(r); return; }
+    void supabase.rpc('bix_chat_read' as never, { p_peer: peer.id } as never);
     added(data);
   };
   const upload = async (blob: Blob, kind: 'image' | 'voice', ext: string, to = peer.id, forwarded = false) => {
@@ -523,7 +524,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
 
   return <main ref={roomRef} className="comm-room is-full mx-auto max-w-xl">
     <header className="comm-room-head">
-      <button onClick={onBack} aria-label="Back"><ArrowLeft size={18}/></button>
+      <button onClick={async () => { await supabase.rpc('bix_chat_read' as never, { p_peer: peer.id } as never); onBack(); }} aria-label="Back"><ArrowLeft size={18}/></button>
       <BixAvatar userId={peer.id} name={name} online={state.online}/>
       <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small>{peerCard?.status_text && <em className="comm-statusline">{peerCard.status_text}</em>}</span>
       <ActionButtons peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>
