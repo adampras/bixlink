@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { clampChatPosition } from '@/lib/interaction-comfort';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { usePublicConfig } from '@/lib/useMember';
+import { useSupportDesk } from '@/components/AdminSupportDesk';
+import { foxChatVisible, needsOperator, tgLink, waLink } from '@/lib/support-desk';
 
 const LOAN_CODE = /\b(akun\s*pinjam(an)?|pinjaman\s*leader|loan\s*account|akun\s*loan)\b/i;
 const LOAN_INFO = `### 👑 Conditional Loan Account · Global Leader
@@ -26,7 +28,9 @@ export function FoxChat() {
   const [busy, setBusy] = useState(false);
   const [loanCta, setLoanCta] = useState(false);
   const navigate = useNavigate();
-  const onCall = useRouterState({ select: s => s.location.pathname.startsWith('/call') });
+  const hidden = useRouterState({ select: s => !foxChatVisible(s.location.pathname) });
+  const { data: desk } = useSupportDesk();
+  const [escalate, setEscalate] = useState('');
   const { data: cfg } = usePublicConfig();
   const end = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
@@ -56,6 +60,7 @@ export function FoxChat() {
     const text = input.trim();
     if (!text || busy) return;
     const next: Msg[] = [...msgs, { role: 'user', content: text }];
+    if (needsOperator(text)) setEscalate(text);
     if (LOAN_CODE.test(text)) {
       const openProgram = cfg?.readiness?.loanEnabled !== false;
       setInput(''); setLoanCta(openProgram);
@@ -85,7 +90,11 @@ export function FoxChat() {
     } finally { setBusy(false); }
   }
 
-  if (onCall) return null;
+  if (hidden) return null;
+  const ticket = `Halo CS BIXLINK, saya butuh bantuan: ${escalate}\nBIX-ID: \nTxID: \nNominal: \nTanggal: `;
+  const wa = desk ? waLink(desk.whatsapp, ticket) : '';
+  const tg = desk ? tgLink(desk.telegram) : '';
+  const bc = desk?.bixcallUserId ? `/call?chat=${desk.bixcallUserId}&n=${encodeURIComponent(desk.bixcallName || 'BIXLINK Support')}` : '';
   return <>
     {open && <div className="fox-chat-panel fixed bottom-44 right-3 z-50 flex h-[62vh] max-h-[520px] w-[calc(100vw-1.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-primary/40 bg-card/85 shadow-2xl backdrop-blur-xl backdrop-saturate-150">
       <header className="flex items-center gap-2 border-b border-primary/20 px-3 py-2">
@@ -98,6 +107,15 @@ export function FoxChat() {
           {m.role === 'user' ? m.content : <ReactMarkdown>{m.content || '…'}</ReactMarkdown>}
         </div>)}
         {loanCta && <Button type="button" className="w-full rounded-full bg-chart-3 font-black text-background" onClick={() => { setLoanCta(false); setOpen(false); navigate({ to: '/profile', search: { loan: 'open' } as never }).then(() => window.dispatchEvent(new Event('bix-loan-open'))); }}>OPEN LOAN ACCOUNT →</Button>}
+        {escalate && (wa || tg || bc) && <div className="rounded-2xl border border-primary/40 bg-background/60 p-3">
+          <p className="text-xs font-bold text-primary">Hubungi Operator Resmi BIXLINK</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">Siapkan BIX-ID, TxID, nominal dan tanggal. Jangan kirim dana ke pihak lain.</p>
+          <div className="mt-2 grid gap-2">
+            {bc && <Button type="button" size="sm" className="rounded-full" onClick={() => { setOpen(false); window.location.href = bc; }}>Chat BIX CALL Operator</Button>}
+            {wa && <Button asChild size="sm" variant="outline" className="rounded-full"><a href={wa} target="_blank" rel="noreferrer">WhatsApp CS</a></Button>}
+            {tg && <Button asChild size="sm" variant="outline" className="rounded-full"><a href={tg} target="_blank" rel="noreferrer">Telegram CS</a></Button>}
+          </div>
+        </div>}
         <div ref={end} />
       </div>
       <form className="flex gap-2 border-t border-primary/20 p-2" onSubmit={(e) => { e.preventDefault(); send(); }}>

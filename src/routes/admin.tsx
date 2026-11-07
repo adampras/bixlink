@@ -30,6 +30,7 @@ import { DepositAudit } from '@/components/DepositAudit';
 import { NetworkLeaders } from '@/components/NetworkLeaders';
 import { AdminAppearance } from '@/components/AdminAppearance';
 import { AdminSplash } from '@/components/AdminSplash';
+import { AdminSupportDesk } from '@/components/AdminSupportDesk';
 import { AdminReferrals } from '@/components/AdminReferrals';
 import { AdminNetworkEditor } from '@/components/AdminNetworkEditor';
 import { AdminBixtok } from '@/components/AdminBixtok';
@@ -121,6 +122,7 @@ function Admin() {
       { title: 'Visibilitas & Updates', content: <AdminReadiness initial={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} onMessage={setMessage} onSaved={refresh}/> },
       { title: 'Menu HUB', content: <AdminHubMenu/> },
       { title: 'Splash', content: <AdminSplash onMessage={setMessage}/> },
+      { title: 'Customer Service 24/7', content: <AdminSupportDesk onMessage={setMessage}/> },
       { title: 'Banner & Pop-up', content: <AdminPopups content={data?.settings.find(s => s.key === 'landing_content')?.value as LandingContent | undefined} onMessage={setMessage} onSaved={refresh}/> },
       { title: 'Booster', content: <AdminBoosterVisual initialVisual={((data?.settings.find(s=>s.key==='booster_visual')?.value as {visual?: BoosterVisual} | undefined)?.visual ?? 'video')} enabled={Boolean((data?.settings.find(s=>s.key==='booster')?.value as {enabled?: boolean})?.enabled)} onMessage={setMessage} onSaved={refresh}/> },
     ]}/>}
