@@ -6976,3 +6976,14 @@ body[data-bc-chat-font=grotesk] .bixcall-page{font-family:'Space Grotesk','Arial
 .comm-calllog.is-missed{border-color:color-mix(in oklab,var(--destructive) 50%,transparent)}
 .comm-calllog.is-missed span{color:var(--destructive)}
 .bc-pay-quick{margin-left:.25rem;color:var(--primary)}
+
+/* BIX CALL attachment sheet (no stacked buttons) */
+.comm-compose{position:relative}
+.bc-attach-bg{position:fixed;inset:0;z-index:40;background:rgb(0 0 0 / .35)}
+.bc-attach{position:absolute;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:30rem;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 10px;border-radius:22px;background:rgb(10 8 16 / .97);border:1px solid rgb(255 215 0 / .28);box-shadow:0 14px 40px rgb(0 0 0 / .55)}
+.comm-compose .bc-attach button{width:auto;height:auto;border-radius:14px;background:transparent!important;box-shadow:none!important;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:rgb(240 230 255 / .9)!important;padding:4px}
+.bc-attach i{display:grid;place-items:center;width:50px;height:50px;border-radius:50%;color:#0b0b10}
+.bc-attach i.is-gold{background:linear-gradient(145deg,#FFD700,#b8860b)}
+.bc-attach i.is-violet{background:linear-gradient(145deg,#c084fc,#7e22ce);color:#fff}
+.bc-attach i.is-teal{background:linear-gradient(145deg,#2dd4bf,#0d9488)}
+.bc-attach i.is-blue{background:linear-gradient(145deg,#60a5fa,#1d4ed8);color:#fff}

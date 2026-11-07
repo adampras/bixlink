@@ -162,7 +162,7 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
       const old = published.current.get(t.kind);
       if (old?.track) { if (old.track.mediaStreamTrack !== t) await old.track.replaceTrack(t).catch(() => {}); continue; }
       if (t.kind === 'video' && 'contentHint' in t) t.contentHint = 'detail';
-      const pub = await room.localParticipant.publishTrack(t, t.kind === 'video' ? { source: lk.Track.Source.Camera, simulcast: true, videoCodec: 'vp8', degradationPreference: 'maintain-resolution', videoEncoding: { maxBitrate: 2_500_000, maxFramerate: 30 } } : { source: lk.Track.Source.Microphone, dtx: true, red: true })
+      const pub = await room.localParticipant.publishTrack(t, t.kind === 'video' ? { source: lk.Track.Source.Camera, simulcast: true, videoCodec: 'vp8', degradationPreference: 'maintain-resolution', videoEncoding: { maxBitrate: 2_500_000, maxFramerate: 30 } } : { source: lk.Track.Source.Microphone, dtx: false, red: true, audioPreset: { maxBitrate: 96000, priority: 'high' } })
         .catch(() => room.localParticipant.publishTrack(t, { source: t.kind === 'video' ? lk.Track.Source.Camera : lk.Track.Source.Microphone }).catch(() => null));
       if (pub) published.current.set(t.kind, pub);
     }
@@ -200,7 +200,7 @@ export function useLiveRtc({ liveId, me, host, hostId, publisher, stream, saver 
           setVoiceOnly(!out.length && heard);
         };
         room.on(lk.RoomEvent.TrackSubscribed, (track, pub, part) => {
-          if (track.kind === lk.Track.Kind.Audio) { const el = track.attach(); el.setAttribute('playsinline', ''); el.dataset['pid'] = part.identity; el.muted = !soundOn.current; box.appendChild(el); if (room!.canPlaybackAudio) void el.play().catch(() => setAudioBlocked(true)); }
+          if (track.kind === lk.Track.Kind.Audio) { const el = track.attach(); el.setAttribute('playsinline', ''); el.dataset['pid'] = part.identity; (el as HTMLAudioElement).volume = 1; el.muted = !soundOn.current; box.appendChild(el); if (room!.canPlaybackAudio) void el.play().catch(() => setAudioBlocked(true)); }
           else pub.setVideoQuality(saverRef.current ? lk.VideoQuality.LOW : lk.VideoQuality.HIGH); // data saver picks the light layer
           rebuild();
         }).on(lk.RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach(el => el.remove()); rebuild(); })

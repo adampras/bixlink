@@ -18,7 +18,7 @@ export function classifyMediaError(e: unknown): MediaIssue {
   return 'unknown';
 }
 
-const AUDIO: MediaTrackConstraints = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+const AUDIO: MediaTrackConstraints = { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, sampleRate: 48000 };
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 /**

@@ -291,7 +291,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         // Native mic track: keeps the phone's hardware echo canceller linked to the call output (a WebAudio-processed track breaks it → echo/howl).
         if (cancelled) return;
-        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 64000, priority: 'high' } } as never);
+        await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 96000, priority: 'high' } } as never);
         // Lock the phone's own echo canceller / noise suppressor / high-pass on (Chrome flags), so loudspeaker video calls stay echo-free.
         { const mt = room.localParticipant.getTrackPublication(Track.Source.Microphone)?.track?.mediaStreamTrack;
           void mt?.applyConstraints({ echoCancellation: true, noiseSuppression: true, autoGainControl: true, googEchoCancellation: true, googEchoCancellation2: true, googNoiseSuppression: true, googNoiseSuppression2: true, googHighpassFilter: true, googAutoGainControl: true, googAutoGainControl2: true, googTypingNoiseDetection: true } as never).catch(() => {}); }
@@ -329,7 +329,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       setCam(false); return;
     }
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
-      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'maintain-framerate', videoEncoding: { maxBitrate: saver ? 800_000 : 1_800_000, maxFramerate: res.frameRate, priority: 'medium' } as never,
+      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 900_000 : 2_500_000, maxFramerate: res.frameRate, priority: 'high' } as never,
         videoSimulcastLayers: [{ width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 800_000, maxFramerate: 30 } }] as never });
     const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
     setCam(on);
