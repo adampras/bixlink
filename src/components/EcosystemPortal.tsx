@@ -57,7 +57,7 @@ export function EcosystemPortal({ onLanding }: { onLanding: () => void }) {
     <div className="eco-portal-head">
       <span className="eco-portal-eyebrow">E C O S Y S T E M &nbsp; G A T E W A Y</span>
       <h1 className="eco-title">{'BIXLINK'.split('').map((c, i) => <b key={i} style={{ animationDelay: `${2 + i * 0.09}s` }}>{c}</b>)}</h1>
-      <p>Real utilities you can use today</p>
+      <p>Communication · Mobility · Community</p>
     </div>
     <div className="eco-orbit">
       <div className="eco-ring eco-ring-1" aria-hidden/><div className="eco-ring eco-ring-2" aria-hidden/><div className="eco-ring eco-ring-3" aria-hidden/>
@@ -73,6 +73,7 @@ export function EcosystemPortal({ onLanding }: { onLanding: () => void }) {
     <div className="eco-portal-actions">
       <Link to="/call" className="eco-cta">START WITH BIX CALL</Link>
       <button type="button" className="eco-landing" onClick={onLanding}>LANDING PAGE <ChevronDown className="size-4"/></button>
+      <Link to="/ecosystem" className="text-sm text-muted-foreground">Explore the BIXLINK ecosystem →</Link>
     </div>
   </main>;
 }

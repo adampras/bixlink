@@ -31,6 +31,7 @@ import { EcosystemRail } from '@/components/EcosystemRail';
 import { LandingTradeStyle } from '@/components/LandingTradeStyle';
 import { EcosystemPortal } from '@/components/EcosystemPortal';
 import { useState } from 'react';
+import { ecosystemDescription, ecosystemHead, ecosystemSchema } from '@/lib/ecosystem-seo';
 
 const homeQuery = queryOptions({ queryKey: ['bix-home-market'], queryFn: () => getHomeMarketData(), staleTime: 60_000, refetchInterval: 60_000 });
 
@@ -39,7 +40,7 @@ export const Route = createFileRoute('/')({
   loader: ({ context }) => context.queryClient.ensureQueryData(homeQuery),
   errorComponent: HomeError,
   notFoundComponent: () => <div className="p-10">Market overview unavailable.</div>,
-  head: () => ({ meta: [{ title: 'HOME Market & Staking Statistics — BIXLINK' }, { name: 'description', content: 'BIXLINK internal BIX/USDT reference market, staking statistics, tokenomics, RWA model and roadmap.' }, { property: 'og:title', content: 'BIXLINK Market & Staking Statistics' }, { property: 'og:description', content: 'Track the BIXLINK internal market reference, staking ecosystem and global crypto prices.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }),
+  head: () => ({ ...ecosystemHead('/', 'BIXLINK — Ekosistem BIX CALL, BIXGO, BIXTOK & BIX GOLD', ecosystemDescription), scripts: [{ type: 'application/ld+json', children: JSON.stringify(ecosystemSchema) }] }),
   component: Home,
 });
 
@@ -64,8 +65,7 @@ function Home() {
   const landingView = !user || (landing === 1 && !!cfg?.isAdmin);
   const [showLanding, setShowLanding] = useState(false);
   if (!user && cfg && isLandingClosedFor(cfg.siteControl, cfg.isAdmin, false)) return <BixShell><LandingClosed message={cfg.siteControl.landingMessage}/></BixShell>;
-  if (!user && !ready && landing !== 1) return <div className="eco-portal" aria-hidden/>;
-  if (!user && ready && !showLanding && landing !== 1) return <EcosystemPortal onLanding={() => { setShowLanding(true); window.scrollTo(0, 0); }}/>;
+  if (!user && !showLanding && landing !== 1) return <EcosystemPortal onLanding={() => { setShowLanding(true); window.scrollTo(0, 0); }}/>;
   if (landingView) return <BixShell>{cfg?.siteControl.landingClosed && <div className="bg-primary px-4 py-2 text-center text-xs font-semibold text-primary-foreground">Admin preview — landing is currently closed to the public</div>}{rd?.liveActivityEnabled !== false && <RecordedActivity/>}<div className="mx-auto max-w-7xl px-5 pt-4 md:px-8"><HighlightsHub/></div><div className="hub-divider" aria-hidden/>{rd?.landingTradeStyle && <LandingTradeStyle bixPrice={cfg?.bixMarket.priceUsd}/>}<div className="relative"><LandingExperience {...(cfg ? { packages: cfg.packages, booster: cfg.booster.enabled, bixPrice: cfg.bixMarket.priceUsd, content: cfg.landingContent } : {})}/></div></BixShell>;
   return <BixShell><MarketTicker/><MemberGate ready={ready} signedIn={!!user} title="HOME"><main>
     <div className="mx-auto max-w-7xl px-5 pt-4 md:px-8"><HighlightsHub/></div>

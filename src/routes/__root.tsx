@@ -106,7 +106,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#020203" },
       
       
-      { name: "author", content: "Lovable" },
+      { name: "author", content: "BIXLINK" },
+      { property: "og:site_name", content: "BIXLINK" },
       
       
       { property: "og:type", content: "website" },

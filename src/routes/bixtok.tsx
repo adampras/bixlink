@@ -17,15 +17,10 @@ import { bixtokMini, useBixtokMini } from '@/lib/bixtok-mini';
 import { Button } from '@/components/ui/button';
 import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
 import { copyText } from '@/lib/copy-text';
+import { ecosystemHead } from '@/lib/ecosystem-seo';
 
 export const Route = createFileRoute('/bixtok')({
-  head: () => ({ meta: [
-    { title: 'BIXTOK — Web3 short video & LIVE on BIXLINK' },
-    { name: 'description', content: 'Watch BIXLINK short videos, go LIVE as a staking member and gift creators with BIXP or BIXCOIN.' },
-    { property: 'og:title', content: 'BIXTOK — Web3 short video & LIVE' },
-    { property: 'og:description', content: 'Vertical video feed, member LIVE rooms and BIXP / BIXCOIN gifts.' },
-    { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' },
-  ] }),
+  head: () => ecosystemHead('/bixtok', 'BIXTOK — Video Pendek & LIVE Komunitas | BIXLINK', 'BIXTOK menghadirkan video pendek dan siaran langsung komunitas BIXLINK. Menonton, berinteraksi dan menjadi host mengikuti akses anggota.'),
   component: BixtokPage,
 });
 

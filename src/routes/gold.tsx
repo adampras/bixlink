@@ -9,15 +9,10 @@ import vaultImg from '@/assets/gold-vault.jpg';
 import netImg from '@/assets/gold-network.jpg';
 import { supabase } from '@/integrations/supabase/client';
 import { readBixGold, goldPackageUsd, type BixGoldSettings } from '@/lib/bix-gold';
+import { ecosystemHead } from '@/lib/ecosystem-seo';
 
 export const Route = createFileRoute('/gold')({
-  head: () => ({ meta: [
-    { title: 'BIX GOLD — Digital 24K Gold Savings | BIXLINK' },
-    { name: 'description', content: 'Save 999.9 gold by the gram with USD, IDR and MYR references and a transparent BIX GOLD marketing plan.' },
-    { property: 'og:title', content: 'BIX GOLD — Digital Gold Savings' },
-    { property: 'og:description', content: 'Gram packages, gold yield plans, physical minting and rank rewards on BIXLINK.' },
-    { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' },
-  ] }),
+  head: () => ecosystemHead('/gold', 'BIX GOLD — Referensi Harga Emas & Rencana Layanan | BIXLINK', 'Lihat referensi harga emas per gram dalam USD, IDR dan MYR, kalkulator serta pratinjau BIX GOLD. Bukan bukti kepemilikan atau penitipan emas.'),
   component: GoldPage,
 });
 

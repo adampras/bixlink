@@ -24,9 +24,10 @@ import { getBixPay } from '@/lib/bixlink.functions';
 import { CONTACTS_EVENT, addContact, readContacts, removeContact, parseBixId, type BixContact } from '@/lib/bix-contacts';
 import { ChatThemePicker } from '@/components/ChatThemePicker';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
+import { ecosystemHead } from '@/lib/ecosystem-seo';
 
 export const Route = createFileRoute('/call')({
-  head: () => ({ meta: [{ title: 'BIX CALL & CHAT — BIXLINK' }, { name: 'description', content: 'Private chat, voice and video calls between BIXLINK members, unlocked by staking tier.' }, { property: 'og:title', content: 'BIX CALL & CHAT — BIXLINK' }, { property: 'og:description', content: 'Secure member-to-member chat and calls inside BIXLINK.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
+  head: () => ecosystemHead('/call', 'BIX CALL — Chat, Panggilan Suara & Video | BIXLINK', 'Kenali BIX CALL untuk chat, panggilan suara, video dan grup antaranggota BIXLINK. Akun diperlukan; akses mengikuti ketentuan layanan.'),
   validateSearch: (s: Record<string, unknown>): CallSearch => {
     const out: CallSearch = {}; const t = s['tab'], c = s['chat'], n = s['n'];
     if (typeof t === 'string' && COMM_TABS.includes(t)) out.tab = t as CommTab;

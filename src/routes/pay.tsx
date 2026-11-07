@@ -12,9 +12,10 @@ import { ScanLine, QrCode, Lock, ArrowUpRight, ArrowDownLeft, Copy, ShieldCheck,
 import { dateTime, number } from '@/lib/bixlink';
 import { confirmPin, txFeedback } from '@/components/TxFeedback';
 import { QrScanner as Scanner } from '@/components/QrScanner';
+import { ecosystemHead } from '@/lib/ecosystem-seo';
 
 export const Route = createFileRoute('/pay')({
-  head: () => ({ meta: [{ title: 'BIX PAY — BIXLINK' }, { name: 'description', content: 'Scan a QR code to pay other BIXLINK members in BIX.' }, { property: 'og:title', content: 'BIX PAY — BIXLINK' }, { property: 'og:description', content: 'Member-to-member BIX payments by QR scan.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
+  head: () => ecosystemHead('/pay', 'BIX PAY — Transfer BIX Antaranggota | BIXLINK', 'BIX PAY menyediakan transfer BIX antaranggota melalui QR dalam ledger internal ketika layanan aktif. Bukan jaringan pembayaran bank atau kartu.'),
   component: PayPage,
 });
 

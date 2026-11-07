@@ -62,3 +62,4 @@
 - A global `[role="dialog"]` rule caps height at 92dvh, so any full-screen fixed overlay that uses role="dialog" must restate its own max-height/overflow — the splash does.
 
 - BIXGO cancellations use a row-locked reasoned RPC before trip start, releasing derived holds without extra refund credits; GPS writes are assigned-driver-only and floating maps must label stale data.
+- Ecosystem search metadata uses a shared leaf-head helper and public /ecosystem overview; crawler guides exclude member-only surfaces and describe preview services without implying custody or guaranteed outcomes.

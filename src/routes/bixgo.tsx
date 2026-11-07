@@ -18,15 +18,10 @@ import { BixgoJastip } from '@/components/BixgoJastip';
 import { QrScanner } from '@/components/QrScanner';
 import { GLOBAL_CITIES, cryptoEquivalent, formatMoney, readCurrency, saveCurrency, type GlobalCurrency } from '@/lib/bixgo-global';
 import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
+import { ecosystemHead } from '@/lib/ecosystem-seo';
 
 export const Route = createFileRoute('/bixgo')({
-  head: () => ({ meta: [
-    { title: 'BIXGO — Rides, Food & Courier | BIXLINK' },
-    { name: 'description', content: 'BIXGO super-app preview: BIXRide, BIXCar, BIXFood, BIXSend and BIXMart with global fare estimates in USD, EUR, AED, SGD, USDT and BIX.' },
-    { property: 'og:title', content: 'BIXGO — BIXLINK super-app' },
-    { property: 'og:description', content: 'Ride, car, food, courier and grocery fare estimates inside the BIXLINK ecosystem.' },
-    { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' },
-  ] }),
+  head: () => ecosystemHead('/bixgo', 'BIXGO — Perjalanan, Pengantaran & Jastip | BIXLINK', 'Kenali BIXGO untuk perjalanan motor dan mobil, pengantaran serta Jastip. Lihat estimasi tarif; layanan bergantung pada mitra aktif di kota Anda.'),
   component: BixgoPage,
 });
 

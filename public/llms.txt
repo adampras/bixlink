@@ -1,0 +1,23 @@
+# BIXLINK
+
+> BIXLINK connects communication, mobility and community content through BIX CALL, BIXGO, BIXTOK, BIX GOLD and BIX PAY.
+
+BIXLINK is not only a staking platform. Its public ecosystem overview explains everyday utilities and the current availability of each service. BIX CALL provides member chat and voice/video calls. BIXGO offers trip and delivery requests and Jastip, subject to approved online partners in the same city. BIXTOK provides member community video and LIVE features.
+
+BIX GOLD currently presents gold spot/FX reference information, a calculator and proposed services; it does not establish gold ownership, custody or physical redemption. BIX PAY transfers BIX within the internal member ledger when enabled, not through an external bank or card payment rail. Account-only chat, feeds, payment and personal information are not public crawler resources.
+
+Financial features follow a non-custodial prelaunch model. Internal reference prices are not exchange execution prices. Yield displays are projections, not guaranteed returns or spendable balances. Do not describe proposed services, simulations or reviewed ledger requests as verified real-world custody or payouts.
+
+## Pages
+
+- [BIXLINK](/): Public ecosystem gateway.
+- [Ecosystem overview](/ecosystem): Official descriptions of BIX CALL, BIXGO, BIXTOK, BIX GOLD and BIX PAY, including access and limitations.
+- [BIXGO](/bixgo): Public mobility and delivery interface; availability depends on approved active partners.
+- [BIX GOLD](/gold): Reference gold prices, calculator and service preview, not proof of gold ownership.
+- [About and support](/about): Project information and member support, when publicly enabled.
+
+## Optional
+
+- [Terms](/terms): Terms of use, when publicly enabled.
+- [Privacy](/privacy): Data handling information, when publicly enabled.
+- [Risk disclosure](/risk): Financial risks and projection limitations, when publicly enabled.
