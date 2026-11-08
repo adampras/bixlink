@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
 import { useRouter } from '@tanstack/react-router';
-import { Room, RoomEvent, Track, type RemoteTrack } from 'livekit-client';
+import type { Room, RemoteTrack } from 'livekit-client';
+/** livekit-client loads only when a call connects, keeping it out of every page's startup bundle. */
+let LK: typeof import('livekit-client') | null = null;
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, X } from 'lucide-react';
 import { syncBixCallTheme } from '@/lib/bix-call-theme';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
@@ -231,7 +233,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const heal = () => {
       const r = roomRef.current, box = audioBox.current; if (!r || !box) return;
       r.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => {
-        const tr = pub.track as RemoteTrack | undefined; if (!tr || tr.kind !== Track.Kind.Audio) return;
+        const tr = pub.track as RemoteTrack | undefined; if (!tr || tr.kind !== LK!.Track.Kind.Audio) return;
         const el = box.querySelector(`audio[data-sid="${tr.sid}"]`) as HTMLAudioElement | null;
         if (!el || !el.srcObject) attachAudio(tr); else if (el.paused) void el.play().catch(() => setAudioBlocked(true));
       }));
@@ -292,30 +294,31 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       try {
         const res = await getBixCallToken({ data: { callId: call.id } });
         if (!res.ok || cancelled) { setLink('fail'); return; }
-        room = new Room({ adaptiveStream: false, dynacast: true, webAudioMix: false, audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }, publishDefaults: { dtx: false, red: true, stopMicTrackOnMute: false } } as never);
+        LK ??= await import('livekit-client'); if (cancelled) return;
+        room = new LK.Room({ adaptiveStream: false, dynacast: true, webAudioMix: false, audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }, publishDefaults: { dtx: false, red: true, stopMicTrackOnMute: false } } as never);
         roomRef.current = room;
-        room.on(RoomEvent.TrackSubscribed, (t: RemoteTrack) => {
-          if (t.kind === Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); setRemoteVideo(true); }
-          if (t.kind === Track.Kind.Audio) attachAudio(t);
+        room.on(LK!.RoomEvent.TrackSubscribed, (t: RemoteTrack) => {
+          if (t.kind === LK!.Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); setRemoteVideo(true); }
+          if (t.kind === LK!.Track.Kind.Audio) attachAudio(t);
         });
-        room.on(RoomEvent.AudioPlaybackStatusChanged, () => setAudioBlocked(!room?.canPlaybackAudio));
+        room.on(LK!.RoomEvent.AudioPlaybackStatusChanged, () => setAudioBlocked(!room?.canPlaybackAudio));
         // Remote camera on/off mid-call (voice → video upgrade without redialing).
-        room.on(RoomEvent.TrackMuted, (pub, p) => { if (!p.isLocal && pub.kind === Track.Kind.Video) setRemoteVideo(false); });
-        room.on(RoomEvent.TrackUnmuted, (pub, p) => { if (!p.isLocal && pub.kind === Track.Kind.Video) setRemoteVideo(true); });
-        room.on(RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach().forEach(e => { if (e.tagName === 'AUDIO') e.remove(); }); if (t.kind === Track.Kind.Video) setRemoteVideo(false); });
-        room.on(RoomEvent.ParticipantDisconnected, () => onEnd());
+        room.on(LK!.RoomEvent.TrackMuted, (pub, p) => { if (!p.isLocal && pub.kind === LK!.Track.Kind.Video) setRemoteVideo(false); });
+        room.on(LK!.RoomEvent.TrackUnmuted, (pub, p) => { if (!p.isLocal && pub.kind === LK!.Track.Kind.Video) setRemoteVideo(true); });
+        room.on(LK!.RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach().forEach(e => { if (e.tagName === 'AUDIO') e.remove(); }); if (t.kind === LK!.Track.Kind.Video) setRemoteVideo(false); });
+        room.on(LK!.RoomEvent.ParticipantDisconnected, () => onEnd());
         // After a network hiccup, re-bind every remote track so neither side goes silent/black.
-        room.on(RoomEvent.Reconnected, () => { void room?.startAudio().catch(() => {}); room?.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { const tr = pub.track as RemoteTrack | undefined; if (!tr) return; if (tr.kind === Track.Kind.Audio) attachAudio(tr); else if (remoteV.current) tr.attach(remoteV.current); })); });
-        room.on(RoomEvent.ConnectionQualityChanged, (q, p) => { if (p.isLocal) setQuality(String(q) as 'excellent' | 'good' | 'poor' | 'unknown'); });
+        room.on(LK!.RoomEvent.Reconnected, () => { void room?.startAudio().catch(() => {}); room?.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { const tr = pub.track as RemoteTrack | undefined; if (!tr) return; if (tr.kind === LK!.Track.Kind.Audio) attachAudio(tr); else if (remoteV.current) tr.attach(remoteV.current); })); });
+        room.on(LK!.RoomEvent.ConnectionQualityChanged, (q, p) => { if (p.isLocal) setQuality(String(q) as 'excellent' | 'good' | 'poor' | 'unknown'); });
         await room.connect(res.url, res.token);
         void room.startAudio().catch(() => {});
-        room.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { if (pub.track && pub.kind === Track.Kind.Audio) attachAudio(pub.track as RemoteTrack); }));
+        room.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { if (pub.track && pub.kind === LK!.Track.Kind.Audio) attachAudio(pub.track as RemoteTrack); }));
         // Voice Shield: band filter + feedback notch + limiter + noise gate; falls back to the plain mic.
         // Native mic track: keeps the phone's hardware echo canceller linked to the call output (a WebAudio-processed track breaks it → echo/howl).
         if (cancelled) return;
         await room.localParticipant.setMicrophoneEnabled(true, { echoCancellation: true, noiseSuppression: true, autoGainControl: false, channelCount: 1, voiceIsolation: true } as never, { dtx: false, red: true, forceStereo: false, audioPreset: { maxBitrate: 96000, priority: 'high' } } as never);
         // Lock the phone's own echo canceller / noise suppressor / high-pass on (Chrome flags), so loudspeaker video calls stay echo-free.
-        { const mt = room.localParticipant.getTrackPublication(Track.Source.Microphone)?.track?.mediaStreamTrack;
+        { const mt = room.localParticipant.getTrackPublication(LK!.Track.Source.Microphone)?.track?.mediaStreamTrack;
           if (mt && 'contentHint' in mt) mt.contentHint = 'speech';
           // Background filter: ask the OS for voice isolation + strong noise suppression (ignored where unsupported).
           }
@@ -346,7 +349,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
 
   const toggleMic = async () => {
     const n = !mic; setMic(n);
-    const pub = roomRef.current?.localParticipant.getTrackPublication(Track.Source.Microphone);
+    const pub = roomRef.current?.localParticipant.getTrackPublication(LK!.Track.Source.Microphone);
     if (voiceRef.current && pub?.track) { if (n) await pub.track.unmute(); else await pub.track.mute(); return; }
     await roomRef.current?.localParticipant.setMicrophoneEnabled(n);
   };
@@ -359,7 +362,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const res = saver ? { width: 854, height: 480, frameRate: 24 } : { width: 1280, height: 720, frameRate: 30 };
     if (!on) {
       // Fully release the camera so the phone's camera indicator turns off at once.
-      const pub = lp.getTrackPublication(Track.Source.Camera);
+      const pub = lp.getTrackPublication(LK!.Track.Source.Camera);
       if (pub?.track) { const t = pub.track; await lp.unpublishTrack(t, true).catch(() => {}); t.mediaStreamTrack?.stop(); }
       if (localV.current) localV.current.srcObject = null;
       setCam(false); return;
@@ -370,7 +373,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
           { width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 1_200_000, maxFramerate: 30 } },
         ] as never });
     // 'motion' keeps frames smooth and low-latency instead of stalling to hold detail.
-    const mt = lp.getTrackPublication(Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
+    const mt = lp.getTrackPublication(LK!.Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
     setCam(on);
   };
   const toggleCam = async () => {
@@ -380,11 +383,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   };
   // (Re)attach the local camera whenever its preview element appears or moves (pip ⇄ big).
   useEffect(() => {
-    const t = roomRef.current?.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
+    const t = roomRef.current?.localParticipant.getTrackPublication(LK!.Track.Source.Camera)?.track;
     if (cam && t && localV.current) t.attach(localV.current);
   }, [cam, swapped, remoteVideo, link]);
   const flip = async () => {
-    const pub = roomRef.current?.localParticipant.getTrackPublication(Track.Source.Camera);
+    const pub = roomRef.current?.localParticipant.getTrackPublication(LK!.Track.Source.Camera);
     const tr = pub?.track as unknown as { restartTrack?: (o: object) => Promise<void> } | undefined;
     const nf = !front; setFront(nf);
     await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment', resolution: { width: 1280, height: 720, frameRate: 30 } }).catch(() => {});

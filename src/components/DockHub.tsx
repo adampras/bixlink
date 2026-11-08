@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type UIEvent } from 'react';
 import { Link } from '@tanstack/react-router';
-import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, UserRound, Settings2, Bot, Bike, WalletCards, PhoneCall, type LucideIcon } from 'lucide-react';
+import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, Search, Coins, Wrench, UserRound, Settings2, Bot, Bike, WalletCards, PhoneCall, type LucideIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { HUB_GROUPS, HUB_ITEMS, hubVisible, hubOrdered } from '@/lib/dock-hub';
+import { HUB_GROUPS, HUB_ITEMS, PILLARS, hubVisible, hubOrdered, pillarOf } from '@/lib/dock-hub';
 
-const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: Bike, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards, call: PhoneCall, settings: Settings2 };
+const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: Bike, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards, call: PhoneCall, settings: Settings2, gold: Coins, care: Wrench };
 /** Category look: swipe rows for long groups, fixed grids for short ones. */
 const GROUP_STYLE: Record<string, { tone: string; swipe: boolean }> = {
   'Trading & Finance': { tone: 'gold', swipe: true },
@@ -27,8 +27,10 @@ function SwipeRow({ children, count }: { children: React.ReactNode; count: numbe
 }
 
 /** Mobile dock HUB (replaces HOME): opens owner-selected shortcuts. */
-export function DockHub({ path, cfg, order }: { path: string; cfg?: Record<string, boolean> | undefined; order?: string[] | undefined }) {
+export function DockHub({ path, cfg, order, matrix = false }: { path: string; cfg?: Record<string, boolean> | undefined; order?: string[] | undefined; matrix?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [q, setQ] = useState('');
+  useEffect(() => { if (!open) setQ(''); }, [open]);
   const [recent, setRecent] = useState<string[]>([]);
   useEffect(() => { if (open) { try { setRecent(JSON.parse(localStorage.getItem(RECENT_KEY) || '[]')); } catch { setRecent([]); } } }, [open]);
   const items = hubOrdered(HUB_ITEMS, order).filter(i => hubVisible(cfg, i.id));
@@ -70,15 +72,22 @@ export function DockHub({ path, cfg, order }: { path: string; cfg?: Record<strin
         <div className="hub-grabber" aria-hidden/>
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest">BIX HUB</SheetTitle></SheetHeader>
         </div>
+        {matrix && <label className="hub-search mt-2 flex items-center gap-2 rounded-2xl border border-border bg-background/40 px-3 py-2"><Search size={15} className="text-muted-foreground"/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari layanan… (ride, gold, call)" aria-label="Cari layanan" className="w-full bg-transparent text-sm outline-none"/></label>}
+        {matrix && q.trim() ? (() => { const k = q.trim().toLowerCase(); const hits = items.filter(i => `${i.label} ${i.note} ${i.id}`.toLowerCase().includes(k)); return <section className="hub-group hub-tone-gold mt-3">{hits.length ? <div className="grid grid-cols-3 gap-2">{hits.map((i, n) => tile(i, n))}</div> : <p className="py-6 text-center text-xs text-muted-foreground">Tidak ditemukan.</p>}</section>; })() : <>
         {recentItems.length > 0 && <section className="hub-group hub-tone-gold hub-recent mt-2">
-          <h3 className="hub-group-head"><span>Last opened</span></h3>
+          <h3 className="hub-group-head"><span>{matrix ? 'Terakhir dibuka' : 'Last opened'}</span></h3>
           <div className="grid grid-cols-3 gap-2">{recentItems.map((i, n) => tile(i, n, true))}</div>
         </section>}
-        {HUB_GROUPS.map(g => { const list = items.filter(i => i.group === g); if (!list.length) return null; const st = GROUP_STYLE[g] ?? { tone: 'gold', swipe: false }; const swipe = st.swipe && list.length > 3;
+        {matrix ? PILLARS.map((p, pi) => { const list = items.filter(i => pillarOf(i.id) === p.id); if (!list.length) return null; const tone = ['emerald', 'gold', 'violet', 'silver'][pi];
+          return <section key={p.id} className={`hub-group hub-tone-${tone} mt-3`}>
+          <h3 className="hub-group-head"><span>{p.label}</span><em>{p.note}</em></h3>
+          {list.length > 3 ? <SwipeRow count={list.length}>{list.map((i, n) => tile(i, n))}</SwipeRow> : <div className="grid grid-cols-3 gap-2">{list.map((i, n) => tile(i, n))}</div>}
+          </section>; }) : HUB_GROUPS.map(g => { const list = items.filter(i => i.group === g); if (!list.length) return null; const st = GROUP_STYLE[g] ?? { tone: 'gold', swipe: false }; const swipe = st.swipe && list.length > 3;
           return <section key={g} className={`hub-group hub-tone-${st.tone} mt-3`}>
           <h3 className="hub-group-head"><span>{g}</span>{swipe && <em>Geser ⇆</em>}</h3>
           {swipe ? <SwipeRow count={list.length}>{list.map((i, n) => tile(i, n))}</SwipeRow> : <div className="grid grid-cols-3 gap-2">{list.map((i, n) => tile(i, n))}</div>}
           </section>; })}
+        </>}
       </SheetContent>
     </Sheet>
   </>;

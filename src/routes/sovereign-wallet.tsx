@@ -19,7 +19,7 @@ function Button(props: ButtonProps) { return <BaseButton variant="wallet" size="
 import { useServerFn } from '@tanstack/react-start';
 import { getMyWallet } from '@/lib/bixlink.functions';
 import { getFiatRates } from '@/lib/market.functions';
-import walletArt from '@/assets/bix-lux-wallet.png';
+import walletArt from '@/assets/bix-lux-wallet.webp';
 import foxIcon from '@/assets/fox-icon-512.png.asset.json';
 const foxMark = foxIcon.url;
 

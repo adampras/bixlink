@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import { Fingerprint, ShieldCheck, Zap, Network, Sparkles, ArrowUpRight, ArrowDownLeft, Repeat, History, ExternalLink, X, Copy, Fuel } from 'lucide-react';
-import walletArt from '@/assets/bix-lux-wallet.png';
+import walletArt from '@/assets/bix-lux-wallet.webp';
 
 /** Brand-colored token badges (symbol glyphs, not official artwork). */
 const TOKENS: [string, string, string, string, string][] = [

@@ -14,6 +14,8 @@ const DEFAULT_ORDER = HUB_ITEMS.map(i => i.id as string);
 export function AdminHubMenu() {
   const { data } = usePublicConfig(); const save = useServerFn(updateDockHub); const qc = useQueryClient();
   const [cfg, setCfg] = useState<Record<string, boolean>>({}); const [order, setOrder] = useState<string[]>(DEFAULT_ORDER);
+  const [model, setModel] = useState<'classic'|'owner'|'all'>('owner');
+  useEffect(() => { setModel(data?.readiness.dockModel ?? 'owner'); }, [data?.readiness.dockModel]);
   const [msg, setMsg] = useState(''); const [busy, setBusy] = useState(false);
   useEffect(() => { setCfg(data?.readiness.dockHub ?? {}); }, [data?.readiness.dockHub]);
   useEffect(() => { setOrder(hubOrdered(HUB_ITEMS, data?.readiness.dockOrder).map(i => i.id)); }, [data?.readiness.dockOrder]);
@@ -32,6 +34,11 @@ export function AdminHubMenu() {
     const idx: Record<string, number> = {}; setOrder(ordered.map(i => byGroup[i.group]![idx[i.group] = (idx[i.group] ?? -1) + 1]!));
   };
   return <div className="space-y-3">
+    <div className="rounded-xl border border-border bg-card/70 p-3">
+      <h4 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Model navigasi HUB</h4>
+      <p className="mt-1 text-xs text-muted-foreground">Matrix 4 pilar + pencarian. Uji dulu di akun Admin 1, lalu buka ke semua member atau kembali ke model lama.</p>
+      <div className="mt-2 grid grid-cols-3 gap-2">{([['classic', 'Model lama'], ['owner', 'Matrix · Admin 1'], ['all', 'Matrix · Semua']] as const).map(([v, l]) => <Button key={v} size="sm" variant={model === v ? 'default' : 'outline'} onClick={() => setModel(v)}>{l}</Button>)}</div>
+    </div>
     <div className="flex flex-wrap items-center justify-between gap-2">
       <p className="text-xs text-muted-foreground">Menu tampil di HUB: <b className="text-foreground">{shown}/{HUB_ITEMS.length}</b>. Admin selalu melihat semua menu.</p>
       <div className="flex flex-wrap gap-2">
@@ -51,6 +58,6 @@ export function AdminHubMenu() {
       </div>)}</div>
     </div>; })}
     {msg && <p className="text-xs text-primary">{msg}</p>}
-    <Button disabled={busy} onClick={async () => { setMsg(''); setBusy(true); try { await save({ data: { dockHub: cfg, dockOrder: order } }); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); setMsg('Menu & posisi HUB tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } finally { setBusy(false); } }}>Save HUB menu</Button>
+    <Button disabled={busy} onClick={async () => { setMsg(''); setBusy(true); try { await save({ data: { dockHub: cfg, dockOrder: order, dockModel: model } }); await qc.invalidateQueries({ queryKey: ['bix-public-config'] }); setMsg('Menu & posisi HUB tersimpan.'); } catch (e) { setMsg(e instanceof Error ? e.message : 'Gagal'); } finally { setBusy(false); } }}>Save HUB menu</Button>
   </div>;
 }

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import fox from "@/assets/bixlink-fox.png";
+import fox from "@/assets/bixlink-fox.webp";
 import { LionCrest } from "@/components/BixZoom";
 import { StudioProvider, StudioWalletBar, StudioOwnerPanel, useStudio } from "@/components/StudioCredits";
 

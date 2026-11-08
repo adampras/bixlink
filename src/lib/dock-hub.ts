@@ -29,3 +29,15 @@ export function hubOrdered<T extends { id: string }>(items: readonly T[], order:
   const rank = new Map((order ?? []).map((id, i) => [id, i]));
   return items.map((it, i) => ({ it, r: rank.get(it.id) ?? 1000 + i })).sort((a, b) => a.r - b.r).map(x => x.it);
 }
+
+/** Matrix model: four pillars regroup the same catalog (classic groups stay untouched). */
+export const PILLARS = [
+  { id: 'daily', label: 'Layanan Harian', note: 'BIXGO · BIXCARE', ids: ['bixgo', 'care', 'nft'] },
+  { id: 'finance', label: 'Finansial & Aset', note: 'Pay · Gold · Trade', ids: ['pay', 'gold', 'onchain', 'vault', 'trade', 'bixtrade', 'presale', 'boost', 'buyback', 'exchange', 'mining'] },
+  { id: 'connect', label: 'Koneksi & Media', note: 'Call · Live · Arena', ids: ['call', 'bixtok', 'arena'] },
+  { id: 'account', label: 'Akun', note: 'Home · Profile', ids: ['home', 'profile', 'settings'] },
+] as const;
+export type DockModel = 'classic' | 'owner' | 'all';
+/** 'owner' = Matrix only for Owner 1 (trial); 'all' = everyone; 'classic' = current model. */
+export const useMatrix = (model: DockModel | undefined, isAdmin: boolean) => (model ?? 'owner') === 'all' || ((model ?? 'owner') === 'owner' && isAdmin);
+export const pillarOf = (id: string) => PILLARS.find(p => (p.ids as readonly string[]).includes(id))?.id ?? 'account';

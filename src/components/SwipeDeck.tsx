@@ -1,6 +1,6 @@
 import { Children, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import arenaGlobe from '@/assets/arena-globe.png';
+import arenaGlobe from '@/assets/arena-globe.webp';
 
 /** Phone-widget style swipe deck: one card per page with snap + dots. Desktop shows a grid unless `alwaysSwipe`. */
 export function SwipeDeck({ children, label, desktopCols = 'md:grid-cols-3', autoPlayMs, alwaysSwipe = false }: { children: ReactNode; label: string; desktopCols?: string; autoPlayMs?: number; alwaysSwipe?: boolean }) {

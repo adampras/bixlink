@@ -4,7 +4,7 @@ import { Building2, CircleDollarSign, Globe2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LandingNarrative } from '@/components/LandingNarrative';
 import { fallbackPackages, type Package } from '@/lib/bixlink';
-import coinCutout from '@/assets/bixcoin-cutout.png';
+import coinCutout from '@/assets/bixcoin-cutout.webp';
 import vaultBg from '@/assets/coin-vault-bg.jpg';
 import heroObsidian from '@/assets/hero-obsidian-gold.jpg';
 import { usePublicConfig, useMember } from '@/lib/useMember';
