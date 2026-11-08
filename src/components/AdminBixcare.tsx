@@ -24,7 +24,7 @@ export function AdminBixcare({ onMessage }: { onMessage: (m: string) => void }) 
   const set = async (o: Outlet, status: string, needNote = false) => {
     let note = '';
     if (needNote) { note = window.prompt(`Alasan untuk ${o.name}?`) ?? ''; if (!note.trim()) return; }
-    const patch: Record<string, unknown> = { status, review_note: note };
+    const patch: { status: string; review_note: string; is_open?: boolean } = { status, review_note: note };
     if (status !== 'approved') patch.is_open = false;
     const { error } = await supabase.from('bixcare_outlets').update(patch).eq('id', o.id);
     onMessage(error ? error.message : `${o.name} → ${CARE_STATUS[status] ?? status}.`); void load();
