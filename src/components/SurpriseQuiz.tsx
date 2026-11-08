@@ -6,6 +6,19 @@ import { supabase } from '@/integrations/supabase/client';
 type Status = { enabled: boolean; quota: number; reward: number; round: number; winners: number; left: number; mine: string | null };
 type Q = { q: string; options: string[] };
 
+/** Stable per-phone id: stored key plus a hardware/browser fingerprint hash, so clearing one doesn't free a second claim. */
+async function deviceId(): Promise<string> {
+  const KEY = 'bix_dev_id';
+  let saved = '';
+  try { saved = localStorage.getItem(KEY) ?? ''; } catch { /* ignore */ }
+  const s = window.screen;
+  const fp = [navigator.platform, navigator.hardwareConcurrency, (navigator as { deviceMemory?: number }).deviceMemory, s.width, s.height, s.colorDepth, window.devicePixelRatio, Intl.DateTimeFormat().resolvedOptions().timeZone, navigator.maxTouchPoints].join('|');
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(fp));
+  const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+  if (!saved) { saved = hash; try { localStorage.setItem(KEY, saved); } catch { /* ignore */ } }
+  return saved;
+}
+
 /** Floating gold orb: surprise FREE BIX quiz with 2 random server-picked questions. Answers are checked only on the server. */
 export function SurpriseQuiz() {
   const path = useRouterState({ select: s => s.location.pathname });
@@ -44,7 +57,7 @@ export function SurpriseQuiz() {
   const submit = async () => {
     if (!attempt) return;
     setBusy(true); setErr('');
-    const { data, error } = await supabase.rpc('bix_surprise_answer', { p_attempt: attempt, p_answers: picks });
+    const { data, error } = await supabase.rpc('bix_surprise_answer', { p_attempt: attempt, p_answers: picks, p_device: await deviceId() });
     setBusy(false);
     if (error) { setErr(error.message); return; }
     setResult(data as unknown as { result: string; amount?: number });
@@ -69,7 +82,15 @@ export function SurpriseQuiz() {
             <p className="mb-4 text-center text-xs text-muted-foreground">Tersisa {status.left} dari {status.quota} hadiah · jawab 2 soal dengan benar · 1 kesempatan per ronde</p>
             {result ? (
               <div className="py-4 text-center">
-                {result.result === 'win' && <p className="text-base font-bold text-primary">🎉 Selamat! {result.amount} BIX promo masuk ke saldo vBIX Anda.</p>}
+                {result.result === 'win' && <>
+                  <p className="text-base font-bold text-primary">🎉 Selamat! {result.amount} BIX masuk ke Saldo Utama & BIX PAY Anda.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Tercatat di Ledger Internal BIXLINK.</p>
+                  <div className="mt-4 grid gap-2">
+                    <a href="/sovereign-wallet" className="rounded-full bg-primary py-2.5 text-sm font-black text-primary-foreground">Lihat di Sovereign Wallet</a>
+                    <a href="/pay" className="rounded-full border border-primary/60 py-2.5 text-sm font-bold text-primary">Buka BIX PAY</a>
+                  </div>
+                </>}
+                {result.result === 'device' && <p className="text-sm">HP ini sudah pernah menang di ronde ini. 1 HP hanya untuk 1 kali klaim.</p>}
                 {result.result === 'wrong' && <p className="text-sm">Jawaban belum tepat. Nantikan ronde kejutan berikutnya!</p>}
                 {result.result === 'late' && <p className="text-sm">Jawaban benar, tapi kuota hadiah sudah habis (atau email belum terverifikasi).</p>}
               </div>

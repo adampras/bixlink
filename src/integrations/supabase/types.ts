@@ -1697,6 +1697,7 @@ export type Database = {
           amount: number
           answered_at: string | null
           created_at: string
+          device_id: string | null
           id: string
           qids: number[]
           result: string | null
@@ -1707,6 +1708,7 @@ export type Database = {
           amount?: number
           answered_at?: string | null
           created_at?: string
+          device_id?: string | null
           id?: string
           qids: number[]
           result?: string | null
@@ -1717,6 +1719,7 @@ export type Database = {
           amount?: number
           answered_at?: string | null
           created_at?: string
+          device_id?: string | null
           id?: string
           qids?: number[]
           result?: string | null
@@ -4544,10 +4547,12 @@ export type Database = {
       bix_studio_spend: { Args: { p_feature: string }; Returns: Json }
       bix_studio_status: { Args: never; Returns: Json }
       bix_surprise_admin: { Args: never; Returns: Json }
-      bix_surprise_answer: {
-        Args: { p_answers: number[]; p_attempt: string }
-        Returns: Json
-      }
+      bix_surprise_answer:
+        | { Args: { p_answers: number[]; p_attempt: string }; Returns: Json }
+        | {
+            Args: { p_answers: number[]; p_attempt: string; p_device: string }
+            Returns: Json
+          }
       bix_surprise_cfg: { Args: never; Returns: Json }
       bix_surprise_open: { Args: never; Returns: Json }
       bix_surprise_save: {

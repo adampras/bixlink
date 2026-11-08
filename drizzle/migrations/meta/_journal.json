@@ -1275,6 +1275,13 @@
       "when": 1794132536351,
       "tag": "0181_bix_surprise_admin_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 182,
+      "version": "7",
+      "when": 1794133903278,
+      "tag": "0182_bix_surprise_ledger_device",
+      "breakpoints": true
     }
   ]
 }
