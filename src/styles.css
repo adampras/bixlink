@@ -7495,3 +7495,47 @@ html[data-chrono="on"] [data-page="profit"] .profit-withdraw__btn { background: 
 html[data-chrono="on"] [data-page="wallet"] .wallet-face--front { box-shadow: 0 0 0 4px #ecece8, 0 0 0 5px #c8102e, 0 24px 50px -20px rgba(0,0,0,.8) !important; background: radial-gradient(circle at 85% 10%, rgba(200,16,46,.22), transparent 50%), #08080a !important; }
 html[data-chrono="on"] [data-page="wallet"] .wallet-action span { background: #111 !important; color: #facc15 !important; border: 1px solid #c8102e !important; }
 @media (prefers-reduced-motion: reduce) { .chrono-tourbillon { animation: none; } }
+
+/* ===== Chronograph RM · dock quadrants + STAKE (html[data-chrono=on], Owner 1 tree only) ===== */
+html[data-chrono="on"] nav.glass-dock { --rm-off:#64748b; background: linear-gradient(180deg,#0e1217,#06080b) !important; border-color: rgba(241,245,249,.18) !important; box-shadow: inset 0 1px 0 rgba(241,245,249,.12), 0 14px 34px -14px #000 !important; }
+html[data-chrono="on"] nav.glass-dock > :is(a,button):not(.dock-wallet) { color: var(--rm-off) !important; }
+html[data-chrono="on"] nav.glass-dock > :first-child { --rm:#38bdf8; }
+html[data-chrono="on"] nav.glass-dock [data-nav="stake"] { --rm:#facc15; }
+html[data-chrono="on"] nav.glass-dock [data-nav="profit"] { --rm:#ef4444; }
+html[data-chrono="on"] nav.glass-dock [data-nav="network"] { --rm:#10b981; }
+html[data-chrono="on"] nav.glass-dock .mobile-nav-on:not(.dock-wallet) { color: var(--rm) !important; text-shadow: 0 0 10px color-mix(in srgb, var(--rm) 55%, transparent) !important; }
+html[data-chrono="on"] nav.glass-dock .mobile-nav-on:not(.dock-wallet)::before { content:""; position:absolute; top:0; left:30%; right:30%; width:auto; height:2px; border-radius:2px; background: var(--rm) !important; box-shadow: 0 0 10px var(--rm) !important; }
+html[data-chrono="on"] nav.glass-dock .dock-wallet svg { background: radial-gradient(circle at 35% 30%, #2a0d10, #08080a 70%) !important; color: #facc15 !important; box-shadow: 0 0 0 2px #c8102e, 0 0 0 5px #f1f1ee, 0 0 0 6px #0b0b0d, 0 8px 20px -6px rgba(200,16,46,.6) !important; }
+html[data-chrono="on"] nav.glass-dock .dock-wallet { color: #f1f5f9 !important; }
+
+/* STAKE · Quartz bezel header */
+html[data-chrono="on"] [data-page="stake"] .stake-lux-head { position: relative; padding: 1.1rem 1rem !important; border-radius: 20px !important; border: 0 !important;
+  background: radial-gradient(circle at 70% 20%, #2a0d10, #08080a 70%) padding-box, repeating-linear-gradient(172deg,#f4f4f2 0 3px,#dcdcd8 3px 5px,#fbfbfa 5px 9px) border-box !important;
+  border: 5px solid transparent !important; box-shadow: inset 0 0 0 1px #c8102e, 0 14px 34px -16px rgba(0,0,0,.8) !important; }
+html[data-chrono="on"] [data-page="stake"] .stake-lux-head::before { content:""; position:absolute; inset:6px; pointer-events:none; animation:none !important; background:
+  radial-gradient(circle,#cbd5e1 0 2px,transparent 2.5px) 0 0/100% 100% no-repeat; 
+  background-image: radial-gradient(circle,#cbd5e1 2px,transparent 2.5px),radial-gradient(circle,#cbd5e1 2px,transparent 2.5px),radial-gradient(circle,#cbd5e1 2px,transparent 2.5px),radial-gradient(circle,#cbd5e1 2px,transparent 2.5px);
+  background-size: 6px 6px; background-repeat: no-repeat; background-position: left top, right top, left bottom, right bottom; }
+html[data-chrono="on"] [data-page="stake"] h1.stake-lux-title { background: linear-gradient(180deg,#ffffff,#e2e8f0) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
+html[data-chrono="on"] [data-page="stake"] h1.stake-lux-title span { background: none !important; -webkit-text-fill-color: #facc15 !important; color: #facc15 !important; text-shadow: 0 0 16px rgba(250,204,21,.35) !important; }
+
+/* STAKE · 3 chrono sub-dials */
+html[data-chrono="on"] [data-page="stake"] .hud-scan { gap: 8px; background: transparent !important; border: 0 !important; box-shadow: none !important; }
+html[data-chrono="on"] [data-page="stake"] .hud-scan > .stake-metric { border-radius: 16px; background: radial-gradient(circle at 50% 0%, #1a1d24, #08090c 75%) !important; border: 0 !important; }
+html[data-chrono="on"] [data-page="stake"] .hud-scan > .stake-metric:nth-child(1) { box-shadow: inset 0 0 0 1px #94a3b8, inset 0 2px 0 #38bdf8 !important; }
+html[data-chrono="on"] [data-page="stake"] .hud-scan > .stake-metric:nth-child(2) { box-shadow: inset 0 0 0 1px #facc15, inset 0 2px 0 #facc15 !important; }
+html[data-chrono="on"] [data-page="stake"] .hud-scan > .stake-metric:nth-child(3) { box-shadow: inset 0 0 0 1px #c8102e, inset 0 2px 0 #10b981 !important; }
+html[data-chrono="on"] [data-page="stake"] .hud-scan > .stake-metric:nth-child(1) dd { color: #e2e8f0 !important; }
+html[data-chrono="on"] [data-page="stake"] .hud-scan > .stake-metric:nth-child(2) dd { color: #facc15 !important; }
+html[data-chrono="on"] [data-page="stake"] .hud-scan > .stake-metric:nth-child(3) dd { color: #10b981 !important; }
+
+/* STAKE · carbon chassis package cards */
+html[data-chrono="on"] [data-page="stake"] :is(.duration-package,.stake-lux-card,.stake-pick,.stake-request) { position: relative; background: linear-gradient(160deg,#0f1217,#0b0d11 60%,#07080a) !important; border: 1px solid rgba(241,245,249,.16) !important; border-radius: 14px !important; box-shadow: inset 0 2px 0 #f1f1ee, 0 16px 32px -20px #000 !important; }
+html[data-chrono="on"] [data-page="stake"] :is(.duration-package,.stake-lux-card)::after { content:""; position:absolute; left:14px; top:0; width:42px; height:3px; background:#c8102e; border-radius:0 0 2px 2px; pointer-events:none; }
+html[data-chrono="on"] [data-page="stake"] .tier-bar[aria-selected="true"], html[data-chrono="on"] [data-page="stake"] [aria-pressed="true"] { border-color: #ef4444 !important; background: rgba(200,16,46,.16) !important; box-shadow: 0 0 14px -4px rgba(239,68,68,.6) !important; }
+html[data-chrono="on"] [data-page="stake"] .tier-bar[aria-selected="true"] b { color: #facc15 !important; }
+html[data-chrono="on"] [data-page="stake"] .text-chart-3 { color: #facc15 !important; }
+html[data-chrono="on"] [data-page="stake"] .text-chart-2 { color: #10b981 !important; }
+html[data-chrono="on"] [data-page="stake"] :is(.stake-lux-btn, button.bg-primary, button[data-variant="default"]) { background: linear-gradient(180deg,#e11d48,#9f1239) !important; color: #fff !important; border-radius: 12px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), inset 0 -3px 0 rgba(0,0,0,.35) !important; }
+html[data-chrono="on"] [data-page="stake"] :is(.stake-lux-btn, button.bg-primary, button[data-variant="default"]):active { transform: translateY(1px); box-shadow: inset 0 2px 4px rgba(0,0,0,.5) !important; }
+html[data-chrono="on"] [data-page="stake"] .stake-progress > * { background: linear-gradient(90deg,#10b981,#facc15) !important; }
