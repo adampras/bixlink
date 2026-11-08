@@ -88,8 +88,8 @@ function AddMembers({ g, onClose }: { g: Group; onClose: () => void }) {
           <button type="button" className="bx-grp-btn is-alt" disabled={s === 'ok' || busy === c.id} onClick={() => void add(c.code, c.id)}>{s === 'ok' ? <Check size={14}/> : <UserPlus size={14}/>}</button>
         </li>; })}
         {!manual && list.length === 0 && (tab === 'Kontak' || net) && <li className="bx-grp-empty">{tab === 'Kontak' ? 'Belum ada kontak tersimpan.' : 'Belum ada anggota jaringan.'}</li>}
-        {manual && <li><span className="bx-grp-meta"><b>Tambah “{q.trim()}”</b><small>{done.manual && done.manual !== 'ok' ? done.manual : 'BIX-ID atau @username'}</small></span>
-          <button type="button" className="bx-grp-btn is-alt" disabled={done.manual === 'ok'} onClick={() => void add(q.trim(), 'manual')}>{done.manual === 'ok' ? <Check size={14}/> : <UserPlus size={14}/>}</button></li>}
+        {manual && <li><span className="bx-grp-meta"><b>Tambah “{q.trim()}”</b><small>{done['manual'] && done['manual'] !== 'ok' ? done['manual'] : 'BIX-ID atau @username'}</small></span>
+          <button type="button" className="bx-grp-btn is-alt" disabled={done['manual'] === 'ok'} onClick={() => void add(q.trim(), 'manual')}>{done['manual'] === 'ok' ? <Check size={14}/> : <UserPlus size={14}/>}</button></li>}
       </ul>
     </div>
   </div>;
