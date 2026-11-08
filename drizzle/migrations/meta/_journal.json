@@ -1219,6 +1219,13 @@
       "when": 1794103553511,
       "tag": "0173_bixcare",
       "breakpoints": true
+    },
+    {
+      "idx": 174,
+      "version": "7",
+      "when": 1794104477756,
+      "tag": "0174_bixcare_payments",
+      "breakpoints": true
     }
   ]
 }

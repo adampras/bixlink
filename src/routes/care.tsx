@@ -8,7 +8,7 @@ import autoImg from '@/assets/bixcare-auto.jpg';
 import washImg from '@/assets/bixcare-wash.jpg';
 import laundryImg from '@/assets/bixcare-laundry.jpg';
 import rentImg from '@/assets/bixcare-rent.jpg';
-import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX } from '@/lib/bixcare';
+import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet } from '@/lib/bixcare';
 
 export const Route = createFileRoute('/care')({
   head: () => ecosystemHead('/care', 'BIXCARE — Bengkel, Cuci, Laundry & Rental | BIXLINK', 'Pesan servis bengkel, cuci kendaraan, laundry dan rental motor/mobil dari mitra BIXLINK. Bayar langsung ke QRIS mitra; biaya platform BIX Gas dari saldo mitra.'),
@@ -50,7 +50,7 @@ function CarePage() {
         </div>
       </section>
       <nav className="sticky top-0 z-10 flex gap-2 bg-background/90 px-4 py-2 backdrop-blur">
-        {([['explore', 'Jelajah', Search], ['orders', 'Pesanan', ClipboardList], ['partner', 'Mitra', Store]] as const).map(([k, l, I]) => (
+        {([['explore', 'Jelajah', Search], ['orders', 'Pesanan Saya', ClipboardList], ['partner', 'Pemilik Layanan', Store]] as const).map(([k, l, I]) => (
           <button key={k} onClick={() => setTab(k)} className={`flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-bold ${tab === k ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground'}`}><I className="h-4 w-4" />{l}</button>
         ))}
       </nav>
@@ -108,13 +108,18 @@ function Explore({ uid, onBooked }: { uid: string | null; onBooked: () => void }
 function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: string | null; onBack: () => void; onBooked: () => void }) {
   const [services, setServices] = useState<Service[]>([]);
   const [qty, setQty] = useState<Record<string, number>>({});
-  const [pay, setPay] = useState<'qris' | 'cash'>('qris');
+  const [pay, setPay] = useState<PayMethod>('cash');
+  const [wbal, setWbal] = useState<{ bix: number; usdt: number } | null>(null);
+  useEffect(() => { if (uid) void supabase.rpc('bix_asset_balances', { p_user: uid }).then(({ data }) => { const r = (data as { bix_balance: number; usdt_balance: number }[] | null)?.[0]; setWbal({ bix: Number(r?.bix_balance ?? 0), usdt: Number(r?.usdt_balance ?? 0) }); }); }, [uid]);
+  const methods = (['bix', 'usdt', 'qris', 'bank', 'cash'] as PayMethod[]).filter(m => m === 'bix' ? outlet.accept_bix : m === 'usdt' ? outlet.accept_usdt : m === 'qris' ? !!outlet.qris_path : m === 'bank' ? !!outlet.bank_account : true);
   const [when, setWhen] = useState('');
   const [note, setNote] = useState('');
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
   useEffect(() => { void supabase.from('bixcare_services').select('*').eq('outlet_id', outlet.id).eq('available', true).order('price_idr').then(({ data }) => setServices((data ?? []) as Service[])); }, [outlet.id]);
   const total = services.reduce((s, x) => s + x.price_idr * (qty[x.id] ?? 0), 0);
+  const quote = payQuote(total);
+  const short = pay === 'bix' ? (wbal?.bix ?? 0) < quote.bix : pay === 'usdt' ? (wbal?.usdt ?? 0) < quote.usdt : false;
   const book = async () => {
     setBusy(true); setMsg('');
     const items = Object.entries(qty).filter(([, n]) => n > 0).map(([id, n]) => ({ id, qty: n }));
@@ -142,9 +147,11 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
         <div className={`${card} space-y-3`}>
           <label className="block text-xs text-muted-foreground">Jadwal datang (opsional — lewati antrean)<input type="datetime-local" className={`${input} mt-1`} value={when} onChange={e => setWhen(e.target.value)} /></label>
           <input className={input} placeholder="Catatan (plat nomor, jenis kendaraan, dll.)" value={note} onChange={e => setNote(e.target.value)} />
-          <div className="flex gap-2">{(['qris', 'cash'] as const).map(p => <button key={p} onClick={() => setPay(p)} className={`flex-1 rounded-xl py-2 text-xs font-bold ${pay === p ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{p === 'qris' ? 'QRIS / transfer ke mitra' : 'Tunai di kasir'}</button>)}</div>
-          <p className="text-[11px] text-muted-foreground">Pembayaran Anda langsung ke mitra. BIXLINK tidak memegang uang Anda.</p>
-          <div className="flex items-center justify-between"><span className="text-lg font-black text-primary">{rp(total)}</span><button className={btn} disabled={busy || total <= 0} onClick={book}>Pesan sekarang</button></div>
+          <p className="text-xs font-bold">Metode pembayaran</p>
+          <div className="grid grid-cols-2 gap-2">{methods.map(p => <button key={p} onClick={() => setPay(p)} className={`rounded-xl px-2 py-2 text-left text-xs font-bold ${pay === p ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{PAY_LABEL[p]}{p === 'bix' && <span className="block text-[10px] font-normal opacity-80">{quote.bix} BIX · saldo {wbal?.bix.toFixed(2) ?? '…'}</span>}{p === 'usdt' && <span className="block text-[10px] font-normal opacity-80">{quote.usdt} USDT · saldo {wbal?.usdt.toFixed(2) ?? '…'}</span>}</button>)}</div>
+          <p className="text-[11px] text-muted-foreground">{isWalletPay(pay) ? 'Saldo ditahan otomatis saat pesan dan diteruskan ke mitra setelah order Selesai. Batal/ditolak = saldo kembali penuh.' : pay === 'cash' ? 'Bayar tunai langsung ke mitra.' : 'Setelah pesan, buka Pesanan Saya untuk melihat QRIS/rekening mitra, bayar, lalu tekan "Saya sudah bayar".'}</p>
+          {short && <p className="text-xs text-destructive">Saldo tidak cukup untuk metode ini.</p>}
+          <div className="flex items-center justify-between"><span className="text-lg font-black text-primary">{rp(total)}</span><button className={btn} disabled={busy || total <= 0 || short} onClick={book}>Pesan sekarang</button></div>
           {msg && <p className="text-xs text-destructive">{msg}</p>}
         </div>
       ) : <SignIn />}
@@ -158,10 +165,19 @@ function Tracker({ o, division }: { o: CareOrder; division?: Division | undefine
   return <div className="mt-2 flex gap-1">{stages.map((s, i) => <div key={s} className="flex-1"><div className={`h-1.5 rounded-full ${i <= idx ? 'bg-primary' : 'bg-muted'}`} /><p className="mt-1 text-[9px] leading-tight text-muted-foreground">{s}</p></div>)}</div>;
 }
 
+function PayBadge({ o }: { o: CareOrder }) {
+  const closed = o.status === 'cancelled' || o.status === 'rejected';
+  const t = isWalletPay(o.pay_method)
+    ? (closed ? 'Saldo dikembalikan' : o.status === 'completed' ? 'Dibayar ke mitra' : 'Saldo ditahan (aman)')
+    : o.pay_method === 'cash' ? 'Bayar di tempat' : o.paid_at ? `Konfirmasi bayar terkirim${o.pay_ref ? ` · ${o.pay_ref}` : ''}` : 'Belum dikonfirmasi bayar';
+  return <span className="mt-1 inline-block rounded-full border border-primary/40 px-2 py-0.5 text-[10px] font-bold text-primary">{t}</span>;
+}
+
 function MyOrders({ uid }: { uid: string }) {
   const [orders, setOrders] = useState<CareOrder[]>([]);
   const [outlets, setOutlets] = useState<Record<string, Outlet>>({});
   const [qris, setQris] = useState<Record<string, string>>({});
+  const [refs, setRefs] = useState<Record<string, string>>({});
   const load = useCallback(async () => {
     const { data } = await supabase.from('bixcare_orders').select('*').eq('buyer_id', uid).order('created_at', { ascending: false }).limit(50);
     const list = (data ?? []) as unknown as CareOrder[]; setOrders(list);
@@ -179,16 +195,23 @@ function MyOrders({ uid }: { uid: string }) {
     <div key={o.id} className={card}>
       <div className="flex justify-between"><p className="font-bold">{ot?.name ?? 'Outlet'}</p><span className="text-xs font-bold text-primary">{CARE_STATUS[o.status]}</span></div>
       <p className="text-xs text-muted-foreground">{o.items.map(i => `${i.qty}× ${i.name}`).join(', ')}</p>
-      <p className="text-sm font-bold">{rp(o.total_idr)} · {o.pay_method === 'qris' ? 'QRIS mitra' : 'Tunai'}</p>
+      <p className="text-sm font-bold">{rp(o.total_idr)} · {PAY_LABEL[o.pay_method]}{o.pay_method === 'bix' ? ` · ${o.fare_bix} BIX` : o.pay_method === 'usdt' ? ` · ${o.fare_usdt} USDT` : ''}</p>
+      <PayBadge o={o} />
       {!['cancelled', 'rejected'].includes(o.status) && <Tracker o={o} division={ot?.division} />}
       {o.pay_method === 'qris' && ot?.qris_path && qris[ot.qris_path] && !['completed', 'cancelled', 'rejected'].includes(o.status) && (
         <details className="mt-2"><summary className="flex cursor-pointer items-center gap-1 text-xs font-bold text-primary"><QrCode className="h-4 w-4" />Tampilkan QRIS mitra</summary><img src={qris[ot.qris_path]} alt="QRIS mitra" className="mx-auto mt-2 max-h-72 rounded-xl" /><p className="text-center text-[10px] text-muted-foreground">Bayar {rp(o.total_idr)} langsung ke mitra.</p></details>
+      )}
+      {o.pay_method === 'bank' && ot && !['completed', 'cancelled', 'rejected'].includes(o.status) && (
+        <div className="mt-2 rounded-xl border border-border/60 p-2 text-xs"><p className="font-bold">{ot.bank_name}</p><p className="font-mono text-sm">{ot.bank_account}</p><p className="text-muted-foreground">a.n. {ot.bank_holder}</p><button className={`${ghost} mt-1`} onClick={() => void navigator.clipboard?.writeText(ot.bank_account)}>Salin nomor</button></div>
+      )}
+      {(o.pay_method === 'bank' || o.pay_method === 'qris') && !o.paid_at && !['completed', 'cancelled', 'rejected'].includes(o.status) && (
+        <div className="mt-2 flex gap-2"><input className={input} placeholder="No. referensi (opsional)" value={refs[o.id] ?? ''} onChange={e => setRefs({ ...refs, [o.id]: e.target.value })} /><button className={btn} onClick={() => void supabase.rpc('bixcare_order_paid', { p_id: o.id, p_ref: refs[o.id] ?? '' }).then(load)}>Saya sudah bayar</button></div>
       )}
       {careNext(o.status, 'buyer').includes('cancelled') && <button className={`${ghost} mt-2`} onClick={() => cancel(o.id)}>Batalkan</button>}
     </div>); })}</>;
 }
 
-const emptyOutlet = { name: '', division: 'wash' as Division, city: '', address: '', phone: '', description: '', open_time: '08:00', close_time: '20:00' };
+const emptyOutlet = { name: '', division: 'wash' as Division, city: '', address: '', phone: '', description: '', open_time: '08:00', close_time: '20:00', bank_name: '', bank_account: '', bank_holder: '', accept_bix: true, accept_usdt: true };
 
 function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
   const [outlet, setOutlet] = useState<Outlet | null | undefined>(undefined);
@@ -199,7 +222,7 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
   const load = useCallback(async () => {
     const { data } = await supabase.from('bixcare_outlets').select('*').eq('owner_id', uid).maybeSingle();
     setOutlet((data as Outlet) ?? null);
-    if (data) { setForm({ name: data.name, division: data.division as Division, city: data.city, address: data.address, phone: data.phone, description: data.description, open_time: data.open_time, close_time: data.close_time }); setUrls(await signCare([data.logo_path, data.qris_path])); }
+    if (data) { setForm({ name: data.name, division: data.division as Division, city: data.city, address: data.address, phone: data.phone, description: data.description, open_time: data.open_time, close_time: data.close_time, bank_name: data.bank_name, bank_account: data.bank_account, bank_holder: data.bank_holder, accept_bix: data.accept_bix, accept_usdt: data.accept_usdt }); setUrls(await signCare([data.logo_path, data.qris_path])); }
     const { data: b } = await supabase.rpc('bix_asset_balances', { p_user: uid });
     setBal(Number((b as { bix_balance: number }[] | null)?.[0]?.bix_balance ?? 0));
   }, [uid]);
@@ -229,7 +252,7 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
       <div className={`${card} space-y-1`}>
         <p className="flex items-center gap-2 text-sm font-bold"><Fuel className="h-4 w-4 text-primary" />BIX Gas Tank</p>
         <p className="text-2xl font-black text-primary">{bal === null ? '…' : bal.toLocaleString('en-US', { maximumFractionDigits: 4 })} BIX</p>
-        <p className="text-[11px] text-muted-foreground">Konsumen bayar rupiah langsung ke QRIS Anda. Saat order ditandai Selesai, biaya platform (AutoCare/Rent 2%, Wash/Laundry 3%) dipotong otomatis dalam BIX dari saldo Anda. Minimal {MIN_GAS_BIX} BIX agar outlet bisa BUKA; di bawah itu outlet tutup otomatis.</p>
+        <p className="text-[11px] text-muted-foreground">Bayar saldo BIX/USDT: dana konsumen ditahan, lalu masuk ke saldo Anda dikurangi biaya platform saat order Selesai. QRIS/transfer/tunai: konsumen bayar langsung ke Anda; saat order ditandai Selesai, biaya platform (AutoCare/Rent 2%, Wash/Laundry 3%) dipotong otomatis dalam BIX dari saldo Anda. Minimal {MIN_GAS_BIX} BIX agar outlet bisa BUKA; di bawah itu outlet tutup otomatis.</p>
         <Link to="/wallet" className={`${ghost} mt-2 inline-block`}>Isi ulang BIX</Link>
       </div>
       <div className={`${card} space-y-2`}>
@@ -241,6 +264,10 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
         <input className={input} placeholder="Alamat & patokan" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
         <textarea className={input} placeholder="Deskripsi singkat" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
         <div className="grid grid-cols-2 gap-2"><input type="time" className={input} value={form.open_time} onChange={e => setForm({ ...form, open_time: e.target.value })} /><input type="time" className={input} value={form.close_time} onChange={e => setForm({ ...form, close_time: e.target.value })} /></div>
+        <p className="pt-2 text-xs font-bold">Pembayaran yang diterima</p>
+        <div className="grid grid-cols-3 gap-2"><input className={input} placeholder="Bank (BCA, BRI…)" value={form.bank_name} onChange={e => setForm({ ...form, bank_name: e.target.value })} /><input className={input} placeholder="No. rekening" inputMode="numeric" value={form.bank_account} onChange={e => setForm({ ...form, bank_account: e.target.value.replace(/[^0-9 -]/g, '') })} /><input className={input} placeholder="Atas nama" value={form.bank_holder} onChange={e => setForm({ ...form, bank_holder: e.target.value })} /></div>
+        <div className="flex gap-4 text-xs"><label className="flex items-center gap-1"><input type="checkbox" checked={form.accept_bix} onChange={e => setForm({ ...form, accept_bix: e.target.checked })} />Terima saldo BIX</label><label className="flex items-center gap-1"><input type="checkbox" checked={form.accept_usdt} onChange={e => setForm({ ...form, accept_usdt: e.target.checked })} />Terima saldo USDT</label></div>
+        <p className="text-[10px] text-muted-foreground">QRIS diunggah di bawah setelah outlet tersimpan. Tunai selalu tersedia.</p>
         <button className={btn} onClick={save}>Simpan</button>
         {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
       </div>
@@ -308,7 +335,7 @@ function IncomingOrders({ outlet, onChange }: { outlet: Outlet; onChange: () => 
     setMsg('');
     const { data, error } = await supabase.rpc('bixcare_order_set', { p_id: o.id, p_status: status, p_stage: stage });
     if (error) setMsg(error.message);
-    else if (status === 'completed') { const r = data as { fee_bix: number; closed: boolean }; setMsg(`Selesai. BIX Gas terpotong ${r.fee_bix} BIX.${r.closed ? ' Saldo di bawah minimum — outlet ditutup otomatis.' : ''}`); onChange(); }
+    else if (status === 'completed') { const r = data as { fee_bix?: number; closed?: boolean; merchant_bix?: number; merchant_usdt?: number }; setMsg(r.merchant_bix !== undefined ? `Selesai. ${r.merchant_bix} BIX masuk ke saldo Anda.` : r.merchant_usdt !== undefined ? `Selesai. ${r.merchant_usdt} USDT masuk ke saldo Anda.` : `Selesai. BIX Gas terpotong ${r.fee_bix} BIX.${r.closed ? ' Saldo di bawah minimum — outlet ditutup otomatis.' : ''}`); onChange(); }
     load();
   };
   const active = useMemo(() => orders.filter(o => !['completed', 'cancelled', 'rejected'].includes(o.status)), [orders]);
@@ -321,13 +348,15 @@ function IncomingOrders({ outlet, onChange }: { outlet: Outlet; onChange: () => 
       {active.map(o => (
         <div key={o.id} className="rounded-xl border border-border/60 p-3">
           <div className="flex justify-between text-sm"><span className="font-semibold">{o.items.map(i => `${i.qty}× ${i.name}`).join(', ')}</span><span className="text-xs text-primary">{CARE_STATUS[o.status]}</span></div>
-          <p className="text-xs text-muted-foreground">{rp(o.total_idr)} · {o.pay_method === 'qris' ? 'QRIS' : 'Tunai'}{o.schedule_at ? ` · ${new Date(o.schedule_at).toLocaleString('id-ID')}` : ''} · gas ±{gasFeeBix(o.total_idr, outlet.division)} BIX</p>
+          <p className="text-xs text-muted-foreground">{rp(o.total_idr)} · {PAY_LABEL[o.pay_method]}{o.schedule_at ? ` · ${new Date(o.schedule_at).toLocaleString('id-ID')}` : ''} · {o.pay_method === 'bix' ? `Anda terima ${walletNet(o.fare_bix, outlet.division)} BIX` : o.pay_method === 'usdt' ? `Anda terima ${walletNet(o.fare_usdt, outlet.division)} USDT` : `gas ±${gasFeeBix(o.total_idr, outlet.division)} BIX`}</p>
+          <PayBadge o={o} />
+          {(o.pay_method === 'qris' || o.pay_method === 'bank') && <p className="text-[10px] text-muted-foreground">Cek mutasi QRIS/rekening Anda sebelum menyelesaikan order.</p>}
           {o.note && <p className="text-xs">“{o.note}”</p>}
           {['accepted', 'in_progress', 'ready'].includes(o.status) && <div className="mt-2 flex flex-wrap gap-1">{STAGES[outlet.division].map(s => <button key={s} onClick={() => act(o, o.status, s)} className={`rounded-full px-2 py-1 text-[10px] ${o.stage === s ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{s}</button>)}</div>}
           <div className="mt-2 flex flex-wrap gap-2">{careNext(o.status, 'merchant').map(s => <button key={s} className={s === 'rejected' ? ghost : btn} onClick={() => act(o, s)}>{label[s]}</button>)}</div>
         </div>
       ))}
-      <p className="text-[11px] text-muted-foreground">Selesai: {done.length} order · omzet {rp(done.reduce((s, o) => s + Number(o.total_idr), 0))} · gas {done.reduce((s, o) => s + Number(o.fee_bix), 0).toFixed(4)} BIX</p>
+      <p className="text-[11px] text-muted-foreground">Selesai: {done.length} order · omzet {rp(done.reduce((s, o) => s + Number(o.total_idr), 0))} · diterima {done.reduce((s, o) => s + Number(o.merchant_bix), 0).toFixed(2)} BIX + {done.reduce((s, o) => s + Number(o.merchant_usdt), 0).toFixed(2)} USDT</p>
     </div>
   );
 }

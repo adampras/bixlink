@@ -2098,16 +2098,25 @@ export type Database = {
           buyer_id: string
           completed_at: string | null
           created_at: string
+          fare_bix: number
+          fare_usdt: number
           fee_bix: number
           fee_rate: number
+          fee_usdt: number
+          held_at: string | null
           id: string
           items: Json
+          merchant_bix: number
           merchant_id: string
+          merchant_usdt: number
           note: string
           outlet_id: string
           owner_user_id: string | null
+          paid_at: string | null
           pay_method: string
+          pay_ref: string
           ref_bix: number
+          ref_usdt: number
           ref_user: string | null
           schedule_at: string | null
           stage: string
@@ -2118,16 +2127,25 @@ export type Database = {
           buyer_id: string
           completed_at?: string | null
           created_at?: string
+          fare_bix?: number
+          fare_usdt?: number
           fee_bix?: number
           fee_rate?: number
+          fee_usdt?: number
+          held_at?: string | null
           id?: string
           items?: Json
+          merchant_bix?: number
           merchant_id: string
+          merchant_usdt?: number
           note?: string
           outlet_id: string
           owner_user_id?: string | null
+          paid_at?: string | null
           pay_method?: string
+          pay_ref?: string
           ref_bix?: number
+          ref_usdt?: number
           ref_user?: string | null
           schedule_at?: string | null
           stage?: string
@@ -2138,16 +2156,25 @@ export type Database = {
           buyer_id?: string
           completed_at?: string | null
           created_at?: string
+          fare_bix?: number
+          fare_usdt?: number
           fee_bix?: number
           fee_rate?: number
+          fee_usdt?: number
+          held_at?: string | null
           id?: string
           items?: Json
+          merchant_bix?: number
           merchant_id?: string
+          merchant_usdt?: number
           note?: string
           outlet_id?: string
           owner_user_id?: string | null
+          paid_at?: string | null
           pay_method?: string
+          pay_ref?: string
           ref_bix?: number
+          ref_usdt?: number
           ref_user?: string | null
           schedule_at?: string | null
           stage?: string
@@ -2166,7 +2193,12 @@ export type Database = {
       }
       bixcare_outlets: {
         Row: {
+          accept_bix: boolean
+          accept_usdt: boolean
           address: string
+          bank_account: string
+          bank_holder: string
+          bank_name: string
           city: string
           close_time: string
           created_at: string
@@ -2184,7 +2216,12 @@ export type Database = {
           status: string
         }
         Insert: {
+          accept_bix?: boolean
+          accept_usdt?: boolean
           address?: string
+          bank_account?: string
+          bank_holder?: string
+          bank_name?: string
           city?: string
           close_time?: string
           created_at?: string
@@ -2202,7 +2239,12 @@ export type Database = {
           status?: string
         }
         Update: {
+          accept_bix?: boolean
+          accept_usdt?: boolean
           address?: string
+          bank_account?: string
+          bank_holder?: string
+          bank_name?: string
           city?: string
           close_time?: string
           created_at?: string
@@ -4450,6 +4492,10 @@ export type Database = {
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
       bixcare_bix_delta: { Args: { p_user: string }; Returns: number }
       bixcare_config: { Args: never; Returns: Json }
+      bixcare_order_paid: {
+        Args: { p_id: string; p_ref: string }
+        Returns: Json
+      }
       bixcare_order_place: {
         Args: {
           p_items: Json
@@ -4466,6 +4512,7 @@ export type Database = {
       }
       bixcare_owner1_id: { Args: never; Returns: string }
       bixcare_set_open: { Args: { p_open: boolean }; Returns: Json }
+      bixcare_usdt_delta: { Args: { p_user: string }; Returns: number }
       bixgo_bix_balance_internal: { Args: { p_user: string }; Returns: number }
       bixgo_cancel_trip: {
         Args: { p_id: string; p_note?: string; p_reason: string }
