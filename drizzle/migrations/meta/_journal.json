@@ -1303,6 +1303,13 @@
       "when": 1794177466305,
       "tag": "0185_design_chrono_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 186,
+      "version": "7",
+      "when": 1794180205711,
+      "tag": "0186_design_card_skin",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,3 @@
-import { ChronoDial } from '@/components/ChronoDial';
 import { Web3Connect } from '@/components/Web3Connect';
 import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { VaultStage } from '@/components/TechSuite';
@@ -25,6 +24,18 @@ import { Wallet, ArrowDownToLine, ArrowUpFromLine, Gift, Copy, QrCode, X, ArrowL
 import { CoinMark, networkName } from '@/components/deposit/CoinBadge';
 import { WalletCardBack } from '@/components/WalletCardBack';
 import { DepositFlightScanner } from '@/components/DepositFlightScanner';
+
+/** Compact RM sub-dial: a real clock — hand follows the seconds, block counter ticks every ~3s (BNB block time). Display-only. */
+function WalletHeartbeat() {
+  const [t, setT] = useState<number | null>(null);
+  useEffect(() => { const u = () => { if (!document.hidden) setT(Date.now()); }; u(); const id = window.setInterval(u, 1000); return () => window.clearInterval(id); }, []);
+  const sec = t === null ? 0 : (t / 1000) % 60;
+  const block = t === null ? 0 : Math.floor(t / 3000) % 100000;
+  return <div className="chrono-only chrono-mini" aria-hidden>
+    <span className="chrono-mini__dial"><i style={{ transform: `rotate(${sec * 6}deg)` }}/><em/></span>
+    <span className="chrono-mini__txt"><b>BLOCK</b><small className="numeric">#{String(block).padStart(5, '0')}</small></span>
+  </div>;
+}
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
   return <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border bg-card/60 p-8 text-center"><span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary"><Inbox size={22}/></span><p className="text-sm text-muted-foreground">{text}</p>{action && onAction && <Button size="sm" variant="outline" className="rounded-full" onClick={onAction}>{action}</Button>}</div>;
@@ -108,7 +119,7 @@ function WalletPage() {
       <div className={`wallet-flip${flipped ? ' is-flipped' : ''}`}><div className="wallet-flip-inner">
       <div data-sov-color={cfg?.readiness.walletCard && !pickWalletSkin(cfg?.readiness.walletColors) ? (cfg?.readiness.walletCardColor ?? 'onyx') : undefined} data-wallet-skin={pickWalletSkin(cfg?.readiness.walletColors)} className={`wallet-face wallet-summary wallet-vault auric-card wallet-face--front relative overflow-hidden rounded-[20px] border p-5${cfg?.readiness.walletCard ? ' wallet-sovereign' : ''}${cfg?.readiness.walletCard && cfg?.readiness.walletCardModel === 'elite' ? ' wallet-elite' : ''}`}>
         {cfg?.readiness.walletCard ? <><span className="sov-sheen" aria-hidden/>{cfg?.readiness.walletCardModel === 'elite' && <><span className="elite-grid" aria-hidden/><span className="elite-orbs" aria-hidden><i/><i/></span></>}</> : <WalletFinanceMotion settings={cfg?.readiness}/>}
-        <ChronoDial value={0.72} beat={3} label="BLOCK HEARTBEAT" caption="BNB Chain · ~3s pulse"/>
+        <WalletHeartbeat/>
         <div className="wallet-balance-block">
           <div className="flex items-center justify-between gap-2"><div className="flex min-w-0 items-center gap-2 text-xs tracking-[.14em] uppercase text-muted-foreground"><Wallet size={14}/> Available balance<Button type="button" size="icon" variant="ghost" className="vault-pill! size-7 rounded-full" aria-label={hidden ? 'Show balance' : 'Hide balance'} aria-pressed={hidden} title={hidden ? 'Show balance' : 'Hide balance'} onClick={toggleHidden}>{hidden ? <Eye size={14}/> : <EyeOff size={14}/>}</Button></div><div className="flex shrink-0 items-center gap-2">{cfg?.readiness.walletCard && <span className="wallet-mc wallet-mc--inline" aria-hidden><i/><i/></span>}<button type="button" className="wallet-flip-btn" aria-label="Show QR and member ID" onClick={() => setFlipped(true)}><ArrowLeftRight size={14}/></button></div></div>
           <strong className="numeric mt-1 block break-all text-[28px] leading-tight font-black text-foreground md:text-[34px]">{hidden ? '••••••••' : <><AnimatedNumber value={data?.balance ?? 0}/> USDT</>}</strong>

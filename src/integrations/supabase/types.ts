@@ -4252,6 +4252,7 @@ export type Database = {
         Args: { p_locked: Json; p_mode: string; p_owner2_design: boolean }
         Returns: Json
       }
+      bix_design_set_card: { Args: { p_skin: string }; Returns: Json }
       bix_design_set_chrono: { Args: { p_on: boolean }; Returns: Json }
       bix_design_whitelist_set: {
         Args: { p_on: boolean; p_query: string }

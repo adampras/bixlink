@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { HUB_ITEMS } from '@/lib/dock-hub';
 
-type Cfg = { mode: 'off' | 'scoped' | 'public'; chrono?: boolean; owner2_design: boolean; owner2_locked: string[] };
+type Cfg = { mode: 'off' | 'scoped' | 'public'; chrono?: boolean; card?: string; owner2_design: boolean; owner2_locked: string[] };
 type Wl = { user_id: string; code: string | null; name: string | null };
+const CARD_SKINS = [['quartz', 'White Quartz'], ['obsidian', 'Obsidian Gold'], ['emerald', 'Imperial Emerald'], ['corsa', 'Titanium Corsa'], ['amethyst', 'Royal Amethyst']] as const;
 const ECOS = HUB_ITEMS.filter(i => !['home', 'profile', 'settings'].includes(i.id));
 
 /** Owner 1: design release track + Admin 2 network isolation and ecosystem locks. */
@@ -30,6 +31,13 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
     setCfg(c => ({ ...c, chrono: !!(data as { chrono?: boolean })?.chrono })); qc.invalidateQueries({ queryKey: ['bix-design-access'] });
     onMessage(on ? 'Model Chronograph RM aktif untuk Admin 1 & jaringan.' : 'Model Chronograph RM dimatikan.');
   };
+  const setCard = async (skin: string) => {
+    setBusy(true);
+    const { data, error } = await supabase.rpc('bix_design_set_card' as never, { p_skin: skin } as never);
+    setBusy(false); if (error) return onMessage(error.message);
+    setCfg(c => ({ ...c, card: (data as { card?: string })?.card ?? skin })); qc.invalidateQueries({ queryKey: ['bix-design-access'] });
+    onMessage('Warna kartu saldo tersimpan.');
+  };
   const setId = async (query: string, on: boolean) => {
     if (!query.trim()) return; setBusy(true);
     const { data, error } = await supabase.rpc('bix_design_whitelist_set' as never, { p_query: query, p_on: on } as never);
@@ -53,6 +61,10 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
         <button type="button" disabled={busy} className={pill(!!cfg.chrono)} onClick={() => setChrono(true)}>Buka · Chronograph</button>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">Hanya Admin 1, jaringannya & ID terpilih. Admin 2 dan jaringannya tidak pernah melihat model ini. Langsung tersimpan.</p>
+      <h4 className="mt-4 text-xs font-bold">Warna latar kartu saldo (Wallet)</h4>
+      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+        {CARD_SKINS.map(([v, l]) => <button key={v} type="button" disabled={busy} onClick={() => setCard(v)} className={`chrono-skin-pick ${(cfg.card ?? 'obsidian') === v ? 'is-on' : ''}`} data-skin={v}><i/><span>{l}</span></button>)}
+      </div>
     </section>
     <section>
       <h3 className="font-bold">Saklar Admin 2 & jaringan</h3>

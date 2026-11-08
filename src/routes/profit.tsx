@@ -41,13 +41,12 @@ function ProfitPage() {
   const locked = !!leader && leader.status === 'approved' && !leader.qualified;
 
   useEffect(() => {
-    const update = () => setNow(Date.now());
+    const update = () => { if (!document.hidden) setNow(Date.now()); };
     update();
     const timer = window.setInterval(update, 1_000);
     return () => window.clearInterval(timer);
   }, []);
 
-  const minuteNow = now === null ? null : Math.floor(now / MINUTE) * MINUTE;
   const splitUsdt = Number(cfg?.referrals.splitUsdt ?? 70) / 100;
   const splitBix = Number(cfg?.referrals.splitBix ?? 30) / 100;
   const bixPrice = Math.max(Number(cfg?.bixMarket.priceUsd ?? 0.84291), 0.000001);
@@ -55,7 +54,7 @@ function ProfitPage() {
   const active = useMemo(() => boosterActive ? (data?.stakes ?? []).filter(stake => stake.status === 'active' && stake.activated_at) : [], [boosterActive, data?.stakes]);
   const rows = useMemo(() => active.map(stake => {
     const started = new Date(stake.activated_at ?? stake.created_at).getTime();
-    const elapsed = minuteNow === null ? 0 : Math.max(0, Math.min(minuteNow - started, Number(stake.lock_days) * 24 * 60 * MINUTE));
+    const elapsed = now === null ? 0 : Math.max(0, Math.min(now - started, Number(stake.lock_days) * 24 * 60 * MINUTE));
     const annual = Number(stake.amount_usd) * Number(stake.apy) / 100;
     const accrued = Math.max(0, annual * elapsed / YEAR - (claimed?.get(stake.id) ?? 0));
     const daily = annual / 365;
@@ -67,7 +66,7 @@ function ProfitPage() {
       daily,
       minute: daily / 1440,
     };
-  }), [active, bixPrice, minuteNow, splitBix, splitUsdt, claimed]);
+  }), [active, bixPrice, now, splitBix, splitUsdt, claimed]);
   const totals = rows.reduce((sum, row) => ({ accrued: sum.accrued + row.accrued, usdt: sum.usdt + row.usdt, bix: sum.bix + row.bix, daily: sum.daily + row.daily, minute: sum.minute + row.minute }), { accrued: 0, usdt: 0, bix: 0, daily: 0, minute: 0 });
   const withdraw = async () => {
     setBusy(true); setMsg(null);
@@ -87,7 +86,7 @@ function ProfitPage() {
         <span className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-1.5 text-[9px] font-bold sm:px-3 sm:text-xs ${boosterActive ? 'border-chart-2/40 bg-chart-2/10 text-chart-2' : 'border-border bg-muted text-muted-foreground'}`}><i className={`h-1.5 w-1.5 rounded-full ${boosterActive ? 'animate-pulse bg-chart-2' : 'bg-muted-foreground'}`}/> {boosterActive ? `BOOSTER LIVE · ${nextRefresh}s` : 'BOOSTER PAUSED'}</span>
       </div>
 
-       <ChronoDial value={(60 - nextRefresh) / 60} label="TOURBILLON YIELD ENGINE" caption={`Re-accrual in ${nextRefresh}s · projection only`}/>
+       <ChronoDial value={(60 - nextRefresh) / 60} label="TOURBILLON YIELD ENGINE" caption={`+$${number(totals.minute / 60, { maximumFractionDigits: 8 })}/s · live projection`}/>
        <section aria-label="Profit summary" className="profit-summary mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="profit-metric profit-metric--total"><TrendingUp/><span>Total active profit</span><strong className="numeric">{money(totals.accrued)}</strong><small>Projected accrued yield</small></div>
         <div className="profit-metric profit-metric--usdt"><WalletCards/><span>USDT profit · {Math.round(splitUsdt * 100)}%</span><strong className="numeric">{number(totals.usdt, { minimumFractionDigits: 8, maximumFractionDigits: 8 })}</strong><small>Virtual USDT allocation</small></div>
