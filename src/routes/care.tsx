@@ -49,21 +49,21 @@ function CarePage() {
     });
   }, []);
   return (
-    <main className="mx-auto min-h-screen max-w-3xl pb-24 text-foreground">
+    <main className="care-live mx-auto min-h-screen max-w-3xl pb-24 text-foreground">
       <section className="relative overflow-hidden">
-        <img src={heroImg} alt="BIXCARE kendaraan, laundry dan rental" width={1536} height={864} className="h-56 w-full object-cover sm:h-72" />
+        <img src={heroImg} alt="BIXCARE kendaraan, laundry dan rental" width={1536} height={864} className="care-hero-img h-56 w-full object-cover sm:h-72" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <Link to="/" className="absolute left-3 top-3 rounded-full bg-background/70 p-2"><ArrowLeft className="h-4 w-4" /></Link>
         <div className="absolute bottom-3 left-4 right-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">BIXLINK Ecosystem</p>
-          <h1 className="text-3xl font-black tracking-tight">BIX<span className="text-primary">CARE</span></h1>
+          <p className="care-beacon mb-1 text-primary"><i />BIXCARE LIVE NETWORK</p>
+          <h1 className="care-title text-3xl font-black tracking-tight">BIX<span className="text-primary">CARE</span></h1>
           <p className="text-xs text-muted-foreground">Bengkel · Cuci · Laundry · Rental — bayar langsung ke mitra, BIX sebagai bahan bakar platform.</p>
         </div>
       </section>
       <GlobalRegions service="BIXCARE"/>
       <nav className="sticky top-0 z-10 flex gap-2 bg-background/90 px-4 py-2 backdrop-blur">
         {([['explore', 'Jelajah', Search], ['orders', 'Pesanan Saya', ClipboardList], ['partner', 'Pemilik Layanan', Store]] as const).map(([k, l, I]) => (
-          <button key={k} onClick={() => setTab(k)} className={`flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-bold ${tab === k ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground'}`}><I className="h-4 w-4" />{l}</button>
+          <button key={k} onClick={() => setTab(k)} className={`flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-bold ${tab === k ? 'care-tab-on bg-primary text-primary-foreground' : 'border border-border text-muted-foreground'}`}><I className="h-4 w-4" />{l}</button>
         ))}
       </nav>
       <div className="space-y-4 px-4 pt-2">
@@ -99,7 +99,7 @@ function Explore({ uid, onBooked }: { uid: string | null; onBooked: () => void }
     <>
       <div className="grid grid-cols-2 gap-3">
         {DIVS.map(d => (
-          <button key={d.id} onClick={() => setDiv(div === d.id ? 'all' : d.id)} className={`group relative overflow-hidden rounded-2xl border text-left ${div === d.id ? 'border-primary ring-2 ring-primary/50' : 'border-border/60'}`}>
+          <button key={d.id} onClick={() => setDiv(div === d.id ? 'all' : d.id)} className={`care-shine group relative overflow-hidden rounded-2xl border text-left ${div === d.id ? 'border-primary ring-2 ring-primary/50' : 'border-border/60'}`}>
             <img src={d.img} alt={d.name} loading="lazy" width={816} height={816} className="aspect-square w-full object-cover transition group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
             <div className="absolute bottom-2 left-3 right-3"><p className="flex items-center gap-1 text-sm font-black"><d.Icon className="h-4 w-4 text-primary" />{d.name}</p><p className="text-[10px] text-muted-foreground">{d.tag}</p></div>
@@ -109,10 +109,10 @@ function Explore({ uid, onBooked }: { uid: string | null; onBooked: () => void }
       <input className={input} placeholder="Cari outlet atau kota…" value={q} onChange={e => setQ(e.target.value)} />
       {shown.length === 0 && <div className={`${card} text-center text-sm text-muted-foreground`}>Belum ada outlet buka{div !== 'all' ? ` untuk ${divName(div)}` : ''}. Punya usaha? Daftar di tab Mitra.</div>}
       {shown.map(o => (
-        <button key={o.id} onClick={() => setOpen(o)} className={`${card} flex w-full items-center gap-3 text-left`}>
+        <button key={o.id} onClick={() => setOpen(o)} className={`${card} care-card care-fade flex w-full items-center gap-3 text-left`}>
           {o.logo_path && urls[o.logo_path] ? <img src={urls[o.logo_path]} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="grid h-14 w-14 place-items-center rounded-xl bg-primary/15"><Store className="h-6 w-6 text-primary" /></div>}
-          <div className="min-w-0 flex-1"><p className="truncate font-bold">{o.name}</p><p className="text-xs text-muted-foreground">{divName(o.division)} · {o.city} · {o.open_time}–{o.close_time}</p>{stars[o.id] && <p className="text-[11px] font-bold text-primary">★ {stars[o.id]!.avg} · {stars[o.id]!.n} ulasan{stars[o.id]!.avg >= 4.5 && stars[o.id]!.n >= 3 ? ' · TERPERCAYA' : ''}</p>}</div>
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${o.is_open && !onBreak(o) ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>{!o.is_open ? 'TUTUP' : onBreak(o) ? 'ISTIRAHAT' : 'BUKA'}</span>
+          <div className="min-w-0 flex-1"><p className="truncate font-bold">{o.name}</p><p className="text-xs text-muted-foreground">{divName(o.division)} · {o.city} · {o.open_time}–{o.close_time}</p>{stars[o.id] && <p className="care-star text-[11px] font-bold text-primary">★ {stars[o.id]!.avg} · {stars[o.id]!.n} ulasan{stars[o.id]!.avg >= 4.5 && stars[o.id]!.n >= 3 ? ' · TERPERCAYA' : ''}</p>}</div>
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${o.is_open && !onBreak(o) ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>{o.is_open && !onBreak(o) && <i className="care-open-dot" />}{!o.is_open ? 'TUTUP' : onBreak(o) ? 'ISTIRAHAT' : 'BUKA'}</span>
         </button>
       ))}
     </>
