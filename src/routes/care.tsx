@@ -152,7 +152,7 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
   );
 }
 
-function Tracker({ o, division }: { o: CareOrder; division?: Division }) {
+function Tracker({ o, division }: { o: CareOrder; division?: Division | undefined }) {
   const stages = STAGES[division ?? 'wash'];
   const idx = o.status === 'completed' ? stages.length : stages.indexOf(o.stage);
   return <div className="mt-2 flex gap-1">{stages.map((s, i) => <div key={s} className="flex-1"><div className={`h-1.5 rounded-full ${i <= idx ? 'bg-primary' : 'bg-muted'}`} /><p className="mt-1 text-[9px] leading-tight text-muted-foreground">{s}</p></div>)}</div>;
@@ -215,7 +215,7 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
   };
   const upload = async (field: 'logo_path' | 'qris_path', f?: File) => {
     if (!f || !outlet) return;
-    try { const p = await uploadCareFile(uid, f); await supabase.from('bixcare_outlets').update({ [field]: p }).eq('id', outlet.id); void load(); } catch (e) { setMsg((e as Error).message); }
+    try { const p = await uploadCareFile(uid, f); await supabase.from('bixcare_outlets').update(field === 'logo_path' ? { logo_path: p } : { qris_path: p }).eq('id', outlet.id); void load(); } catch (e) { setMsg((e as Error).message); }
   };
   const toggle = async () => {
     if (!outlet) return;
