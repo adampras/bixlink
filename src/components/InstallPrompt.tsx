@@ -39,7 +39,7 @@ export function InstallPrompt() {
     <h2>Faster <em>BIXLINK</em> Access!</h2>
     <p>Tap <b>SAVE BIXLINK ACCESS</b> to add it to your home screen and open it instantly without your browser.</p>
     <button type="button" className="install-pop-cta" onClick={install}>SAVE BIXLINK ACCESS</button>
-    {tip && <p className="!text-xs">{ios ? <>Tap <Share size={12} className="inline"/> <b>Share</b> in Safari, then <b>Add to Home Screen</b>.</> : <>Open the browser menu (⋮) and choose <b>Install app</b> or <b>Add to Home screen</b>.</>}</p>}
+    {tip && <p className="install-pop-tip !text-xs">{ios ? <>Tap <Share size={12} className="inline"/> <b>Share</b> in Safari, then <b>Add to Home Screen</b>.</> : <>Open the browser menu (⋮) and choose <b>Install app</b> or <b>Add to Home screen</b>.</>}</p>}
     <span className="install-pop-line" aria-hidden/>
   </div></div>;
 }
