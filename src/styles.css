@@ -7028,3 +7028,20 @@ html.bc-incall-mini .comm-room.is-full{padding-top:calc(env(safe-area-inset-top)
 .stake-pick .lux-ledger > *:last-child { border-bottom:0 !important; }
 .hud-scan, .hud-scan > * { border-color:color-mix(in oklab, var(--foreground) 6%, transparent) !important; }
 .hud-scan > * + * { border-left-width:1px !important; }
+
+/* Stake: precious-gem tier tints + no "graph paper" lines */
+.stake-compact.stake-compact.stake-compact .tier-tone-0{--gem:#2dd4bf}.stake-compact.stake-compact.stake-compact .tier-tone-1{--gem:#38bdf8}.stake-compact.stake-compact.stake-compact .tier-tone-2{--gem:#60a5fa}.stake-compact.stake-compact.stake-compact .tier-tone-3{--gem:#a855f7}
+.stake-compact.stake-compact.stake-compact .tier-tone-4{--gem:#ec4899}.stake-compact.stake-compact.stake-compact .tier-tone-5{--gem:#f43f5e}.stake-compact.stake-compact.stake-compact .tier-tone-6{--gem:#f59e0b}.stake-compact.stake-compact.stake-compact .tier-tone-7{--gem:#ffd700}
+html:not([data-color-mode="light"]) .stake-compact.stake-compact.stake-compact .duration-package.duration-package{background:radial-gradient(120% 70% at 100% 0%,color-mix(in oklab,var(--gem) 16%,transparent),transparent 60%),linear-gradient(180deg,#141821,#0c0f15) !important;border:1px solid color-mix(in oklab,var(--gem) 30%,transparent) !important;box-shadow:inset 0 1px 0 color-mix(in oklab,var(--gem) 25%,transparent),0 18px 40px -26px color-mix(in oklab,var(--gem) 60%,transparent) !important}
+html:not([data-color-mode="light"]) .stake-compact.stake-compact.stake-compact .duration-package-head{background:linear-gradient(135deg,color-mix(in oklab,var(--gem) 22%,transparent),transparent 75%) !important;border-bottom:0 !important}
+html[data-color-mode="light"] .stake-compact.stake-compact.stake-compact .duration-package-head{background:linear-gradient(135deg,color-mix(in oklab,var(--gem) 14%,#fff),#fff 75%) !important;border-bottom:0 !important}
+.stake-compact.stake-compact.stake-compact .duration-package.duration-package h3{color:var(--gem) !important;text-shadow:0 0 16px color-mix(in oklab,var(--gem) 35%,transparent)}
+.stake-compact.stake-compact.stake-compact .duration-package-head p{color:color-mix(in oklab,var(--gem) 70%,var(--foreground)) !important}
+.stake-compact.stake-compact.stake-compact .duration-price{border-color:color-mix(in oklab,var(--gem) 45%,transparent) !important}
+.stake-compact.stake-compact.stake-compact .lux-ledger.lux-ledger{border:0 !important;background:color-mix(in oklab,var(--foreground) 3%,transparent) !important;box-shadow:none !important;backdrop-filter:none !important;border-radius:14px !important;padding:6px 14px !important}
+.stake-compact.stake-compact.stake-compact .lux-ledger.lux-ledger>div,.stake-compact.stake-compact.stake-compact .lux-ledger.lux-ledger>*{border:0 !important}
+.stake-compact.stake-compact.stake-compact .lux-ledger-total{margin-top:4px;padding-top:10px !important;background:linear-gradient(90deg,transparent,color-mix(in oklab,var(--foreground) 10%,transparent),transparent) top/100% 1px no-repeat !important}
+.stake-compact.stake-compact.stake-compact .stake-pick,.stake-compact.stake-compact.stake-compact .stake-pick>.stake-list,.stake-compact.stake-compact.stake-compact .auric-card:has(>.duration-package){border:0 !important;background:transparent !important;box-shadow:none !important;padding-inline:0 !important}
+.stake-compact.stake-compact.stake-compact .duration-yield{border:0 !important}
+.stake-compact.stake-compact.stake-compact dl.hud-scan>.stake-metric+.stake-metric{border-left:0 !important;background:linear-gradient(180deg,transparent 20%,color-mix(in oklab,var(--foreground) 10%,transparent),transparent 80%) left/1px 100% no-repeat !important}
+.stake-compact.stake-compact.stake-compact .duration-option[aria-pressed="true"]{border-color:var(--gem) !important;color:var(--gem) !important;background:color-mix(in oklab,var(--gem) 14%,transparent) !important;box-shadow:0 0 12px -3px var(--gem) !important}
