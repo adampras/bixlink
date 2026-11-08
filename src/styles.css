@@ -7429,3 +7429,31 @@ html[data-design="v2"] .vault-swap { border-radius: 22px !important; border: .5p
 html[data-design="v2"] .vault-swap h2 { background: linear-gradient(180deg, #fff1b8, #e9c46a 55%, #b8891f) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
 html[data-design="v2"] .vault-swap .swap-balrow { background: rgba(255,255,255,.02) !important; border: .5px solid rgba(223,247,243,.1) !important; border-radius: 16px !important; }
 html[data-design="v2"] .vault-swap .swap-balrow b.text-chart-3 { color: #FFD700 !important; }
+
+/* ===== v2 · Imperial Obsidian unify: Stake, Profit, Network, BIX PAY, Transfer follow Wallet ===== */
+html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="network"],[data-page="pay"],[data-page="transfer"]) {
+  --ob-card: radial-gradient(120% 90% at 100% 0%, rgba(255,215,0,.12), transparent 50%), radial-gradient(90% 80% at 0% 100%, rgba(94,234,212,.10), transparent 55%), linear-gradient(155deg, #0b0e0d 0%, #050706 55%, #0a1714 100%);
+  --ob-gold-line: rgba(255,215,0,.26);
+}
+html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="network"],[data-page="pay"],[data-page="transfer"]) :is(.hubx-hero, .stake-lux-head, .hud-scan, .duration-package, .profit-summary, .profit-metric, .profit-position, .profit-withdraw, .stake-request, .register-panel, .rounded-2xl.border, .rounded-3xl.border, .rounded-xl.border, [class*="rounded-[20px]"].border, [class*="rounded-[18px]"].border) {
+  background: var(--ob-card) !important;
+  border: .5px solid var(--ob-gold-line) !important;
+  box-shadow: inset 0 1px 0 rgba(255,241,184,.16), 0 22px 44px -30px rgba(255,215,0,.3) !important;
+}
+html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="network"],[data-page="pay"],[data-page="transfer"]) .hubx-hero { border-radius: 24px !important; border-color: rgba(255,215,0,.38) !important; }
+html[data-design="v2"] :is([data-page="pay"],[data-page="transfer"]) .hubx-hero__num b { color: #f7fbfc !important; text-shadow: 0 0 22px rgba(255,255,255,.18); }
+html[data-design="v2"] :is([data-page="pay"],[data-page="transfer"]) .hubx-hero__num em,
+html[data-design="v2"] :is([data-page="pay"],[data-page="transfer"]) :is(.hubx-chip, .pay-hero__tag, .pay-hero__back) { border: .5px solid rgba(255,215,0,.45) !important; color: #FFD700 !important; background: rgba(255,215,0,.06) !important; }
+html[data-design="v2"] [data-page="pay"] .pay-hero__title span { color: #FFD700 !important; }
+html[data-design="v2"] :is([data-page="pay"],[data-page="transfer"]) .hubx-tabs { background: #050706 !important; border: .5px solid var(--ob-gold-line) !important; }
+html[data-design="v2"] :is([data-page="pay"],[data-page="transfer"]) .hubx-tabs .is-on { background: linear-gradient(180deg, #fff1b8, #e9c46a 55%, #b8891f) !important; color: #0b0f0e !important; }
+html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="network"],[data-page="pay"],[data-page="transfer"]) .form-input { background: rgba(255,255,255,.03) !important; border: .5px solid rgba(223,247,243,.16) !important; border-radius: 14px !important; }
+html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="network"],[data-page="pay"],[data-page="transfer"]) .form-input:focus { border-color: rgba(255,215,0,.55) !important; box-shadow: 0 0 0 3px rgba(255,215,0,.12) !important; }
+html[data-design="v2"] :is([data-page="profit"],[data-page="pay"],[data-page="transfer"]) :is(button.bg-chart-3, button.bg-chart-2, button.bg-primary, .profit-withdraw button) {
+  background: linear-gradient(180deg, #fff1b8, #e9c46a 55%, #b8891f) !important; color: #0b0f0e !important; border: 0 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 10px 24px -14px rgba(255,215,0,.7) !important;
+}
+html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="network"]) .numeric { text-shadow: 0 0 16px rgba(255,255,255,.08); }
+html[data-design="v2"] [data-page="network"] img.rounded-full { box-shadow: 0 0 0 1.5px rgba(255,215,0,.55), 0 0 18px -4px rgba(255,215,0,.45) !important; }
+html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="network"],[data-page="pay"],[data-page="transfer"]) :is(.text-chart-3) { color: #FFD700 !important; }
+html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="network"],[data-page="pay"],[data-page="transfer"]) :is(.text-chart-2) { color: #5eead4 !important; }
