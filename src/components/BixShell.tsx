@@ -25,6 +25,7 @@ import { MemberWelcome } from '@/components/MemberWelcome';
 import { stakingUpdates } from '@/lib/staking-activity';
 import { DockHub } from '@/components/DockHub';
 import { useMatrix } from '@/lib/dock-hub';
+import { useDesignAccess, lockedEcosystem } from '@/lib/design-release';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
@@ -49,6 +50,8 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     ds['animShimmer'] = rd?.animShimmer ? 'on' : 'off';
     ds['animFloat'] = rd?.animFloat ? 'on' : 'off';
   }, [rd?.animGlow, rd?.animShimmer, rd?.animFloat]);
+  const design = useDesignAccess(user?.id);
+  useEffect(() => { document.documentElement.dataset['design'] = design.data?.next_gen ? 'v2' : 'classic'; }, [design.data?.next_gen]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const path = useRouterState({ select: s => s.location.pathname });
@@ -128,16 +131,16 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     </div></header></div>
     {path !== '/stake' && path !== '/call' && <MarketTicker/>}
     {publicConfig?.isAdmin && (publicConfig.siteControl.maintenance || publicConfig.siteControl.staging) && <div role="status" className="border-b border-chart-3 bg-card px-5 py-2 text-center text-[11px] font-bold text-chart-3">{publicConfig.siteControl.maintenance ? 'MAINTENANCE ON · ' : ''}{publicConfig.siteControl.staging ? 'ADMIN PREVIEW ACTIVE — changes visible to admins only' : 'Only admins can access the application'}</div>}
-    {publicConfig && isBlockedByMaintenance(publicConfig.siteControl, publicConfig.isAdmin, path) ? <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-5 py-16 text-center"><img src={headerMark.url} width={72} height={72} alt="" className="rounded-full"/><div className="eyebrow mt-6">SYSTEM MAINTENANCE</div><h1 className="section-title mt-3">BIXLINK <span>MAINTENANCE</span></h1><p className="mt-4 text-sm leading-6 text-muted-foreground">{publicConfig.siteControl.message || 'BIXLINK system is currently under maintenance. Please check back shortly.'}</p></main> : (() => { const tone = ({ '/wallet': 'emerald', '/stake': 'gold', '/network': 'violet', '/profile': 'silver', '/bixtrade': 'gold', '/bixgo': 'emerald', '/bixtok': 'violet', '/pay': 'emerald', '/presale': 'gold', '/transfer': 'emerald', '/call': 'violet' } as Record<string, string>)[path]; return tone ? <div className={`lux-page hub-tone-${tone}${path === '/bixtok' ? ' lux-media' : ''}`}>{children}</div> : children; })()}
+    {publicConfig && isBlockedByMaintenance(publicConfig.siteControl, publicConfig.isAdmin, path) ? <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-5 py-16 text-center"><img src={headerMark.url} width={72} height={72} alt="" className="rounded-full"/><div className="eyebrow mt-6">SYSTEM MAINTENANCE</div><h1 className="section-title mt-3">BIXLINK <span>MAINTENANCE</span></h1><p className="mt-4 text-sm leading-6 text-muted-foreground">{publicConfig.siteControl.message || 'BIXLINK system is currently under maintenance. Please check back shortly.'}</p></main> : lockedEcosystem(path, design.data?.locked ?? []) ? <main className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center px-5 py-16 text-center"><Lock size={40} className="text-primary"/><h1 className="section-title mt-4">{lockedEcosystem(path, design.data?.locked ?? [])?.label} <span>SEGERA HADIR</span></h1><p className="mt-3 text-sm text-muted-foreground">Layanan ini belum dibuka untuk jaringan Anda.</p><Link to="/" className="mt-6 underline">Kembali ke Home</Link></main> : (() => { const tone = ({ '/wallet': 'emerald', '/stake': 'gold', '/network': 'violet', '/profile': 'silver', '/bixtrade': 'gold', '/bixgo': 'emerald', '/bixtok': 'violet', '/pay': 'emerald', '/presale': 'gold', '/transfer': 'emerald', '/call': 'violet' } as Record<string, string>)[path]; return tone ? <div className={`lux-page hub-tone-${tone}${path === '/bixtok' ? ' lux-media' : ''}`}>{children}</div> : children; })()}
     <TxFeedbackHost/>
     <SitePopup path={path} popups={publicConfig?.landingContent.popups} signedIn={!!user}/>
     {user && !path.startsWith('/admin') && <MemberWelcome userId={user.id}/>}
     <footer hidden={path === '/call'} className="border-t border-border py-4"><SocialLinks links={publicConfig?.readiness.socials} signedIn={!!user}/><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
     {user && path === '/call' ? <nav aria-label="BIX CALL" data-no-translate className="glass-dock comm-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden">
-      <DockHub path={path} cfg={publicConfig?.isAdmin ? undefined : publicConfig?.readiness.dockHub} order={publicConfig?.readiness.dockOrder} matrix={useMatrix(publicConfig?.readiness.dockModel, !!publicConfig?.isAdmin)}/>
+      <DockHub path={path} cfg={publicConfig?.isAdmin ? undefined : { ...(publicConfig?.readiness.dockHub ?? {}), ...Object.fromEntries((design.data?.locked ?? []).map(id => [id, false])) }} order={publicConfig?.readiness.dockOrder} matrix={useMatrix(publicConfig?.readiness.dockModel, !!publicConfig?.isAdmin)}/>
       {COMM_NAV.map(n => { const on = (callTab ?? 'chat') === n.tab; return <Link key={n.tab} to="/call" search={{ tab: n.tab }} aria-current={on ? 'page' : undefined} className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19} className="shrink-0"/><span className="max-w-full truncate">{n.label}</span></Link>; })}
     </nav> : user && <nav aria-label="Main" data-no-translate className={`glass-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden`}>
-      <DockHub path={path} cfg={publicConfig?.isAdmin ? undefined : publicConfig?.readiness.dockHub} order={publicConfig?.readiness.dockOrder} matrix={useMatrix(publicConfig?.readiness.dockModel, !!publicConfig?.isAdmin)}/>
+      <DockHub path={path} cfg={publicConfig?.isAdmin ? undefined : { ...(publicConfig?.readiness.dockHub ?? {}), ...Object.fromEntries((design.data?.locked ?? []).map(id => [id, false])) }} order={publicConfig?.readiness.dockOrder} matrix={useMatrix(publicConfig?.readiness.dockModel, !!publicConfig?.isAdmin)}/>
       {NAV.filter(n => n.to !== '/boost' && n.to !== '/').map(n => n as typeof NAV[number]).map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} title={n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}><n.icon size={19} className="shrink-0"/><span className="max-w-full truncate">{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')}</span></Link>; })}
     </nav>}
   </div>;

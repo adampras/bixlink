@@ -24,6 +24,7 @@ import { AdminSurpriseQuiz } from '@/components/AdminSurpriseQuiz';
 import { AdminBixVault } from '@/components/AdminBixVault';
 import { AdminBixToken } from '@/components/AdminBixToken';
 import { AdminHubMenu } from '@/components/AdminHubMenu';
+import { AdminDesignRelease } from '@/components/AdminDesignRelease';
 import { AdminReadiness } from '@/components/AdminReadiness';
 import { AdminNotify } from '@/components/AdminNotify';
 import { AdminReviewers, AdminTurnover } from '@/components/AdminReviewers';
@@ -123,6 +124,7 @@ function Admin() {
     {tab === 'Desain & Tampilan' && <AdminWorkspace label="Desain & Tampilan" panels={[
       { title: 'Tema & Wallet', content: <AdminAppearance initialReadiness={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} initialTheme={(data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined)?.presentationTheme} onMessage={setMessage} onSaved={refresh}/> },
       { title: 'Visibilitas & Updates', content: <AdminReadiness initial={data?.settings.find(s => s.key === 'readiness')?.value as Readiness | undefined} onMessage={setMessage} onSaved={refresh}/> },
+      { title: 'Rilis Desain & Isolasi Admin 2', content: <AdminDesignRelease onMessage={setMessage}/> },
       { title: 'Menu HUB', content: <AdminHubMenu/> },
       { title: 'Splash', content: <AdminSplash onMessage={setMessage}/> },
       { title: 'Customer Service 24/7', content: <AdminSupportDesk onMessage={setMessage}/> },

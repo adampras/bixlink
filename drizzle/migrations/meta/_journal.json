@@ -1289,6 +1289,13 @@
       "when": 1794145511527,
       "tag": "0183_bix_group_avatar",
       "breakpoints": true
+    },
+    {
+      "idx": 184,
+      "version": "7",
+      "when": 1794150289441,
+      "tag": "0184_design_release_scope",
+      "breakpoints": true
     }
   ]
 }

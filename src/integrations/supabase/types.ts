@@ -322,6 +322,24 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_design_whitelist: {
+        Row: {
+          created_at: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_fleet_orders: {
         Row: {
           address: string
@@ -4225,6 +4243,17 @@ export type Database = {
       }
       bix_deposit_route_preview: {
         Args: { p_max: number; p_q: string }
+        Returns: Json
+      }
+      bix_design_access: { Args: never; Returns: Json }
+      bix_design_admin: { Args: never; Returns: Json }
+      bix_design_cfg: { Args: never; Returns: Json }
+      bix_design_save: {
+        Args: { p_locked: Json; p_mode: string; p_owner2_design: boolean }
+        Returns: Json
+      }
+      bix_design_whitelist_set: {
+        Args: { p_on: boolean; p_query: string }
         Returns: Json
       }
       bix_edit_duration_package: {
