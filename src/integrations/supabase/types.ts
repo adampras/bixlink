@@ -4583,12 +4583,17 @@ export type Database = {
         }[]
       }
       bixcare_owner1_id: { Args: never; Returns: string }
+      bixcare_partner_gate: { Args: never; Returns: Json }
       bixcare_rate_order: {
         Args: { p_id: string; p_rating: number; p_review: string }
         Returns: undefined
       }
       bixcare_set_break: { Args: { p_minutes: number }; Returns: string }
       bixcare_set_open: { Args: { p_open: boolean }; Returns: Json }
+      bixcare_set_partner_gate: {
+        Args: { p_min: number; p_promo: boolean }
+        Returns: undefined
+      }
       bixcare_usdt_delta: { Args: { p_user: string }; Returns: number }
       bixgo_bix_balance_internal: { Args: { p_user: string }; Returns: number }
       bixgo_cancel_trip: {

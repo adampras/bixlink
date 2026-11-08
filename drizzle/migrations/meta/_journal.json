@@ -1254,6 +1254,13 @@
       "when": 1794121145488,
       "tag": "0178_bixcare_dashboard_plus",
       "breakpoints": true
+    },
+    {
+      "idx": 179,
+      "version": "7",
+      "when": 1794122060364,
+      "tag": "0179_bixcare_partner_gate",
+      "breakpoints": true
     }
   ]
 }

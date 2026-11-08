@@ -7,6 +7,26 @@ import { type Outlet, CARE_STATUS, signCare } from '@/lib/bixcare';
 const DIV: Record<string, string> = { auto: 'AutoCare', wash: 'Wash', laundry: 'Laundry', rent: 'Rent' };
 const TABS = [['pending', 'Menunggu'], ['approved', 'Akun disetujui'], ['rejected', 'Ditolak'], ['suspended', 'Ditangguhkan']] as const;
 
+function PartnerGateControl({ onMessage }: { onMessage: (m: string) => void }) {
+  const [promo, setPromo] = useState(true);
+  const [min, setMin] = useState('100');
+  useEffect(() => { void supabase.rpc('bixcare_partner_gate').then(({ data }) => { const g = data as { promo_free: boolean; min_stake_usd: number } | null; if (g) { setPromo(g.promo_free); setMin(String(g.min_stake_usd)); } }); }, []);
+  const save = async (p = promo) => {
+    const { error } = await supabase.rpc('bixcare_set_partner_gate', { p_promo: p, p_min: Number(min) || 0 });
+    onMessage(error ? error.message : `Akses mitra: ${p ? 'PROMO GRATIS dibuka' : `wajib stake aktif ≥ $${min}`}.`);
+  };
+  return <div className="space-y-2 rounded-2xl border border-primary/40 bg-card/70 p-3">
+    <p className="text-sm font-bold">Akses pendaftaran Pemilik Layanan</p>
+    <div className="flex flex-wrap items-center gap-2">
+      <button onClick={() => { setPromo(true); void save(true); }} className={`rounded-full px-3 py-1.5 text-xs font-bold ${promo ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>Promo gratis (buka)</button>
+      <button onClick={() => { setPromo(false); void save(false); }} className={`rounded-full px-3 py-1.5 text-xs font-bold ${!promo ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>Wajib staking (tutup promo)</button>
+      <label className="flex items-center gap-1 text-xs">Min. stake aktif $<input type="number" min={0} value={min} onChange={e => setMin(e.target.value)} className="w-24 rounded-lg border border-border bg-background px-2 py-1"/></label>
+      <button onClick={() => void save()} className="rounded-full border border-border px-3 py-1.5 text-xs font-bold">Simpan</button>
+    </div>
+    <p className="text-[11px] text-muted-foreground">Berlaku untuk pendaftaran outlet baru. Mitra yang sudah terdaftar tetap aktif.</p>
+  </div>;
+}
+
 export function AdminBixcare({ onMessage }: { onMessage: (m: string) => void }) {
   const [all, setAll] = useState<Outlet[]>([]);
   const [tab, setTab] = useState<(typeof TABS)[number][0]>('pending');
@@ -42,6 +62,7 @@ export function AdminBixcare({ onMessage }: { onMessage: (m: string) => void }) 
       <div><h2 className="text-lg font-bold">BIXCARE · Mitra layanan</h2><p className="text-xs text-muted-foreground">Bengkel, cuci, laundry & rental. Setujui pengajuan dan kelola akun mitra.</p></div>
       <Link to="/care" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold"><ExternalLink size={14}/>Buka BIXCARE</Link>
     </div>
+    <PartnerGateControl onMessage={onMessage} />
     <div className="flex flex-wrap gap-2" role="tablist">{TABS.map(([k, l]) => <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${tab === k ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{l} ({count(k)})</button>)}</div>
     <div className="flex flex-wrap gap-2">
       <div className="flex flex-1 items-center gap-2 rounded-full border border-border bg-card px-3"><Search size={14}/><input className="w-full bg-transparent py-2 text-sm outline-none" placeholder="Cari nama, kota, WhatsApp" value={q} onChange={e => setQ(e.target.value)}/></div>

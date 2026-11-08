@@ -285,10 +285,24 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
     const { error } = await supabase.rpc('bixcare_set_open', { p_open: !outlet.is_open });
     setMsg(error ? error.message : ''); void load();
   };
-  if (outlet === undefined) return <p className="text-sm text-muted-foreground">Memuat…</p>;
+  const [gate, setGate] = useState<{ promo_free: boolean; min_stake_usd: number; staked_usd: number; allowed: boolean } | null>(null);
+  useEffect(() => { void supabase.rpc('bixcare_partner_gate').then(({ data }) => setGate(data as typeof gate)); }, []);
+  if (outlet === undefined || (!outlet && !gate)) return <p className="text-sm text-muted-foreground">Memuat…</p>;
+  if (!outlet && gate && !gate.allowed) return (
+    <>
+      {owner1 && <OwnerReview />}
+      <div className={`${card} space-y-2 text-center`}>
+        <Store className="mx-auto h-8 w-8 text-primary" />
+        <p className="text-base font-bold">Kemitraan BIXCARE untuk Staker</p>
+        <p className="text-xs text-muted-foreground">Buka outlet bengkel, cuci, laundry atau rental dengan paket staking aktif minimal <b>${Number(gate.min_stake_usd).toLocaleString('en-US')}</b>. Staking aktif Anda saat ini: ${Number(gate.staked_usd).toLocaleString('en-US')}.</p>
+        <Link to="/stake" className={`${btn} inline-block`}>Buka Akses Kemitraan dengan Staking</Link>
+      </div>
+    </>
+  );
   return (
     <>
       {owner1 && <OwnerReview />}
+      {!outlet && gate?.promo_free && <div className="rounded-2xl border border-primary/40 bg-primary/10 p-3 text-xs"><b className="text-primary">Promo Peluncuran:</b> pendaftaran kemitraan gratis tanpa syarat staking. Promo dapat ditutup sewaktu-waktu oleh BIXLINK.</div>}
       <div className={`${card} space-y-1`}>
         <p className="flex items-center gap-2 text-sm font-bold"><Fuel className="h-4 w-4 text-primary" />BIX Gas Tank</p>
         <p className="text-2xl font-black text-primary">{bal === null ? '…' : bal.toLocaleString('en-US', { maximumFractionDigits: 4 })} BIX</p>
