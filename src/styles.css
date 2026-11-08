@@ -7698,3 +7698,10 @@ html[data-chrono="on"][data-chrono-card="amethyst"] .site-shell [data-page="wall
 .chrono-skin-pick[data-skin="corsa"] i { background: repeating-linear-gradient(45deg,#18181b 0 3px,#0c0c0e 3px 6px); border: 1px solid #e11d48; }
 .chrono-skin-pick[data-skin="amethyst"] i { background: linear-gradient(135deg,#3b1366,#12051f); border: 1px solid #ffd700; }
 @media (prefers-reduced-motion: reduce) { .chrono-mini__dial i { transition: none; } }
+/* Mini sub-dial: hard reset against legacy wallet-card span/div rules */
+html[data-chrono="on"] .wallet-face .chrono-mini { position: absolute !important; inset: auto !important; top: 12px !important; right: 14px !important; left: auto !important; width: auto !important; height: auto !important; min-width: 0 !important; max-width: none !important; margin: 0 !important; padding: 3px 9px 3px 3px !important; display: inline-flex !important; flex-direction: row !important; transform: none !important; overflow: visible !important; }
+html[data-chrono="on"] .wallet-face .chrono-mini > span { position: relative !important; inset: auto !important; padding: 0 !important; border-radius: 0; background: none; box-shadow: none; transform: none !important; animation: none !important; }
+html[data-chrono="on"] .wallet-face .chrono-mini > .chrono-mini__dial { width: 26px !important; height: 26px !important; flex: none; border-radius: 50% !important; background: repeating-linear-gradient(172deg,#f4f4f2 0 2px,#d6d6d2 2px 4px) !important; box-shadow: inset 0 0 0 3px #0b0b0d !important; }
+html[data-chrono="on"] .wallet-face .chrono-mini > .chrono-mini__txt { display: flex !important; flex-direction: column; white-space: nowrap; }
+html[data-chrono="on"] [data-page="wallet"] .wallet-face--front { padding-top: 46px !important; }
+html[data-chrono="on"] [data-page="wallet"] .wallet-actions--card .wallet-action > span { background: rgba(255,255,255,.06) !important; }
