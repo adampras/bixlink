@@ -2093,6 +2093,178 @@ export type Database = {
         }
         Relationships: []
       }
+      bixcare_orders: {
+        Row: {
+          buyer_id: string
+          completed_at: string | null
+          created_at: string
+          fee_bix: number
+          fee_rate: number
+          id: string
+          items: Json
+          merchant_id: string
+          note: string
+          outlet_id: string
+          owner_user_id: string | null
+          pay_method: string
+          ref_bix: number
+          ref_user: string | null
+          schedule_at: string | null
+          stage: string
+          status: string
+          total_idr: number
+        }
+        Insert: {
+          buyer_id: string
+          completed_at?: string | null
+          created_at?: string
+          fee_bix?: number
+          fee_rate?: number
+          id?: string
+          items?: Json
+          merchant_id: string
+          note?: string
+          outlet_id: string
+          owner_user_id?: string | null
+          pay_method?: string
+          ref_bix?: number
+          ref_user?: string | null
+          schedule_at?: string | null
+          stage?: string
+          status?: string
+          total_idr?: number
+        }
+        Update: {
+          buyer_id?: string
+          completed_at?: string | null
+          created_at?: string
+          fee_bix?: number
+          fee_rate?: number
+          id?: string
+          items?: Json
+          merchant_id?: string
+          note?: string
+          outlet_id?: string
+          owner_user_id?: string | null
+          pay_method?: string
+          ref_bix?: number
+          ref_user?: string | null
+          schedule_at?: string | null
+          stage?: string
+          status?: string
+          total_idr?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixcare_orders_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "bixcare_outlets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bixcare_outlets: {
+        Row: {
+          address: string
+          city: string
+          close_time: string
+          created_at: string
+          description: string
+          division: string
+          id: string
+          is_open: boolean
+          logo_path: string | null
+          name: string
+          open_time: string
+          owner_id: string
+          phone: string
+          qris_path: string | null
+          review_note: string
+          status: string
+        }
+        Insert: {
+          address?: string
+          city?: string
+          close_time?: string
+          created_at?: string
+          description?: string
+          division: string
+          id?: string
+          is_open?: boolean
+          logo_path?: string | null
+          name: string
+          open_time?: string
+          owner_id: string
+          phone?: string
+          qris_path?: string | null
+          review_note?: string
+          status?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          close_time?: string
+          created_at?: string
+          description?: string
+          division?: string
+          id?: string
+          is_open?: boolean
+          logo_path?: string | null
+          name?: string
+          open_time?: string
+          owner_id?: string
+          phone?: string
+          qris_path?: string | null
+          review_note?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      bixcare_services: {
+        Row: {
+          available: boolean
+          created_at: string
+          duration_min: number
+          id: string
+          name: string
+          outlet_id: string
+          owner_id: string
+          price_idr: number
+          unit: string
+        }
+        Insert: {
+          available?: boolean
+          created_at?: string
+          duration_min?: number
+          id?: string
+          name: string
+          outlet_id: string
+          owner_id?: string
+          price_idr: number
+          unit?: string
+        }
+        Update: {
+          available?: boolean
+          created_at?: string
+          duration_min?: number
+          id?: string
+          name?: string
+          outlet_id?: string
+          owner_id?: string
+          price_idr?: number
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixcare_services_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "bixcare_outlets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bixgo_bookings: {
         Row: {
           cancel_note: string | null
@@ -4276,6 +4448,24 @@ export type Database = {
         Returns: undefined
       }
       bix_zoom_save: { Args: { p: Json }; Returns: undefined }
+      bixcare_bix_delta: { Args: { p_user: string }; Returns: number }
+      bixcare_config: { Args: never; Returns: Json }
+      bixcare_order_place: {
+        Args: {
+          p_items: Json
+          p_note: string
+          p_outlet: string
+          p_pay: string
+          p_schedule: string
+        }
+        Returns: string
+      }
+      bixcare_order_set: {
+        Args: { p_id: string; p_stage: string; p_status: string }
+        Returns: Json
+      }
+      bixcare_owner1_id: { Args: never; Returns: string }
+      bixcare_set_open: { Args: { p_open: boolean }; Returns: Json }
       bixgo_bix_balance_internal: { Args: { p_user: string }; Returns: number }
       bixgo_cancel_trip: {
         Args: { p_id: string; p_note?: string; p_reason: string }

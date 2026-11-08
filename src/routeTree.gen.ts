@@ -22,6 +22,7 @@ import { Route as BoostRouteImport } from './routes/boost'
 import { Route as BoostTiersRouteImport } from './routes/boost-tiers'
 import { Route as BuybackRouteImport } from './routes/buyback'
 import { Route as CallRouteImport } from './routes/call'
+import { Route as CareRouteImport } from './routes/care'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as ConsortiumVaultRouteImport } from './routes/consortium-vault'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -125,6 +126,11 @@ const BuybackRoute = BuybackRouteImport.update({
 const CallRoute = CallRouteImport.update({
   id: '/call',
   path: '/call',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareRoute = CareRouteImport.update({
+  id: '/care',
+  path: '/care',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComingSoonRoute = ComingSoonRouteImport.update({
@@ -339,6 +345,7 @@ export interface FileRoutesByFullPath {
   '/boost-tiers': typeof BoostTiersRoute
   '/buyback': typeof BuybackRoute
   '/call': typeof CallRoute
+  '/care': typeof CareRoute
   '/coming-soon': typeof ComingSoonRoute
   '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
@@ -393,6 +400,7 @@ export interface FileRoutesByTo {
   '/boost-tiers': typeof BoostTiersRoute
   '/buyback': typeof BuybackRoute
   '/call': typeof CallRoute
+  '/care': typeof CareRoute
   '/coming-soon': typeof ComingSoonRoute
   '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
@@ -448,6 +456,7 @@ export interface FileRoutesById {
   '/boost-tiers': typeof BoostTiersRoute
   '/buyback': typeof BuybackRoute
   '/call': typeof CallRoute
+  '/care': typeof CareRoute
   '/coming-soon': typeof ComingSoonRoute
   '/consortium-vault': typeof ConsortiumVaultRoute
   '/dashboard': typeof DashboardRoute
@@ -504,6 +513,7 @@ export interface FileRouteTypes {
     | '/boost-tiers'
     | '/buyback'
     | '/call'
+    | '/care'
     | '/coming-soon'
     | '/consortium-vault'
     | '/dashboard'
@@ -558,6 +568,7 @@ export interface FileRouteTypes {
     | '/boost-tiers'
     | '/buyback'
     | '/call'
+    | '/care'
     | '/coming-soon'
     | '/consortium-vault'
     | '/dashboard'
@@ -612,6 +623,7 @@ export interface FileRouteTypes {
     | '/boost-tiers'
     | '/buyback'
     | '/call'
+    | '/care'
     | '/coming-soon'
     | '/consortium-vault'
     | '/dashboard'
@@ -667,6 +679,7 @@ export interface RootRouteChildren {
   BoostTiersRoute: typeof BoostTiersRoute
   BuybackRoute: typeof BuybackRoute
   CallRoute: typeof CallRoute
+  CareRoute: typeof CareRoute
   ComingSoonRoute: typeof ComingSoonRoute
   ConsortiumVaultRoute: typeof ConsortiumVaultRoute
   DashboardRoute: typeof DashboardRoute
@@ -799,6 +812,13 @@ declare module '@tanstack/react-router' {
       path: '/call'
       fullPath: '/call'
       preLoaderRoute: typeof CallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/care': {
+      id: '/care'
+      path: '/care'
+      fullPath: '/care'
+      preLoaderRoute: typeof CareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coming-soon': {
@@ -1091,6 +1111,7 @@ const rootRouteChildren: RootRouteChildren = {
   BoostTiersRoute: BoostTiersRoute,
   BuybackRoute: BuybackRoute,
   CallRoute: CallRoute,
+  CareRoute: CareRoute,
   ComingSoonRoute: ComingSoonRoute,
   ConsortiumVaultRoute: ConsortiumVaultRoute,
   DashboardRoute: DashboardRoute,
