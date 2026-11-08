@@ -1,12 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Copy, Check, GraduationCap, LogOut, Radio, Send, UserPlus, Users } from 'lucide-react';
+import { ArrowLeft, Camera, Copy, Check, GraduationCap, LogOut, Radio, Search, Send, UserPlus, Users, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { copyText } from '@/lib/copy-text';
 import { MeetingStage } from '@/components/BixGroupMeeting';
+import { useSignedUrl } from '@/components/BixAvatar';
+import { shrinkImage } from '@/lib/bix-avatar';
+import { readContacts } from '@/lib/bix-contacts';
 
-type Group = { id: string; name: string; about: string; code: string; live_code: string | null; owner_id: string };
+type Group = { id: string; name: string; about: string; code: string; live_code: string | null; owner_id: string; avatar_path: string | null };
 type Msg = { id: string; sender_id: string; name: string; body: string; created_at: string };
+type Cand = { id: string; code: string; name: string; src: 'Kontak' | 'Jaringan'; depth?: number };
+const COLS = 'id,name,about,code,live_code,owner_id,avatar_path';
 const newCode = (n = 6) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
+
+function GroupAvatar({ g, size = 44 }: { g: Group; size?: number }) {
+  const url = useSignedUrl('bix-avatars', g.avatar_path);
+  return <span className="bx-grp-av" style={{ width: size, height: size }}>{url ? <img src={url} alt="" /> : <Users size={size * 0.42} />}</span>;
+}
 
 /** GROUP tab: education groups with group chat + a host-started Live Class (voice/video room). */
 export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean }) {
@@ -15,14 +25,14 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
   const [code, setCode] = useState(''); const [msg, setMsg] = useState('');
   const [open, setOpen] = useState<Group | null>(null);
   const load = async () => {
-    const { data } = await supabase.from('bix_groups').select('id,name,about,code,live_code,owner_id').order('created_at', { ascending: false });
+    const { data } = await supabase.from('bix_groups').select(COLS).order('created_at', { ascending: false });
     const list = (data as Group[] | null) ?? []; setGroups(list);
     setOpen(o => o ? list.find(g => g.id === o.id) ?? null : o);
   };
   useEffect(() => { void load(); const t = setInterval(() => { if (!document.hidden) void load(); }, 20000); return () => clearInterval(t); }, []);
   const create = async () => {
     setMsg(''); if (name.trim().length < 2) { setMsg('Enter a group name first.'); return; }
-    const { data, error } = await supabase.from('bix_groups').insert({ owner_id: me, name: name.trim().slice(0, 60), about: about.trim().slice(0, 300), code: newCode(7) }).select('id,name,about,code,live_code,owner_id').single();
+    const { data, error } = await supabase.from('bix_groups').insert({ owner_id: me, name: name.trim().slice(0, 60), about: about.trim().slice(0, 300), code: newCode(7) }).select(COLS).single();
     if (error) { setMsg('Failed to create group.'); return; }
     setName(''); setAbout(''); await load();
     if (data) setOpen(data as Group);
@@ -44,23 +54,63 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
       </div>}
       {msg && <p className="bx-grp-msg">{msg}</p>}
     </div>
-    {createOnly ? <p className="bx-grp-empty">Setelah grup dibuat, tambahkan member lewat BIX-ID atau @username di dalam grup.</p> : groups.length === 0 ? <p className="bx-grp-empty">No groups yet. Create one or join with an invite code.</p>
+    {createOnly ? <p className="bx-grp-empty">Setelah grup dibuat, pasang foto grup dan tambahkan member dari kontak atau jaringan Anda.</p> : groups.length === 0 ? <p className="bx-grp-empty">No groups yet. Create one or join with an invite code.</p>
       : <ul className="bx-grp-list">{groups.map(g => <li key={g.id}><button type="button" onClick={() => setOpen(g)}>
-        <span className="bx-grp-av"><Users size={18}/></span>
+        <GroupAvatar g={g}/>
         <span className="bx-grp-meta"><b>{g.name}</b><small>{g.about || (g.owner_id === me ? 'You are the host' : 'Education group')}</small></span>
         {g.live_code && <em className="bx-grp-live"><Radio size={12}/> LIVE</em>}
       </button></li>)}</ul>}
   </section>;
 }
 
+function AddMembers({ g, onClose }: { g: Group; onClose: () => void }) {
+  const [tab, setTab] = useState<'Kontak' | 'Jaringan'>('Kontak');
+  const [net, setNet] = useState<Cand[] | null>(null); const [q, setQ] = useState('');
+  const [done, setDone] = useState<Record<string, string>>({}); const [busy, setBusy] = useState('');
+  const contacts: Cand[] = readContacts().map(c => ({ id: c.id, code: c.code, name: c.name, src: 'Kontak' }));
+  useEffect(() => { void supabase.rpc('bix_group_candidates').then(({ data }) => setNet(((data as { id: string; code: string; name: string; depth: number }[] | null) ?? []).filter(x => x.code).map(x => ({ ...x, src: 'Jaringan' as const })))); }, []);
+  const list = (tab === 'Kontak' ? contacts : net ?? []).filter(c => `${c.code} ${c.name}`.toLowerCase().includes(q.trim().toLowerCase().replace(/^@/, '')));
+  const add = async (query: string, key: string) => {
+    setBusy(key); const { error } = await supabase.rpc('bix_group_add_member', { p_group: g.id, p_query: query });
+    setBusy(''); setDone(d => ({ ...d, [key]: error ? error.message : 'ok' }));
+  };
+  const manual = q.trim().length >= 3 && list.length === 0;
+  return <div className="bx-grp-sheet" role="dialog" aria-label="Tambah anggota">
+    <div className="bx-grp-sheet-box">
+      <header><b>Tambah anggota</b><button type="button" aria-label="Tutup" onClick={onClose}><X size={18}/></button></header>
+      <div className="bx-grp-tabs">{(['Kontak', 'Jaringan'] as const).map(t => <button key={t} type="button" aria-pressed={tab === t} onClick={() => setTab(t)}>{t === 'Kontak' ? 'Kontak Saya' : 'Jaringan Saya'}</button>)}</div>
+      <label className="bx-grp-search"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari nama, BIX-ID atau @username"/></label>
+      <ul className="bx-grp-cands">
+        {tab === 'Jaringan' && net === null && <li className="bx-grp-empty">Memuat jaringan…</li>}
+        {list.map(c => { const s = done[c.id]; return <li key={c.id}>
+          <span className="bx-grp-av" style={{ width: 36, height: 36 }}>{c.name.slice(0, 1).toUpperCase()}</span>
+          <span className="bx-grp-meta"><b>{c.name}</b><small>{c.code}{c.src === 'Jaringan' ? (c.depth === 0 ? ' · Upline' : ` · L${c.depth}`) : ''}{s && s !== 'ok' ? ` · ${s}` : ''}</small></span>
+          <button type="button" className="bx-grp-btn is-alt" disabled={s === 'ok' || busy === c.id} onClick={() => void add(c.code, c.id)}>{s === 'ok' ? <Check size={14}/> : <UserPlus size={14}/>}</button>
+        </li>; })}
+        {!manual && list.length === 0 && (tab === 'Kontak' || net) && <li className="bx-grp-empty">{tab === 'Kontak' ? 'Belum ada kontak tersimpan.' : 'Belum ada anggota jaringan.'}</li>}
+        {manual && <li><span className="bx-grp-meta"><b>Tambah “{q.trim()}”</b><small>{done.manual && done.manual !== 'ok' ? done.manual : 'BIX-ID atau @username'}</small></span>
+          <button type="button" className="bx-grp-btn is-alt" disabled={done.manual === 'ok'} onClick={() => void add(q.trim(), 'manual')}>{done.manual === 'ok' ? <Check size={14}/> : <UserPlus size={14}/>}</button></li>}
+      </ul>
+    </div>
+  </div>;
+}
+
 function GroupRoom({ g, me, onBack, onChange }: { g: Group; me: string; onBack: () => void; onChange: () => Promise<void> }) {
   const [msgs, setMsgs] = useState<Msg[]>([]); const [text, setText] = useState('');
   const [live, setLive] = useState<string | null>(null); const [copied, setCopied] = useState(false); const [err, setErr] = useState('');
-  const host = g.owner_id === me; const end = useRef<HTMLDivElement>(null);
-  const [addQ, setAddQ] = useState(''); const [info, setInfo] = useState('');
-  const addMember = async () => {
-    setErr(''); setInfo(''); const { data, error } = await supabase.rpc('bix_group_add_member', { p_group: g.id, p_query: addQ });
-    if (error) { setErr(error.message); return; } setAddQ(''); setInfo(`@${data as string} ditambahkan ke grup.`);
+  const host = g.owner_id === me; const end = useRef<HTMLDivElement>(null); const file = useRef<HTMLInputElement>(null);
+  const [adding, setAdding] = useState(false);
+  const setPhoto = async (f?: File) => {
+    if (!f) return; setErr('');
+    try {
+      const blob = await shrinkImage(f); const path = `${me}/group-${g.id}-${crypto.randomUUID().slice(0, 8)}.${blob.type === 'image/webp' ? 'webp' : 'jpg'}`;
+      const up = await supabase.storage.from('bix-avatars').upload(path, blob, { contentType: blob.type });
+      if (up.error) throw new Error(up.error.message);
+      const { error } = await supabase.rpc('bix_group_set_avatar', { p_group: g.id, p_path: path });
+      if (error) { await supabase.storage.from('bix-avatars').remove([path]); throw new Error(error.message); }
+      if (g.avatar_path) void supabase.storage.from('bix-avatars').remove([g.avatar_path]);
+      await onChange();
+    } catch (e) { setErr(e instanceof Error ? e.message : 'Gagal mengunggah foto.'); }
   };
   const leave = async () => {
     if (!confirm(`Keluar dari grup ${g.name}?`)) return;
@@ -88,17 +138,23 @@ function GroupRoom({ g, me, onBack, onChange }: { g: Group; me: string; onBack: 
     setLive(null); await onChange();
   };
   if (live) return <MeetingStage code={live} me={me} onLeave={() => void leaveLive()}/>;
-  return <section className="bx-grp-room">
-    <header><button type="button" aria-label="Back" onClick={onBack}><ArrowLeft size={18}/></button>
-      <div><b>{g.name}</b><small>Invite code {g.code}</small></div>
+  return <section className="bx-grp-room is-full">
+    <header>
+      <button type="button" aria-label="Back" onClick={onBack}><ArrowLeft size={18}/></button>
+      <span className="bx-grp-room-av">
+        <GroupAvatar g={g} size={40}/>
+        {host && <button type="button" className="bx-grp-cam" aria-label="Ganti foto grup" onClick={() => file.current?.click()}><Camera size={11}/></button>}
+        <input ref={file} type="file" accept="image/*" hidden onChange={e => { void setPhoto(e.target.files?.[0]); e.target.value = ''; }}/>
+      </span>
+      <div><b>{g.name}</b><small>Kode {g.code}</small></div>
       <button type="button" aria-label="Copy invite code" onClick={async () => { if (await copyText(g.code)) { setCopied(true); setTimeout(() => setCopied(false), 1600); } }}>{copied ? <Check size={16}/> : <Copy size={16}/>}</button>
+      {g.live_code ? <button type="button" className="is-live" aria-label="Join Live Class" onClick={() => setLive(g.live_code)}><Radio size={16}/></button>
+        : host && <button type="button" aria-label="Start Live Class" onClick={() => void startLive()}><Radio size={16}/></button>}
+      {host ? <button type="button" aria-label="Tambah anggota" onClick={() => setAdding(true)}><UserPlus size={16}/></button>
+        : <button type="button" aria-label="Keluar dari grup" onClick={() => void leave()}><LogOut size={16}/></button>}
     </header>
-    {g.live_code ? <button type="button" className="bx-grp-livebar is-on" onClick={() => setLive(g.live_code)}><Radio size={16}/> Join Live Class</button>
-      : host && <button type="button" className="bx-grp-livebar" onClick={() => void startLive()}><Radio size={16}/> Start Live Class</button>}
-    {host ? <div className="bx-grp-row bx-grp-add"><input className="form-input" placeholder="Tambah member: BIX-ID / @username" value={addQ} maxLength={40} onChange={e => setAddQ(e.target.value)}/>
-      <button type="button" className="bx-grp-btn is-alt" disabled={addQ.trim().length < 3} onClick={() => void addMember()}><UserPlus size={15}/> Add</button></div>
-      : <button type="button" className="bx-grp-leave" onClick={() => void leave()}><LogOut size={14}/> Keluar dari grup</button>}
-    {err && <p className="bx-grp-msg">{err}</p>}{info && <p className="bx-grp-msg is-ok">{info}</p>}
+    {g.live_code && <button type="button" className="bx-grp-livebar is-on" onClick={() => setLive(g.live_code)}><Radio size={14}/> Live Class berlangsung · Gabung</button>}
+    {err && <p className="bx-grp-msg">{err}</p>}
     <div className="bx-grp-feed bc-chatbox">
       {msgs.length === 0 && <p className="bx-grp-empty">Share the first lesson, tip or link with your group.</p>}
       {msgs.map(m => <div key={m.id} className={`bx-grp-msg-row${m.sender_id === me ? ' is-me' : ''}`}>
@@ -110,5 +166,6 @@ function GroupRoom({ g, me, onBack, onChange }: { g: Group; me: string; onBack: 
       <input className="form-input" placeholder="Write a lesson or message…" value={text} maxLength={2000} onChange={e => setText(e.target.value)}/>
       <button type="submit" aria-label="Send" disabled={!text.trim()}><Send size={18}/></button>
     </form>
+    {adding && <AddMembers g={g} onClose={() => setAdding(false)}/>}
   </section>;
 }

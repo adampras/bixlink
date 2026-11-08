@@ -431,6 +431,7 @@ export type Database = {
       bix_groups: {
         Row: {
           about: string
+          avatar_path: string | null
           code: string
           created_at: string
           id: string
@@ -440,6 +441,7 @@ export type Database = {
         }
         Insert: {
           about?: string
+          avatar_path?: string | null
           code: string
           created_at?: string
           id?: string
@@ -449,6 +451,7 @@ export type Database = {
         }
         Update: {
           about?: string
+          avatar_path?: string | null
           code?: string
           created_at?: string
           id?: string
@@ -4241,6 +4244,7 @@ export type Database = {
         Args: { p_group: string; p_query: string }
         Returns: string
       }
+      bix_group_candidates: { Args: never; Returns: Json }
       bix_group_feed: {
         Args: { p_group: string }
         Returns: {
@@ -4253,6 +4257,10 @@ export type Database = {
       }
       bix_group_is_member: { Args: { _g: string }; Returns: boolean }
       bix_group_join: { Args: { p_code: string }; Returns: string }
+      bix_group_set_avatar: {
+        Args: { p_group: string; p_path: string }
+        Returns: undefined
+      }
       bix_growth_excluded: { Args: { p_user: string }; Returns: boolean }
       bix_growth_radar: { Args: never; Returns: Json }
       bix_growth_scope_report: { Args: never; Returns: Json }

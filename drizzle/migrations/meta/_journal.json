@@ -1282,6 +1282,13 @@
       "when": 1794133903278,
       "tag": "0182_bix_surprise_ledger_device",
       "breakpoints": true
+    },
+    {
+      "idx": 183,
+      "version": "7",
+      "when": 1794145511527,
+      "tag": "0183_bix_group_avatar",
+      "breakpoints": true
     }
   ]
 }
