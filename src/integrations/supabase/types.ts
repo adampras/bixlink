@@ -2109,6 +2109,7 @@ export type Database = {
           merchant_bix: number
           merchant_id: string
           merchant_usdt: number
+          next_service_at: string | null
           note: string
           outlet_id: string
           owner_user_id: string | null
@@ -2116,10 +2117,14 @@ export type Database = {
           pay_method: string
           pay_ref: string
           proof_path: string | null
+          rated_at: string | null
+          rating: number | null
           ref_bix: number
           ref_usdt: number
           ref_user: string | null
+          review: string
           schedule_at: string | null
+          service_note: string
           stage: string
           status: string
           total_idr: number
@@ -2139,6 +2144,7 @@ export type Database = {
           merchant_bix?: number
           merchant_id: string
           merchant_usdt?: number
+          next_service_at?: string | null
           note?: string
           outlet_id: string
           owner_user_id?: string | null
@@ -2146,10 +2152,14 @@ export type Database = {
           pay_method?: string
           pay_ref?: string
           proof_path?: string | null
+          rated_at?: string | null
+          rating?: number | null
           ref_bix?: number
           ref_usdt?: number
           ref_user?: string | null
+          review?: string
           schedule_at?: string | null
+          service_note?: string
           stage?: string
           status?: string
           total_idr?: number
@@ -2169,6 +2179,7 @@ export type Database = {
           merchant_bix?: number
           merchant_id?: string
           merchant_usdt?: number
+          next_service_at?: string | null
           note?: string
           outlet_id?: string
           owner_user_id?: string | null
@@ -2176,10 +2187,14 @@ export type Database = {
           pay_method?: string
           pay_ref?: string
           proof_path?: string | null
+          rated_at?: string | null
+          rating?: number | null
           ref_bix?: number
           ref_usdt?: number
           ref_user?: string | null
+          review?: string
           schedule_at?: string | null
+          service_note?: string
           stage?: string
           status?: string
           total_idr?: number
@@ -2202,6 +2217,7 @@ export type Database = {
           bank_account: string
           bank_holder: string
           bank_name: string
+          break_until: string | null
           city: string
           close_time: string
           created_at: string
@@ -2225,6 +2241,7 @@ export type Database = {
           bank_account?: string
           bank_holder?: string
           bank_name?: string
+          break_until?: string | null
           city?: string
           close_time?: string
           created_at?: string
@@ -2248,6 +2265,7 @@ export type Database = {
           bank_account?: string
           bank_holder?: string
           bank_name?: string
+          break_until?: string | null
           city?: string
           close_time?: string
           created_at?: string
@@ -4540,11 +4558,36 @@ export type Database = {
         Args: { p_id: string; p_path: string; p_ref: string }
         Returns: Json
       }
+      bixcare_order_service_note: {
+        Args: { p_id: string; p_next: string; p_note: string }
+        Returns: undefined
+      }
       bixcare_order_set: {
         Args: { p_id: string; p_stage: string; p_status: string }
         Returns: Json
       }
+      bixcare_outlet_ratings: {
+        Args: never
+        Returns: {
+          avg_rating: number
+          outlet_id: string
+          reviews: number
+        }[]
+      }
+      bixcare_outlet_reviews: {
+        Args: { p_outlet: string }
+        Returns: {
+          rated_at: string
+          rating: number
+          review: string
+        }[]
+      }
       bixcare_owner1_id: { Args: never; Returns: string }
+      bixcare_rate_order: {
+        Args: { p_id: string; p_rating: number; p_review: string }
+        Returns: undefined
+      }
+      bixcare_set_break: { Args: { p_minutes: number }; Returns: string }
       bixcare_set_open: { Args: { p_open: boolean }; Returns: Json }
       bixcare_usdt_delta: { Args: { p_user: string }; Returns: number }
       bixgo_bix_balance_internal: { Args: { p_user: string }; Returns: number }

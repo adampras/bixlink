@@ -9,7 +9,8 @@ import autoImg from '@/assets/bixcare-auto.jpg';
 import washImg from '@/assets/bixcare-wash.jpg';
 import laundryImg from '@/assets/bixcare-laundry.jpg';
 import rentImg from '@/assets/bixcare-rent.jpg';
-import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet, uploadCareProof, openCareReceipt, careChime, rateLine, careCode } from '@/lib/bixcare';
+import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet, uploadCareProof, openCareReceipt, careChime, rateLine, careCode, timeSlots } from '@/lib/bixcare';
+import { CarePartnerStats, RateOrder, ServiceNote, onBreak } from '@/components/BixcareExtras';
 import { startBixCall } from '@/components/BixCall';
 
 function ContactBar({ peer, name, phone }: { peer: string; name: string; phone?: string | undefined }) {
@@ -84,6 +85,8 @@ function Explore({ uid, onBooked }: { uid: string | null; onBooked: () => void }
   const [outlets, setOutlets] = useState<Outlet[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<Outlet | null>(null);
+  const [stars, setStars] = useState<Record<string, { avg: number; n: number }>>({});
+  useEffect(() => { if (uid) void supabase.rpc('bixcare_outlet_ratings').then(({ data }) => { const m: Record<string, { avg: number; n: number }> = {}; (data ?? []).forEach((r: { outlet_id: string; avg_rating: number; reviews: number }) => { m[r.outlet_id] = { avg: Number(r.avg_rating), n: Number(r.reviews) }; }); setStars(m); }); }, [uid]);
   useEffect(() => {
     void supabase.from('bixcare_outlets').select('*').eq('status', 'approved').then(async ({ data }) => {
       const list = ((data ?? []) as Outlet[]).sort((a, b) => Number(b.is_open) - Number(a.is_open)); setOutlets(list);
@@ -108,8 +111,8 @@ function Explore({ uid, onBooked }: { uid: string | null; onBooked: () => void }
       {shown.map(o => (
         <button key={o.id} onClick={() => setOpen(o)} className={`${card} flex w-full items-center gap-3 text-left`}>
           {o.logo_path && urls[o.logo_path] ? <img src={urls[o.logo_path]} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="grid h-14 w-14 place-items-center rounded-xl bg-primary/15"><Store className="h-6 w-6 text-primary" /></div>}
-          <div className="min-w-0 flex-1"><p className="truncate font-bold">{o.name}</p><p className="text-xs text-muted-foreground">{divName(o.division)} · {o.city} · {o.open_time}–{o.close_time}</p></div>
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${o.is_open ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>{o.is_open ? 'BUKA' : 'TUTUP'}</span>
+          <div className="min-w-0 flex-1"><p className="truncate font-bold">{o.name}</p><p className="text-xs text-muted-foreground">{divName(o.division)} · {o.city} · {o.open_time}–{o.close_time}</p>{stars[o.id] && <p className="text-[11px] font-bold text-primary">★ {stars[o.id]!.avg} · {stars[o.id]!.n} ulasan{stars[o.id]!.avg >= 4.5 && stars[o.id]!.n >= 3 ? ' · TERPERCAYA' : ''}</p>}</div>
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${o.is_open && !onBreak(o) ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>{!o.is_open ? 'TUTUP' : onBreak(o) ? 'ISTIRAHAT' : 'BUKA'}</span>
         </button>
       ))}
     </>
@@ -124,6 +127,10 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
   useEffect(() => { if (uid) void supabase.rpc('bix_asset_balances', { p_user: uid }).then(({ data }) => { const r = (data as { bix_balance: number; usdt_balance: number }[] | null)?.[0]; setWbal({ bix: Number(r?.bix_balance ?? 0), usdt: Number(r?.usdt_balance ?? 0) }); }); }, [uid]);
   const methods = (['bix', 'usdt', 'qris', 'bank', 'cash'] as PayMethod[]).filter(m => m === 'bix' ? outlet.accept_bix : m === 'usdt' ? outlet.accept_usdt : m === 'qris' ? !!outlet.qris_path : m === 'bank' ? !!outlet.bank_account : true);
   const [when, setWhen] = useState('');
+  const slots = useMemo(() => timeSlots(outlet.open_time, outlet.close_time, new Date()), [outlet.open_time, outlet.close_time]);
+  const [reviews, setReviews] = useState<{ rating: number; review: string; rated_at: string }[]>([]);
+  useEffect(() => { if (uid) void supabase.rpc('bixcare_outlet_reviews', { p_outlet: outlet.id }).then(({ data }) => setReviews((data ?? []) as { rating: number; review: string; rated_at: string }[])); }, [uid, outlet.id]);
+  const resting = onBreak(outlet);
   const [note, setNote] = useState('');
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
@@ -143,6 +150,7 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
       <button onClick={onBack} className={ghost}>← Semua outlet</button>
       <div className={card}><p className="text-xs text-primary">{divName(outlet.division)}</p><h2 className="text-xl font-black">{outlet.name}</h2><p className="text-xs text-muted-foreground">{outlet.address}, {outlet.city} · {outlet.open_time}–{outlet.close_time}</p>{outlet.description && <p className="mt-2 text-sm">{outlet.description}</p>}
         {!outlet.is_open && <p className="mt-2 text-xs font-bold text-destructive">Outlet sedang TUTUP — pemesanan dibuka saat mitra online.</p>}
+        {outlet.is_open && resting && <p className="mt-2 text-xs font-bold text-destructive">Mitra istirahat sampai {new Date(outlet.break_until!).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} — buka otomatis setelahnya.</p>}
         {uid && uid !== outlet.owner_id && <ContactBar peer={outlet.owner_id} name={outlet.name} phone={outlet.phone} />}
       </div>
       <div className={card}>
@@ -159,17 +167,19 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
       </div>
       {uid ? (
         <div className={`${card} space-y-3`}>
-          <label className="block text-xs text-muted-foreground">Jadwal datang (opsional — lewati antrean)<input type="datetime-local" className={`${input} mt-1`} value={when} onChange={e => setWhen(e.target.value)} /></label>
+          <div><p className="text-xs font-bold">Pilih slot jam (opsional — lewati antrean)</p>
+            <div className="mt-1 flex gap-1 overflow-x-auto pb-1">{slots.map(t => { const v = t.toISOString(); return <button key={v} onClick={() => setWhen(when === v ? '' : v)} className={`shrink-0 rounded-xl px-2 py-1 text-[10px] font-bold ${when === v ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{t.toLocaleDateString('id-ID', { weekday: 'short' })}<span className="block">{t.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span></button>; })}</div></div>
           <input className={input} placeholder="Catatan (plat nomor, jenis kendaraan, dll.)" value={note} onChange={e => setNote(e.target.value)} />
           <p className="text-xs font-bold">Metode pembayaran</p>
           <div className="grid grid-cols-2 gap-2">{methods.map(p => <button key={p} onClick={() => setPay(p)} className={`rounded-xl px-2 py-2 text-left text-xs font-bold ${pay === p ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{PAY_LABEL[p]}{p === 'bix' && <span className="block text-[10px] font-normal opacity-80">{quote.bix} BIX · saldo {wbal?.bix.toFixed(2) ?? '…'}</span>}{p === 'usdt' && <span className="block text-[10px] font-normal opacity-80">{quote.usdt} USDT · saldo {wbal?.usdt.toFixed(2) ?? '…'}</span>}</button>)}</div>
           <p className="text-[11px] text-muted-foreground">{isWalletPay(pay) ? 'Saldo ditahan otomatis saat pesan dan diteruskan ke mitra setelah order Selesai. Batal/ditolak = saldo kembali penuh.' : pay === 'cash' ? 'Bayar tunai langsung ke mitra.' : 'Setelah pesan, buka Pesanan Saya untuk melihat QRIS/rekening mitra, bayar, lalu tekan "Saya sudah bayar".'}</p>
           {total > 0 && <p className="rounded-lg bg-muted/40 px-2 py-1 text-[11px] font-semibold">Kurs: {rateLine(total)} <span className="font-normal text-muted-foreground">(acuan internal)</span></p>}
           {short && <p className="text-xs text-destructive">Saldo tidak cukup untuk metode ini.</p>}
-          <div className="flex items-center justify-between"><span className="text-lg font-black text-primary">{rp(total)}</span><button className={btn} disabled={busy || total <= 0 || short || !outlet.is_open} onClick={book}>Pesan sekarang</button></div>
+          <div className="flex items-center justify-between"><span className="text-lg font-black text-primary">{rp(total)}</span><button className={btn} disabled={busy || total <= 0 || short || !outlet.is_open || resting} onClick={book}>Pesan sekarang</button></div>
           {msg && <p className="text-xs text-destructive">{msg}</p>}
         </div>
       ) : <SignIn />}
+      {reviews.length > 0 && <div className={`${card} space-y-2`}><p className="text-sm font-bold">Ulasan konsumen</p>{reviews.map((r, i) => <div key={i} className="text-xs"><span className="font-bold text-primary">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span> {r.review && <span>“{r.review}”</span>}</div>)}</div>}
     </>
   );
 }
@@ -234,6 +244,8 @@ function MyOrders({ uid }: { uid: string }) {
       {o.proof_path && <p className="mt-1 text-[10px] font-bold text-primary">✓ Bukti transfer terkirim ke mitra</p>}
       {err && <p className="text-xs text-destructive">{err}</p>}
       {!['cancelled', 'rejected'].includes(o.status) && <ContactBar peer={o.merchant_id} name={ot?.name ?? 'Mitra'} phone={ot?.phone} />}
+      {o.service_note && <div className="mt-2 rounded-lg bg-primary/10 p-2 text-[11px]"><p className="font-bold text-primary">Catatan servis & garansi</p><p>{o.service_note}</p>{o.next_service_at && <p className="font-semibold">Servis berikutnya: {new Date(o.next_service_at).toLocaleDateString('id-ID')}{new Date(o.next_service_at).getTime() - Date.now() < 7 * 864e5 ? ' — segera jadwalkan!' : ''}</p>}</div>}
+      {o.status === 'completed' && <RateOrder o={o} onDone={load} />}
       {o.status === 'completed' && <button className={`${btn} mt-2`} onClick={() => openCareReceipt(o, ot)}><Receipt className="mr-1 inline h-3.5 w-3.5" />Unduh / Cetak struk</button>}
       {careNext(o.status, 'buyer').includes('cancelled') && <button className={`${ghost} mt-2`} onClick={() => cancel(o.id)}>Batalkan</button>}
     </div>); })}</>;
@@ -314,6 +326,7 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
             <div><p className="font-bold">{outlet.is_open ? 'BUKA' : 'TUTUP'}</p><p className="text-[11px] text-muted-foreground">Tampil di radar publik saat BUKA.</p></div>
             <button className={btn} onClick={toggle} disabled={outlet.status !== 'approved'}>{outlet.is_open ? 'Tutup' : 'Buka'}</button>
           </div>
+          <CarePartnerStats outlet={outlet} balance={bal} onBreakChange={load} />
           <ServiceManager outlet={outlet} uid={uid} />
           <IncomingOrders outlet={outlet} onChange={load} />
         </>
@@ -390,6 +403,7 @@ function IncomingOrders({ outlet, onChange }: { outlet: Outlet; onChange: () => 
           {o.proof_path && proofs[o.proof_path] && <a href={proofs[o.proof_path]} target="_blank" rel="noreferrer" className={`${ghost} mt-1 inline-block`}>Lihat bukti transfer</a>}
           {o.note && <p className="text-xs">“{o.note}”</p>}
           <ContactBar peer={o.buyer_id} name="Konsumen BIXCARE" />
+          <ServiceNote o={o} onSaved={load} />
           {['accepted', 'in_progress', 'ready'].includes(o.status) && <div className="mt-2 flex flex-wrap gap-1">{STAGES[outlet.division].map(s => <button key={s} onClick={() => act(o, o.status, s)} className={`rounded-full px-2 py-1 text-[10px] ${o.stage === s ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{s}</button>)}</div>}
           <div className="mt-2 flex flex-wrap gap-2">{careNext(o.status, 'merchant').map(s => <button key={s} className={s === 'rejected' ? ghost : btn} onClick={() => act(o, s)}>{label[s]}</button>)}</div>
         </div>

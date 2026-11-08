@@ -2,9 +2,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const CARE_BUCKET = 'bixcare';
 export type Division = 'auto' | 'wash' | 'laundry' | 'rent';
-export type Outlet = { id: string; owner_id: string; name: string; division: Division; city: string; address: string; phone: string; description: string; logo_path: string | null; qris_path: string | null; open_time: string; close_time: string; is_open: boolean; status: string; review_note: string; bank_name: string; bank_account: string; bank_holder: string; accept_bix: boolean; accept_usdt: boolean };
+export type Outlet = { id: string; owner_id: string; name: string; division: Division; city: string; address: string; phone: string; description: string; logo_path: string | null; qris_path: string | null; open_time: string; close_time: string; is_open: boolean; status: string; review_note: string; bank_name: string; bank_account: string; bank_holder: string; accept_bix: boolean; accept_usdt: boolean; break_until?: string | null };
 export type Service = { id: string; outlet_id: string; name: string; unit: string; price_idr: number; duration_min: number; available: boolean };
-export type CareOrder = { id: string; outlet_id: string; merchant_id: string; buyer_id: string; items: { id: string; name: string; price: number; qty: number; unit: string }[]; total_idr: number; pay_method: PayMethod; fare_bix: number; fare_usdt: number; merchant_bix: number; merchant_usdt: number; fee_usdt: number; held_at: string | null; paid_at: string | null; pay_ref: string; schedule_at: string | null; note: string; stage: string; status: string; fee_bix: number; created_at: string; completed_at?: string | null; proof_path?: string | null };
+export type CareOrder = { id: string; outlet_id: string; merchant_id: string; buyer_id: string; items: { id: string; name: string; price: number; qty: number; unit: string }[]; total_idr: number; pay_method: PayMethod; fare_bix: number; fare_usdt: number; merchant_bix: number; merchant_usdt: number; fee_usdt: number; held_at: string | null; paid_at: string | null; pay_ref: string; schedule_at: string | null; note: string; stage: string; status: string; fee_bix: number; created_at: string; completed_at?: string | null; proof_path?: string | null; rating?: number | null; review?: string; rated_at?: string | null; service_note?: string; next_service_at?: string | null };
 
 export type PayMethod = 'bix' | 'usdt' | 'qris' | 'bank' | 'cash';
 export const PAY_LABEL: Record<PayMethod, string> = { bix: 'Saldo BIX', usdt: 'Saldo USDT', qris: 'QRIS mitra', bank: 'Transfer bank mitra', cash: 'Tunai di kasir' };
@@ -120,4 +120,42 @@ export function openCareReceipt(o: CareOrder, outlet?: Outlet) {
 <p class="m">Konversi BIX/USDT memakai acuan internal BIXLINK, bukan harga pasar.</p>
 <button onclick="print()">Cetak / Simpan PDF</button></body></html>`);
   w.document.close();
+}
+
+export type CareStats = { orders: number; omzet: number; byMethod: Record<string, number>; bix: number; usdt: number; gas: number };
+/** Completed-order totals since a date (default: all time). */
+export function careStats(orders: CareOrder[], since?: Date): CareStats {
+  const s: CareStats = { orders: 0, omzet: 0, byMethod: {}, bix: 0, usdt: 0, gas: 0 };
+  for (const o of orders) {
+    if (o.status !== 'completed') continue;
+    const t = new Date(o.completed_at ?? o.created_at);
+    if (since && t < since) continue;
+    s.orders++; s.omzet += Number(o.total_idr);
+    s.byMethod[o.pay_method] = (s.byMethod[o.pay_method] ?? 0) + Number(o.total_idr);
+    s.bix += Number(o.merchant_bix); s.usdt += Number(o.merchant_usdt); s.gas += Number(o.fee_bix);
+  }
+  return s;
+}
+/** How many average direct-pay orders the current BIX gas balance still covers above the minimum. */
+export function gasRunway(balance: number, avgFeeBix: number): number {
+  if (avgFeeBix <= 0) return 0;
+  return Math.max(0, Math.floor((balance - MIN_GAS_BIX) / avgFeeBix));
+}
+/** Two-hour booking slots between open and close (HH:MM), for the next `days` days. */
+export function timeSlots(open: string, close: string, from: Date, days = 3, stepH = 2): Date[] {
+  const [oh, om] = open.split(':').map(Number); const [ch] = close.split(':').map(Number);
+  const out: Date[] = [];
+  for (let d = 0; d < days; d++) {
+    for (let h = oh ?? 8; h + stepH <= (ch ?? 17); h += stepH) {
+      const t = new Date(from); t.setDate(t.getDate() + d); t.setHours(h, om ?? 0, 0, 0);
+      if (t.getTime() > from.getTime() + 30 * 60000) out.push(t);
+    }
+  }
+  return out;
+}
+export function careCsv(orders: CareOrder[]): string {
+  const head = ['Kode', 'Tanggal', 'Status', 'Item', 'Total IDR', 'Metode', 'Diterima BIX', 'Diterima USDT', 'Gas BIX', 'Rating'];
+  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = orders.map(o => [careCode(o.id), new Date(o.created_at).toISOString().slice(0, 16).replace('T', ' '), o.status, o.items.map(i => `${i.qty}x ${i.name}`).join('; '), o.total_idr, o.pay_method, o.merchant_bix, o.merchant_usdt, o.fee_bix, (o as CareOrder & { rating?: number | null }).rating ?? ''].map(esc).join(','));
+  return [head.join(','), ...rows].join('\n');
 }
