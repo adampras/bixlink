@@ -14,6 +14,7 @@ export const HUB_ITEMS = [
   { id: 'call', to: '/call', label: 'BIX CALL', note: 'Voice & Video', group: 'Ecosystem' },
   { id: 'bixgo', to: '/bixgo', label: 'BIXGO', note: 'Ride · Food · Send', group: 'Ecosystem' },
   { id: 'gold', to: '/gold', label: 'BIX GOLD', note: 'Gold · Gram savings', group: 'Ecosystem' },
+  { id: 'care', to: '/care', label: 'BIXCARE', note: 'Bengkel · Cuci · Laundry · Rental', group: 'Ecosystem' },
   { id: 'nft', to: '/nft-marketplace', label: 'NFT & Shop', note: 'Marketplace', group: 'Ecosystem' },
   { id: 'mining', to: '/mining', label: 'Mining', note: 'Rig pre-order', group: 'Ecosystem' },
   { id: 'arena', to: '/arena', label: 'Fox Arena', note: 'Missions', group: 'Ecosystem' },
