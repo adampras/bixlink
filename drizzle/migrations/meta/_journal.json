@@ -1233,6 +1233,13 @@
       "when": 1794105111375,
       "tag": "0175_bixgo_driver_qris_bank",
       "breakpoints": true
+    },
+    {
+      "idx": 176,
+      "version": "7",
+      "when": 1794107815256,
+      "tag": "0176_bixcare_approve_opens",
+      "breakpoints": true
     }
   ]
 }

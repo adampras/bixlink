@@ -76,8 +76,8 @@ function Explore({ uid, onBooked }: { uid: string | null; onBooked: () => void }
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<Outlet | null>(null);
   useEffect(() => {
-    void supabase.from('bixcare_outlets').select('*').eq('status', 'approved').eq('is_open', true).then(async ({ data }) => {
-      const list = (data ?? []) as Outlet[]; setOutlets(list);
+    void supabase.from('bixcare_outlets').select('*').eq('status', 'approved').then(async ({ data }) => {
+      const list = ((data ?? []) as Outlet[]).sort((a, b) => Number(b.is_open) - Number(a.is_open)); setOutlets(list);
       if (uid) setUrls(await signCare(list.map(o => o.logo_path)));
     });
   }, [uid]);
@@ -100,7 +100,7 @@ function Explore({ uid, onBooked }: { uid: string | null; onBooked: () => void }
         <button key={o.id} onClick={() => setOpen(o)} className={`${card} flex w-full items-center gap-3 text-left`}>
           {o.logo_path && urls[o.logo_path] ? <img src={urls[o.logo_path]} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="grid h-14 w-14 place-items-center rounded-xl bg-primary/15"><Store className="h-6 w-6 text-primary" /></div>}
           <div className="min-w-0 flex-1"><p className="truncate font-bold">{o.name}</p><p className="text-xs text-muted-foreground">{divName(o.division)} · {o.city} · {o.open_time}–{o.close_time}</p></div>
-          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">BUKA</span>
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${o.is_open ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>{o.is_open ? 'BUKA' : 'TUTUP'}</span>
         </button>
       ))}
     </>
@@ -132,7 +132,10 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
   return (
     <>
       <button onClick={onBack} className={ghost}>← Semua outlet</button>
-      <div className={card}><p className="text-xs text-primary">{divName(outlet.division)}</p><h2 className="text-xl font-black">{outlet.name}</h2><p className="text-xs text-muted-foreground">{outlet.address}, {outlet.city} · {outlet.open_time}–{outlet.close_time}</p>{outlet.description && <p className="mt-2 text-sm">{outlet.description}</p>}</div>
+      <div className={card}><p className="text-xs text-primary">{divName(outlet.division)}</p><h2 className="text-xl font-black">{outlet.name}</h2><p className="text-xs text-muted-foreground">{outlet.address}, {outlet.city} · {outlet.open_time}–{outlet.close_time}</p>{outlet.description && <p className="mt-2 text-sm">{outlet.description}</p>}
+        {!outlet.is_open && <p className="mt-2 text-xs font-bold text-destructive">Outlet sedang TUTUP — pemesanan dibuka saat mitra online.</p>}
+        {outlet.phone && <a href={`https://wa.me/${outlet.phone.replace(/\D/g, '').replace(/^0/, '62')}?text=${encodeURIComponent(`Halo ${outlet.name}, saya dari BIXCARE ingin bertanya.`)}`} target="_blank" rel="noreferrer" className={`${ghost} mt-2 inline-block`}>Chat WhatsApp mitra</a>}
+      </div>
       <div className={card}>
         <p className="mb-2 text-sm font-bold">Daftar harga resmi</p>
         {services.length === 0 && <p className="text-xs text-muted-foreground">Belum ada layanan.</p>}
@@ -153,7 +156,7 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
           <div className="grid grid-cols-2 gap-2">{methods.map(p => <button key={p} onClick={() => setPay(p)} className={`rounded-xl px-2 py-2 text-left text-xs font-bold ${pay === p ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{PAY_LABEL[p]}{p === 'bix' && <span className="block text-[10px] font-normal opacity-80">{quote.bix} BIX · saldo {wbal?.bix.toFixed(2) ?? '…'}</span>}{p === 'usdt' && <span className="block text-[10px] font-normal opacity-80">{quote.usdt} USDT · saldo {wbal?.usdt.toFixed(2) ?? '…'}</span>}</button>)}</div>
           <p className="text-[11px] text-muted-foreground">{isWalletPay(pay) ? 'Saldo ditahan otomatis saat pesan dan diteruskan ke mitra setelah order Selesai. Batal/ditolak = saldo kembali penuh.' : pay === 'cash' ? 'Bayar tunai langsung ke mitra.' : 'Setelah pesan, buka Pesanan Saya untuk melihat QRIS/rekening mitra, bayar, lalu tekan "Saya sudah bayar".'}</p>
           {short && <p className="text-xs text-destructive">Saldo tidak cukup untuk metode ini.</p>}
-          <div className="flex items-center justify-between"><span className="text-lg font-black text-primary">{rp(total)}</span><button className={btn} disabled={busy || total <= 0 || short} onClick={book}>Pesan sekarang</button></div>
+          <div className="flex items-center justify-between"><span className="text-lg font-black text-primary">{rp(total)}</span><button className={btn} disabled={busy || total <= 0 || short || !outlet.is_open} onClick={book}>Pesan sekarang</button></div>
           {msg && <p className="text-xs text-destructive">{msg}</p>}
         </div>
       ) : <SignIn />}
