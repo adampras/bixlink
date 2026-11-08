@@ -1198,6 +1198,20 @@
       "when": 1794064473147,
       "tag": "0170_bixgo_trip_cancellation_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 171,
+      "version": "7",
+      "when": 1794101556095,
+      "tag": "0171_bixgo_merchants",
+      "breakpoints": true
+    },
+    {
+      "idx": 172,
+      "version": "7",
+      "when": 1794101587841,
+      "tag": "0172_bixgo_merchant_storage",
+      "breakpoints": true
     }
   ]
 }

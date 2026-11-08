@@ -2363,6 +2363,172 @@ export type Database = {
         }
         Relationships: []
       }
+      bixgo_menu_items: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          in_stock: boolean
+          merchant_id: string
+          name: string
+          photo_path: string | null
+          price_idr: number
+          sort: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          in_stock?: boolean
+          merchant_id: string
+          name: string
+          photo_path?: string | null
+          price_idr: number
+          sort?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          in_stock?: boolean
+          merchant_id?: string
+          name?: string
+          photo_path?: string | null
+          price_idr?: number
+          sort?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixgo_menu_items_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "bixgo_merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bixgo_merchant_orders: {
+        Row: {
+          address: string
+          buyer_id: string
+          created_at: string
+          id: string
+          items: Json
+          merchant_id: string
+          note: string
+          pay_method: string
+          status: string
+          subtotal_idr: number
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          buyer_id: string
+          created_at?: string
+          id?: string
+          items?: Json
+          merchant_id: string
+          note?: string
+          pay_method?: string
+          status?: string
+          subtotal_idr?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          items?: Json
+          merchant_id?: string
+          note?: string
+          pay_method?: string
+          status?: string
+          subtotal_idr?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixgo_merchant_orders_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "bixgo_merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bixgo_merchants: {
+        Row: {
+          address: string
+          banner_path: string | null
+          category: string
+          city: string
+          close_time: string
+          created_at: string
+          id: string
+          is_open: boolean
+          kind: string
+          landmark: string
+          lat: number | null
+          lng: number | null
+          logo_path: string | null
+          name: string
+          open_time: string
+          owner_id: string
+          phone: string
+          review_note: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          banner_path?: string | null
+          category?: string
+          city?: string
+          close_time?: string
+          created_at?: string
+          id?: string
+          is_open?: boolean
+          kind?: string
+          landmark?: string
+          lat?: number | null
+          lng?: number | null
+          logo_path?: string | null
+          name: string
+          open_time?: string
+          owner_id: string
+          phone?: string
+          review_note?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          banner_path?: string | null
+          category?: string
+          city?: string
+          close_time?: string
+          created_at?: string
+          id?: string
+          is_open?: boolean
+          kind?: string
+          landmark?: string
+          lat?: number | null
+          lng?: number | null
+          logo_path?: string | null
+          name?: string
+          open_time?: string
+          owner_id?: string
+          phone?: string
+          review_note?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bixtok_comments: {
         Row: {
           author_name: string
@@ -4146,6 +4312,19 @@ export type Database = {
       bixgo_jastip_cancel: { Args: { _id: string }; Returns: undefined }
       bixgo_jastip_set_status: {
         Args: { _id: string; _status: string }
+        Returns: undefined
+      }
+      bixgo_merchant_order_place: {
+        Args: {
+          p_address: string
+          p_items: Json
+          p_merchant: string
+          p_note: string
+        }
+        Returns: string
+      }
+      bixgo_merchant_order_set: {
+        Args: { p_id: string; p_status: string }
         Returns: undefined
       }
       bixgo_passenger_cancel: { Args: { p_id: string }; Returns: undefined }

@@ -15,6 +15,8 @@ import { BixgoHero } from '@/components/BixgoHero';
 import { BixgoPassport } from '@/components/BixgoPassport';
 import { BixgoTravel } from '@/components/BixgoTravel';
 import { BixgoJastip } from '@/components/BixgoJastip';
+import { BixgoMerchant } from '@/components/BixgoMerchant';
+import { BixgoStores } from '@/components/BixgoStores';
 import { QrScanner } from '@/components/QrScanner';
 import { GLOBAL_CITIES, cryptoEquivalent, formatMoney, readCurrency, saveCurrency, type GlobalCurrency } from '@/lib/bixgo-global';
 import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
@@ -76,7 +78,7 @@ function BixgoPage() {
   const [tab, setTab] = useState<'order' | 'history'>('order');
   const [view, setView] = useState<BixgoView>('home');
   const [sub, setSub] = useState<null | 'ride' | 'car' | 'bills' | 'travel' | 'jastip'>(null);
-  const [mode, setMode] = useState<'rider' | 'driver'>('rider');
+  const [mode, setMode] = useState<'rider' | 'driver' | 'merchant'>('rider');
   const [scan, setScan] = useState(false);
   const navigate = useNavigate();
   const [cur, setCur] = useState<GlobalCurrency>('USD');
@@ -142,10 +144,12 @@ function BixgoPage() {
     {sub === 'bills' && <BixgoBills onBack={() => setSub(null)}/>}
     {(sub === 'ride' || sub === 'car') && <BixgoRideBooking cfg={cfg} start={sub} cur={cur} city={city} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
     {!sub && <>
-    {view === 'home' && <div className="sticky top-0 z-10 bg-background/90 px-3 pt-3 pb-2 backdrop-blur"><div role="tablist" aria-label="BIXGO mode" className="grid grid-cols-2 rounded-full border border-primary/40 bg-card p-1 text-xs font-bold">{([['rider', 'Saya Penumpang'], ['driver', 'Saya Driver']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={mode === k} onClick={() => setMode(k)} className={`rounded-full py-2 transition ${mode === k ? 'bg-primary text-primary-foreground shadow-[0_0_18px_-6px_var(--primary)]' : 'text-muted-foreground'}`}>{l}</button>)}</div></div>}
+    {view === 'home' && <div className="sticky top-0 z-10 bg-background/90 px-3 pt-3 pb-2 backdrop-blur"><div role="tablist" aria-label="BIXGO mode" className="grid grid-cols-3 rounded-full border border-primary/40 bg-card p-1 text-[11px] font-bold">{([['rider', 'Penumpang'], ['driver', 'Driver'], ['merchant', 'Merchant']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={mode === k} onClick={() => setMode(k)} className={`rounded-full py-2 transition ${mode === k ? 'bg-primary text-primary-foreground shadow-[0_0_18px_-6px_var(--primary)]' : 'text-muted-foreground'}`}>{l}</button>)}</div></div>}
+    {view === 'home' && mode === 'merchant' && <BixgoMerchant city={city} isAdmin={isAdmin}/>}
     {view === 'home' && mode === 'driver' && <BixgoPassport cur={cur} usdtIdr={cfg.usdtIdr} city={city}/>}
     {view === 'home' && mode === 'rider' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
     {((view === 'home' && mode === 'rider') || view === 'activity') && <BixgoActiveTrip/>}
+    {view === 'home' && mode === 'rider' && <BixgoStores/>}
     {view === 'home' && mode === 'rider' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
     {view === 'home' && <BixgoInvite/>}
     {view === 'inbox' && <BixgoInbox/>}
