@@ -52,6 +52,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
   }, [rd?.animGlow, rd?.animShimmer, rd?.animFloat]);
   const design = useDesignAccess(user?.id);
   useEffect(() => { document.documentElement.dataset['design'] = design.data?.next_gen ? 'v2' : 'classic'; }, [design.data?.next_gen]);
+  useEffect(() => { document.documentElement.dataset['chrono'] = design.data?.chrono ? 'on' : 'off'; }, [design.data?.chrono]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const path = useRouterState({ select: s => s.location.pathname });

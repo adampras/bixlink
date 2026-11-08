@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { HUB_ITEMS } from '@/lib/dock-hub';
 
-type Cfg = { mode: 'off' | 'scoped' | 'public'; owner2_design: boolean; owner2_locked: string[] };
+type Cfg = { mode: 'off' | 'scoped' | 'public'; chrono?: boolean; owner2_design: boolean; owner2_locked: string[] };
 type Wl = { user_id: string; code: string | null; name: string | null };
 const ECOS = HUB_ITEMS.filter(i => !['home', 'profile', 'settings'].includes(i.id));
 
@@ -23,6 +23,13 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
     setBusy(false); if (error) return onMessage(error.message);
     qc.invalidateQueries({ queryKey: ['bix-design-access'] }); onMessage('Pengaturan rilis desain tersimpan.');
   };
+  const setChrono = async (on: boolean) => {
+    setBusy(true);
+    const { data, error } = await supabase.rpc('bix_design_set_chrono' as never, { p_on: on } as never);
+    setBusy(false); if (error) return onMessage(error.message);
+    setCfg(c => ({ ...c, chrono: !!(data as { chrono?: boolean })?.chrono })); qc.invalidateQueries({ queryKey: ['bix-design-access'] });
+    onMessage(on ? 'Model Chronograph RM aktif untuk Admin 1 & jaringan.' : 'Model Chronograph RM dimatikan.');
+  };
   const setId = async (query: string, on: boolean) => {
     if (!query.trim()) return; setBusy(true);
     const { data, error } = await supabase.rpc('bix_design_whitelist_set' as never, { p_query: query, p_on: on } as never);
@@ -38,6 +45,14 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
         {([['off', 'Mati (semua desain lama)'], ['scoped', 'Admin 1 + jaringan + ID terpilih'], ['public', 'Rilis publik']] as const).map(([v, l]) => <button key={v} type="button" className={pill(cfg.mode === v)} onClick={() => setCfg(c => ({ ...c, mode: v }))}>{l}</button>)}
       </div>
       <p className="mt-1 text-xs text-muted-foreground">Admin 2 & seluruh downline-nya selalu mengikuti saklar Admin 2 di bawah, apa pun mode ini.</p>
+    </section>
+    <section>
+      <h3 className="font-bold">Model Chronograph RM · Profit & Wallet</h3>
+      <div className="mt-2 flex gap-2">
+        <button type="button" disabled={busy} className={pill(!cfg.chrono)} onClick={() => setChrono(false)}>Tutup · model saat ini</button>
+        <button type="button" disabled={busy} className={pill(!!cfg.chrono)} onClick={() => setChrono(true)}>Buka · Chronograph</button>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">Hanya Admin 1, jaringannya & ID terpilih. Admin 2 dan jaringannya tidak pernah melihat model ini. Langsung tersimpan.</p>
     </section>
     <section>
       <h3 className="font-bold">Saklar Admin 2 & jaringan</h3>

@@ -7467,3 +7467,31 @@ html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="
 html[data-design="v2"] [data-page="network"] img.rounded-full { box-shadow: 0 0 0 1.5px rgba(255,215,0,.55), 0 0 18px -4px rgba(255,215,0,.45) !important; }
 html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="network"],[data-page="pay"],[data-page="transfer"]) :is(.text-chart-3) { color: #FFD700 !important; }
 html[data-design="v2"] :is([data-page="stake"],[data-page="profit"],[data-page="network"],[data-page="pay"],[data-page="transfer"]) :is(.text-chart-2) { color: #5eead4 !important; }
+
+/* ===== Chronograph RM model (Owner 1 tree only, html[data-chrono=on]) ===== */
+.chrono-only { display: none; }
+html[data-chrono="on"] .chrono-only { display: flex; }
+.chrono-dial { position: relative; align-items: center; gap: 12px; margin: 14px 0 4px; padding: 10px 14px; border-radius: 22px;
+  background: repeating-linear-gradient(172deg, #f4f4f2 0 3px, #dcdcd8 3px 5px, #fbfbfa 5px 9px); box-shadow: inset 0 0 0 4px #0b0b0d, 0 10px 30px -12px rgba(0,0,0,.7); }
+.chrono-dial::before { content: ""; position: absolute; inset: 6px; border-radius: 17px; background: radial-gradient(circle at 70% 30%, #2a0d10, #08080a 70%); border: 1px solid #c8102e; }
+.chrono-dial > * { position: relative; }
+.chrono-arc { width: 96px; height: 56px; flex: none; }
+.chrono-arc__track { fill: none; stroke: url(#none); stroke: #222; stroke-width: 7; stroke-linecap: round; }
+.chrono-arc__fill { fill: none; stroke-width: 7; stroke-linecap: round; stroke: #22c55e; transition: stroke-dasharray .8s; filter: drop-shadow(0 0 4px rgba(250,204,21,.6)); }
+.chrono-arc__hand { stroke: #facc15; stroke-width: 2.5; stroke-linecap: round; transition: transform .8s cubic-bezier(.3,1.6,.5,1); }
+.chrono-tourbillon { position: relative; width: 38px; height: 38px; flex: none; border-radius: 50%; border: 2px solid #c8102e; animation: chrono-spin 60s linear infinite;
+  background: conic-gradient(from 0deg, #1a1a1d, #3a3a40, #1a1a1d, #3a3a40, #1a1a1d); }
+.chrono-tourbillon i { position: absolute; left: 50%; top: 2px; bottom: 2px; width: 2px; margin-left: -1px; background: #e5e5e5; }
+.chrono-tourbillon i:nth-child(2) { transform: rotate(60deg); } .chrono-tourbillon i:nth-child(3) { transform: rotate(120deg); background: #c8102e; }
+@keyframes chrono-spin { to { transform: rotate(360deg); } }
+.chrono-dial__text { display: flex; flex-direction: column; min-width: 0; }
+.chrono-dial__text b { font-size: 11px; letter-spacing: .18em; color: #fafafa; }
+.chrono-dial__text small { font-size: 10px; color: #facc15; font-variant-numeric: tabular-nums; }
+html[data-chrono="on"] [data-page="profit"] :is(.profit-metric, .profit-withdraw) { border: 1px solid rgba(200,16,46,.55) !important; background: radial-gradient(circle at 80% 0%, rgba(200,16,46,.18), transparent 55%), #09090b !important; }
+html[data-chrono="on"] [data-page="profit"] .profit-metric strong { color: #fafafa !important; }
+html[data-chrono="on"] [data-page="profit"] .profit-metric svg { color: #facc15 !important; }
+html[data-chrono="on"] [data-page="profit"] .profit-metric--total { box-shadow: inset 0 0 0 3px #f1f1ee, inset 0 0 0 4px #c8102e !important; }
+html[data-chrono="on"] [data-page="profit"] .profit-withdraw__btn { background: linear-gradient(180deg, #e11d48, #9f1239) !important; color: #fff !important; border-radius: 12px !important; box-shadow: inset 0 -3px 0 rgba(0,0,0,.35) !important; }
+html[data-chrono="on"] [data-page="wallet"] .wallet-face--front { box-shadow: 0 0 0 4px #ecece8, 0 0 0 5px #c8102e, 0 24px 50px -20px rgba(0,0,0,.8) !important; background: radial-gradient(circle at 85% 10%, rgba(200,16,46,.22), transparent 50%), #08080a !important; }
+html[data-chrono="on"] [data-page="wallet"] .wallet-action span { background: #111 !important; color: #facc15 !important; border: 1px solid #c8102e !important; }
+@media (prefers-reduced-motion: reduce) { .chrono-tourbillon { animation: none; } }

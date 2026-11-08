@@ -1,3 +1,4 @@
+import { ChronoDial } from '@/components/ChronoDial';
 import { Web3Connect } from '@/components/Web3Connect';
 import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { VaultStage } from '@/components/TechSuite';
@@ -107,6 +108,7 @@ function WalletPage() {
       <div className={`wallet-flip${flipped ? ' is-flipped' : ''}`}><div className="wallet-flip-inner">
       <div data-sov-color={cfg?.readiness.walletCard && !pickWalletSkin(cfg?.readiness.walletColors) ? (cfg?.readiness.walletCardColor ?? 'onyx') : undefined} data-wallet-skin={pickWalletSkin(cfg?.readiness.walletColors)} className={`wallet-face wallet-summary wallet-vault auric-card wallet-face--front relative overflow-hidden rounded-[20px] border p-5${cfg?.readiness.walletCard ? ' wallet-sovereign' : ''}${cfg?.readiness.walletCard && cfg?.readiness.walletCardModel === 'elite' ? ' wallet-elite' : ''}`}>
         {cfg?.readiness.walletCard ? <><span className="sov-sheen" aria-hidden/>{cfg?.readiness.walletCardModel === 'elite' && <><span className="elite-grid" aria-hidden/><span className="elite-orbs" aria-hidden><i/><i/></span></>}</> : <WalletFinanceMotion settings={cfg?.readiness}/>}
+        <ChronoDial value={0.72} beat={3} label="BLOCK HEARTBEAT" caption="BNB Chain · ~3s pulse"/>
         <div className="wallet-balance-block">
           <div className="flex items-center justify-between gap-2"><div className="flex min-w-0 items-center gap-2 text-xs tracking-[.14em] uppercase text-muted-foreground"><Wallet size={14}/> Available balance<Button type="button" size="icon" variant="ghost" className="vault-pill! size-7 rounded-full" aria-label={hidden ? 'Show balance' : 'Hide balance'} aria-pressed={hidden} title={hidden ? 'Show balance' : 'Hide balance'} onClick={toggleHidden}>{hidden ? <Eye size={14}/> : <EyeOff size={14}/>}</Button></div><div className="flex shrink-0 items-center gap-2">{cfg?.readiness.walletCard && <span className="wallet-mc wallet-mc--inline" aria-hidden><i/><i/></span>}<button type="button" className="wallet-flip-btn" aria-label="Show QR and member ID" onClick={() => setFlipped(true)}><ArrowLeftRight size={14}/></button></div></div>
           <strong className="numeric mt-1 block break-all text-[28px] leading-tight font-black text-foreground md:text-[34px]">{hidden ? '••••••••' : <><AnimatedNumber value={data?.balance ?? 0}/> USDT</>}</strong>
