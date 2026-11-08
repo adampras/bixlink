@@ -72,7 +72,7 @@ function PayPage() {
 
       <div className="hubx-tabs mt-4">{(['pay', 'receive'] as const).map(t => <button key={t} onClick={() => setTab(t)} className={tab === t ? 'is-on' : ''}>{t === 'pay' ? <><ArrowUpRight size={14}/> Pay</> : <><ArrowDownLeft size={14}/> Receive</>}</button>)}</div>
 
-      {tab === 'pay' ? <section className="mt-5 rounded-[20px] border border-primary bg-card p-5">
+      {tab === 'pay' ? <section className="rm-pay-panel mt-5 rounded-[20px] border border-primary bg-card p-5">
         <Button className="w-full rounded-full bg-chart-2 text-background" onClick={() => gate() && setScan(true)}>{enabled ? <><ScanLine/> Scan QR code</> : <><Lock/> Scan QR · Coming soon</>}</Button>
         <p className="tx-hint">Opens the camera or a gallery image to read a member's BIX PAY QR.</p>
         <div className="my-4 text-center text-xs text-muted-foreground">or enter manually</div>
@@ -82,7 +82,7 @@ function PayPage() {
         <Button disabled={busy || (enabled && (!code || !(Number(amount) > 0)))} className="mt-5 w-full rounded-full bg-primary" onClick={review}>{enabled ? 'Review payment' : <><Lock size={16}/> Pay · Coming soon</>}</Button>
         <p className="tx-hint">Checks the recipient first; nothing is sent until you confirm with your PIN.</p>
         <p className="mt-3 text-xs text-muted-foreground">Payments move BIX instantly inside the BIXLINK internal ledger. Max 100,000 BIX per payment, 500,000 BIX per 24 hours. The owner can reverse suspicious payments.</p>
-      </section> : <section className="mt-5 rounded-[20px] border border-chart-2 bg-card p-5 text-center">
+      </section> : <section className="rm-pay-panel mt-5 rounded-[20px] border border-chart-2 bg-card p-5 text-center">
         {data?.code ? <><div className="pay-qr-card">
             <div className="pay-qr-card__head"><span className="inline-flex items-center gap-1"><QrCode size={13}/> BIX PAY</span><span>{Number(reqAmount) > 0 ? `${number(Number(reqAmount), { maximumFractionDigits: 8 })} BIX` : 'ANY AMOUNT'}</span></div>
             <div className="pay-qr-plate"><QRCodeSVG value={qrUrl} size={220} level="M" marginSize={0}/></div>
@@ -100,11 +100,11 @@ function PayPage() {
       {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
 
       <h2 className="mt-10 font-display text-xl font-black">BIX PAY history</h2>
-      <div className="mt-4 space-y-2">{(data?.transfers ?? []).length ? data?.transfers.map(t => <div key={t.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-sm"><div className="flex items-center gap-3"><span className={`grid size-9 place-items-center rounded-full ${t.outgoing ? 'bg-primary/15 text-primary' : 'bg-chart-2/15 text-chart-2'}`}>{t.outgoing ? <ArrowUpRight size={16}/> : <ArrowDownLeft size={16}/>}</span><div><b>{t.outgoing ? `To ${t.recipient_code}` : `From ${t.sender_code}`}</b><div className="text-xs text-muted-foreground">{dateTime(t.created_at)}{t.note ? ` · ${t.note}` : ''}</div></div></div><div className="text-right"><b className={`numeric ${t.outgoing ? '' : 'text-chart-2'}`}>{t.outgoing ? '−' : '+'}{number(Number(t.amount_bix), { maximumFractionDigits: 8 })} BIX</b><div className={`text-xs capitalize ${t.status === 'reversed' ? 'text-destructive' : 'text-muted-foreground'}`}>{t.status}</div></div></div>)
+      <div className="rm-pay-history mt-4 space-y-2">{(data?.transfers ?? []).length ? data?.transfers.map(t => <div key={t.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-sm"><div className="flex min-w-0 items-center gap-3"><span className={`grid size-9 shrink-0 place-items-center rounded-full ${t.outgoing ? 'bg-primary/15 text-primary' : 'bg-chart-2/15 text-chart-2'}`}>{t.outgoing ? <ArrowUpRight size={16}/> : <ArrowDownLeft size={16}/>}</span><div className="min-w-0 break-words"><b>{t.outgoing ? `To ${t.recipient_code}` : `From ${t.sender_code}`}</b><div className="text-xs text-muted-foreground">{dateTime(t.created_at)}{t.note ? ` · ${t.note}` : ''}</div></div></div><div className="text-right"><b className={`numeric ${t.outgoing ? '' : 'text-chart-2'}`}>{t.outgoing ? '−' : '+'}{number(Number(t.amount_bix), { maximumFractionDigits: 8 })} BIX</b><div className={`text-xs capitalize ${t.status === 'reversed' ? 'text-destructive' : 'text-muted-foreground'}`}>{t.status}</div></div></div>)
         : <div className="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-border bg-card/60 p-8 text-center"><QrCode className="text-primary"/><p className="text-sm text-muted-foreground">No BIX PAY transactions yet.</p></div>}</div>
 
       {scan && <Scanner onClose={() => setScan(false)} onResult={raw => { setScan(false); const p = parse(raw); if (!p) { setMsg('That QR is not a BIX PAY code.'); return; } setCode(p.code); if (p.amount) setAmount(String(p.amount)); if (p.note) setNote(p.note); }}/>}
-      {confirm && <div className="fixed inset-0 z-50 grid place-items-center bg-background/90 p-4 backdrop-blur"><div className="w-full max-w-sm rounded-[20px] border border-chart-3 bg-card p-6 text-center">
+      {confirm && <div className="fixed inset-0 z-50 grid place-items-center bg-background/90 p-4 backdrop-blur"><div className="rm-pay-confirm w-full max-w-sm rounded-[20px] border border-chart-3 bg-card p-6 text-center">
         <ShieldCheck className="mx-auto text-chart-2" size={32}/><h3 className="mt-3 font-display text-lg font-black">Confirm payment</h3>
         <strong className="numeric mt-3 block text-3xl font-black text-chart-3">{number(Number(amount), { maximumFractionDigits: 8 })} BIX</strong>
         <p className="mt-2 text-sm text-muted-foreground">to <b className="text-foreground">{code.toUpperCase()}</b>{note ? ` · ${note}` : ''}</p>

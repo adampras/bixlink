@@ -7539,3 +7539,129 @@ html[data-chrono="on"] [data-page="stake"] .text-chart-2 { color: #10b981 !impor
 html[data-chrono="on"] [data-page="stake"] :is(.stake-lux-btn, button.bg-primary, button[data-variant="default"]) { background: linear-gradient(180deg,#e11d48,#9f1239) !important; color: #fff !important; border-radius: 12px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), inset 0 -3px 0 rgba(0,0,0,.35) !important; }
 html[data-chrono="on"] [data-page="stake"] :is(.stake-lux-btn, button.bg-primary, button[data-variant="default"]):active { transform: translateY(1px); box-shadow: inset 0 2px 4px rgba(0,0,0,.5) !important; }
 html[data-chrono="on"] [data-page="stake"] .stake-progress > * { background: linear-gradient(90deg,#10b981,#facc15) !important; }
+
+/* RM extension: carbon dominates, quartz frames the account; color marks actions, not surfaces. */
+html[data-chrono="on"] {
+  --rm-carbon: oklch(0.145 0.008 260);
+  --rm-chassis: oklch(0.20 0.012 260);
+  --rm-quartz: oklch(0.96 0.004 100);
+  --rm-quartz-grain: oklch(0.85 0.006 100);
+  --rm-titanium: oklch(0.72 0.025 250);
+  --rm-crimson: oklch(0.55 0.20 20);
+  --rm-crimson-deep: oklch(0.40 0.15 20);
+  --rm-canary: oklch(0.88 0.17 95);
+  --rm-kinetic: oklch(0.76 0.15 165);
+  --rm-ice: oklch(0.79 0.11 225);
+  --rm-line: color-mix(in oklab, var(--rm-quartz) 18%, transparent);
+  --rm-surface: linear-gradient(155deg, var(--rm-chassis), var(--rm-carbon) 70%);
+  --rm-bezel: repeating-linear-gradient(172deg, var(--rm-quartz) 0 3px, var(--rm-quartz-grain) 3px 5px, var(--rm-quartz) 5px 9px);
+  --rm-shadow: 0 16px 32px -22px var(--rm-carbon);
+  --rm-pusher: linear-gradient(180deg, var(--rm-crimson), var(--rm-crimson-deep));
+}
+html[data-chrono="on"] :is([data-page="network"], [data-page="pay"]) {
+  --foreground: var(--rm-quartz); --muted-foreground: var(--rm-titanium);
+  --card: var(--rm-carbon); --border: var(--rm-line); --input: var(--rm-line);
+  --primary: var(--rm-crimson); --primary-foreground: var(--rm-quartz);
+  --chart-2: var(--rm-kinetic); --chart-3: var(--rm-canary); --ring: var(--rm-crimson);
+}
+html[data-chrono="on"] :is([data-page="network"], [data-page="pay"]) :is(h1,h2,h3,.pay-hero__title) {
+  background: none !important; color: var(--rm-quartz) !important;
+  -webkit-text-fill-color: currentColor; letter-spacing: 0;
+}
+html[data-chrono="on"] :is([data-page="network"], [data-page="pay"]) .text-chart-2 { color: var(--rm-kinetic) !important; }
+html[data-chrono="on"] :is([data-page="network"], [data-page="pay"]) .text-chart-3 { color: var(--rm-canary) !important; }
+html[data-chrono="on"][data-design] :is([data-page="network"] .nx-root-compact, [data-page="pay"] .pay-hero) {
+  position: relative; border: 4px solid transparent !important; border-radius: 20px !important;
+  background: var(--rm-surface) padding-box, var(--rm-bezel) border-box !important;
+  box-shadow: inset 0 0 0 1px var(--rm-crimson), var(--rm-shadow) !important;
+  padding: 18px !important;
+}
+html[data-chrono="on"] :is([data-page="network"] .nx-root-compact, [data-page="pay"] .pay-hero)::before {
+  content: ""; position: absolute; inset: 6px; height: auto; pointer-events: none;
+  background: radial-gradient(circle, var(--rm-titanium) 2px, transparent 2.5px) left top / 5px 5px no-repeat,
+    radial-gradient(circle, var(--rm-titanium) 2px, transparent 2.5px) right top / 5px 5px no-repeat,
+    radial-gradient(circle, var(--rm-titanium) 2px, transparent 2.5px) left bottom / 5px 5px no-repeat,
+    radial-gradient(circle, var(--rm-titanium) 2px, transparent 2.5px) right bottom / 5px 5px no-repeat;
+}
+html[data-chrono="on"] [data-page="network"] .nx-avatar-halo {
+  background: var(--rm-bezel); box-shadow: 0 0 0 1px var(--rm-crimson); animation: none;
+}
+html[data-chrono="on"] [data-page="network"] .nx-avatar-halo img { animation: none; }
+html[data-chrono="on"] [data-page="network"] .nx-mini { gap: 12px 16px; margin-top: 18px; }
+html[data-chrono="on"] [data-page="network"] .nx-mini > div {
+  background: transparent !important; border: 0 !important; border-top: 1px solid var(--rm-line) !important;
+  border-radius: 0 !important; padding: 9px 0 0 !important; box-shadow: none !important;
+}
+html[data-chrono="on"] [data-page="network"] .nx-mini dd { font-size: 16px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+html[data-chrono="on"] [data-page="network"] .nx-mini > :first-child dd { color: var(--rm-quartz); }
+html[data-chrono="on"] [data-page="network"] .nx-gender button[aria-pressed="true"] { background: var(--rm-chassis); color: var(--rm-canary); }
+html[data-chrono="on"] [data-page="network"] .nx-pills { margin-top: 16px; }
+html[data-chrono="on"] [data-page="network"] .nx-pills span.on { border-color: var(--rm-kinetic) !important; color: var(--rm-kinetic) !important; }
+html[data-chrono="on"] [data-page="network"] .nx-tabs,
+html[data-chrono="on"] [data-page="pay"] .hubx-tabs {
+  background: var(--rm-carbon) !important; border: 1px solid var(--rm-line) !important;
+  border-radius: 8px; padding: 5px; box-shadow: none;
+}
+html[data-chrono="on"] [data-page="network"] .nx-tabs button[aria-selected="true"] {
+  background: var(--rm-chassis) !important; color: var(--rm-kinetic) !important; box-shadow: inset 0 -2px 0 var(--rm-kinetic) !important; border-radius: 5px;
+}
+html[data-chrono="on"] [data-page="pay"] .hubx-tabs button { border-radius: 5px; }
+html[data-chrono="on"] [data-page="pay"] .hubx-tabs .is-on {
+  background: var(--rm-chassis) !important; color: var(--rm-canary) !important;
+  box-shadow: inset 0 -2px 0 var(--rm-crimson) !important;
+}
+html[data-chrono="on"][data-design] :is([data-page="network"], [data-page="pay"]) :is(.rm-network-panel,.rm-network-members,.rm-pay-panel,.rm-pay-history > div,.rm-pay-confirm,.nx-plan-details,.pay-qr-card) {
+  background: var(--rm-surface) !important; border: 1px solid var(--rm-line) !important;
+  border-radius: 8px !important; box-shadow: var(--rm-shadow) !important;
+}
+html[data-chrono="on"] [data-page="network"] .rm-network-panel .rounded-xl.border {
+  background: transparent !important; border: 0 !important; border-left: 1px solid var(--rm-line) !important;
+  border-radius: 0; box-shadow: none !important;
+}
+html[data-chrono="on"] [data-page="network"] .nx-focus { border-color: var(--rm-kinetic); background: var(--rm-chassis); }
+html[data-chrono="on"] [data-page="network"] :is(.nx-drill,.nx-breadcrumb button,.nx-earned) { color: var(--rm-kinetic); }
+html[data-chrono="on"] [data-page="network"] .nx-earned { background: var(--rm-carbon); border-color: var(--rm-line); }
+html[data-chrono="on"] [data-page="network"] .nx-search { background: var(--rm-carbon); border-color: var(--rm-line); }
+html[data-chrono="on"] [data-page="pay"] .pay-hero__title span { color: var(--rm-canary) !important; }
+html[data-chrono="on"] [data-page="pay"] .hubx-hero__num :is(b,small) {
+  background: none !important; color: var(--rm-quartz) !important; -webkit-text-fill-color: currentColor;
+  letter-spacing: 0; text-shadow: none !important; font-variant-numeric: tabular-nums;
+}
+html[data-chrono="on"] [data-page="pay"] .hubx-hero__num b { font-size: 32px; }
+html[data-chrono="on"] [data-page="pay"] :is(.hubx-hero__num em,.hubx-chip,.pay-hero__tag,.pay-hero__back) {
+  background: var(--rm-chassis) !important; color: var(--rm-canary) !important; border: 1px solid var(--rm-line) !important;
+}
+html[data-chrono="on"] [data-page="pay"] .pay-qr-card { box-shadow: none !important; }
+html[data-chrono="on"] [data-page="pay"] .pay-qr-plate { background: var(--rm-quartz); }
+html[data-chrono="on"] [data-page="pay"] :is(.pay-qr-plate::before,.pay-qr-plate::after) { border-color: var(--rm-crimson); }
+html[data-chrono="on"] [data-page="pay"] .pay-qr-code { color: var(--rm-canary); border-color: var(--rm-line); }
+html[data-chrono="on"] :is([data-page="network"], [data-page="pay"]) .form-input {
+  background: var(--rm-carbon) !important; border: 1px solid var(--rm-line) !important; color: var(--rm-quartz);
+  border-radius: 8px !important;
+}
+html[data-chrono="on"] :is([data-page="network"], [data-page="pay"]) .form-input:focus {
+  border-color: var(--rm-crimson) !important; box-shadow: 0 0 0 2px color-mix(in oklab, var(--rm-crimson) 18%, transparent) !important;
+}
+html[data-chrono="on"] :is([data-page="network"], [data-page="pay"]) :is(button.bg-primary,button.bg-chart-2) {
+  background: var(--rm-pusher) !important; color: var(--rm-quartz) !important; border: 0 !important;
+  border-radius: 8px !important; box-shadow: inset 0 1px 0 var(--rm-line), inset 0 -3px 0 var(--rm-crimson-deep) !important;
+}
+html[data-chrono="on"] [data-page="pay"] .rm-pay-panel button.bg-chart-2 {
+  background: var(--rm-chassis) !important; color: var(--rm-canary) !important;
+  border: 1px solid var(--rm-line) !important; box-shadow: none !important;
+}
+html[data-chrono="on"] [data-page="pay"] .rm-pay-history .numeric { overflow-wrap: anywhere; }
+html[data-chrono="on"] nav[aria-label="Main"].glass-dock > :first-child { --rm: var(--rm-ice); }
+html[data-chrono="on"] nav[aria-label="Main"].glass-dock [data-nav="stake"] { --rm: var(--rm-canary); }
+html[data-chrono="on"] nav[aria-label="Main"].glass-dock [data-nav="profit"] { --rm: var(--rm-crimson); }
+html[data-chrono="on"] nav[aria-label="Main"].glass-dock [data-nav="network"] { --rm: var(--rm-kinetic); }
+html[data-chrono="on"] nav[aria-label="Main"].glass-dock > :is(a,button):not(.dock-wallet) svg {
+  color: var(--rm); padding: 3px; width: 25px; height: 25px; border-radius: 6px;
+  background: color-mix(in oklab, var(--rm) 10%, var(--rm-carbon));
+}
+html[data-chrono="on"] nav[aria-label="Main"].glass-dock .dock-wallet svg { width: 25px; height: 25px; }
+@media (max-width: 420px) {
+  html[data-chrono="on"] [data-page="network"] .nx-root-row { flex-wrap: wrap; }
+  html[data-chrono="on"] [data-page="network"] .nx-gender { margin-left: auto; }
+  html[data-chrono="on"] [data-page="pay"] .rm-pay-panel { padding: 16px; }
+}
