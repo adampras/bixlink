@@ -1692,6 +1692,60 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_surprise_attempts: {
+        Row: {
+          amount: number
+          answered_at: string | null
+          created_at: string
+          id: string
+          qids: number[]
+          result: string | null
+          round: number
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          answered_at?: string | null
+          created_at?: string
+          id?: string
+          qids: number[]
+          result?: string | null
+          round: number
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          answered_at?: string | null
+          created_at?: string
+          id?: string
+          qids?: number[]
+          result?: string | null
+          round?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bix_surprise_bank: {
+        Row: {
+          answer: number
+          id: number
+          options: Json
+          q: string
+        }
+        Insert: {
+          answer: number
+          id?: number
+          options: Json
+          q: string
+        }
+        Update: {
+          answer?: number
+          id?: number
+          options?: Json
+          q?: string
+        }
+        Relationships: []
+      }
       bix_team_accounts: {
         Row: {
           active: boolean
@@ -4489,6 +4543,23 @@ export type Database = {
       bix_studio_save: { Args: { p: Json }; Returns: undefined }
       bix_studio_spend: { Args: { p_feature: string }; Returns: Json }
       bix_studio_status: { Args: never; Returns: Json }
+      bix_surprise_admin: { Args: never; Returns: Json }
+      bix_surprise_answer: {
+        Args: { p_answers: number[]; p_attempt: string }
+        Returns: Json
+      }
+      bix_surprise_cfg: { Args: never; Returns: Json }
+      bix_surprise_open: { Args: never; Returns: Json }
+      bix_surprise_save: {
+        Args: {
+          p_enabled: boolean
+          p_new_round: boolean
+          p_quota: number
+          p_reward: number
+        }
+        Returns: Json
+      }
+      bix_surprise_status: { Args: never; Returns: Json }
       bix_team_sales_usd: { Args: { p_user: string }; Returns: number }
       bix_team_size: { Args: { p_root: string }; Returns: number }
       bix_unreal_bonus_bix: {

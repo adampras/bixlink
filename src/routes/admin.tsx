@@ -20,6 +20,7 @@ import { AdminBoosterVisual, type BoosterVisual } from '@/components/AdminBooste
 import { AdminBixMarket } from '@/components/AdminBixMarket';
 import { AdminLandingContent } from '@/components/AdminLandingContent';
 import { AdminPopups } from '@/components/AdminPopups';
+import { AdminSurpriseQuiz } from '@/components/AdminSurpriseQuiz';
 import { AdminBixVault } from '@/components/AdminBixVault';
 import { AdminBixToken } from '@/components/AdminBixToken';
 import { AdminHubMenu } from '@/components/AdminHubMenu';
@@ -125,6 +126,7 @@ function Admin() {
       { title: 'Menu HUB', content: <AdminHubMenu/> },
       { title: 'Splash', content: <AdminSplash onMessage={setMessage}/> },
       { title: 'Customer Service 24/7', content: <AdminSupportDesk onMessage={setMessage}/> },
+      { title: 'Kuis Kejutan FREE BIX', content: <AdminSurpriseQuiz onMessage={setMessage}/> },
       { title: 'Banner & Pop-up', content: <AdminPopups content={data?.settings.find(s => s.key === 'landing_content')?.value as LandingContent | undefined} onMessage={setMessage} onSaved={refresh}/> },
       { title: 'Booster', content: <AdminBoosterVisual initialVisual={((data?.settings.find(s=>s.key==='booster_visual')?.value as {visual?: BoosterVisual} | undefined)?.visual ?? 'video')} enabled={Boolean((data?.settings.find(s=>s.key==='booster')?.value as {enabled?: boolean})?.enabled)} onMessage={setMessage} onSaved={refresh}/> },
     ]}/>}

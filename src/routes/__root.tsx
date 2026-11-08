@@ -1,3 +1,4 @@
+import { SurpriseQuiz } from '@/components/SurpriseQuiz';
 import { BixCallHost } from '@/components/BixCall';
 import { BixtokMiniHost } from '@/components/BixtokMiniHost';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -163,6 +164,7 @@ function RootComponent() {
         <Outlet />
         <BixtokMiniHost />
         <FoxChat />
+        <SurpriseQuiz />
         <BixCallHost />
         <InteractionComfort />
         <PowerSaver />

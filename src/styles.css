@@ -7070,3 +7070,8 @@ html[data-color-mode="light"] .stake-compact.stake-compact.stake-compact .durati
 .care-fade { animation: care-rise .5s ease both; }
 @keyframes care-rise { from { opacity: 0; transform: translateY(8px); } }
 @media (prefers-reduced-motion: reduce) { .care-live::before, .care-hero-img, .care-beacon i, .care-title span, .care-shine::after, .care-open-dot, .care-fade { animation: none; } }
+
+.surprise-orb { background: radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--primary) 35%, transparent), color-mix(in oklab, var(--background) 92%, transparent) 70%); border: 1.5px solid color-mix(in oklab, var(--primary) 70%, transparent); box-shadow: 0 0 22px color-mix(in oklab, var(--primary) 45%, transparent), inset 0 1px 0 color-mix(in oklab, var(--foreground) 25%, transparent); backdrop-filter: blur(10px); animation: surprise-breathe 2.6s ease-in-out infinite; }
+.surprise-card { background: linear-gradient(160deg, color-mix(in oklab, var(--card) 96%, transparent), color-mix(in oklab, var(--background) 98%, transparent)); border: 1px solid color-mix(in oklab, var(--primary) 45%, transparent); box-shadow: 0 20px 60px color-mix(in oklab, var(--primary) 20%, transparent); max-height: 88dvh; overflow: auto; }
+@keyframes surprise-breathe { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-5px) scale(1.04); } }
+@media (prefers-reduced-motion: reduce) { .surprise-orb { animation: none; } }
