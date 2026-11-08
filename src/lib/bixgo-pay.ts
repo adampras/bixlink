@@ -5,10 +5,13 @@ export const BIXGO_BIX_USD = 0.5;
 export const DRIVER_SHARE = 0.85;
 
 export type PayKind = 'usdt' | 'bix' | 'cash';
+/** Direct-to-driver methods (cash, driver QR, bank transfer) all count as 'cash': the fee is BIX gas taken on accept. */
 export const payKind = (m: string | null | undefined): PayKind => {
   const s = (m ?? 'USDT').toLowerCase();
-  return s.startsWith('bix') ? 'bix' : s === 'cash' ? 'cash' : 'usdt';
+  return s.startsWith('bix') ? 'bix' : s === 'cash' || s === 'qris' || s === 'bank' ? 'cash' : 'usdt';
 };
+export const isDirectTransfer = (m: string | null | undefined) => ['qris', 'bank'].includes((m ?? '').toLowerCase());
+export const BANKS = ['BCA', 'BRI', 'Mandiri', 'BNI', 'BSI', 'CIMB Niaga', 'Permata', 'Danamon', 'Jago', 'SeaBank', 'GoPay', 'OVO', 'DANA', 'ShopeePay', 'Maybank', 'Other'];
 
 /** Driver-adjusted fare plus what moves for each payment kind. */
 export function tripQuote(totalIdr: number, adjPct: number, usdtIdr: number, commissionPct: number, kind: PayKind) {

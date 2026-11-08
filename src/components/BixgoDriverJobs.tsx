@@ -1,3 +1,4 @@
+import { BixgoTripPayee } from '@/components/BixgoDriverPay';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { CheckCircle2, Loader2, MapPin, MessageCircle, Navigation, Phone, Play, X } from 'lucide-react';
@@ -13,7 +14,7 @@ export function jobChime() {
 }
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { payKind, type PayKind } from '@/lib/bixgo-pay';
+import { isDirectTransfer, payKind, type PayKind } from '@/lib/bixgo-pay';
 import { Button } from '@/components/ui/button';
 import { BixgoCancelDialog } from '@/components/BixgoCancelDialog';
 import { BixgoDriverLocation } from '@/components/BixgoDriverLocation';
@@ -96,6 +97,7 @@ export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean
       </div>}
       <div className="flex gap-2">
         {j.status === 'assigned' && <><Btn id={j.id} onClick={() => void advance(j.id, 'in_transit', 'Trip started')}><Play className="h-3.5 w-3.5"/>Start trip</Btn><Btn ghost id={j.id} onClick={() => setCancelId(j.id)}><X className="h-3.5 w-3.5"/>Release</Btn></>}
+        {isDirectTransfer(j.pay_method) && <BixgoTripPayee id={j.id} role="driver"/>}
         {j.status === 'in_transit' && <Btn id={j.id} onClick={() => void advance(j.id, 'completed', 'Trip completed')}><CheckCircle2 className="h-3.5 w-3.5"/>Confirm completed</Btn>}
       </div>
     </div>)}

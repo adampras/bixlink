@@ -1,3 +1,4 @@
+import { GlobalRegions } from '@/components/GlobalRegions';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Wrench, Droplets, Shirt, KeyRound, Store, ClipboardList, Search, Fuel, QrCode, Check, X, Trash2 } from 'lucide-react';
@@ -49,6 +50,7 @@ function CarePage() {
           <p className="text-xs text-muted-foreground">Bengkel · Cuci · Laundry · Rental — bayar langsung ke mitra, BIX sebagai bahan bakar platform.</p>
         </div>
       </section>
+      <GlobalRegions service="BIXCARE"/>
       <nav className="sticky top-0 z-10 flex gap-2 bg-background/90 px-4 py-2 backdrop-blur">
         {([['explore', 'Jelajah', Search], ['orders', 'Pesanan Saya', ClipboardList], ['partner', 'Pemilik Layanan', Store]] as const).map(([k, l, I]) => (
           <button key={k} onClick={() => setTab(k)} className={`flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-bold ${tab === k ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground'}`}><I className="h-4 w-4" />{l}</button>

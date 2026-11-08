@@ -2338,7 +2338,10 @@ export type Database = {
           owner_bix: number
           owner_usdt: number
           owner_user_id: string | null
+          paid_at: string | null
+          paid_confirmed_at: string | null
           pay_method: string
+          pay_ref: string
           pickup: string
           pickup_lat: number | null
           pickup_lng: number | null
@@ -2389,7 +2392,10 @@ export type Database = {
           owner_bix?: number
           owner_usdt?: number
           owner_user_id?: string | null
+          paid_at?: string | null
+          paid_confirmed_at?: string | null
           pay_method?: string
+          pay_ref?: string
           pickup?: string
           pickup_lat?: number | null
           pickup_lng?: number | null
@@ -2440,7 +2446,10 @@ export type Database = {
           owner_bix?: number
           owner_usdt?: number
           owner_user_id?: string | null
+          paid_at?: string | null
+          paid_confirmed_at?: string | null
           pay_method?: string
+          pay_ref?: string
           pickup?: string
           pickup_lat?: number | null
           pickup_lng?: number | null
@@ -2465,8 +2474,13 @@ export type Database = {
       }
       bixgo_driver_licenses: {
         Row: {
+          accept_bank: boolean
           accept_bix: boolean
           accept_cash: boolean
+          accept_qris: boolean
+          bank_account: string
+          bank_holder: string
+          bank_name: string
           city: string
           created_at: string
           full_name: string
@@ -2476,6 +2490,7 @@ export type Database = {
           operator_note: string
           phone: string
           plate: string
+          qris_path: string | null
           rate_adj_pct: number
           status: string
           updated_at: string
@@ -2484,8 +2499,13 @@ export type Database = {
           vehicle_type: string
         }
         Insert: {
+          accept_bank?: boolean
           accept_bix?: boolean
           accept_cash?: boolean
+          accept_qris?: boolean
+          bank_account?: string
+          bank_holder?: string
+          bank_name?: string
           city?: string
           created_at?: string
           full_name?: string
@@ -2495,6 +2515,7 @@ export type Database = {
           operator_note?: string
           phone?: string
           plate?: string
+          qris_path?: string | null
           rate_adj_pct?: number
           status?: string
           updated_at?: string
@@ -2503,8 +2524,13 @@ export type Database = {
           vehicle_type?: string
         }
         Update: {
+          accept_bank?: boolean
           accept_bix?: boolean
           accept_cash?: boolean
+          accept_qris?: boolean
+          bank_account?: string
+          bank_holder?: string
+          bank_name?: string
           city?: string
           created_at?: string
           full_name?: string
@@ -2514,6 +2540,7 @@ export type Database = {
           operator_note?: string
           phone?: string
           plate?: string
+          qris_path?: string | null
           rate_adj_pct?: number
           status?: string
           updated_at?: string
@@ -4542,6 +4569,17 @@ export type Database = {
       }
       bixgo_driver_set_city: { Args: { p_city: string }; Returns: undefined }
       bixgo_driver_set_online: { Args: { p_online: boolean }; Returns: boolean }
+      bixgo_driver_set_pay: {
+        Args: {
+          p_bank: boolean
+          p_bank_account: string
+          p_bank_holder: string
+          p_bank_name: string
+          p_qris: boolean
+          p_qris_path: string
+        }
+        Returns: undefined
+      }
       bixgo_driver_set_rates: {
         Args: { p_adj: number; p_bix: boolean; p_cash: boolean }
         Returns: undefined
@@ -4570,7 +4608,13 @@ export type Database = {
         Returns: undefined
       }
       bixgo_ref_stats: { Args: never; Returns: Json }
+      bixgo_trip_confirm_paid: { Args: { p_id: string }; Returns: undefined }
       bixgo_trip_driver: { Args: { p_id: string }; Returns: Json }
+      bixgo_trip_mark_paid: {
+        Args: { p_id: string; p_ref: string }
+        Returns: undefined
+      }
+      bixgo_trip_payee: { Args: { p_id: string }; Returns: Json }
       bixtok_am_official: { Args: never; Returns: boolean }
       bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_can_bypass: { Args: never; Returns: boolean }

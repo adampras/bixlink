@@ -15,7 +15,7 @@ const OPTS: Opt[] = [
   { name: 'BIX Moto', svc: 'ride', mult: 1, seats: 1 },
   { name: 'BIX Moto Saver', svc: 'ride', mult: 0.9, seats: 1, tag: 'Saver' },
 ];
-const PAYS = ['USDT', 'BIX Token', 'Cash'];
+const PAYS = ['USDT', 'BIX Token', 'Cash', 'QRIS', 'Bank'];
 
 /** Pickup + vehicle selection on a real map with device GPS and real road distance. Booking itself is still a preview: no driver dispatch or payment. */
 export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'USD', city = '' }: { cfg: BixgoSettings; cur?: GlobalCurrency; city?: string; start: 'ride' | 'car'; onBack: () => void; onBooked: (o: { svc: 'ride' | 'car'; from: string; to: string; total: number; pay: string; name: string }) => void }) {
@@ -113,7 +113,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
     {stage === 'booked' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-4 pt-5 text-center">
       <CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">{ref ? `Booking request #${ref} sent` : 'Demo booking created'}</h2>
       <p className="text-sm text-muted-foreground">{cur.name} · {from?.name} → {to?.name}</p><p className="mt-1 text-xl font-black">{idr(price(cur).final)}</p><p className="text-[11px] text-muted-foreground tabular-nums">≈ {cryptoEquivalent(price(cur).final, cfg.usdtIdr).usdt} USDT · {cryptoEquivalent(price(cur).final, cfg.usdtIdr).bix} BIX</p>
-      <p className="mt-2 text-[11px] text-muted-foreground">{ref ? (pay === 0 ? 'When a driver accepts, the fare is held from your USDT wallet and settled on completion.' : pay === 1 ? 'When a driver accepts, the BIX fare (with your discount) is held from your BIX balance and settled on completion.' : 'Pay the driver in cash. The final fare may differ slightly based on the driver’s own rate.') : 'Sign in to send a real request to the operator. Nothing was charged.'}</p>
+      <p className="mt-2 text-[11px] text-muted-foreground">{ref ? (pay === 0 ? 'When a driver accepts, the fare is held from your USDT wallet and settled on completion.' : pay === 1 ? 'When a driver accepts, the BIX fare (with your discount) is held from your BIX balance and settled on completion.' : pay === 2 ? 'Pay the driver in cash. The final fare may differ slightly based on the driver’s own rate.' : pay === 3 ? 'When a driver accepts, their QR appears on your trip screen. Scan it, then tap “I\'ve paid”.' : 'When a driver accepts, their bank account appears on your trip screen. Transfer, then tap “I\'ve paid”.') : 'Sign in to send a real request to the operator. Nothing was charged.'}</p>
       <button onClick={onBack} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground">Back to Home</button>
     </section>}
 

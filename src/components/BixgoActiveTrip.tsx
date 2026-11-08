@@ -1,3 +1,5 @@
+import { BixgoTripPayee } from '@/components/BixgoDriverPay';
+import { isDirectTransfer } from '@/lib/bixgo-pay';
 import { useEffect, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { Button } from '@/components/ui/button';
@@ -75,6 +77,7 @@ export function BixgoActiveTrip() {
       <Button variant="ghost" className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-primary/40 p-0" aria-label="View driver ID" onClick={() => setIdOpen(true)}>{photo ? <img src={photo} alt={driver?.name ?? name} className="h-full w-full object-cover" onError={() => setPhoto('')}/> : <span className="text-xl font-bold text-primary">{name.slice(0, 2).toUpperCase()}</span>}</Button>
       <div className="min-w-0 text-xs"><b className="block text-sm">{driver?.name ?? name}</b><p>{driver?.vehicle_model || trip.vehicle} · {driver?.plate || trip.plate}</p><p className="text-primary">{driver?.approved ? 'Verified BIXGO partner' : 'Assigned driver'}{driver?.rating != null ? ` · ★ ${driver.rating} (${driver.rating_count})` : ''}</p></div>
     </div>}
+    {trip.driver_user_id && ['assigned', 'in_transit'].includes(trip.status) && isDirectTransfer(trip.pay_method) && <BixgoTripPayee id={trip.id} role="rider"/>}
     {trip.status === 'cancelled' && <p className="mt-3 text-xs text-muted-foreground">{trip.cancel_reason}{trip.cancel_note ? ` · ${trip.cancel_note}` : ''} · No cancellation fee</p>}
     {trip.driver_user_id && ['assigned', 'in_transit'].includes(trip.status) && <BixgoTripMap driver={trip.driver_lat != null && trip.driver_lng != null ? { lat: trip.driver_lat, lng: trip.driver_lng } : null} pickup={trip.pickup_lat != null && trip.pickup_lng != null ? { lat: trip.pickup_lat, lng: trip.pickup_lng } : null} at={trip.driver_location_at ?? null}/>}
     <BixgoCancelDialog id={trip.id} role="rider" open={cancelOpen} onClose={() => setCancelOpen(false)} onDone={() => void load()}/>

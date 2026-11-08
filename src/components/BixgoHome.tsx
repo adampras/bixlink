@@ -1,3 +1,4 @@
+import { GlobalRegions } from '@/components/GlobalRegions';
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Bell, Briefcase, ChevronRight, ClipboardList, Home, MessageSquare, Plus, ScanLine, Search, Star, User, ShoppingBasket, Utensils, X } from 'lucide-react';
@@ -55,6 +56,7 @@ export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<B
         {q && <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" aria-label="Clear search" title="Clear search" onClick={() => setQ('')}><X/></Button>}
       </div>
     </header>
+    <GlobalRegions service="BIXGO"/>
     <section className="no-scrollbar overflow-x-auto px-2 pt-4">
       <div className="grid grid-cols-4 gap-y-3">
         {tiles.map(t => <Button variant="ghost" key={t.label} onClick={() => t.svc && enabled.has(t.svc) ? onPick(t.svc) : onSoon(t.label)} className="h-auto min-w-0 flex-col gap-1 px-1 py-2 text-center active:scale-95 transition">
