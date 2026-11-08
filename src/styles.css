@@ -7159,3 +7159,74 @@ html[data-design="v2"] :is(nav, header).sticky {
   border-color: var(--ts-hairline) !important;
 }
 html[data-design="v2"] ::selection { background: rgba(251, 191, 36, 0.3); }
+
+/* ===== Design v2 · page signatures: HUB, STAKING, WALLET, PROFIT, NETWORK ===== */
+html[data-design="v2"] .lux-page :is(.section-title, .stake-lux-title, .hub-title) {
+  font-family: "Urbanist", sans-serif; text-transform: uppercase; letter-spacing: .14em; font-weight: 700;
+}
+html[data-design="v2"] .lux-page :is(.section-title, .stake-lux-title) span {
+  background: linear-gradient(100deg, #fde68a, var(--ts-amber) 45%, var(--ts-amber-deep));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+html[data-design="v2"] .lux-page .eyebrow { font-family: "Urbanist", sans-serif; letter-spacing: .32em; color: var(--ts-titanium); }
+html[data-design="v2"] .lux-page :is(.text-2xl, .text-3xl, .text-4xl).font-bold,
+html[data-design="v2"] :is(.stake-metric, .profit-metric, .wallet-balance-block) :is(strong, b, .text-xl, .text-2xl, .text-3xl) {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; letter-spacing: -.03em;
+}
+/* Shared titanium card */
+html[data-design="v2"] :is(.stake-metric, .profit-metric, .profit-summary, .profit-position, .wallet-tile, .wallet-fold, .stake-request, .hub-group) {
+  background: linear-gradient(160deg, rgba(26,32,44,.82), rgba(13,17,24,.92)) !important;
+  border: 0.5px solid var(--ts-hairline) !important; border-radius: 22px !important;
+  box-shadow: inset 0 1px 0 rgba(248,250,252,.05), 0 18px 40px -24px rgba(0,0,0,.8) !important;
+  position: relative;
+}
+html[data-design="v2"] :is(.stake-metric, .profit-metric, .wallet-tile, .hub-group)::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(120px 60px at 0 0, rgba(251,191,36,.12), transparent 70%);
+}
+/* HUB · cockpit matrix */
+html[data-design="v2"] .hub-search { background: rgba(8,10,14,.7) !important; border: .5px solid rgba(251,191,36,.25) !important; border-radius: 999px !important; }
+html[data-design="v2"] .hub-group-head { font-family: "Urbanist", sans-serif; letter-spacing: .26em; text-transform: uppercase; font-size: .68rem; color: var(--ts-amber) !important; }
+html[data-design="v2"] .hub-group :is(a, button) > span:first-child,
+html[data-design="v2"] .hub-emblem {
+  background: radial-gradient(circle at 30% 25%, #2a3242, #0d1118 70%) !important;
+  border: .5px solid rgba(251,191,36,.28) !important; color: var(--ts-amber) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 6px 16px -8px rgba(251,191,36,.35) !important;
+}
+/* STAKING · monolithic vault */
+html[data-design="v2"] [data-page="stake"] .stake-lux-head { padding-bottom: .5rem; border-bottom: .5px solid var(--ts-hairline); }
+html[data-design="v2"] [data-page="stake"] .stake-lux-chip { background: rgba(251,191,36,.1) !important; color: var(--ts-amber) !important; border: .5px solid rgba(251,191,36,.35) !important; border-radius: 999px; }
+html[data-design="v2"] [data-page="stake"] .stake-progress > * { background: linear-gradient(90deg, var(--ts-amber-deep), #fde68a) !important; box-shadow: 0 0 12px rgba(251,191,36,.5); }
+html[data-design="v2"] [data-page="stake"] .stake-compact { --tier-glow: rgba(251,191,36,.16); }
+/* WALLET · titanium black card */
+html[data-design="v2"] .wallet-flip-inner > * {
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px), linear-gradient(135deg, #1d2430, #0a0d12 60%, #151a23) !important;
+  border: .5px solid rgba(251,191,36,.22) !important;
+  box-shadow: 0 30px 60px -30px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+html[data-design="v2"] .wallet-action {
+  background: rgba(26,32,44,.55) !important; backdrop-filter: blur(14px);
+  border: .5px solid var(--ts-hairline) !important; border-radius: 999px !important; color: var(--ts-platinum) !important;
+}
+html[data-design="v2"] .wallet-action--in { border-color: rgba(251,191,36,.45) !important; color: var(--ts-amber) !important; }
+html[data-design="v2"] .wallet-tile-icon { color: var(--ts-amber) !important; background: rgba(251,191,36,.08) !important; }
+html[data-design="v2"] .wallet-tile-title { font-family: "Urbanist", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+/* PROFIT · precision yield gauge */
+html[data-design="v2"] .profit-metric--total { border-color: rgba(251,191,36,.35) !important; }
+html[data-design="v2"] .profit-metric--total :is(strong, b, .text-2xl, .text-3xl) { color: var(--ts-amber) !important; text-shadow: 0 0 22px rgba(251,191,36,.35); }
+html[data-design="v2"] .profit-withdraw {
+  background: linear-gradient(100deg, var(--ts-amber-deep), #fde68a) !important; color: var(--ts-void) !important;
+  border: 0 !important; border-radius: 999px !important; font-family: "Urbanist", sans-serif; letter-spacing: .12em; text-transform: uppercase; font-weight: 800;
+  box-shadow: 0 12px 30px -12px rgba(251,191,36,.6) !important;
+}
+/* NETWORK · sovereign hierarchy */
+html[data-design="v2"] [data-page="network"] :is(.rounded-2xl, .rounded-3xl, .rounded-xl).border {
+  background: linear-gradient(160deg, rgba(26,32,44,.78), rgba(13,17,24,.92)) !important; border-radius: 20px !important;
+}
+html[data-design="v2"] [data-page="network"] img.rounded-full { box-shadow: 0 0 0 1.5px rgba(251,191,36,.55), 0 0 18px -4px rgba(251,191,36,.5); }
+html[data-design="v2"] [data-page="network"] [role="tab"][data-state="active"],
+html[data-design="v2"] [data-page="network"] button[aria-pressed="true"] { color: var(--ts-amber) !important; border-color: rgba(251,191,36,.45) !important; }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-design="v2"] :is(.stake-metric, .profit-metric, .wallet-tile) { transition: transform .25s, border-color .25s; }
+  html[data-design="v2"] :is(.stake-metric, .profit-metric, .wallet-tile):active { transform: scale(.985); border-color: rgba(251,191,36,.35) !important; }
+}
