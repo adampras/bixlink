@@ -2115,6 +2115,7 @@ export type Database = {
           paid_at: string | null
           pay_method: string
           pay_ref: string
+          proof_path: string | null
           ref_bix: number
           ref_usdt: number
           ref_user: string | null
@@ -2144,6 +2145,7 @@ export type Database = {
           paid_at?: string | null
           pay_method?: string
           pay_ref?: string
+          proof_path?: string | null
           ref_bix?: number
           ref_usdt?: number
           ref_user?: string | null
@@ -2173,6 +2175,7 @@ export type Database = {
           paid_at?: string | null
           pay_method?: string
           pay_ref?: string
+          proof_path?: string | null
           ref_bix?: number
           ref_usdt?: number
           ref_user?: string | null
@@ -4532,6 +4535,10 @@ export type Database = {
           p_schedule: string
         }
         Returns: string
+      }
+      bixcare_order_proof: {
+        Args: { p_id: string; p_path: string; p_ref: string }
+        Returns: Json
       }
       bixcare_order_set: {
         Args: { p_id: string; p_stage: string; p_status: string }

@@ -4,7 +4,7 @@ export const CARE_BUCKET = 'bixcare';
 export type Division = 'auto' | 'wash' | 'laundry' | 'rent';
 export type Outlet = { id: string; owner_id: string; name: string; division: Division; city: string; address: string; phone: string; description: string; logo_path: string | null; qris_path: string | null; open_time: string; close_time: string; is_open: boolean; status: string; review_note: string; bank_name: string; bank_account: string; bank_holder: string; accept_bix: boolean; accept_usdt: boolean };
 export type Service = { id: string; outlet_id: string; name: string; unit: string; price_idr: number; duration_min: number; available: boolean };
-export type CareOrder = { id: string; outlet_id: string; merchant_id: string; buyer_id: string; items: { id: string; name: string; price: number; qty: number; unit: string }[]; total_idr: number; pay_method: PayMethod; fare_bix: number; fare_usdt: number; merchant_bix: number; merchant_usdt: number; fee_usdt: number; held_at: string | null; paid_at: string | null; pay_ref: string; schedule_at: string | null; note: string; stage: string; status: string; fee_bix: number; created_at: string };
+export type CareOrder = { id: string; outlet_id: string; merchant_id: string; buyer_id: string; items: { id: string; name: string; price: number; qty: number; unit: string }[]; total_idr: number; pay_method: PayMethod; fare_bix: number; fare_usdt: number; merchant_bix: number; merchant_usdt: number; fee_usdt: number; held_at: string | null; paid_at: string | null; pay_ref: string; schedule_at: string | null; note: string; stage: string; status: string; fee_bix: number; created_at: string; completed_at?: string | null; proof_path?: string | null };
 
 export type PayMethod = 'bix' | 'usdt' | 'qris' | 'bank' | 'cash';
 export const PAY_LABEL: Record<PayMethod, string> = { bix: 'Saldo BIX', usdt: 'Saldo USDT', qris: 'QRIS mitra', bank: 'Transfer bank mitra', cash: 'Tunai di kasir' };
@@ -66,4 +66,58 @@ export async function signCare(paths: (string | null | undefined)[]): Promise<Re
   const out: Record<string, string> = {};
   data?.forEach(d => { if (d.path && d.signedUrl) out[d.path] = d.signedUrl; });
   return out;
+}
+
+/** Accept image or PDF proof of a direct QRIS/bank payment. */
+export async function uploadCareProof(uid: string, file: File): Promise<string> {
+  if (!file.type.startsWith('image/') && file.type !== 'application/pdf') throw new Error('Pilih gambar atau PDF');
+  if (file.size > 5 * 1024 * 1024) throw new Error('Maksimal 5 MB');
+  const path = `${uid}/proof-${crypto.randomUUID()}.${(file.name.split('.').pop() || 'jpg').toLowerCase()}`;
+  const { error } = await supabase.storage.from(CARE_BUCKET).upload(path, file, { contentType: file.type });
+  if (error) throw error;
+  return path;
+}
+
+/** Short human order code shown on receipts. */
+export const careCode = (id: string) => `BXC-${id.replace(/-/g, '').slice(0, 8).toUpperCase()}`;
+
+/** Display-only IDR conversions at the internal references (not a market quote). */
+export function rateLine(totalIdr: number): string {
+  const q = payQuote(totalIdr);
+  return `${rp(totalIdr)} ≈ $${q.usdt.toFixed(2)} ≈ ${q.usdt.toFixed(2)} USDT ≈ ${q.bix.toFixed(2)} BIX`;
+}
+
+/** Short two-tone chime for new merchant orders (Web Audio, no asset). */
+export function careChime() {
+  try {
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new Ctx();
+    [880, 1320, 1760].forEach((f, i) => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.frequency.value = f; o.type = 'sine';
+      const t = ctx.currentTime + i * 0.18;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.4);
+    });
+    navigator.vibrate?.([200, 100, 200]);
+    setTimeout(() => void ctx.close(), 1500);
+  } catch { /* audio unavailable */ }
+}
+
+const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+
+/** Opens a printable BIXLINK e-receipt (user can Save as PDF). */
+export function openCareReceipt(o: CareOrder, outlet?: Outlet) {
+  const w = window.open('', '_blank'); if (!w) return;
+  const rows = o.items.map(i => `<tr><td>${i.qty}× ${esc(i.name)}</td><td style="text-align:right">${rp(i.price * i.qty)}</td></tr>`).join('');
+  const paid = o.pay_method === 'bix' ? `${o.fare_bix} BIX` : o.pay_method === 'usdt' ? `${o.fare_usdt} USDT` : rp(o.total_idr);
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Struk ${careCode(o.id)}</title><style>body{font-family:system-ui,sans-serif;max-width:420px;margin:24px auto;padding:20px;color:#111}h1{margin:0;font-size:22px;letter-spacing:2px}.gold{color:#b8860b}table{width:100%;border-collapse:collapse;font-size:14px}td{padding:6px 0;border-bottom:1px solid #eee}.tot td{font-weight:800;font-size:16px;border:0}.m{color:#666;font-size:12px}button{margin-top:16px;width:100%;padding:12px;border:0;border-radius:10px;background:#111;color:#ffd700;font-weight:700}@media print{button{display:none}}</style></head><body>
+<h1>BIX<span class="gold">CARE</span></h1><p class="m">Struk digital resmi BIXLINK</p>
+<p><b>${esc(outlet?.name ?? 'Outlet')}</b><br><span class="m">${esc(outlet ? `${outlet.address}, ${outlet.city}` : '')}</span></p>
+<p class="m">No. order: <b>${careCode(o.id)}</b><br>Dipesan: ${new Date(o.created_at).toLocaleString('id-ID')}${o.completed_at ? `<br>Selesai: ${new Date(o.completed_at).toLocaleString('id-ID')}` : ''}<br>Status: ${esc(CARE_STATUS[o.status] ?? o.status)}</p>
+<table>${rows}<tr class="tot"><td>Total</td><td style="text-align:right">${rp(o.total_idr)}</td></tr></table>
+<p class="m">Metode: <b>${esc(PAY_LABEL[o.pay_method] ?? o.pay_method)}</b> · Dibayar: <b>${paid}</b>${o.pay_ref ? `<br>Ref: ${esc(o.pay_ref)}` : ''}</p>
+<p class="m">Konversi BIX/USDT memakai acuan internal BIXLINK, bukan harga pasar.</p>
+<button onclick="print()">Cetak / Simpan PDF</button></body></html>`);
+  w.document.close();
 }

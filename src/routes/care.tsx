@@ -1,7 +1,7 @@
 import { GlobalRegions } from '@/components/GlobalRegions';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Wrench, Droplets, Shirt, KeyRound, Store, ClipboardList, Search, Fuel, QrCode, Check, X, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, Wrench, Droplets, Shirt, KeyRound, Store, ClipboardList, Search, Fuel, QrCode, Check, X, Trash2, Phone, MessageCircle, Receipt, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
 import heroImg from '@/assets/bixcare-hero.jpg';
@@ -9,7 +9,16 @@ import autoImg from '@/assets/bixcare-auto.jpg';
 import washImg from '@/assets/bixcare-wash.jpg';
 import laundryImg from '@/assets/bixcare-laundry.jpg';
 import rentImg from '@/assets/bixcare-rent.jpg';
-import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet } from '@/lib/bixcare';
+import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet, uploadCareProof, openCareReceipt, careChime, rateLine, careCode } from '@/lib/bixcare';
+import { startBixCall } from '@/components/BixCall';
+
+function ContactBar({ peer, name, phone }: { peer: string; name: string; phone?: string | undefined }) {
+  return <div className="mt-2 flex flex-wrap gap-2">
+    <button className={btn} onClick={() => startBixCall(peer, name, 'voice')}><Phone className="mr-1 inline h-3.5 w-3.5" />BIX CALL</button>
+    <Link to="/call" search={{ chat: peer, n: name }} className={ghost}><MessageCircle className="mr-1 inline h-3.5 w-3.5" />Chat</Link>
+    {phone && <a href={`https://wa.me/${phone.replace(/\D/g, '').replace(/^0/, '62')}`} target="_blank" rel="noreferrer" className={ghost}>WhatsApp</a>}
+  </div>;
+}
 
 export const Route = createFileRoute('/care')({
   head: () => ecosystemHead('/care', 'BIXCARE — Bengkel, Cuci, Laundry & Rental | BIXLINK', 'Pesan servis bengkel, cuci kendaraan, laundry dan rental motor/mobil dari mitra BIXLINK. Bayar langsung ke QRIS mitra; biaya platform BIX Gas dari saldo mitra.'),
@@ -134,7 +143,7 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
       <button onClick={onBack} className={ghost}>← Semua outlet</button>
       <div className={card}><p className="text-xs text-primary">{divName(outlet.division)}</p><h2 className="text-xl font-black">{outlet.name}</h2><p className="text-xs text-muted-foreground">{outlet.address}, {outlet.city} · {outlet.open_time}–{outlet.close_time}</p>{outlet.description && <p className="mt-2 text-sm">{outlet.description}</p>}
         {!outlet.is_open && <p className="mt-2 text-xs font-bold text-destructive">Outlet sedang TUTUP — pemesanan dibuka saat mitra online.</p>}
-        {outlet.phone && <a href={`https://wa.me/${outlet.phone.replace(/\D/g, '').replace(/^0/, '62')}?text=${encodeURIComponent(`Halo ${outlet.name}, saya dari BIXCARE ingin bertanya.`)}`} target="_blank" rel="noreferrer" className={`${ghost} mt-2 inline-block`}>Chat WhatsApp mitra</a>}
+        {uid && uid !== outlet.owner_id && <ContactBar peer={outlet.owner_id} name={outlet.name} phone={outlet.phone} />}
       </div>
       <div className={card}>
         <p className="mb-2 text-sm font-bold">Daftar harga resmi</p>
@@ -155,6 +164,7 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
           <p className="text-xs font-bold">Metode pembayaran</p>
           <div className="grid grid-cols-2 gap-2">{methods.map(p => <button key={p} onClick={() => setPay(p)} className={`rounded-xl px-2 py-2 text-left text-xs font-bold ${pay === p ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{PAY_LABEL[p]}{p === 'bix' && <span className="block text-[10px] font-normal opacity-80">{quote.bix} BIX · saldo {wbal?.bix.toFixed(2) ?? '…'}</span>}{p === 'usdt' && <span className="block text-[10px] font-normal opacity-80">{quote.usdt} USDT · saldo {wbal?.usdt.toFixed(2) ?? '…'}</span>}</button>)}</div>
           <p className="text-[11px] text-muted-foreground">{isWalletPay(pay) ? 'Saldo ditahan otomatis saat pesan dan diteruskan ke mitra setelah order Selesai. Batal/ditolak = saldo kembali penuh.' : pay === 'cash' ? 'Bayar tunai langsung ke mitra.' : 'Setelah pesan, buka Pesanan Saya untuk melihat QRIS/rekening mitra, bayar, lalu tekan "Saya sudah bayar".'}</p>
+          {total > 0 && <p className="rounded-lg bg-muted/40 px-2 py-1 text-[11px] font-semibold">Kurs: {rateLine(total)} <span className="font-normal text-muted-foreground">(acuan internal)</span></p>}
           {short && <p className="text-xs text-destructive">Saldo tidak cukup untuk metode ini.</p>}
           <div className="flex items-center justify-between"><span className="text-lg font-black text-primary">{rp(total)}</span><button className={btn} disabled={busy || total <= 0 || short || !outlet.is_open} onClick={book}>Pesan sekarang</button></div>
           {msg && <p className="text-xs text-destructive">{msg}</p>}
@@ -183,6 +193,11 @@ function MyOrders({ uid }: { uid: string }) {
   const [outlets, setOutlets] = useState<Record<string, Outlet>>({});
   const [qris, setQris] = useState<Record<string, string>>({});
   const [refs, setRefs] = useState<Record<string, string>>({});
+  const [err, setErr] = useState('');
+  const proof = async (o: CareOrder, f?: File) => {
+    if (!f) return; setErr('');
+    try { const p = await uploadCareProof(uid, f); const { error } = await supabase.rpc('bixcare_order_proof', { p_id: o.id, p_path: p, p_ref: refs[o.id] ?? '' }); if (error) throw error; void load(); } catch (e) { setErr((e as Error).message); }
+  };
   const load = useCallback(async () => {
     const { data } = await supabase.from('bixcare_orders').select('*').eq('buyer_id', uid).order('created_at', { ascending: false }).limit(50);
     const list = (data ?? []) as unknown as CareOrder[]; setOrders(list);
@@ -199,6 +214,7 @@ function MyOrders({ uid }: { uid: string }) {
   return <>{orders.map(o => { const ot = outlets[o.outlet_id]; return (
     <div key={o.id} className={card}>
       <div className="flex justify-between"><p className="font-bold">{ot?.name ?? 'Outlet'}</p><span className="text-xs font-bold text-primary">{CARE_STATUS[o.status]}</span></div>
+      <p className="text-[10px] text-muted-foreground">{careCode(o.id)}</p>
       <p className="text-xs text-muted-foreground">{o.items.map(i => `${i.qty}× ${i.name}`).join(', ')}</p>
       <p className="text-sm font-bold">{rp(o.total_idr)} · {PAY_LABEL[o.pay_method]}{o.pay_method === 'bix' ? ` · ${o.fare_bix} BIX` : o.pay_method === 'usdt' ? ` · ${o.fare_usdt} USDT` : ''}</p>
       <PayBadge o={o} />
@@ -212,6 +228,13 @@ function MyOrders({ uid }: { uid: string }) {
       {(o.pay_method === 'bank' || o.pay_method === 'qris') && !o.paid_at && !['completed', 'cancelled', 'rejected'].includes(o.status) && (
         <div className="mt-2 flex gap-2"><input className={input} placeholder="No. referensi (opsional)" value={refs[o.id] ?? ''} onChange={e => setRefs({ ...refs, [o.id]: e.target.value })} /><button className={btn} onClick={() => void supabase.rpc('bixcare_order_paid', { p_id: o.id, p_ref: refs[o.id] ?? '' }).then(load)}>Saya sudah bayar</button></div>
       )}
+      {(o.pay_method === 'bank' || o.pay_method === 'qris') && !['completed', 'cancelled', 'rejected'].includes(o.status) && (
+        <label className={`${ghost} mt-2 inline-flex cursor-pointer items-center gap-1`}><Upload className="h-3.5 w-3.5" />{o.proof_path ? 'Ganti bukti transfer' : 'Unggah bukti transfer'}<input type="file" accept="image/*,application/pdf" className="hidden" onChange={e => void proof(o, e.target.files?.[0])} /></label>
+      )}
+      {o.proof_path && <p className="mt-1 text-[10px] font-bold text-primary">✓ Bukti transfer terkirim ke mitra</p>}
+      {err && <p className="text-xs text-destructive">{err}</p>}
+      {!['cancelled', 'rejected'].includes(o.status) && <ContactBar peer={o.merchant_id} name={ot?.name ?? 'Mitra'} phone={ot?.phone} />}
+      {o.status === 'completed' && <button className={`${btn} mt-2`} onClick={() => openCareReceipt(o, ot)}><Receipt className="mr-1 inline h-3.5 w-3.5" />Unduh / Cetak struk</button>}
       {careNext(o.status, 'buyer').includes('cancelled') && <button className={`${ghost} mt-2`} onClick={() => cancel(o.id)}>Batalkan</button>}
     </div>); })}</>;
 }
@@ -334,7 +357,15 @@ function ServiceManager({ outlet, uid }: { outlet: Outlet; uid: string }) {
 function IncomingOrders({ outlet, onChange }: { outlet: Outlet; onChange: () => void }) {
   const [orders, setOrders] = useState<CareOrder[]>([]);
   const [msg, setMsg] = useState('');
-  const load = useCallback(() => void supabase.from('bixcare_orders').select('*').eq('outlet_id', outlet.id).order('created_at', { ascending: false }).limit(50).then(({ data }) => setOrders((data ?? []) as unknown as CareOrder[])), [outlet.id]);
+  const [proofs, setProofs] = useState<Record<string, string>>({});
+  const seen = useRef<Set<string> | null>(null);
+  const load = useCallback(() => void supabase.from('bixcare_orders').select('*').eq('outlet_id', outlet.id).order('created_at', { ascending: false }).limit(50).then(async ({ data }) => {
+    const list = (data ?? []) as unknown as CareOrder[]; setOrders(list);
+    const pend = list.filter(o => o.status === 'pending').map(o => o.id);
+    if (seen.current && pend.some(id => !seen.current!.has(id))) careChime();
+    seen.current = new Set(pend);
+    setProofs(await signCare(list.map(o => o.proof_path)));
+  }), [outlet.id]);
   useEffect(() => { load(); const t = setInterval(load, 15000); return () => clearInterval(t); }, [load]);
   const act = async (o: CareOrder, status: string, stage = '') => {
     setMsg('');
@@ -356,11 +387,14 @@ function IncomingOrders({ outlet, onChange }: { outlet: Outlet; onChange: () => 
           <p className="text-xs text-muted-foreground">{rp(o.total_idr)} · {PAY_LABEL[o.pay_method]}{o.schedule_at ? ` · ${new Date(o.schedule_at).toLocaleString('id-ID')}` : ''} · {o.pay_method === 'bix' ? `Anda terima ${walletNet(o.fare_bix, outlet.division)} BIX` : o.pay_method === 'usdt' ? `Anda terima ${walletNet(o.fare_usdt, outlet.division)} USDT` : `gas ±${gasFeeBix(o.total_idr, outlet.division)} BIX`}</p>
           <PayBadge o={o} />
           {(o.pay_method === 'qris' || o.pay_method === 'bank') && <p className="text-[10px] text-muted-foreground">Cek mutasi QRIS/rekening Anda sebelum menyelesaikan order.</p>}
+          {o.proof_path && proofs[o.proof_path] && <a href={proofs[o.proof_path]} target="_blank" rel="noreferrer" className={`${ghost} mt-1 inline-block`}>Lihat bukti transfer</a>}
           {o.note && <p className="text-xs">“{o.note}”</p>}
+          <ContactBar peer={o.buyer_id} name="Konsumen BIXCARE" />
           {['accepted', 'in_progress', 'ready'].includes(o.status) && <div className="mt-2 flex flex-wrap gap-1">{STAGES[outlet.division].map(s => <button key={s} onClick={() => act(o, o.status, s)} className={`rounded-full px-2 py-1 text-[10px] ${o.stage === s ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{s}</button>)}</div>}
           <div className="mt-2 flex flex-wrap gap-2">{careNext(o.status, 'merchant').map(s => <button key={s} className={s === 'rejected' ? ghost : btn} onClick={() => act(o, s)}>{label[s]}</button>)}</div>
         </div>
       ))}
+      {done.slice(0, 5).map(o => <button key={o.id} className={`${ghost} mr-1 text-[10px]`} onClick={() => openCareReceipt(o, outlet)}><Receipt className="mr-1 inline h-3 w-3" />{careCode(o.id)}</button>)}
       <p className="text-[11px] text-muted-foreground">Selesai: {done.length} order · omzet {rp(done.reduce((s, o) => s + Number(o.total_idr), 0))} · diterima {done.reduce((s, o) => s + Number(o.merchant_bix), 0).toFixed(2)} BIX + {done.reduce((s, o) => s + Number(o.merchant_usdt), 0).toFixed(2)} USDT</p>
     </div>
   );
