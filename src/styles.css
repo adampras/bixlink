@@ -7367,3 +7367,19 @@ html[data-design="v2"] .duration-stake::after {
 }
 @keyframes v2-ingot { 0%,60% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 @media (prefers-reduced-motion: reduce) { html[data-design="v2"] .duration-stake::after { animation: none; } }
+
+/* Nov 8 — Total received: solid imperial gold (no transparent clip) + VIP settlement strip */
+html[data-design="v2"] .duration-package .lux-ledger .lux-ledger-total {
+  display:flex !important; justify-content:space-between; align-items:center; gap:12px;
+  margin:10px -6px 4px !important; padding:12px 14px !important; border-radius:14px !important;
+  background:linear-gradient(135deg, rgba(15,95,90,.28), rgba(5,8,10,.95) 70%) !important;
+  border:.5px solid rgba(255,215,0,.32) !important;
+  box-shadow:inset 0 1px 0 rgba(255,236,170,.22), 0 10px 26px -16px rgba(255,215,0,.45) !important;
+}
+html[data-design="v2"] .duration-package .lux-ledger .lux-ledger-total span { color:rgba(255,236,170,.8) !important; letter-spacing:.18em !important; }
+html[data-design="v2"] .duration-package .lux-ledger .lux-ledger-total b {
+  background:none !important; -webkit-background-clip:border-box !important; background-clip:border-box !important;
+  color:#FFD700 !important; -webkit-text-fill-color:#FFD700 !important; filter:none !important;
+  font-size:clamp(20px,6vw,24px) !important; font-weight:800 !important;
+  text-shadow:0 0 18px rgba(255,215,0,.4), 0 1px 0 rgba(0,0,0,.6) !important;
+}
