@@ -7279,3 +7279,40 @@ html[data-design="v2"] .wallet-action--in { border-color: rgba(94,234,212,.5) !i
 html[data-design="v2"] .wallet-tile-icon { color: var(--ts-toska-light) !important; background: rgba(94,234,212,.08) !important; }
 html[data-design="v2"] .profit-metric--total { border-color: rgba(233,196,106,.45) !important; }
 html[data-design="v2"] ::selection { background: rgba(94,234,212,.3); }
+
+/* ===== v2 polish: Imperial Obsidian Jade header + Satin Glass minimal cards ===== */
+html[data-design="v2"] [data-page="stake"] .stake-lux-head {
+  position: relative; overflow: hidden; padding: 1.1rem 1rem !important; border-radius: 18px !important;
+  background: radial-gradient(120% 140% at 50% 0%, rgba(94,234,212,.14), transparent 55%), linear-gradient(160deg, #081a16, #040a08 70%) !important;
+  border: 0 !important; border-bottom: 0 !important;
+  box-shadow: inset 0 1px 0 rgba(247,251,252,.35), inset 0 0 0 .5px rgba(94,234,212,.22), 0 18px 40px -26px rgba(94,234,212,.55) !important;
+}
+html[data-design="v2"] [data-page="stake"] .stake-lux-head::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(247,251,252,.10) 48%, transparent 62%); background-size: 250% 100%;
+  animation: v2-sheen 7s ease-in-out infinite;
+}
+@keyframes v2-sheen { 0%,100% { background-position: 120% 0; } 50% { background-position: -20% 0; } }
+@media (prefers-reduced-motion: reduce) { html[data-design="v2"] [data-page="stake"] .stake-lux-head::before { animation: none; } }
+html[data-design="v2"] [data-page="stake"] h1.stake-lux-title { position: relative; letter-spacing: .06em !important; background: linear-gradient(180deg, #ffffff, #dff7f3) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; filter: none !important; }
+html[data-design="v2"] [data-page="stake"] h1.stake-lux-title span { background: linear-gradient(180deg, #fff1b8, #e9c46a 55%, #b8891f) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; text-shadow: none !important; }
+
+/* Summary strip: one surface, hairline dividers, no inner boxes */
+html[data-design="v2"] [data-page="stake"] .hud-scan { background: rgba(11,20,22,.55) !important; border: .5px solid rgba(94,234,212,.14) !important; border-radius: 16px !important; box-shadow: none !important; }
+html[data-design="v2"] [data-page="stake"] .hud-scan .stake-metric { background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+html[data-design="v2"] [data-page="stake"] .hud-scan .stake-metric + .stake-metric { border-left: .5px solid rgba(94,234,212,.14) !important; }
+
+/* Package cards: single satin layer */
+html[data-design="v2"] [data-page="stake"] :is(.duration-package) { border: .5px solid rgba(94,234,212,.16) !important; box-shadow: 0 20px 40px -30px rgba(0,0,0,.8) !important; }
+html[data-design="v2"] [data-page="stake"] :is(.duration-package-body, .lux-ledger) { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+html[data-design="v2"] [data-page="stake"] .lux-ledger { border-top: .5px solid rgba(94,234,212,.12) !important; border-radius: 0 !important; }
+
+/* Profit: fix pill-shaped withdraw, calm cards */
+html[data-design="v2"] .profit-withdraw {
+  border-radius: 20px !important; background: linear-gradient(160deg, rgba(15,95,90,.22), rgba(5,8,10,.92)) !important;
+  border: .5px solid rgba(233,196,106,.28) !important; color: inherit !important; text-transform: none; letter-spacing: normal; font-weight: inherit;
+  box-shadow: inset 0 1px 0 rgba(247,251,252,.08) !important;
+}
+html[data-design="v2"] .profit-withdraw__amounts div { background: transparent !important; border: 0 !important; border-left: 2px solid rgba(94,234,212,.35) !important; border-radius: 0 !important; padding: 4px 12px !important; }
+html[data-design="v2"] .profit-withdraw__btn { border-radius: 14px !important; color: #0b0f0e !important; background: linear-gradient(180deg, #fff1b8, #e9c46a 55%, #b8891f) !important; border: 0 !important; }
+html[data-design="v2"] :is(.profit-metric, .profit-summary, .profit-position) { border-width: .5px !important; box-shadow: none !important; }
