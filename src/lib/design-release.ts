@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { HUB_ITEMS } from '@/lib/dock-hub';
 
 /** Server-decided design track + ecosystem locks (Owner 2 branch). Client only presents it. */
-export type DesignAccess = { next_gen: boolean; owner2: boolean; owner1?: boolean; chrono?: boolean; card?: string; locked: string[] };
+export type DesignAccess = { next_gen: boolean; owner2: boolean; owner1?: boolean; chrono?: boolean; card?: string | undefined; locked: string[] };
 
 export function useDesignAccess(userId: string | undefined) {
   return useQuery({
