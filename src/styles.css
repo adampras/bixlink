@@ -7383,3 +7383,49 @@ html[data-design="v2"] .duration-package .lux-ledger .lux-ledger-total b {
   font-size:clamp(20px,6vw,24px) !important; font-weight:800 !important;
   text-shadow:0 0 18px rgba(255,215,0,.4), 0 1px 0 rgba(0,0,0,.6) !important;
 }
+
+/* ===== v2 · Wallet Imperial: obsidian black card + gold foil + toska glass (Admin 1 network only) ===== */
+html[data-design="v2"] .site-shell .wallet-summary.wallet-face--front,
+html[data-design="v2"] .site-shell .wallet-summary.wallet-face--front[data-wallet-skin],
+html[data-design="v2"] .site-shell .wallet-summary.wallet-face--front[data-sov-color] {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(255,215,0,.16), transparent 50%),
+    radial-gradient(90% 80% at 0% 100%, rgba(94,234,212,.14), transparent 55%),
+    linear-gradient(155deg, #0b0e0d 0%, #050706 55%, #0a1714 100%) !important;
+  border: .5px solid rgba(255,215,0,.38) !important; border-radius: 24px !important;
+  box-shadow: inset 0 1px 0 rgba(255,241,184,.28), 0 0 0 .5px rgba(94,234,212,.15), 0 28px 50px -28px rgba(255,215,0,.35) !important;
+}
+html[data-design="v2"] .wallet-summary.wallet-face--front :is(span,div,svg,.text-muted-foreground) { color: rgba(223,247,243,.62) !important; }
+html[data-design="v2"] .wallet-summary.wallet-face--front strong.numeric {
+  color: #f7fbfc !important; -webkit-text-fill-color: #f7fbfc !important; background: none !important;
+  font-family: "Urbanist", sans-serif; font-size: clamp(28px, 8vw, 36px) !important; letter-spacing: .01em;
+  text-shadow: 0 0 22px rgba(255,255,255,.18) !important;
+}
+html[data-design="v2"] .wallet-summary.wallet-face--front .wallet-fx-grid > div {
+  background: rgba(255,215,0,.06) !important; border: .5px solid rgba(255,215,0,.3) !important;
+}
+html[data-design="v2"] .wallet-summary.wallet-face--front .wallet-fx-grid b { color: #FFD700 !important; }
+html[data-design="v2"] .wallet-summary.wallet-face--front .wallet-actions { border-top: .5px solid rgba(255,215,0,.18) !important; gap: 8px; }
+html[data-design="v2"] .wallet-summary.wallet-face--front .wallet-action {
+  background: rgba(255,255,255,.03) !important; border: .5px solid rgba(223,247,243,.16) !important; border-radius: 16px !important;
+}
+html[data-design="v2"] .wallet-summary.wallet-face--front .wallet-action b { color: #effffc !important; letter-spacing: .08em; }
+html[data-design="v2"] .wallet-summary.wallet-face--front .wallet-action:first-child {
+  background: linear-gradient(180deg, #fff1b8, #e9c46a 55%, #b8891f) !important; border: 0 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 10px 24px -14px rgba(255,215,0,.7) !important;
+}
+html[data-design="v2"] .wallet-summary.wallet-face--front .wallet-action:first-child :is(b,svg,span) { color: #0b0f0e !important; }
+html[data-design="v2"] .wallet-summary.wallet-face--front .wallet-action :is(span) { color: #5eead4 !important; }
+html[data-design="v2"] .wallet-summary.wallet-face--front::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; display: block !important;
+  background: linear-gradient(115deg, transparent 35%, rgba(255,241,184,.09) 50%, transparent 65%); background-size: 260% 100%;
+  animation: v2-sheen 8s ease-in-out infinite; mix-blend-mode: normal;
+}
+@media (prefers-reduced-motion: reduce) { html[data-design="v2"] .wallet-summary.wallet-face--front::after { animation: none; } }
+html[data-design="v2"] .wallet-tile { border-radius: 20px !important; border: .5px solid rgba(255,215,0,.22) !important; background: linear-gradient(160deg, #0a1714, #050706) !important; }
+html[data-design="v2"] .wallet-tile-icon { border-radius: 14px !important; border: .5px solid rgba(255,215,0,.45) !important; color: #FFD700 !important; background: rgba(255,215,0,.06) !important; }
+html[data-design="v2"] .wallet-tile-status.is-open { color: #5eead4 !important; }
+html[data-design="v2"] .vault-swap { border-radius: 22px !important; border: .5px solid rgba(94,234,212,.2) !important; background: linear-gradient(165deg, #030708, #0a1f1b) !important; }
+html[data-design="v2"] .vault-swap h2 { background: linear-gradient(180deg, #fff1b8, #e9c46a 55%, #b8891f) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important; }
+html[data-design="v2"] .vault-swap .swap-balrow { background: rgba(255,255,255,.02) !important; border: .5px solid rgba(223,247,243,.1) !important; border-radius: 16px !important; }
+html[data-design="v2"] .vault-swap .swap-balrow b.text-chart-3 { color: #FFD700 !important; }
