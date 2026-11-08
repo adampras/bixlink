@@ -7705,3 +7705,33 @@ html[data-chrono="on"] .wallet-face .chrono-mini > .chrono-mini__dial { width: 2
 html[data-chrono="on"] .wallet-face .chrono-mini > .chrono-mini__txt { display: flex !important; flex-direction: column; white-space: nowrap; }
 html[data-chrono="on"] [data-page="wallet"] .wallet-face--front { padding-top: 46px !important; }
 html[data-chrono="on"] [data-page="wallet"] .wallet-actions--card .wallet-action > span { background: rgba(255,255,255,.06) !important; }
+
+/* ===== RM 50-04 large inspection watch + header badges (chrono on only) ===== */
+.chrono-tap { background: none; border: 0; padding: 0; color: inherit; cursor: pointer; text-align: left; font: inherit; }
+html[data-chrono="on"] .chrono-dial-tap { display: block; width: 100%; }
+html[data-chrono="on"] .chrono-tap.rm-badge { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 4px 12px 4px 4px; border-radius: 999px; background: linear-gradient(180deg,#121317,#060607); box-shadow: inset 0 0 0 1px rgba(241,245,249,.18), 0 0 0 1px #0b0b0d; }
+.rm-badge span { display: flex; flex-direction: column; line-height: 1.1; }
+.rm-badge b { font-size: 9px; letter-spacing: .2em; color: #f8fafc; }
+.rm-badge small { font-size: 11px; color: #facc15; }
+.rmw-backdrop { position: fixed; inset: 0; max-height: none !important; overflow: hidden; z-index: 9999; display: grid; place-items: center; padding: 16px; background: radial-gradient(circle at 50% 35%, rgba(200,16,46,.18), rgba(0,0,0,.94) 60%); backdrop-filter: blur(8px); animation: rmw-in .35s ease-out; }
+.rmw-stage { position: relative; width: min(380px, 100%); max-height: 96dvh; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.rmw-svg { width: min(320px, 82vw); height: auto; filter: drop-shadow(0 30px 40px rgba(0,0,0,.8)) drop-shadow(0 0 30px rgba(200,16,46,.25)); animation: rmw-rise .5s cubic-bezier(.2,1.3,.4,1); }
+.rmw-svg line { transition: none; }
+.rmw-btn { cursor: pointer; }
+.rmw-brand { font: 800 11px/1 Urbanist, system-ui, sans-serif; letter-spacing: .25em; fill: #f8fafc; }
+.rmw-sub { font: 700 6px/1 Epilogue, system-ui, sans-serif; letter-spacing: .2em; fill: #facc15; }
+.rmw-tiny { font: 700 6px/1 Epilogue, system-ui, sans-serif; fill: #9ca3af; }
+.rmw-close { position: absolute; top: 0; right: 0; z-index: 1; width: 36px; height: 36px; border-radius: 50%; background: #111; color: #f8fafc; border: 1px solid #c8102e; }
+.rmw-readout { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; width: 100%; }
+.rmw-readout div { padding: 8px; border-radius: 12px; background: #0b0b0d; box-shadow: inset 0 0 0 1px rgba(241,245,249,.14), inset 0 2px 0 #c8102e; min-width: 0; }
+.rmw-readout small { display: block; font-size: 8px; letter-spacing: .14em; color: #9ca3af; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rmw-readout b { font-size: 14px; color: #f8fafc; }
+.rmw-actions { display: flex; gap: 8px; width: 100%; }
+.rmw-actions button { flex: 1; height: 42px; border-radius: 12px; font-weight: 800; letter-spacing: .14em; color: #fff; background: #111; box-shadow: inset 0 -3px 0 rgba(0,0,0,.4); }
+.rmw-actions .is-red { background: linear-gradient(180deg,#e11d48,#9f1239); }
+.rmw-actions .is-yellow { background: linear-gradient(180deg,#facc15,#a16207); color: #0b0b0d; }
+.rmw-actions .is-green { background: linear-gradient(180deg,#10b981,#047857); }
+.rmw-actions button:disabled { opacity: .45; }
+@keyframes rmw-in { from { opacity: 0; } }
+@keyframes rmw-rise { from { opacity: 0; transform: scale(.8) translateY(20px); } }
+@media (prefers-reduced-motion: reduce) { .rmw-backdrop, .rmw-svg { animation: none; } }

@@ -174,3 +174,4 @@
 - [x] Add reasoned rider/driver/operator cancellation before start with no fee, driver photo/ID, assigned-driver GPS and supported-browser floating map. Nine tests passed; authenticated zero-fare pending cancellation saved/read back on phone; no payout created.
 - [ ] Verify assigned-trip hold release with two authorized accounts, physical driver GPS/photo and floating map on supported devices — waits on an authorized active trip and physical device support; no arbitrary driver account selected.
 - [x] Prepare ecosystem-first search metadata, public ecosystem overview, safe sitemap and AI reading guide; public phone/desktop rendering and navigation verified, two crawler-scope tests passed; live changes require publishing and subsequent crawler indexing.
+- [x] RM 50-04 large watch modal (local + Jakarta time) and header badges

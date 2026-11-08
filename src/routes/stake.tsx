@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { ChronoBadge } from '@/components/ChronoWatch';
 import { StakePackageLayouts } from '@/components/StakePackageLayouts';
 import { InstitutionalStakeHeader } from '@/components/InstitutionalStake';
 import { BixShell } from '@/components/BixShell';
@@ -60,6 +61,7 @@ function StakePage() {
   return <BixShell><main className="stake-compact mx-auto max-w-7xl px-5 py-3 md:px-8 md:py-10">
     <MemberGate ready={ready} signedIn={!!user} title="STAKE">
       <div className="stake-lux-head auric-card text-center">
+        <ChronoBadge tone="#facc15" label="TORQUE"/>
         <h1 className="section-title stake-lux-title w-full text-center !text-2xl !tracking-wide sm:!text-5xl">STAKING PACKAGE <span>CRYPTO</span></h1>
         
       </div>

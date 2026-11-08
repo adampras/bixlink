@@ -1,3 +1,4 @@
+import { ChronoBadge } from '@/components/ChronoWatch';
 import { CallButtons } from '@/components/BixCall';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -64,6 +65,7 @@ function NetworkPage() {
  <MemberGate ready={ready} signedIn={!!user} title="NETWORK">
  {error && <p role="alert" className="mt-4 text-destructive">Network records could not load. Please refresh.</p>}
  <section aria-label="Main account" className="nx-root-compact !mt-0">
+  <ChronoBadge tone="#10b981" label="NETWORK"/>
   <div className="nx-root-row"><div className="nx-avatar-halo"><img src={gender==='f' ? avatarF : avatarM} alt="" width={56} height={56}/></div>
    <div className="min-w-0 flex-1"><span className="eyebrow">MAIN ACCOUNT</span><h2 className="truncate font-display text-lg font-bold">{data?.referral?.code ?? user?.id.slice(0,8).toUpperCase()}</h2><p className="text-[11px] text-muted-foreground"><Users size={11} className="inline"/> {directNodes.length} direct · <GitBranch size={11} className="inline"/> {deepest} gen</p></div>
    <div className="nx-gender" role="group" aria-label="Avatar">{(['m','f'] as const).map(g => <button key={g} type="button" aria-pressed={gender===g} onClick={() => pickGender(g)}>{g==='m' ? 'Pria' : 'Wanita'}</button>)}</div></div>

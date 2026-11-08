@@ -1,4 +1,5 @@
 import { Web3Connect } from '@/components/Web3Connect';
+import { ChronoTap } from '@/components/ChronoWatch';
 import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { VaultStage } from '@/components/TechSuite';
 import { PoweredBy } from '@/components/PoweredBy';
@@ -31,10 +32,10 @@ function WalletHeartbeat() {
   useEffect(() => { const u = () => { if (!document.hidden) setT(Date.now()); }; u(); const id = window.setInterval(u, 1000); return () => window.clearInterval(id); }, []);
   const sec = t === null ? 0 : (t / 1000) % 60;
   const block = t === null ? 0 : Math.floor(t / 3000) % 100000;
-  return <div className="chrono-only chrono-mini" aria-hidden>
+  return <ChronoTap className="chrono-only chrono-mini">
     <span className="chrono-mini__dial"><i style={{ transform: `rotate(${sec * 6}deg)` }}/><em/></span>
     <span className="chrono-mini__txt"><b>BLOCK</b><small className="numeric">#{String(block).padStart(5, '0')}</small></span>
-  </div>;
+  </ChronoTap>;
 }
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {

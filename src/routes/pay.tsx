@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
+import { ChronoBadge } from '@/components/ChronoWatch';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
@@ -68,7 +69,7 @@ function PayPage() {
 
   return <BixShell><main className="mx-auto max-w-3xl px-5 pt-3 pb-10 md:px-8 md:pt-6">
     <MemberGate ready={ready} signedIn={!!user} title="BIX PAY">
-      {(() => { const [whole, frac] = number(Number(data?.bixBalance ?? 0), { maximumFractionDigits: 8 }).split('.'); return <div className="hubx-hero pay-hero"><div className="pay-hero__top"><Link to="/wallet" aria-label="Back to Wallet" className="pay-hero__back"><ArrowLeft size={15}/></Link><b className="pay-hero__title font-display">BIX <span>PAY</span></b>{!enabled ? <span className="pay-hero__soon"><Lock size={11}/> Soon</span> : <span className="pay-hero__tag"><ScanLine size={11}/> UTILITY</span>}</div><span className="hubx-hero__label">BIX BALANCE</span><div className="hubx-hero__num numeric"><b>{whole}</b>{frac && <small>.{frac}</small>}<em>BIX</em></div><button type="button" className="hubx-chip numeric" onClick={() => { if (data?.code) { navigator.clipboard.writeText(data.code); setMsg('Member code copied.'); } }}>{data?.code ?? '—'}<Copy size={11}/></button></div>; })()}
+      {(() => { const [whole, frac] = number(Number(data?.bixBalance ?? 0), { maximumFractionDigits: 8 }).split('.'); return <div className="hubx-hero pay-hero"><div className="pay-hero__top"><Link to="/wallet" aria-label="Back to Wallet" className="pay-hero__back"><ArrowLeft size={15}/></Link><b className="pay-hero__title font-display">BIX <span>PAY</span></b>{!enabled ? <span className="pay-hero__soon"><Lock size={11}/> Soon</span> : <span className="pay-hero__tag"><ScanLine size={11}/> UTILITY</span>}</div><ChronoBadge tone="#e11d48" label="SETTLEMENT"/><span className="hubx-hero__label">BIX BALANCE</span><div className="hubx-hero__num numeric"><b>{whole}</b>{frac && <small>.{frac}</small>}<em>BIX</em></div><button type="button" className="hubx-chip numeric" onClick={() => { if (data?.code) { navigator.clipboard.writeText(data.code); setMsg('Member code copied.'); } }}>{data?.code ?? '—'}<Copy size={11}/></button></div>; })()}
 
       <div className="hubx-tabs mt-4">{(['pay', 'receive'] as const).map(t => <button key={t} onClick={() => setTab(t)} className={tab === t ? 'is-on' : ''}>{t === 'pay' ? <><ArrowUpRight size={14}/> Pay</> : <><ArrowDownLeft size={14}/> Receive</>}</button>)}</div>
 
