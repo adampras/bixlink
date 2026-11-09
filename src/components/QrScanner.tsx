@@ -13,6 +13,7 @@ export function QrScanner({ onResult, onClose, title = 'Scan BIX PAY QR', hint =
       if (stopped) return;
       const s = new Html5Qrcode('bix-scanner'); ref.current = s;
       s.start({ facingMode: 'environment' }, { fps: 12, qrbox: (w: number, h: number) => { const m = Math.floor(Math.min(w, h) * 0.7); return { width: m, height: m }; } }, text => { safeStop(s); ref.current = null; navigator.vibrate?.(30); onResult(text); }, () => {})
+        .then(() => { if (stopped) safeStop(s); })
         .catch(() => setErr('Camera unavailable. Choose a QR image from your gallery or enter the code manually.'));
     });
     return () => { stopped = true; safeStop(ref.current); ref.current = null; };
