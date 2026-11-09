@@ -212,8 +212,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const applyVolume = () => {
     // Full volume in every mode (video calls run on the loudspeaker and need the most headroom).
     // Echo-safe levels: earpiece softer, loudspeaker below max so the phone's echo canceller can keep up; lower further on howl.
-    const base = loudRef.current ? 1 : 0.3;
-    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? 0.02 : base; });
+    const base = loudRef.current ? 1 : 0.6;
+    audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? base * 0.4 : base; });
   };
   const attachAudio = (t: RemoteTrack) => {
     const box = audioBox.current; if (!box) return;
@@ -256,11 +256,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       const me = r.localParticipant.audioLevel ?? 0;
       // Only very loud, sustained overlap (~1.5 s) counts as a loop, so normal two-way talk is never muted.
       // Loop detector: loud overlap for ~0.6 s = phones feeding each other; hold the duck ~2 s after it stops.
-      if (me > 0.08 && m > 0.08) both = Math.min(20, both + 1); else both = Math.max(0, both - 1);
-      if (both >= 3) quiet = 16; else if (quiet > 0) quiet--;
+      // Two-way talk must stay audible even with phones side by side: only a strong, sustained loop (~1.2 s) ducks, and only partially.
+      if (me > 0.2 && m > 0.2) both = Math.min(20, both + 1); else both = Math.max(0, both - 2);
+      if (both >= 8) quiet = 10; else if (quiet > 0) quiet--;
       const h = quiet > 0;
-      const base = loudRef.current ? 1 : 0.3;
-      const vol = h ? 0.02 : base;
+      const base = loudRef.current ? 1 : 0.6;
+      const vol = h ? base * 0.4 : base;
       if (h !== howlRef.current) { howlRef.current = h; setHowl(h); }
       if (micLowRef.current) { micLowRef.current = false; setMicLow(false); }
       setMyLevel(me);
