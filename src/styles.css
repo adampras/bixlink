@@ -8093,3 +8093,20 @@ html[data-chrono="on"] .care-live button:active { transform: scale(.97); }
 @keyframes hub-gate-pulse{50%{opacity:.35}}
 .hub-midnight .hub-group{background:linear-gradient(170deg,color-mix(in oklab,var(--tone) 9%,oklch(.14 .03 290 / .7)),oklch(.08 .02 280 / .55))!important;backdrop-filter:blur(6px)}
 @media (prefers-reduced-motion:reduce){.hub-midnight .hub-title,.hub-midnight .hub-gate i{animation:none!important}}
+
+/* HUB obsidian lux v4 (Nov 9): true black, unified 3D art, glass name pill, living tiles */
+.hub-midnight{--hub-violet:oklch(.68 .25 305);--hub-gold:oklch(.88 .18 95);background:radial-gradient(60% 28% at 0% 0%,color-mix(in oklab,var(--hub-violet) 28%,transparent),transparent 70%),radial-gradient(60% 28% at 100% 4%,color-mix(in oklab,var(--hub-gold) 18%,transparent),transparent 70%),radial-gradient(80% 30% at 50% 100%,color-mix(in oklab,var(--hub-violet) 10%,transparent),transparent 70%),linear-gradient(180deg,oklch(.1 .008 300),oklch(.05 .004 300))!important}
+.hub-midnight .hub-group{background:linear-gradient(170deg,color-mix(in oklab,var(--tone) 8%,oklch(.11 .006 300 / .85)),oklch(.06 .004 300 / .7))!important}
+.hub-midnight .hub-group .hub-tile.hub-photo{aspect-ratio:1/1.12;background:oklch(.04 0 0)!important;border-color:color-mix(in oklab,var(--tone) 60%,transparent)!important;box-shadow:0 10px 22px -12px var(--tone),inset 0 1px 0 color-mix(in oklab,var(--foreground) 18%,transparent)!important;transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
+.hub-midnight .hub-photo>img{inset:0 0 auto;height:100%;object-position:center 30%;animation:hub-float 6s ease-in-out infinite}
+.hub-midnight .hub-swipe>*:nth-child(2n) .hub-photo>img,.hub-midnight .grid>*:nth-child(2n)>img{animation-delay:-3s}
+@keyframes hub-float{50%{transform:translateY(-3px) scale(1.03)}}
+.hub-midnight .hub-photo::before{background:linear-gradient(to top,oklch(.04 0 0 / .85) 0%,transparent 45%)!important}
+.hub-midnight .hub-photo::after{content:""!important;display:block!important;position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,transparent 35%,color-mix(in oklab,var(--foreground) 16%,transparent) 50%,transparent 65%);transform:translateX(-130%);animation:hub-sheen 8s ease-in-out infinite;height:auto!important}
+.hub-midnight .hub-photo .hub-photo-text{margin:0 .25rem .25rem;width:calc(100% - .5rem);padding:.3rem .2rem .32rem;border-radius:.65rem;background:oklch(.06 .004 300 / .78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid color-mix(in oklab,var(--tone) 40%,transparent);text-shadow:none}
+.hub-midnight .hub-photo-name{font-size:12.5px;font-weight:900;letter-spacing:.04em;color:oklch(.99 0 0);text-shadow:0 1px 2px oklch(0 0 0)}
+.hub-midnight .hub-photo-note{font-size:9.5px;font-weight:700;color:var(--hub-gold)}
+.hub-midnight .hub-group .hub-tile.hub-photo:active{transform:scale(.95);box-shadow:0 0 0 1px var(--tone),0 0 24px -4px var(--tone)!important}
+.hub-midnight .hub-group .hub-tile.hub-photo:active>img{transform:scale(1.08)}
+.hub-midnight .hub-badge{backdrop-filter:blur(4px);box-shadow:0 0 10px -2px var(--tone),inset 0 1px 0 oklch(1 0 0 / .4)}
+@media (prefers-reduced-motion:reduce){.hub-midnight .hub-photo>img,.hub-midnight .hub-photo::after{animation:none!important}}
