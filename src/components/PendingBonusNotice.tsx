@@ -3,7 +3,7 @@ import { Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 /** Bonuses held until the member's own first approved deposit (released automatically by the server). */
-export function PendingBonusNotice({ userId }: { userId?: string }) {
+export function PendingBonusNotice({ userId }: { userId?: string | undefined }) {
   const { data } = useQuery({
     queryKey: ['pending-network-bonuses', userId],
     enabled: !!userId,
