@@ -8126,3 +8126,13 @@ html[data-chrono="on"] .care-live button:active { transform: scale(.97); }
 @media (min-width:768px){.bixcall-page>main{max-width:48rem!important}}
 .comm-room.is-full{padding-left:0;padding-right:0}.comm-room.is-full .comm-msgs{padding-inline:8px}.comm-room.is-full .comm-room-head{border-radius:0}
 @media (min-width:640px){.comm-room.is-full{left:0;width:auto;margin-left:0}}
+/* BIX CALL group header: labeled actions + visible group photo */
+.bx-grp-room.is-full>header>.bx-grp-actions{display:flex;gap:6px;flex:none;width:auto;height:auto;border:0}
+.bx-grp-room header .bx-grp-act{width:auto;height:auto;min-width:46px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 7px;border-radius:12px;border:1px solid color-mix(in oklab,var(--tk) 45%,transparent);background:color-mix(in oklab,var(--tk) 12%,transparent);color:var(--tk)}
+.bx-grp-act span{font-size:9.5px;font-weight:700;line-height:1;color:var(--foreground)}
+.bx-grp-room header .bx-grp-act.is-live{background:#e11d48;border-color:#e11d48;color:#fff;animation:bxGrpPulse 1.8s infinite}
+.bx-grp-act.is-live span{color:#fff}
+.bx-grp-av{border:1.5px solid color-mix(in oklab,var(--tk) 60%,transparent)}
+.bx-grp-av b{font-weight:800;color:var(--tk)}
+.bx-grp-info{display:grid;justify-items:center;gap:6px;padding:4px 0 12px;text-align:center}
+.bx-grp-info b{font-size:16px;color:var(--group-ink)}.bx-grp-info small{font-size:11px;color:var(--group-muted)}

@@ -18,7 +18,7 @@ const newCode = (n = 6) => Array.from(crypto.getRandomValues(new Uint8Array(n)),
 
 function GroupAvatar({ g, size = 44 }: { g: Group; size?: number }) {
   const url = useSignedUrl('bix-avatars', g.avatar_path);
-  return <span className="bx-grp-av" style={{ width: size, height: size }}>{url ? <img src={url} alt="" /> : <Users size={size * 0.42} />}</span>;
+  return <span className="bx-grp-av" style={{ width: size, height: size }}>{url ? <img src={url} alt={`Foto grup ${g.name}`} /> : <b style={{ fontSize: size * 0.4 }}>{(g.name.trim()[0] || 'G').toUpperCase()}</b>}</span>;
 }
 
 /** GROUP tab: education groups with group chat + a host-started Live Class (voice/video room). */
@@ -82,7 +82,7 @@ function GroupSheet({ title, description, onClose, children }: { title: string; 
   </DialogPrimitive.Root>;
 }
 
-function MembersSheet({ g, me, roster, onClose, onAdd, onReload }: { g: Group; me: string; roster: Mem[]; onClose: () => void; onAdd: () => void; onReload: () => void }) {
+function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g: Group; me: string; roster: Mem[]; onClose: () => void; onAdd: () => void; onReload: () => void; onPhoto: () => void }) {
   const host = g.owner_id === me; const [err, setErr] = useState('');
   const remove = async (m: Mem) => {
     if (!confirm(`Keluarkan @${m.name} dari grup?`)) return;
@@ -90,6 +90,8 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload }: { g: Group; m
     if (error) setErr(error.message); else onReload();
   };
   return <GroupSheet title="Anggota grup" description={`${g.name} · ${roster.length} anggota`} onClose={onClose}>
+      <div className="bx-grp-info"><GroupAvatar g={g} size={76}/><b>{g.name}</b><small>Kode undangan {g.code}</small>
+        {host && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" onClick={onPhoto}><Camera size={14}/> {g.avatar_path ? 'Ganti foto grup' : 'Pasang foto grup'}</Button>}</div>
       {g.about && <p className="bx-grp-empty" style={{ textAlign: 'left' }}>{g.about}</p>}
       {err && <p className="bx-grp-msg">{err}</p>}
       {host && <Button variant="ghost" type="button" className="bx-grp-btn" style={{ width: '100%', marginBottom: 8 }} onClick={onAdd}><UserPlus size={14}/> Tambah anggota</Button>}
@@ -193,11 +195,13 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
         <input ref={file} type="file" accept="image/*" hidden onChange={e => { void setPhoto(e.target.files?.[0]); e.target.value = ''; }}/>
       </span>
       <Button variant="ghost" type="button" className="bx-grp-room-title" aria-label="Lihat anggota grup" onClick={() => setShowMem(true)}><b>{g.name}</b><small>{roster.length} anggota · Kode {g.code}</small></Button>
-      <Button variant="ghost" type="button" aria-label="Copy invite code" onClick={async () => { if (await copyText(g.code)) { setCopied(true); setTimeout(() => setCopied(false), 1600); } }}>{copied ? <Check size={16}/> : <Copy size={16}/>}</Button>
-      {g.live_code ? <Button variant="ghost" type="button" className="is-live" aria-label="Join Live Class" onClick={() => setLive(g.live_code)}><Radio size={16}/></Button>
-        : host && <Button variant="ghost" type="button" aria-label="Start Live Class" onClick={() => void startLive()}><Radio size={16}/></Button>}
-      {host ? <Button variant="ghost" type="button" aria-label="Tambah anggota" onClick={() => setAdding(true)}><UserPlus size={16}/></Button>
-        : <Button variant="ghost" type="button" aria-label="Keluar dari grup" onClick={() => void leave()}><LogOut size={16}/></Button>}
+      <nav className="bx-grp-actions" aria-label="Aksi grup">
+        <Button variant="ghost" type="button" className="bx-grp-act" onClick={async () => { if (await copyText(g.code)) { setCopied(true); setTimeout(() => setCopied(false), 1600); } }}>{copied ? <Check size={15}/> : <Copy size={15}/>}<span>{copied ? 'Tersalin' : 'Kode'}</span></Button>
+        {g.live_code ? <Button variant="ghost" type="button" className="bx-grp-act is-live" onClick={() => setLive(g.live_code)}><Radio size={15}/><span>Gabung</span></Button>
+          : host && <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => void startLive()}><Radio size={15}/><span>Live</span></Button>}
+        {host ? <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => setAdding(true)}><UserPlus size={15}/><span>Tambah</span></Button>
+          : <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => void leave()}><LogOut size={15}/><span>Keluar</span></Button>}
+      </nav>
     </header>
     {g.live_code && <Button variant="ghost" type="button" className="bx-grp-livebar is-on" onClick={() => setLive(g.live_code)}><Radio size={14}/> Live Class berlangsung · Gabung</Button>}
     {err && <p className="bx-grp-msg">{err}</p>}
@@ -213,7 +217,7 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
       <input className="form-input" placeholder="Write a lesson or message…" value={text} maxLength={2000} onChange={e => setText(e.target.value)}/>
       <Button variant="ghost" type="submit" aria-label="Send" disabled={!text.trim()}><Send size={18}/></Button>
     </form>
-    {showMem && <MembersSheet g={g} me={me} roster={roster} onClose={() => setShowMem(false)} onAdd={() => { setShowMem(false); setAdding(true); }} onReload={() => void loadRoster()}/>}
+    {showMem && <MembersSheet g={g} me={me} roster={roster} onClose={() => setShowMem(false)} onAdd={() => { setShowMem(false); setAdding(true); }} onReload={() => void loadRoster()} onPhoto={() => file.current?.click()}/>}
     {adding && <AddMembers g={g} inGroup={new Set(roster.map(m => m.id))} onClose={() => setAdding(false)}/>}
   </section>;
 }
