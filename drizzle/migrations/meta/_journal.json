@@ -1310,6 +1310,13 @@
       "when": 1794180205711,
       "tag": "0186_design_card_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 187,
+      "version": "7",
+      "when": 1794221636951,
+      "tag": "0187_hold_network_bonus_until_deposit",
+      "breakpoints": true
     }
   ]
 }

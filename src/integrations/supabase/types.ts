@@ -1213,6 +1213,57 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_pending_network_bonuses: {
+        Row: {
+          base_usd: number
+          bix_amount: number
+          bix_price_usd: number
+          bonus_date: string
+          created_at: string
+          id: string
+          kind: string
+          level: number
+          member_id: string
+          rate_pct: number
+          source_stake_id: string
+          total_usd: number
+          usdt_amount: number
+          user_id: string
+        }
+        Insert: {
+          base_usd: number
+          bix_amount: number
+          bix_price_usd: number
+          bonus_date: string
+          created_at?: string
+          id?: string
+          kind: string
+          level?: number
+          member_id: string
+          rate_pct: number
+          source_stake_id: string
+          total_usd: number
+          usdt_amount: number
+          user_id: string
+        }
+        Update: {
+          base_usd?: number
+          bix_amount?: number
+          bix_price_usd?: number
+          bonus_date?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          level?: number
+          member_id?: string
+          rate_pct?: number
+          source_stake_id?: string
+          total_usd?: number
+          usdt_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_presale_orders: {
         Row: {
           bix_amount: number
@@ -4097,6 +4148,7 @@ export type Database = {
       bix_bixgo_bix_delta: { Args: { p_user: string }; Returns: number }
       bix_bixgo_usdt_delta: { Args: { p_user: string }; Returns: number }
       bix_bixtrade_usdt_delta: { Args: { p_user: string }; Returns: number }
+      bix_bonus_qualified: { Args: { p_user: string }; Returns: boolean }
       bix_booster_withdraw_config: { Args: never; Returns: Json }
       bix_buyback_request: {
         Args: { p_amount: number; p_contact: string; p_method: string }
@@ -4509,6 +4561,7 @@ export type Database = {
           weekly_turnover_usd: number
         }[]
       }
+      bix_release_pending_bonuses: { Args: { p_user: string }; Returns: number }
       bix_requires_360: { Args: { p_user: string }; Returns: boolean }
       bix_resolve_member: { Args: { p_q: string }; Returns: string }
       bix_review_referral_bonus: {

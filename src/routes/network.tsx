@@ -1,3 +1,4 @@
+import { PendingBonusNotice } from '@/components/PendingBonusNotice';
 import { ChronoBadge } from '@/components/ChronoWatch';
 import { CallButtons } from '@/components/BixCall';
 import { createFileRoute, Link } from '@tanstack/react-router';
@@ -75,7 +76,7 @@ function NetworkPage() {
  </section>
  {user && <PlacementRegister open={regOpen} onOpenChange={setRegOpen} initial={regTarget || user.id} options={[{ id: user.id, label: `YOU · ${data?.referral?.code ?? ''} (L1)` }, ...tree.map(n => ({ id: n.user_id, label: `${n.member_code ?? ''} ${identity(n)} → member jadi L${n.depth+1}` }))]}/>}
  <div className="nx-tabs" role="tablist" aria-label="Network sections">{([['team','Team',Users],['bonus','Bonus',BadgeCheck],['history','History',GitBranch]] as const).map(([k,l,I]) => <button key={k} type="button" role="tab" aria-selected={tab===k} onClick={() => {setTab(k); if(k!=='history') setHistFrom(null);}}><I size={14}/>{l}{k==='history' && history.length>0 && <em>{history.length}</em>}</button>)}</div>
- {tab==='bonus' && <>
+ {tab==='bonus' && <><PendingBonusNotice userId={user?.id}/>
  <section aria-label="Leader bonus hub" className="rm-network-panel mt-6 rounded-2xl border border-chart-3/50 bg-card p-4 md:p-5">
   <div className="eyebrow">LEADER BONUS HUB</div><h2 className="mt-1 font-display text-lg font-bold">My network bonuses</h2>
   <label className="nx-search mt-3 !w-full"><Search size={18} className="shrink-0"/><input aria-label="Search network members" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search member ID or name"/>{search && <Button variant="ghost" size="sm" className="shrink-0" onClick={() => setSearch('')}>Clear</Button>}</label>
