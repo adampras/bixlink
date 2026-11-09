@@ -7802,3 +7802,53 @@ html[data-chrono="on"] .profit-position { border-radius: 12px !important; border
 html[data-chrono="on"] [data-page="network"] .nx-pills { gap: .4rem; }
 html[data-chrono="on"] [data-page="network"] :is(.rounded-2xl, .rounded-xl).border { border-width: .5px !important; }
 html[data-chrono="on"] [data-page="network"] li, html[data-chrono="on"] [data-page="network"] [role="listitem"] { padding-block: .55rem; }
+
+/* ===== RM polish batch: dock LED, avatar ring, HUB press, dialogs, BIX PAY ===== */
+html[data-chrono="on"] .glass-dock a[aria-current="page"],
+html[data-chrono="on"] .glass-dock a.active { position: relative; }
+html[data-chrono="on"] .glass-dock a[aria-current="page"]::after,
+html[data-chrono="on"] .glass-dock a.active::after {
+  content: ""; position: absolute; left: 50%; bottom: 4px; width: 4px; height: 4px; margin-left: -2px;
+  border-radius: 999px; background: currentColor; box-shadow: 0 0 6px 1px currentColor;
+}
+html[data-chrono="on"] header img.rounded-full,
+html[data-chrono="on"] header .avatar, html[data-chrono="on"] header [data-avatar] {
+  box-shadow: 0 0 0 1.5px #c8102e, 0 0 0 3px #f4f1ea;
+}
+html[data-chrono="on"] .hub-group + .hub-group {
+  border-top: 0.5px solid transparent;
+  border-image: linear-gradient(90deg, transparent, rgba(226,232,240,.35), transparent) 1;
+  padding-top: 12px;
+}
+html[data-chrono="on"] .hub-tile { position: relative; overflow: hidden; transition: transform .16s ease; }
+html[data-chrono="on"] .hub-tile::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,.18) 50%, transparent 65%);
+  transform: translateX(-100%); transition: transform .45s ease, opacity .2s;
+}
+html[data-chrono="on"] .hub-tile:active { transform: scale(.98); }
+html[data-chrono="on"] .hub-tile:active::before { opacity: 1; transform: translateX(100%); }
+html[data-chrono="on"] [role="dialog"] {
+  background: linear-gradient(160deg, rgba(20,24,32,.96), rgba(8,10,14,.98)) !important;
+  border: 0.5px solid rgba(212,175,55,.35) !important; border-radius: 18px !important;
+  box-shadow: 0 24px 60px -20px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+html[data-chrono="on"] [role="dialog"] input[inputmode="decimal"],
+html[data-chrono="on"] [role="dialog"] input[type="number"],
+html[data-chrono="on"] [data-page="pay"] input[inputmode="decimal"],
+html[data-chrono="on"] [data-page="pay"] input[type="number"] {
+  font-variant-numeric: tabular-nums; font-size: 1.35rem; font-weight: 700; color: #fafafa;
+  background: rgba(148,163,184,.06) !important; border: 0.5px solid rgba(212,175,55,.4) !important; border-radius: 12px;
+}
+html[data-chrono="on"] [role="dialog"] code,
+html[data-chrono="on"] [role="dialog"] .font-mono {
+  background: rgba(212,175,55,.06); border: 0.5px solid rgba(212,175,55,.35); border-radius: 8px; padding: 2px 6px; color: #f4e4b0;
+}
+html[data-chrono="on"] [role="dialog"] [role="alert"],
+html[data-chrono="on"] [role="dialog"] .bg-amber-500\/10,
+html[data-chrono="on"] [role="dialog"] .bg-yellow-500\/10 {
+  background: rgba(148,163,184,.06) !important; border: 0 !important; border-left: 2px solid #c8102e !important; border-radius: 6px !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-chrono="on"] .hub-tile, html[data-chrono="on"] .hub-tile::before { transition: none; }
+}
