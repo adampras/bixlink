@@ -16,7 +16,7 @@ const pillars = [
 export function TrustCenter({ bixPrice, serverNow }: { bixPrice: number; serverNow?: string | number | undefined }) {
   const { data: sentiment } = useQuery({ queryKey: ['trust-sentiment'], queryFn: () => getMarketSentiment(), staleTime: 3_600_000 });
   return (
-    <section className="border-y border-border bg-card/30">
+    <section className="trust-center border-y border-border bg-card/30">
       <div className="mx-auto max-w-7xl px-5 py-12 md:px-8">
         <div className="eyebrow"><ShieldCheck size={13}/> TRANSPARENCY &amp; SECURITY</div>
         <h2 className="section-title">PROTOCOL <span>TRUST CENTER</span></h2>

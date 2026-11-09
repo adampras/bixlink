@@ -7999,3 +7999,17 @@ html[data-chrono="on"] .auth-vault button[type="submit"], html[data-chrono="on"]
 html[data-chrono="on"] .auth-vault button[type="submit"]:active { transform: translateY(1px) scale(.99); }
 html[data-chrono="on"] .auth-vault .pw-rules span.is-ok { color: #10b981 !important; }
 html[data-chrono="on"] .auth-vault .pw-rules span.is-ok::before { background: #10b981 !important; border-color: #10b981 !important; }
+
+/* ===== Chronograph RM · Trust Center + Protocol Status (html[data-chrono=on]) ===== */
+html[data-chrono="on"] :is(.trust-center,.protocol-status) { background: radial-gradient(circle at 85% 0%, rgba(200,16,46,.12), transparent 45%), #07080a !important; border-color: rgba(241,241,238,.12) !important; }
+html[data-chrono="on"] :is(.trust-center,.protocol-status) .section-title span { color: #facc15 !important; -webkit-text-fill-color: #facc15 !important; background: none !important; }
+html[data-chrono="on"] :is(.trust-center,.protocol-status) .eyebrow { color: #ef4444 !important; letter-spacing: .22em; }
+html[data-chrono="on"] .trust-center :is(article, .rounded-2xl), html[data-chrono="on"] .protocol-status .rounded-xl { border: 0 !important; border-radius: 16px !important; background: radial-gradient(circle at 50% 0%, #1a1d24, #08090c 75%) !important; box-shadow: inset 0 0 0 1px rgba(241,241,238,.22), inset 0 2px 0 #c8102e, 0 12px 26px -16px #000 !important; transition: transform .18s ease; }
+html[data-chrono="on"] .trust-center article:active, html[data-chrono="on"] .protocol-status .rounded-xl:active { transform: scale(.97); }
+html[data-chrono="on"] .trust-center article > span:first-child { border-radius: 50% !important; background: #0b0b0d !important; color: #facc15 !important; border: 0 !important; box-shadow: 0 0 0 1px #c8102e, 0 0 0 3px #f1f1ee, 0 0 0 4px #0b0b0d !important; }
+html[data-chrono="on"] .trust-center .text-chart-3 { color: #facc15 !important; }
+html[data-chrono="on"] :is(.trust-center,.protocol-status) .text-chart-2 { color: #10b981 !important; }
+html[data-chrono="on"] .protocol-status .bg-chart-2 { background: #10b981 !important; box-shadow: 0 0 8px #10b981; }
+html[data-chrono="on"] .trust-center .rounded-xl.border-primary\/30 { background: #0b0b0d !important; border: 1px solid #c8102e !important; box-shadow: inset 0 0 0 3px #07080a, inset 0 0 0 4px rgba(241,241,238,.35) !important; }
+html[data-chrono="on"] .trust-center a[href="/whitepaper"] { background: linear-gradient(180deg,#e11d48,#9f1239) !important; color: #fff !important; border: 0 !important; box-shadow: inset 0 -3px 0 rgba(0,0,0,.35) !important; }
+html[data-chrono="on"] .trust-center .text-primary { color: #facc15 !important; }

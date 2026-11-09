@@ -16,7 +16,7 @@ export function ProtocolStatus({ serverNow, marketCount, sentimentValue }: { ser
     { Icon: Activity, label: 'Statistics integrity', value: 'Clone accounts excluded', ok: true },
   ];
   return (
-    <section className="border-b border-border">
+    <section className="protocol-status border-b border-border">
       <div className="mx-auto max-w-7xl px-5 py-10 md:px-8">
         <div className="eyebrow"><Activity size={13} /> LIVE PROTOCOL TELEMETRY</div>
         <h2 className="section-title">SYSTEM <span>STATUS</span></h2>
