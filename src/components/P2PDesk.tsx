@@ -1,4 +1,5 @@
 import { P2PFleetDesk } from "@/components/P2PFleetDesk";
+import { P2PFiatDesk } from "@/components/P2PFiatDesk";
 import { DepthVisualizer } from '@/components/TechSuite';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -60,6 +61,7 @@ export function P2PDesk({ userId, refPrice }: { userId?: string | undefined; ref
 
   return <div className="p2p-desk grid gap-4">
     <P2PFleetDesk />
+    <P2PFiatDesk userId={userId} />
     <P2PStats pulse={pulse.data ?? null} asks={asks} bids={bids} refPrice={refPrice} />
     <div className="p2p-boxes">
       <button className="p2p-box is-buy" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowUpRight size={22} /><b>BUY BIX</b><small>Bayar USDT · escrow</small></button>

@@ -1136,6 +1136,110 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_p2p_fiat_ads: {
+        Row: {
+          amount_bix: number
+          created_at: string
+          id: string
+          methods: string[]
+          min_idr: number
+          price_idr: number
+          remaining_bix: number
+          seller_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_bix: number
+          created_at?: string
+          id?: string
+          methods?: string[]
+          min_idr?: number
+          price_idr: number
+          remaining_bix: number
+          seller_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_bix?: number
+          created_at?: string
+          id?: string
+          methods?: string[]
+          min_idr?: number
+          price_idr?: number
+          remaining_bix?: number
+          seller_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bix_p2p_fiat_orders: {
+        Row: {
+          ad_id: string
+          amount_bix: number
+          buyer_id: string
+          created_at: string
+          disputed_by: string | null
+          expires_at: string
+          id: string
+          method: string
+          note: string | null
+          paid_at: string | null
+          price_idr: number
+          proof_path: string | null
+          released_at: string | null
+          seller_id: string
+          status: string
+          total_idr: number
+        }
+        Insert: {
+          ad_id: string
+          amount_bix: number
+          buyer_id: string
+          created_at?: string
+          disputed_by?: string | null
+          expires_at?: string
+          id?: string
+          method: string
+          note?: string | null
+          paid_at?: string | null
+          price_idr: number
+          proof_path?: string | null
+          released_at?: string | null
+          seller_id: string
+          status?: string
+          total_idr: number
+        }
+        Update: {
+          ad_id?: string
+          amount_bix?: number
+          buyer_id?: string
+          created_at?: string
+          disputed_by?: string | null
+          expires_at?: string
+          id?: string
+          method?: string
+          note?: string | null
+          paid_at?: string | null
+          price_idr?: number
+          proof_path?: string | null
+          released_at?: string | null
+          seller_id?: string
+          status?: string
+          total_idr?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_p2p_fiat_orders_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "bix_p2p_fiat_ads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bix_p2p_fills: {
         Row: {
           amount_bix: number
@@ -1208,6 +1312,33 @@ export type Database = {
           remaining_bix?: number
           side?: string
           status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bix_p2p_pay_profiles: {
+        Row: {
+          bank_account: string
+          bank_holder: string
+          bank_name: string
+          qris_path: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bank_account?: string
+          bank_holder?: string
+          bank_name?: string
+          qris_path?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bank_account?: string
+          bank_holder?: string
+          bank_name?: string
+          qris_path?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1760,6 +1891,24 @@ export type Database = {
           note?: string | null
           paid_usd?: number
           ref_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bix_support_operators: {
+        Row: {
+          active: boolean
+          added_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          added_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          added_at?: string
           user_id?: string
         }
         Relationships: []
@@ -4479,10 +4628,39 @@ export type Database = {
       bix_owner_wallets_save_extra: { Args: { p_wallets: Json }; Returns: Json }
       bix_p2p_bix_delta: { Args: { p_user: string }; Returns: number }
       bix_p2p_cancel: { Args: { p_offer: string }; Returns: undefined }
+      bix_p2p_fiat_act: {
+        Args: { p_action: string; p_order: string; p_proof: string }
+        Returns: string
+      }
+      bix_p2p_fiat_close: { Args: { p_ad: string }; Returns: undefined }
+      bix_p2p_fiat_expire: { Args: never; Returns: undefined }
+      bix_p2p_fiat_payee: { Args: { p_order: string }; Returns: Json }
+      bix_p2p_fiat_post: {
+        Args: {
+          p_amount: number
+          p_methods: string[]
+          p_min: number
+          p_price: number
+        }
+        Returns: string
+      }
+      bix_p2p_fiat_take: {
+        Args: { p_ad: string; p_amount: number; p_method: string }
+        Returns: string
+      }
       bix_p2p_market_pulse: { Args: never; Returns: Json }
       bix_p2p_post: {
         Args: { p_amount: number; p_price: number; p_side: string }
         Returns: string
+      }
+      bix_p2p_set_pay: {
+        Args: {
+          p_bank_account: string
+          p_bank_holder: string
+          p_bank_name: string
+          p_qris_path: string
+        }
+        Returns: undefined
       }
       bix_p2p_take: {
         Args: { p_amount: number; p_offer: string }
@@ -4643,6 +4821,16 @@ export type Database = {
       bix_studio_save: { Args: { p: Json }; Returns: undefined }
       bix_studio_spend: { Args: { p_feature: string }; Returns: Json }
       bix_studio_status: { Args: never; Returns: Json }
+      bix_support_operator_set: {
+        Args: {
+          p_active: boolean
+          p_query: string
+          p_remove: boolean
+          p_user: string
+        }
+        Returns: undefined
+      }
+      bix_support_operators_list: { Args: never; Returns: Json }
       bix_surprise_admin: { Args: never; Returns: Json }
       bix_surprise_answer:
         | { Args: { p_answers: number[]; p_attempt: string }; Returns: Json }

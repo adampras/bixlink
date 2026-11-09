@@ -22,6 +22,7 @@ import { AppSplash } from "../components/AppSplash";
 import { InstallPrompt } from "../components/InstallPrompt";
 import { InteractionComfort } from '../components/InteractionComfort';
 import { FoxChat } from "../components/FoxChat";
+import { SupportFloat } from "../components/SupportFloat";
 import { PowerSaver } from "../components/PowerSaver";
 import { ContentGuard } from "../components/ContentGuard";
 import { I18nProvider } from "../lib/i18n";
@@ -164,6 +165,7 @@ function RootComponent() {
         <Outlet />
         <BixtokMiniHost />
         <FoxChat />
+        <SupportFloat />
         <SurpriseQuiz />
         <BixCallHost />
         <InteractionComfort />

@@ -11,18 +11,37 @@ async function readConfig(supabase: any): Promise<FleetConfig> {
   return { ...DEFAULT_FLEET, ...((data?.value ?? {}) as Partial<FleetConfig>) };
 }
 
-/** Member's BEP-20 USDT pay-to wallet: prefer shared (flex) wallets, fall back to any enabled BEP-20 wallet. */
-async function fleetWallet(context: { supabase: any; userId: string }) {
-  const all = (await memberWalletsFor(context)).filter(w => w.enabled && w.address && w.network === 'BEP20' && (!w.asset || w.asset === 'USDT'));
-  return all.find(w => walletFits(w, 'flex')) ?? all[0];
+type PayWallet = { code: string; address: string };
+const isBep20Usdt = (w: { enabled: boolean; address: string; network: string; asset?: string }) => w.enabled && !!w.address && w.network === 'BEP20' && (!w.asset || w.asset === 'USDT');
+
+/** All BEP-20 USDT wallets this member may pay: Owner 2–5 members use their owner's wallets; everyone else gets every Owner 1 wallet (no sticky collapse). */
+async function fleetWallets(context: { supabase: any; userId: string }): Promise<PayWallet[]> {
+  const { data: own } = await context.supabase.rpc('bix_my_deposit_wallets');
+  let list: any[] = Array.isArray(own) && own.length ? own : [];
+  if (!list.length) {
+    const { data: role } = await context.supabase.from('user_roles').select('role').eq('user_id', context.userId).eq('role', 'reviewer').maybeSingle();
+    if (role) list = await memberWalletsFor(context);
+    else { const { data: row } = await context.supabase.from('app_settings').select('value').eq('key', 'deposit_wallets').maybeSingle(); list = (row?.value as { wallets?: any[] } | null)?.wallets ?? []; }
+  }
+  const ok = list.filter(isBep20Usdt).filter(w => walletFits(w, 'flex'));
+  const seen = new Set<string>();
+  return ok.filter(w => { const k = String(w.address).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; }).map(w => ({ code: w.code, address: w.address }));
 }
 
-/** Public-to-members: active Official Desk merchants plus the member's assigned BEP-20 wallet. */
+/** Each merchant is bound to one wallet by its fleet number, spreading payments across every official wallet. */
+export function walletForMerchant(name: string, wallets: PayWallet[]): PayWallet | undefined {
+  if (!wallets.length) return undefined;
+  const n = Number(/#(\d+)/.exec(name)?.[1] ?? 1);
+  return wallets[(Math.max(1, n) - 1) % wallets.length];
+}
+
+/** Public-to-members: active Official Desk merchants, each with its own BEP-20 pay-to wallet. */
 export const getFleetDesk = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const cfg = await readConfig(context.supabase);
-  const w = await fleetWallet(context);
+  const ws = await fleetWallets(context);
   const { data: orders } = await context.supabase.from('bix_fleet_orders').select('id,merchant,price,usdt,bix,status,tx_hash,created_at,note').eq('user_id', context.userId).order('created_at', { ascending: false }).limit(10);
-  return { enabled: cfg.enabled, merchants: cfg.enabled ? fleetMerchants(cfg) : [], wallet: w ? { code: w.code, address: w.address } : null, orders: orders ?? [], minUsdt: cfg.minUsdt };
+  const merchants = cfg.enabled ? fleetMerchants(cfg).map(m => { const w = walletForMerchant(m.name, ws); return { ...m, wallet: w ?? null }; }) : [];
+  return { enabled: cfg.enabled, merchants, walletCount: ws.length, wallet: ws[0] ?? null, orders: orders ?? [], minUsdt: cfg.minUsdt };
 });
 
 async function creditOrder(admin: any, order: any, cfg: FleetConfig) {
@@ -52,7 +71,7 @@ export const submitFleetBuy = createServerFn({ method: 'POST' }).middleware([req
     if (!cfg.enabled) throw new Error('Official Desk is closed right now.');
     const m = fleetMerchants(cfg).find(x => x.name === data.merchant);
     if (!m) throw new Error('This merchant is no longer active. Pick another.');
-    const w = await fleetWallet(context);
+    const w = walletForMerchant(m.name, await fleetWallets(context));
     if (!w) throw new Error('No BEP-20 wallet is available.');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const hash = data.txHash.toLowerCase();

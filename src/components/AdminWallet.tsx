@@ -1,4 +1,5 @@
 import { AdminP2PFleet } from "@/components/AdminP2PFleet";
+import { AdminP2PFiat } from "@/components/AdminP2PFiat";
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -26,6 +27,7 @@ export function AdminWallet({ members, depositWallets, swapEnabled = false, onMe
     <section className="max-w-2xl rounded-[20px] border border-primary bg-card p-5"><div className="flex flex-wrap items-center justify-between gap-4"><div><h3 className="font-display text-lg font-black">BIX/USDT swap availability</h3><p className="mt-1 text-xs text-muted-foreground">Closed mode shows Coming soon and blocks requests in the backend.</p></div><label className="flex items-center gap-3 text-sm font-bold"><input type="checkbox" checked={isSwapOpen} onChange={async e=>{const next=e.target.checked;setIsSwapOpen(next);try{await save({data:{key:'swap',value:{enabled:next}}});await qc.invalidateQueries({queryKey:['bix-public-config']});onMessage(next?'Swap is now open.':'Swap is now closed.');}catch{setIsSwapOpen(!next);onMessage('Could not update swap availability.');}}}/>{isSwapOpen?'OPEN':'CLOSED'}</label></div></section>
     <AdminDepositWallets initial={depositWallets} onMessage={onMessage}/>
     <AdminP2PFleet />
+    <AdminP2PFiat />
     <DepositRecovery onMessage={(m) => { onMessage(m); void refresh(); }}/>
     <OwnerRevenueTable/>
     <div><div className="flex flex-wrap gap-2">{['pending','approved','rejected','all'].map(s => <Button key={s} size="sm" variant={filter===s?'default':'outline'} className="rounded-full capitalize" onClick={()=>setFilter(s)}>{s}</Button>)}</div>

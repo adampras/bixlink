@@ -4,7 +4,6 @@ import { useServerFn } from '@tanstack/react-start';
 import { toast } from 'sonner';
 import { BadgeCheck, CheckCircle2, ClipboardPaste, Clock, Copy, ShieldCheck, Wallet, X, XCircle } from 'lucide-react';
 import { getFleetDesk, submitFleetBuy, recheckMyFleetOrder } from '@/lib/p2p-fleet.functions';
-import type { FleetMerchant } from '@/lib/p2p-fleet';
 
 const TX_RE = /^0x[0-9a-fA-F]{64}$/;
 
@@ -13,7 +12,8 @@ export function P2PFleetDesk() {
   const qc = useQueryClient();
   const load = useServerFn(getFleetDesk); const submit = useServerFn(submitFleetBuy); const recheck = useServerFn(recheckMyFleetOrder);
   const q = useQuery({ queryKey: ['p2p-fleet'], queryFn: () => load(), refetchInterval: () => (document.hidden ? false : 60_000) });
-  const [pick, setPick] = useState<FleetMerchant | null>(null);
+  type DeskMerchant = { name: string; price: number; stockBix: number; fills: number; wallet: { code: string; address: string } | null };
+  const [pick, setPick] = useState<DeskMerchant | null>(null);
   const [usdt, setUsdt] = useState('100'); const [tx, setTx] = useState(''); const [busy, setBusy] = useState(false);
   const d = q.data;
   if (!d?.enabled) return null;
@@ -47,8 +47,8 @@ export function P2PFleetDesk() {
     </ol>
     {!d.wallet && <p role="alert" className="rounded-lg border border-destructive/40 p-2 text-xs text-destructive">Alamat pembayaran USDT BEP-20 belum tersedia untuk akun Anda. Hubungi admin.</p>}
     <div className="grid max-h-80 gap-2 overflow-y-auto">
-      {d.merchants.map(m => <button key={m.name} disabled={!d.wallet} onClick={() => { setPick(m); setTx(''); }} className="flex items-center justify-between rounded-xl border border-border bg-background/60 px-3 py-2 text-left transition hover:border-primary active:scale-[.98] disabled:opacity-50">
-        <span><b className="text-sm">{m.name}</b> <BadgeCheck size={13} className="inline text-chart-2" /><br /><small className="text-muted-foreground">{m.fills} transaksi · 99% selesai · stok {m.stockBix.toLocaleString()} BIX</small></span>
+      {d.merchants.map(m => <button key={m.name} disabled={!m.wallet} onClick={() => { setPick(m); setTx(''); }} className="flex items-center justify-between rounded-xl border border-border bg-background/60 px-3 py-2 text-left transition hover:border-primary active:scale-[.98] disabled:opacity-50">
+        <span><b className="text-sm">{m.name}</b> <BadgeCheck size={13} className="inline text-chart-2" /><br /><small className="text-muted-foreground">{m.fills} transaksi · 99% selesai · stok {m.stockBix.toLocaleString()} BIX{m.wallet && <> · wallet …{m.wallet.address.slice(-4)}</>}</small></span>
         <span className="text-right"><b className="text-primary">${m.price.toFixed(4)}</b><br /><span className="rounded bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">BELI</span></span>
       </button>)}
     </div>
@@ -65,7 +65,7 @@ export function P2PFleetDesk() {
     </div>}
     <p className="text-[10px] text-muted-foreground">Merchant Official Desk adalah akun likuiditas resmi BIXLINK. BIX adalah aset ledger internal; BIX hanya dikirim setelah transfer USDT terkonfirmasi di BNB Smart Chain. Satu TxID hanya bisa dipakai sekali.</p>
 
-    {pick && d.wallet && <div className="fixed inset-0 z-[80] grid place-items-end bg-background/90 p-3 sm:place-items-center" onClick={() => setPick(null)}>
+    {pick && pick.wallet && <div className="fixed inset-0 z-[80] grid place-items-end bg-background/90 p-3 sm:place-items-center" onClick={() => setPick(null)}>
       <div role="dialog" aria-modal="true" aria-label={`Beli dari ${pick.name}`} className="grid max-h-[92dvh] w-full max-w-md gap-3 overflow-y-auto rounded-2xl border border-primary/40 bg-card p-4" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between"><div><b>Beli BIX · {pick.name}</b><p className="text-[11px] text-muted-foreground">Harga ${pick.price.toFixed(4)} / BIX · minimal {d.minUsdt} USDT</p></div><button aria-label="Tutup" onClick={() => setPick(null)}><X size={18} /></button></div>
 
@@ -78,10 +78,11 @@ export function P2PFleetDesk() {
 
         <div className="grid gap-2 rounded-xl border border-primary/30 bg-background p-3 text-xs">
           <span className="flex items-center gap-1 font-semibold"><Wallet size={14} />2 · Kirim tepat <b className="text-primary">{amt || 0} USDT</b> ke alamat ini</span>
+          <small className="text-muted-foreground">Wallet resmi merchant ini · kode {pick.wallet.code} · {d.walletCount} wallet resmi aktif</small>
           <span className="w-fit rounded bg-chart-3/15 px-2 py-0.5 text-[10px] font-bold text-chart-3">JARINGAN: BNB SMART CHAIN (BEP-20) SAJA</span>
-          <code className="break-all rounded-lg bg-card p-2 text-sm select-text">{d.wallet.address}</code>
+          <code className="break-all rounded-lg bg-card p-2 text-sm select-text">{pick.wallet.address}</code>
           <div className="flex gap-2">
-            <button className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-border py-2 font-semibold active:scale-95" onClick={() => copy(d.wallet!.address, 'Alamat')}><Copy size={14} />Salin alamat</button>
+            <button className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-border py-2 font-semibold active:scale-95" onClick={() => copy(pick.wallet!.address, 'Alamat')}><Copy size={14} />Salin alamat</button>
             <button className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-border py-2 font-semibold active:scale-95" onClick={() => copy(String(amt), 'Jumlah')}><Copy size={14} />Salin jumlah</button>
           </div>
           <small className="text-muted-foreground">Kirim dari TokenPocket, Trust Wallet, MetaMask atau exchange. Jaringan lain (TRC-20/ERC-20) akan hilang.</small>

@@ -1324,6 +1324,13 @@
       "when": 1794223782883,
       "tag": "0188_bix_group_roster",
       "breakpoints": true
+    },
+    {
+      "idx": 189,
+      "version": "7",
+      "when": 1794231942152,
+      "tag": "0189_p2p_fiat_escrow_and_support_operators",
+      "breakpoints": true
     }
   ]
 }
