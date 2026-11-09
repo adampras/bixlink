@@ -7987,3 +7987,15 @@ html[data-chrono="on"] .site-header .nav-link { border-radius: 9px; border: .5px
 html[data-chrono="on"] .site-header .nav-link:hover { border-color: rgba(241,245,249,.22); background: linear-gradient(180deg,#1c1e24,#0a0b0d); }
 html[data-chrono="on"] .site-header .nav-link.active { color: #facc15 !important; background: linear-gradient(180deg,#1c1e24,#0a0b0d) !important; border-color: rgba(241,245,249,.25); box-shadow: inset 0 -2px 0 #c8102e; }
 @media (prefers-reduced-motion: reduce) { html[data-chrono="on"] nav.glass-dock > a { transition: none; } }
+
+/* ===== RM 50 · Sign in / Register (Owner 1 tree, html[data-chrono=on]) ===== */
+html[data-chrono="on"] .auth-vault { background: radial-gradient(circle at 85% 0%, rgba(200,16,46,.16), transparent 50%), linear-gradient(180deg,#0e1217,#06080b) !important; border: 1px solid rgba(241,241,238,.22) !important; box-shadow: inset 0 0 0 4px #0b0b0d, inset 0 0 0 5px rgba(200,16,46,.55), 0 24px 60px -24px #000 !important; border-radius: 28px !important; }
+html[data-chrono="on"] .auth-vault::before { background: linear-gradient(90deg, transparent, #c8102e, #f1f1ee, #facc15, transparent) !important; }
+html[data-chrono="on"] .auth-vault .auth-tabs { background: #08080a !important; border: 1px solid rgba(241,241,238,.18) !important; }
+html[data-chrono="on"] .auth-vault .auth-tabs [data-active="true"] { background: linear-gradient(180deg,#f1f1ee,#cfcfca) !important; color: #0b0b0d !important; box-shadow: inset 0 -2px 0 #c8102e !important; }
+html[data-chrono="on"] .auth-vault .form-input { background: #0b0d10 !important; border: 1px solid rgba(241,241,238,.16) !important; color: #f1f5f9 !important; font-variant-numeric: tabular-nums; }
+html[data-chrono="on"] .auth-vault .form-input:focus { border-color: #c8102e !important; box-shadow: 0 0 0 3px rgba(200,16,46,.22) !important; }
+html[data-chrono="on"] .auth-vault button[type="submit"], html[data-chrono="on"] .auth-vault form > button:last-child { background: linear-gradient(180deg,#e11d48,#9f1239) !important; color: #fff !important; box-shadow: inset 0 -3px 0 rgba(0,0,0,.35), 0 10px 24px -12px rgba(200,16,46,.8) !important; }
+html[data-chrono="on"] .auth-vault button[type="submit"]:active { transform: translateY(1px) scale(.99); }
+html[data-chrono="on"] .auth-vault .pw-rules span.is-ok { color: #10b981 !important; }
+html[data-chrono="on"] .auth-vault .pw-rules span.is-ok::before { background: #10b981 !important; border-color: #10b981 !important; }
