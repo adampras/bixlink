@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { ArrowDownToLine, ArrowUpRight, ChevronDown, Coins, Clock3, Lock, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
 import { BixShell } from '@/components/BixShell';
-import { ChronoDial } from '@/components/ChronoDial';
 import { MemberGate } from '@/components/MemberGate';
 import { Button } from '@/components/ui/button';
 import { money, number } from '@/lib/bixlink';
@@ -86,7 +85,6 @@ function ProfitPage() {
         <span className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-1.5 text-[9px] font-bold sm:px-3 sm:text-xs ${boosterActive ? 'border-chart-2/40 bg-chart-2/10 text-chart-2' : 'border-border bg-muted text-muted-foreground'}`}><i className={`h-1.5 w-1.5 rounded-full ${boosterActive ? 'animate-pulse bg-chart-2' : 'bg-muted-foreground'}`}/> {boosterActive ? `BOOSTER LIVE · ${nextRefresh}s` : 'BOOSTER PAUSED'}</span>
       </div>
 
-       <div className="chrono-only chrono-dial-tap"><ChronoDial value={(60 - nextRefresh) / 60} label="TOURBILLON YIELD ENGINE" caption={`+$${number(totals.minute / 60, { maximumFractionDigits: 8 })}/s`}/></div>
        <section aria-label="Profit summary" className="profit-summary mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="profit-metric profit-metric--total"><TrendingUp/><span>Total active profit</span><strong className="numeric">{money(totals.accrued)}</strong><small>Projected accrued yield</small></div>
         <div className="profit-metric profit-metric--usdt"><WalletCards/><span>USDT profit · {Math.round(splitUsdt * 100)}%</span><strong className="numeric">{number(totals.usdt, { minimumFractionDigits: 8, maximumFractionDigits: 8 })}</strong><small>Virtual USDT allocation</small></div>

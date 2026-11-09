@@ -1,5 +1,6 @@
 import { Web3Connect } from '@/components/Web3Connect';
 import { ChronoTap } from '@/components/ChronoWatch';
+import { useDesignAccess } from '@/lib/design-release';
 import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { VaultStage } from '@/components/TechSuite';
 import { PoweredBy } from '@/components/PoweredBy';
@@ -26,16 +27,10 @@ import { CoinMark, networkName } from '@/components/deposit/CoinBadge';
 import { WalletCardBack } from '@/components/WalletCardBack';
 import { DepositFlightScanner } from '@/components/DepositFlightScanner';
 
-/** Compact RM sub-dial: a real clock — hand follows the seconds, block counter ticks every ~3s (BNB block time). Display-only. */
-function WalletHeartbeat() {
-  const [t, setT] = useState<number | null>(null);
-  useEffect(() => { const u = () => { if (!document.hidden) setT(Date.now()); }; u(); const id = window.setInterval(u, 1000); return () => window.clearInterval(id); }, []);
-  const sec = t === null ? 0 : (t / 1000) % 60;
-  const block = t === null ? 0 : Math.floor(t / 3000) % 100000;
-  return <ChronoTap className="chrono-only chrono-mini">
-    <span className="chrono-mini__dial"><i style={{ transform: `rotate(${sec * 6}deg)` }}/><em/></span>
-    <span className="chrono-mini__txt"><b>BLOCK</b><small className="numeric">#{String(block).padStart(5, '0')}</small></span>
-  </ChronoTap>;
+/** Mastercard-style emblem, embossed, top-right of the card; tapping it opens the RM 50-04 watch (Chronograph track only). */
+function CardEmblem({ chrono }: { chrono: boolean }) {
+  const mark = <span className="wallet-mc wallet-mc--emboss" aria-hidden><i/><i/></span>;
+  return chrono ? <ChronoTap className="wallet-mc-tap">{mark}</ChronoTap> : <span className="wallet-mc-tap">{mark}</span>;
 }
 
 function EmptyState({ text, action, onAction }: { text: string; action?: string; onAction?: () => void }) {
@@ -54,6 +49,7 @@ function WalletPage() {
   const { data: cfg } = usePublicConfig();
   const verifyTx = useServerFn(verifyDeposit); const [flex, setFlex] = useState(true); const [txHash, setTxHash] = useState('');
   const fetchWallet = useServerFn(getMyWallet); const fetchFiat = useServerFn(getFiatRates); const createIntent = useServerFn(createDepositIntent); const checkIntent = useServerFn(checkDepositIntent); const claimIntent = useServerFn(claimDepositIntent); const [claimed, setClaimed] = useState(false); const withdraw = useServerFn(requestWithdraw); const swap = useServerFn(requestSwap);
+  const chrono = useDesignAccess(user?.id).data?.chrono === true;
   const qc = useQueryClient(); const isAdmin = !!useMember().data?.isAdmin;
   const { data } = useQuery({ queryKey: ['my-wallet', user?.id], queryFn: () => fetchWallet(), enabled: !!user });
   const fiat = useQuery({ queryKey: ['wallet-fiat-rates'], queryFn: () => fetchFiat(), staleTime: 3_600_000 });
@@ -120,9 +116,9 @@ function WalletPage() {
       <div className={`wallet-flip${flipped ? ' is-flipped' : ''}`}><div className="wallet-flip-inner">
       <div data-sov-color={cfg?.readiness.walletCard && !pickWalletSkin(cfg?.readiness.walletColors) ? (cfg?.readiness.walletCardColor ?? 'onyx') : undefined} data-wallet-skin={pickWalletSkin(cfg?.readiness.walletColors)} className={`wallet-face wallet-summary wallet-vault auric-card wallet-face--front relative overflow-hidden rounded-[20px] border p-5${cfg?.readiness.walletCard ? ' wallet-sovereign' : ''}${cfg?.readiness.walletCard && cfg?.readiness.walletCardModel === 'elite' ? ' wallet-elite' : ''}`}>
         {cfg?.readiness.walletCard ? <><span className="sov-sheen" aria-hidden/>{cfg?.readiness.walletCardModel === 'elite' && <><span className="elite-grid" aria-hidden/><span className="elite-orbs" aria-hidden><i/><i/></span></>}</> : <WalletFinanceMotion settings={cfg?.readiness}/>}
-        <WalletHeartbeat/>
+        {(cfg?.readiness.walletCard || chrono) && <CardEmblem chrono={chrono}/>}
         <div className="wallet-balance-block">
-          <div className="flex items-center justify-between gap-2"><div className="flex min-w-0 items-center gap-2 text-xs tracking-[.14em] uppercase text-muted-foreground"><Wallet size={14}/> Available balance<Button type="button" size="icon" variant="ghost" className="vault-pill! size-7 rounded-full" aria-label={hidden ? 'Show balance' : 'Hide balance'} aria-pressed={hidden} title={hidden ? 'Show balance' : 'Hide balance'} onClick={toggleHidden}>{hidden ? <Eye size={14}/> : <EyeOff size={14}/>}</Button></div><div className="flex shrink-0 items-center gap-2">{cfg?.readiness.walletCard && <span className="wallet-mc wallet-mc--inline" aria-hidden><i/><i/></span>}<button type="button" className="wallet-flip-btn" aria-label="Show QR and member ID" onClick={() => setFlipped(true)}><ArrowLeftRight size={14}/></button></div></div>
+          <div className="flex items-center justify-between gap-2"><div className="flex min-w-0 items-center gap-2 text-xs tracking-[.14em] uppercase text-muted-foreground"><Wallet size={14}/> Available balance<Button type="button" size="icon" variant="ghost" className="vault-pill! size-7 rounded-full" aria-label={hidden ? 'Show balance' : 'Hide balance'} aria-pressed={hidden} title={hidden ? 'Show balance' : 'Hide balance'} onClick={toggleHidden}>{hidden ? <Eye size={14}/> : <EyeOff size={14}/>}</Button></div><div className="flex shrink-0 items-center gap-2"><button type="button" className="wallet-flip-btn" aria-label="Show QR and member ID" onClick={() => setFlipped(true)}><ArrowLeftRight size={14}/></button></div></div>
           <strong className="numeric mt-1 block break-all text-[28px] leading-tight font-black text-foreground md:text-[34px]">{hidden ? '••••••••' : <><AnimatedNumber value={data?.balance ?? 0}/> USDT</>}</strong>
         </div>
         {fiatShown.length > 0 && <><div className="wallet-fx-grid mt-3">{fiatShown.map(item => <div key={item.code}><span>{item.label}</span><b className="numeric">{hidden ? '••••••' : `${item.code} ${number((data?.balance ?? 0) * item.rate, { maximumFractionDigits: item.code === 'IDR' ? 0 : 2 })}`}</b></div>)}</div>
