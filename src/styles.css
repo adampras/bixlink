@@ -8071,3 +8071,12 @@ html[data-chrono="on"] .care-live button:active { transform: scale(.97); }
 .hub-photo::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, color-mix(in oklab, var(--background) 92%, transparent) 8%, color-mix(in oklab, var(--background) 35%, transparent) 50%, transparent 75%); }
 .hub-photo .hub-photo-text { padding: .35rem .3rem .45rem; width: 100%; text-shadow: 0 1px 4px var(--background); }
 .hub-photo:active > img { transform: scale(1.06); }
+
+/* HUB clarity pass: crisp artwork + legible names on every photo tile */
+.hub-midnight .hub-group .hub-tile.hub-photo{border-width:1px!important;border-color:color-mix(in oklab,var(--tone) 55%,transparent)!important;box-shadow:0 8px 20px -12px var(--tone),inset 0 1px 0 color-mix(in oklab,var(--foreground) 14%,transparent)!important;overflow:hidden}
+.hub-photo>img{filter:saturate(1.15) contrast(1.08)}
+.hub-photo::before{background:linear-gradient(to top,oklch(.07 .02 270 / .96) 0%,oklch(.07 .02 270 / .7) 30%,transparent 62%)!important}
+.hub-photo .hub-photo-text{padding:.4rem .35rem .5rem;text-shadow:0 1px 2px oklch(0 0 0 / .9),0 0 8px oklch(0 0 0 / .7)}
+.hub-photo-name{font-size:12px;font-weight:900;letter-spacing:.03em;line-height:1.1;color:var(--foreground)}
+.hub-photo-note{margin-top:2px;font-size:9.5px;font-weight:600;line-height:1.15;color:color-mix(in oklab,var(--primary) 80%,var(--foreground));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-midnight .hub-group-head{font-size:12px;letter-spacing:.12em}

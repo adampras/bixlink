@@ -9,11 +9,23 @@ import artGold from '@/assets/hub/gold.jpg';
 import artMining from '@/assets/hub/mining.jpg';
 import artArena from '@/assets/hub/arena.jpg';
 import artCare from '@/assets/hub/care.jpg';
+import artTrade from '@/assets/hub-market.jpg';
+import artBot from '@/assets/sovereign-core.jpg';
+import artPresale from '@/assets/hub-launch.jpg';
+import artBoost from '@/assets/hub-stake.jpg';
+import artBuyback from '@/assets/hub/buyback.jpg';
+import artExchange from '@/assets/hub-p2p.jpg';
+import artOnchain from '@/assets/bix-lux-wallet.webp';
+import artPay from '@/assets/eco/pay.png';
+import artVault from '@/assets/coin-vault-bg.jpg';
+import artHome from '@/assets/hero-obsidian-gold.jpg';
+import artProfile from '@/assets/hub/profile.jpg';
+import artSettings from '@/assets/hub/settings.jpg';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { HUB_GROUPS, HUB_ITEMS, PILLARS, hubVisible, hubOrdered, pillarOf } from '@/lib/dock-hub';
 
 const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: CarFront, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards, call: PhoneCall, settings: Settings2, gold: Coins, care: Wrench };
-const ART: Record<string, string> = { bixgo: artGo, nft: artMall, call: artCall, bixtok: artTok, gold: artGold, mining: artMining, arena: artArena, care: artCare };
+const ART: Record<string, string> = { bixgo: artGo, nft: artMall, call: artCall, bixtok: artTok, gold: artGold, mining: artMining, arena: artArena, care: artCare, trade: artTrade, bixtrade: artBot, presale: artPresale, boost: artBoost, buyback: artBuyback, exchange: artExchange, onchain: artOnchain, pay: artPay, vault: artVault, home: artHome, profile: artProfile, settings: artSettings };
 /** Category look: swipe rows for long groups, fixed grids for short ones. */
 const GROUP_STYLE: Record<string, { tone: string; swipe: boolean }> = {
   'Trading & Finance': { tone: 'gold', swipe: true },
@@ -54,7 +66,8 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
     const cls = `hub-tile rounded-2xl border px-2 py-3 text-center ${path === i.to ? 'is-active' : ''} ${compact ? 'hub-recent-tile' : ''}`;
     const art = !compact ? ART[i.id] : undefined;
     if (art) {
-      const pbody = <>{BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<img src={art} alt="" loading="lazy" width={320} height={320}/><span className="hub-photo-text"><div className="text-xs font-black">{i.label}</div><div className="mt-0.5 truncate text-[10px] text-muted-foreground">{i.note}</div></span></>;
+      const pbody = <>{BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<img src={art} alt="" loading="lazy" width={320} height={320}/><span className="hub-photo-text"><div className="hub-photo-name">{i.label}</div><div className="hub-photo-note">{i.note}</div></span></>;
+      if (i.id === 'onchain') return <a key={i.id} href={i.to} onClick={() => pick(i.id)} className={`${cls} hub-photo`}>{pbody}</a>;
       return <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={`${cls} hub-photo`}>{pbody}</Link>;
     }
     const body = <>{!compact && BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<span className="hub-emblem" style={{ animationDelay: `${(n % 4) * -0.9}s` }}><Icon size={20} strokeWidth={1.7}/></span><div className="text-xs font-black">{i.label}</div>{!compact && <div className="mt-0.5 text-[10px] text-muted-foreground">{i.note}</div>}</>;
