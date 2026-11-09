@@ -8136,3 +8136,46 @@ html[data-chrono="on"] .care-live button:active { transform: scale(.97); }
 .bx-grp-av b{font-weight:800;color:var(--tk)}
 .bx-grp-info{display:grid;justify-items:center;gap:6px;padding:4px 0 12px;text-align:center}
 .bx-grp-info b{font-size:16px;color:var(--group-ink)}.bx-grp-info small{font-size:11px;color:var(--group-muted)}
+
+/* ===== PRESALE · RM 50-04 (html[data-chrono=on], Owner 1 tree only; visual only) ===== */
+html[data-chrono="on"] [data-page="presale"] .presale-portal { border: 5px solid transparent !important; border-radius: 22px !important;
+  background: radial-gradient(circle at 75% 15%, #2a0d10, #08080a 70%) padding-box, repeating-linear-gradient(172deg,#f4f4f2 0 3px,#dcdcd8 3px 5px,#fbfbfa 5px 9px) border-box !important;
+  box-shadow: inset 0 0 0 1px #c8102e, 0 18px 40px -18px rgba(0,0,0,.85) !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-portal::after { content:""; position:absolute; inset:7px; pointer-events:none; z-index:2;
+  background: radial-gradient(circle,#cbd5e1 2px,transparent 2.5px) left top/6px 6px no-repeat, radial-gradient(circle,#cbd5e1 2px,transparent 2.5px) right top/6px 6px no-repeat,
+  radial-gradient(circle,#cbd5e1 2px,transparent 2.5px) left bottom/6px 6px no-repeat, radial-gradient(circle,#cbd5e1 2px,transparent 2.5px) right bottom/6px 6px no-repeat; }
+html[data-chrono="on"] [data-page="presale"] .presale-hero-art { opacity: .28 !important; filter: grayscale(.4) contrast(1.1); }
+html[data-chrono="on"] [data-page="presale"] .presale-gold-text { background: none !important; -webkit-text-fill-color: #facc15 !important; color: #facc15 !important; text-shadow: 0 0 18px rgba(250,204,21,.35); }
+html[data-chrono="on"] [data-page="presale"] .text-chart-3 { color: #facc15 !important; }
+html[data-chrono="on"] [data-page="presale"] .text-chart-2 { color: #10b981 !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-live-dot { background: #ef4444 !important; box-shadow: 0 0 10px #ef4444 !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-hero-chip { background: #0b0b0d !important; color: #facc15 !important; border: 1px solid #c8102e !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-cd-cell { background: radial-gradient(circle at 50% 0%,#1a1d24,#08090c 75%) !important; border: 1px solid rgba(241,241,238,.18) !important; border-radius: 10px !important; box-shadow: inset 0 2px 0 #c8102e !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-cd-cell b { color: #facc15; font-variant-numeric: tabular-nums; }
+html[data-chrono="on"] [data-page="presale"] .presale-stage-step { background: #08080a !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-stage-step.is-active { background: linear-gradient(180deg,rgba(200,16,46,.3),rgba(200,16,46,.06)) !important; box-shadow: inset 0 2px 0 #ef4444 !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-stage-step.is-active b { color: #facc15 !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-stage-step.is-done b { color: #10b981 !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-stat-card { border-radius: 16px !important; background: radial-gradient(circle at 50% 0%,#1a1d24,#08090c 75%) !important; border: 0 !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-stat-card:nth-child(1) { box-shadow: inset 0 0 0 1px #94a3b8, inset 0 2px 0 #38bdf8 !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-stat-card:nth-child(2) { box-shadow: inset 0 0 0 1px #10b981, inset 0 2px 0 #10b981 !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-stat-card:nth-child(3) { box-shadow: inset 0 0 0 1px #c8102e, inset 0 2px 0 #facc15 !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-stat-card .text-primary { color: #e2e8f0 !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-tabs { background: #07080a !important; border: 1px solid rgba(241,241,238,.14) !important; border-radius: 12px !important; padding: 3px !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-tabs button { color: #94a3b8 !important; border-radius: 9px !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-tabs button.is-active { background: linear-gradient(180deg,#f4f4f2,#d8d8d3) !important; color: #0b0b0d !important; box-shadow: inset 0 -2px 0 #c8102e !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-lux-card { position: relative; background: linear-gradient(160deg,#0f1217,#0b0d11 60%,#07080a) !important; border: 1px solid rgba(241,245,249,.16) !important; border-radius: 14px !important; box-shadow: inset 0 2px 0 #f1f1ee, 0 16px 32px -20px #000 !important; transition: transform .15s ease; }
+html[data-chrono="on"] [data-page="presale"] .presale-lux-card::after { content:""; position:absolute; left:14px; top:0; width:42px; height:3px; background:#c8102e; border-radius:0 0 2px 2px; pointer-events:none; }
+html[data-chrono="on"] [data-page="presale"] .presale-lux-card:active { transform: scale(.985); }
+html[data-chrono="on"] [data-page="presale"] .presale-lux-inner { background: transparent !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-lux-price { background: none !important; -webkit-text-fill-color: #facc15 !important; color: #facc15 !important; font-variant-numeric: tabular-nums; }
+html[data-chrono="on"] [data-page="presale"] .presale-lux-card .text-primary { color: #f1f1ee !important; }
+html[data-chrono="on"] [data-page="presale"] :is(.presale-lux-card button[data-variant="default"], .presale-lux-card button.bg-primary, .presale-lux-card > div > button:last-child) { background: linear-gradient(180deg,#e11d48,#9f1239) !important; color: #fff !important; border-radius: 12px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), inset 0 -3px 0 rgba(0,0,0,.4) !important; }
+html[data-chrono="on"] [data-page="presale"] .presale-lux-card > div > button:last-child:active { transform: translateY(1px); box-shadow: inset 0 2px 5px rgba(0,0,0,.5) !important; }
+html[data-chrono="on"] [data-page="presale"] .nft-preview-chip { background: #0b0b0d !important; color: #facc15 !important; border: 1px solid rgba(250,204,21,.4) !important; }
+html[data-chrono="on"] [data-page="presale"] .allocation-progress { accent-color: #10b981; }
+html[data-chrono="on"] [data-page="presale"] .apy-meter i { background: linear-gradient(90deg,#10b981,#facc15) !important; }
+html[data-chrono="on"] .pp-sheet.lux-sheet { background: radial-gradient(circle at 80% 0%, rgba(200,16,46,.18), transparent 50%), #09090b !important; border: 1px solid #c8102e !important; box-shadow: inset 0 0 0 3px #0b0b0d, inset 0 0 0 4px rgba(241,241,238,.6), 0 30px 60px -20px #000 !important; }
+html[data-chrono="on"] .pp-sheet .lux-gold-text { background: none !important; -webkit-text-fill-color: #facc15 !important; color: #facc15 !important; }
+html[data-chrono="on"] .pp-sheet .lux-cta { background: linear-gradient(180deg,#e11d48,#9f1239) !important; color: #fff !important; box-shadow: inset 0 -3px 0 rgba(0,0,0,.4) !important; }
+@media (prefers-reduced-motion: reduce) { html[data-chrono="on"] [data-page="presale"] .presale-lux-card { transition: none; } }
