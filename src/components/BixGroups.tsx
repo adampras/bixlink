@@ -23,7 +23,7 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
   const [groups, setGroups] = useState<Group[]>([]);
   const [name, setName] = useState(''); const [about, setAbout] = useState('');
   const [code, setCode] = useState(''); const [msg, setMsg] = useState('');
-  const [open, setOpen] = useState<Group | null>(null);
+  const [open, setOpen] = useState<Group | null>(null); const [fresh, setFresh] = useState(false);
   const load = async () => {
     const { data } = await supabase.from('bix_groups').select(COLS).order('created_at', { ascending: false });
     const list = (data as Group[] | null) ?? []; setGroups(list);
@@ -35,13 +35,13 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
     const { data, error } = await supabase.from('bix_groups').insert({ owner_id: me, name: name.trim().slice(0, 60), about: about.trim().slice(0, 300), code: newCode(7) }).select(COLS).single();
     if (error) { setMsg('Failed to create group.'); return; }
     setName(''); setAbout(''); await load();
-    if (data) setOpen(data as Group);
+    if (data) { setFresh(true); setOpen(data as Group); }
   };
   const join = async () => {
     setMsg(''); const { error } = await supabase.rpc('bix_group_join', { p_code: code });
     if (error) { setMsg(error.message); return; } setCode(''); await load();
   };
-  if (open) return <GroupRoom g={open} me={me} onBack={() => { setOpen(null); void load(); }} onChange={load}/>;
+  if (open) return <GroupRoom g={open} me={me} fresh={fresh} onBack={() => { setOpen(null); setFresh(false); void load(); }} onChange={load}/>;
   return <section className="bx-grp">
     <div className="bx-grp-card">
       <div className="bx-grp-head"><GraduationCap size={18}/><b>Education Groups</b><small>Group chat + Live Class</small></div>
@@ -64,7 +64,7 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
 }
 
 function AddMembers({ g, onClose }: { g: Group; onClose: () => void }) {
-  const [tab, setTab] = useState<'Kontak' | 'Jaringan'>('Kontak');
+  const [tab, setTab] = useState<'Kontak' | 'Jaringan'>(() => readContacts().length ? 'Kontak' : 'Jaringan');
   const [net, setNet] = useState<Cand[] | null>(null); const [q, setQ] = useState('');
   const [done, setDone] = useState<Record<string, string>>({}); const [busy, setBusy] = useState('');
   const contacts: Cand[] = readContacts().map(c => ({ id: c.id, code: c.code, name: c.name, src: 'Kontak' }));
@@ -77,7 +77,7 @@ function AddMembers({ g, onClose }: { g: Group; onClose: () => void }) {
   const manual = q.trim().length >= 3 && list.length === 0;
   return <div className="bx-grp-sheet" role="dialog" aria-label="Tambah anggota">
     <div className="bx-grp-sheet-box">
-      <header><b>Tambah anggota</b><button type="button" aria-label="Tutup" onClick={onClose}><X size={18}/></button></header>
+      <header><b>Tambah anggota · ketuk + untuk menambah</b><button type="button" aria-label="Tutup" onClick={onClose}><X size={18}/></button></header>
       <div className="bx-grp-tabs">{(['Kontak', 'Jaringan'] as const).map(t => <button key={t} type="button" aria-pressed={tab === t} onClick={() => setTab(t)}>{t === 'Kontak' ? 'Kontak Saya' : 'Jaringan Saya'}</button>)}</div>
       <label className="bx-grp-search"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari nama, BIX-ID atau @username"/></label>
       <ul className="bx-grp-cands">
@@ -95,11 +95,11 @@ function AddMembers({ g, onClose }: { g: Group; onClose: () => void }) {
   </div>;
 }
 
-function GroupRoom({ g, me, onBack, onChange }: { g: Group; me: string; onBack: () => void; onChange: () => Promise<void> }) {
+function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; fresh?: boolean; onBack: () => void; onChange: () => Promise<void> }) {
   const [msgs, setMsgs] = useState<Msg[]>([]); const [text, setText] = useState('');
   const [live, setLive] = useState<string | null>(null); const [copied, setCopied] = useState(false); const [err, setErr] = useState('');
   const host = g.owner_id === me; const end = useRef<HTMLDivElement>(null); const file = useRef<HTMLInputElement>(null);
-  const [adding, setAdding] = useState(false);
+  const [adding, setAdding] = useState(!!fresh && g.owner_id === me);
   const setPhoto = async (f?: File) => {
     if (!f) return; setErr('');
     try {

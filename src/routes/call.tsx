@@ -124,7 +124,7 @@ function CallInner() {
   const TITLE: Record<CommTab, string> = { chat: 'CHAT', group: 'GROUP', updates: 'UPDATES', call: 'CALLS', community: 'COMMUNITY', setting: 'SETTINGS', newgroup: 'NEW GROUP' };
   const view: CommTab = tab;
 
-  return <main className="mx-auto max-w-xl px-4 py-5">
+  return <main className="mx-auto w-full px-3 py-4">
     <div className="bc-head">
       <div className="bc-head__search"><FindMember bar me={me} tier={tier} onChat={open}/></div>
       <ContactQr/>
@@ -611,7 +611,7 @@ function ContactQr() {
   const mine = useQuery({ queryKey: ['bix-pay'], queryFn: () => load(), enabled: open });
   const code = mine.data?.code ?? '';
   const saveFrom = async (raw: string) => {
-    setScan(false); const id = parseBixId(raw);
+    const id = parseBixId(raw);
     if (!id) { setMsg('QR ini bukan BIX-ID member.'); return; }
     const { data } = await supabase.rpc('bix_call_find' as never, { p_query: id } as never);
     const f = data as { user_id: string; name: string } | null;
@@ -631,7 +631,7 @@ function ContactQr() {
         <button type="button" className="bc-qr-scan mt-4" onClick={() => setScan(true)}><ScanLine size={16}/> Pindai & simpan kontak</button>
         {msg && <p role="status" className="mt-3 text-center text-xs text-chart-2">{msg}</p>}
       </div></div>}
-    {scan && <QrScanner title="Pindai QR BIX-ID" hint="Arahkan kamera ke QR BIX-ID member" onClose={() => setScan(false)} onResult={raw => void saveFrom(raw)}/>}
+    {scan && <QrScanner title="Pindai QR BIX-ID" hint={msg || 'Arahkan kamera ke QR BIX-ID member'} continuous onClose={() => setScan(false)} onResult={raw => void saveFrom(raw)}/>}
   </>;
 }
 

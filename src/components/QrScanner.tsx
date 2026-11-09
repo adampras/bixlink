@@ -4,20 +4,28 @@ import { X, ImageUp } from 'lucide-react';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /** html5-qrcode throws synchronously when the camera is not running; swallow both sync and async failures. */
 const safeStop = (s: any) => { try { const st = s?.getState?.(); if (st !== undefined && st !== 2 && st !== 3) return; void s?.stop?.()?.catch?.(() => {}); } catch { /* not running */ } };
-export function QrScanner({ onResult, onClose, title = 'Scan BIX PAY QR', hint = "Point the camera at a member's BIX PAY QR" }: { onResult: (v: string) => void; onClose: () => void; title?: string; hint?: string }) {
+export function QrScanner({ onResult, onClose, title = 'Scan BIX PAY QR', hint = "Point the camera at a member's BIX PAY QR", continuous = false }: { onResult: (v: string) => void; onClose: () => void; title?: string; hint?: string; continuous?: boolean }) {
   const ref = useRef<any>(null);
+  const last = useRef({ t: '', at: 0 });
   const [err, setErr] = useState('');
   useEffect(() => {
     let stopped = false;
     import('html5-qrcode').then(({ Html5Qrcode }) => {
       if (stopped) return;
       const s = new Html5Qrcode('bix-scanner'); ref.current = s;
-      s.start({ facingMode: 'environment' }, { fps: 12, qrbox: (w: number, h: number) => { const m = Math.floor(Math.min(w, h) * 0.7); return { width: m, height: m }; } }, text => { safeStop(s); ref.current = null; navigator.vibrate?.(30); onResult(text); }, () => {})
+      s.start({ facingMode: 'environment' }, { fps: 12, qrbox: (w: number, h: number) => { const m = Math.floor(Math.min(w, h) * 0.7); return { width: m, height: m }; } }, text => {
+        navigator.vibrate?.(30);
+        if (!continuous) { safeStop(s); ref.current = null; onResult(text); return; }
+        const now = Date.now(); if (text === last.current.t && now - last.current.at < 4000) return; last.current = { t: text, at: now };
+        try { s.pause(true); } catch { /* not running */ }
+        onResult(text);
+        setTimeout(() => { if (!stopped) { try { s.resume(); } catch { /* not paused */ } } }, 1400);
+      }, () => {})
         .then(() => { if (stopped) safeStop(s); })
         .catch(() => setErr('Camera unavailable. Choose a QR image from your gallery or enter the code manually.'));
     });
     return () => { stopped = true; safeStop(ref.current); ref.current = null; };
-  }, [onResult]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { const prev = document.body.style.overflow; document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = prev; }; }, []);
   return <div className="qr-full" role="dialog" aria-label={title}>
     <div id="bix-scanner" className="qr-full__cam"/>
