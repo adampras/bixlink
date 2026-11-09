@@ -7892,3 +7892,43 @@ html[data-design="v2"] .stake-metric dd { white-space: nowrap; overflow: hidden;
 html[data-design="v2"] .stake-metric + .stake-metric { border-left: .5px solid rgba(148,163,184,.2); }
 html[data-design="v2"] .stake-request { border: .5px solid rgba(148,163,184,.2) !important; border-radius: 16px !important; background: rgba(17,22,32,.85) !important; }
 html[data-design="v2"] .stake-progress i { background: linear-gradient(90deg, #10b981, #6ee7b7); box-shadow: 0 0 8px rgba(16,185,129,.5); }
+
+/* ===== Chronograph RM · BIX CALL (html[data-chrono=on], Owner 1 tree only) ===== */
+html[data-chrono="on"] [data-page="call"] .bc-bar { background: linear-gradient(180deg,#14161b,#07080a) !important; border: .5px solid rgba(241,245,249,.2) !important; box-shadow: inset 0 -1px 0 #c8102e, 0 8px 20px -12px #000 !important; border-radius: 14px !important; }
+html[data-chrono="on"] [data-page="call"] .bc-bar:focus-within { box-shadow: inset 0 -1px 0 #c8102e, 0 0 0 1px rgba(250,204,21,.55), 0 0 18px -6px rgba(250,204,21,.5) !important; }
+html[data-chrono="on"] [data-page="call"] .bc-logo svg { border-radius: 50%; box-shadow: 0 0 0 2px #c8102e, 0 0 0 4px #f1f1ee, 0 0 0 5px #0b0b0d; }
+html[data-chrono="on"] [data-page="call"] .bc-bar button { background: linear-gradient(180deg,#1c1e24,#0a0b0d) !important; color: #facc15 !important; border: .5px solid rgba(241,245,249,.22) !important; border-radius: 9px !important; }
+html[data-chrono="on"] [data-page="call"] .comm-subhead b { color: #fafafa; letter-spacing: .22em; }
+html[data-chrono="on"] [data-page="call"] .comm-tier { background: #0b0b0d !important; color: #facc15 !important; border: 1px solid #c8102e !important; border-radius: 6px !important; }
+html[data-chrono="on"] [data-page="call"] .comm-card { position: relative; background: linear-gradient(160deg,#10131a,#07080b) !important; border: .5px solid rgba(241,245,249,.16) !important; border-radius: 16px !important; box-shadow: inset 0 2px 0 #f1f1ee, 0 14px 30px -20px #000 !important; }
+html[data-chrono="on"] [data-page="call"] .comm-card::after { content:""; position:absolute; left:14px; top:0; width:38px; height:3px; background:#c8102e; border-radius:0 0 2px 2px; pointer-events:none; }
+html[data-chrono="on"] [data-page="call"] .comm-h { color: #e2e8f0 !important; letter-spacing: .14em; }
+html[data-chrono="on"] [data-page="call"] .comm-list li + li { border-top: .5px solid rgba(241,245,249,.08); }
+html[data-chrono="on"] [data-page="call"] .comm-badge { background: #c8102e !important; color: #fff !important; }
+html[data-chrono="on"] [data-page="call"] .comm-actions button { background: radial-gradient(circle at 35% 30%,#22252c,#08090b 70%) !important; color: #e2e8f0 !important; border: .5px solid rgba(241,245,249,.25) !important; box-shadow: inset 0 -2px 0 rgba(0,0,0,.5); }
+html[data-chrono="on"] [data-page="call"] .comm-actions button:nth-child(1) svg { color: #38bdf8; }
+html[data-chrono="on"] [data-page="call"] .comm-actions button:nth-child(2) svg { color: #10b981; }
+html[data-chrono="on"] [data-page="call"] .comm-actions button:nth-child(3) svg { color: #facc15; }
+html[data-chrono="on"] [data-page="call"] :is(.comm-dir,.comm-hbadge).is-in, html[data-chrono="on"] [data-page="call"] :is(.comm-dir,.comm-hbadge).is-out { color: #10b981 !important; }
+html[data-chrono="on"] [data-page="call"] :is(.comm-dir,.comm-hbadge).is-miss { color: #ef4444 !important; }
+html[data-chrono="on"] [data-page="call"] .comm-dial-num input { font-variant-numeric: tabular-nums; font-size: 26px; letter-spacing: .08em; color: #fafafa !important; background: #050608 !important; border: .5px solid rgba(241,245,249,.2) !important; box-shadow: inset 0 2px 8px #000; text-align: center; }
+html[data-chrono="on"] [data-page="call"] .comm-dial-pad button { background: radial-gradient(circle at 35% 25%,#23262d,#08090b 72%) !important; border: .5px solid rgba(241,245,249,.22) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -3px 0 rgba(0,0,0,.55), 0 6px 14px -8px #000 !important; color: #fafafa !important; transition: transform .1s ease; }
+html[data-chrono="on"] [data-page="call"] .comm-dial-pad button small { color: #facc15 !important; }
+html[data-chrono="on"] [data-page="call"] .comm-dial-pad button:active { transform: translateY(1px) scale(.97); box-shadow: inset 0 2px 5px rgba(0,0,0,.6), 0 0 0 1px #c8102e !important; }
+html[data-chrono="on"] [data-page="call"] :is(.comm-dial-go,.comm-fab,.comm-save) { background: linear-gradient(180deg,#e11d48,#9f1239) !important; color: #fff !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), inset 0 -3px 0 rgba(0,0,0,.35), 0 0 0 .5px rgba(250,204,21,.6) !important; }
+html[data-chrono="on"] nav.comm-dock > :nth-child(1) { --rm:#38bdf8; }
+html[data-chrono="on"] nav.comm-dock > :nth-child(2) { --rm:#facc15; }
+html[data-chrono="on"] nav.comm-dock > :nth-child(3) { --rm:#10b981; }
+html[data-chrono="on"] nav.comm-dock > :nth-child(4) { --rm:#ef4444; }
+html[data-chrono="on"] nav.comm-dock .mobile-nav-on { color: var(--rm) !important; }
+/* In-call screen */
+html[data-chrono="on"] .bixcall { background: radial-gradient(110% 60% at 50% 15%, rgba(200,16,46,.18), transparent 60%), radial-gradient(90% 50% at 50% 100%, rgba(250,204,21,.08), transparent 70%), #06070a !important; }
+html[data-chrono="on"] .bixcall-head { border-color: rgba(241,245,249,.25) !important; box-shadow: inset 0 -1px 0 #c8102e !important; border-radius: 12px !important; }
+html[data-chrono="on"] .bixcall-head span { color: #facc15 !important; }
+html[data-chrono="on"] .bixcall-av { border: 3px solid #f1f1ee !important; box-shadow: 0 0 0 2px #c8102e, 0 0 0 7px rgba(241,241,238,.08), 0 0 40px rgba(200,16,46,.3) !important; background: radial-gradient(circle at 35% 30%,#1c1f26,#07080a) !important; }
+html[data-chrono="on"] .bixcall-av b { color: #facc15 !important; }
+html[data-chrono="on"] .bixcall-ctl { background: linear-gradient(180deg,rgba(18,20,25,.88),rgba(6,7,9,.92)) !important; border: .5px solid rgba(241,245,249,.2) !important; box-shadow: inset 0 2px 0 #f1f1ee, 0 18px 40px -16px #000 !important; }
+html[data-chrono="on"] .bixcall-ctl button:not(.end):not(.off) { background: radial-gradient(circle at 35% 25%,#262930,#08090b 72%) !important; border: .5px solid rgba(241,245,249,.26) !important; box-shadow: inset 0 -3px 0 rgba(0,0,0,.55) !important; }
+html[data-chrono="on"] .bixcall-ctl button.shield { box-shadow: 0 0 0 1.5px #10b981, 0 0 14px -3px #10b981 !important; color: #10b981 !important; }
+html[data-chrono="on"] .bixcall-ctl .end { background: linear-gradient(180deg,#e11d48,#9f1239) !important; border: 2px solid #f1f1ee !important; box-shadow: 0 0 0 1px #c8102e, 0 0 18px -4px rgba(225,29,72,.7) !important; }
+html[data-chrono="on"] .bixcall-pip { border-color: #f1f1ee !important; box-shadow: 0 0 0 1px #c8102e; }
