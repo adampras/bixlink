@@ -1,5 +1,5 @@
 /** RM-style large inspection watch. Display-only: real local time (device zone) + Jakarta dual time + working split-seconds chrono. */
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import React, { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 function partsIn(zone: string, d: Date) {
@@ -17,6 +17,12 @@ export function ChronoWatchModal({ onClose }: { onClose: () => void }) {
   const [base, setBase] = useState(0);
   const [split, setSplit] = useState<number | null>(null);
   const start = useRef(0);
+  const [bezel, setBezel] = useState(0);
+  const drag = useRef<{ a: number; b: number } | null>(null);
+  const angleAt = (e: React.PointerEvent<SVGGElement>) => { const r = (e.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height * 170 / 340), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; };
+  const onDown = (e: React.PointerEvent<SVGGElement>) => { e.currentTarget.setPointerCapture(e.pointerId); drag.current = { a: angleAt(e), b: bezel }; };
+  const onMove = (e: React.PointerEvent<SVGGElement>) => { if (!drag.current) return; const d = angleAt(e) - drag.current.a; setBezel(Math.round((drag.current.b + d) / 6) * 6); };
+  const onUp = () => { drag.current = null; try { navigator.vibrate?.(8); } catch { /* no haptics */ } };
   useEffect(() => { try { setZone(Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'); } catch { /* keep Jakarta */ } }, []);
   useEffect(() => {
     let raf = 0; const tick = () => { if (!document.hidden) setNow(new Date()); raf = requestAnimationFrame(tick); };
@@ -66,8 +72,13 @@ export function ChronoWatchModal({ onClose }: { onClose: () => void }) {
         <path d="M150 10 C250 10 270 40 272 170 C270 300 250 330 150 330 C50 330 30 300 28 170 C30 40 50 10 150 10Z" fill="url(#rmwQuartz)" stroke="#0b0b0d" strokeWidth="3"/>
         <path d="M150 10 C250 10 270 40 272 170 C270 300 250 330 150 330 C50 330 30 300 28 170 C30 40 50 10 150 10Z" fill="url(#rmwCaseShade)"/>
         {/* diamond-set bezel ring */}
-        <path d="M150 30 C235 30 250 55 252 170 C250 285 235 310 150 310 C65 310 50 285 48 170 C50 55 65 30 150 30Z" fill="#0b0b0d" stroke="#c8102e" strokeWidth="2"/>
-        {Array.from({ length: 36 }, (_, i) => { const t = i / 36 * Math.PI * 2; const x = 150 + Math.sin(t) * 98, y = 170 - Math.cos(t) * 135; return <g key={i} transform={`translate(${x} ${y}) rotate(${i*10})`}><path d="M0-3 L2.6 0 L0 3 L-2.6 0Z" fill="url(#rmwDia)"/><path d="M0-3 L0 3 M-2.6 0 L2.6 0" stroke="#fff" strokeWidth=".3" opacity=".8"/></g>; })}
+        <path d="M150 30 C235 30 250 55 252 170 C250 285 235 310 150 310 C65 310 50 285 48 170 C50 55 65 30 150 30Z" fill="#0b0b0d" stroke="url(#rmwGold)" strokeWidth="2.4"/>
+        {/* rotatable gem-set bezel: drag to turn (clicks every 6°) */}
+        <g className="rmw-bezel" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} style={{ transform: `rotate(${bezel}deg)`, transformOrigin: '150px 170px' }}>
+          <ellipse cx="150" cy="170" rx="99" ry="136" fill="none" stroke="transparent" strokeWidth="16"/>
+          {Array.from({ length: 48 }, (_, i) => { const t = i / 48 * Math.PI * 2; const x = 150 + Math.sin(t) * 98, y = 170 - Math.cos(t) * 135; const big = i % 4 === 0; return <g key={i} transform={`translate(${x} ${y}) rotate(${i*7.5})`}><circle r={big ? 4 : 3} fill="url(#rmwGold)"/><path d={big ? 'M0-3.2 L2.8 0 L0 3.2 L-2.8 0Z' : 'M0-2.2 L2 0 L0 2.2 L-2 0Z'} fill="url(#rmwDia)" className="rmw-gem" style={{ animationDelay: `${(i % 8) * .35}s` }}/><path d="M0-2 L0 2 M-2 0 L2 0" stroke="#fff" strokeWidth=".3" opacity=".9"/></g>; })}
+          <path d="M150 33 l-4 -6 h8z" fill="#c8102e"/>
+        </g>
         {screws.map(([x,y]) => <g key={`${x}-${y}`} transform={`translate(${x} ${y})`}><circle r="6.5" fill="url(#rmwTi)" stroke="#1f2937"/><path d="M-3.5 0H3.5M0-3.5V3.5M-2.5-2.5L2.5 2.5M2.5-2.5L-2.5 2.5" stroke="#1f2937" strokeWidth="1.3"/><circle cx="-2" cy="-2" r="1.5" fill="#fff" opacity=".6"/></g>)}
         <path d="M150 42 C228 42 240 62 241 170 C240 278 228 298 150 298 C72 298 60 278 59 170 C60 62 72 42 150 42Z" fill="url(#rmwDial)"/>
         {/* carbon base plate + gear train */}
@@ -79,6 +90,9 @@ export function ChronoWatchModal({ onClose }: { onClose: () => void }) {
         {[[80,90],[220,90],[90,260],[210,260],[150,112],[92,170],[208,170],[130,200]].map(([x,y])=><g key={`j${x}${y}`} transform={`translate(${x} ${y})`}><circle r="3.6" fill="#c0c4cc"/><circle r="2.6" fill="url(#rmwRuby)"/><circle cx="-.8" cy="-.9" r=".7" fill="#fff"/></g>)}
         {/* indices: diamond baguettes at 12/3/6/9 */}
         {Array.from({ length: 60 }, (_, i) => { const a = (i * 6 - 90) * Math.PI / 180, r1 = i % 5 ? 84 : 76; if (i % 15 === 0) { const x = 150 + Math.cos(a) * 82, y = 170 + Math.sin(a) * 82; return <g key={i} transform={`translate(${x} ${y}) rotate(${i*6})`}><rect x="-2.6" y="-7" width="5.2" height="14" rx="1" fill="url(#rmwDia)" stroke="#d4a017" strokeWidth=".6"/><path d="M-2.6-7 L2.6 7 M2.6-7 L-2.6 7" stroke="#fff" strokeWidth=".3"/></g>; } return <line key={i} x1={150 + Math.cos(a) * r1} y1={170 + Math.sin(a) * r1} x2={150 + Math.cos(a) * 88} y2={170 + Math.sin(a) * 88} stroke={i % 5 ? '#6b7280' : '#e5e7eb'} strokeWidth={i % 5 ? .8 : 2.2}/>; })}
+        {/* 18K gold engraved chapter ring + pavé diamonds on the inner flange */}
+        <ellipse cx="150" cy="170" rx="90" ry="124" fill="none" stroke="url(#rmwGold)" strokeWidth="1.2" opacity=".85"/>
+        {Array.from({ length: 24 }, (_, i) => { const t = (i + .5) / 24 * Math.PI * 2; return <circle key={`p${i}`} cx={150 + Math.sin(t) * 93} cy={170 - Math.cos(t) * 127} r="1.3" fill="url(#rmwDia)" className="rmw-gem" style={{ animationDelay: `${(i % 6) * .5}s` }}/>; })}
         <text x="150" y="72" textAnchor="middle" className="rmw-brand">RM 50-04</text>
         <text x="150" y="84" textAnchor="middle" className="rmw-sub">BIXLINK · SPLIT-SECONDS</text>
         {/* torque + power reserve arcs */}

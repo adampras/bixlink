@@ -8036,3 +8036,25 @@ html[data-chrono="on"] .stake-detail-dialog { background: linear-gradient(160deg
 html[data-chrono="on"] .stake-detail-dialog [role="radio"][aria-checked="true"] { border-color: #c8102e !important; background: rgba(200,16,46,.16) !important; color: #facc15 !important; }
 html[data-chrono="on"] .stake-detail-dialog dd { font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) { html[data-chrono="on"] [data-page="stake"] :is(.duration-option,.stake-request) { transition: none; } }
+
+/* ===== RM watch: rotatable bezel + gem sparkle ===== */
+.rmw-bezel { cursor: grab; touch-action: none; }
+.rmw-bezel:active { cursor: grabbing; }
+.rmw-gem { animation: rmw-gem 2.8s ease-in-out infinite; }
+@keyframes rmw-gem { 0%,100% { opacity: .82; } 50% { opacity: 1; filter: brightness(1.6) drop-shadow(0 0 1.5px #fff); } }
+@media (prefers-reduced-motion: reduce) { .rmw-gem { animation: none; } }
+
+/* ===== BIXCARE RM50 polish (Admin 1 path) ===== */
+html[data-chrono="on"] .care-live { background: radial-gradient(120% 40% at 50% 0%, rgba(200,16,46,.12), transparent 60%), linear-gradient(180deg,#0b0d11,#050608); }
+html[data-chrono="on"] .care-live .care-title { color: #f1f5f9; letter-spacing: .04em; text-shadow: 0 1px 0 #000, 0 0 18px rgba(241,245,249,.15); }
+html[data-chrono="on"] .care-live .care-title span { color: #facc15 !important; }
+html[data-chrono="on"] .care-live .care-beacon { color: #ef4444 !important; letter-spacing: .22em; font-size: 10px; font-weight: 800; }
+html[data-chrono="on"] .care-live > nav { background: linear-gradient(180deg,#0d1015,#06080b) !important; border-bottom: 1px solid rgba(241,245,249,.12); box-shadow: inset 0 -1px 0 rgba(200,16,46,.35); }
+html[data-chrono="on"] .care-live > nav button { background: linear-gradient(180deg,#15181e,#090a0d); color: #cbd5e1; box-shadow: inset 0 0 0 1px rgba(241,245,249,.12); transition: transform .15s ease; }
+html[data-chrono="on"] .care-live > nav button:active { transform: scale(.96); }
+html[data-chrono="on"] .care-live > nav .care-tab-on { background: linear-gradient(180deg,#e11d48,#9f1239) !important; color: #fff !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 0 14px -4px #e11d48; }
+html[data-chrono="on"] .care-live .rounded-2xl.border { background: linear-gradient(160deg,#12151c,#07080b) !important; border: .5px solid rgba(241,245,249,.16) !important; box-shadow: inset 0 2px 0 -1px rgba(200,16,46,.55), 0 10px 24px -14px #000; }
+html[data-chrono="on"] .care-live .rounded-xl.border { border-color: rgba(241,245,249,.14) !important; background: rgba(255,255,255,.02); }
+html[data-chrono="on"] .care-live .bg-primary { background: linear-gradient(180deg,#e11d48,#9f1239) !important; color: #fff !important; }
+html[data-chrono="on"] .care-live .text-primary { color: #facc15 !important; }
+html[data-chrono="on"] .care-live button:active { transform: scale(.97); }
