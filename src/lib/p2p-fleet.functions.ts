@@ -11,13 +11,18 @@ async function readConfig(supabase: any): Promise<FleetConfig> {
   return { ...DEFAULT_FLEET, ...((data?.value ?? {}) as Partial<FleetConfig>) };
 }
 
+/** Member's BEP-20 USDT pay-to wallet: prefer shared (flex) wallets, fall back to any enabled BEP-20 wallet. */
+async function fleetWallet(context: { supabase: any; userId: string }) {
+  const all = (await memberWalletsFor(context)).filter(w => w.enabled && w.address && w.network === 'BEP20' && (!w.asset || w.asset === 'USDT'));
+  return all.find(w => walletFits(w, 'flex')) ?? all[0];
+}
+
 /** Public-to-members: active Official Desk merchants plus the member's assigned BEP-20 wallet. */
 export const getFleetDesk = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const cfg = await readConfig(context.supabase);
-  const wallets = (await memberWalletsFor(context)).filter(w => w.enabled && w.address && w.network === 'BEP20' && walletFits(w, 'flex'));
-  const w = wallets[0];
+  const w = await fleetWallet(context);
   const { data: orders } = await context.supabase.from('bix_fleet_orders').select('id,merchant,price,usdt,bix,status,tx_hash,created_at,note').eq('user_id', context.userId).order('created_at', { ascending: false }).limit(10);
-  return { enabled: cfg.enabled && !!w, merchants: cfg.enabled ? fleetMerchants(cfg) : [], wallet: w ? { code: w.code, address: w.address } : null, orders: orders ?? [], minUsdt: cfg.minUsdt };
+  return { enabled: cfg.enabled, merchants: cfg.enabled ? fleetMerchants(cfg) : [], wallet: w ? { code: w.code, address: w.address } : null, orders: orders ?? [], minUsdt: cfg.minUsdt };
 });
 
 async function creditOrder(admin: any, order: any, cfg: FleetConfig) {
@@ -47,7 +52,7 @@ export const submitFleetBuy = createServerFn({ method: 'POST' }).middleware([req
     if (!cfg.enabled) throw new Error('Official Desk is closed right now.');
     const m = fleetMerchants(cfg).find(x => x.name === data.merchant);
     if (!m) throw new Error('This merchant is no longer active. Pick another.');
-    const w = (await memberWalletsFor(context)).find(x => x.enabled && x.address && x.network === 'BEP20' && walletFits(x, 'flex'));
+    const w = await fleetWallet(context);
     if (!w) throw new Error('No BEP-20 wallet is available.');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const hash = data.txHash.toLowerCase();
