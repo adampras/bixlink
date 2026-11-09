@@ -8051,3 +8051,16 @@ html[data-chrono="on"] .care-live button:active { transform: scale(.97); }
 .hub-midnight .hub-group .hub-tile .text-xs{font-weight:600!important;font-size:11.5px}
 .hub-midnight .hub-group .hub-tile .text-\[10px\]{opacity:.7}
 .hub-midnight .hub-badge{background:color-mix(in oklab,var(--tone) 85%,transparent)!important;color:var(--primary-foreground)!important;border:0!important}
+
+/* HUB futuristic neon + cinematic entrance */
+.hub-midnight{background:radial-gradient(90% 40% at 50% 0%,color-mix(in oklab,var(--primary) 18%,transparent),transparent 70%),linear-gradient(180deg,oklch(.13 .03 270),oklch(.07 .02 270))!important}
+.hub-midnight .hub-title{text-shadow:0 0 18px color-mix(in oklab,var(--primary) 60%,transparent)}
+.hub-midnight .hub-group{border-color:color-mix(in oklab,var(--tone) 55%,transparent)!important;box-shadow:0 0 0 1px color-mix(in oklab,var(--tone) 20%,transparent),0 0 22px -8px var(--tone),inset 0 0 24px -16px var(--tone)!important;animation:hub-cine .6s cubic-bezier(.2,.8,.2,1) both}
+.hub-midnight .hub-group:nth-of-type(2){animation-delay:.08s}.hub-midnight .hub-group:nth-of-type(3){animation-delay:.16s}.hub-midnight .hub-group:nth-of-type(4){animation-delay:.24s}
+.hub-midnight .hub-group-head{text-shadow:0 0 10px var(--tone)}
+.hub-midnight .hub-group .hub-tile{border-color:color-mix(in oklab,var(--tone) 30%,transparent)!important}
+.hub-midnight .hub-group .hub-tile:active{box-shadow:0 0 16px -4px var(--tone)!important}
+.hub-midnight .hub-group .hub-emblem{box-shadow:0 0 14px -4px var(--tone),inset 0 0 8px -4px var(--tone)!important}
+.hub-midnight .hub-group .hub-emblem svg{filter:drop-shadow(0 0 4px var(--tone))!important}
+@keyframes hub-cine{from{opacity:0;transform:translateY(14px) scale(.98);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+@media (prefers-reduced-motion:reduce){.hub-midnight .hub-group{animation:none}}

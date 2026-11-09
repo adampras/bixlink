@@ -61,7 +61,6 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
     setDrag(Math.max(0, pos));
   };
   useEffect(() => { if (!open) setDrag(0); }, [open]);
-  const recentItems = recent.map(id => items.find(i => i.id === id)).filter((i): i is typeof items[number] => !!i);
   return <>
     <button type="button" onClick={() => setOpen(true)} aria-label="Open BIX HUB" className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}>
       <LayoutGrid size={19} className="shrink-0"/><span>HUB</span>
@@ -72,12 +71,7 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
         <div className="hub-grabber" aria-hidden/>
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest">BIX HUB</SheetTitle></SheetHeader>
         </div>
-        {matrix && <label className="hub-search mt-2 flex items-center gap-2 rounded-2xl border border-border bg-background/40 px-3 py-2"><Search size={15} className="text-muted-foreground"/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari layanan… (ride, gold, call)" aria-label="Cari layanan" className="w-full bg-transparent text-sm outline-none"/></label>}
-        {matrix && q.trim() ? (() => { const k = q.trim().toLowerCase(); const hits = items.filter(i => `${i.label} ${i.note} ${i.id}`.toLowerCase().includes(k)); return <section className="hub-group hub-tone-gold mt-3">{hits.length ? <div className="grid grid-cols-3 gap-2">{hits.map((i, n) => tile(i, n))}</div> : <p className="py-6 text-center text-xs text-muted-foreground">Tidak ditemukan.</p>}</section>; })() : <>
-        {recentItems.length > 0 && <section className="hub-group hub-tone-gold hub-recent mt-2">
-          <h3 className="hub-group-head"><span>{matrix ? 'Terakhir dibuka' : 'Last opened'}</span></h3>
-          <div className="grid grid-cols-3 gap-2">{recentItems.map((i, n) => tile(i, n, true))}</div>
-        </section>}
+        {<>
         {matrix ? PILLARS.map((p, pi) => { const list = items.filter(i => pillarOf(i.id) === p.id); if (!list.length) return null; const tone = ['emerald', 'gold', 'violet', 'silver'][pi];
           return <section key={p.id} className={`hub-group hub-tone-${tone} mt-3`}>
           <h3 className="hub-group-head"><span>{p.label}</span><em>{p.note}</em></h3>
