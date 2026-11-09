@@ -7852,3 +7852,14 @@ html[data-chrono="on"] [role="dialog"] .bg-yellow-500\/10 {
 @media (prefers-reduced-motion: reduce) {
   html[data-chrono="on"] .hub-tile, html[data-chrono="on"] .hub-tile::before { transition: none; }
 }
+
+/* HUB 3D depth: tiles lift, press-shrink and flash a diagonal glint on touch (all ecosystems). */
+.hub-tile { position: relative; overflow: hidden; transform: translateZ(0); transition: transform .18s cubic-bezier(.2,.8,.3,1), box-shadow .18s ease; box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 -2px 0 rgba(0,0,0,.35) inset, 0 8px 16px -10px rgba(0,0,0,.7); -webkit-tap-highlight-color: transparent; }
+.hub-tile .hub-emblem { transition: transform .18s ease; filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
+.hub-tile > .hub-glint { display: none; }
+.hub-tile::before { content: ""; position: absolute; inset: -20% -60%; pointer-events: none; z-index: 2; background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.38) 50%, transparent 58%); transform: translateX(-70%); opacity: 0; animation: none !important; transition: none; }
+.hub-tile:active { transform: scale(.94) translateY(1px) !important; box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 2px 4px rgba(0,0,0,.45) inset, 0 3px 8px -6px rgba(0,0,0,.6) !important; }
+.hub-tile:active .hub-emblem { transform: scale(.92); }
+.hub-tile:active::before { opacity: 1; transform: translateX(70%); transition: transform .45s ease, opacity .1s; }
+@media (hover: hover) { .hub-tile:hover { transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) { .hub-tile, .hub-tile::before, .hub-tile .hub-emblem { transition: none !important; } .hub-tile:active { transform: none !important; } }
