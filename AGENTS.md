@@ -64,3 +64,5 @@
 - BIXGO cancellations use a row-locked reasoned RPC before trip start, releasing derived holds without extra refund credits; GPS writes are assigned-driver-only and floating maps must label stale data.
 - Ecosystem search metadata uses a shared leaf-head helper and public /ecosystem overview; crawler guides exclude member-only surfaces and describe preview services without implying custody or guaranteed outcomes.
 - Chronograph NETWORK and BIX PAY styling uses semantic RM tokens under the existing server-decided html[data-chrono] switch; targeted presentation hooks preserve classic styling and ledger behavior.
+
+- BIX CALL roster and member picker share a Radix body-portal sheet with opaque messenger tokens and internal list scrolling, preventing chat wallpapers and shell transforms from overlapping member details.
