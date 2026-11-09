@@ -7955,3 +7955,17 @@ html[data-chrono="on"] .bixcall-pip { border-color: #f1f1ee !important; box-shad
 .app-splash .splash-emblem img { border-radius: 50%; border: 3px solid var(--rm-quartz); box-shadow: 0 0 0 2px var(--rm-crimson), 0 0 0 6px #0b0b0d, 0 0 34px rgba(200,16,46,.45) !important; }
 .app-splash .splash-emblem .splash-word { background: linear-gradient(180deg,#fff,#e2e8f0 55%,#94a3b8); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .rm-splash-preview { border-radius: 18px; background: #07080a; border: 1px solid rgba(241,241,238,.3); box-shadow: inset 0 0 0 3px #0b0b0d, 0 0 0 1px #c8102e, 0 18px 40px -18px rgba(200,16,46,.5); }
+
+/* HOME polish — v2 design path only, presentation only */
+html[data-design="v2"] :is(.terminal-market,.internal-market,.terminal-balance,.terminal-kpi) { border-radius: 18px; border-color: color-mix(in oklab, var(--foreground) 12%, transparent); box-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 8%, transparent) inset, 0 18px 40px -24px color-mix(in oklab, var(--background) 90%, transparent); }
+html[data-design="v2"] .terminal-watchlist .terminal-asset { border-bottom: 1px solid color-mix(in oklab, var(--foreground) 7%, transparent); padding-block: 10px; }
+html[data-design="v2"] .terminal-watchlist .terminal-asset:last-child { border-bottom: 0; }
+html[data-design="v2"] .terminal-market-head { padding-bottom: 12px; margin-bottom: 4px; border-bottom: 1px solid color-mix(in oklab, var(--chart-3) 22%, transparent); }
+html[data-design="v2"] .internal-market-trade a { border-radius: 12px; transition: transform .15s ease, filter .15s ease; }
+html[data-design="v2"] .internal-market-trade a:active { transform: scale(.97); filter: brightness(1.1); }
+html[data-design="v2"] .hub-card { border-radius: 16px; box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent), 0 14px 30px -18px color-mix(in oklab, var(--background) 95%, transparent); transition: transform .18s ease; }
+html[data-design="v2"] .hub-card:active { transform: scale(.97); }
+html[data-design="v2"] .terminal-kpi strong { letter-spacing: -.01em; }
+html[data-design="v2"] main > section + section { border-color: color-mix(in oklab, var(--foreground) 7%, transparent); }
+@media (max-width: 480px) { html[data-design="v2"] :is(.terminal-market,.internal-market) { padding: 14px; } html[data-design="v2"] main > section { padding-inline: 14px; } }
+@media (prefers-reduced-motion: reduce) { html[data-design="v2"] :is(.hub-card,.internal-market-trade a) { transition: none; } }
