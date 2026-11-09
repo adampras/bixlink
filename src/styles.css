@@ -7947,3 +7947,11 @@ html[data-chrono="on"] .bixcall-pip { border-color: #f1f1ee !important; box-shad
 .app-splash__caption::after { content:""; width: min(220px,60vw); height: 3px; border-radius: 3px; background: linear-gradient(90deg,var(--rm-kinetic),var(--rm-canary),#e11d48); transform-origin:left; animation: splash-progress 2.4s ease-out both; }
 .app-splash__skip { background: linear-gradient(180deg,#1a1c21,#07080a) !important; border: .5px solid rgba(241,241,238,.35) !important; box-shadow: inset 0 -2px 0 var(--rm-crimson) !important; border-radius: 8px !important; color: #e2e8f0 !important; }
 @media (prefers-reduced-motion: reduce) { .app-splash .aix-emblem::before, .app-splash__caption::after { animation: none; } }
+
+/* ===== Splash · RM 50-04 fallback emblem + admin preview ===== */
+.app-splash .splash-emblem { display: grid; justify-items: center; padding: 28px 26px 22px; border-radius: 34% / 26%; background: linear-gradient(160deg,#16181d,#07080a); border: 1px solid rgba(241,241,238,.28); box-shadow: inset 0 0 0 4px #0b0b0d, inset 0 0 0 5px rgba(200,16,46,.55), 0 24px 60px -20px rgba(200,16,46,.45); position: relative; }
+.app-splash .splash-emblem::before, .app-splash .splash-emblem::after { content:""; position:absolute; top: 12px; width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 35%,#f8fafc,#64748b 70%); box-shadow: 0 0 0 1px #0b0b0d; }
+.app-splash .splash-emblem::before { left: 18%; } .app-splash .splash-emblem::after { right: 18%; }
+.app-splash .splash-emblem img { border-radius: 50%; border: 3px solid var(--rm-quartz); box-shadow: 0 0 0 2px var(--rm-crimson), 0 0 0 6px #0b0b0d, 0 0 34px rgba(200,16,46,.45) !important; }
+.app-splash .splash-emblem .splash-word { background: linear-gradient(180deg,#fff,#e2e8f0 55%,#94a3b8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.rm-splash-preview { border-radius: 18px; background: #07080a; border: 1px solid rgba(241,241,238,.3); box-shadow: inset 0 0 0 3px #0b0b0d, 0 0 0 1px #c8102e, 0 18px 40px -18px rgba(200,16,46,.5); }
