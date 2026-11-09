@@ -74,6 +74,10 @@ function AddMembers({ g, onClose }: { g: Group; onClose: () => void }) {
     setBusy(key); const { error } = await supabase.rpc('bix_group_add_member', { p_group: g.id, p_query: query });
     setBusy(''); setDone(d => ({ ...d, [key]: error ? error.message : 'ok' }));
   };
+  const [pick, setPick] = useState<Record<string, string>>({});
+  const toggle = (c: Cand) => setPick(p => { const n = { ...p }; if (n[c.id]) delete n[c.id]; else n[c.id] = c.code; return n; });
+  const addAll = async () => { for (const [id, code] of Object.entries(pick)) await add(code, id); setPick({}); };
+  const nPick = Object.keys(pick).length;
   const manual = q.trim().length >= 3 && list.length === 0;
   return <div className="bx-grp-sheet" role="dialog" aria-label="Tambah anggota">
     <div className="bx-grp-sheet-box">
@@ -83,6 +87,7 @@ function AddMembers({ g, onClose }: { g: Group; onClose: () => void }) {
       <ul className="bx-grp-cands">
         {tab === 'Jaringan' && net === null && <li className="bx-grp-empty">Memuat jaringan…</li>}
         {list.map(c => { const s = done[c.id]; return <li key={c.id}>
+          <input type="checkbox" aria-label={`Pilih ${c.name}`} disabled={s === 'ok'} checked={!!pick[c.id]} onChange={() => toggle(c)} style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}/>
           <span className="bx-grp-av" style={{ width: 36, height: 36 }}>{c.name.slice(0, 1).toUpperCase()}</span>
           <span className="bx-grp-meta"><b>{c.name}</b><small>{c.code}{c.src === 'Jaringan' ? (c.depth === 0 ? ' · Upline' : ` · L${c.depth}`) : ''}{s && s !== 'ok' ? ` · ${s}` : ''}</small></span>
           <button type="button" className="bx-grp-btn is-alt" disabled={s === 'ok' || busy === c.id} onClick={() => void add(c.code, c.id)}>{s === 'ok' ? <Check size={14}/> : <UserPlus size={14}/>}</button>
@@ -91,6 +96,7 @@ function AddMembers({ g, onClose }: { g: Group; onClose: () => void }) {
         {manual && <li><span className="bx-grp-meta"><b>Tambah “{q.trim()}”</b><small>{done['manual'] && done['manual'] !== 'ok' ? done['manual'] : 'BIX-ID atau @username'}</small></span>
           <button type="button" className="bx-grp-btn is-alt" disabled={done['manual'] === 'ok'} onClick={() => void add(q.trim(), 'manual')}>{done['manual'] === 'ok' ? <Check size={14}/> : <UserPlus size={14}/>}</button></li>}
       </ul>
+      {nPick > 0 && <button type="button" className="bx-grp-btn" style={{ width: '100%', marginTop: 8 }} disabled={!!busy} onClick={() => void addAll()}><UserPlus size={14}/> Tambahkan {nPick} anggota</button>}
     </div>
   </div>;
 }
