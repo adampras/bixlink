@@ -10,7 +10,8 @@ function partsIn(zone: string, d: Date) {
 const zoneLabel = (zone: string) => zone.split('/').pop()?.replace(/_/g, ' ') ?? zone;
 const fmt = (ms: number) => { const t = Math.max(0, ms); const m = Math.floor(t / 60000), s = Math.floor(t / 1000) % 60, c = Math.floor(t / 10) % 100; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(c).padStart(2,'0')}`; };
 
-export function ChronoWatchModal({ onClose }: { onClose: () => void }) {
+export type ChronoAction = 'deposit' | 'withdraw' | 'pay';
+export function ChronoWatchModal({ onClose, onAction }: { onClose: () => void; onAction?: (a: ChronoAction) => void }) {
   const [now, setNow] = useState(() => new Date());
   const [zone, setZone] = useState('Asia/Jakarta');
   const [run, setRun] = useState(false);
@@ -123,12 +124,12 @@ export function ChronoWatchModal({ onClose }: { onClose: () => void }) {
       <div className="rmw-readout">
         <div><small>WAKTU LOKAL · {zoneLabel(zone)}</small><b className="numeric">{local}</b></div>
         <div><small>JAKARTA · WIB</small><b className="numeric">{jakarta}</b></div>
-        <div><small>CHRONO{split !== null ? ' · SPLIT' : ''}</small><b className="numeric">{fmt(split ?? elapsed)}</b></div>
+        <div><small>ZONA</small><b className="numeric">{zoneLabel(zone)}</b></div>
       </div>
       <div className="rmw-actions">
-        <button type="button" onClick={toggle} className="is-red">{run ? 'STOP' : 'START'}</button>
-        <button type="button" onClick={doSplit} className="is-yellow">SPLIT</button>
-        <button type="button" onClick={reset} disabled={run} className="is-green">RESET</button>
+        <button type="button" onClick={() => { onClose(); onAction?.('deposit'); }} className="is-green">DEPOSIT</button>
+        <button type="button" onClick={() => { onClose(); onAction?.('withdraw'); }} className="is-red">WITHDRAWAL</button>
+        <button type="button" onClick={() => { onClose(); onAction?.('pay'); }} className="is-yellow">BIXPAY</button>
       </div>
     </div>
   </div>, document.body);
@@ -152,10 +153,10 @@ export function ChronoBadge({ tone = '#ef4444', label }: { tone?: string; label:
 }
 
 /** Wrap any mini chrono ornament to make it open the large watch on tap. */
-export function ChronoTap({ children, className = '' }: { children: ReactNode; className?: string }) {
+export function ChronoTap({ children, className = '', onAction }: { children: ReactNode; className?: string; onAction?: (a: ChronoAction) => void }) {
   const [open, setOpen] = useState(false);
   return <>
     <button type="button" className={`chrono-tap ${className}`} onClick={() => setOpen(true)} aria-label="Buka jam RM 50-04">{children}</button>
-    {open && <ChronoWatchModal onClose={() => setOpen(false)}/>}
+    {open && <ChronoWatchModal onClose={() => setOpen(false)} onAction={onAction}/>}
   </>;
 }
