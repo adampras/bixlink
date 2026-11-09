@@ -7863,3 +7863,32 @@ html[data-chrono="on"] [role="dialog"] .bg-yellow-500\/10 {
 .hub-tile:active::before { opacity: 1; transform: translateX(70%); transition: transform .45s ease, opacity .1s; }
 @media (hover: hover) { .hub-tile:hover { transform: translateY(-2px); } }
 @media (prefers-reduced-motion: reduce) { .hub-tile, .hub-tile::before, .hub-tile .hub-emblem { transition: none !important; } .hub-tile:active { transform: none !important; } }
+
+/* ===== Lux polish batch: HUB · PROFIT · PROFILE · STAKE (Admin 1 track only) ===== */
+html[data-design="v2"] .hub-grabber { width: 52px; height: 4px; border-radius: 99px; background: linear-gradient(90deg, transparent, #facc15aa, transparent); }
+html[data-design="v2"] .hub-title { letter-spacing: .32em; background: linear-gradient(180deg, #fff, #cbd5e1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+html[data-design="v2"] .hub-search { background: rgba(8,10,14,.75) !important; border-color: rgba(148,163,184,.22) !important; transition: border-color .2s, box-shadow .2s; }
+html[data-design="v2"] .hub-search:focus-within { border-color: #facc1588 !important; box-shadow: 0 0 0 3px rgba(250,204,21,.08); }
+html[data-design="v2"] .hub-group-head span { padding-left: 8px; border-left: 2px solid currentColor; }
+html[data-design="v2"] .hub-tile .text-xs { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html[data-design="v2"] .hub-emblem { box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 .5px rgba(148,163,184,.35); }
+
+html[data-design="v2"] .profit-metric { background: linear-gradient(160deg, rgba(17,22,32,.92), rgba(8,10,14,.95)) !important; border: .5px solid rgba(148,163,184,.22) !important; border-radius: 16px !important; }
+html[data-design="v2"] .profit-metric strong { color: #f8fafc; font-variant-numeric: tabular-nums; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+html[data-design="v2"] .profit-withdraw__amounts b { color: #facc15; font-variant-numeric: tabular-nums; }
+html[data-design="v2"] .profit-withdraw__btn { background: linear-gradient(180deg, #fde68a, #d4a017) !important; color: #1a1205 !important; transition: transform .12s; }
+html[data-design="v2"] .profit-withdraw__btn:active { transform: scale(.97); }
+html[data-design="v2"] .profit-position { border-left: 2px solid #10b981 !important; background: rgba(17,22,32,.85) !important; border-radius: 14px !important; }
+
+html[data-design="v2"] .profile-page .profile-referral, html[data-design="v2"] .profile-page #bixp { background: linear-gradient(160deg, rgba(17,22,32,.92), rgba(8,10,14,.96)) !important; border: .5px solid rgba(250,204,21,.25) !important; border-radius: 18px !important; }
+html[data-design="v2"] .profile-code b { color: #facc15; letter-spacing: .14em; font-variant-numeric: tabular-nums; }
+html[data-design="v2"] .profile-page .arena-cap i { background: linear-gradient(90deg, #d4a017, #fde68a); box-shadow: 0 0 10px rgba(250,204,21,.4); }
+html[data-design="v2"] .profile-actions > a, html[data-design="v2"] .profile-actions > button { background: rgba(17,22,32,.8) !important; border: .5px solid rgba(148,163,184,.2) !important; border-radius: 14px !important; transition: transform .12s, border-color .2s; }
+html[data-design="v2"] .profile-actions > a:active, html[data-design="v2"] .profile-actions > button:active { transform: scale(.98); border-color: rgba(250,204,21,.45) !important; }
+html[data-design="v2"] .profile-action-icon { box-shadow: 0 0 0 .5px rgba(148,163,184,.4) inset; }
+html[data-design="v2"] .profile-action-arrow { color: #facc15aa; }
+
+html[data-design="v2"] .stake-metric dd { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.01em; }
+html[data-design="v2"] .stake-metric + .stake-metric { border-left: .5px solid rgba(148,163,184,.2); }
+html[data-design="v2"] .stake-request { border: .5px solid rgba(148,163,184,.2) !important; border-radius: 16px !important; background: rgba(17,22,32,.85) !important; }
+html[data-design="v2"] .stake-progress i { background: linear-gradient(90deg, #10b981, #6ee7b7); box-shadow: 0 0 8px rgba(16,185,129,.5); }
