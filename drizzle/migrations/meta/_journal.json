@@ -1317,6 +1317,13 @@
       "when": 1794221636951,
       "tag": "0187_hold_network_bonus_until_deposit",
       "breakpoints": true
+    },
+    {
+      "idx": 188,
+      "version": "7",
+      "when": 1794223782883,
+      "tag": "0188_bix_group_roster",
+      "breakpoints": true
     }
   ]
 }

@@ -4340,6 +4340,11 @@ export type Database = {
       }
       bix_group_is_member: { Args: { _g: string }; Returns: boolean }
       bix_group_join: { Args: { p_code: string }; Returns: string }
+      bix_group_remove_member: {
+        Args: { p_group: string; p_user: string }
+        Returns: undefined
+      }
+      bix_group_roster: { Args: { p_group: string }; Returns: Json }
       bix_group_set_avatar: {
         Args: { p_group: string; p_path: string }
         Returns: undefined

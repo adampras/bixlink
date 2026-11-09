@@ -10,6 +10,7 @@ import { readContacts } from '@/lib/bix-contacts';
 type Group = { id: string; name: string; about: string; code: string; live_code: string | null; owner_id: string; avatar_path: string | null };
 type Msg = { id: string; sender_id: string; name: string; body: string; created_at: string };
 type Cand = { id: string; code: string; name: string; src: 'Kontak' | 'Jaringan'; depth?: number };
+type Mem = { id: string; code: string | null; name: string; host: boolean };
 const COLS = 'id,name,about,code,live_code,owner_id,avatar_path';
 const newCode = (n = 6) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
 
@@ -63,7 +64,31 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
   </section>;
 }
 
-function AddMembers({ g, onClose }: { g: Group; onClose: () => void }) {
+function MembersSheet({ g, me, roster, onClose, onAdd, onReload }: { g: Group; me: string; roster: Mem[]; onClose: () => void; onAdd: () => void; onReload: () => void }) {
+  const host = g.owner_id === me; const [err, setErr] = useState('');
+  const remove = async (m: Mem) => {
+    if (!confirm(`Keluarkan @${m.name} dari grup?`)) return;
+    const { error } = await supabase.rpc('bix_group_remove_member', { p_group: g.id, p_user: m.id });
+    if (error) setErr(error.message); else onReload();
+  };
+  return <div className="bx-grp-sheet" role="dialog" aria-label="Anggota grup">
+    <div className="bx-grp-sheet-box">
+      <header><b>{roster.length} Anggota · {g.name}</b><button type="button" aria-label="Tutup" onClick={onClose}><X size={18}/></button></header>
+      {g.about && <p className="bx-grp-empty" style={{ textAlign: 'left' }}>{g.about}</p>}
+      {err && <p className="bx-grp-msg">{err}</p>}
+      {host && <button type="button" className="bx-grp-btn" style={{ width: '100%', marginBottom: 8 }} onClick={onAdd}><UserPlus size={14}/> Tambah anggota</button>}
+      <ul className="bx-grp-cands">
+        {roster.map(m => <li key={m.id}>
+          <span className="bx-grp-av" style={{ width: 36, height: 36 }}>{m.name.slice(0, 1).toUpperCase()}</span>
+          <span className="bx-grp-meta"><b>@{m.name}{m.id === me ? ' (Anda)' : ''}</b><small>{m.code ? `BIX-ID ${m.code}` : 'BIX-ID —'} · {m.host ? '👑 Host' : 'Anggota'}</small></span>
+          {host && !m.host && <button type="button" className="bx-grp-btn is-alt" aria-label={`Keluarkan ${m.name}`} onClick={() => void remove(m)}><X size={14}/></button>}
+        </li>)}
+      </ul>
+    </div>
+  </div>;
+}
+
+function AddMembers({ g, inGroup, onClose }: { g: Group; inGroup: Set<string>; onClose: () => void }) {
   const [tab, setTab] = useState<'Kontak' | 'Jaringan'>(() => readContacts().length ? 'Kontak' : 'Jaringan');
   const [net, setNet] = useState<Cand[] | null>(null); const [q, setQ] = useState('');
   const [done, setDone] = useState<Record<string, string>>({}); const [busy, setBusy] = useState('');
@@ -86,10 +111,10 @@ function AddMembers({ g, onClose }: { g: Group; onClose: () => void }) {
       <label className="bx-grp-search"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari nama, BIX-ID atau @username"/></label>
       <ul className="bx-grp-cands">
         {tab === 'Jaringan' && net === null && <li className="bx-grp-empty">Memuat jaringan…</li>}
-        {list.map(c => { const s = done[c.id]; return <li key={c.id}>
+        {list.map(c => { const s = inGroup.has(c.id) ? 'ok' : done[c.id]; return <li key={c.id}>
           <input type="checkbox" aria-label={`Pilih ${c.name}`} disabled={s === 'ok'} checked={!!pick[c.id]} onChange={() => toggle(c)} style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}/>
           <span className="bx-grp-av" style={{ width: 36, height: 36 }}>{c.name.slice(0, 1).toUpperCase()}</span>
-          <span className="bx-grp-meta"><b>{c.name}</b><small>{c.code}{c.src === 'Jaringan' ? (c.depth === 0 ? ' · Upline' : ` · L${c.depth}`) : ''}{s && s !== 'ok' ? ` · ${s}` : ''}</small></span>
+          <span className="bx-grp-meta"><b>{c.name}</b><small>{c.code}{c.src === 'Jaringan' ? (c.depth === 0 ? ' · Upline' : ` · L${c.depth}`) : ''}{s === 'ok' ? ' · ✓ Sudah di grup' : s ? ` · ${s}` : ''}</small></span>
           <button type="button" className="bx-grp-btn is-alt" disabled={s === 'ok' || busy === c.id} onClick={() => void add(c.code, c.id)}>{s === 'ok' ? <Check size={14}/> : <UserPlus size={14}/>}</button>
         </li>; })}
         {!manual && list.length === 0 && (tab === 'Kontak' || net) && <li className="bx-grp-empty">{tab === 'Kontak' ? 'Belum ada kontak tersimpan.' : 'Belum ada anggota jaringan.'}</li>}
@@ -106,6 +131,9 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
   const [live, setLive] = useState<string | null>(null); const [copied, setCopied] = useState(false); const [err, setErr] = useState('');
   const host = g.owner_id === me; const end = useRef<HTMLDivElement>(null); const file = useRef<HTMLInputElement>(null);
   const [adding, setAdding] = useState(!!fresh && g.owner_id === me);
+  const [roster, setRoster] = useState<Mem[]>([]); const [showMem, setShowMem] = useState(false);
+  const loadRoster = async () => { const { data } = await supabase.rpc('bix_group_roster', { p_group: g.id }); setRoster((data as Mem[] | null) ?? []); };
+  useEffect(() => { void loadRoster(); }, [g.id, adding]); // eslint-disable-line react-hooks/exhaustive-deps
   const setPhoto = async (f?: File) => {
     if (!f) return; setErr('');
     try {
@@ -152,7 +180,7 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
         {host && <button type="button" className="bx-grp-cam" aria-label="Ganti foto grup" onClick={() => file.current?.click()}><Camera size={11}/></button>}
         <input ref={file} type="file" accept="image/*" hidden onChange={e => { void setPhoto(e.target.files?.[0]); e.target.value = ''; }}/>
       </span>
-      <div><b>{g.name}</b><small>Kode {g.code}</small></div>
+      <button type="button" className="bx-grp-room-title" aria-label="Lihat anggota grup" onClick={() => setShowMem(true)} style={{ all: 'unset', cursor: 'pointer', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}><b style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.name}</b><small>{roster.length} anggota · Kode {g.code}</small></button>
       <button type="button" aria-label="Copy invite code" onClick={async () => { if (await copyText(g.code)) { setCopied(true); setTimeout(() => setCopied(false), 1600); } }}>{copied ? <Check size={16}/> : <Copy size={16}/>}</button>
       {g.live_code ? <button type="button" className="is-live" aria-label="Join Live Class" onClick={() => setLive(g.live_code)}><Radio size={16}/></button>
         : host && <button type="button" aria-label="Start Live Class" onClick={() => void startLive()}><Radio size={16}/></button>}
@@ -172,6 +200,8 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
       <input className="form-input" placeholder="Write a lesson or message…" value={text} maxLength={2000} onChange={e => setText(e.target.value)}/>
       <button type="submit" aria-label="Send" disabled={!text.trim()}><Send size={18}/></button>
     </form>
-    {adding && <AddMembers g={g} onClose={() => setAdding(false)}/>}
+    {roster.length > 0 && <button type="button" className="bx-grp-livebar" onClick={() => setShowMem(true)}><Users size={14}/> {roster.slice(0, 4).map(m => '@' + m.name).join(', ')}{roster.length > 4 ? ` +${roster.length - 4}` : ''}</button>}
+    {showMem && <MembersSheet g={g} me={me} roster={roster} onClose={() => setShowMem(false)} onAdd={() => { setShowMem(false); setAdding(true); }} onReload={() => void loadRoster()}/>}
+    {adding && <AddMembers g={g} inGroup={new Set(roster.map(m => m.id))} onClose={() => setAdding(false)}/>}
   </section>;
 }
