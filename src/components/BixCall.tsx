@@ -279,12 +279,13 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     return () => clearInterval(t);
   }, [link, ear]);
   // Callee rings at once; caller hears the tuut-tuut ringback while Calling/Ringing.
+  // One continuous tone loop: Calling → Ringing must not restart it (that caused overlapping tuuts).
+  const toneOn = ringing && !ringMuted && !(call.role === 'caller' && phase === 'offline');
   useEffect(() => {
-    if (!ringing || ringMuted) return;
-    if (call.role === 'caller' && phase === 'offline') return;
+    if (!toneOn) return;
     const stop = call.role === 'callee' ? startChosenRingtone() : startRingback();
     return () => { stop(); };
-  }, [ringing, ringMuted, call.role, phase]);
+  }, [toneOn, call.role]);
   // Incoming call vibration: keeps buzzing in a WA-style rhythm until answered/declined, even if the ringtone is muted.
   useEffect(() => {
     if (!ringing || call.role !== 'callee') return;

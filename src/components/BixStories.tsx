@@ -228,7 +228,8 @@ function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: '
       : <input className="comm-input" value={text} onChange={e => setText(e.target.value)} maxLength={200} placeholder="Keterangan (opsional)"/>}
     {err && <p className="comm-err">{err}</p>}
     {status && <p className="comm-busy">{status}</p>}
-    <button type="button" className="comm-save" disabled={busy || (mode === 'text' ? !text.trim() : !file)} onClick={() => void post()}>{busy ? 'Memasang…' : 'Pasang Story'}</button>
+    {mode !== 'text' && file && <p className="bx-sc-ready">✓ {mode === 'video' ? 'Video' : 'Foto'} siap disimpan</p>}
+    <button type="button" className="comm-save bx-sc-save" disabled={busy || (mode === 'text' ? !text.trim() : !file)} onClick={() => void post()}>{busy ? 'Menyimpan…' : 'Simpan & Pasang Story'}</button>
     {mode === 'text' && text.trim() && <button type="button" className="ghost" onClick={() => void quickStatus()}>Set as profile status only</button>}
     <small className="bx-sc-hint">Visible to chat contacts, network team, and mutual followers. Automatically disappears after 24 hours · max 10 active stories.</small>
   </div></div>;

@@ -8425,3 +8425,14 @@ html[data-color-mode="light"] .stake-compact.stake-compact.stake-compact.stake-c
 .hub-midnight .hub-group .hub-tile:active{transform:scale(.9)!important;border-color:var(--tone)!important;box-shadow:0 0 0 1px var(--tone),0 0 22px -4px var(--tone)!important;transition-duration:.08s!important}
 .hub-midnight .hub-group .hub-tile:active::after{opacity:1;transition-duration:.05s}
 .hub-midnight .hub-group .hub-tile:active .hub-emblem{transform:translateY(-2px) scale(1.12);animation:none}
+
+/* BIX CALL: QR contact card (portal, square QR), save-contact, story save */
+.bc-qr-overlay{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:16px;background:rgb(4 4 8/.88);backdrop-filter:blur(8px)}
+.bc-qr-overlay .bc-qr-card{max-height:92dvh;overflow-y:auto}
+.bc-qr-card .pay-qr-plate{width:248px;height:248px;margin-inline:auto;padding:14px;background:#fff;border-radius:16px;box-sizing:border-box}
+.bc-qr-card svg.bc-qr-svg{width:220px!important;height:220px!important;max-width:none;aspect-ratio:1}
+.bc-save-contact{margin-top:8px;width:100%;min-height:38px;border-radius:999px;font-size:12px;font-weight:800;background:linear-gradient(135deg,#FFD700,#e0b84a);color:#0a0812}
+.bc-save-contact:disabled{background:rgb(16 185 129/.18);color:#6ee7b7;border:1px solid rgb(16 185 129/.4)}
+.bx-sc-ready{font-size:12px;font-weight:700;color:#6ee7b7;text-align:center}
+.bx-sc .bx-sc-save{background:linear-gradient(135deg,#FFE680,#FFD700 50%,#c99a1a)!important;color:#0a0812!important;opacity:1;min-height:46px;font-size:14px}
+.bx-sc .bx-sc-save:disabled{opacity:.45}

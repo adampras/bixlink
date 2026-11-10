@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { createPortal } from 'react-dom';
 const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting', 'newgroup'];
 import { useEffect, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X } from 'lucide-react';
@@ -150,6 +151,13 @@ function CommMenu() {
     {o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }
 
+/** Bare 6-digit numbers are BIX-IDs: 123456 → BIX-123456. */
+const normQuery = (t: string) => /^\d{6}$/.test(t.trim()) ? `BIX-${t.trim()}` : t;
+function SaveContactBtn({ id, name, code }: { id: string; name: string; code?: string | null }) {
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { setSaved(readContacts().some(c => c.id === id)); }, [id]);
+  return <button type="button" className="bc-save-contact" disabled={saved} onClick={() => { addContact({ id, name, code: code ?? '' }); setSaved(true); try { navigator.vibrate?.(15); } catch { /* optional */ } }}>{saved ? '✓ Tersimpan' : '+ Simpan Kontak'}</button>;
+}
 type Found = Peer & { code?: string | null; via?: string };
 const VIA: Record<string, string> = { id: 'BIX-ID', username: 'Username', whatsapp: 'WhatsApp' };
 function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier: Tier | null; onChat: (id: string, name: string) => void }) {
@@ -162,7 +170,7 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
   const find = async (term = q) => {
     const t = term.trim(); if (t.length < 3) return;
     setBusy(true); setQ(t);
-    const { data } = await supabase.rpc('bix_call_find' as never, { p_query: t } as never);
+    const { data } = await supabase.rpc('bix_call_find' as never, { p_query: normQuery(t) } as never);
     setBusy(false); setFound((data as Found | null) ?? null);
     if (data) { const r = [t, ...recent.filter(x => x !== t)].slice(0, 3); setRecent(r); localStorage.setItem('bixcall-recent', JSON.stringify(r)); }
   };
@@ -179,6 +187,7 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
       <span className="min-w-0 flex-1"><b className="block truncate">@{found.name}</b>{found.status_text && <em className="comm-statusline">{found.status_text}</em>}
         <span className="comm-meta">{found.code && <button onClick={() => copy(found.code!)}>{found.code} ⧉</button>}{found.whatsapp && <i>WA connected</i>}{found.via && <small>via {VIA[found.via]}</small>}</span></span>
       {found.user_id === me ? <small>Your account</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
+    {found && found.user_id !== me && <SaveContactBtn id={found.user_id} name={found.name} code={found.code}/>}
   </section>;
 }
 
@@ -246,7 +255,7 @@ function Dialpad({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
   const press = (k: string) => { playDtmf(k); try { navigator.vibrate?.(8); } catch { /* optional */ } setFound(undefined); setNum(n => (n + k).slice(0, 20)); };
   const find = async () => {
     const t = num.trim(); if (t.length < 3) return;
-    setBusy(true); const { data } = await supabase.rpc('bix_call_find' as never, { p_query: t } as never); setBusy(false);
+    setBusy(true); const { data } = await supabase.rpc('bix_call_find' as never, { p_query: normQuery(t) } as never); setBusy(false);
     setFound((data as Found | null) ?? null);
   };
   return <section className="comm-card comm-dial">
@@ -258,6 +267,7 @@ function Dialpad({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
     {found === null && <p className="mt-2 text-center text-xs text-muted-foreground">Member not found.</p>}
     {found && <div className="comm-peer"><BixAvatar userId={found.user_id} name={found.name}/><b className="min-w-0 flex-1 truncate">@{found.name}</b>
       {found.user_id === me ? <small>Your account</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
+    {found && found.user_id !== me && <SaveContactBtn id={found.user_id} name={found.name} code={found.code}/>}
   </section>;
 }
 
@@ -628,10 +638,10 @@ function ContactQr() {
   };
   return <>
     <button type="button" className="bc-qr-btn" aria-label="QR kontak BIX-ID" onClick={() => { setMsg(''); setHit(null); setOpen(true); }}><QrCode size={18}/></button>
-    {open && <div className="fixed inset-0 z-50 grid place-items-center bg-background/90 p-4 backdrop-blur" onClick={() => setOpen(false)}>
+    {open && createPortal(<div className="bc-qr-overlay" onClick={() => setOpen(false)}>
       <div role="dialog" aria-label="QR kontak" className="bc-qr-card" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between"><b className="font-display text-sm tracking-widest">BIX CALL · QR KONTAK</b><button type="button" aria-label="Close" onClick={() => setOpen(false)}><X size={18}/></button></div>
-        <div className="pay-qr-plate mt-4">{code ? <QRCodeSVG value={code} size={200} level="M" marginSize={0}/> : <div className="grid size-[200px] place-items-center text-xs text-muted-foreground">Memuat…</div>}</div>
+        <div className="pay-qr-plate mt-4">{code ? <QRCodeSVG value={code} size={220} level="M" marginSize={0} className="bc-qr-svg"/> : <div className="grid size-[200px] place-items-center text-xs text-muted-foreground">Memuat…</div>}</div>
         <p className="numeric mt-3 text-center text-lg font-black text-chart-3">{code || '—'}</p>
         <p className="mt-1 text-center text-[11px] text-muted-foreground">Member lain memindai QR ini untuk menyimpan BIX-ID Anda sebagai kontak.</p>
         <button type="button" className="bc-qr-scan mt-4" onClick={() => setScan(true)}><ScanLine size={16}/> Pindai & simpan kontak</button>
@@ -640,7 +650,7 @@ function ContactQr() {
           <button type="button" onClick={() => { setOpen(false); window.location.assign(`/call?chat=${hit.id}&n=${encodeURIComponent(hit.name)}`); }}><MessageCircle size={14}/> Chat</button>
           <button type="button" onClick={() => { setOpen(false); startBixCall(hit.id, hit.name, 'voice'); }}><Phone size={14}/> Call</button>
           <Link to="/pay" onClick={() => setOpen(false)}><Coins size={14}/> BIX PAY</Link></div></div>}
-      </div></div>}
+      </div></div>, document.body)}
     {scan && <QrScanner title="Pindai QR BIX-ID" hint={msg || 'Arahkan kamera ke QR BIX-ID member'} continuous onClose={() => setScan(false)} onResult={raw => void saveFrom(raw)}/>}
   </>;
 }

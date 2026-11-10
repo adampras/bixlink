@@ -21,9 +21,12 @@ function tone(freqs: number[], start: number, dur: number, gain: number, type: O
 }
 
 /** Repeats a pattern until the returned stop() is called. */
+let activeStop: (() => void) | null = null;
 function loop(pattern: () => void, every: number) {
+  activeStop?.(); // only one ringtone/ringback loop may play at a time
   pattern(); const id = setInterval(pattern, every);
-  return () => clearInterval(id);
+  const stop = () => { clearInterval(id); if (activeStop === stop) activeStop = null; };
+  activeStop = stop; return stop;
 }
 
 /** Incoming call: luxury BIXLINK chime arpeggio. */
