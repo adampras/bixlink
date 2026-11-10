@@ -153,7 +153,7 @@ function CommMenu() {
 
 /** Bare 6-digit numbers are BIX-IDs: 123456 → BIX-123456. */
 const normQuery = (t: string) => /^\d{6}$/.test(t.trim()) ? `BIX-${t.trim()}` : t;
-function SaveContactBtn({ id, name, code }: { id: string; name: string; code?: string | null }) {
+function SaveContactBtn({ id, name, code }: { id: string; name: string; code?: string | null | undefined }) {
   const [saved, setSaved] = useState(false);
   useEffect(() => { setSaved(readContacts().some(c => c.id === id)); }, [id]);
   return <button type="button" className="bc-save-contact" disabled={saved} onClick={() => { addContact({ id, name, code: code ?? '' }); setSaved(true); try { navigator.vibrate?.(15); } catch { /* optional */ } }}>{saved ? '✓ Tersimpan' : '+ Simpan Kontak'}</button>;
