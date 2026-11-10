@@ -13,7 +13,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '21' }
-      - uses: android-actions/setup-android@v3
+      - name: Accept Android licenses (preinstalled SDK)
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
       - run: bun install
       - run: bun add -d @capacitor/cli@^8 @capacitor/android@^8
       - run: bunx cap add android
