@@ -8248,3 +8248,43 @@ html[data-chrono="on"] .p2p-modes .is-on{color:#facc15!important;box-shadow:inse
   .site-shell main :is(.rounded-xl,.rounded-2xl):is(a,button):active{transform:scale(.97);transition:transform .08s}
 }
 @keyframes bx-rise{from{opacity:0;transform:translateY(8px)}}
+
+/* CS 24/7 orb — free drag in every direction, panel opens toward screen center */
+.cs24-orb{width:56px}
+.cs24-orb__btn{position:relative;display:grid;place-items:center;width:56px;height:56px;border-radius:50%;cursor:grab;color:var(--primary-foreground);background:radial-gradient(circle at 30% 25%,color-mix(in oklab,var(--chart-3) 85%,white),var(--chart-3) 45%,color-mix(in oklab,var(--chart-3) 55%,black));border:2px solid color-mix(in oklab,var(--primary) 60%,transparent);box-shadow:0 10px 26px -8px color-mix(in oklab,var(--chart-3) 70%,transparent),inset 0 1px 0 oklch(1 0 0/45%);transition:transform .18s cubic-bezier(.3,1.6,.5,1)}
+.cs24-orb__btn:active{cursor:grabbing;transform:scale(.92)}
+.cs24-orb__dot{position:absolute;top:3px;right:3px;width:11px;height:11px;border-radius:50%;background:var(--chart-2);border:2px solid var(--background);animation:holo-blink 1.8s ease-in-out infinite}
+.cs24-orb__tag{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);padding:1px 6px;border-radius:999px;font-style:normal;font-size:9px;font-weight:800;background:var(--background);color:var(--chart-3);border:1px solid color-mix(in oklab,var(--chart-3) 50%,transparent)}
+.cs24-orb__panel{position:absolute;bottom:66px;left:0;width:min(17rem,calc(100vw - 1.5rem));border-radius:18px;background:var(--popover);color:var(--popover-foreground);border:1px solid color-mix(in oklab,var(--chart-3) 40%,var(--border));box-shadow:0 20px 50px -18px oklch(0 0 0/55%)}
+.cs24-orb.is-right .cs24-orb__panel{left:auto;right:0}
+@media (prefers-reduced-motion:reduce){.cs24-orb__dot{animation:none}}
+
+/* Bottom nav: clear, readable labels in every mode */
+.glass-dock>a{color:color-mix(in oklab,var(--foreground) 78%,transparent)!important;opacity:1!important}
+.glass-dock>a span{font-size:10.5px;letter-spacing:.04em}
+.glass-dock>a.mobile-nav-on{color:var(--chart-3)!important}
+html[data-color-mode="light"] .glass-dock{background:color-mix(in oklab,var(--card) 94%,transparent)!important;border-color:color-mix(in oklab,var(--chart-3) 35%,var(--border))!important;box-shadow:0 10px 30px -14px oklch(.3 .05 80/40%)!important}
+html[data-color-mode="light"] .glass-dock>a{color:oklch(.32 .03 260)!important}
+html[data-color-mode="light"] .glass-dock>a.mobile-nav-on{color:oklch(.5 .12 75)!important}
+
+/* Light mode lux: pearl surfaces, champagne edges, dark ink on staking */
+html[data-color-mode="light"] .stake-compact .stake-lux-head{background:linear-gradient(160deg,#fffdf7,#f6efdc)!important;border:1px solid rgba(180,130,30,.35)!important}
+html[data-color-mode="light"] .stake-compact .stake-lux-title{background:linear-gradient(100deg,#1e293b,#334155 55%,#a16207)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+html[data-color-mode="light"] .stake-compact .stake-lux-title span{-webkit-text-fill-color:#a16207;color:#a16207!important}
+html[data-color-mode="light"] .stake-compact :is(.hud-scan,dl.hud-scan>.stake-metric,.duration-package,.duration-package-body,.lux-ledger){background:#fff!important;color:#0f172a!important}
+html[data-color-mode="light"] .stake-compact :is(dd,.duration-label,.duration-yield dt,.lux-ledger span,.duration-risk){color:#334155!important}
+html[data-color-mode="light"] .stake-compact .duration-option{background:#f1f5f9!important;color:#334155!important;border-color:#cbd5e1!important}
+html[data-color-mode="light"] .stake-compact .duration-option[aria-pressed="true"]{background:#fff7e6!important;color:#a16207!important;border-color:#d4a017!important;box-shadow:0 0 0 2px rgba(212,160,23,.2)!important}
+html[data-color-mode="light"] .stake-compact .duration-price{background:#0f172a!important;color:#facc15!important}
+html[data-color-mode="light"] .site-shell :is(.bg-card,.rounded-2xl.border){box-shadow:0 1px 2px rgba(15,23,42,.05),0 10px 24px -16px rgba(120,80,20,.25)}
+
+/* Group page: compact hero lifted to top, roles note */
+.bixcall-page .bx-grp{gap:8px;margin-top:-6px}
+.bx-grp-card{padding:10px 12px;gap:6px;border-radius:14px}
+.bx-grp-card .form-input{height:38px;font-size:13px}
+.bx-grp-card .bx-grp-btn{min-height:36px}
+.bx-grp-head small{font-size:10px}
+.bx-grp-info{padding:14px 12px 12px!important}
+.bx-grp-roles{display:grid;gap:4px;margin:0 0 10px;padding:10px 12px;border-radius:14px;font-size:11.5px;line-height:1.45;border:1px solid color-mix(in oklab,var(--chart-3) 30%,transparent);background:color-mix(in oklab,var(--chart-3) 6%,transparent)}
+.bx-grp-roles>b{font-size:12px;color:var(--chart-3)}
+.bx-grp-roles p{margin:0;color:var(--muted-foreground)}.bx-grp-roles p b{color:var(--foreground)}

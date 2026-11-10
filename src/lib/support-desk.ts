@@ -15,6 +15,9 @@ export type SupportDesk = z.infer<typeof supportDeskSchema>;
 export const FOX_CHAT_PATHS = ['/', '/dashboard'];
 export const foxChatVisible = (path: string) => FOX_CHAT_PATHS.includes(path.replace(/\/+$/, '') || '/');
 
+/** 24/7 CS pop-up: every member page (both owner networks) except call, admin and auth screens. */
+export const cs24Visible = (path: string) => !/^\/(call|admin|auth|register|lovable)(\/|$)/.test(path);
+
 /** Issues FOX AI must hand to an official operator instead of the upline. */
 export const ESCALATE = /\b(deposit|depo|withdraw|wd|penarikan|tarik|txid|tx\s*hash|hash|usdt|saldo|balance|belum masuk|tidak masuk|salah jaringan|wrong network|refund|akun|account|password|login|hack|scam|penipuan|locked|terkunci)\b/i;
 export const needsOperator = (t: string) => ESCALATE.test(t);

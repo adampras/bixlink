@@ -47,7 +47,7 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
   if (open) return <GroupRoom g={open} me={me} fresh={fresh} onBack={() => { setOpen(null); setFresh(false); void load(); }} onChange={load}/>;
   return <section className="bx-grp">
     <div className="bx-grp-card">
-      <div className="bx-grp-head"><GraduationCap size={18}/><b>Education Groups</b><small>Group chat + Live Class</small></div>
+      <div className="bx-grp-head"><GraduationCap size={16}/><b>Education Groups</b><small>Chat · Live Class · Host & Admin</small></div>
       <input className="form-input" placeholder="Group name, e.g. Crypto Basics Class" value={name} maxLength={60} onChange={e => setName(e.target.value)}/>
       <input className="form-input" placeholder="Short description (optional)" value={about} maxLength={300} onChange={e => setAbout(e.target.value)}/>
       <Button variant="ghost" type="button" className="bx-grp-btn" onClick={() => void create()}>+ Create group</Button>
@@ -98,6 +98,10 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
         }}><Share2 size={14}/> Bagikan undangan</Button>
         {host && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" onClick={onPhoto}><Camera size={14}/> {g.avatar_path ? 'Ganti foto grup' : 'Pasang foto grup'}</Button>}
         {g.about && <p>{g.about}</p>}</div>
+      <div className="bx-grp-roles"><b>Peran di grup</b>
+        <p>👑 <b>Host</b> — membuat grup, mengganti foto, menambah/mengeluarkan anggota dan memulai Live Class.</p>
+        <p>🛡️ <b>Admin grup</b> — Host bisa mengangkat member lain sebagai admin pembantu. Fitur pengangkatan admin sedang disiapkan dan segera tersedia.</p>
+        <p>👤 <b>Anggota</b> — chat, ikut Live Class dan membagikan undangan.</p></div>
       {err && <p className="bx-grp-msg">{err}</p>}
       {host && <Button variant="ghost" type="button" className="bx-grp-btn" style={{ width: '100%', marginBottom: 8 }} onClick={onAdd}><UserPlus size={14}/> Tambah anggota</Button>}
       <ul className="bx-grp-cands">
@@ -201,7 +205,6 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
       <Button variant="ghost" type="button" className="bx-grp-act bx-grp-back" aria-label="Kembali" onClick={onBack}><ArrowLeft size={15}/><span>Kembali</span></Button>
       <span className="bx-grp-room-av">
         <GroupAvatar g={g} size={40}/>
-        {host && <Button variant="ghost" type="button" className="bx-grp-cam" aria-label="Ganti foto grup" onClick={() => file.current?.click()}><Camera size={11}/></Button>}
         <input ref={file} type="file" accept="image/*" hidden onChange={e => { void setPhoto(e.target.files?.[0]); e.target.value = ''; }}/>
       </span>
       <Button variant="ghost" type="button" className="bx-grp-room-title" aria-label="Lihat anggota grup" onClick={() => setShowMem(true)}><b>{g.name}</b><small>{roster.length} anggota · Kode {g.code}</small></Button>
