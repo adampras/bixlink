@@ -96,8 +96,8 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
           try { if (navigator.share) { await navigator.share({ title: g.name, text }); return; } } catch { return; }
           if (await copyText(text)) setErr('Undangan tersalin — tempel ke chat mana saja.');
         }}><Share2 size={14}/> Bagikan undangan</Button>
-        {host && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" onClick={onPhoto}><Camera size={14}/> {g.avatar_path ? 'Ganti foto grup' : 'Pasang foto grup'}</Button>}</div>
-      {g.about && <p className="bx-grp-empty" style={{ textAlign: 'left' }}>{g.about}</p>}
+        {host && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" onClick={onPhoto}><Camera size={14}/> {g.avatar_path ? 'Ganti foto grup' : 'Pasang foto grup'}</Button>}
+        {g.about && <p>{g.about}</p>}</div>
       {err && <p className="bx-grp-msg">{err}</p>}
       {host && <Button variant="ghost" type="button" className="bx-grp-btn" style={{ width: '100%', marginBottom: 8 }} onClick={onAdd}><UserPlus size={14}/> Tambah anggota</Button>}
       <ul className="bx-grp-cands">
