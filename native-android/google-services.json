@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "152438661677",
+    "project_id": "bixlink-ecosystem",
+    "storage_bucket": "bixlink-ecosystem.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:152438661677:android:17e3192237ae16e2440ea4",
+        "android_client_info": {
+          "package_name": "com.bixlink.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfe7gk08R89RIlJx3SkbmGUhIUEu-uYNY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
