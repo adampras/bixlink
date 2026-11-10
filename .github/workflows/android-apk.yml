@@ -24,6 +24,16 @@ jobs:
           if [ -n "$GOOGLE_SERVICES_JSON" ]; then echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
           elif [ -f native-android/google-services.json ]; then cp native-android/google-services.json android/app/google-services.json
           else echo "Add native-android/google-services.json or the GOOGLE_SERVICES_JSON secret"; exit 1; fi
+      - name: BIXLINK fox app icon
+        run: |
+          curl -fsSL -o icon.png "https://bixlink.com/__l5e/assets-v1/c62ecff6-c5d1-4235-8e7a-e49c0c2b7039/fox-icon-512.png"
+          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            dir=android/app/src/main/res/mipmap-${d%%:*}; s=${d##*:}
+            convert icon.png -resize ${s}x${s} $dir/ic_launcher.png
+            convert icon.png -resize ${s}x${s} $dir/ic_launcher_round.png
+            convert icon.png -resize $((s*9/4))x$((s*9/4)) -gravity center -background none -extent $((s*9/4))x$((s*9/4)) $dir/ic_launcher_foreground.png
+          done
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
       - run: bunx cap sync android
       - name: Build APK
         working-directory: android

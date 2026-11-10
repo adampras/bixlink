@@ -5930,7 +5930,7 @@ button:focus-visible,a:focus-visible,[role="tab"]:focus-visible{outline:2px soli
 body > .comm-sheet-bg{z-index:2147483001}
 .comm-sheet.bx-sc{background:linear-gradient(170deg,#160d26,#07050c 70%);border:1px solid rgb(255 215 0 / .22);opacity:1}
 /* Opsi A: HUD + header diam, ticker ikut scroll */
-.sticky-top-bar{position:sticky;top:0;z-index:45}
+.sticky-top-bar{position:sticky;top:0;z-index:45;padding-top:env(safe-area-inset-top);background:var(--background)}
 .sticky-top-bar .site-header{position:relative;top:auto}
 .sticky-top-bar .quantum-hud{background-color:color-mix(in oklab,var(--background) 88%,transparent);backdrop-filter:blur(18px)}
 
