@@ -8325,3 +8325,21 @@ html:not([data-color-mode="light"]) .stake-compact :is(.duration-label,.duration
 :is([data-page="stake"],[data-page="wallet"],[data-page="profit"],[data-page="network"],.stake-compact) :is(button,.duration-option,a[class*="btn"]):not(.duration-stake){box-shadow:none !important;text-shadow:none !important}
 :is([data-page="stake"],[data-page="wallet"],[data-page="profit"],[data-page="network"],.stake-compact) .duration-option[aria-pressed="true"]{border-width:1.5px !important}
 .text-muted-foreground{-webkit-font-smoothing:antialiased}
+
+/* Chat room: compose hugs the bottom/keyboard, no empty band */
+.comm-room.is-full{bottom:auto!important;max-height:none!important;padding-bottom:max(.3rem,env(safe-area-inset-bottom))!important}
+.comm-room.is-full .comm-msgs{flex:1 1 auto}
+.comm-room.is-full .comm-quick{margin-top:auto;padding-bottom:.25rem}
+.comm-room.is-full .comm-compose{margin:0 .5rem .2rem}
+html.comm-room-open .glass-dock,html.comm-room-open .cs24-orb{display:none!important}
+/* QR scan result */
+.bc-qr-hit{margin-top:12px;display:grid;gap:4px;justify-items:center;padding:10px;border-radius:14px;border:1px solid rgb(255 215 0 / .35);background:rgb(255 215 0 / .06)}
+.bc-qr-hit small{font-size:11px;opacity:.75}
+.bc-qr-hit div{display:flex;gap:6px;margin-top:6px}
+.bc-qr-hit :is(button,a){display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#FFD700;color:#0b0812}
+/* Stake: solid tier-color heads, soft readable labels */
+.stake-compact.stake-compact.stake-compact.stake-compact .duration-package-head,html[data-color-mode="light"] .stake-compact.stake-compact.stake-compact.stake-compact .duration-package-head{background:var(--gem,var(--tier-color))!important;border-bottom:0!important}
+.stake-compact .tier-tone-7 .duration-package-head :is(h3,p,.duration-price),.stake-compact .tier-tone-6 .duration-package-head :is(h3,p,.duration-price){color:#1a1204!important}
+.stake-compact .duration-package-head .duration-price{background:rgb(0 0 0 / .18)!important;border-color:rgb(255 255 255 / .35)!important}
+.stake-compact.stake-compact :is(.duration-label,.duration-yield dt,.lux-ledger span,.lux-horizon span,.duration-risk){color:#e8dcc0!important;font-weight:600!important}
+html[data-color-mode="light"] .stake-compact.stake-compact :is(.duration-label,.duration-yield dt,.lux-ledger span,.lux-horizon span,.duration-risk){color:#5b6474!important}

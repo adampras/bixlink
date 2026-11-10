@@ -610,6 +610,7 @@ function ContactQr() {
   const [open, setOpen] = useState(false);
   const [scan, setScan] = useState(false);
   const [msg, setMsg] = useState('');
+  const [hit, setHit] = useState<{ id: string; name: string; code: string } | null>(null);
   const load = useServerFn(getBixPay);
   const mine = useQuery({ queryKey: ['bix-pay'], queryFn: () => load(), enabled: open });
   const code = mine.data?.code ?? '';
@@ -620,11 +621,12 @@ function ContactQr() {
     const f = data as { user_id: string; name: string } | null;
     if (!f) { setMsg(`${id} tidak ditemukan.`); return; }
     if (id === code) { setMsg('Itu BIX-ID Anda sendiri.'); return; }
-    addContact({ id: f.user_id, name: f.name, code: id }); try { navigator.vibrate?.(20); } catch { /* optional */ }
+    const c = (f as { code?: string }).code ?? id;
+    addContact({ id: f.user_id, name: f.name, code: c }); setHit({ id: f.user_id, name: f.name, code: c }); setScan(false); try { navigator.vibrate?.(20); } catch { /* optional */ }
     setMsg(`@${f.name} (${id}) tersimpan di kontak.`);
   };
   return <>
-    <button type="button" className="bc-qr-btn" aria-label="QR kontak BIX-ID" onClick={() => { setMsg(''); setOpen(true); }}><QrCode size={18}/></button>
+    <button type="button" className="bc-qr-btn" aria-label="QR kontak BIX-ID" onClick={() => { setMsg(''); setHit(null); setOpen(true); }}><QrCode size={18}/></button>
     {open && <div className="fixed inset-0 z-50 grid place-items-center bg-background/90 p-4 backdrop-blur" onClick={() => setOpen(false)}>
       <div role="dialog" aria-label="QR kontak" className="bc-qr-card" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between"><b className="font-display text-sm tracking-widest">BIX CALL · QR KONTAK</b><button type="button" aria-label="Close" onClick={() => setOpen(false)}><X size={18}/></button></div>
@@ -633,6 +635,10 @@ function ContactQr() {
         <p className="mt-1 text-center text-[11px] text-muted-foreground">Member lain memindai QR ini untuk menyimpan BIX-ID Anda sebagai kontak.</p>
         <button type="button" className="bc-qr-scan mt-4" onClick={() => setScan(true)}><ScanLine size={16}/> Pindai & simpan kontak</button>
         {msg && <p role="status" className="mt-3 text-center text-xs text-chart-2">{msg}</p>}
+        {hit && <div className="bc-qr-hit"><b>@{hit.name}</b><small>{hit.code}</small><div>
+          <button type="button" onClick={() => { setOpen(false); window.location.assign(`/call?chat=${hit.id}&n=${encodeURIComponent(hit.name)}`); }}><MessageCircle size={14}/> Chat</button>
+          <button type="button" onClick={() => { setOpen(false); startBixCall(hit.id, hit.name, 'voice'); }}><Phone size={14}/> Call</button>
+          <Link to="/pay" onClick={() => setOpen(false)}><Coins size={14}/> BIX PAY</Link></div></div>}
       </div></div>}
     {scan && <QrScanner title="Pindai QR BIX-ID" hint={msg || 'Arahkan kamera ke QR BIX-ID member'} continuous onClose={() => setScan(false)} onResult={raw => void saveFrom(raw)}/>}
   </>;

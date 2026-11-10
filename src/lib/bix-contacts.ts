@@ -3,11 +3,13 @@ export type BixContact = { id: string; name: string; code: string };
 const KEY = 'bixcall-contacts';
 export const CONTACTS_EVENT = 'bixcall-contacts';
 
-/** Accepts a bare BIX-ID or a BIX PAY link (?to=BIX-123456). */
+/** Accepts a BIX-ID (BIX-123456 or 123456), @username, or a BIX link (?to= / ?ref= / ?code=). */
 export function parseBixId(raw: string): string | null {
   const t = raw.trim();
-  if (/^BIX-\d{6}$/i.test(t)) return t.toUpperCase();
-  try { const c = new URL(t).searchParams.get('to') ?? ''; return /^BIX-\d{6}$/i.test(c) ? c.toUpperCase() : null; } catch { return null; }
+  const norm = (v: string) => { const x = v.trim(); if (/^BIX-?\d{6}$/i.test(x)) return 'BIX-' + x.replace(/\D/g, ''); if (/^\d{6}$/.test(x)) return 'BIX-' + x; if (/^@[\w.]{3,}$/.test(x)) return x; return null; };
+  const d = norm(t); if (d) return d;
+  try { const u = new URL(t); for (const k of ['to', 'ref', 'code', 'id']) { const v = u.searchParams.get(k); const n = v ? norm(v) : null; if (n) return n; } } catch { /* not a URL */ }
+  const m = t.match(/BIX-?\d{6}/i); return m ? 'BIX-' + m[0].replace(/\D/g, '') : null;
 }
 export function readContacts(): BixContact[] {
   try { const v = JSON.parse(localStorage.getItem(KEY) ?? '[]'); return Array.isArray(v) ? v : []; } catch { return []; }
