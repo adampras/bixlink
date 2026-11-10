@@ -51,8 +51,10 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     ds['animFloat'] = rd?.animFloat ? 'on' : 'off';
   }, [rd?.animGlow, rd?.animShimmer, rd?.animFloat]);
   const design = useDesignAccess(user?.id);
-  useEffect(() => { document.documentElement.dataset['design'] = design.data?.next_gen ? 'v2' : 'classic'; }, [design.data?.next_gen]);
-  useEffect(() => { document.documentElement.dataset['chrono'] = design.data?.chrono ? 'on' : 'off'; }, [design.data?.chrono]);
+  const stakeClassic = useRouterState({ select: s => s.location.pathname === '/stake' });
+  // STAKE uses the classic (Admin 2 network) layout for every network; other pages keep the released design.
+  useEffect(() => { document.documentElement.dataset['design'] = design.data?.next_gen && !stakeClassic ? 'v2' : 'classic'; }, [design.data?.next_gen, stakeClassic]);
+  useEffect(() => { document.documentElement.dataset['chrono'] = design.data?.chrono && !stakeClassic ? 'on' : 'off'; }, [design.data?.chrono, stakeClassic]);
   useEffect(() => { document.documentElement.dataset['chronoCard'] = design.data?.card ?? 'obsidian'; }, [design.data?.card]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
