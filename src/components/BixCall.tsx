@@ -72,7 +72,15 @@ export function BixCallHost() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  useEffect(() => { if (me && typeof Notification !== 'undefined' && Notification.permission === 'granted') void ensureBixPush(); }, [me]);
+  useEffect(() => {
+    if (!me) return;
+    // In the APK, register this phone for closed-app ringing automatically after sign-in.
+    void import('@/lib/native-device').then(async m => {
+      const caps = await m.getNativeCapabilities();
+      if (caps.push) { await m.enableNativePush().catch(() => {}); return; }
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') void ensureBixPush();
+    }).catch(() => {});
+  }, [me]);
 
   // Outgoing calls
   useEffect(() => {

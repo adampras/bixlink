@@ -34,7 +34,9 @@ export const startRingtone = () => loop(() => {
 }, 2600);
 
 /** Caller waiting: soft dual-tone ringback. */
-export const startRingback = () => loop(() => { tone([425], 0, 1.0, 0.22); tone([425], 1.4, 1.0, 0.22); }, 4000);
+/** Standard ringback, identical on every phone: 425 Hz, 1 s on / 3 s off, fixed level (ignores ringtone choice/volume). */
+export const RINGBACK = { hz: 425, onSec: 1, everyMs: 4000, gain: 0.2 } as const;
+export const startRingback = () => loop(() => tone([RINGBACK.hz], 0, RINGBACK.onSec, RINGBACK.gain, 'sine'), RINGBACK.everyMs);
 // Unlock audio on the first tap so the ringback is audible on phones/WebView.
 if (typeof window !== 'undefined') { const u = () => { ac(); window.removeEventListener('pointerdown', u); }; window.addEventListener('pointerdown', u, { passive: true }); }
 

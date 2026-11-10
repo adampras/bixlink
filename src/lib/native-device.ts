@@ -16,6 +16,11 @@ export async function enableNativePush(): Promise<NativePushResult> {
   let permission = await PushNotifications.checkPermissions();
   if (permission.receive === 'prompt' || permission.receive === 'prompt-with-rationale') permission = await PushNotifications.requestPermissions();
   if (permission.receive !== 'granted') return 'denied';
+  // High-importance channels so calls ring with sound on the lock screen.
+  try {
+    await PushNotifications.createChannel({ id: 'bixcall_ring', name: 'BIX CALL incoming calls', importance: 5, visibility: 1, sound: 'default', vibration: true });
+    await PushNotifications.createChannel({ id: 'bixcall_chat', name: 'BIX CALL messages', importance: 4, visibility: 1, vibration: true });
+  } catch { /* older Android */ }
   let installationId = localStorage.getItem('bix-native-installation');
   if (!installationId) { installationId = crypto.randomUUID(); localStorage.setItem('bix-native-installation', installationId); }
   const id = installationId;

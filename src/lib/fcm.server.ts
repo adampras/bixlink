@@ -16,7 +16,14 @@ export async function sendFcmToUser(admin: Admin, userId: string, data: Record<s
       const res = await fetch(`${GATEWAY_URL}/v1/projects/_/messages:send`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${lovable}`, 'X-Connection-Api-Key': conn, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: { token, data, android: { priority: 'HIGH', ttl: `${ttlSeconds}s` } } }),
+        // Notification block lets Android show + ring even when the app is fully closed (data-only is silent there).
+        body: JSON.stringify({ message: { token, data,
+          notification: { title: data['title'] || 'BIX CALL', body: data['body'] || '' },
+          android: { priority: 'HIGH', ttl: `${ttlSeconds}s`, notification: {
+            channel_id: data['type'] === 'call' ? 'bixcall_ring' : 'bixcall_chat', sound: 'default',
+            default_vibrate_timings: true, notification_priority: data['type'] === 'call' ? 'PRIORITY_MAX' : 'PRIORITY_HIGH',
+            visibility: 'PUBLIC', tag: data['callId'] ? `call-${data['callId']}` : undefined,
+          } } } }),
       });
       if (res.ok) { sent++; return; }
       const body = await res.text();
