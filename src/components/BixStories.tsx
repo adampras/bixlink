@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Camera, Eye, Plus, Trash2, Type, Video as VideoIcon, X } from 'lucide-react';
+import { Camera, Download, Eye, Plus, Share2, Trash2, Type, Video as VideoIcon, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BixAvatar, useSignedUrl } from '@/components/BixAvatar';
 import { invalidateCard, saveStatus } from '@/lib/bix-avatar';
@@ -114,6 +114,19 @@ function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; gr
     const p = data as string | null; if (p) void supabase.storage.from('bix-stories').remove([p]);
     onDeleted(); onClose();
   };
+  const flash = (t: string) => { setNote(t); setTimeout(() => setNote(''), 2500); };
+  const saveMedia = async () => {
+    try {
+      const { data, error } = await supabase.storage.from('bix-stories').download(s.media_path!);
+      if (error || !data) throw new Error('Gagal menyimpan');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(data); a.download = s.media_path!.split('/').pop() || 'story';
+      a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); flash('Story disimpan ke perangkat');
+    } catch (e) { flash(e instanceof Error ? e.message : 'Gagal menyimpan'); }
+  };
+  const share = async () => {
+    const text = `Story @${g.name} di BIX CALL${s.caption ? `: ${s.caption}` : ''}`;
+    try { if (navigator.share) { await navigator.share({ title: 'BIX CALL Story', text, url: `${location.origin}/call?tab=updates` }); return; } await navigator.clipboard.writeText(text); flash('Teks story disalin'); } catch { /* cancelled */ }
+  };
   const openViewers = async () => { setPaused(true); const { data } = await supabase.rpc('bix_story_viewers' as never, { p_id: s.id } as never); setViewers((data as typeof viewers) ?? []); };
   const sendReply = async () => {
     const b = reply.trim(); if (!b) return;
@@ -127,6 +140,8 @@ function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; gr
     <header className="bx-sv-head">
       <BixAvatar userId={g.user_id} path={g.avatar_path} name={g.name} className="comm-ava" ring={false}/>
       <span className="min-w-0 flex-1"><b className="block truncate">{g.mine ? 'Story saya' : `@${g.name}`}</b><small>{ago(s.created_at)}</small></span>
+      {s.kind !== 'text' && s.media_path && <button type="button" aria-label="Simpan story" title="Simpan" onClick={() => void saveMedia()}><Download size={17}/></button>}
+      <button type="button" aria-label="Bagikan story" title="Bagikan" onClick={() => void share()}><Share2 size={17}/></button>
       {g.mine && <button type="button" aria-label="Delete story" onClick={() => void del()}><Trash2 size={17}/></button>}
       <button type="button" aria-label="Close" onClick={onClose}><X size={20}/></button>
     </header>

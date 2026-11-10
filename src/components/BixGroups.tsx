@@ -198,7 +198,7 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
   if (live) return <MeetingStage code={live} me={me} onLeave={() => void leaveLive()}/>;
   return <section className="bx-grp-room is-full">
     <header>
-      <Button variant="ghost" type="button" aria-label="Back" onClick={onBack}><ArrowLeft size={18}/></Button>
+      <Button variant="ghost" type="button" className="bx-grp-act bx-grp-back" aria-label="Kembali" onClick={onBack}><ArrowLeft size={15}/><span>Kembali</span></Button>
       <span className="bx-grp-room-av">
         <GroupAvatar g={g} size={40}/>
         {host && <Button variant="ghost" type="button" className="bx-grp-cam" aria-label="Ganti foto grup" onClick={() => file.current?.click()}><Camera size={11}/></Button>}

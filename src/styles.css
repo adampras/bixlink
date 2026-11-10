@@ -8189,3 +8189,8 @@ html[data-chrono="on"] .pp-sheet .lux-cta { background: linear-gradient(180deg,#
 /* BIX CALL: BIX PAY shortcut beside call buttons */
 .comm-actions .comm-pay-btn { display:inline-grid; place-items:center; width:2rem; height:2rem; border-radius:999px; color:var(--primary); border:1px solid color-mix(in oklab, var(--primary) 45%, transparent); background:color-mix(in oklab, var(--primary) 12%, transparent); }
 .comm-actions .comm-pay-btn:active { transform:scale(.92); }
+/* BIX CALL group header: labeled back + clear group photo */
+.bx-grp-room.is-full>header>.bx-grp-back{width:auto;height:auto;flex:none}
+.bx-grp-room-av .bx-grp-av{background:linear-gradient(145deg,oklch(.24 .03 180),oklch(.14 .02 180));border:1.5px solid #FFD700;box-shadow:0 0 0 2px color-mix(in oklab,#FFD700 18%,transparent)}
+.bx-grp-room-av .bx-grp-av b{color:#FFD700}
+.bx-grp-room-av .bx-grp-cam{width:20px;height:20px;border:1.5px solid var(--background)}
