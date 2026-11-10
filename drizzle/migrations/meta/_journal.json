@@ -1338,6 +1338,13 @@
       "when": 1794297216452,
       "tag": "0190_bix_native_devices",
       "breakpoints": true
+    },
+    {
+      "idx": 191,
+      "version": "7",
+      "when": 1794331903068,
+      "tag": "0191_support_command_center",
+      "breakpoints": true
     }
   ]
 }

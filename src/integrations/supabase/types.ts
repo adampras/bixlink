@@ -4848,6 +4848,7 @@ export type Database = {
       bix_studio_save: { Args: { p: Json }; Returns: undefined }
       bix_studio_spend: { Args: { p_feature: string }; Returns: Json }
       bix_studio_status: { Args: never; Returns: Json }
+      bix_support_inbox: { Args: { p_op: string }; Returns: Json }
       bix_support_operator_set: {
         Args: {
           p_active: boolean
@@ -4858,6 +4859,14 @@ export type Database = {
         Returns: undefined
       }
       bix_support_operators_list: { Args: never; Returns: Json }
+      bix_support_reply: {
+        Args: { p_body: string; p_op: string; p_peer: string }
+        Returns: Json
+      }
+      bix_support_thread: {
+        Args: { p_op: string; p_peer: string }
+        Returns: Json
+      }
       bix_surprise_admin: { Args: never; Returns: Json }
       bix_surprise_answer:
         | { Args: { p_answers: number[]; p_attempt: string }; Returns: Json }

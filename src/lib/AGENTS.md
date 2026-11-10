@@ -20,3 +20,4 @@
 - Design release: next-gen look via bix_design_access (Owner 1 tree + bix_design_whitelist trees; Owner 2 tree via bix_growth_excluded follows its own switch and ecosystem lock list); html[data-design=v2] scopes new styles — one server decision for theme and ecosystem locks.
 - P2P Bank/QRIS: member fiat trades happen off-app; seller BIX is escrowed through bix_p2p_bix_delta (open fiat ads + active orders) and moves only via bix_p2p_fiat_* RPCs (15-min lazy expiry, seller release after paid, owner mediation) — the ledger never records rupiah.
 - 24h support pop-up: support_desk.float24 toggles it; operators live in bix_support_operators managed only by Owner 1 RPCs and chats route to BIX CALL — no new messaging channel.
+- CS command center: Owner 1 reads/replies to every official CS inbox via bix_support_inbox/thread/reply (bix_is_owner1 + operator check), network tag from bix_growth_excluded — no operator logins shared.

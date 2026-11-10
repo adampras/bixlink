@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { updateSetting } from '@/lib/bixlink.functions';
 import { supportDeskSchema, type SupportDesk } from '@/lib/support-desk';
+import { SupportCommandCenter } from '@/components/SupportCommandCenter';
 
 export function useSupportDesk() {
   return useQuery({
@@ -86,5 +87,6 @@ export function AdminSupportDesk({ onMessage }: { onMessage: (m: string) => void
       <Button disabled={busy}>{busy ? 'Menyimpan…' : 'Simpan kontak CS'}</Button>
     </form>
     <SupportOperators onMessage={onMessage}/>
+    <SupportCommandCenter/>
   </section>;
 }
