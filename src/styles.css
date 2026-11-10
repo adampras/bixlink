@@ -8179,3 +8179,9 @@ html[data-chrono="on"] .pp-sheet.lux-sheet { background: radial-gradient(circle 
 html[data-chrono="on"] .pp-sheet .lux-gold-text { background: none !important; -webkit-text-fill-color: #facc15 !important; color: #facc15 !important; }
 html[data-chrono="on"] .pp-sheet .lux-cta { background: linear-gradient(180deg,#e11d48,#9f1239) !important; color: #fff !important; box-shadow: inset 0 -3px 0 rgba(0,0,0,.4) !important; }
 @media (prefers-reduced-motion: reduce) { html[data-chrono="on"] [data-page="presale"] .presale-lux-card { transition: none; } }
+
+/* BIX CALL light polish: readable bubbles, roomier timeline, info actions wrap */
+.bixcall-page .chat-bubble, .bixcall-page [class*="msg-bubble"] { line-height: 1.45; word-break: break-word; box-shadow: 0 1px 2px oklch(0 0 0 / .18); }
+.bixcall-page .bx-grp-info { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.bixcall-page .bx-grp-info .bx-grp-btn { min-width: 12rem; justify-content: center; }
+.bixcall-page .bx-grp-act { min-height: 36px; }

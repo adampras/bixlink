@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Camera, Copy, Check, GraduationCap, LogOut, Radio, Search, Send, UserPlus, Users, X } from 'lucide-react';
+import { ArrowLeft, Camera, Copy, Check, GraduationCap, LogOut, Radio, Search, Send, Share2, UserPlus, Users, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { copyText } from '@/lib/copy-text';
 import { MeetingStage } from '@/components/BixGroupMeeting';
@@ -91,6 +91,11 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
   };
   return <GroupSheet title="Anggota grup" description={`${g.name} · ${roster.length} anggota`} onClose={onClose}>
       <div className="bx-grp-info"><GroupAvatar g={g} size={76}/><b>{g.name}</b><small>Kode undangan {g.code}</small>
+        <Button variant="ghost" type="button" className="bx-grp-btn" onClick={async () => {
+          const text = `Gabung grup "${g.name}" di BIX CALL BIXLINK. Kode undangan: ${g.code} — buka ${location.origin}/call?tab=group`;
+          try { if (navigator.share) { await navigator.share({ title: g.name, text }); return; } } catch { return; }
+          if (await copyText(text)) setErr('Undangan tersalin — tempel ke chat mana saja.');
+        }}><Share2 size={14}/> Bagikan undangan</Button>
         {host && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" onClick={onPhoto}><Camera size={14}/> {g.avatar_path ? 'Ganti foto grup' : 'Pasang foto grup'}</Button>}</div>
       {g.about && <p className="bx-grp-empty" style={{ textAlign: 'left' }}>{g.about}</p>}
       {err && <p className="bx-grp-msg">{err}</p>}
