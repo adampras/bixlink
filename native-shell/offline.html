@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>BIXLINK — Offline</title>
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#2a1240,#000 70%);color:#f5f5f5;font-family:system-ui,sans-serif;text-align:center;padding:env(safe-area-inset-top) 24px env(safe-area-inset-bottom)}
+.ring{width:96px;height:96px;margin:0 auto 24px;border-radius:50%;border:3px solid #A855F7;border-top-color:#FFD700;animation:s 1.4s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.ring{animation:none}}
+h1{color:#FFD700;font-size:22px;letter-spacing:2px;margin:0 0 8px}
+p{opacity:.8;font-size:14px;line-height:1.5;margin:0 0 24px}
+button{background:linear-gradient(135deg,#A855F7,#7c3aed);color:#fff;border:0;border-radius:999px;padding:14px 32px;font-weight:700;font-size:15px}
+</style></head><body><main>
+<div class="ring" aria-hidden="true"></div>
+<h1>BIXLINK</h1>
+<p>Menghubungkan kembali ke jaringan…<br>Periksa data seluler atau Wi‑Fi Anda.</p>
+<button onclick="location.href='https://bixlink.com'">Coba lagi</button>
+</main>
+<script>addEventListener('online',function(){location.href='https://bixlink.com'});setInterval(function(){if(navigator.onLine)fetch('https://bixlink.com',{mode:'no-cors',cache:'no-store'}).then(function(){location.href='https://bixlink.com'}).catch(function(){})},8000);</script>
+</body></html>

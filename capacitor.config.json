@@ -2,6 +2,6 @@
   "appId": "com.bixlink.app",
   "appName": "BIXLINK Mobile",
   "webDir": "native-shell",
-  "server": { "url": "https://bixlink.com", "cleartext": false, "androidScheme": "https" },
+  "server": { "url": "https://bixlink.com", "cleartext": false, "androidScheme": "https", "errorPath": "offline.html" },
   "plugins": { "PushNotifications": { "presentationOptions": ["badge", "sound", "alert"] } }
 }
