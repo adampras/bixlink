@@ -158,6 +158,7 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
   const [busy, setBusy] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   useEffect(() => { try { setRecent(JSON.parse(localStorage.getItem('bixcall-recent') ?? '[]')); } catch { /* ignore */ } }, []);
+  useEffect(() => { if (!bar) return; const h = (e: Event) => { const t = (e as CustomEvent<string>).detail; if (t) { void find(t); window.scrollTo({ top: 0, behavior: 'smooth' }); } }; window.addEventListener('bix-find', h); return () => window.removeEventListener('bix-find', h); });
   const find = async (term = q) => {
     const t = term.trim(); if (t.length < 3) return;
     setBusy(true); setQ(t);
@@ -622,7 +623,7 @@ function ContactQr() {
     if (!f) { setMsg(`${id} tidak ditemukan.`); return; }
     if (id === code) { setMsg('Itu BIX-ID Anda sendiri.'); return; }
     const c = (f as { code?: string }).code ?? id;
-    addContact({ id: f.user_id, name: f.name, code: c }); setHit({ id: f.user_id, name: f.name, code: c }); setScan(false); try { navigator.vibrate?.(20); } catch { /* optional */ }
+    addContact({ id: f.user_id, name: f.name, code: c }); setHit({ id: f.user_id, name: f.name, code: c }); setScan(false); setOpen(false); window.dispatchEvent(new CustomEvent('bix-find', { detail: c })); try { navigator.vibrate?.(20); } catch { /* optional */ }
     setMsg(`@${f.name} (${id}) tersimpan di kontak.`);
   };
   return <>

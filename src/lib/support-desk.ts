@@ -6,7 +6,7 @@ export const supportDeskSchema = z.object({
   bixcallId: z.string().trim().max(40).default(''),
   bixcallUserId: z.string().uuid().or(z.literal('')).default(''),
   bixcallName: z.string().trim().max(60).default(''),
-  float24: z.boolean().default(false),
+  float24: z.boolean().default(true),
   greeting: z.string().trim().max(160).default(''),
 }).strict();
 export type SupportDesk = z.infer<typeof supportDeskSchema>;

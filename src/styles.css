@@ -8343,3 +8343,16 @@ html.comm-room-open .glass-dock,html.comm-room-open .cs24-orb{display:none!impor
 .stake-compact .duration-package-head .duration-price{background:rgb(0 0 0 / .18)!important;border-color:rgb(255 255 255 / .35)!important}
 .stake-compact.stake-compact :is(.duration-label,.duration-yield dt,.lux-ledger span,.lux-horizon span,.duration-risk){color:#e8dcc0!important;font-weight:600!important}
 html[data-color-mode="light"] .stake-compact.stake-compact :is(.duration-label,.duration-yield dt,.lux-ledger span,.lux-horizon span,.duration-risk){color:#5b6474!important}
+/* Stake final: vivid solid tier heads, always-readable price, tidy spacing */
+.stake-compact .duration-package{--gem:#10b981}
+.stake-compact .tier-tone-1{--gem:#0891b2}.stake-compact .tier-tone-2{--gem:#2563eb}.stake-compact .tier-tone-3{--gem:#4f46e5}
+.stake-compact .tier-tone-4{--gem:#9333ea}.stake-compact .tier-tone-5{--gem:#db2777}.stake-compact .tier-tone-6{--gem:#ea580c}.stake-compact .tier-tone-7{--gem:#b8892b}
+.stake-compact.stake-compact.stake-compact.stake-compact.stake-compact .duration-package-head{background:linear-gradient(135deg,var(--gem),color-mix(in oklab,var(--gem) 72%,#000))!important;padding:14px 16px!important;gap:10px}
+.stake-compact.stake-compact .duration-package-head :is(h3,p){color:#fff!important;-webkit-text-fill-color:#fff!important;opacity:1!important}
+.stake-compact.stake-compact.stake-compact .duration-package-head .duration-price{background:#0b0d12!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:1px solid rgb(255 255 255/.55)!important;text-shadow:none!important;padding:6px 12px!important;border-radius:10px!important;font-size:1.05rem!important;white-space:nowrap}
+.stake-compact .duration-package-body{padding:14px 16px 16px!important}
+.stake-compact .duration-options{gap:6px;margin-top:8px}
+.stake-compact .lux-ledger{margin-top:12px!important}
+.stake-compact .stake-pick-chip{min-width:96px}
+.stake-compact .stake-pick-chip small{opacity:1!important;color:inherit!important}
+.stake-compact .stake-pick-chip[aria-selected="true"] :is(b,small){color:var(--obs-gold,#f5c451)!important;-webkit-text-fill-color:currentColor}
