@@ -270,10 +270,10 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     }, 150);
     return () => clearInterval(t);
   }, [link, ear]);
-  // Callee rings at once; caller hears the ringback only after the callee device acknowledges ("Ringing").
+  // Callee rings at once; caller hears the tuut-tuut ringback while Calling/Ringing.
   useEffect(() => {
     if (!ringing || ringMuted) return;
-    if (call.role === 'caller' && phase !== 'ringing') return;
+    if (call.role === 'caller' && phase === 'offline') return;
     const stop = call.role === 'callee' ? startChosenRingtone() : startRingback();
     return () => { stop(); };
   }, [ringing, ringMuted, call.role, phase]);

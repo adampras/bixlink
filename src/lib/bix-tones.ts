@@ -34,7 +34,9 @@ export const startRingtone = () => loop(() => {
 }, 2600);
 
 /** Caller waiting: soft dual-tone ringback. */
-export const startRingback = () => loop(() => tone([440, 480], 0, 1.2, 0.08), 3500);
+export const startRingback = () => loop(() => { tone([425], 0, 1.0, 0.22); tone([425], 1.4, 1.0, 0.22); }, 4000);
+// Unlock audio on the first tap so the ringback is audible on phones/WebView.
+if (typeof window !== 'undefined') { const u = () => { ac(); window.removeEventListener('pointerdown', u); }; window.addEventListener('pointerdown', u, { passive: true }); }
 
 export const playConnected = () => { [784, 1175].forEach((f, i) => tone([f], i * 0.12, 0.25, 0.15, 'triangle')); };
 export const playEnded = () => { [620, 460, 320].forEach((f, i) => tone([f], i * 0.18, 0.22, 0.14)); };

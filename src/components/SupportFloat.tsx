@@ -27,7 +27,7 @@ const T: Record<string, Copy> = {
   tl: { title: '24/7 Suporta · Chat lang', hello: 'Hi! Handa ang opisyal na team namin 24 oras.', chat: 'Chat', signIn: 'Mag-sign in para mag-chat', none: 'Abala ang lahat ng operator.', official: 'OPISYAL NA CS' },
 };
 const POS_KEY = 'bixlink-cs24-pos';
-const clamp = (x: number, y: number) => ({ x: Math.min(Math.max(8, x), window.innerWidth - 200), y: Math.min(Math.max(60, y), window.innerHeight - 70) });
+const clamp = (x: number, y: number) => ({ x: Math.min(Math.max(8, x), window.innerWidth - 120), y: Math.min(Math.max(60, y), window.innerHeight - 70) });
 
 /** Floating, draggable, dismissable 24/7 chat-only support pill on landing and Home; Owner 1 toggles it and appoints operators. */
 export function SupportFloat() {
@@ -47,7 +47,10 @@ export function SupportFloat() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSigned(!!s));
     return () => sub.subscription.unsubscribe();
   }, []);
-  const ops = useQuery({ queryKey: ['support-operators-live'], enabled: signed && open, staleTime: 30_000, queryFn: async () => { const { data } = await supabase.rpc('bix_support_operators_list' as never); return ((data ?? []) as unknown as Op[]).filter(o => o.active); } });
+  const ops = useQuery({ queryKey: ['support-operators-live', desk?.bixcallUserId], enabled: signed && open, staleTime: 30_000, queryFn: async () => { const { data } = await supabase.rpc('bix_support_operators_list' as never); const list = ((data ?? []) as unknown as Op[]).filter(o => o.active);
+    if (desk?.bixcallUserId && !list.some(o => o.id === desk.bixcallUserId)) list.unshift({ id: desk.bixcallUserId, code: desk.bixcallId || null, name: desk.bixcallName || 'BIXLINK Support', active: true });
+    return list; } });
+  const box = useRef<HTMLDivElement>(null); const live = useRef<{ x: number; y: number } | null>(null);
 
   if (!desk?.float24 || closed || !foxChatVisible(path)) return null;
   const style = pos ? { left: pos.x, top: pos.y } : { left: 12, bottom: 112 };
@@ -59,20 +62,21 @@ export function SupportFloat() {
   };
   const onMove = (e: React.PointerEvent) => {
     const d = drag.current; if (!d) return;
-    if (!d.moved && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 6) return;
-    d.moved = true; setPos(clamp(e.clientX - d.dx, e.clientY - d.dy));
+    if (!d.moved && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 4) return;
+    d.moved = true; const p = clamp(e.clientX - d.dx, e.clientY - d.dy); live.current = p;
+    const el = box.current; if (el) { el.style.left = `${p.x}px`; el.style.top = `${p.y}px`; el.style.bottom = 'auto'; }
   };
   const onUp = () => {
     const d = drag.current; drag.current = null;
-    if (d?.moved) { if (pos) try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch { /* optional */ } return; }
+    if (d?.moved) { const p = live.current; if (p) { setPos(p); try { localStorage.setItem(POS_KEY, JSON.stringify(p)); } catch { /* optional */ } } return; }
     setOpen(o => !o);
   };
   const close = () => { setClosed(true); setOpen(false); try { sessionStorage.setItem('bixlink-cs24-closed', '1'); } catch { /* optional */ } };
 
-  return <div className="cs24 fixed z-50 w-[min(18rem,calc(100vw-1rem))] select-none" style={style}>
+  return <div ref={box} className="cs24 fixed z-50 w-[min(18rem,calc(100vw-1rem))] select-none" style={style}>
     <div role="button" tabIndex={0} aria-label={c.title} aria-expanded={open} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={() => { drag.current = null; }}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(o => !o); } }}
-      className="flex cursor-grab touch-none items-center gap-2 rounded-full border border-primary/50 bg-card/95 py-1.5 pl-1.5 pr-2 shadow-xl backdrop-blur active:cursor-grabbing">
+      className="flex cursor-grab touch-none will-change-[left,top] items-center gap-2 rounded-full border border-primary/50 bg-card/95 py-1.5 pl-1.5 pr-2 shadow-xl backdrop-blur active:cursor-grabbing">
       <span className="relative grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground"><Headset size={16} /><span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-chart-2" /></span>
       <span className="min-w-0 flex-1 truncate text-xs font-bold">{c.title}</span>
       <button data-close type="button" aria-label="Close" onClick={close} className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted"><X size={14} /></button>
