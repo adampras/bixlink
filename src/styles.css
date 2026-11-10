@@ -8314,3 +8314,14 @@ html:not([data-color-mode="light"]) .stake-compact.stake-compact.stake-compact .
 .csc-log p { max-width: 82%; justify-self: start; padding: 6px 10px; border-radius: 12px; background: var(--card); font-size: 13px; overflow-wrap: anywhere; }
 .csc-log p.is-mine { justify-self: end; background: color-mix(in oklab, var(--primary) 22%, var(--card)); }
 .csc-log time { display: block; margin-top: 2px; font-size: 9px; color: var(--muted-foreground); text-align: right; }
+
+/* Crisp pass: solid tier heads, sharp labels, no glow on small buttons */
+.stake-compact.stake-compact.stake-compact.stake-compact .duration-package-head{background:color-mix(in oklab,var(--gem,var(--tier-color)) 78%,#0b0d12) !important;color:#fff !important;border-bottom:1px solid color-mix(in oklab,var(--gem,var(--tier-color)) 90%,#fff) !important;box-shadow:none !important}
+html[data-color-mode="light"] .stake-compact.stake-compact.stake-compact.stake-compact .duration-package-head{background:color-mix(in oklab,var(--gem,var(--tier-color)) 85%,#000) !important;color:#fff !important}
+.stake-compact .duration-package-head :is(h3,p,.duration-price){color:#fff !important;text-shadow:none !important;filter:none !important}
+.stake-compact .duration-package-head p{opacity:.92}
+.stake-compact :is(.duration-label,.duration-yield dt,.lux-ledger span,.lux-horizon span,.duration-risk){color:var(--foreground) !important;opacity:1 !important;font-weight:800 !important}
+html:not([data-color-mode="light"]) .stake-compact :is(.duration-label,.duration-yield dt,.lux-ledger span,.lux-horizon span){color:color-mix(in oklab,var(--foreground) 92%,var(--chart-3)) !important}
+:is([data-page="stake"],[data-page="wallet"],[data-page="profit"],[data-page="network"],.stake-compact) :is(button,.duration-option,a[class*="btn"]):not(.duration-stake){box-shadow:none !important;text-shadow:none !important}
+:is([data-page="stake"],[data-page="wallet"],[data-page="profit"],[data-page="network"],.stake-compact) .duration-option[aria-pressed="true"]{border-width:1.5px !important}
+.text-muted-foreground{-webkit-font-smoothing:antialiased}

@@ -21,6 +21,9 @@ import artVault from '@/assets/hub/vault.jpg';
 import artHome from '@/assets/hub/home.jpg';
 import artProfile from '@/assets/hub/profile.jpg';
 import artSettings from '@/assets/hub/settings.jpg';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { SupportCommandCenter } from '@/components/SupportCommandCenter';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { HUB_GROUPS, HUB_ITEMS, PILLARS, hubVisible, hubOrdered, pillarOf } from '@/lib/dock-hub';
 
@@ -50,6 +53,8 @@ function SwipeRow({ children, count }: { children: React.ReactNode; count: numbe
 /** Mobile dock HUB (replaces HOME): opens owner-selected shortcuts. */
 export function DockHub({ path, cfg, order, matrix = false }: { path: string; cfg?: Record<string, boolean> | undefined; order?: string[] | undefined; matrix?: boolean }) {
   const [open, setOpen] = useState(false);
+  const owner1 = useQuery({ queryKey: ['is-owner1'], staleTime: 300_000, enabled: open, queryFn: async () => Boolean((await supabase.rpc('bix_is_owner1')).data) });
+  const [csOpen, setCsOpen] = useState(false);
   const [q, setQ] = useState('');
   useEffect(() => { if (!open) setQ(''); }, [open]);
   const [recent, setRecent] = useState<string[]>([]);
@@ -98,6 +103,7 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
         <div className="hub-grabber" aria-hidden/>
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest" data-text="BIX HUB">BIX HUB</SheetTitle><p className="hub-gate" aria-hidden><i/>GATEWAY ONLINE</p></SheetHeader>
         </div>
+        {owner1.data && <section className="hub-group hub-tone-gold mt-3"><button type="button" className="hub-group-head w-full" onClick={() => setCsOpen(v => !v)} aria-expanded={csOpen}><span>CS 1 · CS 2 · CS 3 control</span><em>{csOpen ? 'Close' : 'Open'}</em></button>{csOpen && <div className="mt-2"><SupportCommandCenter/></div>}</section>}
         {<>
         {matrix ? PILLARS.map((p, pi) => { const list = items.filter(i => pillarOf(i.id) === p.id); if (!list.length) return null; const tone = ['emerald', 'gold', 'violet', 'silver'][pi];
           return <section key={p.id} className={`hub-group hub-tone-${tone} mt-3`}>
