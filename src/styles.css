@@ -8219,3 +8219,24 @@ html[data-chrono="on"] .pp-sheet .lux-cta { background: linear-gradient(180deg,#
 .glass-dock>:is(a,button){-webkit-tap-highlight-color:transparent;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
 .glass-dock>:is(a,button):active{transform:scale(.9)}
 @media (prefers-reduced-motion:reduce){.hub-midnight .hub-tile,.glass-dock>:is(a,button){transition:none!important}}
+
+/* Nov 10b: RM50 dock clears phone system bar; P2P guide */
+@media (max-width:1279px){
+  html[data-chrono="on"] nav.glass-dock{bottom:calc(max(env(safe-area-inset-bottom,0px),34px) + 12px)!important;inset-inline:14px!important;min-height:58px;align-items:center}
+  html[data-chrono="on"] nav.glass-dock>a{padding-block:7px!important}
+  html[data-chrono="on"] nav.glass-dock .dock-wallet{transform:translateY(-6px)}
+  html[data-chrono="on"] .site-shell main{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))!important}
+}
+.p2p-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0;padding:0;list-style:none}
+.p2p-guide li{display:flex;align-items:center;gap:6px;padding:8px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-size:10.5px;line-height:1.25}
+.p2p-guide b{display:grid;place-items:center;flex:none;width:20px;height:20px;border-radius:50%;background:var(--primary);color:var(--primary-foreground);font-size:11px}
+.p2p-guide em{font-style:normal;font-weight:800;color:var(--chart-3)}
+.p2p-section-title{margin:8px 0 -4px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-foreground)}
+html[data-chrono="on"] .p2p-guide li{background:linear-gradient(180deg,#14161b,#08090c);border-color:rgba(241,245,249,.16);box-shadow:inset 0 2px 0 -1px #c8102e}
+html[data-chrono="on"] .p2p-guide b{background:#facc15;color:#0b0b0d}
+html[data-chrono="on"] .p2p-desk :is(.p2p-panel,.p2p-hud){border-radius:16px!important;border:.5px solid rgba(241,245,249,.16)!important;background:linear-gradient(160deg,#12151c,#07080b)!important}
+html[data-chrono="on"] .p2p-box{border-radius:14px!important;transition:transform .12s ease}
+html[data-chrono="on"] .p2p-box:active{transform:scale(.96)}
+html[data-chrono="on"] .p2p-box.is-buy{box-shadow:inset 0 2px 0 #10b981!important}
+html[data-chrono="on"] .p2p-box.is-sell{box-shadow:inset 0 2px 0 #c8102e!important}
+html[data-chrono="on"] .p2p-modes .is-on{color:#facc15!important;box-shadow:inset 0 -2px 0 #c8102e!important}
