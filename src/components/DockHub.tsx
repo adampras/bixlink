@@ -89,7 +89,7 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
   };
   useEffect(() => { if (!open) setDrag(0); }, [open]);
   return <>
-    <button type="button" onClick={() => setOpen(true)} aria-label="Open BIX HUB" className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}>
+    <button type="button" onClick={() => { try { navigator.vibrate?.(6); } catch { /* unsupported */ } setOpen(true); }} aria-label="Open BIX HUB" className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}>
       <LayoutGrid size={19} className="shrink-0"/><span>HUB</span>
     </button>
     <Sheet open={open} onOpenChange={setOpen}>
