@@ -27,3 +27,8 @@ Two real devices: grant/deny notifications, incoming voice/video while locked, e
 2. Copy the downloaded `google-services.json` into `android/app/`.
 3. `bunx cap sync android && bunx cap open android` → Build → Build APK(s).
 4. Add the incoming-call service / full-screen intent receiver described above before releasing.
+
+## Building the official APK
+1. Connect the project to GitHub, add repository secret `GOOGLE_SERVICES_JSON` (full file contents).
+2. Run the "Build BIXLINK Android APK" workflow (Actions tab). Download `bixlink.apk` from the release.
+3. Upload it to `public/download/bixlink.apk`; the opening pop-up then shows "Unduh Aplikasi Resmi Android" to Android visitors (hidden inside the app).

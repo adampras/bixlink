@@ -7,6 +7,8 @@ import { useRouterState } from '@tanstack/react-router';
 
 type BIPEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 const KEY = 'bix-install-dismissed';
+/** Official APK location; place the built bixlink.apk here (public/download). The button only appears once the file exists. */
+export const APK_URL = '/download/bixlink.apk';
 
 /** Manifest-only install invitation shown a few seconds after opening: native prompt on Android, Share steps on iPhone, menu tip elsewhere. */
 export function InstallPrompt() {
@@ -15,10 +17,14 @@ export function InstallPrompt() {
   const [ios, setIos] = useState(false);
   const [open, setOpen] = useState(false);
   const [tip, setTip] = useState(false);
+  const [apk, setApk] = useState(false);
   useEffect(() => {
     const standalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone;
     setOpen(false);
-    if (standalone || window.self !== window.top || wallet) return;
+    const native = !!(window as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
+    if (standalone || native || window.self !== window.top || wallet) return;
+    const android = /android/i.test(navigator.userAgent);
+    if (android) fetch(APK_URL, { method: 'HEAD' }).then(r => setApk(r.ok && !/text\/html/.test(r.headers.get('content-type') ?? ''))).catch(() => {});
     const last = Number(localStorage.getItem(KEY) ?? 0);
     if (Date.now() - last < 864e5) return;
     setIos(/iphone|ipad|ipod/i.test(navigator.userAgent));
@@ -38,6 +44,8 @@ export function InstallPrompt() {
     <div className="install-pop-avatar"><img src={logo} alt="BIXLINK fox emblem" width={80} height={80}/></div>
     <h2>Faster <em>BIXLINK</em> Access!</h2>
     <p>Tap <b>SAVE BIXLINK ACCESS</b> to add it to your home screen and open it instantly without your browser.</p>
+    {apk && <a href={APK_URL} download className="install-pop-cta block text-center" onClick={close}>UNDUH APLIKASI RESMI ANDROID (.APK)</a>}
+    {apk && <p className="install-pop-tip !text-xs">Panggilan BIX CALL berdering walau layar terkunci. Izinkan "Instal dari sumber ini" bila diminta.</p>}
     <button type="button" className="install-pop-cta" onClick={install}>SAVE BIXLINK ACCESS</button>
     {tip && <p className="install-pop-tip !text-xs">{ios ? <>Tap <Share size={12} className="inline"/> <b>Share</b> in Safari, then <b>Add to Home Screen</b>.</> : <>Open the browser menu (⋮) and choose <b>Install app</b> or <b>Add to Home screen</b>.</>}</p>}
     <span className="install-pop-line" aria-hidden/>
