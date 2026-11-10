@@ -8356,3 +8356,16 @@ html[data-color-mode="light"] .stake-compact.stake-compact :is(.duration-label,.
 .stake-compact .stake-pick-chip{min-width:96px}
 .stake-compact .stake-pick-chip small{opacity:1!important;color:inherit!important}
 .stake-compact .stake-pick-chip[aria-selected="true"] :is(b,small){color:var(--obs-gold,#f5c451)!important;-webkit-text-fill-color:currentColor}
+
+/* Stake cards: pure square corners + glass tier header */
+.stake-compact.stake-compact.stake-compact.stake-compact.stake-compact .duration-package,
+.stake-compact.stake-compact.stake-compact.stake-compact.stake-compact .duration-package :is(.duration-package-head,.duration-package-body,.duration-option,.duration-stake,.duration-price,.form-input,.lux-ledger,button){border-radius:0!important}
+.stake-compact.stake-compact.stake-compact.stake-compact.stake-compact.stake-compact .duration-package-head{position:relative;overflow:hidden;background:linear-gradient(135deg,color-mix(in oklab,var(--gem,var(--tier-color)) 88%,#fff 12%),color-mix(in oklab,var(--gem,var(--tier-color)) 70%,#000))!important;box-shadow:inset 0 1px 0 rgb(255 255 255/.45),inset 0 -1px 0 rgb(0 0 0/.25)!important}
+.stake-compact.stake-compact.stake-compact.stake-compact.stake-compact.stake-compact .duration-package-head::before{content:"";position:absolute;inset:0 0 52% 0;background:linear-gradient(180deg,rgb(255 255 255/.28),rgb(255 255 255/0));pointer-events:none}
+.stake-compact .duration-package-head>*{position:relative;z-index:1}
+.stake-compact.stake-compact.stake-compact.stake-compact .duration-package-head .duration-price{background:rgb(8 10 14/.55)!important;backdrop-filter:blur(10px);border:1px solid rgb(255 255 255/.4)!important}
+
+/* Bottom nav: black glass in all modes */
+nav.glass-dock.glass-dock,html[data-color-mode="light"] nav.glass-dock.glass-dock,html[data-chrono="on"] nav.glass-dock.glass-dock{background:rgb(10 11 14/.82)!important;backdrop-filter:blur(18px) saturate(140%);border:1px solid rgb(255 255 255/.12)!important;box-shadow:inset 0 1px 0 rgb(255 255 255/.1),0 14px 34px -14px #000!important}
+html[data-color-mode="light"] nav.glass-dock>a{color:rgb(255 255 255/.78)!important}
+html[data-color-mode="light"] nav.glass-dock>a.mobile-nav-on{color:var(--chart-3)!important}
