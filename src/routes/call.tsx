@@ -191,6 +191,7 @@ function ActionButtons({ peerId, name, tier, canCall, onChat }: { peerId: string
     <button aria-label="Chat" onClick={() => onChat(peerId, name)}><MessageCircle size={15}/></button>
     <button aria-label="Voice call" className={tier?.voice ? '' : 'is-locked'} onClick={() => call('voice')}>{tier?.voice ? <Phone size={15}/> : <Lock size={13}/>}</button>
     <button aria-label="Video call" className={tier?.video ? '' : 'is-locked'} onClick={() => call('video')}>{tier?.video ? <Video size={15}/> : <Lock size={13}/>}</button>
+    <Link to="/pay" aria-label={`Kirim BIX ke @${name}`} title="Kirim BIX PAY" className="comm-pay-btn"><Coins size={15}/></Link>
     {hint && <em className="comm-hint">{hint} · <Link to="/stake">Staking</Link></em>}
   </span>;
 }

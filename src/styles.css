@@ -8185,3 +8185,7 @@ html[data-chrono="on"] .pp-sheet .lux-cta { background: linear-gradient(180deg,#
 .bixcall-page .bx-grp-info { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
 .bixcall-page .bx-grp-info .bx-grp-btn { min-width: 12rem; justify-content: center; }
 .bixcall-page .bx-grp-act { min-height: 36px; }
+
+/* BIX CALL: BIX PAY shortcut beside call buttons */
+.comm-actions .comm-pay-btn { display:inline-grid; place-items:center; width:2rem; height:2rem; border-radius:999px; color:var(--primary); border:1px solid color-mix(in oklab, var(--primary) 45%, transparent); background:color-mix(in oklab, var(--primary) 12%, transparent); }
+.comm-actions .comm-pay-btn:active { transform:scale(.92); }

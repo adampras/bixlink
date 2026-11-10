@@ -120,6 +120,11 @@ function AddMembers({ g, inGroup, onClose }: { g: Group; inGroup: Set<string>; o
   const add = async (query: string, key: string) => {
     setBusy(key); const { error } = await supabase.rpc('bix_group_add_member', { p_group: g.id, p_query: query });
     setBusy(''); setDone(d => ({ ...d, [key]: error ? error.message : 'ok' }));
+    if (!error) {
+      const { data: s } = await supabase.auth.getSession(); const uid = s.session?.user.id;
+      const who = /^BIX-/i.test(query) ? query.toUpperCase() : `@${query.replace(/^@/, '')}`;
+      if (uid) await supabase.from('bix_group_messages').insert({ group_id: g.id, sender_id: uid, body: `👋 ${who} ditambahkan ke grup. Selamat bergabung!` });
+    }
   };
   const [pick, setPick] = useState<Record<string, string>>({});
   const toggle = (c: Cand) => setPick(p => { const n = { ...p }; if (n[c.id]) delete n[c.id]; else n[c.id] = c.code; return n; });
