@@ -175,3 +175,5 @@
 - [ ] Verify assigned-trip hold release with two authorized accounts, physical driver GPS/photo and floating map on supported devices — waits on an authorized active trip and physical device support; no arbitrary driver account selected.
 - [x] Prepare ecosystem-first search metadata, public ecosystem overview, safe sitemap and AI reading guide; public phone/desktop rendering and navigation verified, two crawler-scope tests passed; live changes require publishing and subsequent crawler indexing.
 - [x] RM 50-04 large watch modal (local + Jakarta time) and header badges
+- [x] Add optional Capacitor push/GPS capability adapters, authenticated device registration, BIX CALL notification settings, browser-safe GPS fallback and native handoff documentation.
+- [ ] Activate FCM delivery and verify locked-screen calls/background GPS — blocked by declined Firebase connection and external Android host/services plus physical-device tests.

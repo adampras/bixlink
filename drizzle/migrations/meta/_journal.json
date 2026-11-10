@@ -1331,6 +1331,13 @@
       "when": 1794231942152,
       "tag": "0189_p2p_fiat_escrow_and_support_operators",
       "breakpoints": true
+    },
+    {
+      "idx": 190,
+      "version": "7",
+      "when": 1794297216452,
+      "tag": "0190_bix_native_devices",
+      "breakpoints": true
     }
   ]
 }

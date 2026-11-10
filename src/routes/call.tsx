@@ -25,6 +25,7 @@ import { CONTACTS_EVENT, addContact, readContacts, removeContact, parseBixId, ty
 import { ChatThemePicker } from '@/components/ChatThemePicker';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
+import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
 
 export const Route = createFileRoute('/call')({
   head: () => ecosystemHead('/call', 'BIX CALL — Chat, Panggilan Suara & Video | BIXLINK', 'Kenali BIX CALL untuk chat, panggilan suara, video dan grup antaranggota BIXLINK. Akun diperlukan; akses mengikuti ketentuan layanan.'),
@@ -285,6 +286,7 @@ function PrivacyTab({ tier }: { tier: Tier | null }) {
   };
   return <>
     <TierLadder tier={tier}/>
+    <NativeDeviceSettings/>
     <section className="comm-card">
       <h3 className="comm-h">Who can contact me</h3>
       <div className="comm-perms">{PERMS.map(([v, l]) => <button key={v} onClick={() => setPerm(v)} className={perm === v ? 'is-on' : ''}>{l}</button>)}</div>

@@ -41,8 +41,9 @@ const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${Str
 /** Ask once for phone notification permission (call from a user tap). */
 export async function enableBixNotifications() {
   if (typeof Notification === 'undefined') return 'unsupported';
+  if (window.top !== window.self) return 'open-in-new-tab';
   const p = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission;
-  if (p === 'granted') await ensureBixPush();
+  if (p === 'granted' && !(await ensureBixPush())) return 'failed';
   return p;
 }
 

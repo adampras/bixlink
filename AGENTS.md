@@ -66,3 +66,4 @@
 - Chronograph NETWORK and BIX PAY styling uses semantic RM tokens under the existing server-decided html[data-chrono] switch; targeted presentation hooks preserve classic styling and ledger behavior.
 
 - BIX CALL roster and member picker share a Radix body-portal sheet with opaque messenger tokens and internal list scrolling, preventing chat wallpapers and shell transforms from overlapping member details.
+- Native foundations are optional dynamic Capacitor adapters in the web app; Android services/builds remain external, FCM sends wait for a linked connector, and GPS reuses the assigned-driver gate so a detected bridge never implies verified locked-screen delivery.

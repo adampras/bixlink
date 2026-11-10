@@ -6,6 +6,8 @@
       "name": "tanstack_start_ts",
       "dependencies": {
         "@ai-sdk/openai": "^4.0.99",
+        "@capacitor/core": "^8.6.0",
+        "@capacitor/push-notifications": "^8.1.3",
         "@hookform/resolvers": "^5.2.2",
         "@lovable.dev/cloud-auth-js": "^1.1.2",
         "@lovable.dev/email-js": "0.4.0",
@@ -162,6 +164,10 @@
     "@babel/types": ["@babel/types@7.29.8", "", { "dependencies": { "@babel/helper-string-parser": "^7.29.7", "@babel/helper-validator-identifier": "^7.29.7" } }, "sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg=="],
 
     "@bufbuild/protobuf": ["@bufbuild/protobuf@1.10.1", "", {}, "sha512-wJ8ReQbHxsAfXhrf9ixl0aYbZorRuOWpBNzm8pL8ftmSxQx/wnJD5Eg861NwJU/czy2VXFIebCeZnZrI9rktIQ=="],
+
+    "@capacitor/core": ["@capacitor/core@8.6.0", "", { "dependencies": { "tslib": "^2.1.0" } }, "sha512-9F2zzuGYTJu+wqmQSEmqnFBfGrhC/njjMCfmxbvg9mq8xJT4wNh5pxbMFZxvW/yDhYJWPEBFQxeqzfo1gKrvxg=="],
+
+    "@capacitor/push-notifications": ["@capacitor/push-notifications@8.1.3", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-UlOCTS3uiw8ZUJ1rkFKJgoqPADipHDNn0lq5mNRwtXALVxQXIeIoRd3iqpzC+962R2LpCRJRkCTjPX2OHK3tBA=="],
 
     "@date-fns/tz": ["@date-fns/tz@1.5.0", "", {}, "sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg=="],
 

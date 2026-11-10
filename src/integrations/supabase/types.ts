@@ -903,6 +903,33 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_native_devices: {
+        Row: {
+          id: string
+          installation_id: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          installation_id: string
+          platform: string
+          token: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          id?: string
+          installation_id?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_network_leaders: {
         Row: {
           assigned_by: string
