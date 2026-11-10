@@ -60,9 +60,12 @@ export function P2PDesk({ userId, refPrice }: { userId?: string | undefined; ref
   const doTake = async () => { if (!take) return; const n = Number(takeAmt); if (!(n > 0) || n > Number(take.remaining_bix)) { toast.error('Enter an amount up to the offer size'); return; } if (await run(() => supabase.rpc('bix_p2p_take', { p_offer: take.id, p_amount: n }), 'Trade completed · settled in the internal ledger')) setTake(null); };
 
   return <div className="p2p-desk grid gap-4">
-    <P2PFleetDesk />
-    <P2PFiatDesk userId={userId} />
     <P2PStats pulse={pulse.data ?? null} asks={asks} bids={bids} refPrice={refPrice} />
+    <ol className="p2p-guide" aria-label="Cara trade P2P">
+      <li><b>1</b><span>Pilih <em>BUY</em> atau <em>SELL</em></span></li>
+      <li><b>2</b><span>Isi jumlah BIX</span></li>
+      <li><b>3</b><span>Konfirmasi · saldo langsung berpindah</span></li>
+    </ol>
     <div className="p2p-boxes">
       <button className="p2p-box is-buy" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowUpRight size={22} /><b>BUY BIX</b><small>Bayar USDT · escrow</small></button>
       <button className="p2p-box is-sell" onClick={() => { buzz(); setMode('EXPRESS'); document.querySelector('.p2p-express')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}><ArrowDownRight size={22} /><b>SELL BIX</b><small>Receive USDT · escrow</small></button>
@@ -84,6 +87,9 @@ export function P2PDesk({ userId, refPrice }: { userId?: string | undefined; ref
             <div className="p2p-panel"><h3 className="mb-2 text-sm font-semibold">My open offers</h3><ul className="space-y-2">{offers.filter(o => o.user_id === userId).map(o => <li key={o.id} className="flex items-center justify-between text-xs"><span className={o.side === 'SELL' ? 'text-destructive' : 'text-chart-2'}>{o.side}</span><span className="numeric">{number(Number(o.remaining_bix))} @ ${Number(o.price_usd).toFixed(4)}</span><Button size="sm" variant="ghost" disabled={busy} onClick={() => run(() => supabase.rpc('bix_p2p_cancel', { p_offer: o.id }), 'Offer cancelled')}>Cancel</Button></li>)}{!offers.some(o => o.user_id === userId) && <li className="text-xs text-muted-foreground">No open offers.</li>}</ul></div>
           </section>
         </div>}
+    <h2 className="p2p-section-title">Bayar on-chain / Bank &amp; QRIS</h2>
+    <P2PFleetDesk />
+    <P2PFiatDesk userId={userId} />
     <Link to="/buyback" className="p2p-buyback"><span className="flex items-center gap-2"><Zap size={15} />SELL BIX · DEV BUYBACK $0.25</span><span className="text-xs text-muted-foreground">Fast sell →</span></Link>
     <aside className="lux-deed" aria-label="Market disclosure">
       <div className="lux-deed-head"><ShieldCheck size={14} />BIXLINK INTERNAL ESCROW PROTOCOL</div>
