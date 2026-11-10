@@ -55,7 +55,7 @@ function RegisterPage() {
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
   const label = 'block text-xs font-bold text-muted-foreground';
-  return <BixShell><main id="member-access" className="auth-vault-page mx-auto flex min-h-[75vh] max-w-md flex-col justify-center px-5 py-10"><VaultStardust/><div className="auth-vault"><Link to="/" className="auth-back" aria-label="Back to HOME">← HOME</Link>
+  return <BixShell><main id="member-access" className="auth-vault-page mx-auto flex auth-center min-h-[75vh] max-w-md flex-col justify-center px-5 py-10"><VaultStardust/><div className="auth-vault"><Link to="/" className="auth-back" aria-label="Back to HOME">← HOME</Link>
     <div className="flex items-center justify-center gap-2.5"><img src="https://bixlink.com/__l5e/assets-v1/c62ecff6-c5d1-4235-8e7a-e49c0c2b7039/fox-icon-512.png" alt="" className="h-9 w-9 rounded-full border border-chart-3/40"/><div className="text-left"><div className="text-lg font-black leading-none tracking-wide">BIX<span className="text-chart-3">LINK</span></div><div className="mt-1 text-[9px] font-bold tracking-[0.2em] text-muted-foreground">CREATE MEMBER ACCOUNT</div></div></div>
     <nav className="auth-tabs mt-5" aria-label="Account"><Link to="/auth">SIGN IN</Link><Link to="/register" data-active="true">REGISTER</Link></nav>
     <form onSubmit={submit} className="mt-5 space-y-3" aria-label="Create BIXLINK account">

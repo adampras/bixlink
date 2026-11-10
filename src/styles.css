@@ -8369,3 +8369,16 @@ html[data-color-mode="light"] .stake-compact.stake-compact :is(.duration-label,.
 nav.glass-dock.glass-dock,html[data-color-mode="light"] nav.glass-dock.glass-dock,html[data-chrono="on"] nav.glass-dock.glass-dock{background:rgb(10 11 14/.82)!important;backdrop-filter:blur(18px) saturate(140%);border:1px solid rgb(255 255 255/.12)!important;box-shadow:inset 0 1px 0 rgb(255 255 255/.1),0 14px 34px -14px #000!important}
 html[data-color-mode="light"] nav.glass-dock>a{color:rgb(255 255 255/.78)!important}
 html[data-color-mode="light"] nav.glass-dock>a.mobile-nav-on{color:var(--chart-3)!important}
+
+/* Auth/Register true center, no shift */
+main.auth-center{min-height:calc(100dvh - 72px)!important;display:grid!important;place-items:center;align-content:center;padding-block:16px!important;overflow-anchor:none}
+main.auth-center>.auth-vault,main.auth-center>.register-vault{width:100%}
+main.auth-center .auth-tabs{min-height:44px}
+/* Stake polish: square HUD, steady numbers, crisp durations */
+.stake-compact .hud-scan,.stake-compact .hud-scan>div,.stake-compact .stake-lux-head{border-radius:0!important}
+.stake-compact .hud-scan{border:1px solid rgb(226 232 240/.18)}
+.stake-compact .hud-scan>div+div{border-left:1px solid rgb(226 232 240/.12)}
+.stake-compact .numeric,.stake-compact .duration-package .font-display{font-variant-numeric:tabular-nums}
+.stake-compact .duration-option[aria-pressed="true"],.stake-compact .duration-option[data-active="true"]{background:#08090b!important;border:1px solid #d4af37!important;color:#f5e6b8!important;box-shadow:none!important}
+.stake-compact .duration-stake{box-shadow:inset 0 1px 0 rgb(255 255 255/.25)!important}
+.stake-compact .duration-stake:active{transform:scale(.98)}
