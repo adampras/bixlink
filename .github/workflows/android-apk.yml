@@ -20,8 +20,9 @@ jobs:
       - name: Add Firebase config
         env: { GOOGLE_SERVICES_JSON: '${{ secrets.GOOGLE_SERVICES_JSON }}' }
         run: |
-          test -n "$GOOGLE_SERVICES_JSON" || { echo "Add GOOGLE_SERVICES_JSON repository secret"; exit 1; }
-          echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+          elif [ -f native-android/google-services.json ]; then cp native-android/google-services.json android/app/google-services.json
+          else echo "Add native-android/google-services.json or the GOOGLE_SERVICES_JSON secret"; exit 1; fi
       - run: bunx cap sync android
       - name: Build APK
         working-directory: android
