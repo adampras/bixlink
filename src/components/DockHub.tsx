@@ -62,6 +62,7 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
   const items = hubOrdered(HUB_ITEMS, order).filter(i => hubVisible(cfg, i.id));
   const on = open || items.some(i => i.to === path && !['/stake', '/wallet', '/profit', '/network'].includes(i.to));
   const pick = (id: string) => {
+    try { navigator.vibrate?.(8); } catch {}
     try { navigator.vibrate?.(8); } catch { /* unsupported */ }
     try { const next = [id, ...recent.filter(r => r !== id)].slice(0, 3); localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch { /* storage blocked */ }
     setOpen(false);
