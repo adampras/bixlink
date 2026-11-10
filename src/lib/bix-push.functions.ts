@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
+import { callFcmData } from './native-capabilities';
 
 const UUID = /^[0-9a-f-]{36}$/i;
 
@@ -26,7 +27,8 @@ export const notifyBixPush = createServerFn({ method: 'POST' })
   })
   .handler(async ({ data, context }) => {
     const jwk = process.env['VAPID_PRIVATE_JWK'];
-    if (!jwk) return { sent: 0 };
+    let callCreated = '';
+    let callKind = '';
     let to = ''; let payload: Record<string, string>;
     if (data.type === 'chat') {
       const { data: m } = await context.supabase.from('bix_messages').select('sender_id, recipient_id, body, kind, created_at').eq('id', data.id).maybeSingle();
@@ -35,17 +37,23 @@ export const notifyBixPush = createServerFn({ method: 'POST' })
     } else {
       const { data: c } = await context.supabase.from('bix_calls').select('caller_id, callee_id, kind, status, created_at').eq('id', data.id).maybeSingle();
       if (!c || c.caller_id !== context.userId || c.status !== 'ringing' || Date.now() - new Date(c.created_at).getTime() > 60000) return { sent: 0 };
-      to = c.callee_id; payload = { type: 'call', body: c.kind === 'video' ? '📹 Incoming video call — tap to answer' : '📞 Incoming voice call — tap to answer', tag: `call-${data.id}`, url: '/call' };
+      to = c.callee_id; callCreated = c.created_at; callKind = c.kind; payload = { type: 'call', body: c.kind === 'video' ? '📹 Incoming video call — tap to answer' : '📞 Incoming voice call — tap to answer', tag: `call-${data.id}`, url: '/call' };
     }
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { data: prof } = await supabaseAdmin.from('profiles').select('username, full_name').eq('user_id', context.userId).maybeSingle();
     const who = `@${prof?.username || prof?.full_name || 'Member'}`;
     payload['title'] = data.type === 'call' ? `BIX CALL · ${who}` : `BIX CHAT · ${who}`;
     if (data.type === 'chat') payload['url'] += `&n=${encodeURIComponent(prof?.username || 'Member')}`;
+    const { sendFcmToUser } = await import('./fcm.server');
+    const fcmData: Record<string, string> = data.type === 'call'
+      ? { ...callFcmData(data.id, callKind, callCreated), title: payload['title']!, body: payload['body']! }
+      : { type: 'chat', title: payload['title']!, body: payload['body']!, path: payload['url']! };
+    const native = await sendFcmToUser(supabaseAdmin as never, to, fcmData, data.type === 'call' ? 40 : 86400);
+    if (!jwk) return { sent: native };
     const { data: subs } = await supabaseAdmin.from('bix_push_subscriptions').select('endpoint, p256dh, auth').eq('user_id', to).limit(10);
-    if (!subs?.length) return { sent: 0 };
+    if (!subs?.length) return { sent: native };
     const { buildPushHTTPRequest } = await import('@pushforge/builder');
-    let sent = 0;
+    let sent = native;
     await Promise.all(subs.map(async s => {
       try {
         const req = await buildPushHTTPRequest({ privateJWK: jwk, subscription: { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, message: { payload, adminContact: 'mailto:support@bixlink.com', options: { ttl: data.type === 'call' ? 45 : 86400, urgency: 'high' } } });

@@ -3,7 +3,7 @@
 This repository remains the TanStack web/server application. No APK or Android project is generated here. Capacitor core and push APIs are optional, dynamically loaded adapters for a separately maintained native host. Never point a static Capacitor webDir at the SSR server output.
 
 ## Firebase
-- Connect `firebase_messaging` in Lovable. This turn's connection was declined, so no FCM sending code is enabled and existing VAPID delivery remains unchanged.
+- `firebase_messaging` connector is linked; FCM sends ride on `notifyBixPush` alongside existing VAPID web push.
 - Use HTTP v1 through the connector, never a legacy Server Key or exposed service account.
 - Register native Android/iOS tokens through `registerNativeDevice`; authenticated RLS limits each member to their own rows. Re-register on sign-in/token refresh; invoke `removeNativeDevice` before sign-out and unregister locally in the native host. Do not log tokens.
 - Future sender must re-read call/message rows under authenticated RLS, derive recipient from stored rows, reject stale/ended calls, and deduplicate sends. Never accept a recipient/token supplied by a caller. Delete stale UNREGISTERED tokens; back off on 429/5xx.
@@ -18,3 +18,12 @@ The native host must implement foreground location service, visible persistent n
 
 ## Device acceptance tests
 Two real devices: grant/deny notifications, incoming voice/video while locked, expiry/decline/answer, token rotation, account switching/removal, app process killed/force-stopped, DND/battery restrictions. Driver: grant/deny GPS, active assigned trip with screen locked, stale-map indication, disconnect/reconnect and verify no updates after trip completion/sign-out. A powered-off phone cannot receive calls or GPS updates.
+## Status (2026-11-10)
+- Firebase project `bixlink-ecosystem` is linked through the Firebase connector. `notifyBixPush` now also sends high-priority FCM data messages (call payload expires after 40 s) to every registered native device of the recipient, and deletes stale tokens.
+- `capacitor.config.json` (appId `com.bixlink.app`) loads the live site (https://bixlink.com), so web updates reach installed APKs without reinstall. `native-shell/` is only an offline fallback page.
+
+## Build the APK (on a computer with Android Studio)
+1. `bun install && bunx cap add android`
+2. Copy the downloaded `google-services.json` into `android/app/`.
+3. `bunx cap sync android && bunx cap open android` → Build → Build APK(s).
+4. Add the incoming-call service / full-screen intent receiver described above before releasing.
