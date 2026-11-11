@@ -391,16 +391,19 @@ export type Database = {
       bix_group_members: {
         Row: {
           group_id: string
+          is_admin: boolean
           joined_at: string
           user_id: string
         }
         Insert: {
           group_id: string
+          is_admin?: boolean
           joined_at?: string
           user_id: string
         }
         Update: {
           group_id?: string
+          is_admin?: boolean
           joined_at?: string
           user_id?: string
         }
@@ -4503,6 +4506,7 @@ export type Database = {
         Args: { p_group: string; p_query: string }
         Returns: string
       }
+      bix_group_can_manage: { Args: { p_group: string }; Returns: boolean }
       bix_group_candidates: { Args: never; Returns: Json }
       bix_group_feed: {
         Args: { p_group: string }
@@ -4521,6 +4525,10 @@ export type Database = {
         Returns: undefined
       }
       bix_group_roster: { Args: { p_group: string }; Returns: Json }
+      bix_group_set_admin: {
+        Args: { p_group: string; p_on: boolean; p_user: string }
+        Returns: undefined
+      }
       bix_group_set_avatar: {
         Args: { p_group: string; p_path: string }
         Returns: undefined

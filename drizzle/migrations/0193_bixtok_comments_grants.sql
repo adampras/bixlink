@@ -1,0 +1,1 @@
+GRANT SELECT, INSERT, DELETE ON public.bixtok_comments TO authenticated; GRANT ALL ON public.bixtok_comments TO service_role;

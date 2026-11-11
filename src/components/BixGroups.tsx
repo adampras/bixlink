@@ -12,7 +12,7 @@ import { readContacts } from '@/lib/bix-contacts';
 type Group = { id: string; name: string; about: string; code: string; live_code: string | null; owner_id: string; avatar_path: string | null };
 type Msg = { id: string; sender_id: string; name: string; body: string; created_at: string };
 type Cand = { id: string; code: string; name: string; src: 'Kontak' | 'Jaringan'; depth?: number };
-type Mem = { id: string; code: string | null; name: string; host: boolean };
+type Mem = { id: string; code: string | null; name: string; host: boolean; admin?: boolean };
 const COLS = 'id,name,about,code,live_code,owner_id,avatar_path';
 const newCode = (n = 6) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
 
@@ -83,7 +83,13 @@ function GroupSheet({ title, description, onClose, children }: { title: string; 
 }
 
 function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g: Group; me: string; roster: Mem[]; onClose: () => void; onAdd: () => void; onReload: () => void; onPhoto: () => void }) {
-  const host = g.owner_id === me; const [err, setErr] = useState('');
+  const [o1, setO1] = useState(false);
+  useEffect(() => { void supabase.rpc('bix_is_owner1').then(({ data }) => setO1(Boolean(data))); }, []);
+  const host = g.owner_id === me || o1; const meAdmin = roster.some(m => m.id === me && m.admin); const manage = host || meAdmin; const [err, setErr] = useState('');
+  const setAdmin = async (m: Mem, on: boolean) => {
+    const { error } = await supabase.rpc('bix_group_set_admin', { p_group: g.id, p_user: m.id, p_on: on });
+    if (error) setErr(error.message); else { setErr(on ? `@${m.name} sekarang Admin grup.` : `@${m.name} bukan admin lagi.`); onReload(); }
+  };
   const remove = async (m: Mem) => {
     if (!confirm(`Keluarkan @${m.name} dari grup?`)) return;
     const { error } = await supabase.rpc('bix_group_remove_member', { p_group: g.id, p_user: m.id });
@@ -100,15 +106,16 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
         {g.about && <p>{g.about}</p>}</div>
       <div className="bx-grp-roles"><b>Peran di grup</b>
         <p>👑 <b>Host</b> — membuat grup, mengganti foto, menambah/mengeluarkan anggota dan memulai Live Class.</p>
-        <p>🛡️ <b>Admin grup</b> — Host bisa mengangkat member lain sebagai admin pembantu. Fitur pengangkatan admin sedang disiapkan dan segera tersedia.</p>
+        <p>🛡️ <b>Admin grup</b> — diangkat Host; bisa menambah dan mengeluarkan anggota biasa. Ketuk 🛡️ di samping nama untuk mengangkat/mencopot.</p>
         <p>👤 <b>Anggota</b> — chat, ikut Live Class dan membagikan undangan.</p></div>
       {err && <p className="bx-grp-msg">{err}</p>}
-      {host && <Button variant="ghost" type="button" className="bx-grp-btn" style={{ width: '100%', marginBottom: 8 }} onClick={onAdd}><UserPlus size={14}/> Tambah anggota</Button>}
+      {manage && <Button variant="ghost" type="button" className="bx-grp-btn" style={{ width: '100%', marginBottom: 8 }} onClick={onAdd}><UserPlus size={14}/> Tambah anggota</Button>}
       <ul className="bx-grp-cands">
         {roster.map(m => <li key={m.id}>
           <span className="bx-grp-av" style={{ width: 36, height: 36 }}>{m.name.slice(0, 1).toUpperCase()}</span>
-          <span className="bx-grp-meta"><b>@{m.name}{m.id === me ? ' (Anda)' : ''}</b><small>{m.code ? `BIX-ID ${m.code}` : 'BIX-ID —'}</small><em className="bx-grp-member-role">{m.host ? 'Host' : 'Anggota'}</em></span>
-          {host && !m.host && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" aria-label={`Keluarkan ${m.name}`} onClick={() => void remove(m)}><X size={14}/></Button>}
+          <span className="bx-grp-meta"><b>@{m.name}{m.id === me ? ' (Anda)' : ''}</b><small>{m.code ? `BIX-ID ${m.code}` : 'BIX-ID —'}</small><em className="bx-grp-member-role">{m.host ? '👑 Host' : m.admin ? '🛡️ Admin grup' : 'Anggota'}</em></span>
+          {host && !m.host && <Button variant="ghost" type="button" className={`bx-grp-btn${m.admin ? '' : ' is-alt'}`} aria-label={m.admin ? `Copot admin ${m.name}` : `Jadikan ${m.name} admin`} title={m.admin ? 'Copot admin' : 'Jadikan admin'} onClick={() => void setAdmin(m, !m.admin)}>🛡️</Button>}
+          {!m.host && m.id !== me && (host || (meAdmin && !m.admin)) && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" aria-label={`Keluarkan ${m.name}`} onClick={() => void remove(m)}><X size={14}/></Button>}
         </li>)}
       </ul>
   </GroupSheet>;

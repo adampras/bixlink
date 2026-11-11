@@ -8436,3 +8436,14 @@ html[data-color-mode="light"] .stake-compact.stake-compact.stake-compact.stake-c
 .bx-sc-ready{font-size:12px;font-weight:700;color:#6ee7b7;text-align:center}
 .bx-sc .bx-sc-save{background:linear-gradient(135deg,#FFE680,#FFD700 50%,#c99a1a)!important;color:#0a0812!important;opacity:1;min-height:46px;font-size:14px}
 .bx-sc .bx-sc-save:disabled{opacity:.45}
+
+/* Main dock: larger tap targets + gold rim */
+nav.glass-dock{border:1.5px solid rgb(255 215 0 / .55)!important;box-shadow:0 0 0 1px rgb(0 0 0 / .6),inset 0 1px 0 rgb(255 215 0 / .35),0 10px 28px -10px rgb(0 0 0 / .85)!important}
+nav.glass-dock>a,nav.glass-dock>button{min-height:58px}
+/* Chat receipts: ✓ grey sent · ✓✓ grey delivered · ✓✓ green read */
+.comm-msgs .comm-tick.is-sent,.comm-tick.is-sent{color:#94a3b8!important;opacity:.75;text-shadow:none}
+.comm-msgs .comm-tick.is-delivered,.comm-tick.is-delivered{color:#cbd5e1!important;opacity:.9;text-shadow:none}
+.comm-msgs .comm-tick.is-read,.comm-tick.is-read,body[data-bc-theme] .comm-tick.is-read{color:#22c55e!important;opacity:1;text-shadow:0 0 6px rgb(34 197 94 / .45)}
+/* BIXTOK comment sheet above feed + DM shortcut */
+.bxt-cmt-wrap{z-index:120}
+.bxt-dm{margin-left:auto;margin-right:.6rem;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:.72rem;font-weight:800;background:#A855F7;color:#fff}

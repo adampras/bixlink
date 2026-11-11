@@ -261,12 +261,12 @@ function ShareSheet({ video, code, onClose, onNote }: { video: Video; code: stri
 type Cmt = { id: string; user_id: string; author_name: string; body: string; created_at: string };
 function CommentsSheet({ video, me, onClose, onNote }: { video: Video; me: string; onClose: () => void; onNote: (m: string) => void }) {
   const qc = useQueryClient(); const [text, setText] = useState(''); const [busy, setBusy] = useState(false);
-  const q = useQuery({ queryKey: ['bixtok-comments', video.id], queryFn: async () => { const { data, error } = await supabase.from('bixtok_comments').select('id,user_id,author_name,body,created_at').eq('video_id', video.id).order('created_at', { ascending: false }).limit(100); if (error) throw error; return (data ?? []) as Cmt[]; } });
+  const q = useQuery({ queryKey: ['bixtok-comments', video.id], queryFn: async () => { const { data, error } = await supabase.from('bixtok_comments').select('id,user_id,author_name,body,created_at').eq('video_id', video.id).order('created_at', { ascending: false }).limit(100); if (error) throw error; return (data ?? []) as Cmt[]; }, refetchInterval: 5000 });
   const send = async () => { const body = text.trim(); if (!body) return; setBusy(true);
     const { error } = await supabase.from('bixtok_comments').insert({ video_id: video.id, body, user_id: me });
-    setBusy(false); if (error) { onNote('Comment could not be sent.'); return; } setText(''); qc.invalidateQueries({ queryKey: ['bixtok-comments', video.id] }); };
+    setBusy(false); if (error) { onNote(`Comment could not be sent: ${error.message}`); return; } setText(''); qc.invalidateQueries({ queryKey: ['bixtok-comments', video.id] }); };
   return <div className="bxt-cmt-wrap" onClick={onClose}><div className="bxt-cmt" role="dialog" aria-label="Comments" onClick={e => e.stopPropagation()}>
-    <header><b>{q.data?.length ?? 0} comments</b><button aria-label="Close comments" onClick={onClose}><X size={18}/></button></header>
+    <header><b>{q.data?.length ?? 0} comments</b>{video.creator_id && video.creator_id !== me && <Link to="/call" search={{ chat: video.creator_id } as never} className="bxt-dm" onClick={onClose}><MessageCircle size={14}/> Chat @{video.creator_name}</Link>}<button aria-label="Close comments" onClick={onClose}><X size={18}/></button></header>
     <ul>{q.isLoading ? <li className="muted">Loading…</li> : !q.data?.length ? <li className="muted">No comments yet. Be the first!</li> : q.data.map(c => <li key={c.id}><span>{c.author_name.slice(0, 1).toUpperCase()}</span><div><b>@{c.author_name}</b><p>{c.body}</p></div>
       {c.user_id === me && <button aria-label="Delete comment" onClick={async () => { await supabase.from('bixtok_comments').delete().eq('id', c.id); qc.invalidateQueries({ queryKey: ['bixtok-comments', video.id] }); }}><Trash2 size={14}/></button>}</li>)}</ul>
     <form onSubmit={e => { e.preventDefault(); void send(); }}><input value={text} maxLength={300} onChange={e => setText(e.target.value)} placeholder="Add a comment…"/><button disabled={busy || !text.trim()}>Send</button></form>
