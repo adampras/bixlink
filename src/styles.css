@@ -8447,3 +8447,27 @@ nav.glass-dock>a,nav.glass-dock>button{min-height:58px}
 /* BIXTOK comment sheet above feed + DM shortcut */
 .bxt-cmt-wrap{z-index:120}
 .bxt-dm{margin-left:auto;margin-right:.6rem;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:.72rem;font-weight:800;background:#A855F7;color:#fff}
+
+/* ===== Unified polish batch (all networks) ===== */
+html { -webkit-tap-highlight-color: transparent; text-rendering: optimizeLegibility; }
+body { padding-top: env(safe-area-inset-top, 0px); }
+:where(header.sticky, [class*="sticky"][class*="top-0"]) {
+  backdrop-filter: blur(14px) saturate(140%);
+}
+:where(button, a[role="button"], [role="tab"]):not(:disabled) {
+  transition: transform 120ms ease, filter 120ms ease;
+}
+:where(button, a[role="button"], [role="tab"]):not(:disabled):active {
+  transform: scale(0.97);
+}
+:where(.tabular-nums, .font-mono, [class*="balance"], [class*="amount"]) {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
+}
+:where(input[type="number"], input[inputmode="decimal"], input[inputmode="numeric"]) {
+  font-variant-numeric: tabular-nums;
+}
+:where(.divide-y) > :where(* + *) { border-color: color-mix(in oklab, currentColor 8%, transparent); }
+@media (prefers-reduced-motion: reduce) {
+  :where(button, a[role="button"], [role="tab"]):active { transform: none; }
+}
