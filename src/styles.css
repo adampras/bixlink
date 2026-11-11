@@ -8586,3 +8586,8 @@ body { padding-top: env(safe-area-inset-top, 0px); }
 .comm-dir.is-miss{color:#f43f5e;background:rgb(244 63 94 / .12)}
 .comm-list small{font-variant-numeric:tabular-nums}
 .bc-grid6 label span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:11px}
+
+/* BIXGO 3D vehicle art + compact radar */
+.bixgo-veh-img{filter:drop-shadow(0 4px 8px hsl(var(--background)/.8))}
+.bixgo-float{max-height:72dvh;overflow:auto}
+.bixgo-float .bixgo-sonar{width:150px;height:150px}

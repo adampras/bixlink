@@ -8,8 +8,11 @@ export function vehicleKind(name: string): VehicleKind {
   if (n.includes('executive')) return 'executive';
   return 'urban';
 }
+import vehRide from '@/assets/bixgo/veh-ride.png';
+import vehCar from '@/assets/bixgo/veh-car.png';
 export function BixgoVehicleIcon({ kind, className = '' }: { kind: VehicleKind; className?: string }) {
   const gold = kind === 'black';
+  if (kind !== 'black') return <img src={kind === 'moto' || kind === 'saver' ? vehRide : vehCar} alt="" width={160} height={160} loading="lazy" className={`bixgo-veh-img object-contain ${kind === 'executive' ? 'hue-rotate-[200deg]' : ''} ${className}`}/>;
   return <svg viewBox="0 0 64 40" className={`bixgo-veh ${gold ? 'is-vip' : ''} ${className}`} fill="none" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <defs>
       <linearGradient id={`vb-${kind}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--veh-hi)"/><stop offset="1" stopColor="var(--veh-lo)"/></linearGradient>
