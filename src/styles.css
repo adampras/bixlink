@@ -8680,3 +8680,16 @@ html.comm-room-open .comm-room.is-full .comm-msgs{flex:1;overflow-y:auto}
 .wallet-back-ids{gap:6px;padding-left:12px;border-left:1px solid color-mix(in oklab,currentColor 18%,transparent)}
 .wallet-back-ids dd button{font-size:13px;word-break:normal;overflow-wrap:anywhere}
 .wallet-back-hint{border-top:1px solid color-mix(in oklab,currentColor 18%,transparent);padding-top:6px}
+
+/* ===== Global phone precision pass (all pages, PWA + APK) ===== */
+@media (max-width: 767px) {
+  main img, main video, main iframe, main canvas, main table { max-width: 100%; }
+  main :where(h1,h2,h3,p,span,a,button,label) { overflow-wrap: anywhere; }
+  main :where(.tabular, [class*="balance"], [class*="price"], [class*="amount"], [class*="kpi"]) { font-variant-numeric: tabular-nums; }
+  main :where(input, select, textarea) { font-size: 16px; min-height: 44px; }
+  main :where(button, [role="button"]) { min-height: 40px; }
+  main .grid > *, main .flex > * { min-width: 0; }
+  .wallet-tile, .terminal-kpi, .stake-request, .hub-partner { border-radius: 16px; }
+  .ex-topbar, .comm-subhead { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+  .bixgo-float { margin-bottom: calc(96px + env(safe-area-inset-bottom)); }
+}
