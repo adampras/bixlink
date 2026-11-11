@@ -23,7 +23,7 @@ export function AppSplash() {
     startedThisLoad = true;
     try { window.sessionStorage.setItem('bixlink-splash-seen', '1'); } catch { /* In-memory guard covers this load. */ }
     setVisible(true);
-    const buzz = window.setTimeout(() => { try { navigator.vibrate?.([12, 40, 18]); } catch { /* unsupported */ } }, 2300);
+    const buzz = window.setTimeout(() => { try { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.([12, 40, 18]); } catch { /* unsupported */ } }, 2300);
     const duration = splashDuration(config?.splash);
     const leaveTimer = window.setTimeout(() => setLeaving(true), Math.max(duration - 180, 120));
     const removeTimer = window.setTimeout(() => {
@@ -57,7 +57,7 @@ export function AppSplash() {
     >
       {showVideo ? (
         <>
-          <video ref={videoRef} className="app-splash__video" poster={poster.url} muted autoPlay playsInline preload="auto" onError={() => setVideoFailed(true)} onPlaying={() => { try { navigator.vibrate?.(14); } catch { /* unsupported */ } }} aria-hidden="true">
+          <video ref={videoRef} className="app-splash__video" poster={poster.url} muted autoPlay playsInline preload="auto" onError={() => setVideoFailed(true)} onPlaying={() => { try { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(14); } catch { /* unsupported */ } }} aria-hidden="true">
             <source src={video.url} type="video/webm" />
             <source src={videoFallback.url} type="video/mp4" />
           </video>

@@ -13,7 +13,7 @@ function read(): Theme { try { return { ...DEF, ...JSON.parse(localStorage.getIt
 export function applyChatTheme(t: Theme = read()) {
   const d = document.body.dataset; d['bcChatBg'] = t.bg; d['bcChatFont'] = t.font; d['bcChatWall'] = t.wall;
 }
-if (typeof document !== 'undefined') applyChatTheme();
+if (typeof window !== 'undefined') { const run = () => window.setTimeout(() => applyChatTheme(), 0); if (document.readyState === 'complete') run(); else window.addEventListener('load', run, { once: true }); }
 
 export function ChatThemePicker() {
   const [t, setT] = useState<Theme>(DEF);
