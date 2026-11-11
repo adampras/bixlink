@@ -8723,3 +8723,22 @@ html.comm-room-open .comm-room.is-full .comm-msgs{flex:1;overflow-y:auto}
 html:has(.bixcall) :is(.glass-dock,.site-header,.cs24-orb,footer),html:has(.vf-overlay) :is(.glass-dock,.cs24-orb){display:none!important}
 .bixcall{height:100dvh;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
 .vf-overlay{z-index:9000}
+
+/* Mobile precision polish: HOME, HUB, WALLET, PROFILE, BIXGO */
+@media (max-width: 767px) {
+  main > *, .site-shell main section { max-width: 100%; min-width: 0; }
+  main section, main article { margin-inline: auto; }
+  main :is(.rounded-2xl, .rounded-3xl) { border-radius: 18px; }
+  main :is(h1, h2) { letter-spacing: -0.01em; line-height: 1.15; overflow-wrap: anywhere; }
+  main :is(h3, h4) { line-height: 1.25; }
+  main :is(.text-3xl, .text-4xl) { font-size: clamp(1.35rem, 6vw, 1.85rem); }
+  main .grid { gap: clamp(8px, 2.6vw, 12px); }
+  .hub-tile, .hub-partner { min-height: 92px; padding: 10px 8px; text-align: center; }
+  .hub-tile :is(span, p) { font-size: 11.5px; line-height: 1.2; overflow-wrap: anywhere; }
+  .wallet-tile { min-height: 64px; padding: 10px; }
+  .wallet-tile :is(.text-xl, .text-2xl) { font-variant-numeric: tabular-nums; font-size: 1.05rem; }
+  main :is(button, a)[class*="rounded"] { min-height: 40px; }
+  .bixgo-float { left: 10px; right: 10px; border-radius: 22px; }
+  main [class*="tabular"], main .font-mono { font-variant-numeric: tabular-nums; }
+  main img { max-width: 100%; height: auto; }
+}
