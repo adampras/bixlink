@@ -42,13 +42,14 @@ export function BixgoRadar({ bookingId, summary, onRetry, onSwitch, onClose }: {
     <button onClick={onClose} className="mt-3 min-h-12 w-full rounded-full bg-primary font-bold text-primary-foreground">Lihat perjalanan</button>
   </div>;
 
-  if (timeout || cancelled) return <div className="bixgo-radar-card rounded-3xl p-5 text-center">
-    <SearchX className="mx-auto h-12 w-12 text-muted-foreground"/>
+  if (timeout || cancelled) return <div className="bixgo-cancel-card rounded-3xl p-5 text-center">
+    <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bixgo-cancel-ico"><SearchX className="h-7 w-7"/></span>
     <h2 className="mt-2 text-lg font-black">{cancelled ? 'Pesanan dibatalkan' : 'Driver belum tersedia'}</h2>
-    <p className="mt-1 text-sm text-muted-foreground">{cancelled ? 'Pesanan ini sudah tidak aktif.' : 'Mitra driver di sekitar titik jemput sedang melayani perjalanan lain atau belum online. Tidak ada saldo yang terpotong.'}</p>
+    <p className="mt-1.5 text-sm font-medium leading-relaxed text-foreground/90">{cancelled ? 'Pesanan ini sudah tidak aktif.' : 'Mitra driver di sekitar titik jemput sedang melayani perjalanan lain atau belum online.'}</p>
+    <p className="bixgo-cancel-pill mx-auto mt-3 inline-flex rounded-full px-3 py-1 text-xs font-bold">✓ Tidak ada saldo yang terpotong</p>
     <div className="mt-4 grid gap-2">
       {!cancelled && <button onClick={() => { setSec(0); }} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary font-bold text-primary-foreground"><RefreshCw className="h-4 w-4"/>Coba cari lagi</button>}
-      <button onClick={async () => { if (!cancelled && bookingId) await supabase.rpc('bixgo_passenger_cancel', { p_id: bookingId }); onSwitch(); }} className="min-h-12 rounded-full border border-border bg-card font-bold">Ganti kendaraan</button>
+      <button onClick={async () => { if (!cancelled && bookingId) await supabase.rpc('bixgo_passenger_cancel', { p_id: bookingId }); onSwitch(); }} className="min-h-12 rounded-full border border-border bg-secondary font-bold text-secondary-foreground">Ganti kendaraan</button>
       {cancelled ? <button onClick={onRetry} className="min-h-12 rounded-full border border-border font-bold">Pesan ulang</button> : <button onClick={cancel} className="min-h-12 rounded-full border border-border font-bold text-destructive">Batalkan pencarian</button>}
     </div>
   </div>;
@@ -56,7 +57,7 @@ export function BixgoRadar({ bookingId, summary, onRetry, onSwitch, onClose }: {
   const pct = (sec / LIMIT) * 100;
   return <div className="bixgo-radar-card rounded-3xl p-5 text-center">
     {summary && <p className="mx-auto mb-4 flex max-w-full items-center justify-center gap-1.5 truncate rounded-full border border-border bg-background/60 px-3 py-1.5 text-[11px] font-semibold"><span className="truncate">📍 {summary.from}</span><span className="text-primary">➔</span><span className="truncate">🏁 {summary.to}</span></p>}
-    <div className="bixgo-sonar mx-auto">
+    <div className="bixgo-sonar mx-auto scale-90">
       <i className="blip" style={{ left: '22%', top: '30%' }}/><i className="blip" style={{ left: '70%', top: '24%', animationDelay: '.9s' }}/><i className="blip" style={{ left: '62%', top: '72%', animationDelay: '1.7s' }}/>
       <div className="core">{summary && <BixgoVehicleIcon kind={summary.kind} className="w-14"/>}</div>
     </div>

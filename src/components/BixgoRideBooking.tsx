@@ -75,7 +75,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
   const split = splitCommission(branch, commission);
 
   return <div className="relative min-h-[100dvh] pb-40">
-    <div className={`relative overflow-hidden bg-card ${stage === 'pickup' ? 'h-[55dvh]' : 'h-[36dvh]'} transition-all`}>
+    <div className={`relative overflow-hidden bg-card ${stage === 'pickup' ? 'h-[55dvh]' : stage === 'booked' ? 'h-[52dvh]' : 'h-[36dvh]'} transition-all`}>
       <ClientOnly fallback={<div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Loading map…</div>}>
         <Suspense fallback={<div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Loading map…</div>}>
           <BixgoLiveMap from={from} to={to} active={active} path={route?.path ?? null} onPick={p => void tapMap(p)}/>
@@ -122,7 +122,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
       </div>
     </section>}
 
-    {stage === 'booked' && <section className={`relative z-[500] -mt-4 rounded-t-3xl px-4 pb-6 pt-5 text-center ${bid ? 'bixgo-sheet' : 'bg-background'}`}>
+    {stage === 'booked' && <section className={`relative z-[500] text-center ${bid ? 'bixgo-float mx-3 -mt-24 rounded-[28px] p-1.5' : '-mt-4 rounded-t-3xl bg-background px-4 pb-6 pt-5'}`}>
       {bid ? <BixgoRadar bookingId={bid} summary={{ from: from?.name ?? '', to: to?.name ?? '', fare: idr(price(cur).final), pay: PAYS[pay]!, kind: vehicleKind(cur.name) }} onRetry={() => { setBid(null); setStage('choose'); }} onSwitch={() => { setBid(null); setStage('choose'); }} onClose={onBack}/> : <><CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">{ref ? `Booking request #${ref} sent` : 'Demo booking created'}</h2>
       <p className="text-sm text-muted-foreground">{cur.name} · {from?.name} → {to?.name}</p><p className="mt-1 text-xl font-black">{idr(price(cur).final)}</p><p className="text-[11px] text-muted-foreground tabular-nums">≈ {cryptoEquivalent(price(cur).final, cfg.usdtIdr).usdt} USDT · {cryptoEquivalent(price(cur).final, cfg.usdtIdr).bix} BIX</p>
       <p className="mt-2 text-[11px] text-muted-foreground">{ref ? (pay === 0 ? 'When a driver accepts, the fare is held from your USDT wallet and settled on completion.' : pay === 1 ? 'When a driver accepts, the BIX fare (with your discount) is held from your BIX balance and settled on completion.' : pay === 2 ? 'Pay the driver in cash. The final fare may differ slightly based on the driver’s own rate.' : pay === 3 ? 'When a driver accepts, their QR appears on your trip screen. Scan it, then tap “I\'ve paid”.' : 'When a driver accepts, their bank account appears on your trip screen. Transfer, then tap “I\'ve paid”.') : 'Sign in to send a real request to the operator. Nothing was charged.'}</p>
