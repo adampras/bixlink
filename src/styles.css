@@ -8693,3 +8693,26 @@ html.comm-room-open .comm-room.is-full .comm-msgs{flex:1;overflow-y:auto}
   .ex-topbar, .comm-subhead { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
   .bixgo-float { margin-bottom: calc(96px + env(safe-area-inset-bottom)); }
 }
+
+/* ===== Final lux pass: dock low, wallet back fit, splash polish ===== */
+@media (max-width: 1279px) {
+  .glass-dock { bottom: max(4px, env(safe-area-inset-bottom)) !important; }
+  .glass-dock a:not(.dock-wallet) { transform: none !important; }
+  main { padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important; }
+}
+.wallet-face--back .wallet-back-body { justify-content: space-between !important; gap: 8px !important; height: 100%; }
+.wallet-back-grid { margin-top: 0 !important; display: grid !important; grid-template-columns: auto minmax(0,1fr) !important; gap: 14px !important; align-items: center; flex: 1; min-height: 0; }
+.wallet-back-qr { min-width: 0 !important; min-height: 0 !important; width: clamp(84px, 26vw, 112px); aspect-ratio: 1; padding: 6px !important; }
+.wallet-back-qr svg { width: 100% !important; height: 100% !important; }
+.wallet-back-ids { padding-left: 12px; border-left: 1px solid rgb(212 175 55 / .3); }
+.wallet-back-ids dd button { font-size: clamp(11px, 3.4vw, 14px) !important; letter-spacing: .06em !important; }
+.wallet-back-ids div + div { padding-top: 6px; border-top: 1px solid rgb(212 175 55 / .18); }
+
+/* Splash: centered lux stage, gold hairline progress */
+.app-splash { display: grid; place-items: center; padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom); }
+.app-splash__caption { text-align: center; }
+.app-splash .splash-word { letter-spacing: .32em; background: linear-gradient(180deg, #fff6c8, #FFD700 55%, #b8860b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.app-splash .splash-sub { display: block; margin-top: 10px; font-size: 10px; letter-spacing: .42em; color: color-mix(in oklab, #FFD700 70%, transparent); }
+.app-splash::after { content: ""; position: absolute; left: 50%; bottom: calc(48px + env(safe-area-inset-bottom)); width: 120px; height: 2px; margin-left: -60px; border-radius: 2px; background: linear-gradient(90deg, transparent, #FFD700, transparent); background-size: 200% 100%; animation: splash-line 1.4s ease-in-out infinite; opacity: .85; }
+.app-splash__skip { border: 1px solid rgb(255 215 0 / .35) !important; border-radius: 999px !important; padding: 6px 14px !important; font-size: 11px !important; letter-spacing: .14em; backdrop-filter: none; }
+@keyframes splash-line { 0% { background-position: 100% 0 } 100% { background-position: -100% 0 } }
