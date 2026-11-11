@@ -1,7 +1,8 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { ClientOnly } from '@tanstack/react-router';
-import { ArrowLeft, Bike, CalendarClock, CarFront, CheckCircle2, Crosshair, Info, Loader2, MapPin, MoreHorizontal, Search, Store, Users } from 'lucide-react';
+import { ArrowLeft, CalendarClock, CheckCircle2, Crosshair, Info, Loader2, MapPin, MoreHorizontal, Search, Store, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { BixgoVehicleIcon, vehicleKind } from '@/components/BixgoVehicleIcon';
 import { BixgoRadar } from '@/components/BixgoRadar';
 import { formatMoney, cryptoEquivalent, type GlobalCurrency } from '@/lib/bixgo-global';
 import { bixgoFare, cityFare, franchiseFor, haversineKm, splitCommission, type BixgoSettings } from '@/lib/bixgo';
@@ -108,8 +109,8 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
     {stage === 'choose' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-3 pt-3">
       <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted"/>
       <p className="mb-2 truncate px-1 text-xs text-muted-foreground">{from?.name} → {to?.name} · {km.toFixed(1)} km</p>
-      {OPTS.filter(o => cfg.services[o.svc].enabled).map(o => { const i = OPTS.indexOf(o); const p = price(o); const I = o.svc === 'car' ? CarFront : Bike; const on = i === sel; return <button key={o.name} onClick={() => setSel(i)} className={`mb-1 flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition ${on ? 'border-primary bg-primary/5' : 'border-transparent'}`}>
-        <span className={`grid place-items-center rounded-2xl bg-card ${on ? 'h-16 w-20' : 'h-12 w-14'}`}><I className={`${on ? 'h-10 w-10' : 'h-7 w-7'} text-primary`}/></span>
+      {OPTS.filter(o => cfg.services[o.svc].enabled).map(o => { const i = OPTS.indexOf(o); const p = price(o); const vk = vehicleKind(o.name); const on = i === sel; return <button key={o.name} onClick={() => setSel(i)} className={`mb-1 flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition ${on ? 'border-primary bg-primary/5' : 'border-transparent'}`}>
+        <span className={`bixgo-veh-tile grid shrink-0 place-items-center rounded-2xl transition-all ${vk === 'black' ? 'is-vip' : ''} ${on ? 'h-16 w-20' : 'h-12 w-16'}`}><BixgoVehicleIcon kind={vk} className={on ? 'w-16' : 'w-12'}/></span>
         <span className="flex-1"><b className="block text-sm">{o.name}</b><span className="flex items-center gap-1 text-xs text-muted-foreground">±{eta(o)} min • <Users className="h-3 w-3"/>{o.seats}</span>
           <span className={`mt-1 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] ${on ? 'border-primary/40 bg-primary/15 text-primary' : 'border-border'}`}>{o.svc === 'car' ? `${o.seats} seats` : 'Bike'}{on && <Info className="h-3 w-3"/>}</span></span>
         <span className="text-right"><b className={`block text-sm ${p.final < p.base ? 'text-primary' : ''}`}>{idr(p.final)}</b>{p.final < p.base && <s className="text-[11px] text-muted-foreground">{idr(p.base)}</s>}{o.tag && <span className="block text-[10px] text-primary">{o.tag}</span>}</span>
@@ -121,8 +122,8 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
       </div>
     </section>}
 
-    {stage === 'booked' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-4 pt-5 text-center">
-      {bid ? <BixgoRadar bookingId={bid} onRetry={() => { setBid(null); setStage('choose'); }} onSwitch={() => { setBid(null); setStage('choose'); }} onClose={onBack}/> : <><CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">{ref ? `Booking request #${ref} sent` : 'Demo booking created'}</h2>
+    {stage === 'booked' && <section className={`relative z-[500] -mt-4 rounded-t-3xl px-4 pb-6 pt-5 text-center ${bid ? 'bixgo-sheet' : 'bg-background'}`}>
+      {bid ? <BixgoRadar bookingId={bid} summary={{ from: from?.name ?? '', to: to?.name ?? '', fare: idr(price(cur).final), pay: PAYS[pay]!, kind: vehicleKind(cur.name) }} onRetry={() => { setBid(null); setStage('choose'); }} onSwitch={() => { setBid(null); setStage('choose'); }} onClose={onBack}/> : <><CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">{ref ? `Booking request #${ref} sent` : 'Demo booking created'}</h2>
       <p className="text-sm text-muted-foreground">{cur.name} · {from?.name} → {to?.name}</p><p className="mt-1 text-xl font-black">{idr(price(cur).final)}</p><p className="text-[11px] text-muted-foreground tabular-nums">≈ {cryptoEquivalent(price(cur).final, cfg.usdtIdr).usdt} USDT · {cryptoEquivalent(price(cur).final, cfg.usdtIdr).bix} BIX</p>
       <p className="mt-2 text-[11px] text-muted-foreground">{ref ? (pay === 0 ? 'When a driver accepts, the fare is held from your USDT wallet and settled on completion.' : pay === 1 ? 'When a driver accepts, the BIX fare (with your discount) is held from your BIX balance and settled on completion.' : pay === 2 ? 'Pay the driver in cash. The final fare may differ slightly based on the driver’s own rate.' : pay === 3 ? 'When a driver accepts, their QR appears on your trip screen. Scan it, then tap “I\'ve paid”.' : 'When a driver accepts, their bank account appears on your trip screen. Transfer, then tap “I\'ve paid”.') : 'Sign in to send a real request to the operator. Nothing was charged.'}</p>
       <button onClick={onBack} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground">Back to Home</button></>}

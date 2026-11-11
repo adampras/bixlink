@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, MessageCircle, Phone, RefreshCw, SearchX, X } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
+import { BixgoVehicleIcon, type VehicleKind } from '@/components/BixgoVehicleIcon';
 
 const LIMIT = 60;
 type Found = { driver_name: string; driver_phone: string; status: string };
 
 /** Live driver search: polls the real booking row. Shows found, or a clear "no driver" state after 60 s. */
-export function BixgoRadar({ bookingId, onRetry, onSwitch, onClose }: { bookingId: string | null; onRetry: () => void; onSwitch: () => void; onClose: () => void }) {
+export function BixgoRadar({ bookingId, summary, onRetry, onSwitch, onClose }: { bookingId: string | null; summary?: { from: string; to: string; fare: string; pay: string; kind: VehicleKind }; onRetry: () => void; onSwitch: () => void; onClose: () => void }) {
   const [sec, setSec] = useState(0);
   const [found, setFound] = useState<Found | null>(null);
   const [cancelled, setCancelled] = useState(false);
@@ -29,7 +30,7 @@ export function BixgoRadar({ bookingId, onRetry, onSwitch, onClose }: { bookingI
   const timeout = !found && !cancelled && sec >= LIMIT;
   const msg = sec < 20 ? 'Menghubungkan ke driver terdekat…' : sec < 45 ? 'Memperluas jangkauan radar (3–5 km)…' : 'Menunggu konfirmasi driver di sekitar Anda…';
 
-  if (found) return <div className="glass-card rounded-3xl p-5 text-center">
+  if (found) return <div className="bixgo-radar-card rounded-3xl p-5 text-center">
     <CheckCircle2 className="mx-auto h-12 w-12 text-primary"/>
     <h2 className="mt-2 text-lg font-black">Driver ditemukan!</h2>
     <p className="text-base font-bold">{found.driver_name || 'Mitra BIXGO'}</p>
@@ -41,7 +42,7 @@ export function BixgoRadar({ bookingId, onRetry, onSwitch, onClose }: { bookingI
     <button onClick={onClose} className="mt-3 min-h-12 w-full rounded-full bg-primary font-bold text-primary-foreground">Lihat perjalanan</button>
   </div>;
 
-  if (timeout || cancelled) return <div className="glass-card rounded-3xl p-5 text-center">
+  if (timeout || cancelled) return <div className="bixgo-radar-card rounded-3xl p-5 text-center">
     <SearchX className="mx-auto h-12 w-12 text-muted-foreground"/>
     <h2 className="mt-2 text-lg font-black">{cancelled ? 'Pesanan dibatalkan' : 'Driver belum tersedia'}</h2>
     <p className="mt-1 text-sm text-muted-foreground">{cancelled ? 'Pesanan ini sudah tidak aktif.' : 'Mitra driver di sekitar titik jemput sedang melayani perjalanan lain atau belum online. Tidak ada saldo yang terpotong.'}</p>
@@ -52,12 +53,19 @@ export function BixgoRadar({ bookingId, onRetry, onSwitch, onClose }: { bookingI
     </div>
   </div>;
 
-  return <div className="glass-card rounded-3xl p-5 text-center">
-    <div className="bixgo-radar mx-auto"><span/><span/><span/><i/></div>
-    <h2 className="mt-4 text-lg font-black">Mencari driver…</h2>
+  const pct = (sec / LIMIT) * 100;
+  return <div className="bixgo-radar-card rounded-3xl p-5 text-center">
+    {summary && <p className="mx-auto mb-4 flex max-w-full items-center justify-center gap-1.5 truncate rounded-full border border-border bg-background/60 px-3 py-1.5 text-[11px] font-semibold"><span className="truncate">📍 {summary.from}</span><span className="text-primary">➔</span><span className="truncate">🏁 {summary.to}</span></p>}
+    <div className="bixgo-sonar mx-auto">
+      <i className="blip" style={{ left: '22%', top: '30%' }}/><i className="blip" style={{ left: '70%', top: '24%', animationDelay: '.9s' }}/><i className="blip" style={{ left: '62%', top: '72%', animationDelay: '1.7s' }}/>
+      <div className="core">{summary && <BixgoVehicleIcon kind={summary.kind} className="w-14"/>}</div>
+    </div>
+    <h2 className="mt-4 text-lg font-black tracking-wide">Mencari driver…</h2>
     <p className="text-sm text-muted-foreground">{msg}</p>
-    <div className="mx-auto mt-3 h-1.5 w-48 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary transition-all" style={{ width: `${(sec / LIMIT) * 100}%` }}/></div>
-    <p className="mt-1 text-[11px] tabular-nums text-muted-foreground">{LIMIT - sec} detik</p>
-    <button onClick={cancel} className="mt-4 inline-flex min-h-11 items-center gap-1 rounded-full border border-border px-5 text-sm font-bold"><X className="h-4 w-4"/>Batalkan</button>
+    <div className="mx-auto mt-3 flex items-center justify-center gap-3">
+      <svg viewBox="0 0 36 36" className="h-11 w-11 -rotate-90"><circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--muted))" strokeWidth="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" strokeDasharray={`${(100 - pct) * 0.942} 94.2`} className="transition-all"/></svg>
+      <div className="text-left"><b className="block text-base tabular-nums">{LIMIT - sec}s</b>{summary && <span className="text-[11px] tabular-nums text-muted-foreground">{summary.fare} · {summary.pay}</span>}</div>
+    </div>
+    <button onClick={cancel} className="mt-4 inline-flex min-h-11 items-center gap-1 rounded-full border border-border bg-background/40 px-5 text-sm font-bold text-muted-foreground backdrop-blur"><X className="h-4 w-4"/>Batalkan</button>
   </div>;
 }
