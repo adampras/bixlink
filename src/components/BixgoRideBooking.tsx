@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { ClientOnly } from '@tanstack/react-router';
 import { ArrowLeft, Bike, CalendarClock, CarFront, CheckCircle2, Crosshair, Info, Loader2, MapPin, MoreHorizontal, Search, Store, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { BixgoRadar } from '@/components/BixgoRadar';
 import { formatMoney, cryptoEquivalent, type GlobalCurrency } from '@/lib/bixgo-global';
 import { bixgoFare, cityFare, franchiseFor, haversineKm, splitCommission, type BixgoSettings } from '@/lib/bixgo';
 import { getDevicePosition, reverseGeocode, roadRoute, searchPlaces, type Place } from '@/lib/geo';
@@ -28,6 +29,7 @@ const PAYS = ['USDT', 'BIX Token', 'Cash', 'QRIS', 'Bank'];
 /** Pickup + vehicle selection on a real map with device GPS and real road distance. Booking itself is still a preview: no driver dispatch or payment. */
 export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'USD', city = '' }: { cfg: BixgoSettings; cur?: GlobalCurrency; city?: string; start: 'ride' | 'car'; onBack: () => void; onBooked: (o: { svc: 'ride' | 'car'; from: string; to: string; total: number; pay: string; name: string }) => void }) {
   const [stage, setStage] = useState<'pickup' | 'choose' | 'booked'>('pickup');
+  const [bid, setBid] = useState<string | null>(null);
   const [active, setActive] = useState<'from' | 'to'>('from');
   const [from, setFrom] = useState<Place | null>(null);
   const [to, setTo] = useState<Place | null>(null);
@@ -120,10 +122,10 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
     </section>}
 
     {stage === 'booked' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-4 pt-5 text-center">
-      <CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">{ref ? `Booking request #${ref} sent` : 'Demo booking created'}</h2>
+      {bid ? <BixgoRadar bookingId={bid} onRetry={() => { setBid(null); setStage('choose'); }} onSwitch={() => { setBid(null); setStage('choose'); }} onClose={onBack}/> : <><CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">{ref ? `Booking request #${ref} sent` : 'Demo booking created'}</h2>
       <p className="text-sm text-muted-foreground">{cur.name} · {from?.name} → {to?.name}</p><p className="mt-1 text-xl font-black">{idr(price(cur).final)}</p><p className="text-[11px] text-muted-foreground tabular-nums">≈ {cryptoEquivalent(price(cur).final, cfg.usdtIdr).usdt} USDT · {cryptoEquivalent(price(cur).final, cfg.usdtIdr).bix} BIX</p>
       <p className="mt-2 text-[11px] text-muted-foreground">{ref ? (pay === 0 ? 'When a driver accepts, the fare is held from your USDT wallet and settled on completion.' : pay === 1 ? 'When a driver accepts, the BIX fare (with your discount) is held from your BIX balance and settled on completion.' : pay === 2 ? 'Pay the driver in cash. The final fare may differ slightly based on the driver’s own rate.' : pay === 3 ? 'When a driver accepts, their QR appears on your trip screen. Scan it, then tap “I\'ve paid”.' : 'When a driver accepts, their bank account appears on your trip screen. Transfer, then tap “I\'ve paid”.') : 'Sign in to send a real request to the operator. Nothing was charged.'}</p>
-      <button onClick={onBack} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground">Back to Home</button>
+      <button onClick={onBack} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground">Back to Home</button></>}
     </section>}
 
     {stage === 'choose' && <footer className="fixed inset-x-0 bottom-0 z-[600] mx-auto max-w-xl border-t border-border bg-background px-3 pb-4 pt-2">
@@ -134,7 +136,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
       <input value={landmark} maxLength={120} onChange={e => setLandmark(e.target.value)} placeholder="Pickup landmark (e.g. in front of the black gate)" className="mt-2 w-full rounded-full border border-border bg-card px-4 py-2 text-xs outline-none"/>
       <div className="mt-2 flex gap-2">
         <button aria-label="Schedule" className="grid h-12 w-14 place-items-center rounded-full bg-card"><CalendarClock className="h-5 w-5"/></button>
-        <button disabled={busy === 'book'} onClick={async () => { const total = Math.round(price(cur).final); setBusy('book'); const { data: u } = await supabase.auth.getUser(); if (u.user) { const { data, error } = await supabase.from('bixgo_bookings').insert({ city, service: cur.svc, vehicle: cur.name, pickup: (from?.name ?? '').slice(0, 200), dropoff: (to?.name ?? '').slice(0, 200), km: +km.toFixed(2), total_idr: total, pay_method: PAYS[pay]!, pickup_note: landmark.trim().slice(0, 120), pickup_lat: from?.lat ?? null, pickup_lng: from?.lng ?? null, dropoff_lat: to?.lat ?? null, dropoff_lng: to?.lng ?? null }).select('id').single(); if (error) { setErr(error.message); setBusy(null); return; } setRef(data.id.slice(0, 8).toUpperCase()); } setBusy(null); onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total, pay: PAYS[pay]!, name: cur.name }); setStage('booked'); }} className="flex-1 rounded-full bg-primary py-3 text-base font-bold text-primary-foreground">Book {cur.name}</button>
+        <button disabled={busy === 'book'} onClick={async () => { const total = Math.round(price(cur).final); setBusy('book'); const { data: u } = await supabase.auth.getUser(); if (u.user) { const { data, error } = await supabase.from('bixgo_bookings').insert({ city, service: cur.svc, vehicle: cur.name, pickup: (from?.name ?? '').slice(0, 200), dropoff: (to?.name ?? '').slice(0, 200), km: +km.toFixed(2), total_idr: total, pay_method: PAYS[pay]!, pickup_note: landmark.trim().slice(0, 120), pickup_lat: from?.lat ?? null, pickup_lng: from?.lng ?? null, dropoff_lat: to?.lat ?? null, dropoff_lng: to?.lng ?? null }).select('id').single(); if (error) { setErr(error.message); setBusy(null); return; } setRef(data.id.slice(0, 8).toUpperCase()); setBid(data.id); } setBusy(null); onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total, pay: PAYS[pay]!, name: cur.name }); setStage('booked'); }} className="flex-1 rounded-full bg-primary py-3 text-base font-bold text-primary-foreground">Book {cur.name}</button>
       </div>
     </footer>}
   </div>;
