@@ -82,7 +82,7 @@ function BixgoPage() {
   const [scan, setScan] = useState(false);
   const navigate = useNavigate();
   const [cur, setCur] = useState<GlobalCurrency>('USD');
-  const [city, setCity] = useState<string>('makassar');
+  const [city, setCity] = useState<string>('mataram');
   useEffect(() => { setCur(readCurrency()); }, []);
   const pickCur = (c: GlobalCurrency) => { setCur(c); saveCurrency(c); };
   const { user } = useMember();

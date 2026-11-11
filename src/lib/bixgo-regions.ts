@@ -84,4 +84,4 @@ export const REGION_AIRPORTS = [
 ] as const;
 
 /** Featured launch cities shown as quick chips. */
-export const FEATURED_CITY_IDS = ['jakarta-selatan', 'makassar', 'denpasar', 'surabaya', 'bandung', 'medan', 'my-kuala-lumpur', 'my-johor-bahru', 'my-george-town', 'my-kota-kinabalu'];
+export const FEATURED_CITY_IDS = ['mataram', 'lombok-tengah', 'jakarta-selatan', 'makassar', 'denpasar', 'surabaya', 'bandung', 'medan', 'my-kuala-lumpur', 'my-johor-bahru', 'my-george-town', 'my-kota-kinabalu'];
