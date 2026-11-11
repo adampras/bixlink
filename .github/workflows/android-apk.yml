@@ -24,16 +24,23 @@ jobs:
           if [ -n "$GOOGLE_SERVICES_JSON" ]; then echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
           elif [ -f native-android/google-services.json ]; then cp native-android/google-services.json android/app/google-services.json
           else echo "Add native-android/google-services.json or the GOOGLE_SERVICES_JSON secret"; exit 1; fi
-      - name: BIXLINK fox app icon
+      - name: BIXLINK adaptive fox icon (obsidian + gold)
         run: |
+          sudo apt-get install -y imagemagick > /dev/null || true
           curl -fsSL -o icon.png "https://bixlink.com/__l5e/assets-v1/c62ecff6-c5d1-4235-8e7a-e49c0c2b7039/fox-icon-512.png"
+          R=android/app/src/main/res
           for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
-            dir=android/app/src/main/res/mipmap-${d%%:*}; s=${d##*:}
-            convert icon.png -resize ${s}x${s} $dir/ic_launcher.png
-            convert icon.png -resize ${s}x${s} $dir/ic_launcher_round.png
-            convert icon.png -resize $((s*9/4))x$((s*9/4)) -gravity center -background none -extent $((s*9/4))x$((s*9/4)) $dir/ic_launcher_foreground.png
+            dir=$R/mipmap-${d%%:*}; s=${d##*:}; f=$((s*9/4)); inner=$((f*60/100)); mkdir -p $dir
+            convert icon.png -resize ${s}x${s} -background "#080A0F" -flatten $dir/ic_launcher.png
+            convert -size ${s}x${s} xc:none -fill "#080A0F" -stroke "#FFD700" -strokewidth $((s/24+1)) -draw "circle $((s/2)),$((s/2)) $((s/2)),$((s/24+1))" \( icon.png -resize $((s*78/100))x$((s*78/100)) \) -gravity center -composite $dir/ic_launcher_round.png
+            convert icon.png -resize ${inner}x${inner} -gravity center -background none -extent ${f}x${f} $dir/ic_launcher_foreground.png
           done
-          rm -rf android/app/src/main/res/mipmap-anydpi-v26
+          mkdir -p $R/mipmap-anydpi-v26 $R/values
+          for n in ic_launcher ic_launcher_round; do
+            printf '<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n  <background android:drawable="@color/ic_launcher_background"/>\n  <foreground android:drawable="@mipmap/ic_launcher_foreground"/>\n  <monochrome android:drawable="@mipmap/ic_launcher_foreground"/>\n</adaptive-icon>\n' > $R/mipmap-anydpi-v26/$n.xml
+          done
+          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n  <color name="ic_launcher_background">#080A0F</color>\n</resources>\n' > $R/values/ic_launcher_background.xml
+          sed -i 's#<string name="app_name">.*</string>#<string name="app_name">BIXLINK</string>#; s#<string name="title_activity_main">.*</string>#<string name="title_activity_main">BIXLINK</string>#' $R/values/strings.xml
       - name: Call permissions (lock-screen ringing)
         run: |
           M=android/app/src/main/AndroidManifest.xml
@@ -42,10 +49,36 @@ jobs:
           done
           sed -i 's#<activity #<activity android:showWhenLocked="true" android:turnScreenOn="true" #' $M
       - run: bunx cap sync android
-      - name: Build APK
+      - name: Release keystore (from secrets, or create BIXLINK key once)
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
+            echo "$KS_B64" | base64 -d > bixlink-release.jks
+            echo "KS_PASS=$KS_PASS" >> $GITHUB_ENV; echo "NEW_KEY=0" >> $GITHUB_ENV
+          else
+            P=$(openssl rand -hex 16)
+            keytool -genkeypair -v -keystore bixlink-release.jks -alias bixlink -keyalg RSA -keysize 4096 -validity 10000 \
+              -storepass "$P" -keypass "$P" -dname "CN=BIXLINK Global Technologies, OU=Mobile, O=BIXLINK, L=Mataram, ST=NTB, C=ID"
+            mkdir -p keystore-save; base64 -w0 bixlink-release.jks > keystore-save/ANDROID_KEYSTORE_BASE64.txt
+            echo "$P" > keystore-save/ANDROID_KEYSTORE_PASSWORD.txt
+            echo "KS_PASS=$P" >> $GITHUB_ENV; echo "NEW_KEY=1" >> $GITHUB_ENV
+            echo "::warning::New BIXLINK signing key created. Download the 'bixlink-signing-key' artifact and save both values as repository secrets ANDROID_KEYSTORE_BASE64 and ANDROID_KEYSTORE_PASSWORD, so future APKs can update existing installs."
+          fi
+      - name: Build signed release APK
         working-directory: android
-        run: chmod +x gradlew && ./gradlew assembleDebug
-      - run: cp android/app/build/outputs/apk/debug/app-debug.apk bixlink.apk
+        run: |
+          chmod +x gradlew && ./gradlew assembleRelease
+          B=$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)
+          $ANDROID_HOME/build-tools/$B/zipalign -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
+          $ANDROID_HOME/build-tools/$B/apksigner sign --ks ../bixlink-release.jks --ks-key-alias bixlink \
+            --ks-pass env:KS_PASS --key-pass env:KS_PASS --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true \
+            --out ../bixlink.apk aligned.apk
+          $ANDROID_HOME/build-tools/$B/apksigner verify --print-certs ../bixlink.apk
+      - if: env.NEW_KEY == '1'
+        uses: actions/upload-artifact@v4
+        with: { name: bixlink-signing-key, path: keystore-save, retention-days: 7 }
       - uses: actions/upload-artifact@v4
         with: { name: bixlink-apk, path: bixlink.apk }
       - uses: softprops/action-gh-release@v2
