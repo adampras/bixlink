@@ -95,8 +95,8 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
   };
   useEffect(() => { if (!open) setDrag(0); }, [open]);
   return <>
-    <button type="button" onClick={() => { try { navigator.vibrate?.(6); } catch { /* unsupported */ } setOpen(true); }} aria-label="Open BIX HUB" className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[10px] font-bold ${on ? 'mobile-nav-on' : 'text-muted-foreground'}`}>
-      <LayoutGrid size={19} className="shrink-0"/><span>HUB</span>
+    <button type="button" onClick={() => { try { navigator.vibrate?.(6); } catch { /* unsupported */ } setOpen(true); }} aria-label="Open BIX HUB" className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[11.5px] font-extrabold tracking-wide ${on ? 'mobile-nav-on' : 'dock-item'}`}>
+      <LayoutGrid size={24} strokeWidth={on ? 2.4 : 2} className="shrink-0"/><span>HUB</span>
     </button>
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent side="bottom" ref={sheetRef} className="hub-midnight max-h-[80vh] overflow-y-auto rounded-t-3xl pb-8" style={{ transform: drag ? `translateY(${drag}px)` : undefined, transition: moving ? 'none' : 'transform .32s cubic-bezier(.22,1,.36,1)', opacity: drag > 0 ? Math.max(0.55, 1 - drag / 1400) : 1 }}>
