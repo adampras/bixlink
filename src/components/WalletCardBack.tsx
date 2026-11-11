@@ -21,7 +21,7 @@ export function WalletCardBack({ userId, onFlip }: { userId?: string | undefined
       <button type="button" className="wallet-flip-btn" aria-label="Show balance" onClick={onFlip}><RotateCcw size={14}/></button>
     </div>
     <div className="wallet-back-grid">
-      <div className="wallet-back-qr">{qr ? <QRCodeSVG value={qr} size={112} level="M" marginSize={0}/> : <span className="text-[10px]">Loading…</span>}</div>
+      <div className="wallet-back-qr">{qr ? <QRCodeSVG value={qr} size={92} level="M" marginSize={0}/> : <span className="text-[10px]">Loading…</span>}</div>
       <dl className="wallet-back-ids">
         <div><dt>Member code</dt><dd><button type="button" onClick={() => copy('code', code)}>{code || '—'} <Copy size={11}/></button></dd></div>
         <div><dt>Account ID</dt><dd><button type="button" onClick={() => copy('id', shortId)}>{shortId} <Copy size={11}/></button></dd></div>
