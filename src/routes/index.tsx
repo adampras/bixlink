@@ -79,12 +79,14 @@ function Home() {
     <EcosystemRail presale={presaleVisible}/>
     <section className="mx-auto max-w-7xl px-5 pb-6 md:px-8"><SentimentGauge/></section>
     {rd?.liveActivityEnabled !== false && <RecordedActivity/>}
+    <details className="home-audit-fold mx-auto max-w-7xl px-5 pb-6 md:px-8"><summary className="home-audit-sum">Protokol keamanan, audit &amp; tokenomics<span>Lihat detail</span></summary>
     <PreTgeRoadmap/>
     <TrustCenter bixPrice={bixPrice} serverNow={data.serverNow}/>
     <ReserveTelemetry/>
     <ProtocolStatus serverNow={data.serverNow} marketCount={data.markets.length}/>
     <SponsorSlot sponsor={cfg?.landingContent.sponsor}/>
     <LandingTokenomics content={cfg?.landingContent} member/>
+    </details>
     <section className="border-b border-border bg-card/35"><div className="mx-auto max-w-7xl px-5 py-10 md:px-8"><ContentCarousel group="spaces" title="Development Categories" items={cfg?.landingContent.spaces ?? defaultSpaces}/></div></section>
     <section className="mx-auto max-w-7xl px-5 py-14 md:px-8"><div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]"><div><div className="eyebrow"><Database size={13}/> RECORDED SOURCES</div><h2 className="section-title">INCOME <span>OVERVIEW</span></h2><div className="mt-6 space-y-2">{income.length ? income.map(row => <div className="flex justify-between rounded-lg border border-border bg-card p-4" key={row.category}><span>{row.category}</span><b className="text-chart-3">{money(Number(row.amount_usd))}</b></div>) : <p className="text-sm text-muted-foreground">No verified income source has been recorded by the owner yet.</p>}</div><p className="mt-4 text-xs text-muted-foreground">Values shown are owner-entered internal records, not audited revenue.</p></div><div className="min-w-0"><ContentCarousel group="roadmap" title="Roadmap BIXLINK" items={cfg?.landingContent.roadmap ?? defaultRoadmap}/></div></div></section>
   </main></MemberGate></BixShell>;

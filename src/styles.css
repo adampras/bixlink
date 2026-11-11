@@ -8779,3 +8779,10 @@ html,body{overscroll-behavior-y:none}
 .app-splash--leaving { animation: splash-dissolve .2s ease forwards; }
 @keyframes splash-dissolve { to { opacity: 0; filter: blur(6px); transform: scale(1.03); } }
 html[data-app-hidden] * { animation-play-state: paused !important; }
+
+/* HOME: corporate widgets folded into one panel */
+.home-audit-fold > .home-audit-sum{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:52px;padding:14px 16px;border-radius:16px;border:1px solid hsl(var(--primary)/.28);background:hsl(var(--card)/.9);font-weight:800;font-size:14px;color:hsl(var(--foreground))}
+.home-audit-fold > .home-audit-sum::-webkit-details-marker{display:none}
+.home-audit-fold > .home-audit-sum span{font-size:11px;font-weight:700;color:hsl(var(--primary));letter-spacing:.06em;text-transform:uppercase}
+.home-audit-fold[open] > .home-audit-sum span{opacity:.6}
+.home-audit-fold[open] > .home-audit-sum{margin-bottom:12px}
