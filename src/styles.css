@@ -8509,3 +8509,19 @@ body { padding-top: env(safe-area-inset-top, 0px); }
 @media (prefers-reduced-motion:reduce){.ex-pulse{animation:none}}
 .kyc-reward{background:color-mix(in oklab,var(--primary) 14%,transparent);border:1px solid color-mix(in oklab,var(--primary) 45%,transparent);color:var(--primary)}
 .kyc-drop{display:flex;align-items:center;gap:.5rem;border:1px dashed color-mix(in oklab,var(--primary) 45%,var(--border));border-radius:.75rem;padding:.65rem .8rem;font-size:12px;cursor:pointer;color:var(--muted-foreground)}
+
+/* Exchanger standalone glass */
+.ex-topbar{background:color-mix(in oklab,var(--background) 72%,transparent);backdrop-filter:blur(18px) saturate(150%);border-bottom:1px solid color-mix(in oklab,var(--primary) 28%,var(--border));padding-top:max(.5rem,env(safe-area-inset-top))}
+.ex-icon-btn{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;border:1px solid color-mix(in oklab,var(--foreground) 14%,transparent);background:color-mix(in oklab,var(--card) 60%,transparent);transition:transform .12s}
+.ex-icon-btn:active,.ex-promo:active,.ex-chip:active,.ex-tabs button:active{transform:scale(.95)}
+.ex-chip{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 10px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid color-mix(in oklab,var(--chart-3) 55%,transparent);color:var(--chart-3);background:color-mix(in oklab,var(--chart-3) 10%,transparent)}
+.ex-chip.is-ok{border-color:color-mix(in oklab,var(--chart-2) 55%,transparent);color:var(--chart-2);background:color-mix(in oklab,var(--chart-2) 10%,transparent)}
+.ex-promos{scrollbar-width:none}.ex-promos::-webkit-scrollbar{display:none}
+.ex-promo{flex:0 0 72%;max-width:260px;display:grid;gap:2px;padding:12px 14px;border-radius:18px;background:linear-gradient(150deg,color-mix(in oklab,var(--card) 75%,transparent),color-mix(in oklab,var(--background) 80%,transparent));border:1px solid color-mix(in oklab,var(--foreground) 12%,transparent);backdrop-filter:blur(14px);transition:transform .12s}
+.ex-promo svg{color:var(--primary)}.ex-promo b{font-size:13px;font-weight:900}.ex-promo span{font-size:11px;color:var(--muted-foreground)}
+.ex-promo.is-gold{border-color:color-mix(in oklab,var(--chart-3) 60%,transparent);background:linear-gradient(140deg,color-mix(in oklab,var(--chart-3) 22%,var(--card)),var(--background))}.ex-promo.is-gold svg{color:var(--chart-3)}
+@media (min-width:768px){.ex-promo{flex:1 1 0;max-width:none}}
+.ex-tabs{background:color-mix(in oklab,var(--card) 65%,transparent);border:1px solid color-mix(in oklab,var(--foreground) 12%,transparent);backdrop-filter:blur(14px)}
+.ex-tabs button{display:flex;align-items:center;justify-content:center;gap:4px;height:38px;border-radius:999px;font-size:11px;font-weight:900;color:var(--muted-foreground);transition:all .15s}
+.ex-tabs button.is-on{background:var(--primary);color:var(--primary-foreground)}
+.ex-app .ex-btn-gold,.ex-app .ex-btn-ghost{min-height:44px}

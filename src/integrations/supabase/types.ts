@@ -527,6 +527,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_identity_profiles: {
+        Row: {
+          address: string | null
+          birth_date: string | null
+          city: string | null
+          country: string | null
+          full_name: string
+          gender: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          birth_date?: string | null
+          city?: string | null
+          country?: string | null
+          full_name: string
+          gender?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          birth_date?: string | null
+          city?: string | null
+          country?: string | null
+          full_name?: string
+          gender?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_kyc_rewards: {
         Row: {
           amount: number

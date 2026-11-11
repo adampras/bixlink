@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { LANGUAGES, type Language, useI18n } from '@/lib/i18n';
 import { useMember } from '@/lib/useMember';
 import { KycCard } from '@/components/KycCard';
+import { IdentityProfileForm } from '@/components/IdentityProfileForm';
+import { IdCard } from 'lucide-react';
 import { isWalletOnlyAccount } from '@/lib/wallet-login';
 
 export const Route = createFileRoute('/settings')({
@@ -39,9 +41,10 @@ function SettingsPage() {
     <div className="settings-console mt-7">
       <aside className="settings-rail" aria-label="Settings categories">
         <div className="settings-member"><span><UserRound/></span><div className="min-w-0"><b className="break-all">{walletOnly ? 'BNB wallet' : user?.email?.split('@')[0]}</b><small>{walletOnly ? 'Verified wallet' : 'Member account'}</small></div></div>
-        <nav><a href="#account"><ShieldCheck/>Account</a><a href="#language"><Languages/>{t('language')}</a><a href="#currency"><Coins/>Currency</a><a href="#pin"><LockKeyhole/>Transaction PIN</a><a href="#notifications"><Bell/>{t('notifications')}</a></nav>
+        <nav><a href="#identity"><IdCard/>Data diri</a><a href="#account"><ShieldCheck/>Account</a><a href="#language"><Languages/>{t('language')}</a><a href="#currency"><Coins/>Currency</a><a href="#pin"><LockKeyhole/>Transaction PIN</a><a href="#notifications"><Bell/>{t('notifications')}</a></nav>
       </aside>
       <div className="settings-content">
+        <details id="identity" className="settings-section settings-fold" open><summary><div className="settings-heading"><span className="is-secure"><IdCard/></span><div><h2>Kelengkapan data diri</h2><p>Nama · lahir · domisili · kontak · verifikasi identitas</p></div></div><ChevronRight className="settings-fold-arrow"/></summary><div className="mt-3"><IdentityProfileForm userId={user?.id}/></div><div className="mt-3"><KycCard userId={user?.id}/></div></details>
         <details id="account" className="settings-section settings-fold"><summary><div className="settings-heading"><span className="is-secure"><ShieldCheck/></span><div><h2>Account &amp; security</h2><p>{walletOnly ? 'Wallet sign-in · identity verification' : 'Password · identity verification'}</p></div></div><ChevronRight className="settings-fold-arrow"/></summary><Button asChild variant="ghost" className="settings-account-row"><Link to={walletOnly ? '/profile' : '/reset-password'}><span><KeyRound/>{walletOnly ? 'Account details' : 'Change password'}</span><ChevronRight/></Link></Button><div className="mt-3"><KycCard userId={user?.id}/></div></details>
         <details id="language" className="settings-section settings-fold"><summary><div className="settings-heading"><span><Languages/></span><div><h2>{t('language')}</h2><p>{(() => { const cur = LANGUAGES.find(l => l.code === language); return cur ? <><span className={`flag-symbol flag-${cur.flag}`} aria-hidden/> {cur.label}</> : t('savedHere'); })()}</p></div></div><ChevronRight className="settings-fold-arrow"/></summary><div className="settings-language-grid">{LANGUAGES.map(item => <Button key={item.code} variant="ghost" className={`settings-language${language === item.code ? ' is-active' : ''}`} onClick={() => setLanguage(item.code as Language)}><span className={`flag-symbol flag-${item.flag}`} aria-hidden/><small>{item.label}</small>{language === item.code && <Check/>}</Button>)}</div></details>
         <details id="currency" className="settings-section settings-fold"><summary><div className="settings-heading"><span><Coins/></span><div><h2>Currency conversion</h2><p>{fiat.length ? fiat.join(' · ') : 'Optional · none selected'}</p></div></div><ChevronRight className="settings-fold-arrow"/></summary><div className="settings-language-grid">{FIATS.map(([code, label]) => <Button key={code} variant="ghost" className={`settings-language${fiat.includes(code) ? ' is-active' : ''}`} onClick={() => toggleFiat(code)}><b className="numeric">{code}</b><small>{label}</small>{fiat.includes(code) && <Check/>}</Button>)}</div></details>
