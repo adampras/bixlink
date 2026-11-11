@@ -8716,3 +8716,10 @@ html.comm-room-open .comm-room.is-full .comm-msgs{flex:1;overflow-y:auto}
 .app-splash::after { content: ""; position: absolute; left: 50%; bottom: calc(48px + env(safe-area-inset-bottom)); width: 120px; height: 2px; margin-left: -60px; border-radius: 2px; background: linear-gradient(90deg, transparent, #FFD700, transparent); background-size: 200% 100%; animation: splash-line 1.4s ease-in-out infinite; opacity: .85; }
 .app-splash__skip { border: 1px solid rgb(255 215 0 / .35) !important; border-radius: 999px !important; padding: 6px 14px !important; font-size: 11px !important; letter-spacing: .14em; backdrop-filter: none; }
 @keyframes splash-line { 0% { background-position: 100% 0 } 100% { background-position: -100% 0 } }
+
+/* STAKE title on one line; full-screen call & VIP dialog hide the dock */
+.stake-compact h1.stake-lux-title{white-space:nowrap!important;font-size:clamp(1rem,5.4vw,2.6rem)!important;line-height:1.15}
+.stake-compact h1.stake-lux-title br{display:none}
+html:has(.bixcall) :is(.glass-dock,.site-header,.cs24-orb,footer),html:has(.vf-overlay) :is(.glass-dock,.cs24-orb){display:none!important}
+.bixcall{height:100dvh;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+.vf-overlay{z-index:9000}
