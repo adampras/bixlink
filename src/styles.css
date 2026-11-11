@@ -8591,3 +8591,30 @@ body { padding-top: env(safe-area-inset-top, 0px); }
 .bixgo-veh-img{filter:drop-shadow(0 4px 8px hsl(var(--background)/.8))}
 .bixgo-float{max-height:72dvh;overflow:auto}
 .bixgo-float .bixgo-sonar{width:150px;height:150px}
+
+/* STAKE phone guard — no horizontal overflow on narrow phones */
+@media (max-width: 480px) {
+  html, body { overflow-x: clip; }
+  .stake-compact { max-width: 100vw; overflow-x: clip; padding-inline: max(10px, env(safe-area-inset-left)) !important; }
+  .stake-compact *, .stake-compact *::before { min-width: 0; box-sizing: border-box; }
+  .stake-compact :is(.duration-package, .stake-pick, .stake-list-item, .auric-card, .stake-request, .vault-desk, .vault-card) { max-width: 100%; }
+  .stake-compact .duration-package-head { gap: 8px; padding-inline: 12px !important; }
+  .stake-compact .duration-package-body { padding-inline: 12px !important; }
+  .stake-compact .duration-price { flex-shrink: 0; font-size: 1rem !important; padding: 4px 8px; white-space: nowrap; }
+  .stake-compact .duration-package h3 { font-size: 1.15rem !important; }
+  .stake-compact .duration-options { gap: 4px !important; }
+  .stake-compact .duration-option { font-size: 11px !important; }
+  .stake-compact .lux-ledger { padding-inline: 10px !important; }
+  .stake-compact .lux-ledger > div { gap: 8px; }
+  .stake-compact .lux-ledger b { white-space: nowrap; font-size: 12.5px !important; }
+  .stake-compact .lux-ledger-total b { font-size: 15px !important; }
+  .stake-compact .hud-scan dd { font-size: clamp(10px, 3.1vw, 13px) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stake-compact .stake-lux-title { font-size: clamp(1.15rem, 6vw, 1.5rem) !important; }
+  .stake-compact .stake-pick-head { flex-wrap: wrap; }
+  .stake-compact button[aria-label^="Open Vault"] { white-space: normal; height: auto; }
+  .stake-compact .duration-risk { overflow-wrap: anywhere; }
+}
+@media (max-width: 340px) {
+  .stake-compact .duration-option { font-size: 10px !important; }
+  .stake-compact .hud-scan dt { font-size: 8px !important; letter-spacing: .04em !important; }
+}
