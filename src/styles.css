@@ -8471,3 +8471,21 @@ body { padding-top: env(safe-area-inset-top, 0px); }
 @media (prefers-reduced-motion: reduce) {
   :where(button, a[role="button"], [role="tab"]):active { transform: none; }
 }
+
+/* Unified glass lux: BIXMALL categories, shop cards, BIXTOK chrome, HUB grid */
+.mall-cats{display:flex;gap:.45rem;overflow-x:auto;scrollbar-width:none;padding:.9rem 0 .2rem}
+.mall-cats::-webkit-scrollbar{display:none}
+.mall-cats button{flex-shrink:0;padding:.42rem .95rem;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--muted-foreground);border:1px solid color-mix(in oklab,var(--chart-3) 28%,transparent);background:color-mix(in oklab,var(--card) 55%,transparent);backdrop-filter:blur(14px);transition:transform .15s}
+.mall-cats button:active{transform:scale(.95)}
+.mall-cats button[aria-pressed=true]{color:var(--background);background:linear-gradient(135deg,var(--chart-3),color-mix(in oklab,var(--chart-3) 70%,var(--foreground)));border-color:transparent}
+.lux-shop .shop-item,.boutique-card{border-radius:16px;border:1px solid color-mix(in oklab,var(--chart-3) 26%,transparent);background:linear-gradient(165deg,color-mix(in oklab,var(--card) 70%,transparent),color-mix(in oklab,var(--background) 85%,transparent));backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 color-mix(in oklab,var(--foreground) 10%,transparent),0 12px 28px -18px color-mix(in oklab,var(--background) 90%,transparent);overflow:hidden}
+.lux-shop .shop-item-meta h3,.boutique-body b{line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lux-shop .numeric,.boutique-body .numeric{font-variant-numeric:tabular-nums;letter-spacing:0}
+.bixtok-tabs{padding:.3rem .7rem;border-radius:999px;background:color-mix(in oklab,var(--background) 45%,transparent);border:1px solid color-mix(in oklab,var(--foreground) 12%,transparent);backdrop-filter:blur(14px)}
+.bixtok-icon,.bixtok-rail button svg{backdrop-filter:blur(12px);border-color:color-mix(in oklab,var(--chart-3) 30%,transparent)}
+.bixtok-meta b{letter-spacing:.01em}.bixtok-meta p{line-height:1.45;text-shadow:0 1px 3px color-mix(in oklab,var(--background) 95%,transparent)}
+.bixtok-golive,.bixtok-live-grid button{border-radius:16px;backdrop-filter:blur(16px);border-color:color-mix(in oklab,var(--chart-3) 24%,transparent)}
+.hub-midnight .hub-group .hub-tile{border-radius:16px;min-height:7.2rem;justify-content:flex-start;backdrop-filter:blur(14px)}
+.hub-midnight .hub-group .hub-tile .text-xs,.hub-photo-name{line-height:1.2;overflow-wrap:anywhere}
+.hub-midnight .hub-group .hub-tile .text-\[10px\],.hub-photo-note{line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hub-midnight .grid.grid-cols-3,.hub-swipe{gap:.55rem}

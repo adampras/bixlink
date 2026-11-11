@@ -61,7 +61,7 @@ function ProductCard({ p, children, editorial, liked, onLike, onSeller }: { p: P
   </div>;
 }
 
-export function MemberShop({ userId, onMessage }: { userId?: string | undefined; onMessage?: (m: string) => void }) {
+export function MemberShop({ userId, onMessage, syncCategory }: { userId?: string | undefined; onMessage?: (m: string) => void; syncCategory?: string }) {
   const approved = useQuery({ queryKey: ['member-products', 'approved'], queryFn: async () => { const { data, error } = await supabase.from('bix_member_products').select('*').eq('status', 'approved').order('created_at', { ascending: false }).limit(60); if (error) throw error; return data as Product[]; } });
   const mine = useQuery({ queryKey: ['member-products', 'mine', userId], enabled: !!userId, queryFn: async () => {
     const [{ data, error }, slots] = await Promise.all([supabase.from('bix_member_products').select('*').eq('user_id', userId!).order('created_at', { ascending: false }), supabase.rpc('bix_member_shop_slots', { p_user: userId! })]);
@@ -71,6 +71,7 @@ export function MemberShop({ userId, onMessage }: { userId?: string | undefined;
   const [form, setForm] = useState(blank);
   const [seller, setSeller] = useState<string | null>(null);
   const [cat, setCat] = useState('ALL'), [find, setFind] = useState(''), [sort, setSort] = useState('new'), [onlyLiked, setOnlyLiked] = useState(false), [liked, setLiked] = useState<string[]>([]);
+  useEffect(() => { if (syncCategory) setCat(syncCategory); }, [syncCategory]);
   useEffect(() => { try { setLiked(JSON.parse(localStorage.getItem('bix-wishlist') ?? '[]')); } catch { /* ignore */ } }, []);
   const like = (id: string) => setLiked(l => { const n = l.includes(id) ? l.filter(x => x !== id) : [...l, id]; localStorage.setItem('bix-wishlist', JSON.stringify(n)); return n; });
   const list = (approved.data ?? []).filter(p => (!seller || p.user_id === seller) && (cat === 'ALL' || (p.category ?? 'General') === cat) && p.title.toLowerCase().includes(find.toLowerCase()) && (!onlyLiked || liked.includes(p.id))).sort((a, b) => sort === 'low' ? a.price_usd - b.price_usd : sort === 'high' ? b.price_usd - a.price_usd : 0);
