@@ -21,6 +21,7 @@ import artVault from '@/assets/hub/vault.jpg';
 import artHome from '@/assets/hub/home.jpg';
 import artProfile from '@/assets/hub/profile.jpg';
 import artSettings from '@/assets/hub/settings.jpg';
+import { EcoLogo, ECO_LOGOS } from '@/components/EcoLogo';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SupportCommandCenter } from '@/components/SupportCommandCenter';
@@ -72,7 +73,7 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
     const cls = `hub-tile rounded-2xl border px-2 py-3 text-center ${path === i.to ? 'is-active' : ''} ${compact ? 'hub-recent-tile' : ''}`;
     const art = !compact ? ART[i.id] : undefined;
     if (art) {
-      const pbody = <>{BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<img src={art} alt="" loading="lazy" width={320} height={320}/><span className="hub-photo-text"><div className="hub-photo-name">{i.label}</div><div className="hub-photo-note">{i.note}</div></span></>;
+      const pbody = <>{BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<img src={art} alt="" loading="lazy" width={320} height={320}/><span className="hub-photo-text">{ECO_LOGOS[i.id] ? <EcoLogo id={i.id} size={16}/> : <div className="hub-photo-name">{i.label}</div>}<div className="hub-photo-note">{i.note}</div></span></>;
       if (i.id === 'onchain') return <a key={i.id} href={i.to} onClick={() => pick(i.id)} className={`${cls} hub-photo`}>{pbody}</a>;
       return <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={`${cls} hub-photo`}>{pbody}</Link>;
     }

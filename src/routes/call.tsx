@@ -25,6 +25,7 @@ import { getBixPay } from '@/lib/bixlink.functions';
 import { CONTACTS_EVENT, addContact, readContacts, removeContact, parseBixId, type BixContact } from '@/lib/bix-contacts';
 import { ChatThemePicker } from '@/components/ChatThemePicker';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
+import { EcoLogo } from '@/components/EcoLogo';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
 import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
 
@@ -132,7 +133,7 @@ function CallInner() {
       <ContactQr/>
       <CommMenu/>
     </div>
-    <div className="comm-subhead"><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
+    <div className="comm-subhead"><EcoLogo id="call" size={18}/><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
 
     {view === 'chat' && <><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
     {view === 'group' && <BixGroups me={me}/>}

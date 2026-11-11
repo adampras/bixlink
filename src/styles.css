@@ -8562,3 +8562,27 @@ body { padding-top: env(safe-area-inset-top, 0px); }
 .bixgo-cancel-card h2{color:hsl(var(--foreground));font-size:1.2rem}
 .bixgo-cancel-ico{background:hsl(var(--destructive)/.15);color:hsl(var(--destructive));border:1px solid hsl(var(--destructive)/.4)}
 .bixgo-cancel-pill{background:hsl(var(--primary)/.15);color:hsl(var(--primary));border:1px solid hsl(var(--primary)/.4)}
+
+/* Ecosystem logos: emblem + wordmark, fox remains the platform mark */
+.eco-logo{display:inline-flex;align-items:center;gap:.35rem;color:var(--eco);line-height:1}
+.eco-logo svg{flex:none;filter:drop-shadow(0 0 4px color-mix(in oklab,var(--eco) 45%,transparent))}
+.eco-logo b{font-weight:900;font-size:.78rem;letter-spacing:.06em;color:var(--eco)}
+.eco-logo b span{color:#FFD700;margin-right:.12em}
+.hub-photo-text .eco-logo b{font-size:.72rem}
+.comm-subhead{display:flex;align-items:center;gap:.5rem}
+.comm-subhead .comm-tier{margin-left:auto}
+/* BIX CALL precision polish */
+.comm-dial-num{border:1px solid rgb(255 215 0 / .22);border-radius:999px;padding:.45rem .9rem;background:rgb(255 255 255 / .03)}
+.comm-dial-num input{font-variant-numeric:tabular-nums;font-size:1.25rem}
+.comm-dial-pad{gap:.7rem 1rem;max-width:15.5rem}
+.comm-dial-pad button{aspect-ratio:1;width:100%;max-width:4.4rem;margin:0 auto;border-radius:999px;gap:2px}
+.comm-dial-pad b{font-size:1.45rem;font-weight:600;font-variant-numeric:tabular-nums}
+.comm-dial-pad small{font-family:ui-monospace,monospace;font-size:.52rem;letter-spacing:.18em}
+.comm-dial-go{max-width:15.5rem;min-height:48px}
+.comm-actions button,.comm-actions a{min-width:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center}
+.comm-dir{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;font-weight:900;flex:none}
+.comm-dir.is-in{color:#10B981;background:rgb(16 185 129 / .12)}
+.comm-dir.is-out{color:#FFD700;background:rgb(255 215 0 / .1)}
+.comm-dir.is-miss{color:#f43f5e;background:rgb(244 63 94 / .12)}
+.comm-list small{font-variant-numeric:tabular-nums}
+.bc-grid6 label span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:11px}
