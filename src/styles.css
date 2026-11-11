@@ -8742,3 +8742,18 @@ html:has(.bixcall) :is(.glass-dock,.site-header,.cs24-orb,footer),html:has(.vf-o
   main [class*="tabular"], main .font-mono { font-variant-numeric: tabular-nums; }
   main img { max-width: 100%; height: auto; }
 }
+
+/* STAKE: borderless headline, 3 package chips per screen */
+.stake-compact .stake-lux-head.auric-card,
+.stake-compact .stake-lux-head { border: 0 !important; box-shadow: none !important; background: transparent !important; outline: 0 !important; }
+.stake-compact .stake-lux-head::before, .stake-compact .stake-lux-head::after { display: none !important; }
+.stake-pick-chips { display: flex !important; gap: 8px !important; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 2px; }
+.stake-pick-chips::-webkit-scrollbar { display: none; }
+.stake-pick-chip { flex: 0 0 calc((100% - 16px) / 3) !important; min-width: 0 !important; width: auto !important; scroll-snap-align: start; padding: 8px 4px !important; }
+.stake-pick-chip * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Dock: opaque so page text never shows through labels */
+@media (max-width: 767px) {
+  .glass-dock { background: hsl(var(--card)) !important; }
+  .glass-dock a, .glass-dock button { min-width: 0; }
+  .glass-dock :is(span, small) { white-space: nowrap; font-size: 10.5px; }
+}
