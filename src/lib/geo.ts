@@ -12,7 +12,7 @@ export function getDevicePosition(): Promise<{ lat: number; lng: number; accurac
     if (!navigator.geolocation) return rej(new Error('Device does not support GPS'));
     navigator.geolocation.getCurrentPosition(
       p => res({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy }),
-      e => rej(new Error(e.code === 1 ? 'Location permission denied. Enable location for BIXGO in browser settings.' : 'Location cannot be detected yet, try again in an open area.')),
+      e => rej(new Error(e.code === 1 ? 'GPS belum aktif — titik jemput diatur ke Mataram. Pilih landmark atau ketuk peta.' : 'GPS belum terdeteksi — pilih landmark atau ketuk peta.')),
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
   });
 }

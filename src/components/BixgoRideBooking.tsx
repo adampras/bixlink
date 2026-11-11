@@ -48,7 +48,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
   const locate = async () => {
     setBusy('gps'); setErr('');
     try { const p = await getDevicePosition(); setFrom(await reverseGeocode(p.lat, p.lng)); setActive('to'); }
-    catch (e) { setErr(e instanceof Error ? e.message : 'GPS failed'); } finally { setBusy(null); }
+    catch (e) { setErr(e instanceof Error ? e.message : 'GPS gagal'); if (!city || city.startsWith('mataram') || city.startsWith('lombok')) { setFrom(f => f ?? LANDMARKS[0]!); setActive('to'); } } finally { setBusy(null); }
   };
   useEffect(() => { void locate(); }, []);
   useEffect(() => {
@@ -96,7 +96,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
 
     {stage === 'pickup' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-4 pt-3">
       <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted"/>
-      {err && <p className="mb-2 rounded-xl bg-destructive/15 px-3 py-2 text-xs text-destructive">{err}</p>}
+      {err && <p className="mb-2 flex items-center gap-2 rounded-full border border-primary/30 bg-card px-3 py-2 text-[11px] text-muted-foreground"><span className="flex-1">📍 {err}</span><button type="button" onClick={() => void locate()} className="shrink-0 font-bold text-primary">Aktifkan GPS</button></p>}
       {city.startsWith('mataram') || city.startsWith('lombok') || !city ? <div className="no-scrollbar -mx-1 mb-2 flex gap-1.5 overflow-x-auto px-1">{LANDMARKS.map(l => <button key={l.name} onClick={() => choose(l)} className="bixgo-landmark shrink-0 rounded-full border border-primary/40 bg-card px-3 py-1.5 text-[11px] font-semibold active:scale-95">📍 {l.name}</button>)}</div> : null}
       {(['from', 'to'] as const).map(k => { const p = k === 'from' ? from : to; return <button key={k} onClick={() => setActive(k)} className={`mb-2 flex w-full items-start gap-3 rounded-2xl border-2 p-3 text-left ${active === k ? 'border-primary bg-primary/5' : 'border-border'}`}>
         <MapPin className={`mt-0.5 h-5 w-5 ${k === 'from' ? 'text-primary' : 'text-destructive'}`}/>

@@ -15,7 +15,7 @@ export default function BixgoLiveMap({ from, to, active, path, onPick }: { from:
 
   useEffect(() => {
     if (!el.current || map.current) return;
-    const m = L.map(el.current, { zoomControl: false, attributionControl: true }).setView([-5.1477, 119.4327], 13);
+    const m = L.map(el.current, { zoomControl: false, attributionControl: true }).setView([-8.5913, 116.1063], 13);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(m);
     layer.current = L.layerGroup().addTo(m);
     m.on('click', e => pickRef.current({ lat: e.latlng.lat, lng: e.latlng.lng }));
