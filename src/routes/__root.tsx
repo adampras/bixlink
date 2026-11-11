@@ -25,6 +25,7 @@ import { InteractionComfort } from '../components/InteractionComfort';
 import { FoxChat } from "../components/FoxChat";
 import { SupportFloat } from "../components/SupportFloat";
 import { PowerSaver } from "../components/PowerSaver";
+import { NativeFeel } from "../components/NativeFeel";
 import { ContentGuard } from "../components/ContentGuard";
 import { I18nProvider } from "../lib/i18n";
 
@@ -172,6 +173,7 @@ function RootComponent() {
         <BixCallHost />
         <InteractionComfort />
         <PowerSaver />
+        <NativeFeel />
         <ContentGuard />
       </I18nProvider>
     </QueryClientProvider>

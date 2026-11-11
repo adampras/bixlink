@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import logo from '@/assets/bixlink-logo-gold.webp';
 import { usePublicConfig } from '@/lib/useMember';
 import { splashDuration } from '@/lib/splash-settings';
+import video from '@/assets/bixlink-splash.webm.asset.json';
+import videoFallback from '@/assets/bixlink-splash.mp4.asset.json';
+import poster from '@/assets/bixlink-splash-poster.jpg.asset.json';
 
 let startedThisLoad = false;
 
@@ -54,8 +57,12 @@ export function AppSplash() {
     >
       {showVideo ? (
         <>
+          <video ref={videoRef} className="app-splash__video" poster={poster.url} muted autoPlay playsInline preload="auto" onError={() => setVideoFailed(true)} onPlaying={() => { try { navigator.vibrate?.(14); } catch { /* unsupported */ } }} aria-hidden="true">
+            <source src={video.url} type="video/webm" />
+            <source src={videoFallback.url} type="video/mp4" />
+          </video>
           <div className="app-splash__scrim" aria-hidden="true" />
-          <div className="aix-stage" aria-hidden="true">
+          <div className="aix-stage aix-stage--over" aria-hidden="true">
             <i className="aix-flare" />
             <div className="aix-warp">{[0,1,2,3,4,5].map((n) => <i key={n} style={{ animationDelay: `${n * 0.18}s` }} />)}</div>
             <div className="aix-orbit"><i /><i /><i /></div>
