@@ -19,6 +19,7 @@ import installIcon from '@/assets/fox-icon-180.png.asset.json';
 import splashArtwork from '@/assets/bixcoin-reactor-splash.jpg.asset.json';
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSplash } from "../components/AppSplash";
+import { AppUpdateNotice } from "../components/AppUpdateNotice";
 import { InstallPrompt } from "../components/InstallPrompt";
 import { InteractionComfort } from '../components/InteractionComfort';
 import { FoxChat } from "../components/FoxChat";
@@ -160,6 +161,7 @@ function RootComponent() {
       <I18nProvider>
         <AppSplash />
         <InstallPrompt />
+        <AppUpdateNotice build={appCss} />
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <PageTransition />
         <Outlet />
