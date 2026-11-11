@@ -527,6 +527,27 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_kyc_rewards: {
+        Row: {
+          amount: number
+          created_at: string
+          locked: boolean
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          locked?: boolean
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          locked?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_leader_challenge_claims: {
         Row: {
           challenge: string
@@ -3896,6 +3917,11 @@ export type Database = {
           document_last4: string
           document_type: string
           full_name: string
+          id_path: string | null
+          phone: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          selfie_path: string | null
           status: string
           updated_at: string
           user_id: string
@@ -3906,6 +3932,11 @@ export type Database = {
           document_last4: string
           document_type: string
           full_name: string
+          id_path?: string | null
+          phone?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          selfie_path?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -3916,6 +3947,11 @@ export type Database = {
           document_last4?: string
           document_type?: string
           full_name?: string
+          id_path?: string | null
+          phone?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          selfie_path?: string | null
           status?: string
           updated_at?: string
           user_id?: string

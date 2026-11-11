@@ -1,0 +1,108 @@
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useMemo, useState } from 'react';
+import { ShieldCheck, Wallet, Lock, Cpu, Fingerprint, Radio } from 'lucide-react';
+import { BixShell } from '@/components/BixShell';
+import { ExchangeTerminal } from '@/components/ExchangeTerminal';
+import { KycCard } from '@/components/KycCard';
+import { AdminKycReview } from '@/components/AdminKycReview';
+import { useMember, usePublicConfig } from '@/lib/useMember';
+import { useBinanceDepth, useBinanceTickers } from '@/components/exchange/useBinanceLive';
+
+export const Route = createFileRoute('/exchange')({
+  head: () => ({ meta: [
+    { title: 'BIXLINK Exchanger — Live Crypto Terminal & KYC' },
+    { name: 'description', content: 'Live BTC, ETH, BNB and SOL charts, real-time order books and the BIX/USDT member market, with secure identity verification.' },
+    { property: 'og:title', content: 'BIXLINK Exchanger — Live Crypto Terminal' },
+    { property: 'og:description', content: 'Professional real-time charts, live depth and the BIX internal market in one Web3 cockpit.' },
+    { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' },
+  ] }),
+  component: ExchangePage,
+});
+
+const PAIRS = [
+  { id: 'BIX', label: 'BIX/USDT', sym: null },
+  { id: 'BTC', label: 'BTC/USDT', sym: 'BTCUSDT' },
+  { id: 'ETH', label: 'ETH/USDT', sym: 'ETHUSDT' },
+  { id: 'BNB', label: 'BNB/USDT', sym: 'BNBUSDT' },
+  { id: 'SOL', label: 'SOL/USDT', sym: 'SOLUSDT' },
+  { id: 'XRP', label: 'XRP/USDT', sym: 'XRPUSDT' },
+] as const;
+const SYMS = PAIRS.flatMap(p => (p.sym ? [p.sym] : []));
+const fmt = (v: number) => v.toLocaleString(undefined, { minimumFractionDigits: v < 10 ? 4 : 2, maximumFractionDigits: v < 10 ? 4 : 2 });
+
+function ExchangePage() {
+  const { user } = useMember();
+  const { data: cfg } = usePublicConfig();
+  const ref = Number(cfg?.bixMarket.priceUsd ?? 0.84291);
+  const [pair, setPair] = useState<(typeof PAIRS)[number]>(PAIRS[1]);
+  const [tf, setTf] = useState('15');
+  const ticks = useBinanceTickers(SYMS);
+  const { book, trades } = useBinanceDepth(pair.sym);
+  const t = pair.sym ? ticks[pair.sym] : undefined;
+  const chartUrl = useMemo(() => pair.sym ? `https://s.tradingview.com/widgetembed/?symbol=BINANCE%3A${pair.sym}&interval=${tf}&theme=dark&style=1&timezone=Etc%2FUTC&hide_side_toolbar=0&allow_symbol_change=0&studies=%5B%22RSI%40tv-basicstudies%22%2C%22MACD%40tv-basicstudies%22%5D&locale=en` : '', [pair, tf]);
+  const maxQ = Math.max(1, ...book.bids.map(b => b[1]), ...book.asks.map(a => a[1]));
+
+  return <BixShell><main className="ex-stage mx-auto max-w-7xl space-y-4 px-3 py-4 md:px-6">
+    <header className="ex-hero rounded-2xl p-4 md:p-6">
+      <p className="flex items-center gap-1.5 text-[10px] font-black tracking-[0.3em] text-chart-2"><Radio size={12} className="ex-pulse"/>LIVE · GLOBAL MARKET FEED</p>
+      <h1 className="mt-2 font-display text-2xl font-black leading-tight md:text-4xl">BIXLINK <span className="text-primary">EXCHANGER</span></h1>
+      <p className="mt-1 max-w-2xl text-xs text-muted-foreground md:text-sm">Real-time world crypto charts and order books in one cockpit, connected to your BIXLINK wallet, P2P desk and BIX PAY.</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Link to="/sovereign-wallet" className="ex-btn-gold"><Wallet size={14}/>Connect Web3 Wallet</Link>
+        <a href="#kyc" className="ex-btn-ghost"><Fingerprint size={14}/>Verify · +50 BIX locked</a>
+      </div>
+    </header>
+
+    <div className="ex-ticker flex gap-2 overflow-x-auto rounded-xl p-2">
+      {PAIRS.map(p => { const k = p.sym ? ticks[p.sym] : undefined; const price = p.sym ? k?.c : ref; const ch = k?.P ?? 0;
+        return <button key={p.id} type="button" onClick={() => setPair(p)} className={`ex-tick shrink-0 rounded-lg px-3 py-2 text-left ${pair.id === p.id ? 'is-on' : ''}`}>
+          <span className="block text-[10px] font-black tracking-widest text-muted-foreground">{p.label}</span>
+          <b className="numeric block text-sm">{price ? fmt(price) : '—'}</b>
+          <span className={`numeric text-[10px] font-bold ${p.sym ? (ch >= 0 ? 'text-chart-2' : 'text-destructive') : 'text-primary'}`}>{p.sym ? `${ch >= 0 ? '+' : ''}${ch.toFixed(2)}%` : 'INTERNAL REF'}</span>
+        </button>; })}
+    </div>
+
+    {pair.sym ? <>
+      <section className="ex-panel rounded-2xl p-3">
+        <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
+          <div><h2 className="font-display text-lg font-black">{pair.label}</h2>
+            <p className="numeric text-[11px] text-muted-foreground">H {t ? fmt(t.h) : '—'} · L {t ? fmt(t.l) : '—'} · Vol {t ? (t.q / 1e6).toFixed(1) + 'M' : '—'} USDT</p></div>
+          <div className="flex gap-1">{[['1', '1m'], ['15', '15m'], ['60', '1h'], ['240', '4h'], ['D', '1D']].map(([v, l]) =>
+            <button key={v} type="button" onClick={() => setTf(v!)} className={`ex-tf ${tf === v ? 'is-on' : ''}`}>{l}</button>)}</div>
+        </div>
+        <iframe key={chartUrl} title={`${pair.label} live chart`} src={chartUrl} className="ex-chart w-full rounded-xl" loading="lazy"/>
+      </section>
+      <div className="grid gap-4 md:grid-cols-2">
+        <section className="ex-panel rounded-2xl p-3">
+          <h3 className="mb-2 text-[10px] font-black tracking-widest text-primary">LIVE ORDER BOOK</h3>
+          <div className="numeric grid gap-px text-[11px]">
+            <div className="flex justify-between text-[10px] text-muted-foreground"><span>Price</span><span>Amount</span></div>
+            {[...book.asks].reverse().map(([p, q]) => <div key={'a' + p} className="ex-row relative flex justify-between px-1 text-destructive"><i className="ex-bar ex-bar-ask" style={{ width: `${(q / maxQ) * 100}%` }}/><span>{fmt(p)}</span><span className="text-foreground/80">{q.toFixed(4)}</span></div>)}
+            <div className="my-1 text-center text-base font-black text-primary">{t ? fmt(t.c) : '—'}</div>
+            {book.bids.map(([p, q]) => <div key={'b' + p} className="ex-row relative flex justify-between px-1 text-chart-2"><i className="ex-bar ex-bar-bid" style={{ width: `${(q / maxQ) * 100}%` }}/><span>{fmt(p)}</span><span className="text-foreground/80">{q.toFixed(4)}</span></div>)}
+            {!book.bids.length && <p className="py-6 text-center text-muted-foreground">Connecting to live depth…</p>}
+          </div>
+        </section>
+        <section className="ex-panel rounded-2xl p-3">
+          <h3 className="mb-2 text-[10px] font-black tracking-widest text-primary">RECENT TRADES</h3>
+          <div className="numeric grid gap-px text-[11px]">{trades.map(r => <div key={r.id} className="flex justify-between"><span className={r.buy ? 'text-chart-2' : 'text-destructive'}>{fmt(r.p)}</span><span>{r.q.toFixed(4)}</span><span className="text-muted-foreground">{new Date(r.t).toLocaleTimeString()}</span></div>)}</div>
+          <div className="mt-3 rounded-xl border border-border p-3 text-[11px] text-muted-foreground">Global pairs are live market data for analysis. Trading {pair.label} on BIXLINK opens at launch; BIX trades today on the member market.</div>
+          <Link to="/trade" className="ex-btn-gold mt-2 w-full justify-center">Trade BIX/USDT now →</Link>
+        </section>
+      </div>
+    </> : <ExchangeTerminal/>}
+
+    <section className="grid gap-2 sm:grid-cols-4">
+      {[[ShieldCheck, 'KYC 3-step', 'ID + selfie, private storage'], [Lock, 'Server-verified', 'Every balance move checked'], [Wallet, 'Web3 sign-in', 'BNB Chain signature login'], [Cpu, 'One ledger', 'Wallet · P2P · BIX PAY']].map(([I, a, b]) => { const Ic = I as typeof Lock;
+        return <div key={a as string} className="ex-feature rounded-xl p-3"><Ic size={16} className="text-primary"/><b className="mt-1 block text-xs">{a as string}</b><span className="text-[10px] text-muted-foreground">{b as string}</span></div>; })}
+    </section>
+
+    <section id="kyc" className="ex-panel rounded-2xl p-4">
+      <h2 className="mb-1 text-xs font-black tracking-widest text-primary">IDENTITY VERIFICATION</h2>
+      <p className="mb-3 text-xs text-muted-foreground">Verified members receive a <b className="text-primary">50 BIX welcome reward, locked</b>. It shows in your portfolio but cannot be withdrawn, sold or transferred until a release rule is announced.</p>
+      {user ? <KycCard userId={user.id}/> : <Link to="/auth" className="ex-btn-gold">Sign in to verify</Link>}
+    </section>
+    {cfg?.isAdmin && <AdminKycReview/>}
+    <p className="pb-4 text-center text-[10px] text-muted-foreground">Live data from public market feeds. BIX price is the BIXLINK internal reference, not an exchange listing. Not financial advice.</p>
+  </main></BixShell>;
+}

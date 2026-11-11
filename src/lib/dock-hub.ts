@@ -6,7 +6,7 @@ export const HUB_ITEMS = [
   { id: 'presale', to: '/presale', label: 'Presale', note: 'Genesis', group: 'Trading & Finance' },
   { id: 'boost', to: '/boost', label: 'Boost APY', note: 'Engine', group: 'Trading & Finance' },
   { id: 'buyback', to: '/buyback', label: 'Dev Buyback', note: 'Sell BIX', group: 'Trading & Finance' },
-  { id: 'exchange', to: '/quantum-exchange', label: 'Exchange', note: 'Coming soon', group: 'Trading & Finance' },
+  { id: 'exchange', to: '/exchange', label: 'Exchanger', note: 'Live charts', group: 'Trading & Finance' },
   { id: 'onchain', to: '/sovereign-wallet', label: 'On-chain Wallet', note: 'Open apps wallet', group: 'Wallet & Payments' },
   { id: 'pay', to: '/pay', label: 'BIX PAY', note: 'Transfer', group: 'Wallet & Payments' },
   { id: 'vault', to: '/consortium-vault', label: 'Consortium', note: '5 nations', group: 'Wallet & Payments' },
