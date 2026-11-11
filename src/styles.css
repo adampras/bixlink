@@ -8757,3 +8757,17 @@ html:has(.bixcall) :is(.glass-dock,.site-header,.cs24-orb,footer),html:has(.vf-o
   .glass-dock a, .glass-dock button { min-width: 0; }
   .glass-dock :is(span, small) { white-space: nowrap; font-size: 10.5px; }
 }
+
+/* Final: STAKE title fits, header locked, wallet back tidy */
+.stake-compact h1.stake-lux-title{white-space:nowrap!important;font-size:clamp(.85rem,4.6vw,2.6rem)!important;letter-spacing:.02em!important;max-width:100%;overflow:visible;padding-inline:4px}
+html[data-design="v2"] [data-page="stake"] h1.stake-lux-title{letter-spacing:.02em!important}
+.sticky-top-bar,.ex-topbar{position:sticky!important;top:0!important;transform:translateZ(0);will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+html,body{overscroll-behavior-y:none}
+.wallet-face--back::before{display:none!important}
+.wallet-face--back .wallet-back-body{display:flex!important;flex-direction:column;justify-content:space-between!important;height:100%;gap:10px!important}
+.wallet-back-grid{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;align-items:center!important;gap:14px!important;margin:0!important;flex:1}
+.wallet-back-qr{width:clamp(88px,26vw,112px)!important;height:auto!important;aspect-ratio:1;padding:6px!important;background:#fff!important;border:2px solid #d4af37!important;border-radius:12px!important;display:grid;place-items:center}
+.wallet-back-qr svg{width:100%!important;height:100%!important;display:block}
+.wallet-back-ids{display:grid!important;gap:8px!important;padding-left:12px;border-left:1px solid rgb(212 175 55/.3);min-width:0}
+.wallet-back-ids dd button{font-size:clamp(11px,3.3vw,14px)!important;letter-spacing:.05em!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.wallet-back-hint{border-top:1px solid rgb(212 175 55/.18);padding-top:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}

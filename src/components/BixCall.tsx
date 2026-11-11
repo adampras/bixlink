@@ -512,11 +512,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         <label><button aria-label="Balik kamera" disabled={!cam} className={cam ? '' : 'dim'} onClick={() => void flip()}><SwitchCamera/></button><span>Balik</span></label>
         <label><button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button><span>Akhiri</span></label>
       </div>}
-      {call.offline ? <>
-        <button type="button" className="bc-pill is-chat" onClick={openChat}><MessageCircle size={16}/> Send BIX CHAT Message</button>
+      {(call.offline || done) && <>
+        {!call.offline && call.status !== 'ended' && <div className="bc-offline" role="status"><b>{call.status === 'declined' ? 'Panggilan ditolak' : 'Panggilan tidak terjawab'}</b><small>Lanjutkan lewat chat, atau tutup untuk kembali ke menu BIX CALL.</small></div>}
+        <button type="button" className="bc-pill is-chat" onClick={openChat}><MessageCircle size={16}/> Jalur Chat</button>
         {wa && <a className="bc-pill is-wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer"><Phone size={16}/> Hubungi WhatsApp</a>}
-        <button type="button" className="bc-pill is-close" onClick={onClose}><X size={16}/> Close</button>
-      </> : done && wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
+        <button type="button" className="bc-pill is-close" onClick={() => { onClose(); void router.navigate({ to: '/call' }); }}><X size={16}/> Tutup &amp; Menu BIX CALL</button>
+      </>}
     </footer>
   </div></>;
 }
