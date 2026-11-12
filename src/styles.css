@@ -8865,3 +8865,15 @@ html body .bixcall-ctl:has(.bc-swipe-row){left:0;right:0;transform:none;max-widt
 .bixcall-ctl>.bc-tap{width:auto!important;height:auto!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important}
 .bc-tap.is-end i{border:2px solid #FFD700}
 html body .bixcall-ctl:has(.bc-grid6){width:min(360px,calc(100vw - 24px))}
+
+/* BIX CALL: centered swipe-up Angkat/Tolak and centered Batalkan */
+html body .bixcall-ctl:has(.bc-swipe-row),html body .bixcall-ctl:has(.bc-cancel){left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:none!important;display:flex;flex-direction:column;align-items:center;justify-content:center;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;padding:0 16px calc(env(safe-area-inset-bottom) + 26px)!important}
+html body .bixcall-ctl:has(.bc-cancel){flex-direction:row;gap:36px;align-items:flex-end}
+html body .bc-swipe-row{display:grid!important;grid-template-columns:1fr 1fr;width:min(320px,100%);gap:0!important;justify-items:center;align-items:end;padding-top:130px;margin:0 auto}
+html body .bc-swipe-track{left:50%;transform:translateX(-50%);bottom:84px}
+html body .bc-swipe-knob{width:70px;height:70px;border:2px solid rgb(255 215 0 / .75)}
+html body .bc-swipe small{font-size:12px;font-weight:800;letter-spacing:.12em;color:#fff}
+.bc-swipe-hint{margin:0;font-size:11.5px;font-weight:600;color:rgb(226 232 240 / .7);text-align:center;letter-spacing:.02em}
+html body .bixcall-ctl>.bc-swipe-row{width:min(320px,100%)!important}
+html body .bixcall-ctl>.bc-swipe-hint{width:auto;height:auto;background:none;border:0;border-radius:0;box-shadow:none;display:block}
+html body .bc-swipe-track{bottom:104px}

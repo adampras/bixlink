@@ -496,11 +496,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     {cam && live && <video ref={localV} className={sw ? 'bixcall-remote on bixcall-self-big' : isSplit ? 'bixcall-split-self' : 'bixcall-pip bc-self-glow'} style={sw || isSplit ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})`, transition: 'transform .16s ease-out' }} onPointerDown={sw || isSplit ? undefined : dragPip} onClick={() => { if (sw) setHideUi(v => !v); }} autoPlay playsInline muted/>}
     <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}`}>
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Sorry, I am busy right now. I will call you back.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
-      {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Decline with message</button>}
+      {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
-        <button type="button" className="bc-tap is-end" onClick={onDecline} aria-label="Tolak panggilan"><i><PhoneOff/></i><small>TOLAK</small></button>
-        <button type="button" className="bc-tap is-accept" onClick={onAccept} aria-label="Angkat panggilan"><i>{call.kind === 'video' ? <Video/> : <Phone/>}</i><small>ANGKAT</small></button>
+        <SwipeKey tone="end" label="TOLAK" icon={<PhoneOff size={28}/>} onDone={onDecline}/>
+        <SwipeKey tone="accept" label="ANGKAT" icon={call.kind === 'video' ? <Video size={28}/> : <Phone size={28}/>} onDone={onAccept}/>
       </div>}
+      {!live && !done && call.role === 'callee' && <p className="bc-swipe-hint">Geser ke atas untuk angkat atau tolak</p>}
       {!live && !done && call.role === 'caller' && <>
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
         <button type="button" className="bc-tap is-end bc-cancel" aria-label="Batalkan panggilan" onClick={onEnd}><i><PhoneOff/></i><small>BATALKAN</small></button>
@@ -532,7 +533,6 @@ export function CallButtons({ peerId, peerName, className = '' }: { peerId: stri
 }
 
 /** Swipe-up key: drag the knob upward past the threshold to fire; tap-and-hold safe in pockets. Enter/Space also fires for accessibility. */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function SwipeKey({ tone, label, icon, onDone }: { tone: 'accept' | 'end'; label: string; icon: React.ReactNode; onDone: () => void }) {
   const [dy, setDy] = useState(0);
   const [drag, setDrag] = useState(false);
@@ -553,7 +553,7 @@ export function SwipeKey({ tone, label, icon, onDone }: { tone: 'accept' | 'end'
   };
   return <div className={`bc-swipe is-${tone}`}>
     <span className="bc-swipe-track" aria-hidden="true"><i/><i/><i/></span>
-    <button type="button" className={`bc-swipe-knob${drag ? ' is-drag' : ''}`} style={{ transform: `translateY(${-dy}px)` }} aria-label={`Swipe up for ${label}`}
+    <button type="button" className={`bc-swipe-knob${drag ? ' is-drag' : ''}`} style={{ transform: `translateY(${-dy}px)` }} aria-label={`Geser ke atas untuk ${label.toLowerCase()}`}
       onPointerDown={down} onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !fired.current) { e.preventDefault(); fired.current = true; onDone(); } }}>{icon}</button>
     <small>{label}</small>
   </div>;
