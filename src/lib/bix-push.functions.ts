@@ -36,7 +36,7 @@ export const notifyBixPush = createServerFn({ method: 'POST' })
       to = m.recipient_id; payload = { type: 'chat', body: m.body.slice(0, 140), tag: `chat-${m.sender_id}`, url: `/call?chat=${m.sender_id}` };
     } else {
       const { data: c } = await context.supabase.from('bix_calls').select('caller_id, callee_id, kind, status, created_at').eq('id', data.id).maybeSingle();
-      if (!c || c.caller_id !== context.userId || c.status !== 'ringing' || Date.now() - new Date(c.created_at).getTime() > 60000) return { sent: 0 };
+      if (!c || c.caller_id !== context.userId || c.status !== 'ringing' || Date.now() - new Date(c.created_at).getTime() > 90000) return { sent: 0 };
       to = c.callee_id; callCreated = c.created_at; callKind = c.kind; payload = { type: 'call', body: c.kind === 'video' ? '📹 Incoming video call — tap to answer' : '📞 Incoming voice call — tap to answer', tag: `call-${data.id}`, url: '/call' };
     }
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
@@ -48,7 +48,7 @@ export const notifyBixPush = createServerFn({ method: 'POST' })
     const fcmData: Record<string, string> = data.type === 'call'
       ? { ...callFcmData(data.id, callKind, callCreated), title: payload['title']!, body: payload['body']! }
       : { type: 'chat', title: payload['title']!, body: payload['body']!, path: payload['url']! };
-    const native = await sendFcmToUser(supabaseAdmin as never, to, fcmData, data.type === 'call' ? 40 : 86400);
+    const native = await sendFcmToUser(supabaseAdmin as never, to, fcmData, data.type === 'call' ? 75 : 86400);
     if (!jwk) return { sent: native };
     const { data: subs } = await supabaseAdmin.from('bix_push_subscriptions').select('endpoint, p256dh, auth').eq('user_id', to).limit(10);
     if (!subs?.length) return { sent: native };

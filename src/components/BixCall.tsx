@@ -26,9 +26,9 @@ function CallPeerPhoto({ peerId, name }: { peerId: string; name: string }) {
 type Kind = 'voice' | 'video';
 /** rang = callee's device acknowledged the call ("Ringing"); offline = no acknowledgement within OFFLINE_MS. */
 type Active = { id: string; peerId: string; peerName: string; kind: Kind; role: 'caller' | 'callee'; status: string; whatsapp?: string | null; rang?: boolean; offline?: boolean };
-/** Caller phases: "Calling" until the callee device acks, then "Ringing"; no ack after 25 s means offline. */
-export const OFFLINE_MS = 25000;
-export const RING_TIMEOUT_MS = 40000;
+/** Caller phases: "Calling" until the callee device acks, then "Ringing"; no ack after 45 s means offline. */
+export const OFFLINE_MS = 45000;
+export const RING_TIMEOUT_MS = 75000;
 export function callerPhase(c: { rang?: boolean; offline?: boolean }): 'calling' | 'ringing' | 'offline' {
   return c.offline ? 'offline' : c.rang ? 'ringing' : 'calling';
 }
@@ -120,7 +120,7 @@ export function BixCallHost() {
           setCall(c => c && c.id === cur.id ? { ...c, status: c.offline ? c.status : (st ?? c.status), rang: c.rang || rang } : c);
         }
       } else {
-        const since = new Date(Date.now() - 40000).toISOString();
+        const since = new Date(Date.now() - 80000).toISOString();
         const { data } = await supabase.from('bix_calls' as never).select('id, caller_id, kind, status').eq('callee_id', me).eq('status', 'ringing').gte('created_at', since).order('created_at', { ascending: false }).limit(1);
         const row = (data as { id: string; caller_id: string; kind: Kind }[] | null)?.[0];
         if (row && !stop) {
@@ -148,7 +148,7 @@ export function BixCallHost() {
     return () => { stop = true; clearInterval(t); };
   }, [me]);
 
-  // Caller: no device ack after 25 s → offline screen; ringing but unanswered after 40 s → end.
+  // Caller: no device ack after 45 s → offline screen; ringing but unanswered after 75 s → end.
   useEffect(() => {
     if (!call || call.role !== 'caller' || call.status !== 'ringing' || call.offline) return;
     const t = call.rang
