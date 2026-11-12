@@ -34,7 +34,7 @@ const DIVS: { id: Division; name: string; tag: string; img: string; Icon: typeof
   { id: 'rent', name: 'BIX Rent', tag: 'Rental motor & mobil', img: rentImg, Icon: KeyRound },
 ];
 const divName = (d: string) => DIVS.find(x => x.id === d)?.name ?? d;
-const card = 'rounded-2xl border border-border/60 bg-card/70 backdrop-blur p-4';
+const card = 'rounded-2xl border border-primary/15 bg-card/80 p-4 shadow-lg';
 const input = 'w-full rounded-xl border border-border bg-background/60 px-3 py-2 text-sm';
 const btn = 'rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50';
 const ghost = 'rounded-xl border border-border px-3 py-2 text-xs font-semibold';
@@ -50,7 +50,7 @@ function CarePage() {
     });
   }, []);
   return (
-    <main className="care-live mx-auto min-h-screen max-w-3xl pb-24 text-foreground">
+    <main className="care-live mx-auto min-h-screen max-w-3xl pb-28 text-foreground">
       <section className="relative overflow-hidden">
         <img src={heroImg} alt="BIXCARE kendaraan, laundry dan rental" width={1536} height={864} className="care-hero-img h-56 w-full object-cover sm:h-72" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
@@ -64,16 +64,19 @@ function CarePage() {
       <CityMarquee/>
       <ol className="lux-guide mx-4 mt-3 grid grid-cols-3 gap-2" aria-label="Cara pakai BIXCARE">{([['1', 'Pilih layanan', 'Bengkel, Cuci, Laundry, Rental'], ['2', 'Pilih outlet', 'Lihat harga & jadwal'], ['3', 'Pesan & bayar', 'Pantau status di Pesanan']] as const).map(([n, t, d]) => <li key={n} className="rounded-2xl border border-primary/25 bg-card/80 p-2.5"><span className="grid h-6 w-6 place-items-center rounded-full bg-primary text-[11px] font-black text-primary-foreground">{n}</span><b className="mt-1.5 block text-[11.5px] font-extrabold leading-tight">{t}</b><span className="mt-0.5 block text-[10px] leading-tight text-muted-foreground">{d}</span></li>)}</ol>
       <GlobalRegions service="BIXCARE"/>
-      <nav className="sticky top-0 z-10 flex gap-2 bg-background/90 px-4 py-2 backdrop-blur">
-        {([['explore', 'Jelajah', Search], ['orders', 'Pesanan Saya', ClipboardList], ['partner', 'Pemilik Layanan', Store]] as const).map(([k, l, I]) => (
-          <button key={k} onClick={() => setTab(k)} className={`flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-bold ${tab === k ? 'care-tab-on bg-primary text-primary-foreground' : 'border border-border text-muted-foreground'}`}><I className="h-4 w-4" />{l}</button>
-        ))}
-      </nav>
       <div className="space-y-4 px-4 pt-2">
         {tab === 'explore' && <Explore uid={uid} onBooked={() => setTab('orders')} />}
         {tab === 'orders' && (uid ? <MyOrders uid={uid} /> : <SignIn />)}
         {tab === 'partner' && (uid ? <Partner uid={uid} owner1={owner1} /> : <SignIn />)}
       </div>
+      <nav aria-label="Menu BIXCARE" className="care-dock fixed inset-x-0 bottom-0 z-30 mx-auto grid max-w-3xl grid-cols-4 border-t border-primary/25 bg-background pb-[env(safe-area-inset-bottom)]">
+        {([['explore', 'Jelajah', Search], ['orders', 'Pesanan', ClipboardList], ['partner', 'Mitra', Store]] as const).map(([k, l, I]) => (
+          <button key={k} onClick={() => { setTab(k); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-current={tab === k ? 'page' : undefined} className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] ${tab === k ? 'font-extrabold text-primary' : 'text-muted-foreground'}`}>
+            {tab === k && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-primary" />}<I className="h-5 w-5" />{l}
+          </button>
+        ))}
+        <Link to="/call" className="flex flex-col items-center gap-0.5 py-2.5 text-[11px] text-muted-foreground"><MessageCircle className="h-5 w-5" />Bantuan</Link>
+      </nav>
     </main>
   );
 }
