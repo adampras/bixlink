@@ -26,7 +26,9 @@ export function MemberWelcome({ userId }: { userId: string }) {
   useEffect(() => {
     try { if (localStorage.getItem(KEY + userId)) return; } catch { return; }
     setWelcomeActive(true);
-    const t = window.setTimeout(() => setOpen(true), 1200);
+    let t = 0;
+    const tryOpen = () => { if (document.querySelector('.app-splash')) { t = window.setTimeout(tryOpen, 500); return; } setOpen(true); };
+    t = window.setTimeout(tryOpen, 1200);
     return () => { window.clearTimeout(t); setWelcomeActive(false); };
   }, [userId]);
   const close = () => { try { localStorage.setItem(KEY + userId, '1'); } catch { /* optional storage */ } setOpen(false); setWelcomeActive(false); };

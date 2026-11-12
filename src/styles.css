@@ -8829,3 +8829,12 @@ html[data-app-hidden] .site-shell main>*, html[data-app-hidden] .hub-midnight .h
 .wallet-back-hint{display:block;font-size:9px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:inherit}
 .stake-compact h1.stake-lux-title{font-size:clamp(13px,4.4vw,24px)!important;letter-spacing:0!important;padding-inline:0!important}
 @media (min-width:640px){.stake-compact h1.stake-lux-title{font-size:clamp(24px,4vw,48px)!important}}
+
+/* STAKE title: fits one line even with Samsung font/screen zoom */
+.stake-title-fit { font-size: min(5.2vw, 22px) !important; letter-spacing: -0.02em !important; white-space: nowrap; max-width: 100%; }
+@media (max-width: 360px) { .stake-title-fit { font-size: 4.8vw !important; letter-spacing: -0.03em !important; } }
+
+/* HUB sheet: spring open with soft gold glow */
+.hub-spring[data-state="open"] { animation: hub-spring-in .5s cubic-bezier(.16,1,.3,1) both; box-shadow: 0 -12px 40px -12px rgb(255 215 0 / .28); }
+@keyframes hub-spring-in { from { transform: translateY(14%); opacity: .4; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .hub-spring[data-state="open"] { animation: none; } }

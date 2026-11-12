@@ -44,9 +44,10 @@ jobs:
       - name: Call permissions (lock-screen ringing)
         run: |
           M=android/app/src/main/AndroidManifest.xml
-          for p in USE_FULL_SCREEN_INTENT WAKE_LOCK VIBRATE POST_NOTIFICATIONS FOREGROUND_SERVICE FOREGROUND_SERVICE_PHONE_CALL; do
+          for p in USE_FULL_SCREEN_INTENT WAKE_LOCK VIBRATE POST_NOTIFICATIONS FOREGROUND_SERVICE FOREGROUND_SERVICE_PHONE_CALL CAMERA ACCESS_FINE_LOCATION ACCESS_COARSE_LOCATION RECORD_AUDIO MODIFY_AUDIO_SETTINGS; do
             grep -q "android.permission.$p\"" $M || sed -i "s#</manifest>#    <uses-permission android:name=\"android.permission.$p\" />\n</manifest>#" $M
           done
+          grep -q "android.hardware.camera" $M || sed -i "s#</manifest>#    <uses-feature android:name=\"android.hardware.camera\" android:required=\"false\" />\n</manifest>#" $M
           sed -i 's#<activity #<activity android:showWhenLocked="true" android:turnScreenOn="true" #' $M
       - run: bunx cap sync android
       - name: Release keystore (from secrets, or create BIXLINK key once)

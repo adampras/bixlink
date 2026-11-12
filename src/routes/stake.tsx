@@ -62,7 +62,7 @@ function StakePage() {
     <MemberGate ready={ready} signedIn={!!user} title="STAKE">
       <div className="stake-lux-head auric-card text-center">
         <ChronoBadge tone="#facc15" label="TORQUE"/>
-        <h1 className="section-title stake-lux-title w-full text-center !text-2xl !tracking-wide sm:!text-5xl">STAKING PACKAGE <span>CRYPTO</span></h1>
+        <h1 className="section-title stake-lux-title w-full text-center stake-title-fit sm:!text-5xl">STAKING PACKAGE <span>CRYPTO</span></h1>
         
       </div>
       <GlowSurface className="mt-3 mb-6 rounded-xl sm:mb-8"><dl aria-label="Staking summary" className="hud-scan grid grid-cols-3 sm:mb-8">
