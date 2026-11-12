@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
 import foxLogo from '@/assets/bixlink-logo-gold.webp';
 import { ensureBixPush, pushNotify } from '@/lib/bix-push';
+import { getBeauty, makeBeautyProcessor } from '@/lib/bix-beauty';
 import { startChosenRingtone, startRingback, playConnected, playEnded, installCallAudioUnlock, unlockCallAudio, isCallAudioReady, CALL_AUDIO_EVENT } from '@/lib/bix-tones';
 import { useBixCard, useSignedUrl } from '@/components/BixAvatar';
 import { INCOMING_VIBE, VIBE_EVERY_MS, pickRoute, tiltOf, type Route, type Tilt } from '@/lib/bix-call-route';
@@ -424,6 +425,9 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         ] as never });
     // 'motion' keeps frames smooth and low-latency instead of stalling to hold detail.
     const mt = lp.getTrackPublication(LK!.Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'motion';
+    // Beauty look: processed on this phone before sending, so the other side sees the same filtered video.
+    const bf = getBeauty(); const vt = lp.getTrackPublication(LK!.Track.Source.Camera)?.track as unknown as { setProcessor?: (p: unknown) => Promise<void> } | undefined;
+    if (on && bf !== 'off' && vt?.setProcessor && typeof HTMLCanvasElement.prototype.captureStream === 'function') await vt.setProcessor(makeBeautyProcessor(bf)).catch(() => {});
     setCam(on);
   };
   const toggleCam = async () => {

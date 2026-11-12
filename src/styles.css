@@ -9000,3 +9000,16 @@ html[data-color-mode="light"] body nav.glass-dock>a{color:rgb(255 255 255/.8)!im
 video{background:#000}
 .bixcall video::-webkit-media-controls,.qr-full video::-webkit-media-controls{display:none!important}
 .bixcall-remote.on,.bixcall-pip,.bixcall-self-big,.bixcall-split-self{filter:brightness(1.1) contrast(1.05) saturate(1.08)}
+
+/* BIX CALL settings groups, face filters and light mode */
+.bc-setgroup { margin: 1.1rem .25rem .45rem; font-size: .7rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #FFD700; }
+.bc-beauty { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.bc-beauty button { display: flex; flex-direction: column; align-items: center; gap: .35rem; padding: .5rem .25rem; border-radius: .9rem; border: 1px solid rgb(255 255 255 / .1); font-size: .7rem; font-weight: 600; background: rgb(255 255 255 / .03); }
+.bc-beauty button.is-on { border-color: #FFD700; box-shadow: 0 0 0 1px #FFD700 inset; color: #FFD700; }
+.bc-beauty i { width: 2.6rem; height: 2.6rem; border-radius: 999px; background: radial-gradient(circle at 40% 35%, #f3c9a8, #b07a5a 70%, #3a2a20); }
+html[data-bc-theme=light] main:has(.bc-head) { background: #f6f5fa; color: #17141f; }
+html[data-bc-theme=light] main:has(.bc-head) .comm-card { background: #ffffff; color: #17141f; border-color: rgb(23 20 31 / .1); box-shadow: 0 4px 14px rgb(23 20 31 / .06); }
+html[data-bc-theme=light] main:has(.bc-head) .comm-h, html[data-bc-theme=light] main:has(.bc-head) .bc-setgroup { color: #7c3aed; }
+html[data-bc-theme=light] main:has(.bc-head) .text-muted-foreground, html[data-bc-theme=light] main:has(.bc-head) small { color: #5b5668; }
+html[data-bc-theme=light] main:has(.bc-head) button, html[data-bc-theme=light] main:has(.bc-head) input { color: #17141f; }
+html[data-bc-theme=light] main:has(.bc-head) .is-on { color: #7c3aed !important; border-color: #7c3aed !important; }

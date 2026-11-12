@@ -82,6 +82,10 @@ export const playDtmf = (k: string) => { const p = DTMF[k]; if (p) tone(p, 0, 0.
 
 /* ---- Ringtone choices + member's own device ringtone (stored only on this phone) ---- */
 export const RINGTONES = [
+  { id: 'wa', name: 'Modern Chime (gaya WA)' },
+  { id: 'cyber', name: 'BIX Cyber Pulse' },
+  { id: 'crystal', name: 'Crystal Minimalist' },
+  { id: 'titanium', name: 'Titanium Ring' },
   { id: 'lux', name: 'BIXLINK Luxury Arpeggio' },
   { id: 'fox', name: 'Fox Genesis Chime' },
   { id: 'obsidian', name: 'Obsidian Titanium' },
@@ -103,6 +107,10 @@ export async function loadDeviceRingtone(): Promise<{ blob: Blob; name: string }
 export async function clearDeviceRingtone() { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).delete('custom'); } catch { /* ignore */ } }
 
 const PATTERNS: Record<string, [() => void, number]> = {
+  wa: [() => { const v = getRingVolume() * 0.4; ([[880, 0], [1108.7, 0.12], [1318.5, 0.24], [1108.7, 0.6], [1318.5, 0.72], [1760, 0.84]] as const).forEach(([f, t]) => tone([f], t, 0.32, v, 'sine')); }, 2400],
+  cyber: [() => { const v = getRingVolume() * 0.22; [330, 495, 660, 990, 660, 990].forEach((f, i) => tone([f, f * 1.01], i * 0.11, 0.1, v, 'square')); tone([1320], 0.8, 0.35, v, 'triangle'); }, 2000],
+  crystal: [() => { const v = getRingVolume() * 0.35; [1567.98, 2093, 2637].forEach((f, i) => tone([f], i * 0.22, 1.1, v, 'sine')); }, 3000],
+  titanium: [() => { const v = getRingVolume() * 0.3; for (let r = 0; r < 2; r++) for (let i = 0; i < 6; i++) tone([440, 480], r * 0.9 + i * 0.07, 0.06, v, 'triangle'); }, 3200],
   fox: [() => { const v = getRingVolume() * 0.33; [523.25, 587.33, 783.99, 880, 1046.5].forEach((f, i) => tone([f], i * 0.14, 0.45, v, 'sine')); }, 2400],
   obsidian: [() => { const v = getRingVolume() * 0.3; tone([392, 587.33], 0, 0.9, v, 'triangle'); tone([440, 659.25], 1.0, 0.9, v, 'triangle'); }, 2800],
   harp: [() => { const v = getRingVolume() * 0.32; [392, 493.88, 587.33, 783.99, 987.77, 1174.7].forEach((f, i) => tone([f], i * 0.1, 0.9, v, 'sine')); }, 2600],

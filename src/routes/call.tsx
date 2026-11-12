@@ -27,6 +27,8 @@ import { ChatThemePicker } from '@/components/ChatThemePicker';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
 import { EcoLogo } from '@/components/EcoLogo';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
+import { BEAUTY, getBeauty, setBeauty } from '@/lib/bix-beauty';
+import { getBcTheme, setBcTheme, applyBcTheme } from '@/lib/bix-theme';
 import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
 
 export const Route = createFileRoute('/call')({
@@ -119,6 +121,7 @@ function CallInner() {
     const sp = new URLSearchParams(window.location.search); const c = sp.get('chat');
     if (c) setChatWith({ id: c, name: sp.get('n') ?? 'Member' });
   })(); }, []);
+  useEffect(() => applyBcTheme(), []);
   const first = useRef(true);
   useEffect(() => { if (first.current) { first.current = false; return; } setChatWith(null); window.scrollTo({ top: 0 }); }, [tab]);
 
@@ -141,8 +144,25 @@ function CallInner() {
     {view === 'updates' && <StoryBar me={me} myName="Saya" list/>}
     {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
     {view === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
-    {view === 'setting' && <><ChatThemePicker/><NotifyCard/><PrivacyTab tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
+    {view === 'setting' && <><SetGroup t="Tampilan & Tema"/><AppearanceCard/><ChatThemePicker/><SetGroup t="Panggilan & Video"/><BeautyCard/><SetGroup t="Suara & Dering"/><section className="comm-card"><RingSetting/></section><NotifyCard/><PrivacyTab tier={tier}/><SetGroup t="Paket Anda"/><TierLadder tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
   </main>;
+}
+
+function SetGroup({ t }: { t: string }) { return <h2 className="bc-setgroup">{t}</h2>; }
+function AppearanceCard() {
+  const [m, setM] = useState('dark');
+  useEffect(() => { setM(getBcTheme()); }, []);
+  const pick = (v: string) => { setM(v); setBcTheme(v); };
+  return <section className="comm-card"><h3 className="comm-h">Mode tampilan</h3>
+    <div className="comm-perms">{([['dark', '🌙 Gelap'], ['light', '☀️ Terang'], ['auto', '⚙️ Otomatis']] as const).map(([v, l]) => <button key={v} type="button" className={m === v ? 'is-on' : ''} onClick={() => pick(v)}>{l}</button>)}</div>
+    <small className="mt-2 block text-[11px] text-muted-foreground">Huruf, angka dan ikon menyesuaikan warna otomatis. "Otomatis" mengikuti setelan HP.</small></section>;
+}
+function BeautyCard() {
+  const [b, setB] = useState('off');
+  useEffect(() => { setB(getBeauty()); }, []);
+  return <section className="comm-card"><h3 className="comm-h">Filter wajah video call</h3>
+    <div className="bc-beauty">{BEAUTY.map(x => <button key={x.id} type="button" className={b === x.id ? 'is-on' : ''} onClick={() => { setB(x.id); setBeauty(x.id); }}><i style={{ filter: x.css }}/>{x.name}</button>)}</div>
+    <small className="mt-2 block text-[11px] text-muted-foreground">Filter dipakai saat kamera dinyalakan dan terlihat juga oleh lawan bicara.</small></section>;
 }
 
 /** Settings shortcut only (themes, ringtone, notifications, privacy) — tab navigation stays in the dock. */
@@ -299,16 +319,16 @@ function PrivacyTab({ tier }: { tier: Tier | null }) {
     setMsg(error ? error.message : 'Settings saved'); setTimeout(() => setMsg(''), 3000);
   };
   return <>
-    <TierLadder tier={tier}/>
+    <SetGroup t="Perangkat & Izin"/>
     <CallDiagnostics/>
     <NativeDeviceSettings/>
+    <SetGroup t="Privasi & Kontak"/>
     <section className="comm-card">
       <h3 className="comm-h">Who can contact me</h3>
       <div className="comm-perms">{PERMS.map(([v, l]) => <button key={v} onClick={() => setPerm(v)} className={perm === v ? 'is-on' : ''}>{l}</button>)}</div>
       <h3 className="comm-h mt-4">Nomor HP / WhatsApp</h3>
       <input value={wa} onChange={e => setWa(e.target.value)} inputMode="tel" placeholder="+628123456789" className="comm-input"/>
       <label className="comm-check"><input type="checkbox" checked={pub} onChange={e => setPub(e.target.checked)}/>Show WhatsApp button to callers</label>
-      <RingSetting/>
       <button onClick={() => void save()} className="comm-save">Save</button>
       {msg && <p className="mt-2 text-center text-xs">{msg}</p>}
       <p className="mt-3 flex items-start gap-1.5 text-[10px] text-muted-foreground"><ShieldCheck size={12} className="mt-0.5 shrink-0"/>Chats and calls connect through your BIXLINK account; your number is never shared unless you enable the WhatsApp button.</p>
