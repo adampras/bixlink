@@ -8887,3 +8887,7 @@ html body .bixcall-ctl .bc-swipe-row{padding-top:0!important;gap:0!important}
 .bc-diag-act{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .bc-diag-act button{padding:10px;border-radius:12px;font-size:12px;font-weight:700;background:var(--muted);color:var(--foreground);border:1px solid var(--border)}
 .bc-redial{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;color:var(--background);background:var(--chart-2)}
+
+/* BIX CALL in-call 6-button card: exact center on every phone */
+html body .bixcall-ctl:has(.bc-grid6){left:0!important;right:0!important;margin-inline:auto!important;transform:none!important;width:min(360px,calc(100vw - 24px))!important;max-width:none!important;box-sizing:border-box}
+html body .bixcall-ctl>.bc-ctl4.bc-grid6{justify-items:center;margin:0 auto}
