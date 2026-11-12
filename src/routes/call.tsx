@@ -234,6 +234,7 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
       {hist.length === 0 ? <p className="text-xs text-muted-foreground">No calls yet.</p> : <ul className="comm-list">{hist.map(h => <li key={h.id} className="comm-row">
         <span className={`comm-dir ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.caller_id === me ? '↗' : '↙'}</span>
         <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{h.peer}</b><small className="text-muted-foreground"><em className={`comm-hbadge ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.status === 'missed' ? 'Tak terjawab' : h.status === 'declined' ? 'Rejected' : h.caller_id === me ? 'Leave' : 'Join'}</em> {h.kind === 'video' ? 'Video' : 'Voice'} · {new Date(h.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></span>
+        <button type="button" className="bc-redial" aria-label={`Panggil ulang @${h.peer}`} onClick={() => startBixCall(h.peerId, h.peer, h.kind === 'video' ? 'video' : 'voice')}>{h.kind === 'video' ? <Video size={16}/> : <Phone size={16}/>}</button>
         <ActionButtons peerId={h.peerId} name={h.peer} tier={tier} canCall={h.canCall} onChat={onChat}/></li>)}</ul>}
     </section>
   </>;
@@ -290,6 +291,7 @@ function PrivacyTab({ tier }: { tier: Tier | null }) {
   };
   return <>
     <TierLadder tier={tier}/>
+    <CallDiagnostics/>
     <NativeDeviceSettings/>
     <section className="comm-card">
       <h3 className="comm-h">Who can contact me</h3>
@@ -303,6 +305,29 @@ function PrivacyTab({ tier }: { tier: Tier | null }) {
       <p className="mt-3 flex items-start gap-1.5 text-[10px] text-muted-foreground"><ShieldCheck size={12} className="mt-0.5 shrink-0"/>Chats and calls connect through your BIXLINK account; your number is never shared unless you enable the WhatsApp button.</p>
     </section>
   </>;
+}
+
+type PermState = 'granted' | 'denied' | 'prompt' | 'unsupported';
+function CallDiagnostics() {
+  const [st, setSt] = useState<Record<'mic' | 'cam' | 'notif', PermState>>({ mic: 'prompt', cam: 'prompt', notif: 'prompt' });
+  const check = async () => {
+    const q = async (n: string): Promise<PermState> => { try { const r = await navigator.permissions.query({ name: n as PermissionName }); return r.state as PermState; } catch { return 'prompt'; } };
+    const notif: PermState = typeof Notification === 'undefined' ? 'unsupported' : Notification.permission === 'default' ? 'prompt' : Notification.permission as PermState;
+    setSt({ mic: await q('microphone'), cam: await q('camera'), notif });
+  };
+  useEffect(() => { void check(); }, []);
+  const ask = async () => {
+    try { const m = await navigator.mediaDevices.getUserMedia({ audio: true, video: true }); m.getTracks().forEach(t => t.stop()); } catch { /* denied */ }
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') await Notification.requestPermission().catch(() => 'default');
+    void check();
+  };
+  const L: Record<PermState, string> = { granted: '✓ Aktif', denied: '✕ Ditolak', prompt: '• Belum diizinkan', unsupported: '— Tidak didukung' };
+  const rows = [['Mikrofon', st.mic], ['Kamera', st.cam], ['Notifikasi', st.notif]] as const;
+  return <section className="comm-card"><h3 className="comm-h">Diagnostik perangkat</h3>
+    <ul className="bc-diag">{rows.map(([n, v]) => <li key={n}><span>{n}</span><b className={`is-${v}`}>{L[v]}</b></li>)}</ul>
+    {rows.some(([, v]) => v === 'denied') && <p className="mt-2 text-[11px] text-muted-foreground">Izin yang ditolak harus diaktifkan lewat Setelan HP → Aplikasi → BIXLINK / Chrome → Izin.</p>}
+    <div className="bc-diag-act"><button type="button" onClick={() => void ask()}>Minta izin</button><button type="button" onClick={() => window.dispatchEvent(new Event('bix-call-sim'))}>📞 Uji panggilan masuk</button></div>
+  </section>;
 }
 
 function RingSetting() {

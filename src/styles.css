@@ -8877,3 +8877,13 @@ html body .bc-swipe small{font-size:12px;font-weight:800;letter-spacing:.12em;co
 html body .bixcall-ctl>.bc-swipe-row{width:min(320px,100%)!important}
 html body .bixcall-ctl>.bc-swipe-hint{width:auto;height:auto;background:none;border:0;border-radius:0;box-shadow:none;display:block}
 html body .bc-swipe-track{bottom:104px}
+
+/* BIX CALL one-tap answer + diagnostics */
+html body .bixcall-ctl .bc-swipe-row{padding-top:0!important;gap:0!important}
+.bc-tap.is-accept i,.bc-tap.is-end i{width:76px;height:76px}
+.bc-tap:active i{transform:scale(.92)}
+.bc-diag{display:grid;gap:6px}.bc-diag li{display:flex;justify-content:space-between;font-size:13px}
+.bc-diag b.is-granted{color:var(--chart-2)}.bc-diag b.is-denied{color:var(--destructive)}.bc-diag b.is-prompt{color:var(--muted-foreground)}
+.bc-diag-act{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.bc-diag-act button{padding:10px;border-radius:12px;font-size:12px;font-weight:700;background:var(--muted);color:var(--foreground);border:1px solid var(--border)}
+.bc-redial{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;color:var(--background);background:var(--chart-2)}

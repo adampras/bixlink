@@ -95,8 +95,9 @@ export function BixCallHost() {
       const peer = await supabase.rpc('bix_call_peer' as never, { p_user: d.peerId } as never);
       setCall({ id: data as unknown as string, peerId: d.peerId, peerName: d.peerName, kind: d.kind, role: 'caller', status: 'ringing', whatsapp: (peer.data as { whatsapp?: string } | null)?.whatsapp ?? null });
     };
-    window.addEventListener('bix-call', on);
-    return () => window.removeEventListener('bix-call', on);
+    const sim = () => { if (!callRef.current) setCall({ id: 'sim', peerId: 'sim', peerName: 'Uji BIX CALL', kind: 'voice', role: 'callee', status: 'ringing', rang: true }); };
+    window.addEventListener('bix-call', on); window.addEventListener('bix-call-sim', sim);
+    return () => { window.removeEventListener('bix-call', on); window.removeEventListener('bix-call-sim', sim); };
   }, []);
 
   // Poll incoming + status of active call
@@ -107,7 +108,7 @@ export function BixCallHost() {
       const cur = callRef.current;
       // Mark incoming chat as reached this device (double tick) whenever the app is open.
       if (n++ % 4 === 0) void supabase.rpc('bix_chat_delivered' as never);
-      if (cur) {
+      if (cur?.id === 'sim') { /* local simulation */ } else if (cur) {
         const { data } = await supabase.from('bix_calls' as never).select('status, rang_at').eq('id', cur.id).maybeSingle();
         const row = data as { status?: string; rang_at?: string | null } | null;
         const st = row?.status; const rang = !!row?.rang_at;
@@ -162,6 +163,7 @@ export function BixCallHost() {
 
   const setStatus = async (s: 'accepted' | 'declined' | 'ended') => {
     const cur = callRef.current; if (!cur) return;
+    if (cur.id === 'sim') { setCall(c => c ? { ...c, status: s === 'accepted' ? 'ended' : s } : c); return; }
     const { data } = await supabase.rpc('bix_call_set' as never, { p_id: cur.id, p_status: s } as never);
     setCall(c => c ? { ...c, status: (data as unknown as string) || s } : c);
   };
@@ -416,7 +418,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   };
   // Auto loudspeaker: video on → speaker; voice call follows the phone (laid flat = speaker, at the ear = earpiece).
   // A manual tap on the speaker button wins for 10 s.
-  const tiltRef = useRef<Tilt>('between');
+  const tiltRef = useRef<Tilt>('between'); void tiltOf;
   const anyVideo = cam || remoteVideo;
   useEffect(() => {
     if (link !== 'on') return;
@@ -426,14 +428,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       void route(next === 'speaker');
     };
     decide();
-    let pending: Tilt | null = null; let since = 0;
-    const onTilt = (e: DeviceOrientationEvent) => {
-      const t = tiltOf(e.beta, e.gamma);
-      if (t !== pending) { pending = t; since = Date.now(); return; }
-      if (t !== tiltRef.current && Date.now() - since > 900) { tiltRef.current = t; decide(); }
-    };
-    window.addEventListener('deviceorientation', onTilt);
-    return () => window.removeEventListener('deviceorientation', onTilt);
+    // Speaker follows video on/off only; tilt switching removed so audio stays stable (manual tap wins).
   }, [link, anyVideo]); // eslint-disable-line react-hooks/exhaustive-deps
   const askTilt = () => {
     const D = (globalThis as { DeviceOrientationEvent?: { requestPermission?: () => Promise<string> } }).DeviceOrientationEvent;
@@ -498,10 +493,10 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Sorry, I am busy right now. I will call you back.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
-        <SwipeKey tone="end" label="TOLAK" icon={<PhoneOff size={28}/>} onDone={onDecline}/>
-        <SwipeKey tone="accept" label="ANGKAT" icon={call.kind === 'video' ? <Video size={28}/> : <Phone size={28}/>} onDone={onAccept}/>
+        <button type="button" className="bc-tap is-end" aria-label="Tolak panggilan" onClick={onDecline}><i><PhoneOff/></i><small>TOLAK</small></button>
+        <button type="button" className="bc-tap is-accept" aria-label="Angkat panggilan" onClick={onAccept}>{call.kind === 'video' ? <i><Video/></i> : <i><Phone/></i>}<small>ANGKAT</small></button>
       </div>}
-      {!live && !done && call.role === 'callee' && <p className="bc-swipe-hint">Geser ke atas untuk angkat atau tolak</p>}
+      {!live && !done && call.role === 'callee' && <p className="bc-swipe-hint">{call.id === 'sim' ? 'Simulasi uji · ketuk Angkat atau Tolak' : 'Ketuk sekali untuk angkat atau tolak'}</p>}
       {!live && !done && call.role === 'caller' && <>
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
         <button type="button" className="bc-tap is-end bc-cancel" aria-label="Batalkan panggilan" onClick={onEnd}><i><PhoneOff/></i><small>BATALKAN</small></button>
