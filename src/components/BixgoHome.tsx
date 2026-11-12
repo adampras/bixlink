@@ -123,7 +123,7 @@ export function BixgoAccount({ name, balance, onBack, onSoon }: { name: string; 
 
 export function BixgoBottomNav({ view, setView, inbox, onScan }: { view: BixgoView; setView: (v: BixgoView) => void; inbox: number; onScan: () => void }) {
   const tabs: [BixgoView, string, typeof Home][] = [['home', 'Home', Home], ['order', 'Scan', ScanLine], ['activity', 'Aktivitas', ClipboardList], ['inbox', 'Inbox', MessageSquare], ['account', 'Account', User]];
-  return <nav className="sticky bottom-0 z-20 grid grid-cols-5 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+  return <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto grid max-w-xl grid-cols-5 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)]">
     {tabs.map(([k, l, I]) => <button key={k} onClick={() => k === 'order' ? onScan() : setView(k)} className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] ${view === k ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
       <I className={`h-5 w-5 ${view === k ? 'fill-primary/20' : ''}`}/>{l}
       {k === 'inbox' && inbox > 0 && <span className="absolute right-[22%] top-1 grid h-4 w-4 place-items-center rounded-full text-[9px] font-bold text-primary-foreground" style={{ background: 'var(--bixgo-alert)' }}>{inbox}</span>}

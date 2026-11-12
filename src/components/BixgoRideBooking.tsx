@@ -74,7 +74,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
   const commission = Math.round(price(cur).final * cfg.commissionPct / 100);
   const split = splitCommission(branch, commission);
 
-  return <div className="relative min-h-[100dvh] pb-40">
+  return <div className="relative min-h-[100dvh] pb-56">
     <div className={`relative overflow-hidden bg-card ${stage === 'pickup' ? 'h-[55dvh]' : stage === 'booked' ? 'h-[52dvh]' : 'h-[36dvh]'} transition-all`}>
       <ClientOnly fallback={<div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Loading map…</div>}>
         <Suspense fallback={<div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Loading map…</div>}>
@@ -109,10 +109,9 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
     {stage === 'choose' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-3 pt-3">
       <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted"/>
       <p className="mb-2 truncate px-1 text-xs text-muted-foreground">{from?.name} → {to?.name} · {km.toFixed(1)} km</p>
-      {OPTS.filter(o => cfg.services[o.svc].enabled).map(o => { const i = OPTS.indexOf(o); const p = price(o); const vk = vehicleKind(o.name); const on = i === sel; return <button key={o.name} onClick={() => setSel(i)} className={`mb-1 flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition ${on ? 'border-primary bg-primary/5' : 'border-transparent'}`}>
-        <span className={`bixgo-veh-tile grid shrink-0 place-items-center rounded-2xl transition-all ${vk === 'black' ? 'is-vip' : ''} ${on ? 'h-16 w-20' : 'h-12 w-16'}`}><BixgoVehicleIcon kind={vk} className={on ? 'w-16' : 'w-12'}/></span>
-        <span className="flex-1"><b className="block text-sm">{o.name}</b><span className="flex items-center gap-1 text-xs text-muted-foreground">±{eta(o)} min • <Users className="h-3 w-3"/>{o.seats}</span>
-          <span className={`mt-1 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] ${on ? 'border-primary/40 bg-primary/15 text-primary' : 'border-border'}`}>{o.svc === 'car' ? `${o.seats} seats` : 'Bike'}{on && <Info className="h-3 w-3"/>}</span></span>
+      {OPTS.filter(o => cfg.services[o.svc].enabled).map(o => { const i = OPTS.indexOf(o); const p = price(o); const vk = vehicleKind(o.name); const on = i === sel; return <button key={o.name} onClick={() => setSel(i)} className={`mb-1 flex w-full items-center gap-3 rounded-xl border px-2.5 py-2 text-left transition ${on ? 'border-primary bg-primary/5' : 'border-transparent'}`}>
+        <span className={`bixgo-veh-tile grid shrink-0 place-items-center rounded-2xl transition-all ${vk === 'black' ? 'is-vip' : ''} h-11 w-14`}><BixgoVehicleIcon kind={vk} className="w-11"/></span>
+        <span className="flex-1"><b className="block text-sm">{o.name}</b><span className="flex items-center gap-1 text-xs text-muted-foreground">±{eta(o)} min • <Users className="h-3 w-3"/>{o.seats}</span></span>
         <span className="text-right"><b className={`block text-sm ${p.final < p.base ? 'text-primary' : ''}`}>{idr(p.final)}</b>{p.final < p.base && <s className="text-[11px] text-muted-foreground">{idr(p.base)}</s>}{o.tag && <span className="block text-[10px] text-primary">{o.tag}</span>}</span>
       </button>; })}
       <div className="mt-2 flex flex-wrap gap-1 text-[10px]">{['Vetted Executive Drivers', 'Real-time GPS Route', 'USDT / BIX Settlement'].map(b => <span key={b} className="rounded-full border border-primary/40 px-2 py-0.5 text-primary">✓ {b}</span>)}</div>
@@ -129,7 +128,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
       <button onClick={onBack} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground">Back to Home</button></>}
     </section>}
 
-    {stage === 'choose' && <footer className="fixed inset-x-0 bottom-0 z-[600] mx-auto max-w-xl border-t border-border bg-background px-3 pb-4 pt-2">
+    {stage === 'choose' && <footer className="fixed inset-x-0 bottom-0 z-[600] mx-auto max-w-xl border-t border-border bg-background px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+18px)]">
       <div className="flex items-center gap-2 border-b border-border pb-2 text-sm">
         <button onClick={() => setPay(p => (p + 1) % PAYS.length)} className="flex flex-1 items-center gap-2 font-bold"><span className="rounded-md bg-foreground px-1.5 text-[10px] text-background">{PAYS[pay]}</span>{PAYS[pay]}{pay === 1 && <span className="text-[10px] text-primary">−{cfg.bixDiscountPct}%</span>}</button>
         <MoreHorizontal className="ml-2 h-5 w-5"/>

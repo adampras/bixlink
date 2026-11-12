@@ -138,7 +138,7 @@ function BixgoPage() {
   const go = (v: BixgoView) => { setView(v); if (v === 'activity') setTab('history'); if (v === 'order') setTab('order'); };
   const memberName = user?.email?.split('@')[0] || 'Member BIXLINK';
 
-  return <div className="bixgo-grab fixed inset-0 z-[60] overflow-y-auto"><div className="mx-auto min-h-full max-w-xl">
+  return <div className="bixgo-grab fixed inset-0 z-[60] overflow-y-auto"><div className="mx-auto min-h-full max-w-xl pb-[calc(env(safe-area-inset-bottom)+72px)]">
     {!cfg.enabled && isAdmin && <p className="border-b border-accent/40 bg-accent/20 px-3 py-2 text-[11px]">Admin 1 preview · Under Reconstruction (only visible to you)</p>}
     {sub === 'travel' && <BixgoTravel cur={cur} usdtIdr={cfg.usdtIdr} onBack={() => setSub(null)}/>}
     {sub === 'jastip' && <BixgoJastip city={city} isAdmin={isAdmin} onBack={() => setSub(null)}/>}
