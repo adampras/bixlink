@@ -20,6 +20,7 @@ import splashArtwork from '@/assets/bixcoin-reactor-splash.jpg.asset.json';
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSplash } from "../components/AppSplash";
 import { AppUpdateNotice } from "../components/AppUpdateNotice";
+import { PullToRefresh } from "../components/PullToRefresh";
 import { InstallPrompt } from "../components/InstallPrompt";
 import { InteractionComfort } from '../components/InteractionComfort';
 import { FoxChat } from "../components/FoxChat";
@@ -163,6 +164,7 @@ function RootComponent() {
         <AppSplash />
         <InstallPrompt />
         <AppUpdateNotice build={appCss} />
+        <PullToRefresh />
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <PageTransition />
         <Outlet />

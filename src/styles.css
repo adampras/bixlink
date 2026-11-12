@@ -8926,3 +8926,6 @@ html[data-color-mode="light"] body nav.glass-dock>a{color:rgb(255 255 255/.8)!im
 .lux-guide li:nth-child(2){animation-delay:.08s}.lux-guide li:nth-child(3){animation-delay:.16s}
 @keyframes bx-guide-in{from{opacity:.001;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.lux-guide li{animation:none}}
+
+/* Pull-to-refresh indicator */
+.ptr-indicator { position: fixed; top: calc(env(safe-area-inset-top) + 8px); left: 50%; z-index: 120; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: var(--card); color: var(--foreground); border: 1px solid color-mix(in oklab, var(--primary) 45%, transparent); box-shadow: 0 8px 24px color-mix(in oklab, var(--background) 60%, transparent); font-size: 12px; font-weight: 600; pointer-events: none; }

@@ -57,7 +57,9 @@ jobs:
           cat > "$F" <<JAVA
           $PKG
           import android.Manifest;
+          import android.os.Build;
           import android.os.Bundle;
+          import android.view.WindowManager;
           import android.webkit.PermissionRequest;
           import android.webkit.WebView;
           import android.widget.Toast;
@@ -79,6 +81,9 @@ jobs:
             }
             @Override public void onCreate(Bundle b) {
               super.onCreate(b);
+              // Incoming BIX CALL: light up the screen and draw the answer/decline card over the lock screen.
+              if (Build.VERSION.SDK_INT >= 27) { setShowWhenLocked(true); setTurnScreenOn(true); }
+              getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
               requestPermissions(new String[]{ Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO }, 7);
               getBridge().getWebView().setWebChromeClient(new BridgeWebChromeClient(getBridge()) {
                 @Override public void onPermissionRequest(final PermissionRequest r) { runOnUiThread(() -> r.grant(r.getResources())); }
