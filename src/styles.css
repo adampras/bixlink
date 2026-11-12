@@ -8929,3 +8929,16 @@ html[data-color-mode="light"] body nav.glass-dock>a{color:rgb(255 255 255/.8)!im
 
 /* Pull-to-refresh indicator */
 .ptr-indicator { position: fixed; top: calc(env(safe-area-inset-top) + 8px); left: 50%; z-index: 120; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: var(--card); color: var(--foreground); border: 1px solid color-mix(in oklab, var(--primary) 45%, transparent); box-shadow: 0 8px 24px color-mix(in oklab, var(--background) 60%, transparent); font-size: 12px; font-weight: 600; pointer-events: none; }
+
+/* BIX CALL colour harmony: obsidian base, gold for identity/numbers, violet for actions */
+.bixcall-page{--bc-gold:#FFD700;--bc-violet:#A855F7;--bc-ink:#f5f3ff;--bc-dim:#a7a1b8;color:var(--bc-ink)}
+.bixcall-page .bc-head{background:linear-gradient(180deg,rgb(4 5 7 / .98),rgb(4 5 7 / .85));border-bottom:1px solid rgb(255 215 0 / .22)}
+.bixcall-page .comm-subhead b{background:linear-gradient(90deg,var(--bc-gold),#fff1a8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bixcall-page .comm-card{background:linear-gradient(160deg,rgb(18 14 28 / .92),rgb(6 5 10 / .95));border:1px solid rgb(255 215 0 / .16)}
+.bixcall-page .comm-h{color:var(--bc-gold);letter-spacing:.08em}
+.bixcall-page .comm-list small,.bixcall-page .text-muted-foreground{color:var(--bc-dim)}
+.bixcall-page .comm-actions button,.bixcall-page .comm-actions a{color:var(--bc-violet);border-color:rgb(168 85 247 / .4)}
+.bixcall-page .comm-badge{background:linear-gradient(135deg,var(--bc-gold),#b8860b);color:#0b0710;font-variant-numeric:tabular-nums}
+.bixcall-page .comm-kebab>button{border:1px solid rgb(255 215 0 / .35);background:rgb(255 215 0 / .06)}
+.bixcall-page .comm-kebab-menu a{color:var(--bc-ink)}
+.bixcall-status,.bixcall-page time{font-variant-numeric:tabular-nums}

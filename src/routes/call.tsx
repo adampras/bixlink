@@ -131,6 +131,7 @@ function CallInner() {
     <div className="bc-head">
       <div className="bc-head__search"><FindMember bar me={me} tier={tier} onChat={open}/></div>
       <ContactQr/>
+      <CommMenu/>
     </div>
     <div className="comm-subhead"><EcoLogo id="call" size={18}/><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
 
@@ -142,6 +143,14 @@ function CallInner() {
     {view === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
     {view === 'setting' && <><ChatThemePicker/><NotifyCard/><PrivacyTab tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
   </main>;
+}
+
+/** Settings shortcut only (themes, ringtone, notifications, privacy) — tab navigation stays in the dock. */
+function CommMenu() {
+  const [o, setO] = useState(false);
+  const go = [['setting', 'Pengaturan · Tema & Dering'], ['newgroup', '+ Grup Baru'], ['community', 'Komunitas']] as const;
+  return <span className="comm-kebab"><button type="button" aria-label="Pengaturan BIX CALL" aria-expanded={o} onClick={() => setO(v => !v)}><MoreVertical size={18}/></button>
+    {o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }
 
 /** Bare 6-digit numbers are BIX-IDs: 123456 → BIX-123456. */

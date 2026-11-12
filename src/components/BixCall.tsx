@@ -51,7 +51,14 @@ export async function enableBixNotifications() {
 }
 
 /** System notification shown when BIXLINK is in the background. */
+const isApk = () => !!(globalThis as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
+/** APK: once the in-app ring screen is visible, clear the native Jawab/Tolak banner so only one menu shows. */
+function clearNativeCallBanner() {
+  if (!isApk() || document.hidden) return;
+  void import('@capacitor/push-notifications').then(m => m.PushNotifications.removeAllDeliveredNotifications()).catch(() => {});
+}
 function sysNotify(title: string, body: string, tag: string, ring: boolean, url = '/call') {
+  if (ring && isApk()) return; // the native banner already handles calls in the APK
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted' || !document.hidden) return;
   const opts = { body, tag, icon: foxLogo, badge: foxLogo, requireInteraction: ring, vibrate: ring ? [400, 200, 400, 200, 400] : [120], data: { url } } as NotificationOptions;
   void navigator.serviceWorker?.getRegistration().then(reg => {
@@ -130,6 +137,7 @@ export function BixCallHost() {
           const p = peer.data as { name?: string; whatsapp?: string } | null;
           setCall({ id: row.id, peerId: row.caller_id, peerName: p?.name ?? 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: p?.whatsapp ?? null, rang: true });
           try { navigator.vibrate?.([300, 200, 300]); } catch { /* unsupported */ }
+          clearNativeCallBanner();
           // Native lock-screen call banner (Jawab/Tolak) opens /call?bixcall=answer|decline&id=…
           const q = new URLSearchParams(window.location.search);
           if (q.get('id') === row.id && (q.get('bixcall') === 'answer' || q.get('bixcall') === 'decline')) {
