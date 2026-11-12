@@ -51,14 +51,21 @@ function CarePage() {
   }, []);
   return (
     <main className="care-live mx-auto min-h-screen max-w-3xl pb-28 text-foreground">
-      <section className="relative overflow-hidden">
-        <img src={heroImg} alt="BIXCARE kendaraan, laundry dan rental" width={1536} height={864} className="care-hero-img h-56 w-full object-cover sm:h-72" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <Link to="/" className="absolute left-3 top-3 rounded-full bg-background/70 p-2"><ArrowLeft className="h-4 w-4" /></Link>
-        <div className="absolute bottom-3 left-4 right-4">
-          <p className="care-beacon mb-1 text-primary"><i />BIXCARE LIVE NETWORK</p>
-          <h1 className="care-title text-3xl font-black tracking-tight">BIX<span className="text-primary">CARE</span></h1>
-          <p className="text-xs text-muted-foreground">Bengkel · Cuci · Laundry · Rental — bayar langsung ke mitra, BIX sebagai bahan bakar platform.</p>
+      <div className="care-slogan sticky top-0 z-20 border-b border-primary/25 bg-background px-4 pb-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] text-center">
+        <p className="text-[9px] font-bold uppercase tracking-[0.32em] text-primary">BIXCARE · Rawat Lebih Pasti</p>
+        <p className="text-[10.5px] font-semibold text-muted-foreground">Harga resmi · Mitra terkurasi · Tanpa getok</p>
+      </div>
+      <section className="relative mx-3 mt-3 overflow-hidden rounded-3xl border border-primary/40 p-1 shadow-lg">
+        <div className="relative overflow-hidden rounded-[1.25rem]">
+          <img src={heroImg} alt="BIXCARE kendaraan, laundry dan rental" width={1536} height={864} className="care-hero-img h-52 w-full object-cover sm:h-72" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+          <Link to="/" aria-label="Kembali" className="absolute left-3 top-3 rounded-full border border-primary/40 bg-background/80 p-2"><ArrowLeft className="h-4 w-4" /></Link>
+          <div className="absolute bottom-3 left-4 right-4">
+            <p className="care-beacon mb-1 text-primary"><i />BIXCARE LIVE NETWORK</p>
+            <h1 className="care-title text-3xl font-black tracking-tight">BIX<span className="text-primary">CARE</span></h1>
+            <div className="my-1.5 h-px w-24 bg-gradient-to-r from-primary to-transparent" />
+            <p className="text-xs text-muted-foreground">Bengkel · Cuci · Laundry · Rental — bayar langsung ke mitra.</p>
+          </div>
         </div>
       </section>
       <CityMarquee/>
@@ -308,27 +315,35 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
   return (
     <>
       {owner1 && <OwnerReview />}
+      <ol className="grid grid-cols-3 gap-2" aria-label="Cara jadi mitra">{([['1', 'Daftar outlet', 'Isi data & simpan'], ['2', 'Tunggu disetujui', 'Lalu tekan BUKA'], ['3', 'Terima order', 'Kerjakan → Selesai']] as const).map(([n, t, d]) => <li key={n} className="rounded-2xl border border-primary/25 bg-card/80 p-2.5"><span className="grid h-6 w-6 place-items-center rounded-full bg-primary text-[11px] font-black text-primary-foreground">{n}</span><b className="mt-1.5 block text-[11.5px] font-extrabold leading-tight">{t}</b><span className="mt-0.5 block text-[10px] leading-tight text-muted-foreground">{d}</span></li>)}</ol>
       {!outlet && gate?.promo_free && <div className="rounded-2xl border border-primary/40 bg-primary/10 p-3 text-xs"><b className="text-primary">Promo Peluncuran:</b> pendaftaran kemitraan gratis tanpa syarat staking. Promo dapat ditutup sewaktu-waktu oleh BIXLINK.</div>}
       <div className={`${card} space-y-1`}>
         <p className="flex items-center gap-2 text-sm font-bold"><Fuel className="h-4 w-4 text-primary" />BIX Gas Tank</p>
         <p className="text-2xl font-black text-primary">{bal === null ? '…' : bal.toLocaleString('en-US', { maximumFractionDigits: 4 })} BIX</p>
-        <p className="text-[11px] text-muted-foreground">Bayar saldo BIX/USDT: dana konsumen ditahan, lalu masuk ke saldo Anda dikurangi biaya platform saat order Selesai. QRIS/transfer/tunai: konsumen bayar langsung ke Anda; saat order ditandai Selesai, biaya platform (AutoCare/Rent 2%, Wash/Laundry 3%) dipotong otomatis dalam BIX dari saldo Anda. Minimal {MIN_GAS_BIX} BIX agar outlet bisa BUKA; di bawah itu outlet tutup otomatis.</p>
+        <ul className="space-y-1 text-[11px] text-muted-foreground">
+          <li>• <b className="text-foreground">Bayar saldo BIX/USDT:</b> uang konsumen ditahan, masuk ke saldo Anda saat order Selesai (sudah dipotong biaya).</li>
+          <li>• <b className="text-foreground">QRIS/transfer/tunai:</b> konsumen bayar langsung ke Anda; biaya platform dipotong dalam BIX.</li>
+          <li>• <b className="text-foreground">Biaya:</b> AutoCare/Rent 2% · Wash/Laundry 3%.</li>
+          <li>• <b className="text-foreground">Minimal {MIN_GAS_BIX} BIX</b> agar outlet bisa BUKA.</li>
+        </ul>
         <Link to="/wallet" className={`${ghost} mt-2 inline-block`}>Isi ulang BIX</Link>
       </div>
       <div className={`${card} space-y-2`}>
         <div className="flex items-center justify-between"><p className="font-bold">{outlet ? 'Outlet saya' : 'Daftarkan usaha Anda'}</p>{outlet && <span className="text-xs font-bold text-primary">{CARE_STATUS[outlet.status]}</span>}</div>
         {outlet?.status === 'rejected' && <p className="text-xs text-destructive">Ditolak: {outlet.review_note} — perbaiki lalu simpan untuk ajukan ulang.</p>}
+        <p className="pt-1 text-xs font-bold text-primary">Profil usaha</p>
         <input className={input} placeholder="Nama outlet" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
         <select className={input} value={form.division} onChange={e => setForm({ ...form, division: e.target.value as Division })}>{DIVS.map(d => <option key={d.id} value={d.id}>{d.name} — {d.tag}</option>)}</select>
         <div className="grid grid-cols-2 gap-2"><input className={input} placeholder="Kota" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} /><input className={input} placeholder="WhatsApp" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
         <input className={input} placeholder="Alamat & patokan" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
         <textarea className={input} placeholder="Deskripsi singkat" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+        <p className="pt-1 text-xs font-bold text-primary">Jam buka – tutup</p>
         <div className="grid grid-cols-2 gap-2"><input type="time" className={input} value={form.open_time} onChange={e => setForm({ ...form, open_time: e.target.value })} /><input type="time" className={input} value={form.close_time} onChange={e => setForm({ ...form, close_time: e.target.value })} /></div>
-        <p className="pt-2 text-xs font-bold">Pembayaran yang diterima</p>
-        <div className="grid grid-cols-3 gap-2"><input className={input} placeholder="Bank (BCA, BRI…)" value={form.bank_name} onChange={e => setForm({ ...form, bank_name: e.target.value })} /><input className={input} placeholder="No. rekening" inputMode="numeric" value={form.bank_account} onChange={e => setForm({ ...form, bank_account: e.target.value.replace(/[^0-9 -]/g, '') })} /><input className={input} placeholder="Atas nama" value={form.bank_holder} onChange={e => setForm({ ...form, bank_holder: e.target.value })} /></div>
+        <p className="pt-2 text-xs font-bold text-primary">Pembayaran yang diterima</p>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3"><input className={input} placeholder="Bank (BCA, BRI…)" value={form.bank_name} onChange={e => setForm({ ...form, bank_name: e.target.value })} /><input className={input} placeholder="No. rekening" inputMode="numeric" value={form.bank_account} onChange={e => setForm({ ...form, bank_account: e.target.value.replace(/[^0-9 -]/g, '') })} /><input className={input} placeholder="Atas nama" value={form.bank_holder} onChange={e => setForm({ ...form, bank_holder: e.target.value })} /></div>
         <div className="flex gap-4 text-xs"><label className="flex items-center gap-1"><input type="checkbox" checked={form.accept_bix} onChange={e => setForm({ ...form, accept_bix: e.target.checked })} />Terima saldo BIX</label><label className="flex items-center gap-1"><input type="checkbox" checked={form.accept_usdt} onChange={e => setForm({ ...form, accept_usdt: e.target.checked })} />Terima saldo USDT</label></div>
         <p className="text-[10px] text-muted-foreground">QRIS diunggah di bawah setelah outlet tersimpan. Tunai selalu tersedia.</p>
-        <button className={btn} onClick={save}>Simpan</button>
+        <button className={`${btn} w-full`} onClick={save}>Simpan data outlet</button>
         {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
       </div>
       {outlet && (
@@ -367,22 +382,30 @@ function ServiceManager({ outlet, uid }: { outlet: Outlet; uid: string }) {
   };
   return (
     <div className={`${card} space-y-2`}>
-      <p className="font-bold">Daftar harga (anti-getok)</p>
+      <div><p className="font-bold">Daftar harga (anti-getok)</p><p className="text-[11px] text-muted-foreground">Harga ini yang dilihat konsumen. Ubah angka lalu ketuk di luar kolom untuk menyimpan.</p></div>
+      {list.length === 0 && <p className="rounded-xl border border-dashed border-border p-3 text-center text-xs text-muted-foreground">Belum ada layanan. Tambahkan di bawah.</p>}
       {list.map(s => (
-        <div key={s.id} className="flex items-center gap-2 text-sm">
-          <span className="flex-1">{s.name} <span className="text-xs text-muted-foreground">/ {s.unit}</span></span>
-          <input type="number" defaultValue={s.price_idr} className={`${input} w-28`} onBlur={e => void supabase.from('bixcare_services').update({ price_idr: Number(e.target.value) }).eq('id', s.id)} />
-          <button className={ghost} onClick={() => void supabase.from('bixcare_services').update({ available: !s.available }).eq('id', s.id).then(load)}>{s.available ? 'Aktif' : 'Off'}</button>
-          <button className={ghost} onClick={() => void supabase.from('bixcare_services').delete().eq('id', s.id).then(load)}><Trash2 className="h-3 w-3" /></button>
+        <div key={s.id} className={`rounded-xl border p-3 ${s.available ? 'border-primary/30' : 'border-border opacity-60'}`}>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0"><p className="truncate text-sm font-bold">{s.name}</p><p className="text-[10px] text-muted-foreground">per {s.unit} · ±{s.duration_min} menit</p></div>
+            <button className={ghost} aria-label="Hapus layanan" onClick={() => void supabase.from('bixcare_services').delete().eq('id', s.id).then(load)}><Trash2 className="h-3.5 w-3.5" /></button>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <div className="flex flex-1 items-center rounded-xl border border-border bg-background/60 px-3"><span className="text-xs font-bold text-muted-foreground">Rp</span><input type="number" inputMode="numeric" aria-label="Harga" defaultValue={s.price_idr} className="w-full min-w-0 bg-transparent px-2 py-2 text-sm font-bold outline-none" onBlur={e => void supabase.from('bixcare_services').update({ price_idr: Number(e.target.value) }).eq('id', s.id)} /></div>
+            <button className={`${s.available ? btn : ghost} shrink-0`} onClick={() => void supabase.from('bixcare_services').update({ available: !s.available }).eq('id', s.id).then(load)}>{s.available ? 'Aktif' : 'Nonaktif'}</button>
+          </div>
         </div>
       ))}
-      <div className="grid grid-cols-2 gap-2">
-        <input className={input} placeholder="Nama jasa (mis. Ganti oli)" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} />
-        <input className={input} placeholder="Satuan (kg/unit/hari)" value={f.unit} onChange={e => setF({ ...f, unit: e.target.value })} />
-        <input type="number" className={input} placeholder="Harga Rp" value={f.price_idr} onChange={e => setF({ ...f, price_idr: e.target.value })} />
-        <input type="number" className={input} placeholder="Durasi menit" value={f.duration_min} onChange={e => setF({ ...f, duration_min: e.target.value })} />
+      <div className="space-y-2 rounded-xl border border-primary/25 bg-primary/5 p-3">
+        <p className="text-xs font-bold text-primary">+ Tambah layanan baru</p>
+        <label className="block text-[11px]">Nama jasa<input className={`${input} mt-1`} placeholder="mis. Ganti oli" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} /></label>
+        <div className="grid grid-cols-2 gap-2">
+          <label className="block text-[11px]">Satuan<input className={`${input} mt-1`} placeholder="kg / unit / hari" value={f.unit} onChange={e => setF({ ...f, unit: e.target.value })} /></label>
+          <label className="block text-[11px]">Durasi (menit)<input type="number" className={`${input} mt-1`} value={f.duration_min} onChange={e => setF({ ...f, duration_min: e.target.value })} /></label>
+        </div>
+        <label className="block text-[11px]">Harga (Rp)<input type="number" inputMode="numeric" className={`${input} mt-1`} placeholder="50000" value={f.price_idr} onChange={e => setF({ ...f, price_idr: e.target.value })} /></label>
       </div>
-      <button className={btn} onClick={add}>Tambah layanan</button>
+      <button className={`${btn} w-full`} onClick={add}>Tambah layanan</button>
     </div>
   );
 }
@@ -413,6 +436,7 @@ function IncomingOrders({ outlet, onChange }: { outlet: Outlet; onChange: () => 
   return (
     <div className={`${card} space-y-3`}>
       <p className="font-bold">Order masuk ({active.length})</p>
+      {active.length === 0 && <p className="text-xs text-muted-foreground">Belum ada order aktif. Pastikan outlet BUKA.</p>}
       {msg && <p className="text-xs text-primary">{msg}</p>}
       {active.map(o => (
         <div key={o.id} className="rounded-xl border border-border/60 p-3">
