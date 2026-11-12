@@ -50,6 +50,28 @@ jobs:
           grep -q "android.hardware.camera" $M || sed -i "s#</manifest>#    <uses-feature android:name=\"android.hardware.camera\" android:required=\"false\" />\n</manifest>#" $M
           sed -i 's#<activity #<activity android:showWhenLocked="true" android:turnScreenOn="true" #' $M
       - run: bunx cap sync android
+      - name: Camera & microphone for QR scanner and BIX CALL
+        run: |
+          F=$(find android/app/src/main/java -name MainActivity.java | head -1)
+          PKG=$(head -1 "$F")
+          cat > "$F" <<JAVA
+          $PKG
+          import android.Manifest;
+          import android.os.Bundle;
+          import android.webkit.PermissionRequest;
+          import com.getcapacitor.BridgeActivity;
+          import com.getcapacitor.BridgeWebChromeClient;
+          public class MainActivity extends BridgeActivity {
+            @Override public void onCreate(Bundle b) {
+              super.onCreate(b);
+              requestPermissions(new String[]{ Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO }, 7);
+              getBridge().getWebView().setWebChromeClient(new BridgeWebChromeClient(getBridge()) {
+                @Override public void onPermissionRequest(final PermissionRequest r) { runOnUiThread(() -> r.grant(r.getResources())); }
+              });
+            }
+          }
+          JAVA
+          sed -i 's/^          //' "$F"; cat "$F"
       - name: Release keystore (from secrets, or create BIXLINK key once)
         env:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}

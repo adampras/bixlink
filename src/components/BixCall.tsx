@@ -497,8 +497,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Sorry, I am busy right now. I will call you back.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Decline with message</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
-        <SwipeKey tone="end" label="Reject" onDone={onDecline} icon={<PhoneOff/>}/>
-        <SwipeKey tone="accept" label="Accept" onDone={onAccept} icon={call.kind === 'video' ? <Video/> : <Phone/>}/>
+        <button type="button" className="bc-tap is-end" onClick={onDecline} aria-label="Tolak panggilan"><i><PhoneOff/></i><small>TOLAK</small></button>
+        <button type="button" className="bc-tap is-accept" onClick={onAccept} aria-label="Angkat panggilan"><i>{call.kind === 'video' ? <Video/> : <Phone/>}</i><small>ANGKAT</small></button>
       </div>}
       {!live && !done && call.role === 'caller' && <>
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
@@ -531,7 +531,8 @@ export function CallButtons({ peerId, peerName, className = '' }: { peerId: stri
 }
 
 /** Swipe-up key: drag the knob upward past the threshold to fire; tap-and-hold safe in pockets. Enter/Space also fires for accessibility. */
-function SwipeKey({ tone, label, icon, onDone }: { tone: 'accept' | 'end'; label: string; icon: React.ReactNode; onDone: () => void }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function SwipeKey({ tone, label, icon, onDone }: { tone: 'accept' | 'end'; label: string; icon: React.ReactNode; onDone: () => void }) {
   const [dy, setDy] = useState(0);
   const [drag, setDrag] = useState(false);
   const fired = useRef(false);
