@@ -237,19 +237,24 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const base = loudRef.current ? 1 : 0.6;
     audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? base * 0.4 : base; });
   };
+  const syncAudioPlayback = () => {
+    const tracks = Array.from(audioBox.current?.querySelectorAll('audio') ?? []);
+    const blockedTrack = tracks.some(a => a.paused || a.error !== null);
+    setAudioBlocked(blockedTrack || roomRef.current?.canPlaybackAudio === false);
+  };
   const attachAudio = (t: RemoteTrack) => {
     const box = audioBox.current; if (!box) return;
     box.querySelectorAll(`audio[data-sid="${t.sid}"]`).forEach(a => a.remove());
     const el = t.attach() as HTMLAudioElement; el.dataset['sid'] = t.sid ?? ''; el.autoplay = true; el.setAttribute('playsinline', '');
     box.appendChild(el); applyVolume();
-    void el.play().then(() => setAudioBlocked(false)).catch(() => setAudioBlocked(true));
+    void el.play().then(syncAudioPlayback).catch(() => setAudioBlocked(true));
   };
   const unlockAudio = () => {
     void unlockCallAudio();
     const room = roomRef.current;
     const plays = Array.from(audioBox.current?.querySelectorAll('audio') ?? []).map(a => a.play());
     if (room) plays.push(room.startAudio());
-    if (plays.length) void Promise.all(plays).then(() => setAudioBlocked(false)).catch(() => setAudioBlocked(true));
+    if (plays.length) void Promise.allSettled(plays).then(syncAudioPlayback);
   };
   // One-way-audio watchdog: every 2 s make sure each remote voice track has a playing element.
   useEffect(() => {
@@ -257,9 +262,9 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const heal = () => {
       const r = roomRef.current, box = audioBox.current; if (!r || !box) return;
       r.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => {
-        const tr = pub.track as RemoteTrack | undefined; if (!tr || tr.kind !== LK!.Track.Kind.Audio) return;
+        const tr = pub.track as RemoteTrack | undefined; if (!tr || !LK || tr.kind !== LK.Track.Kind.Audio) return;
         const el = box.querySelector(`audio[data-sid="${tr.sid}"]`) as HTMLAudioElement | null;
-        if (!el || !el.srcObject) attachAudio(tr); else if (el.paused) void el.play().catch(() => setAudioBlocked(true));
+        if (!el || !el.srcObject) attachAudio(tr); else if (el.paused) void el.play().then(syncAudioPlayback).catch(() => setAudioBlocked(true));
       }));
     };
     const vis = () => { if (!document.hidden) { void roomRef.current?.startAudio().catch(() => {}); heal(); } };
@@ -327,7 +332,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
           if (t.kind === LK!.Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); setRemoteVideo(true); }
           if (t.kind === LK!.Track.Kind.Audio) attachAudio(t);
         });
-        room.on(LK!.RoomEvent.AudioPlaybackStatusChanged, () => setAudioBlocked(!room?.canPlaybackAudio));
+        room.on(LK.RoomEvent.AudioPlaybackStatusChanged, syncAudioPlayback);
         // Remote camera on/off mid-call (voice → video upgrade without redialing).
         room.on(LK!.RoomEvent.TrackMuted, (pub, p) => { if (!p.isLocal && pub.kind === LK!.Track.Kind.Video) setRemoteVideo(false); });
         room.on(LK!.RoomEvent.TrackUnmuted, (pub, p) => { if (!p.isLocal && pub.kind === LK!.Track.Kind.Video) setRemoteVideo(true); });

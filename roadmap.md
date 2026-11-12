@@ -177,3 +177,5 @@
 - [x] RM 50-04 large watch modal (local + Jakarta time) and header badges
 - [x] Add optional Capacitor push/GPS capability adapters, authenticated device registration, BIX CALL notification settings, browser-safe GPS fallback and native handoff documentation.
 - [ ] Activate FCM delivery and verify locked-screen calls/background GPS — blocked by declined Firebase connection and external Android host/services plus physical-device tests.
+- [x] Complete BIX CALL audio recovery checks: six regression tests pass; authenticated incoming-call simulation produces ringtone oscillators, stops after decline, and shows centered controls at 360px without runtime errors. Remote playback recovery checks all tracks before hiding retry controls.
+- [ ] Verify actual two-phone/APK call audio — requires physical devices and an authorized second member; browser simulation does not verify remote speech.

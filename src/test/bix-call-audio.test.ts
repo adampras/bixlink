@@ -41,11 +41,25 @@ describe('BIX CALL audio', () => {
     expect(resume).toHaveBeenCalledTimes(2);
   });
   it('does not play a deferred ringtone after a call has stopped', async () => {
-    resume.mockImplementation(() => new Promise<void>(() => {}));
+    const pending: (() => void)[] = [];
+    resume.mockImplementation(() => new Promise<void>(resolve => { pending.push(() => { state = 'running'; resolve(); }); }));
     const { startRingback } = await import('../lib/bix-tones');
     const end = startRingback(); end();
+    pending.forEach(finish => finish());
     await vi.advanceTimersByTimeAsync(4000);
     expect(createOscillator).not.toHaveBeenCalled();
+  });
+  it('retries a blocked ringback on a later gesture and stops it when cancelled', async () => {
+    resume.mockRejectedValueOnce(new Error('NotAllowedError'));
+    const { installCallAudioUnlock, startRingback } = await import('../lib/bix-tones');
+    const cleanup = installCallAudioUnlock();
+    const end = startRingback(); await vi.advanceTimersByTimeAsync(0);
+    expect(createOscillator).not.toHaveBeenCalled();
+    window.dispatchEvent(new Event('pointerdown')); await vi.advanceTimersByTimeAsync(4000);
+    expect(createOscillator).toHaveBeenCalledTimes(1);
+    end(); await vi.advanceTimersByTimeAsync(8000);
+    expect(createOscillator).toHaveBeenCalledTimes(1);
+    cleanup();
   });
   it('stops already scheduled ringtone notes immediately', async () => {
     const { startRingtone } = await import('../lib/bix-tones');
