@@ -35,7 +35,7 @@ export function QrScanner({ onResult, onClose, title = 'Scan BIX PAY QR', hint =
       if (stopped) return;
       const s = new Html5Qrcode('bix-scanner'); lib.current = s;
       s.start({ facingMode: facing }, { fps: 12, qrbox: (w: number, h: number) => { const m = Math.floor(Math.min(w, h) * 0.7); return { width: m, height: m }; } }, t => { if (!paused) hit(t); }, () => {})
-        .then(() => { if (stopped) safeStop(s); }).catch(fail);
+        .then(() => { box.current?.querySelectorAll('video').forEach(el => { el.poster = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; }); if (stopped) safeStop(s); }).catch(fail);
     }).catch(fail);
     (async () => {
       if (!BD || !navigator.mediaDevices?.getUserMedia) { void startLib(); return; }
@@ -46,7 +46,7 @@ export function QrScanner({ onResult, onClose, title = 'Scan BIX PAY QR', hint =
         stream.current = st;
         const track = st.getVideoTracks()[0];
         setCanTorch(!!(track?.getCapabilities?.() as any)?.torch);
-        const v = document.createElement('video'); v.className = 'qr-native'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.srcObject = st;
+        const v = document.createElement('video'); v.className = 'qr-native'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.poster = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; v.srcObject = st;
         box.current?.replaceChildren(v); await v.play();
         const det = new BD({ formats: ['qr_code'] });
         const tick = async () => {
