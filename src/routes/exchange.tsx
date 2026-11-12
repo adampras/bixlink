@@ -6,6 +6,12 @@ import { ExchangeTerminal } from '@/components/ExchangeTerminal';
 import { KycCard } from '@/components/KycCard';
 import { AdminKycReview } from '@/components/AdminKycReview';
 import { useMember, usePublicConfig } from '@/lib/useMember';
+import heroImg from '@/assets/exchange/hero-3d.jpg';
+import cMarket from '@/assets/exchange/cat-market.jpg';
+import cKyc from '@/assets/exchange/cat-kyc.jpg';
+import cP2p from '@/assets/exchange/cat-p2p.jpg';
+import cVip from '@/assets/exchange/cat-vip.jpg';
+import cProfile from '@/assets/exchange/cat-profile.jpg';
 import { useBinanceDepth, useBinanceTickers } from '@/components/exchange/useBinanceLive';
 
 export const Route = createFileRoute('/exchange')({
@@ -60,9 +66,9 @@ function ExchangePage() {
       <Link to="/sovereign-wallet" aria-label="Wallet" className="ex-icon-btn"><Wallet size={17}/></Link>
       <Link to="/settings" hash="identity" className={`ex-chip ${verified ? 'is-ok' : ''}`}><ShieldCheck size={13}/>{verified ? 'Verified' : user ? 'Verifikasi' : 'Masuk'}</Link>
     </header>
-    <main className="ex-stage mx-auto max-w-7xl space-y-3 px-3 pb-10 pt-3 md:px-6">
+    <main className="ex-stage mx-auto max-w-7xl space-y-3 px-3 pb-28 pt-3 md:px-6">
     <section className="ex-hero ex-hero-x relative overflow-hidden rounded-2xl p-4 md:p-6">
-      <i className="ex-grid" aria-hidden/><i className="ex-orb" aria-hidden/>
+      <img src={heroImg} alt="" width={1024} height={640} className="ex-hero-img" aria-hidden/><i className="ex-grid" aria-hidden/><i className="ex-orb" aria-hidden/>
       <p className="relative text-[9px] font-black tracking-[0.3em] text-chart-3">THE SOVEREIGN LIQUIDITY ENGINE</p>
       <h1 className="relative mt-1 font-display text-xl font-black leading-tight md:text-3xl">Satu kokpit. <span className="ex-shine">Pasar dunia & BIX</span> live.</h1>
       <div className="relative mt-3 grid grid-cols-3 gap-1.5 text-center">{[['1', 'Pantau tren'], ['2', 'Pilih pasar'], ['3', 'Trade via wallet']].map(([n, l]) =>
@@ -73,11 +79,11 @@ function ExchangePage() {
       </div>
     </section>
     <div className="ex-promos flex snap-x gap-2 overflow-x-auto pb-1">
-      <Link to="/trade" className="ex-promo ex-anim is-gold snap-start"><i className="ex-fx ex-fx-orb" aria-hidden/><Repeat size={18}/><b>Pasar BIX</b><span>Acuan tetap $0.50 / BIX</span></Link>
-      <Link to="/settings" hash="identity" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-sheen" aria-hidden/><Gift size={18}/><b>Bonus 20 BIX</b><span>Verifikasi identitas → reward terkunci</span></Link>
-      <Link to="/p2p" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-flow" aria-hidden/><Landmark size={18}/><b>P2P Bank & QRIS</b><span>Beli/jual BIX antar member</span></Link>
-      <Link to="/stake" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-sheen" aria-hidden/><Crown size={18}/><b>VIP Staker</b><span>Staker aktif dapat prioritas fitur</span></Link>
-      <Link to="/profile" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-scan" aria-hidden/><UserRound size={18}/><b>Profil saya</b><span>{idDone ? 'Data diri lengkap ✓' : 'Data diri belum lengkap'}</span></Link>
+      <Link to="/trade" className="ex-promo ex-anim is-gold snap-start"><i className="ex-fx ex-fx-orb" aria-hidden/><img src={cMarket} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>Pasar BIX</b><span>Acuan tetap $0.50 / BIX</span></Link>
+      <Link to="/settings" hash="identity" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-sheen" aria-hidden/><img src={cKyc} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>Bonus 20 BIX</b><span>Verifikasi identitas → reward terkunci</span></Link>
+      <Link to="/p2p" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-flow" aria-hidden/><img src={cP2p} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>P2P Bank & QRIS</b><span>Beli/jual BIX antar member</span></Link>
+      <Link to="/stake" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-sheen" aria-hidden/><img src={cVip} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>VIP Staker</b><span>Staker aktif dapat prioritas fitur</span></Link>
+      <Link to="/profile" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-scan" aria-hidden/><img src={cProfile} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>Profil saya</b><span>{idDone ? 'Data diri lengkap ✓' : 'Data diri belum lengkap'}</span></Link>
     </div>
     <div className="ex-ticker flex gap-2 overflow-x-auto rounded-xl p-2">
       {PAIRS.map(p => { const k = p.sym ? ticks[p.sym] : undefined; const price = p.sym ? k?.c : ref; const ch = k?.P ?? 0;
