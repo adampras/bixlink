@@ -13,6 +13,6 @@ describe('native foundations', () => {
     expect(validGps(0, NaN)).toBe(false);
   });
   it('expires a call push after the 75 second ringing window', () => {
-    expect(callFcmData('call-id', 'voice', '2026-11-10T07:34:00Z').expiresAt).toBe(String(Date.parse('2026-11-10T07:34:40Z')));
+    expect(callFcmData('call-id', 'voice', '2026-11-10T07:34:00Z').expiresAt).toBe(String(Date.parse('2026-11-10T07:35:15Z')));
   });
 });
