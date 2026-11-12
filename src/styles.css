@@ -8899,3 +8899,10 @@ html body .bixcall-ctl>.bc-ctl4.bc-grid6{justify-items:center;margin:0 auto}
   nav.glass-dock > a:not(.dock-wallet) { transform: none !important; }
   .sticky-top-bar { position: sticky !important; top: 0 !important; z-index: 50 !important; padding-top: env(safe-area-inset-top, 0px); background: hsl(var(--card)) !important; transform: none !important; }
 }
+
+/* Obsidian anchored chrome: header flush to the very top, header + dock true-black solid */
+@media (max-width: 1279px) {
+  html body .sticky-top-bar { position: sticky !important; top: 0 !important; margin-top: 0 !important; padding-top: env(safe-area-inset-top, 0px) !important; background: #040507 !important; border-bottom: 1px solid rgb(255 215 0 / .16) !important; }
+  html body .sticky-top-bar .site-header { position: relative !important; top: 0 !important; margin: 0 !important; background: #040507 !important; backdrop-filter: none !important; border-bottom: 0 !important; }
+  html body nav.glass-dock { background: #040507 !important; border-top: 1px solid rgb(255 215 0 / .18) !important; }
+}
