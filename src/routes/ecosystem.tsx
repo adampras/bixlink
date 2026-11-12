@@ -1,3 +1,4 @@
+import { EcoMarketingPlan } from '@/components/EcoMarketingPlan';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { ecosystemDescription, ecosystemHead, ecosystemSchema } from '@/lib/ecosystem-seo';
@@ -39,5 +40,5 @@ function EcosystemOverview() {
       <p>BIXLINK juga memiliki fitur staking internal yang terpisah dari kegunaan komunikasi dan mobilitas. Model finansial bersifat prelaunch/non-custodial; proyeksi bukan jaminan keuntungan. Ketersediaan layanan dan ketentuan dapat berubah sesuai pengaturan resmi.</p>
       <nav className="flex flex-wrap gap-5"><Link to="/about">Tentang & dukungan</Link><Link to="/terms">Ketentuan</Link><Link to="/privacy">Privasi</Link><Link to="/risk">Risiko</Link></nav>
     </footer>
-  </main>;
+  <EcoMarketingPlan/></main>;
 }

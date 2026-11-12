@@ -8906,3 +8906,17 @@ html body .bixcall-ctl>.bc-ctl4.bc-grid6{justify-items:center;margin:0 auto}
   html body .sticky-top-bar .site-header { position: relative !important; top: 0 !important; margin: 0 !important; background: #040507 !important; backdrop-filter: none !important; border-bottom: 0 !important; }
   html body nav.glass-dock { background: #040507 !important; border-top: 1px solid rgb(255 215 0 / .18) !important; }
 }
+
+/* National city ribbon under the header */
+.city-mq{overflow:hidden;background:#040507;border-top:1px solid rgb(255 215 0/.12);height:24px;display:flex;align-items:center}
+.city-mq-track{display:flex;gap:22px;white-space:nowrap;width:max-content;animation:city-mq 60s linear infinite;font-size:10.5px}
+.city-mq-item b{color:#FFD700;letter-spacing:.06em;margin-right:5px}
+.city-mq-item em{font-style:normal;color:rgb(255 255 255/.7)}
+.city-mq-lead{color:#A855F7;font-weight:800;letter-spacing:.1em}
+@keyframes city-mq{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.city-mq-track{animation:none}}
+
+/* Bottom dock: same true-black solid as the header on every screen */
+html body nav.glass-dock.glass-dock,html[data-color-mode="light"] body nav.glass-dock.glass-dock,html[data-chrono="on"] body nav.glass-dock.glass-dock{background:#040507!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html body nav.glass-dock::after{background:#040507!important}
+html[data-color-mode="light"] body nav.glass-dock>a{color:rgb(255 255 255/.8)!important}
