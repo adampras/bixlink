@@ -5,13 +5,14 @@ import type { Room, RemoteTrack } from 'livekit-client';
 /** livekit-client loads only when a call connects, keeping it out of every page's startup bundle. */
 let LK: typeof import('livekit-client') | null = null;
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { syncBixCallTheme } from '@/lib/bix-call-theme';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
 import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
 import foxLogo from '@/assets/bixlink-logo-gold.webp';
 import { ensureBixPush, pushNotify } from '@/lib/bix-push';
-import { startChosenRingtone, startRingback, playConnected, playEnded } from '@/lib/bix-tones';
+import { startChosenRingtone, startRingback, playConnected, playEnded, installCallAudioUnlock, unlockCallAudio, isCallAudioReady, CALL_AUDIO_EVENT } from '@/lib/bix-tones';
 import { useBixCard, useSignedUrl } from '@/components/BixAvatar';
 import { INCOMING_VIBE, VIBE_EVERY_MS, pickRoute, tiltOf, type Route, type Tilt } from '@/lib/bix-call-route';
 
@@ -34,6 +35,7 @@ export function callerPhase(c: { rang?: boolean; offline?: boolean }): 'calling'
 
 /** Start a call from anywhere: dispatches to the global BixCallHost. */
 export function startBixCall(peerId: string, peerName: string, kind: Kind) {
+  void unlockCallAudio();
   window.dispatchEvent(new CustomEvent('bix-call', { detail: { peerId, peerName, kind } }));
 }
 
@@ -60,6 +62,7 @@ function sysNotify(title: string, body: string, tag: string, ring: boolean, url 
 
 /** Global host: watches incoming calls and renders the luxury BIXLINK BIXTOK call screen. */
 export function BixCallHost() {
+  useEffect(() => installCallAudioUnlock(), []);
   useEffect(() => { syncBixCallTheme(); }, []);
   const [me, setMe] = useState<string | null>(null);
   const [call, setCall] = useState<Active | null>(null);
@@ -220,6 +223,13 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const [loud, setLoud] = useState(false);
   const loudRef = useRef(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
+  const [tonesBlocked, setTonesBlocked] = useState(false);
+  useEffect(() => {
+    setTonesBlocked(!isCallAudioReady());
+    const changed = (e: Event) => setTonesBlocked(!(e as CustomEvent<boolean>).detail);
+    window.addEventListener(CALL_AUDIO_EVENT, changed);
+    return () => window.removeEventListener(CALL_AUDIO_EVENT, changed);
+  }, []);
   /** Remote volume: earpiece mode is softer; loudspeaker is full; lowered while a howl is detected. */
   const applyVolume = () => {
     // Full volume in every mode (video calls run on the loudspeaker and need the most headroom).
@@ -235,9 +245,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     void el.play().then(() => setAudioBlocked(false)).catch(() => setAudioBlocked(true));
   };
   const unlockAudio = () => {
-    void roomRef.current?.startAudio().catch(() => {});
-    audioBox.current?.querySelectorAll('audio').forEach(a => void a.play().catch(() => {}));
-    setAudioBlocked(false);
+    void unlockCallAudio();
+    const room = roomRef.current;
+    const plays = Array.from(audioBox.current?.querySelectorAll('audio') ?? []).map(a => a.play());
+    if (room) plays.push(room.startAudio());
+    if (plays.length) void Promise.all(plays).then(() => setAudioBlocked(false)).catch(() => setAudioBlocked(true));
   };
   // One-way-audio watchdog: every 2 s make sure each remote voice track has a playing element.
   useEffect(() => {
@@ -468,7 +480,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     <video ref={backV} className={`bixcall-back${showVideo && !fill ? " on" : ""}`} autoPlay playsInline muted aria-hidden="true"/>
     <video ref={remoteV} className={sw ? 'bixcall-pip is-peer' : `bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} style={sw ? { transform: `translate(${pip.x}px, ${pip.y}px)` } : undefined} onPointerDown={sw ? dragPip : undefined} autoPlay playsInline onClick={() => { if (showVideo && !sw) setHideUi(v => !v); }} onDoubleClick={() => { if (!sw) setFill(v => !v); }}/>
     <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>
-    {audioBlocked && live && <button type="button" className="bc-pill is-chat" style={{ position: 'absolute', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 5 }} onClick={unlockAudio}><Volume2 size={16}/> Tap for sound</button>}
+    {audioBlocked && live && <Button type="button" variant="wallet" size="wallet" className="bc-pill is-chat absolute top-18 left-1/2 -translate-x-1/2 z-10 max-w-[calc(100%-32px)] whitespace-normal" onClick={unlockAudio}><Volume2 size={16}/> Ketuk untuk aktifkan suara</Button>}
     {live && link === 'on' && remoteVideo && !cam && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
@@ -490,11 +502,12 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     {howl && live && <div className="bc-howl" role="status">Echo is automatically reduced</div>}
     {cam && live && <video ref={localV} className={sw ? 'bixcall-remote on bixcall-self-big' : isSplit ? 'bixcall-split-self' : 'bixcall-pip bc-self-glow'} style={sw || isSplit ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})`, transition: 'transform .16s ease-out' }} onPointerDown={sw || isSplit ? undefined : dragPip} onClick={() => { if (sw) setHideUi(v => !v); }} autoPlay playsInline muted/>}
     <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}`}>
+      {toneOn && tonesBlocked && <Button type="button" variant="wallet" size="wallet" className="bc-pill is-chat whitespace-normal" onClick={() => void unlockCallAudio()}><Volume2 size={16}/> Aktifkan suara {call.role === 'callee' ? 'dering' : 'panggilan'}</Button>}
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Sorry, I am busy right now. I will call you back.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
         <button type="button" className="bc-tap is-end" aria-label="Tolak panggilan" onClick={onDecline}><i><PhoneOff/></i><small>TOLAK</small></button>
-        <button type="button" className="bc-tap is-accept" aria-label="Angkat panggilan" onClick={onAccept}>{call.kind === 'video' ? <i><Video/></i> : <i><Phone/></i>}<small>ANGKAT</small></button>
+        <button type="button" className="bc-tap is-accept" aria-label="Angkat panggilan" onClick={() => { unlockAudio(); onAccept(); }}>{call.kind === 'video' ? <i><Video/></i> : <i><Phone/></i>}<small>ANGKAT</small></button>
       </div>}
       {!live && !done && call.role === 'callee' && <p className="bc-swipe-hint">{call.id === 'sim' ? 'Simulasi uji · ketuk Angkat atau Tolak' : 'Ketuk sekali untuk angkat atau tolak'}</p>}
       {!live && !done && call.role === 'caller' && <>

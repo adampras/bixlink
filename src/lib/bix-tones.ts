@@ -1,23 +1,53 @@
 /** BIX CALL tones synthesized with Web Audio (no audio files, tiny and offline). */
 let ctx: AudioContext | null = null;
+export const CALL_AUDIO_EVENT = 'bix-call-audio-state';
+let retryDeviceAudio: (() => void) | null = null;
+const activeOscillators = new Set<OscillatorNode>();
+let toneGeneration = 0;
+const reportAudioState = (ready: boolean) => window.dispatchEvent(new CustomEvent(CALL_AUDIO_EVENT, { detail: ready }));
 const ac = () => {
   if (typeof window === 'undefined') return null;
-  try { ctx ??= new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)(); } catch { return null; }
-  if (ctx.state === 'suspended') void ctx.resume().catch(() => {});
+  try {
+    if (!ctx || ctx.state === 'closed') {
+      ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      ctx.onstatechange = () => reportAudioState(ctx?.state === 'running');
+    }
+  } catch { return null; }
   return ctx;
 };
+/** Call synchronously from a real tap, before any network request. Retry on later gestures if blocked. */
+export function unlockCallAudio(retryDevice = true): Promise<boolean> {
+  const c = ac();
+  if (retryDevice) retryDeviceAudio?.();
+  if (!c) return Promise.resolve(false);
+  const ready = () => { const ok = c.state === 'running'; reportAudioState(ok); return ok; };
+  if (c.state === 'running') return Promise.resolve(ready());
+  return c.resume().then(ready).catch(() => { reportAudioState(false); return false; });
+}
+export const isCallAudioReady = () => ctx?.state === 'running';
+export function installCallAudioUnlock() {
+  const unlock = () => { void unlockCallAudio(); };
+  window.addEventListener('pointerdown', unlock, { capture: true, passive: true });
+  window.addEventListener('keydown', unlock, { capture: true });
+  return () => { window.removeEventListener('pointerdown', unlock, true); window.removeEventListener('keydown', unlock, true); };
+}
 const KEY = 'bixcall-ring-vol';
-export const getRingVolume = () => { try { const v = Number(localStorage.getItem(KEY)); return Number.isFinite(v) && localStorage.getItem(KEY) !== null ? v : 0.7; } catch { return 0.7; } };
-export const setRingVolume = (v: number) => { try { localStorage.setItem(KEY, String(v)); } catch { /* ignore */ } };
+export const getRingVolume = () => { try { const v = Number(localStorage.getItem(KEY)); return Number.isFinite(v) && localStorage.getItem(KEY) !== null ? Math.max(0, Math.min(1, v)) : 0.7; } catch { return 0.7; } };
+export const setRingVolume = (v: number) => { try { localStorage.setItem(KEY, String(Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : 0.7)); } catch { /* ignore */ } };
 
 function tone(freqs: number[], start: number, dur: number, gain: number, type: OscillatorType = 'sine') {
   const c = ac(); if (!c || gain <= 0) return;
+  const generation = toneGeneration;
+  void unlockCallAudio(false).then(ready => {
+  if (!ready || generation !== toneGeneration) return;
   const g = c.createGain(); g.connect(c.destination);
   const t = c.currentTime + start;
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(gain, t + 0.015);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  for (const f of freqs) { const o = c.createOscillator(); o.type = type; o.frequency.value = f; o.connect(g); o.start(t); o.stop(t + dur + 0.05); }
+  let remaining = freqs.length;
+  for (const f of freqs) { const o = c.createOscillator(); o.type = type; o.frequency.value = f; o.connect(g); activeOscillators.add(o); o.onended = () => { activeOscillators.delete(o); o.disconnect(); if (--remaining === 0) g.disconnect(); }; o.start(t); o.stop(t + dur + 0.05); }
+  });
 }
 
 /** Repeats a pattern until the returned stop() is called. */
@@ -25,23 +55,21 @@ let activeStop: (() => void) | null = null;
 function loop(pattern: () => void, every: number) {
   activeStop?.(); // only one ringtone/ringback loop may play at a time
   pattern(); const id = setInterval(pattern, every);
-  const stop = () => { clearInterval(id); if (activeStop === stop) activeStop = null; };
+  const stop = () => { clearInterval(id); if (activeStop === stop) { activeStop = null; toneGeneration++; activeOscillators.forEach(o => { try { o.stop(); } catch { /* already stopped */ } }); activeOscillators.clear(); } };
   activeStop = stop; return stop;
 }
 
 /** Incoming call: luxury BIXLINK chime arpeggio. */
 export const startRingtone = () => loop(() => {
-  const v = getRingVolume() * 0.35;
+  const v = getRingVolume() * 0.45;
   [659.25, 830.61, 987.77, 1318.5].forEach((f, i) => tone([f, f * 2], i * 0.16, 0.5, v, 'triangle'));
   [987.77, 1318.5].forEach((f, i) => tone([f], 1.0 + i * 0.16, 0.6, v * 0.8, 'triangle'));
 }, 2600);
 
 /** Caller waiting: soft dual-tone ringback. */
 /** Standard ringback, identical on every phone: 425 Hz, 1 s on / 3 s off, fixed level (ignores ringtone choice/volume). */
-export const RINGBACK = { hz: 425, onSec: 1, everyMs: 4000, gain: 0.2 } as const;
+export const RINGBACK = { hz: 425, onSec: 1, everyMs: 4000, gain: 0.32 } as const;
 export const startRingback = () => loop(() => tone([RINGBACK.hz], 0, RINGBACK.onSec, RINGBACK.gain, 'sine'), RINGBACK.everyMs);
-// Unlock audio on the first tap so the ringback is audible on phones/WebView.
-if (typeof window !== 'undefined') { const u = () => { ac(); window.removeEventListener('pointerdown', u); }; window.addEventListener('pointerdown', u, { passive: true }); }
 
 export const playConnected = () => { [784, 1175].forEach((f, i) => tone([f], i * 0.12, 0.25, 0.15, 'triangle')); };
 export const playEnded = () => { [620, 460, 320].forEach((f, i) => tone([f], i * 0.18, 0.22, 0.14)); };
@@ -50,7 +78,7 @@ const DTMF: Record<string, [number, number]> = {
   '1': [697, 1209], '2': [697, 1336], '3': [697, 1477], '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
   '7': [852, 1209], '8': [852, 1336], '9': [852, 1477], '*': [941, 1209], '0': [941, 1336], '#': [941, 1477],
 };
-export const playDtmf = (k: string) => { const p = DTMF[k]; if (p) tone(p, 0, 0.14, 0.12); };
+export const playDtmf = (k: string) => { const p = DTMF[k]; if (p) tone(p, 0, 0.14, 0.24); };
 
 /* ---- Ringtone choices + member's own device ringtone (stored only on this phone) ---- */
 export const RINGTONES = [
@@ -90,9 +118,10 @@ export function startChosenRingtone(id = getRingId()): () => void {
       if (stopped) return;
       if (!f) { fallback = startRingtone(); return; }
       url = URL.createObjectURL(f.blob); el = new Audio(url); el.loop = true; el.volume = getRingVolume();
-      void el.play().catch(() => { if (!stopped) fallback = startRingtone(); });
+      const play = () => { if (!el || stopped) return; void el.play().then(() => { fallback?.(); fallback = null; reportAudioState(true); }).catch(() => { if (!stopped && !fallback) fallback = startRingtone(); reportAudioState(false); }); };
+      retryDeviceAudio = play; play();
     });
-    return () => { stopped = true; el?.pause(); if (url) URL.revokeObjectURL(url); fallback?.(); };
+    return () => { stopped = true; retryDeviceAudio = null; el?.pause(); if (url) URL.revokeObjectURL(url); fallback?.(); };
   }
   const p = PATTERNS[id]; return p ? loop(p[0], p[1]) : startRingtone();
 }
