@@ -8807,3 +8807,25 @@ html[data-app-hidden] .site-shell main>*, html[data-app-hidden] .hub-midnight .h
 .hub-swipe > *, .hub-midnight .hub-swipe > *, .hub-card, .eco-card { scroll-snap-align: none !important; }
 [class*="hub-"] { content-visibility: visible !important; }
 [class*="hub-photo"] img { transform: translateZ(0); }
+
+/* Compact one-screen auth, wallet back QR lift, STAKE title fit */
+.auth-fit{min-height:calc(100dvh - 150px)!important;padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
+.auth-fit .auth-vault{padding:14px 16px!important}
+.auth-fit .form-input{height:44px!important;font-size:14px!important;letter-spacing:normal!important}
+.auth-fit label{font-size:11px!important}
+.auth-mini-hero{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px}
+.auth-mini-hero img{width:34px;height:34px;border-radius:999px;border:1px solid rgb(212 175 55/.45)}
+.auth-mini-hero b{display:block;font-size:18px;font-weight:900;letter-spacing:.06em;line-height:1}
+.auth-mini-hero b span{color:hsl(var(--chart-3))}
+.auth-mini-hero small{display:block;margin-top:3px;font-size:9px;font-weight:800;letter-spacing:.2em;color:hsl(var(--muted-foreground))}
+.auth-mini-alt{margin-top:10px}
+.auth-mini-alt button{height:38px!important;min-height:38px!important;font-size:12px!important}
+.wallet-flip-inner>.wallet-face--back{padding:14px 16px!important}
+.wallet-face--back .wallet-back-body{justify-content:flex-start!important;gap:8px!important}
+.wallet-back-grid{flex:0 0 auto!important;align-items:start!important;margin-top:4px!important}
+.wallet-back-qr{width:clamp(76px,22vw,96px)!important}
+.wallet-back-ids{gap:5px!important}
+.wallet-back-ids dt{font-size:8px!important}
+.wallet-back-hint{display:block;font-size:9px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:inherit}
+.stake-compact h1.stake-lux-title{font-size:clamp(13px,4.4vw,24px)!important;letter-spacing:0!important;padding-inline:0!important}
+@media (min-width:640px){.stake-compact h1.stake-lux-title{font-size:clamp(24px,4vw,48px)!important}}

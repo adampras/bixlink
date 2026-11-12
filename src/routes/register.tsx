@@ -8,7 +8,6 @@ import { BixShell } from '@/components/BixShell';
 import { passwordValid, PASSWORD_HINT } from '@/lib/password-rule';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { lovable } from '@/integrations/lovable';
 import { WalletSignIn } from '@/components/WalletSignIn';
 import { createManualAccount, LOGIN_IDENTIFIER_KEY } from '@/lib/manual-registration';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -55,10 +54,10 @@ function RegisterPage() {
     } catch (error) { setNotice(error instanceof Error ? error.message : 'Could not create your account.'); } finally { setBusy(false); }
   };
   const label = 'block text-xs font-bold text-muted-foreground';
-  return <BixShell><main id="member-access" className="auth-vault-page mx-auto flex auth-center min-h-[75vh] max-w-md flex-col justify-center px-5 py-10"><VaultStardust/><div className="auth-vault"><Link to="/" className="auth-back" aria-label="Back to HOME">← HOME</Link>
+  return <BixShell><main id="member-access" className="auth-vault-page mx-auto flex auth-center auth-fit max-w-md flex-col justify-center px-4 py-3"><VaultStardust/><div className="auth-vault"><Link to="/" className="auth-back" aria-label="Back to HOME">← HOME</Link>
     <div className="flex items-center justify-center gap-2.5"><img src="https://bixlink.com/__l5e/assets-v1/c62ecff6-c5d1-4235-8e7a-e49c0c2b7039/fox-icon-512.png" alt="" className="h-9 w-9 rounded-full border border-chart-3/40"/><div className="text-left"><div className="text-lg font-black leading-none tracking-wide">BIX<span className="text-chart-3">LINK</span></div><div className="mt-1 text-[9px] font-bold tracking-[0.2em] text-muted-foreground">CREATE MEMBER ACCOUNT</div></div></div>
-    <nav className="auth-tabs mt-5" aria-label="Account"><Link to="/auth">SIGN IN</Link><Link to="/register" data-active="true">REGISTER</Link></nav>
-    <form onSubmit={submit} className="mt-5 space-y-3" aria-label="Create BIXLINK account">
+    <nav className="auth-tabs mt-3" aria-label="Account"><Link to="/auth">SIGN IN</Link><Link to="/register" data-active="true">REGISTER</Link></nav>
+    <form onSubmit={submit} className="mt-4 space-y-2" aria-label="Create BIXLINK account">
       <label className={label}>FULL NAME<input required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={e => setFullName(e.target.value)} className="form-input mt-1.5" placeholder="Your full name"/></label>
       <label className={label}>USERNAME<input required pattern="[A-Za-z0-9_.]{3,24}" maxLength={24} autoComplete="username" value={username} onChange={e => setUsername(e.target.value)} className="form-input mt-1.5" placeholder="3–24 letters or numbers"/></label>
       <div className={label}><span id="wa-label">WHATSAPP NUMBER</span><div className="relative mt-1.5 grid grid-cols-[6.75rem_minmax(0,1fr)] gap-2">
@@ -77,10 +76,8 @@ function RegisterPage() {
       {notice && <p role="status" className="text-sm text-chart-2">{notice}</p>}
       <Button type="submit" disabled={busy} className="mt-2 h-12 w-full rounded-full bg-primary text-sm font-black tracking-widest text-primary-foreground hover:bg-primary/90">{busy ? 'Please wait…' : 'Create account'} <ArrowRight/></Button>
     </form>
-    <div className="my-5 text-center text-[10px] font-bold tracking-widest text-muted-foreground">OR</div>
-    <Button type="button" variant="outline" className="h-12 w-full rounded-full border-border bg-card" onClick={async () => { const r = await lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/auth` }); if (r.error) setNotice(r.error.message); else if (!r.redirected) window.location.assign('/'); }}>Register with Google</Button>
-    <WalletSignIn/>
-    <p className="mt-6 text-center text-sm text-muted-foreground">Already have an account? <Link to="/auth" className="auth-toska-link">Sign in →</Link></p>
+    <div className="auth-mini-alt"><WalletSignIn/></div>
+    <p className="mt-3 text-center text-xs text-muted-foreground">Already have an account? <Link to="/auth" className="auth-toska-link">Sign in →</Link></p>
   </div></main>
   <Dialog open={!!done} onOpenChange={() => {}}><DialogContent className="max-w-sm border-chart-3/40 bg-card" onInteractOutside={e => e.preventDefault()}>
     <DialogHeader><DialogTitle className="text-center text-xl font-black tracking-wide">{done?.verify ? 'VERIFY YOUR EMAIL' : 'ACCOUNT CREATED'}</DialogTitle><DialogDescription className="text-center">{done?.verify ? <>We sent an activation link to <b className="text-foreground">{done.email}</b>. Open it to activate your account, then sign in. Check your Inbox and Spam folder.</> : 'Save your login details, then sign in manually with your password.'}</DialogDescription></DialogHeader>

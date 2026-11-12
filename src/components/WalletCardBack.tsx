@@ -3,6 +3,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { QRCodeSVG } from 'qrcode.react';
 import { Copy, RotateCcw, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from '@tanstack/react-router';
 import { getBixPay } from '@/lib/bixlink.functions';
 
 /** Back face of the wallet balance card: personal BIX PAY QR, member code and account ID. */
@@ -25,7 +26,7 @@ export function WalletCardBack({ userId, onFlip }: { userId?: string | undefined
       <dl className="wallet-back-ids">
         <div><dt>Member code</dt><dd><button type="button" onClick={() => copy('code', code)}>{code || '—'} <Copy size={11}/></button></dd></div>
         <div><dt>Account ID</dt><dd><button type="button" onClick={() => copy('id', shortId)}>{shortId} <Copy size={11}/></button></dd></div>
-        <p className="wallet-back-hint">{copied ? 'Copied' : 'Scan to send BIX via BIX PAY'}</p>
+        <Link to="/pay" search={{ scan: '1' } as never} className="wallet-back-hint">{copied ? 'Copied' : 'Scan to send BIX'}</Link>
       </dl>
     </div>
   </div>;
