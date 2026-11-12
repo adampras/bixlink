@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import type { Room, RemoteTrack } from 'livekit-client';
@@ -167,7 +168,7 @@ export function BixCallHost() {
 
   return <>
     {err && <div className="bixcall-toast" role="alert">{err}</div>}
-    {call && <CallScreen call={call} onAccept={() => void setStatus('accepted')} onDecline={() => void setStatus('declined')} onEnd={() => void setStatus('ended')} onClose={() => setCall(null)}/>}
+    {call && typeof document !== 'undefined' && createPortal(<CallScreen call={call} onAccept={() => void setStatus('accepted')} onDecline={() => void setStatus('declined')} onEnd={() => void setStatus('ended')} onClose={() => setCall(null)}/>, document.body)}
   </>;
 }
 
@@ -502,7 +503,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       </div>}
       {!live && !done && call.role === 'caller' && <>
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
-        <button className="end" aria-label="Batalkan" onClick={onEnd}><PhoneOff/></button>
+        <button type="button" className="bc-tap is-end bc-cancel" aria-label="Batalkan panggilan" onClick={onEnd}><i><PhoneOff/></i><small>BATALKAN</small></button>
       </>}
       {live && <div className="bc-ctl4 bc-grid6" onPointerDown={askTilt}>
         <label><button aria-label={loud ? 'Speaker active' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={speaker}>{loud ? <Volume2/> : <VolumeX/>}</button><span>{loud ? 'Speaker On' : 'Speaker Off'}</span></label>
