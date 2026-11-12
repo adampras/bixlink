@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GATE_DB, GATE_TUNE, HOWL_BANDS, gateStep } from './bix-voice';
-import { callerPhase, OFFLINE_MS } from '@/components/BixCall';
+import { callerPhase, OFFLINE_MS, RING_TIMEOUT_MS } from '@/components/BixCall';
 
 /** Run a level sequence (dBFS per 50 ms tick) through the gate; returns gains. */
 function run(levels: number[]) {
@@ -37,10 +37,11 @@ describe('BIX CALL anti-storing and call phases', () => {
   it('notches the four phone-to-phone howl bands', () => {
     expect([...HOWL_BANDS]).toEqual([1800, 2400, 3200, 4100]);
   });
-  it('caller sees Memanggil until the device acks, then Berdering; offline after 25 s', () => {
+  it('caller sees Memanggil until the device acks, then Berdering; offline after 45 s', () => {
     expect(callerPhase({})).toBe('calling');
     expect(callerPhase({ rang: true })).toBe('ringing');
     expect(callerPhase({ offline: true })).toBe('offline');
-    expect(OFFLINE_MS).toBe(25000);
+    expect(OFFLINE_MS).toBe(45000);
+    expect(RING_TIMEOUT_MS).toBe(75000);
   });
 });
