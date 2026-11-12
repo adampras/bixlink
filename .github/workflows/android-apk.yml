@@ -24,22 +24,22 @@ jobs:
           if [ -n "$GOOGLE_SERVICES_JSON" ]; then echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
           elif [ -f native-android/google-services.json ]; then cp native-android/google-services.json android/app/google-services.json
           else echo "Add native-android/google-services.json or the GOOGLE_SERVICES_JSON secret"; exit 1; fi
-      - name: BIXLINK adaptive fox icon (obsidian + gold)
+      - name: BIXLINK APK icon (gold fox, separate from PWA)
         run: |
           sudo apt-get install -y imagemagick > /dev/null || true
-          curl -fsSL -o icon.png "https://bixlink.com/__l5e/assets-v1/c62ecff6-c5d1-4235-8e7a-e49c0c2b7039/fox-icon-512.png"
+          cp native-android/icon.png icon.png
           R=android/app/src/main/res
           for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
             dir=$R/mipmap-${d%%:*}; s=${d##*:}; f=$((s*9/4)); inner=$((f*60/100)); mkdir -p $dir
-            convert icon.png -resize ${s}x${s} -background "#080A0F" -flatten $dir/ic_launcher.png
-            convert -size ${s}x${s} xc:none -fill "#080A0F" -stroke "#FFD700" -strokewidth $((s/24+1)) -draw "circle $((s/2)),$((s/2)) $((s/2)),$((s/24+1))" \( icon.png -resize $((s*78/100))x$((s*78/100)) \) -gravity center -composite $dir/ic_launcher_round.png
+            convert icon.png -resize ${s}x${s} -background "#000000" -flatten $dir/ic_launcher.png
+            convert -size ${s}x${s} xc:none -fill "#000000" -stroke "#FFD700" -strokewidth $((s/24+1)) -draw "circle $((s/2)),$((s/2)) $((s/2)),$((s/24+1))" \( icon.png -resize $((s*78/100))x$((s*78/100)) \) -gravity center -composite $dir/ic_launcher_round.png
             convert icon.png -resize ${inner}x${inner} -gravity center -background none -extent ${f}x${f} $dir/ic_launcher_foreground.png
           done
           mkdir -p $R/mipmap-anydpi-v26 $R/values
           for n in ic_launcher ic_launcher_round; do
             printf '<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n  <background android:drawable="@color/ic_launcher_background"/>\n  <foreground android:drawable="@mipmap/ic_launcher_foreground"/>\n  <monochrome android:drawable="@mipmap/ic_launcher_foreground"/>\n</adaptive-icon>\n' > $R/mipmap-anydpi-v26/$n.xml
           done
-          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n  <color name="ic_launcher_background">#080A0F</color>\n</resources>\n' > $R/values/ic_launcher_background.xml
+          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n  <color name="ic_launcher_background">#000000</color>\n</resources>\n' > $R/values/ic_launcher_background.xml
           sed -i 's#<string name="app_name">.*</string>#<string name="app_name">BIXLINK</string>#; s#<string name="title_activity_main">.*</string>#<string name="title_activity_main">BIXLINK</string>#' $R/values/strings.xml
       - name: Call permissions (lock-screen ringing)
         run: |
@@ -167,7 +167,12 @@ jobs:
           grep -q 'xmlns:tools' $M || sed -i '0,/<manifest /s#<manifest #<manifest xmlns:tools="http://schemas.android.com/tools" #' $M
           sed -i 's#</application>#    <service android:name=".BixCallService" android:exported="false"><intent-filter android:priority="10"><action android:name="com.google.firebase.MESSAGING_EVENT" /></intent-filter></service>\n        <service android:name="com.capacitorjs.plugins.pushnotifications.MessagingService" tools:node="remove" />\n    </application>#' $M
           sed -i 's#<activity #<activity android:launchMode="singleTask" #' $M
-          grep -q "com.google.gms.google-services" android/app/build.gradle || echo "apply plugin: 'com.google.gms.google-services'" >> android/app/build.gradle
+          G=android/app/build.gradle
+          grep -q "com.google.gms.google-services" $G || echo "apply plugin: 'com.google.gms.google-services'" >> $G
+          # BixCallService uses Firebase + Capacitor push classes directly: the app module must compile against them.
+          printf '\ndependencies {\n    implementation "com.google.firebase:firebase-messaging:24.1.0"\n    implementation "androidx.core:core:1.13.1"\n    implementation project(":capacitor-push-notifications")\n}\n' >> $G
+          grep -q "classpath 'com.google.gms:google-services" android/build.gradle || sed -i "0,/dependencies {/s##dependencies {\n        classpath 'com.google.gms:google-services:4.4.2'#" android/build.gradle
+          tail -20 $G
           cat $M
       - name: Release keystore (from secrets, or create BIXLINK key once)
         env:
@@ -189,7 +194,7 @@ jobs:
       - name: Build signed release APK
         working-directory: android
         run: |
-          chmod +x gradlew && ./gradlew assembleRelease
+          chmod +x gradlew && ./gradlew assembleRelease --stacktrace
           B=$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)
           $ANDROID_HOME/build-tools/$B/zipalign -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
           $ANDROID_HOME/build-tools/$B/apksigner sign --ks ../bixlink-release.jks --ks-key-alias bixlink \
