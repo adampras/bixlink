@@ -138,5 +138,12 @@ function ExchangePage() {
     </section>
     {cfg?.isAdmin && <AdminKycReview/>}
     <p className="pb-4 text-center text-[10px] text-muted-foreground">Live data from public market feeds. BIX price is the BIXLINK internal reference, not an exchange listing. Not financial advice.</p>
-  </main></div>;
+  </main>
+    <nav className="ex-dock" aria-label="Menu Exchanger">
+      <Link to="/exchange" className="is-on"><LineChart size={19}/><span>Pasar</span></Link>
+      <Link to="/trade"><Repeat size={19}/><span>Trade</span></Link>
+      <Link to="/p2p"><Landmark size={19}/><span>P2P</span></Link>
+      <Link to="/sovereign-wallet"><Wallet size={19}/><span>Aset</span></Link>
+      <Link to="/settings" hash="identity"><Fingerprint size={19}/><span>KYC</span></Link>
+    </nav></div>;
 }
