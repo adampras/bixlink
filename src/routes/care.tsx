@@ -12,6 +12,7 @@ import rentImg from '@/assets/bixcare-rent.jpg';
 import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet, uploadCareProof, openCareReceipt, careChime, rateLine, careCode, timeSlots } from '@/lib/bixcare';
 import { CarePartnerStats, RateOrder, ServiceNote, onBreak } from '@/components/BixcareExtras';
 import { startBixCall } from '@/components/BixCall';
+import { CityMarquee } from '@/components/CityMarquee';
 
 function ContactBar({ peer, name, phone }: { peer: string; name: string; phone?: string | undefined }) {
   return <div className="mt-2 flex flex-wrap gap-2">
@@ -60,6 +61,8 @@ function CarePage() {
           <p className="text-xs text-muted-foreground">Bengkel · Cuci · Laundry · Rental — bayar langsung ke mitra, BIX sebagai bahan bakar platform.</p>
         </div>
       </section>
+      <CityMarquee/>
+      <ol className="lux-guide mx-4 mt-3 grid grid-cols-3 gap-2" aria-label="Cara pakai BIXCARE">{([['1', 'Pilih layanan', 'Bengkel, Cuci, Laundry, Rental'], ['2', 'Pilih outlet', 'Lihat harga & jadwal'], ['3', 'Pesan & bayar', 'Pantau status di Pesanan']] as const).map(([n, t, d]) => <li key={n} className="rounded-2xl border border-primary/25 bg-card/80 p-2.5"><span className="grid h-6 w-6 place-items-center rounded-full bg-primary text-[11px] font-black text-primary-foreground">{n}</span><b className="mt-1.5 block text-[11.5px] font-extrabold leading-tight">{t}</b><span className="mt-0.5 block text-[10px] leading-tight text-muted-foreground">{d}</span></li>)}</ol>
       <GlobalRegions service="BIXCARE"/>
       <nav className="sticky top-0 z-10 flex gap-2 bg-background/90 px-4 py-2 backdrop-blur">
         {([['explore', 'Jelajah', Search], ['orders', 'Pesanan Saya', ClipboardList], ['partner', 'Pemilik Layanan', Store]] as const).map(([k, l, I]) => (

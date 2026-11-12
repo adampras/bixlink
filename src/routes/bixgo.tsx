@@ -21,6 +21,7 @@ import { QrScanner } from '@/components/QrScanner';
 import { GLOBAL_CITIES, cryptoEquivalent, formatMoney, readCurrency, saveCurrency, type GlobalCurrency } from '@/lib/bixgo-global';
 import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
+import { CityMarquee } from '@/components/CityMarquee';
 
 export const Route = createFileRoute('/bixgo')({
   head: () => ecosystemHead('/bixgo', 'BIXGO — Perjalanan, Pengantaran & Jastip | BIXLINK', 'Kenali BIXGO untuk perjalanan motor dan mobil, pengantaran serta Jastip. Lihat estimasi tarif; layanan bergantung pada mitra aktif di kota Anda.'),
@@ -144,7 +145,8 @@ function BixgoPage() {
     {sub === 'bills' && <BixgoBills onBack={() => setSub(null)}/>}
     {(sub === 'ride' || sub === 'car') && <BixgoRideBooking cfg={cfg} start={sub} cur={cur} city={city} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
     {!sub && <>
-    {view === 'home' && <div className="sticky top-0 z-10 bg-background/90 px-3 pt-3 pb-2 backdrop-blur"><div className="mb-2 flex items-center gap-2"><Link to="/" aria-label="Kembali ke BIXLINK" className="grid h-10 w-10 place-items-center rounded-full border border-primary/40 bg-card active:scale-95"><ArrowLeft className="h-5 w-5"/></Link><b className="flex-1 text-base font-black tracking-wide">BIXGO <span className="text-primary">Mataram</span></b><Link to="/wallet" className="rounded-full border border-border bg-card px-3 py-2 text-[11px] font-bold">Wallet</Link></div><div role="tablist" aria-label="BIXGO mode" className="grid grid-cols-3 rounded-full border border-primary/40 bg-card p-1 text-[11px] font-bold">{([['rider', 'Penumpang'], ['driver', 'Driver'], ['merchant', 'Merchant']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={mode === k} onClick={() => setMode(k)} className={`rounded-full py-2 transition ${mode === k ? 'bg-primary text-primary-foreground shadow-[0_0_18px_-6px_var(--primary)]' : 'text-muted-foreground'}`}>{l}</button>)}</div></div>}
+    {view === 'home' && <div className="sticky top-0 z-10 bg-background/90 px-3 pt-3 pb-2 backdrop-blur"><div className="mb-2 flex items-center gap-2"><Link to="/" aria-label="Kembali ke BIXLINK" className="grid h-10 w-10 place-items-center rounded-full border border-primary/40 bg-card active:scale-95"><ArrowLeft className="h-5 w-5"/></Link><div className="min-w-0 flex-1 leading-tight"><b className="block text-base font-black tracking-wide">BIX<span className="text-primary">GO</span></b><span className="block truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Mobilitas · Antar · Belanja</span></div><Link to="/wallet" className="rounded-full border border-border bg-card px-3 py-2 text-[11px] font-bold">Wallet</Link></div><div role="tablist" aria-label="BIXGO mode" className="grid grid-cols-3 rounded-full border border-primary/40 bg-card p-1 text-[11px] font-bold">{([['rider', 'Penumpang'], ['driver', 'Driver'], ['merchant', 'Merchant']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={mode === k} onClick={() => setMode(k)} className={`rounded-full py-2 transition ${mode === k ? 'bg-primary text-primary-foreground shadow-[0_0_18px_-6px_var(--primary)]' : 'text-muted-foreground'}`}>{l}</button>)}</div></div>}
+    {view === 'home' && <><CityMarquee/><ModeGuide mode={mode}/></>}
     {view === 'home' && mode === 'merchant' && <BixgoMerchant city={city} isAdmin={isAdmin}/>}
     {view === 'home' && mode === 'driver' && <BixgoPassport cur={cur} usdtIdr={cfg.usdtIdr} city={city}/>}
     {view === 'home' && mode === 'rider' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
@@ -231,4 +233,13 @@ function BixgoPage() {
     {scan && <QrScanner title="Scan BIX PAY / Driver QR" hint="Point the camera at a driver's or member's BIX PAY QR" onClose={() => setScan(false)} onResult={raw => { setScan(false); sessionStorage.setItem('bixgo_scan', raw); void navigate({ to: '/pay' }); }}/>}
     </>}
   </div></div>;
+}
+
+const GUIDE = {
+  rider: [['1', 'Pilih layanan', 'Motor, Mobil, Food, Kirim'], ['2', 'Atur lokasi', 'Jemput & tujuan, cek tarif'], ['3', 'Pesan & lacak', 'Driver terdekat menjemput']],
+  driver: [['1', 'Daftar lisensi', 'Disetujui admin'], ['2', 'Aktifkan online', 'Order masuk otomatis'], ['3', 'Selesaikan trip', 'Pendapatan tercatat']],
+  merchant: [['1', 'Daftarkan toko', 'Menunggu persetujuan'], ['2', 'Isi menu & foto', 'Harga resmi toko'], ['3', 'Terima pesanan', 'Proses sampai selesai']],
+} as const;
+function ModeGuide({ mode }: { mode: keyof typeof GUIDE }) {
+  return <ol className="lux-guide mx-3 mt-2 grid grid-cols-3 gap-2" aria-label="Cara pakai">{GUIDE[mode].map(([n, t, d]) => <li key={n} className="rounded-2xl border border-primary/25 bg-card/80 p-2.5"><span className="grid h-6 w-6 place-items-center rounded-full bg-primary text-[11px] font-black text-primary-foreground">{n}</span><b className="mt-1.5 block text-[11.5px] font-extrabold leading-tight">{t}</b><span className="mt-0.5 block text-[10px] leading-tight text-muted-foreground">{d}</span></li>)}</ol>;
 }
