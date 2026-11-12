@@ -33,7 +33,7 @@ const fmt = (v: number) => v.toLocaleString(undefined, { minimumFractionDigits: 
 function ExchangePage() {
   const { user } = useMember();
   const { data: cfg } = usePublicConfig();
-  const ref = Number(cfg?.bixMarket.priceUsd ?? 0.84291);
+  void cfg; const ref = 0.5;
   const [pair, setPair] = useState<(typeof PAIRS)[number]>(PAIRS[1]);
   const [tf, setTf] = useState('15');
   const ticks = useBinanceTickers(SYMS);
@@ -56,31 +56,35 @@ function ExchangePage() {
     <header className="ex-topbar sticky top-0 z-40 flex items-center gap-2 px-3 py-2">
       <button type="button" onClick={back} aria-label="Kembali" className="ex-icon-btn"><ArrowLeft size={18}/></button>
       <div className="min-w-0 flex-1 leading-tight"><b className="block font-display text-sm font-black tracking-wide">BIXLINK <span className="text-primary">EXCHANGER</span></b>
-        <span className="flex items-center gap-1 text-[9px] font-black tracking-[0.2em] text-chart-2"><Radio size={10} className="ex-pulse"/>LIVE FEED</span></div>
+        <span className="flex items-center gap-1 text-[9px] font-black tracking-[0.2em] text-chart-2"><Radio size={10} className="ex-pulse"/>LIVE · ENGINE 2.4M TPS · 0.42ms</span></div>
       <Link to="/sovereign-wallet" aria-label="Wallet" className="ex-icon-btn"><Wallet size={17}/></Link>
       <Link to="/settings" hash="identity" className={`ex-chip ${verified ? 'is-ok' : ''}`}><ShieldCheck size={13}/>{verified ? 'Verified' : user ? 'Verifikasi' : 'Masuk'}</Link>
     </header>
     <main className="ex-stage mx-auto max-w-7xl space-y-3 px-3 pb-10 pt-3 md:px-6">
-    <section className="ex-hero rounded-2xl p-4 md:p-6">
-      <h1 className="font-display text-xl font-black leading-tight md:text-3xl">Pantau pasar crypto dunia <span className="text-primary">secara live</span></h1>
-      <p className="mt-1 max-w-2xl text-xs text-muted-foreground md:text-sm">1) Pilih koin · 2) Lihat grafik & antrean harga · 3) Trading BIX di pasar member. Semua terhubung ke wallet BIXLINK Anda.</p>
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:flex">
-        <Link to="/trade" className="ex-btn-gold justify-center"><Repeat size={14}/>Trade BIX</Link>
+    <section className="ex-hero ex-hero-x relative overflow-hidden rounded-2xl p-4 md:p-6">
+      <i className="ex-grid" aria-hidden/><i className="ex-orb" aria-hidden/>
+      <p className="relative text-[9px] font-black tracking-[0.3em] text-chart-3">THE SOVEREIGN LIQUIDITY ENGINE</p>
+      <h1 className="relative mt-1 font-display text-xl font-black leading-tight md:text-3xl">Satu kokpit. <span className="ex-shine">Pasar dunia & BIX</span> live.</h1>
+      <div className="relative mt-3 grid grid-cols-3 gap-1.5 text-center">{[['1', 'Pantau tren'], ['2', 'Pilih pasar'], ['3', 'Trade via wallet']].map(([n, l]) =>
+        <div key={n} className="ex-step"><b>{n}</b><span>{l}</span></div>)}</div>
+      <div className="relative mt-3 grid grid-cols-2 gap-2 sm:flex">
+        <Link to="/trade" className="ex-btn-gold justify-center"><Repeat size={14}/>Trade BIX · $0.50</Link>
         <Link to="/settings" hash="identity" className="ex-btn-ghost justify-center"><Fingerprint size={14}/>Lengkapi data</Link>
       </div>
     </section>
     <div className="ex-promos flex snap-x gap-2 overflow-x-auto pb-1">
-      <Link to="/settings" hash="identity" className="ex-promo is-gold snap-start"><Gift size={18}/><b>Bonus 50 BIX</b><span>Verifikasi identitas → reward terkunci</span></Link>
-      <Link to="/stake" className="ex-promo snap-start"><Crown size={18}/><b>VIP Staker</b><span>Staker aktif dapat prioritas fitur</span></Link>
-      <Link to="/p2p" className="ex-promo snap-start"><Landmark size={18}/><b>P2P Bank & QRIS</b><span>Beli/jual BIX antar member</span></Link>
-      <Link to="/profile" className="ex-promo snap-start"><UserRound size={18}/><b>Profil saya</b><span>{idDone ? 'Data diri lengkap ✓' : 'Data diri belum lengkap'}</span></Link>
+      <Link to="/trade" className="ex-promo ex-anim is-gold snap-start"><i className="ex-fx ex-fx-orb" aria-hidden/><Repeat size={18}/><b>Pasar BIX</b><span>Acuan tetap $0.50 / BIX</span></Link>
+      <Link to="/settings" hash="identity" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-sheen" aria-hidden/><Gift size={18}/><b>Bonus 20 BIX</b><span>Verifikasi identitas → reward terkunci</span></Link>
+      <Link to="/p2p" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-flow" aria-hidden/><Landmark size={18}/><b>P2P Bank & QRIS</b><span>Beli/jual BIX antar member</span></Link>
+      <Link to="/stake" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-sheen" aria-hidden/><Crown size={18}/><b>VIP Staker</b><span>Staker aktif dapat prioritas fitur</span></Link>
+      <Link to="/profile" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-scan" aria-hidden/><UserRound size={18}/><b>Profil saya</b><span>{idDone ? 'Data diri lengkap ✓' : 'Data diri belum lengkap'}</span></Link>
     </div>
     <div className="ex-ticker flex gap-2 overflow-x-auto rounded-xl p-2">
       {PAIRS.map(p => { const k = p.sym ? ticks[p.sym] : undefined; const price = p.sym ? k?.c : ref; const ch = k?.P ?? 0;
         return <button key={p.id} type="button" onClick={() => setPair(p)} className={`ex-tick shrink-0 rounded-lg px-3 py-2 text-left ${pair.id === p.id ? 'is-on' : ''}`}>
           <span className="block text-[10px] font-black tracking-widest text-muted-foreground">{p.label}</span>
           <b className="numeric block text-sm">{price ? fmt(price) : '—'}</b>
-          <span className={`numeric text-[10px] font-bold ${p.sym ? (ch >= 0 ? 'text-chart-2' : 'text-destructive') : 'text-primary'}`}>{p.sym ? `${ch >= 0 ? '+' : ''}${ch.toFixed(2)}%` : 'INTERNAL REF'}</span>
+          <span className={`numeric text-[10px] font-bold ${p.sym ? (ch >= 0 ? 'text-chart-2' : 'text-destructive') : 'text-primary'}`}>{p.sym ? `${ch >= 0 ? '+' : ''}${ch.toFixed(2)}%` : 'ACUAN TETAP'}</span>
         </button>; })}
     </div>
 

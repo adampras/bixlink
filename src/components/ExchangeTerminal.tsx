@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchBixPrice } from '@/lib/mining-rigs';
 
-const PAIRS = { 'BIX/USDT': 0.84291, 'BTC/USDT': 68420, 'ETH/USDT': 3520 } as const;
+const PAIRS = { 'BIX/USDT': 0.5, 'BTC/USDT': 68420, 'ETH/USDT': 3520 } as const;
 type Pair = keyof typeof PAIRS;
 type Candle = { o: number; h: number; l: number; c: number };
 
@@ -16,7 +16,7 @@ function seed(base: number): Candle[] {
 
 export function ExchangeTerminal() {
   const { data: bixRef } = useQuery({ queryKey: ['bix-ref-price'], queryFn: fetchBixPrice });
-  const base = (p: Pair) => (p === 'BIX/USDT' ? bixRef ?? PAIRS[p] : PAIRS[p]);
+  const base = (p: Pair) => (p === 'BIX/USDT' ? PAIRS[p] : PAIRS[p]);
   const [pair, setPair] = useState<Pair>('BIX/USDT');
   const [candles, setCandles] = useState<Candle[]>(() => seed(PAIRS['BIX/USDT']));
   const [side, setSide] = useState<'BUY' | 'SELL'>('BUY');
@@ -32,7 +32,7 @@ export function ExchangeTerminal() {
     }, 1200);
     return () => clearInterval(i);
   }, []);
-  const price = pair === 'BIX/USDT' && bixRef ? bixRef : candles[candles.length - 1]?.c ?? PAIRS[pair];
+  const price = pair === 'BIX/USDT' ? 0.5 : candles[candles.length - 1]?.c ?? PAIRS[pair];
   const hi = Math.max(...candles.map((c) => c.h)), lo = Math.min(...candles.map((c) => c.l));
   const y = (v: number) => 4 + ((hi - v) / (hi - lo || 1)) * 152;
   const dp = price < 10 ? 5 : 2;

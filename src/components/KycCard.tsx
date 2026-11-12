@@ -6,7 +6,7 @@ import { usePublicConfig } from '@/lib/useMember';
 
 type Kyc = { status: string; full_name: string; country: string; document_type: string; document_last4: string; id_path?: string | null; selfie_path?: string | null; review_note?: string | null };
 
-/** Identity verification: name/country/doc last-4 + private ID & selfie photos; approval unlocks a display-only 50 BIX locked welcome reward. */
+/** Identity verification: name/country/doc last-4 + private ID & selfie photos; approval unlocks a display-only 20 BIX locked welcome reward. */
 export function KycCard({ userId, compact = false }: { userId?: string | undefined; compact?: boolean }) {
   const { data: config } = usePublicConfig();
   const enabled = config?.readiness.kycEnabled === true;
@@ -24,7 +24,7 @@ export function KycCard({ userId, compact = false }: { userId?: string | undefin
     supabase.from('bix_kyc_rewards').select('amount').eq('user_id', userId).maybeSingle().then(({ data }) => setReward(data ? Number(data.amount) : null));
   }, [userId, enabled]);
   if (!userId) return null;
-  if (!enabled) return compact ? null : <div className="kyc-card rounded-xl border border-border p-3 text-xs text-muted-foreground"><Lock size={14} className="mr-1 inline"/>Identity verification opens soon. Verified members receive a 50 BIX locked welcome reward.</div>;
+  if (!enabled) return compact ? null : <div className="kyc-card rounded-xl border border-border p-3 text-xs text-muted-foreground"><Lock size={14} className="mr-1 inline"/>Identity verification opens soon. Verified members receive a 20 BIX locked welcome reward.</div>;
   const up = async (f: File, kind: string) => {
     const ext = (f.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
     const path = `${userId}/${kind}-${Date.now()}.${ext}`;
@@ -55,7 +55,7 @@ export function KycCard({ userId, compact = false }: { userId?: string | undefin
       {status === 'rejected' && kyc?.review_note && <p className="mt-1 text-xs text-destructive">{kyc.review_note}</p>}
       <p className="mt-1 text-xs text-muted-foreground">3 steps: personal data · ID photo · selfie with ID. Photos are stored in a private encrypted folder visible only to you and the review team.</p></div></div>
     {reward !== null && <div className="kyc-reward mt-3 flex items-center justify-between rounded-lg px-3 py-2"><span className="flex items-center gap-1.5 text-xs font-bold"><Lock size={13}/>Welcome reward · LOCKED</span><b className="numeric">+{reward.toFixed(2)} BIX</b></div>}
-    {status !== 'approved' && reward === null && <p className="mt-2 text-[11px] text-primary">Verify now and receive 50 BIX locked welcome reward (not withdrawable or tradable until released).</p>}
+    {status !== 'approved' && reward === null && <p className="mt-2 text-[11px] text-primary">Verify now and receive 20 BIX locked welcome reward (not withdrawable or tradable until released).</p>}
     {status !== 'approved' && status !== 'pending' && !open && <Button type="button" size="sm" variant="outline" className="mt-3 w-full rounded-full" onClick={() => setOpen(true)}>Verify identity</Button>}
     {open && <div className="mt-3 grid gap-2">
       <input className="form-input" placeholder="Full legal name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })}/>

@@ -29,7 +29,7 @@ export function AdminKycReview() {
     <div className="grid gap-3">{rows.map(r => <div key={r.user_id} className="rounded-xl border border-border p-3 text-xs">
       <b className="text-sm">{r.full_name}</b> · {r.country} · {r.document_type} ••{r.document_last4}{r.phone ? ` · ${r.phone}` : ''}
       <div className="mt-2 flex gap-2">{[r.id_path, r.selfie_path].map((p, i) => p && (urls[p] ? <a key={p} href={urls[p]} target="_blank" rel="noreferrer"><img src={urls[p]} alt={i ? 'Selfie' : 'ID'} className="h-20 w-28 rounded-md object-cover"/></a> : <Button key={p} size="sm" variant="outline" onClick={() => view(p)}>{i ? 'View selfie' : 'View ID'}</Button>))}</div>
-      <div className="mt-2 grid grid-cols-2 gap-2"><Button size="sm" variant="ghost" onClick={() => act(r.user_id, 'rejected')}>Reject</Button><Button size="sm" onClick={() => act(r.user_id, 'approved')}>Approve · +50 BIX locked</Button></div>
+      <div className="mt-2 grid grid-cols-2 gap-2"><Button size="sm" variant="ghost" onClick={() => act(r.user_id, 'rejected')}>Reject</Button><Button size="sm" onClick={() => act(r.user_id, 'approved')}>Approve · +20 BIX locked</Button></div>
     </div>)}</div>
   </section>;
 }
