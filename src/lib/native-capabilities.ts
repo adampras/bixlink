@@ -16,5 +16,5 @@ export function validGps(lat: number, lng: number) {
 }
 
 export function callFcmData(id: string, kind: string, createdAt: string) {
-  return { type: 'call', callId: id, kind, path: '/call', expiresAt: String(new Date(createdAt).getTime() + 40000) };
+  return { type: 'call', callId: id, kind, path: '/call', expiresAt: String(new Date(createdAt).getTime() + 75000) };
 }

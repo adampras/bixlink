@@ -17,7 +17,10 @@ export async function sendFcmToUser(admin: Admin, userId: string, data: Record<s
         method: 'POST',
         headers: { Authorization: `Bearer ${lovable}`, 'X-Connection-Api-Key': conn, 'Content-Type': 'application/json' },
         // Notification block lets Android show + ring even when the app is fully closed (data-only is silent there).
-        body: JSON.stringify({ message: { token, data,
+        // Calls are data-only so the APK's BixCallService draws the WhatsApp-style Jawab/Tolak banner itself.
+        body: JSON.stringify({ message: data['type'] === 'call'
+          ? { token, data, android: { priority: 'HIGH', ttl: `${ttlSeconds}s` } }
+          : { token, data,
           notification: { title: data['title'] || 'BIX CALL', body: data['body'] || '' },
           android: { priority: 'HIGH', ttl: `${ttlSeconds}s`, notification: {
             channel_id: data['type'] === 'call' ? 'bixcall_ring' : 'bixcall_chat', sound: 'default',

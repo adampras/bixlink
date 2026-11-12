@@ -130,6 +130,12 @@ export function BixCallHost() {
           const p = peer.data as { name?: string; whatsapp?: string } | null;
           setCall({ id: row.id, peerId: row.caller_id, peerName: p?.name ?? 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: p?.whatsapp ?? null, rang: true });
           try { navigator.vibrate?.([300, 200, 300]); } catch { /* unsupported */ }
+          // Native lock-screen call banner (Jawab/Tolak) opens /call?bixcall=answer|decline&id=…
+          const q = new URLSearchParams(window.location.search);
+          if (q.get('id') === row.id && (q.get('bixcall') === 'answer' || q.get('bixcall') === 'decline')) {
+            const act = q.get('bixcall'); window.history.replaceState(null, '', window.location.pathname);
+            setTimeout(() => void setStatus(act === 'answer' ? 'accepted' : 'declined'), 300);
+          }
           sysNotify(`📞 BIXCALL · Incoming ${row.kind === 'video' ? 'Video call' : 'Voice call'}`, `@${p?.name ?? 'Member'} is calling you`, `call-${row.id}`, true);
         }
       }
