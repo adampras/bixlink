@@ -19,10 +19,15 @@ export function NativeFeel() {
     document.addEventListener('pointerdown', onTap, { passive: true });
     window.addEventListener('popstate', onPop);
     document.addEventListener('visibilitychange', onHide);
+    window.addEventListener('pageshow', onHide);
+    window.addEventListener('focus', onHide);
+    onHide();
     return () => {
       document.removeEventListener('pointerdown', onTap);
       window.removeEventListener('popstate', onPop);
       document.removeEventListener('visibilitychange', onHide);
+      window.removeEventListener('pageshow', onHide);
+      window.removeEventListener('focus', onHide);
     };
   }, []);
   return null;
