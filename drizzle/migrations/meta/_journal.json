@@ -1373,6 +1373,20 @@
       "when": 1794377180895,
       "tag": "0195_identity_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 196,
+      "version": "7",
+      "when": 1794488162445,
+      "tag": "0196_kyc_reward_unlock_on_stake_100",
+      "breakpoints": true
+    },
+    {
+      "idx": 197,
+      "version": "7",
+      "when": 1794488226994,
+      "tag": "0197_stake_tier_bix_bonus",
+      "breakpoints": true
     }
   ]
 }

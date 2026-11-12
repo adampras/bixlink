@@ -568,18 +568,21 @@ export type Database = {
           amount: number
           created_at: string
           locked: boolean
+          unlocked_at: string | null
           user_id: string
         }
         Insert: {
           amount?: number
           created_at?: string
           locked?: boolean
+          unlocked_at?: string | null
           user_id: string
         }
         Update: {
           amount?: number
           created_at?: string
           locked?: boolean
+          unlocked_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1808,6 +1811,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      bix_stake_tier_bonus: {
+        Row: {
+          paid_bix: number
+          tier_usd: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          paid_bix: number
+          tier_usd: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          paid_bix?: number
+          tier_usd?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       bix_stakes: {
         Row: {
@@ -4620,6 +4644,7 @@ export type Database = {
         Args: { p_member: string; p_stake: string }
         Returns: boolean
       }
+      bix_kyc_try_unlock: { Args: { p_user: string }; Returns: undefined }
       bix_leader_30d_progress: { Args: { p_user: string }; Returns: Json }
       bix_leader_challenge_claim: { Args: never; Returns: Json }
       bix_leader_challenge_list: { Args: never; Returns: Json }
@@ -4890,6 +4915,7 @@ export type Database = {
         Args: { p_amount: number; p_days: number }
         Returns: string
       }
+      bix_stake_tier_award: { Args: { p_user: string }; Returns: undefined }
       bix_staking_skin_admin: { Args: never; Returns: Json }
       bix_staking_skin_for_me: { Args: never; Returns: boolean }
       bix_staking_skin_save: {

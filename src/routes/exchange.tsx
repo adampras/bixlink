@@ -80,7 +80,7 @@ function ExchangePage() {
     </section>
     <div className="ex-promos flex snap-x gap-2 overflow-x-auto pb-1">
       <Link to="/trade" className="ex-promo ex-anim is-gold snap-start"><i className="ex-fx ex-fx-orb" aria-hidden/><img src={cMarket} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>Pasar BIX</b><span>Acuan tetap $0.50 / BIX</span></Link>
-      <Link to="/settings" hash="identity" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-sheen" aria-hidden/><img src={cKyc} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>Bonus 20 BIX</b><span>Verifikasi identitas → reward terkunci</span></Link>
+      <Link to="/settings" hash="identity" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-sheen" aria-hidden/><img src={cKyc} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>Bonus 20 BIX</b><span>KYC + stake $100 → BIX terbuka</span></Link>
       <Link to="/p2p" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-flow" aria-hidden/><img src={cP2p} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>P2P Bank & QRIS</b><span>Beli/jual BIX antar member</span></Link>
       <Link to="/stake" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-sheen" aria-hidden/><img src={cVip} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>VIP Staker</b><span>Staker aktif dapat prioritas fitur</span></Link>
       <Link to="/profile" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-scan" aria-hidden/><img src={cProfile} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>Profil saya</b><span>{idDone ? 'Data diri lengkap ✓' : 'Data diri belum lengkap'}</span></Link>
@@ -131,9 +131,12 @@ function ExchangePage() {
         return <div key={a as string} className="ex-feature rounded-xl p-3"><Ic size={16} className="text-primary"/><b className="mt-1 block text-xs">{a as string}</b><span className="text-[10px] text-muted-foreground">{b as string}</span></div>; })}
     </section>
 
+    <section className="ex-unlock grid grid-cols-3 gap-1.5 text-center">{[['1', 'Verifikasi KYC', '+20 BIX terkunci'], ['2', 'Stake min. $100', 'Paket aktif'], ['3', 'BIX terbuka', 'Masuk saldo']].map(([n, a, b]) =>
+      <div key={n} className="ex-unlock-step"><b>{n}</b><span>{a}</span><small>{b}</small></div>)}</section>
+    <p className="text-center text-[11px] text-muted-foreground">Bonus staking aktif: <b className="text-chart-3">$500 → +50 BIX</b> · <b className="text-chart-3">$1.000 → +100 BIX</b> (sekali per member, langsung bisa dipakai).</p>
     <section id="kyc" className="ex-panel rounded-2xl p-4">
       <h2 className="mb-1 text-xs font-black tracking-widest text-primary">IDENTITY VERIFICATION</h2>
-      <p className="mb-3 text-xs text-muted-foreground">Verified members receive a <b className="text-primary">50 BIX welcome reward, locked</b>. It shows in your portfolio but cannot be withdrawn, sold or transferred until a release rule is announced.</p>
+      <p className="mb-3 text-xs text-muted-foreground">Member terverifikasi mendapat <b className="text-primary">20 BIX</b> (terkunci). Reward otomatis <b className="text-chart-3">terbuka dan bisa dipakai</b> setelah Anda memiliki staking aktif minimal <b>$100</b>.</p>
       {user ? <><Link to="/settings" hash="identity" className={`ex-btn-gold mb-3 w-full justify-center ${idDone ? 'opacity-90' : ''}`}><UserRound size={14}/>{idDone ? 'Perbarui data diri di Profil' : 'Lengkapi data diri di Profil'}</Link><KycCard userId={user.id}/></> : <Link to="/auth" className="ex-btn-gold w-full justify-center">Masuk untuk verifikasi</Link>}
     </section>
     {cfg?.isAdmin && <AdminKycReview/>}
