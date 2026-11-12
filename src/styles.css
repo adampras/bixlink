@@ -8786,3 +8786,10 @@ html[data-app-hidden] * { animation-play-state: paused !important; }
 .home-audit-fold > .home-audit-sum span{font-size:11px;font-weight:700;color:hsl(var(--primary));letter-spacing:.06em;text-transform:uppercase}
 .home-audit-fold[open] > .home-audit-sum span{opacity:.6}
 .home-audit-fold[open] > .home-audit-sum{margin-bottom:12px}
+
+/* APK stability: no sideways drift, solid locked header, content clear of dock */
+html,body{max-width:100%;overflow-x:clip}
+.sticky-top-bar{position:sticky;top:0;z-index:45;transform:none}
+.site-shell main{min-width:0}
+.site-shell img,.site-shell video{max-width:100%}
+@media (max-width:1279px){.site-shell{padding-bottom:calc(96px + env(safe-area-inset-bottom))}}

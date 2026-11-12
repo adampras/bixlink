@@ -147,6 +147,9 @@ export function BixShell({ children }: { children: React.ReactNode }) {
       <DockHub path={path} cfg={publicConfig?.isAdmin ? undefined : { ...(publicConfig?.readiness.dockHub ?? {}), ...Object.fromEntries((design.data?.locked ?? []).map(id => [id, false])) }} order={publicConfig?.readiness.dockOrder} matrix={useMatrix(publicConfig?.readiness.dockModel, !!publicConfig?.isAdmin)}/>
       {NAV.filter(n => n.to !== '/boost' && n.to !== '/').map(n => n as typeof NAV[number]).map(n => { const on = path === n.to; return <Link key={n.to} to={n.to} data-nav={n.to.slice(1)} title={n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')} className={`${n.to === '/wallet' ? 'dock-wallet ' : ''}flex min-w-0 flex-col items-center gap-1 px-1 py-2.5 text-[11.5px] font-extrabold tracking-wide ${on ? 'mobile-nav-on' : 'dock-item'}`}><n.icon size={24} strokeWidth={on ? 2.4 : 2} className="shrink-0"/><span className="max-w-full truncate">{n.to === '/profit' ? 'PROFIT' : t(n.to === '/' ? 'home' : n.to === '/wallet' ? 'wallet' : n.to === '/stake' ? 'stake' : 'network')}</span></Link>; })}
     </nav>}
+    {!user && path !== '/auth' && path !== '/register' && <nav aria-label="Guest" data-no-translate className="glass-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-3 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden">
+      {([['/', 'HOME', Home], ['/ecosystem', 'EKOSISTEM', Layers], ['/auth', 'MASUK', LogIn]] as const).map(([to, label, I]) => <Link key={to} to={to} className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2.5 text-[11.5px] font-extrabold tracking-wide ${path === to ? 'mobile-nav-on' : 'dock-item'}`}><I size={24} className="shrink-0"/><span className="max-w-full truncate">{label}</span></Link>)}
+    </nav>}
   </div>;
 }
 
