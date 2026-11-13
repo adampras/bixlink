@@ -5,11 +5,11 @@ import { fleetWallets } from './p2p-fleet.functions';
 import { verifyUsdtDeposit } from './deposit.server';
 
 export const PRESALE_DEVS = [
-  { flag: '🇮🇩', country: 'Indonesia', role: 'Lead Protocol Developer' },
-  { flag: '🇸🇬', country: 'Singapore', role: 'Treasury & Vault Developer' },
+  { flag: '🇸🇬', country: 'Singapore', role: 'Lead Protocol Developer' },
   { flag: '🇲🇾', country: 'Malaysia', role: 'Smart Contract Developer' },
   { flag: '🇦🇪', country: 'United Arab Emirates', role: 'Liquidity Developer' },
   { flag: '🇩🇪', country: 'Germany', role: 'Security Developer' },
+  { flag: '🇮🇩', country: 'Indonesia', role: 'Treasury & Vault Developer' },
 ];
 
 /** Owner 1 network (+ designated IDs) gets up to 5 Owner 1 BEP-20 wallets, one per developer nation; Owner 2 network only its owner's wallet. */

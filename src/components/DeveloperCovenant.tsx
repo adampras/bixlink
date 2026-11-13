@@ -1,9 +1,9 @@
 const DEVS = [
-  { flag: '🇮🇩', country: 'Indonesia', role: 'Lead Protocol Developer' },
-  { flag: '🇸🇬', country: 'Singapore', role: 'Treasury & Vault Developer' },
+  { flag: '🇸🇬', country: 'Singapore', role: 'Lead Protocol Developer' },
   { flag: '🇲🇾', country: 'Malaysia', role: 'Smart Contract Developer' },
   { flag: '🇦🇪', country: 'United Arab Emirates', role: 'Liquidity Developer' },
   { flag: '🇩🇪', country: 'Germany', role: 'Security Developer' },
+  { flag: '🇮🇩', country: 'Indonesia', role: 'Treasury & Vault Developer' },
 ];
 
 export function DeveloperCovenant() {

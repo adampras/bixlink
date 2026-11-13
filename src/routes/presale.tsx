@@ -36,10 +36,11 @@ function PresalePage() {
   const loadW = useServerFn(getPresaleWallets); const pay = useServerFn(payPresaleTx);
   const wq = useQuery({ queryKey: ['presale-wallets', user?.id], queryFn: () => loadW(), enabled: !!user });
   const wallets = wq.data ?? []; const [wi, setWi] = useState(0); const w = wallets[Math.min(wi, Math.max(0, wallets.length - 1))];
+  const [receipt, setReceipt] = useState<null | { usd: number; bix: number; serial?: number; via: string; extra?: number; test?: boolean }>(null);
   const [tx, setTx] = useState(''); const [copied, setCopied] = useState(false);
   const doPay = async () => {
-    if (!w) return; setBusy(true); setErr(''); setMsg('');
-    try { const r = await pay({ data: { walletCode: w.code, txHash: tx.trim() } }); setMsg(`Verified! $${r.usd} → ${number(Number(r.bix))} BIX locked${r.extra > 0 ? ` · $${number(r.extra, { maximumFractionDigits: 2 })} extra added to your USDT balance` : ''}.`); setTx(''); qc.invalidateQueries({ queryKey: ['presale'] }); }
+    if (!w) return; setBusy(true); setErr(''); setMsg(''); setReceipt(null);
+    try { const r = await pay({ data: { walletCode: w.code, txHash: tx.trim() } }); setReceipt({ usd: r.usd, bix: Number(r.bix), serial: (r as any).serial, via: 'On-chain USDT (BEP-20)', extra: r.extra }); setMsg(`Verified! $${r.usd} → ${number(Number(r.bix))} BIX locked${r.extra > 0 ? ` · $${number(r.extra, { maximumFractionDigits: 2 })} extra added to your USDT balance` : ''}.`); setTx(''); qc.invalidateQueries({ queryKey: ['presale'] }); }
     catch (e) { setErr(e instanceof Error ? e.message : 'Verification failed'); } finally { setBusy(false); }
   };
   const s = q.data; const cfg = s?.config;
@@ -57,15 +58,15 @@ function PresalePage() {
 
   const tq = useQuery({ queryKey: ['presale-test', user?.id], enabled: !!user, queryFn: async () => (await supabase.rpc('bix_presale_test_state' as never)).data as { enabled?: boolean; allowed?: boolean } | null });
   const doTest = async () => {
-    setBusy(true); setErr(''); setMsg('');
+    setBusy(true); setErr(''); setMsg(''); setReceipt(null);
     const { data, error } = await supabase.rpc('bix_presale_test_buy' as never, { p_usd: usd } as never);
     setBusy(false);
     if (error) return setErr(error.message);
-    setMsg(`TEST: ${number(Number((data as { bix?: number }).bix ?? 0))} BIX virtual order recorded — no balance moved.`); qc.invalidateQueries({ queryKey: ['presale'] });
+    setReceipt({ usd, bix: Number((data as { bix?: number }).bix ?? 0), via: 'Virtual test wallet', test: true }); setMsg(`TEST: ${number(Number((data as { bix?: number }).bix ?? 0))} BIX virtual order recorded — no balance moved.`); qc.invalidateQueries({ queryKey: ['presale'] });
   };
   const doBuy = async () => {
-    setBusy(true); setErr(''); setMsg('');
-    try { const r = await buy({ data: { usd } }); setMsg(`Success! ${number(Number(r.bix))} BIX locked · ${PHASE1.dailyPct}% released daily.`); setConfirm(false); qc.invalidateQueries({ queryKey: ['presale'] }); }
+    setBusy(true); setErr(''); setMsg(''); setReceipt(null);
+    try { const r = await buy({ data: { usd } }); setReceipt({ usd, bix: Number(r.bix), serial: r.serial, via: 'USDT balance' }); setMsg(`Success! ${number(Number(r.bix))} BIX locked · ${PHASE1.dailyPct}% released daily.`); setConfirm(false); qc.invalidateQueries({ queryKey: ['presale'] }); }
     catch (e) { setErr(e instanceof Error ? e.message : 'Purchase failed'); } finally { setBusy(false); }
   };
 
@@ -117,7 +118,20 @@ function PresalePage() {
           <p className="mt-3 text-center text-[10px] text-muted-foreground">— or pay from your USDT balance above —</p>
         </div>
         {err && <p role="alert" className="mt-3 text-sm text-destructive">{err}</p>}
-        {msg && <p role="status" className="mt-3 text-sm text-chart-2">{msg}</p>}
+        {msg && !receipt && <p role="status" className="mt-3 text-sm text-chart-2">{msg}</p>}
+        {receipt && <div role="status" className="presale-receipt mt-4">
+          <div className="presale-receipt-check" aria-hidden>✓</div>
+          <p className="lux-kicker text-center">{receipt.test ? 'TEST PURCHASE RECORDED' : 'PURCHASE SUCCESSFUL'}</p>
+          <h3 className="lux-gold-text text-center font-display text-2xl font-black numeric">{number(receipt.bix)} BIX</h3>
+          <p className="text-center text-[11px] text-foreground/80">Your BIX is locked in your presale vault and starts releasing tomorrow.</p>
+          <dl className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+            {[['Paid', `$${number(receipt.usd)} USDT`], ['Price', `$${price.toFixed(2)} / BIX`], ['Daily release', `${number(receipt.bix * PHASE1.dailyPct / 100, { maximumFractionDigits: 2 })} BIX (${PHASE1.dailyPct}%)`], ['Fully released', new Date(Date.now() + PHASE1.vestingDays * 864e5).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })], ['Payment', receipt.via], ['Certificate', receipt.serial ? `#${receipt.serial}` : '—']].map(([k, v]) => <div key={k} className="presale-receipt-row"><dt>{k}</dt><dd className="numeric">{v}</dd></div>)}
+          </dl>
+          {!!receipt.extra && receipt.extra > 0 && <p className="mt-2 text-center text-[10px] text-chart-2">${number(receipt.extra, { maximumFractionDigits: 2 })} extra was added to your USDT balance.</p>}
+          {receipt.test && <p className="mt-2 text-center text-[10px] text-primary">Test only — no balance moved, cannot be claimed as real BIX.</p>}
+          <p className="mt-3 text-center text-[10px] text-muted-foreground">Track and claim released BIX in My Presale Portfolio below.</p>
+          <button type="button" onClick={() => { setReceipt(null); setMsg(''); }} className="mt-3 w-full rounded-full border border-chart-3/50 py-2 text-xs font-black text-chart-3">Done</button>
+        </div>}
       </section>
 
       <section className="mt-6 rounded-3xl border border-border bg-card/60 p-5">

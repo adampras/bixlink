@@ -1443,6 +1443,13 @@
       "when": 1794587610421,
       "tag": "0205_presale_owner1_wallet_ids",
       "breakpoints": true
+    },
+    {
+      "idx": 206,
+      "version": "7",
+      "when": 1794595139348,
+      "tag": "0206_presale_real_usdt_only",
+      "breakpoints": true
     }
   ]
 }
