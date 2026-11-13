@@ -9044,3 +9044,26 @@ body:not([data-bc-chat-bg=pearl]) .comm-room,body:not([data-bc-chat-bg=pearl]) .
 .bixcall-page .bc-head{top:0;margin-top:0!important;padding-top:calc(env(safe-area-inset-top) + 6px)!important;padding-bottom:8px!important}
 .bixcall-page :is(.comm-room-head,.bx-grp-room>header){padding-top:calc(env(safe-area-inset-top) + 6px)!important}
 .bixcall-page .comm-card{margin-bottom:10px}
+
+/* BIX CALL: WA-style compact header flush under the status bar, room calls + kebab */
+html:has(.bixcall-page) body{padding-top:0!important}
+html:has(.bixcall-page) .sticky-top-bar{padding-top:0!important;border:0!important;min-height:0!important;background:transparent!important}
+.bixcall-page>main{padding-top:0!important}
+.bixcall-page .bc-head.bc-head--wa{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin:0 -10px 10px!important;padding:calc(env(safe-area-inset-top) + 4px) 12px 8px!important;border-radius:0 0 20px 20px}
+.bc-toprow{display:flex;align-items:center;gap:8px;min-height:40px}
+.bc-brand{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;font-size:20px;font-weight:900;letter-spacing:.02em;color:#FFD700;white-space:nowrap;overflow:hidden}
+.bc-brand span{color:#f5f3ff}.bc-brand em{font-style:normal;font-size:10px;letter-spacing:.2em;color:#A855F7}
+.bc-toprow .comm-tier{display:none}
+.bc-head--wa .bc-qr-btn,.bc-head--wa .comm-kebab{margin-top:0!important}
+.bc-head--wa .comm-kebab>button,.comm-room-head .comm-kebab>button{display:grid;place-items:center;width:40px;height:40px;border-radius:999px}
+.bc-head--wa .bc-bar{height:46px}
+.bixcall-page .comm-room.is-full{padding-top:0!important}
+.bixcall-page .comm-room-head{padding:calc(env(safe-area-inset-top) + 4px) 6px 6px!important;gap:6px;border-radius:0!important;border-width:0 0 1px!important}
+.comm-room-head .comm-status{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc-room-calls{display:inline-flex;gap:2px;flex:none;position:relative}
+.bc-room-calls>button{display:grid;place-items:center;width:40px;height:40px;border-radius:999px;color:#f5f3ff}
+.bc-room-calls>button.is-locked{color:rgb(255 255 255 / .35)}
+.bc-room-calls .comm-hint{position:absolute;right:0;top:44px;width:220px;z-index:5}
+.comm-kebab-menu>button{text-align:left;padding:10px 12px;border-radius:10px;font-size:14px}
+.comm-kebab-menu>button.danger{color:#fb7185}
+.comm-kebab-menu>a{padding:10px 12px;font-size:14px}

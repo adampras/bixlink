@@ -43,7 +43,18 @@ export const Route = createFileRoute('/call')({
   },
   component: CallPage,
 });
-type CommTab = 'chat' | 'group' | 'updates' | 'call' | 'community' | 'setting' | 'newgroup';
+type CommTab = 'chat' | 'group' | 'updates' | 'call' | 'community' | 'setting' | 'newgroup' | 'starred';
+type Star = { id: string; peer: string; name: string; body: string; at: string };
+const readStars = (): Star[] => { try { return JSON.parse(localStorage.getItem('bc-starred') ?? '[]') as Star[]; } catch { return []; } };
+const writeStars = (l: Star[]) => { try { localStorage.setItem('bc-starred', JSON.stringify(l.slice(0, 300))); } catch { /* optional */ } };
+function StarredList({ peer, onOpen }: { peer?: string; onOpen?: (id: string, name: string) => void }) {
+  const [l, setL] = useState<Star[]>([]);
+  useEffect(() => { setL(readStars()); }, []);
+  const rows = l.filter(x => !peer || x.peer === peer);
+  return <section className="comm-card"><h3 className="comm-h">⭐ Pesan berbintang</h3>
+    {rows.length === 0 ? <p className="text-xs text-muted-foreground">Belum ada. Tekan lama pesan lalu pilih ⭐ Bintangi.</p> : <ul className="comm-list">{rows.map(x => <li key={x.id} className="comm-row"><button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpen?.(x.peer, x.name)}><b className="block truncate text-sm">@{x.name}</b><small className="block truncate text-muted-foreground">{x.body}</small></button><button type="button" aria-label="Hapus bintang" onClick={() => { const n = l.filter(y => y.id !== x.id); setL(n); writeStars(n); }}>✕</button></li>)}</ul>}
+  </section>;
+}
 type CallSearch = { tab?: CommTab; chat?: string; n?: string; join?: string };
 
 type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call: boolean; avatar_path?: string | null; status_text?: string | null };
@@ -58,6 +69,15 @@ const REACTS = ['👍', '❤️', '😂', '😮', '🙏', '🔥'];
 const fmtSize = (n = 0) => n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
 const fileIcon = (name = '') => { const e = name.split('.').pop()?.toLowerCase() ?? ''; return e === 'pdf' ? 'PDF' : ['xls', 'xlsx', 'csv'].includes(e) ? 'XLS' : ['doc', 'docx'].includes(e) ? 'DOC' : ['ppt', 'pptx'].includes(e) ? 'PPT' : ['zip', 'rar'].includes(e) ? 'ZIP' : 'FILE'; };
 const fmtBix = (n?: number) => Number(n ?? 0).toLocaleString('en-US', { maximumFractionDigits: 4 });
+/** Mono 16 kHz 16-bit WAV with gentle normalisation. */
+function encodeWav(bufs: Float32Array[], rate: number, gain: number): Blob {
+  const out = 16000; const step = rate / out; const len = bufs.reduce((n, b) => n + b.length, 0); const all = new Float32Array(len); let o = 0; for (const b of bufs) { all.set(b, o); o += b.length; }
+  const n = Math.floor(len / step); const buf = new ArrayBuffer(44 + n * 2); const v = new DataView(buf);
+  const w = (off: number, t: string) => { for (let i = 0; i < t.length; i++) v.setUint8(off + i, t.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, out, true); v.setUint32(28, out * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) { const x = Math.max(-1, Math.min(1, (all[Math.floor(i * step)] ?? 0) * Math.max(1, gain))); v.setInt16(44 + i * 2, x < 0 ? x * 0x8000 : x * 0x7fff, true); }
+  return new Blob([buf], { type: 'audio/wav' });
+}
 function VoiceNote({ url }: { url: string }) {
   const ref = useRef<HTMLAudioElement>(null);
   const [rate, setRate] = useState(1); const [play, setPlay] = useState(false); const [t, setT] = useState(0); const [dur, setDur] = useState(0); const [err, setErr] = useState(false);
@@ -72,7 +92,7 @@ function VoiceNote({ url }: { url: string }) {
       if (!blobUrl.current) {
         const b = await (await fetch(url)).blob(); if (b.size < 200) throw new Error('empty');
         const ext = url.split('?')[0]!.split('.').pop() ?? '';
-        const type = ext === 'm4a' || ext === 'mp4' ? 'audio/mp4' : ext === 'ogg' ? 'audio/ogg' : ext === 'aac' ? 'audio/aac' : 'audio/webm';
+        const type = ext === 'wav' ? 'audio/wav' : ext === 'm4a' || ext === 'mp4' ? 'audio/mp4' : ext === 'ogg' ? 'audio/ogg' : ext === 'aac' ? 'audio/aac' : 'audio/webm';
         blobUrl.current = URL.createObjectURL(new Blob([b], { type })); a.src = blobUrl.current; a.load();
       }
       a.muted = false; a.volume = 1; a.playbackRate = rate; await a.play(); setErr(false);
@@ -154,18 +174,17 @@ function CallInner() {
 
   if (chatWith) return <ChatRoom me={me} peer={chatWith} tier={tier} onBack={() => setChatWith(null)}/>;
   const open = (id: string, name: string) => setChatWith({ id, name });
-  const TITLE: Record<CommTab, string> = { chat: 'CHAT', group: 'GROUP', updates: 'UPDATES', call: 'CALLS', community: 'COMMUNITY', setting: 'SETTINGS', newgroup: 'NEW GROUP' };
+  const TITLE: Record<CommTab, string> = { chat: 'CHAT', group: 'GROUP', updates: 'UPDATES', call: 'CALLS', community: 'COMMUNITY', setting: 'SETTINGS', newgroup: 'NEW GROUP', starred: 'BERBINTANG' };
   const view: CommTab = tab;
 
-  return <main className="mx-auto w-full px-3 py-4">
-    <div className="bc-head">
+  return <main className="mx-auto w-full px-3 pt-0 pb-4">
+    <div className="bc-head bc-head--wa">
+      <div className="bc-toprow"><EcoLogo id="call" size={22}/><b className="bc-brand">BIX<span>CALL</span><em>{TITLE[view]}</em></b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}<ContactQr/><CommMenu/></div>
       <div className="bc-head__search"><FindMember bar me={me} tier={tier} onChat={open}/></div>
-      <ContactQr/>
-      <CommMenu/>
     </div>
-    <div className="comm-subhead"><EcoLogo id="call" size={18}/><b>{TITLE[view]}</b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}</div>
 
     {view === 'chat' && <><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
+    {view === 'starred' && <StarredList onOpen={open}/>}
     {view === 'group' && <BixGroups me={me}/>}
     {view === 'newgroup' && <BixGroups me={me} createOnly/>}
     {view === 'updates' && <StoryBar me={me} myName="Saya" list/>}
@@ -188,7 +207,7 @@ function AppearanceCard() {
 /** Settings shortcut only (themes, ringtone, notifications, privacy) — tab navigation stays in the dock. */
 function CommMenu() {
   const [o, setO] = useState(false);
-  const go = [['setting', 'Pengaturan · Tema & Dering'], ['newgroup', '+ Grup Baru'], ['community', 'Komunitas']] as const;
+  const go = [['newgroup', 'Grup baru'], ['community', 'Komunitas'], ['starred', 'Berbintang'], ['call', 'Riwayat panggilan'], ['setting', 'Pengaturan']] as const;
   return <span className="comm-kebab"><button type="button" aria-label="Pengaturan BIX CALL" aria-expanded={o} onClick={() => setO(v => !v)}><MoreVertical size={18}/></button>
     {o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }
@@ -233,13 +252,18 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
   </section>;
 }
 
-function ActionButtons({ peerId, name, tier, canCall, onChat }: { peerId: string; name: string; tier: Tier | null; canCall: boolean; onChat: (id: string, name: string) => void }) {
+function ActionButtons({ peerId, name, tier, canCall, onChat, compact }: { compact?: boolean; peerId: string; name: string; tier: Tier | null; canCall: boolean; onChat: (id: string, name: string) => void }) {
   const [hint, setHint] = useState('');
   const call = (k: 'voice' | 'video') => {
     if (!tier?.[k]) { setHint(`Requires an active stake of $${tier?.min[k] ?? '-'} for ${k === 'voice' ? 'voice calls' : 'video calls'}`); setTimeout(() => setHint(''), 3500); return; }
     if (!canCall) { setHint('This member does not accept calls from you'); setTimeout(() => setHint(''), 3500); return; }
     startBixCall(peerId, name, k);
   };
+  if (compact) return <span className="bc-room-calls">
+    <button type="button" aria-label="Video call" className={tier?.video ? '' : 'is-locked'} onClick={() => call('video')}>{tier?.video ? <Video size={20}/> : <Lock size={16}/>}</button>
+    <button type="button" aria-label="Voice call" className={tier?.voice ? '' : 'is-locked'} onClick={() => call('voice')}>{tier?.voice ? <Phone size={19}/> : <Lock size={16}/>}</button>
+    {hint && <em className="comm-hint">{hint} · <Link to="/stake">Staking</Link></em>}
+  </span>;
   return <span className="comm-actions">
     <button aria-label="Chat" onClick={() => onChat(peerId, name)}><MessageCircle size={15}/></button>
     <button aria-label="Voice call" className={tier?.voice ? '' : 'is-locked'} onClick={() => call('voice')}>{tier?.voice ? <Phone size={15}/> : <Lock size={13}/>}</button>
@@ -509,21 +533,34 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   const [recording, setRecording] = useState(false);
   const [recSecs, setRecSecs] = useState(0); const recCancel = useRef(false);
   useEffect(() => { if (!recording) return; const t = setInterval(() => setRecSecs(x => x + 1), 1000); return () => clearInterval(t); }, [recording]);
-  const cancelRec = () => { recCancel.current = true; rec.current?.stop(); };
+  const cancelRec = () => { recCancel.current = true; recStop.current?.(); rec.current?.stop(); };
+  // Voice notes are recorded as plain WAV (PCM): every phone and WebView can play it, and silence is detectable.
+  const recStop = useRef<(() => void) | null>(null);
   const toggleRec = async () => {
-    if (rec.current) { rec.current.stop(); return; }
+    if (rec.current || recStop.current) { recStop.current?.(); return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
-      const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/aac', 'audio/ogg;codecs=opus'].find(t => typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(t));
-      const r = mime ? new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond: 64000 }) : new MediaRecorder(stream); const chunks: Blob[] = []; const t0 = Date.now(); setRecSecs(0); recCancel.current = false;
-      r.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-      r.onstop = () => { stream.getTracks().forEach(t => t.stop()); rec.current = null; setRecording(false);
-        if (recCancel.current || Date.now() - t0 < 700 || !chunks.length) return; const total = chunks.reduce((n, c) => n + c.size, 0); if (total < 1500) { fail('Rekaman kosong — mikrofon tidak menangkap suara. Coba lagi.'); return; } const type = (r.mimeType || 'audio/webm').split(';')[0] || 'audio/webm'; void upload(new Blob(chunks, { type }), 'voice', type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm'); };
-      r.start(1000); rec.current = r; setRecording(true); setTimeout(() => { if (rec.current === r) r.stop(); }, 120000);
-    } catch { fail('Microphone permission denied'); }
+      const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = new AC(); await ctx.resume();
+      const src = ctx.createMediaStreamSource(stream); const proc = ctx.createScriptProcessor(4096, 1, 1); const mute = ctx.createGain(); mute.gain.value = 0;
+      const bufs: Float32Array[] = []; let peak = 0; const t0 = Date.now(); setRecSecs(0); recCancel.current = false;
+      proc.onaudioprocess = e => { const d = new Float32Array(e.inputBuffer.getChannelData(0)); for (let i = 0; i < d.length; i += 16) peak = Math.max(peak, Math.abs(d[i]!)); bufs.push(d); };
+      src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+      const stop = () => {
+        recStop.current = null; setRecording(false); clearTimeout(cap);
+        try { src.disconnect(); proc.disconnect(); } catch { /* ignore */ }
+        stream.getTracks().forEach(t => t.stop()); const rate = ctx.sampleRate; void ctx.close();
+        if (recCancel.current || Date.now() - t0 < 700 || !bufs.length) return;
+        if (peak < 0.003) { fail('Rekaman tanpa suara — izinkan mikrofon untuk BIXLINK di pengaturan HP, lalu coba lagi.'); return; }
+        void upload(encodeWav(bufs, rate, Math.min(1.8, 0.9 / peak)), 'voice', 'wav');
+      };
+      const cap = setTimeout(stop, 120000);
+      recStop.current = stop; setRecording(true);
+    } catch { fail('Izin mikrofon ditolak'); }
   };
   const [payOpen, setPayOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [roomMenu, setRoomMenu] = useState(false); const [starOpen, setStarOpen] = useState(false);
   const [amt, setAmt] = useState('');
   const [note, setNote] = useState('');
   const pay = async () => {
@@ -638,9 +675,16 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       <button onClick={async () => { await supabase.rpc('bix_chat_read' as never, { p_peer: peer.id } as never); onBack(); }} aria-label="Back"><ArrowLeft size={18}/></button>
       <BixAvatar userId={peer.id} name={name} online={state.online}/>
       <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small>{peerCard?.status_text && <em className="comm-statusline">{peerCard.status_text}</em>}</span>
-      <ActionButtons peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>
-      <button type="button" aria-label="Bersihkan chat" title="Bersihkan chat" onClick={() => void clearAll()}><Trash2 size={17}/></button>
+      <ActionButtons compact peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>
+      <span className="comm-kebab"><button type="button" aria-label="Menu chat" aria-expanded={roomMenu} onClick={() => setRoomMenu(v => !v)}><MoreVertical size={19}/></button>
+        {roomMenu && <span className="comm-kebab-menu" role="menu" onClick={() => setRoomMenu(false)}>
+          <button type="button" role="menuitem" onClick={() => setPayOpen(true)}>Kirim BIX</button>
+          <button type="button" role="menuitem" onClick={() => setStarOpen(true)}>Pesan berbintang</button>
+          <Link to="/pay" role="menuitem">BIX PAY</Link>
+          <button type="button" role="menuitem" className="danger" onClick={() => void clearAll()}>Bersihkan chat</button>
+        </span>}</span>
     </header>
+    {starOpen && <div className="comm-sheet-bg" onClick={() => setStarOpen(false)}><div className="comm-sheet" onClick={e => e.stopPropagation()}><StarredList peer={peer.id} onOpen={() => setStarOpen(false)}/><button type="button" className="ghost" onClick={() => setStarOpen(false)}>Tutup</button></div></div>}
     {pinned && <button type="button" className="comm-pinbar" onClick={() => jump(pinned.id)}><b>📌 Disematkan</b><span>{pinned.body}</span></button>}
     <div className="comm-msgs">
       {msgs.length === 0 && <p className="text-center text-xs text-muted-foreground">Mulai percakapan dengan @{name}</p>}
@@ -675,6 +719,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       <button type="button" onClick={() => { setReplyTo(menu); setMenu(null); }} disabled={locked}>↩ Balas</button>
       {menu.kind !== 'pay' && menu.kind !== 'request' && menu.kind !== 'file' && <button type="button" onClick={() => { setFwd(menu); setMenu(null); }} disabled={locked}>↪ Teruskan</button>}
       {(!menu.kind || menu.kind === 'text') && <button type="button" onClick={() => { void navigator.clipboard?.writeText(menu.body); setMenu(null); toastOk('Disalin'); }}>⧉ Salin</button>}
+      <button type="button" onClick={() => { const l = readStars(); const on = l.some(x => x.id === menu.id); writeStars(on ? l.filter(x => x.id !== menu.id) : [{ id: menu.id, peer: peer.id, name, body: menu.body, at: menu.created_at }, ...l]); setMenu(null); toastOk(on ? 'Bintang dihapus' : '⭐ Dibintangi'); }}>⭐ {readStars().some(x => x.id === menu.id) ? 'Hapus bintang' : 'Bintangi'}</button>
       <button type="button" onClick={() => void pin(menu, !menu.pinned_at)}>📌 {menu.pinned_at ? 'Lepas sematan' : 'Sematkan'}</button>
       <button type="button" onClick={() => void remove(menu, false)}>🗑 Hapus untuk saya</button>
       {menu.sender_id === me && menu.kind !== 'pay' && <button type="button" className="danger" onClick={() => void remove(menu, true)}>🗑 Hapus untuk semua</button>}
