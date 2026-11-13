@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X, Play, Pause } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import callGateImg from '@/assets/eco/call.png';
-import { startBixCall } from '@/components/BixCall';
+import { startBixCall, VQ_KEY, type VideoQuality } from '@/components/BixCall';
+import { unlockCallAudio } from '@/lib/bix-tones';
 import { BixGroupMeeting } from '@/components/BixGroupMeeting';
 import { BixGroups } from '@/components/BixGroups';
 import { useMember } from '@/lib/useMember';
@@ -63,29 +64,28 @@ function VoiceNote({ url }: { url: string }) {
   const next = () => { const r = rate === 1 ? 1.5 : rate === 1.5 ? 2 : 1; setRate(r); if (ref.current) ref.current.playbackRate = r; };
   const web = useRef<{ ctx: AudioContext; src?: AudioBufferSourceNode | undefined; buf?: AudioBuffer; t0: number; raf?: number } | null>(null);
   const stopWeb = () => { const w = web.current; if (w?.src) { try { w.src.onended = null; w.src.stop(); } catch { /* done */ } w.src = undefined; } if (w?.raf) cancelAnimationFrame(w.raf); setPlay(false); };
-  // Decode the whole note and play it through Web Audio: works for WebM/Opus notes from Android even when the <audio> element stays silent.
-  const playWeb = async () => {
-    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!AC) throw new Error('no-ac');
-    const w = web.current ?? (web.current = { ctx: new AC(), t0: 0 });
-    if (w.ctx.state === 'suspended') await w.ctx.resume();
-    if (!w.buf) { const ab = await (await fetch(url)).arrayBuffer(); if (ab.byteLength < 200) throw new Error('empty'); w.buf = await w.ctx.decodeAudioData(ab); setDur(w.buf.duration); }
-    const src = w.ctx.createBufferSource(); src.buffer = w.buf; src.playbackRate.value = rate;
-    const g = w.ctx.createGain(); g.gain.value = 1.6; src.connect(g).connect(w.ctx.destination);
-    src.onended = () => { stopWeb(); setT(0); }; src.start(); w.src = src; w.t0 = w.ctx.currentTime; setPlay(true); setErr(false);
-    const tick = () => { if (!web.current?.src) return; setT(Math.min(w.buf!.duration, (w.ctx.currentTime - w.t0) * rate)); w.raf = requestAnimationFrame(tick); }; tick();
-  };
+  // Play through a typed blob URL: storage may serve notes as octet-stream, which phones refuse to play.
+  const blobUrl = useRef<string | null>(null);
   const toggle = async () => {
-    if (web.current?.src) { stopWeb(); return; }
-    const a = ref.current; if (a && !a.paused) { a.pause(); return; }
-    try { await playWeb(); return; } catch { /* fall back to the element */ }
-    if (!a) return; try { a.muted = false; a.volume = 1; a.playbackRate = rate; await a.play(); setErr(false); } catch { setErr(true); }
+    const a = ref.current; if (!a) return;
+    if (!a.paused) { a.pause(); return; }
+    void unlockCallAudio();
+    try {
+      if (!blobUrl.current) {
+        const b = await (await fetch(url)).blob(); if (b.size < 200) throw new Error('empty');
+        const ext = url.split('?')[0]!.split('.').pop() ?? '';
+        const type = ext === 'm4a' || ext === 'mp4' ? 'audio/mp4' : ext === 'ogg' ? 'audio/ogg' : ext === 'aac' ? 'audio/aac' : 'audio/webm';
+        blobUrl.current = URL.createObjectURL(new Blob([b], { type })); a.src = blobUrl.current; a.load();
+      }
+      a.muted = false; a.volume = 1; a.playbackRate = rate; await a.play(); setErr(false);
+    } catch { try { a.src = url; await a.play(); setErr(false); } catch { setErr(true); } }
   };
-  useEffect(() => () => { stopWeb(); void web.current?.ctx.close().catch(() => {}); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const stopWeb = () => { if (blobUrl.current) URL.revokeObjectURL(blobUrl.current); };
+  useEffect(() => () => { stopWeb(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const mm = (x: number) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`;
   const pct = dur > 0 ? Math.min(100, (t / dur) * 100) : 0;
   return <span className="comm-voice">
-    <audio ref={ref} src={url} preload="metadata" onPlay={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onTimeUpdate={e => { setT(e.currentTarget.currentTime); const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onLoadedMetadata={e => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onError={() => setErr(true)}/>
+    <audio ref={ref} src={url} preload="metadata" playsInline onPlay={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onTimeUpdate={e => { setT(e.currentTarget.currentTime); const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onLoadedMetadata={e => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onError={() => setErr(true)}/>
     <button type="button" className="comm-vplay" onClick={() => void toggle()} aria-label={play ? 'Jeda' : 'Putar pesan suara'}>{play ? <Pause size={16}/> : <Play size={16}/>}</button>
     <span className="comm-vbar" onClick={e => { const a = ref.current; if (!a || !dur) return; const r = e.currentTarget.getBoundingClientRect(); a.currentTime = ((e.clientX - r.left) / r.width) * dur; }}><i style={{ width: `${pct}%` }}/></span>
     <small className="comm-vtime">{err ? 'Gagal' : `${mm(t)}${dur ? ` / ${mm(dur)}` : ''}`}</small>
@@ -173,7 +173,7 @@ function CallInner() {
     {view === 'updates' && <StoryBar me={me} myName="Saya" list/>}
     {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
     {view === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
-    {view === 'setting' && <><SetGroup t="🎨 Tampilan & Tema"/><AppearanceCard/><ChatThemePicker/><SetGroup t="🔔 Suara & Dering"/><section className="comm-card"><RingSetting/></section><SetGroup t="🛡️ Perangkat & Izin"/><NotifyCard/><PrivacyTab tier={tier}/><SetGroup t="Paket Anda"/><TierLadder tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
+    {view === 'setting' && <><SetGroup t="🎨 Tampilan & Tema"/><AppearanceCard/><ChatThemePicker/><SetGroup t="🔔 Suara & Dering"/><section className="comm-card"><RingSetting/></section><SetGroup t="📹 Kualitas Video Call"/><VideoQualitySetting/><SetGroup t="🛡️ Perangkat & Izin"/><NotifyCard/><PrivacyTab tier={tier}/><SetGroup t="Paket Anda"/><TierLadder tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
   </main>;
 }
 
@@ -381,6 +381,13 @@ function CallDiagnostics() {
   </section>;
 }
 
+function VideoQualitySetting() {
+  const [q, setQ] = useState<VideoQuality>('auto');
+  useEffect(() => { try { const v = localStorage.getItem(VQ_KEY); if (v === 'saver' || v === 'hd') setQ(v); } catch { /* private mode */ } }, []);
+  const pick = (v: VideoQuality) => { setQ(v); try { localStorage.setItem(VQ_KEY, v); } catch { /* private mode */ } };
+  const opts: [VideoQuality, string, string][] = [['auto', 'Otomatis', 'Menyesuaikan Wi-Fi / seluler — HD saat sinyal kuat, turun mulus saat lemah'], ['saver', 'Hemat Data & Baterai', '540p · ~0,75 Mbps — HP lebih dingin, kuota hemat'], ['hd', 'Kualitas Maksimal', '720p HD · ~2,5 Mbps — terbaik di Wi-Fi']];
+  return <section className="comm-card"><div className="flex flex-col gap-2">{opts.map(([v, t, d]) => <button key={v} type="button" onClick={() => pick(v)} aria-pressed={q === v} className={`text-left rounded-2xl border px-3 py-2 ${q === v ? 'border-primary bg-primary/10' : 'border-border'}`}><b className="block text-sm">{q === v ? '● ' : '○ '}{t}</b><small className="text-muted-foreground">{d}</small></button>)}</div><small className="block mt-2 text-muted-foreground">Berlaku pada video call berikutnya.</small></section>;
+}
 function RingSetting() {
   const [v, setV] = useState(0.7);
   const [id, setId] = useState('lux');

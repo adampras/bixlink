@@ -34,8 +34,26 @@ export function callerPhase(c: { rang?: boolean; offline?: boolean }): 'calling'
 }
 
 /** Start a call from anywhere: dispatches to the global BixCallHost. */
+/** Audio element unlocked during the tap that starts/answers a call; remote voice reuses it so the caller hears the callee without a second tap. */
+let primed: HTMLAudioElement | null = null;
+export function primeCallAudio() {
+  try {
+    primed ??= Object.assign(document.createElement('audio'), { autoplay: true });
+    primed.setAttribute('playsinline', '');
+    primed.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+    void primed.play().catch(() => {});
+  } catch { /* unsupported */ }
+}
+export type VideoQuality = 'auto' | 'saver' | 'hd';
+export const VQ_KEY = 'bixcall.vq';
+export function videoProfile(q: VideoQuality, cellularWeak: boolean) {
+  const saver = q === 'saver' || (q === 'auto' && cellularWeak);
+  if (saver) return { width: 960, height: 540, frameRate: 24, maxBitrate: 750_000 };
+  if (q === 'hd') return { width: 1280, height: 720, frameRate: 30, maxBitrate: 2_500_000 };
+  return { width: 1280, height: 720, frameRate: 30, maxBitrate: 2_000_000 };
+}
 export function startBixCall(peerId: string, peerName: string, kind: Kind) {
-  void unlockCallAudio();
+  void unlockCallAudio(); primeCallAudio();
   window.dispatchEvent(new CustomEvent('bix-call', { detail: { peerId, peerName, kind } }));
 }
 
@@ -193,7 +211,7 @@ export function BixCallHost() {
 
   return <>
     {err && <div className="bixcall-toast" role="alert">{err}</div>}
-    {call && typeof document !== 'undefined' && createPortal(<CallScreen call={call} onAccept={() => void setStatus('accepted')} onDecline={() => void setStatus('declined')} onEnd={() => void setStatus('ended')} onClose={() => setCall(null)}/>, document.body)}
+    {call && typeof document !== 'undefined' && createPortal(<CallScreen call={call} onAccept={() => { primeCallAudio(); void unlockCallAudio(); void setStatus('accepted'); }} onDecline={() => void setStatus('declined')} onEnd={() => void setStatus('ended')} onClose={() => setCall(null)}/>, document.body)}
   </>;
 }
 
@@ -265,7 +283,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   const attachAudio = (t: RemoteTrack) => {
     const box = audioBox.current; if (!box) return;
     box.querySelectorAll(`audio[data-sid="${t.sid}"]`).forEach(a => a.remove());
-    const el = t.attach() as HTMLAudioElement; el.dataset['sid'] = t.sid ?? ''; el.autoplay = true; el.setAttribute('playsinline', '');
+    const reuse = primed && !primed.isConnected ? primed : null;
+    const el = (reuse ? t.attach(reuse) : t.attach()) as HTMLAudioElement; el.muted = false; el.dataset['sid'] = t.sid ?? ''; el.autoplay = true; el.setAttribute('playsinline', '');
     box.appendChild(el); applyVolume();
     void el.play().then(syncAudioPlayback).catch(() => setAudioBlocked(true));
   };
@@ -423,9 +442,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const lp = room.localParticipant;
     // Data/battery saver: low-power devices, Save-Data or cellular links get a 480p/24fps profile.
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean; type?: string; effectiveType?: string } }).connection;
-    const saver = document.documentElement.dataset['lowPower'] === '1' || !!conn?.saveData || /2g|3g/.test(conn?.effectiveType ?? '');
+    const weak = document.documentElement.dataset['lowPower'] === '1' || !!conn?.saveData || /2g|3g/.test(conn?.effectiveType ?? '');
+    const q = ((): VideoQuality => { try { const v = localStorage.getItem(VQ_KEY); return v === 'saver' || v === 'hd' ? v : 'auto'; } catch { return 'auto'; } })();
     // Ask in the sensor's native landscape order: phones rotate it to portrait themselves; asking 720x1280 forces a centre crop (the 'zoomed-in' face).
-    const res = saver ? { width: 960, height: 540, frameRate: 24 } : { width: 1280, height: 720, frameRate: 30 };
+    const prof = videoProfile(q, weak); const saver = prof.maxBitrate < 1_000_000;
+    const res = { width: prof.width, height: prof.height, frameRate: prof.frameRate };
     if (!on) {
       // Fully release the camera so the phone's camera indicator turns off at once.
       const pub = lp.getTrackPublication(LK!.Track.Source.Camera);
@@ -435,7 +456,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     }
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
       // WA-style: hardware H.264, ~1.3 Mbps cap and 3 simulcast layers so weak signal steps down instead of freezing.
-      { videoCodec: 'h264', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 900_000 : 2_200_000, maxFramerate: res.frameRate, priority: 'high' } as never,
+      { videoCodec: 'h264', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: prof.maxBitrate, maxFramerate: res.frameRate, priority: 'high' } as never,
         videoSimulcastLayers: [
           { width: 480, height: 270, resolution: { width: 480, height: 270, frameRate: 20 }, encoding: { maxBitrate: 300_000, maxFramerate: 20 } },
           { width: 960, height: 540, resolution: { width: 960, height: 540, frameRate: 30 }, encoding: { maxBitrate: 900_000, maxFramerate: 30 } },
@@ -540,7 +561,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   return <>{mini && <button type="button" className="bc-incall-bar" onClick={() => setMini(false)} aria-label="Kembali ke panggilan"><i/><Phone size={14}/><span>Panggilan aktif · @{call.peerName}</span><b>{fmt(secs)}</b><em>Ketuk untuk kembali</em></button>}<div className={`bixcall${showVideo ? ' is-video' : ''}${showVideo && hideUi ? ' is-hidden' : ''}${isSplit ? ' is-split' : ''}${studio ? ' is-studio' : ''}`} style={{ ['--me' as string]: Math.min(1, myLevel * 4), ['--lvl' as string]: Math.min(1, level * 3), ...(mini ? { transform: 'translateY(120%)', pointerEvents: 'none', opacity: 0 } : {}) }} role="dialog" aria-label="BIX CALL" onPointerDownCapture={() => { if (live) unlockAudio(); }}>
     <video ref={backV} className={`bixcall-back${showVideo && !fill ? " on" : ""}`} autoPlay playsInline poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" muted aria-hidden="true"/>
     <video ref={remoteV} className={sw ? 'bixcall-pip is-peer' : `bixcall-remote${showVideo ? ' on' : ''}${fill ? '' : ' fit'}`} style={sw ? { transform: `translate(${pip.x}px, ${pip.y}px)` } : undefined} onPointerDown={sw ? dragPip : undefined} autoPlay playsInline poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onClick={() => { if (showVideo && !sw) setHideUi(v => !v); }} onDoubleClick={() => { if (!sw) setFill(v => !v); }}/>
-    <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>
+    <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 2, height: 2, left: 0, bottom: 0, opacity: 0.01, pointerEvents: 'none', overflow: 'hidden' }}/>
     {audioBlocked && live && <Button type="button" variant="wallet" size="wallet" className="bc-pill is-chat absolute top-18 left-1/2 -translate-x-1/2 z-10 max-w-[calc(100%-32px)] whitespace-normal" onClick={unlockAudio}><Volume2 size={16}/> Ketuk untuk aktifkan suara</Button>}
     {live && link === 'on' && remoteVideo && !cam && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
     {toneOn && tonesBlocked && <button type="button" className="bc-tone-chip" onClick={() => void unlockCallAudio()}><Volume2 size={13}/> Ketuk untuk bunyikan {call.role === 'callee' ? 'dering' : 'nada'}</button>}
