@@ -169,6 +169,11 @@ const manualPhrases: Record<Exclude<Language, 'en'>, Record<string, string>> = {
 const generated = generatedPhrases as Partial<Record<Exclude<Language, 'en'>, Record<string, string>>>;
 const phrases = Object.fromEntries((Object.keys(manualPhrases) as Exclude<Language, 'en'>[]).map(l => [l, { ...generated[l], ...manualPhrases[l] }])) as Record<Exclude<Language, 'en'>, Record<string, string>>;
 
+/** Reverse map (local text → English) so components written in Indonesian/other languages still render in English and translate onward. */
+const toEnglish: Record<string, string> = {};
+for (const l of Object.keys(phrases) as Exclude<Language, 'en'>[]) for (const [en, tr] of Object.entries(phrases[l])) if (tr && tr !== en && !(tr in toEnglish)) toEnglish[tr] = en;
+for (const en of Object.keys(phrases.id)) delete toEnglish[en];
+
 type ProductUpdate = { id: string; title: string; body: string };
 const locales: Record<Language, string> = { en: 'en-US', id: 'id-ID', ms: 'ms-MY', vi: 'vi-VN', th: 'th-TH', zh: 'zh-CN', ja: 'ja-JP', ko: 'ko-KR', hi: 'hi-IN', es: 'es-ES', pt: 'pt-BR', ru: 'ru-RU', tr: 'tr-TR', ar: 'ar-AE', tl: 'fil-PH' };
 type I18nValue = { language: Language; setLanguage: (language: Language) => void; t: (key: UiKey) => string; updates: ProductUpdate[]; formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string; formatDate: (value: string | number | Date, options?: Intl.DateTimeFormatOptions) => string; };
@@ -201,13 +206,14 @@ function translateDocument(language: Language) {
       if (!trimmed || !holder || holder.closest('[data-no-translate]')) return;
       const original = renderedText.get(node) === trimmed ? originalText.get(node) ?? trimmed : trimmed;
       originalText.set(node, original);
-      const translated = dictionary?.[original] ?? original;
+      const english = toEnglish[original] ?? original;
+      const translated = dictionary ? (dictionary[english] ?? dictionary[original] ?? original) : english;
       renderedText.set(node, translated);
       if (trimmed !== translated) node.textContent = text.replace(trimmed, translated);
     }
     if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) {
       const original = renderedPlaceholder.get(node) === node.placeholder ? originalPlaceholder.get(node) ?? node.placeholder : node.placeholder;
-      if (original) { originalPlaceholder.set(node, original); node.placeholder = dictionary?.[original] ?? original; renderedPlaceholder.set(node, node.placeholder); }
+      if (original) { originalPlaceholder.set(node, original); const en = toEnglish[original] ?? original; node.placeholder = dictionary ? (dictionary[en] ?? original) : en; renderedPlaceholder.set(node, node.placeholder); }
     }
     node.childNodes.forEach(translateNode);
   };
@@ -222,12 +228,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     setLanguageState(initial);
   }, []);
   const setLanguage = useCallback((next: Language) => {
-    const root = document.documentElement;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.localStorage.setItem('bixlink-language', next);
-    if (reduce) { setLanguageState(next); return; }
-    root.classList.add('lang-out');
-    window.setTimeout(() => { setLanguageState(next); root.classList.remove('lang-out'); root.classList.add('lang-in'); window.setTimeout(() => root.classList.remove('lang-in'), 420); }, 160);
+    // Instant switch: translate the page synchronously, then update React state.
+    document.documentElement.lang = next;
+    translateDocument(next);
+    setLanguageState(next);
   }, []);
   useEffect(() => {
     document.documentElement.lang = language;

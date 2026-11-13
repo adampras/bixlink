@@ -63,14 +63,13 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
   const items = hubOrdered(HUB_ITEMS, order).filter(i => hubVisible(cfg, i.id));
   const on = open || items.some(i => i.to === path && !['/stake', '/wallet', '/profit', '/network'].includes(i.to));
   const pick = (id: string) => {
-    try { navigator.vibrate?.(8); } catch {}
     try { navigator.vibrate?.(8); } catch { /* unsupported */ }
     try { const next = [id, ...recent.filter(r => r !== id)].slice(0, 3); localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch { /* storage blocked */ }
     setOpen(false);
   };
   const tile = (i: typeof items[number], n: number, compact = false) => {
     const Icon = ICONS[i.id] ?? LayoutGrid;
-    const cls = `hub-tile rounded-2xl border px-2 py-3 text-center ${path === i.to ? 'is-active' : ''} ${compact ? 'hub-recent-tile' : ''}`;
+    const cls = `hub-tile hub-press rounded-2xl border px-2 py-3 text-center ${path === i.to ? 'is-active' : ''} ${compact ? 'hub-recent-tile' : ''}`;
     const art = !compact ? ART[i.id] : undefined;
     if (art) {
       const pbody = <>{BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<img src={art} alt="" loading="eager" decoding="sync" draggable={false} width={320} height={320}/><span className="hub-photo-text">{ECO_LOGOS[i.id] ? <EcoLogo id={i.id} size={16}/> : <div className="hub-photo-name">{i.label}</div>}<div className="hub-photo-note">{i.note}</div></span></>;
@@ -95,12 +94,17 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
     setDrag(0);
   };
   useEffect(() => { if (!open) setDrag(0); }, [open]);
+  // Full-body pull: when the list is at the top, dragging down anywhere stretches the sheet like a spring.
+  const tStart = useRef<{ y: number; t: number; lastY: number; lastT: number; armed: boolean; buzzed: boolean } | null>(null);
+  const onTStart = (e: React.TouchEvent) => { const y = e.touches[0]?.clientY ?? 0; const now = Date.now(); tStart.current = { y, t: now, lastY: y, lastT: now, armed: (sheetRef.current?.scrollTop ?? 0) <= 0, buzzed: false }; };
+  const onTMove = (e: React.TouchEvent) => { const s = tStart.current; if (!s || !s.armed) return; const y = e.touches[0]?.clientY ?? 0; const dy = y - s.y; if (dy <= 0 || (sheetRef.current?.scrollTop ?? 0) > 0) { if (drag) setDrag(0); return; } setMoving(true); const damped = 140 * Math.log1p(dy / 140); setDrag(damped); if (!s.buzzed && damped > 110) { s.buzzed = true; try { navigator.vibrate?.(10); } catch { /* unsupported */ } } s.lastY = y; s.lastT = Date.now(); };
+  const onTEnd = () => { const s = tStart.current; tStart.current = null; if (!s || !s.armed) return; setMoving(false); const v = (s.lastY - s.y) / Math.max(1, s.lastT - s.t); if (drag > 110 || (v > 0.8 && drag > 30)) { try { navigator.vibrate?.(12); } catch { /* unsupported */ } setDrag(sheetRef.current?.offsetHeight ?? 600); setTimeout(() => setOpen(false), 240); return; } setDrag(0); };
   return <>
     <button type="button" onClick={() => { try { navigator.vibrate?.(6); } catch { /* unsupported */ } setOpen(true); }} aria-label="Open BIX HUB" className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[11.5px] font-extrabold tracking-wide ${on ? 'mobile-nav-on' : 'dock-item'}`}>
       <LayoutGrid size={24} strokeWidth={on ? 2.4 : 2} className="shrink-0"/><span>HUB</span>
     </button>
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="bottom" ref={sheetRef} className="hub-midnight hub-spring max-h-[80vh] overflow-y-auto rounded-t-3xl pb-8" style={{ transform: drag ? `translateY(${drag}px)` : undefined, transition: moving ? 'none' : 'transform .42s cubic-bezier(.16,1,.3,1), opacity .3s ease', opacity: drag > 0 ? Math.max(0.55, 1 - drag / 1400) : 1 }}>
+      <SheetContent side="bottom" ref={sheetRef} onTouchStart={onTStart} onTouchMove={onTMove} onTouchEnd={onTEnd} onTouchCancel={onTEnd} className="hub-midnight hub-spring hub-lux max-h-[80vh] overflow-y-auto overscroll-contain rounded-t-3xl pb-8" style={{ transform: drag ? `translateY(${drag}px)` : undefined, transition: moving ? 'none' : 'transform .55s cubic-bezier(.16,1.18,.3,1), opacity .3s ease', opacity: drag > 0 ? Math.max(0.55, 1 - drag / 1400) : 1 }}>
         <div className="touch-none -mx-6 -mt-6 cursor-grab px-6 pt-6 pb-1" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} aria-label="Swipe down to close HUB">
         <div className="hub-grabber" aria-hidden/>
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest" data-text="BIX HUB">BIX HUB</SheetTitle><p className="hub-gate" aria-hidden><i/>GATEWAY ONLINE</p></SheetHeader>
