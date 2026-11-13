@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ImageUp, Flashlight, SwitchCamera, RotateCcw } from 'lucide-react';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -66,7 +67,8 @@ export function QrScanner({ onResult, onClose, title = 'Scan BIX PAY QR', hint =
     try { await track.applyConstraints({ advanced: [{ torch: !torch } as any] }); setTorch(v => !v); } catch { setCanTorch(false); }
   };
 
-  return <div className="qr-full" role="dialog" aria-label={title} style={{ maxHeight: 'none' }}>
+  if (typeof document === 'undefined') return null;
+  return createPortal(<div className="qr-full" role="dialog" aria-label={title} style={{ maxHeight: 'none', position: 'fixed', inset: 0, zIndex: 2147483000 }}>
     <div id="bix-scanner" ref={box} className="qr-full__cam"/>
     <div className="qr-full__mask" aria-hidden><div className="qr-full__frame"><i/><i/><i/><i/><span className="qr-full__laser"/></div></div>
     <div className="qr-full__top"><b className="font-display">{title}</b><button type="button" onClick={onClose} aria-label="Tutup" className="qr-full__x"><X size={20}/></button></div>
@@ -87,5 +89,5 @@ export function QrScanner({ onResult, onClose, title = 'Scan BIX PAY QR', hint =
       </label>
     </div>
     <div id="bix-file-reader" className="hidden"/>
-  </div>;
+  </div>, document.body);
 }

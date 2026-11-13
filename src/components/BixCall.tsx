@@ -12,7 +12,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { getBixCallToken } from '@/lib/bix-call.functions';
 import foxLogo from '@/assets/bixlink-logo-gold.webp';
 import { ensureBixPush, pushNotify } from '@/lib/bix-push';
-import { getBeauty, makeBeautyProcessor } from '@/lib/bix-beauty';
 import { startChosenRingtone, startRingback, playConnected, playEnded, installCallAudioUnlock, unlockCallAudio, isCallAudioReady, CALL_AUDIO_EVENT } from '@/lib/bix-tones';
 import { useBixCard, useSignedUrl } from '@/components/BixAvatar';
 import { INCOMING_VIBE, VIBE_EVERY_MS, pickRoute, tiltOf, type Route, type Tilt } from '@/lib/bix-call-route';
@@ -100,11 +99,16 @@ export function BixCallHost() {
       const d = (e as CustomEvent).detail as { peerId: string; peerName: string; kind: Kind };
       if (callRef.current) return;
       setErr('');
+      // Show the calling screen immediately (0 ms); the server row id arrives a moment later.
+      const pending: Active = { id: 'pending', peerId: d.peerId, peerName: d.peerName, kind: d.kind, role: 'caller', status: 'ringing' };
+      callRef.current = pending; setCall(pending);
       const { data, error } = await supabase.rpc('bix_call_start' as never, { p_callee: d.peerId, p_kind: d.kind } as never);
-      if (error) { setErr(error.message); setTimeout(() => setErr(''), 4000); return; }
-      pushNotify('call', data as unknown as string);
-      const peer = await supabase.rpc('bix_call_peer' as never, { p_user: d.peerId } as never);
-      setCall({ id: data as unknown as string, peerId: d.peerId, peerName: d.peerName, kind: d.kind, role: 'caller', status: 'ringing', whatsapp: (peer.data as { whatsapp?: string } | null)?.whatsapp ?? null });
+      if (error) { callRef.current = null; setCall(null); setErr(error.message); setTimeout(() => setErr(''), 4000); return; }
+      const id = data as unknown as string;
+      if (callRef.current?.id !== 'pending') { void supabase.rpc('bix_call_set' as never, { p_id: id, p_status: 'ended' } as never); return; } // cancelled before the server answered
+      pushNotify('call', id);
+      setCall(c => c ? { ...c, id } : c);
+      void supabase.rpc('bix_call_peer' as never, { p_user: d.peerId } as never).then(peer => setCall(c => c && c.id === id ? { ...c, whatsapp: (peer.data as { whatsapp?: string } | null)?.whatsapp ?? null } : c));
     };
     const sim = () => { if (!callRef.current) setCall({ id: 'sim', peerId: 'sim', peerName: 'Uji BIX CALL', kind: 'voice', role: 'callee', status: 'ringing', rang: true }); };
     window.addEventListener('bix-call', on); window.addEventListener('bix-call-sim', sim);
@@ -119,7 +123,7 @@ export function BixCallHost() {
       const cur = callRef.current;
       // Mark incoming chat as reached this device (double tick) whenever the app is open.
       if (n++ % 4 === 0) void supabase.rpc('bix_chat_delivered' as never);
-      if (cur?.id === 'sim') { /* local simulation */ } else if (cur) {
+      if (cur?.id === 'sim' || cur?.id === 'pending') { /* local or not yet created */ } else if (cur) {
         const { data } = await supabase.from('bix_calls' as never).select('status, rang_at').eq('id', cur.id).maybeSingle();
         const row = data as { status?: string; rang_at?: string | null } | null;
         const st = row?.status; const rang = !!row?.rang_at;
@@ -175,12 +179,13 @@ export function BixCallHost() {
   // Auto-close finished calls (the offline screen stays until the caller closes it)
   useEffect(() => {
     if (!call || call.offline || !['ended', 'declined', 'missed'].includes(call.status)) return;
-    const t = setTimeout(() => setCall(null), 2200);
+    const t = setTimeout(() => { setCall(null); if (!window.location.pathname.startsWith('/call')) window.location.assign('/call'); }, 2200);
     return () => clearTimeout(t);
   }, [call?.status, call?.offline]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setStatus = async (s: 'accepted' | 'declined' | 'ended') => {
     const cur = callRef.current; if (!cur) return;
+    if (cur.id === 'pending') { callRef.current = null; setCall(null); return; }
     if (cur.id === 'sim') { setCall(c => c ? { ...c, status: s === 'accepted' ? 'ended' : s } : c); return; }
     const { data } = await supabase.rpc('bix_call_set' as never, { p_id: cur.id, p_status: s } as never);
     setCall(c => c ? { ...c, status: (data as unknown as string) || s } : c);
@@ -436,9 +441,6 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         ] as never });
     // 'motion' keeps frames smooth and low-latency instead of stalling to hold detail.
     const mt = lp.getTrackPublication(LK!.Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'motion';
-    // Beauty look: processed on this phone before sending, so the other side sees the same filtered video.
-    const bf = getBeauty(); const vt = lp.getTrackPublication(LK!.Track.Source.Camera)?.track as unknown as { setProcessor?: (p: unknown) => Promise<void> } | undefined;
-    if (on && bf !== 'off' && vt?.setProcessor && typeof HTMLCanvasElement.prototype.captureStream === 'function') await vt.setProcessor(makeBeautyProcessor(bf)).catch(() => {});
     setCam(on);
   };
   const toggleCam = async () => {

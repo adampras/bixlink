@@ -27,7 +27,6 @@ import { ChatThemePicker } from '@/components/ChatThemePicker';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
 import { EcoLogo } from '@/components/EcoLogo';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
-import { BEAUTY, getBeauty, setBeauty } from '@/lib/bix-beauty';
 import { getBcTheme, setBcTheme, applyBcTheme } from '@/lib/bix-theme';
 import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
 
@@ -145,7 +144,7 @@ function CallInner() {
     {view === 'updates' && <StoryBar me={me} myName="Saya" list/>}
     {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
     {view === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
-    {view === 'setting' && <><SetGroup t="Tampilan & Tema"/><AppearanceCard/><ChatThemePicker/><SetGroup t="Panggilan & Video"/><BeautyCard/><SetGroup t="Suara & Dering"/><section className="comm-card"><RingSetting/></section><NotifyCard/><PrivacyTab tier={tier}/><SetGroup t="Paket Anda"/><TierLadder tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
+    {view === 'setting' && <><SetGroup t="🎨 Tampilan & Tema"/><AppearanceCard/><ChatThemePicker/><SetGroup t="🔔 Suara & Dering"/><section className="comm-card"><RingSetting/></section><SetGroup t="🛡️ Perangkat & Izin"/><NotifyCard/><PrivacyTab tier={tier}/><SetGroup t="Paket Anda"/><TierLadder tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
   </main>;
 }
 
@@ -157,13 +156,6 @@ function AppearanceCard() {
   return <section className="comm-card"><h3 className="comm-h">Mode tampilan</h3>
     <div className="comm-perms">{([['dark', '🌙 Gelap'], ['light', '☀️ Terang'], ['auto', '⚙️ Otomatis']] as const).map(([v, l]) => <button key={v} type="button" className={m === v ? 'is-on' : ''} onClick={() => pick(v)}>{l}</button>)}</div>
     <small className="mt-2 block text-[11px] text-muted-foreground">Huruf, angka dan ikon menyesuaikan warna otomatis. "Otomatis" mengikuti setelan HP.</small></section>;
-}
-function BeautyCard() {
-  const [b, setB] = useState('off');
-  useEffect(() => { setB(getBeauty()); }, []);
-  return <section className="comm-card"><h3 className="comm-h">Filter wajah video call</h3>
-    <div className="bc-beauty">{BEAUTY.map(x => <button key={x.id} type="button" className={b === x.id ? 'is-on' : ''} onClick={() => { setB(x.id); setBeauty(x.id); }}><i style={{ filter: x.css }}/>{x.name}</button>)}</div>
-    <small className="mt-2 block text-[11px] text-muted-foreground">Filter dipakai saat kamera dinyalakan dan terlihat juga oleh lawan bicara.</small></section>;
 }
 
 /** Settings shortcut only (themes, ringtone, notifications, privacy) — tab navigation stays in the dock. */
@@ -420,7 +412,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       const { data } = await supabase.from('bix_messages' as never).select('*').or(`and(sender_id.eq.${me},recipient_id.eq.${peer.id}),and(sender_id.eq.${peer.id},recipient_id.eq.${me})`).order('created_at', { ascending: false }).limit(80);
       setMsgs(((data as Msg[] | null) ?? []).filter(m => !(m.hidden_by ?? []).includes(me)).reverse());
       void supabase.rpc('bix_chat_read' as never, { p_peer: peer.id } as never);
-      if (++tick.current % 5 === 1) { const { data: cl } = await supabase.from('bix_calls' as never).select('id,caller_id,callee_id,kind,status,created_at').or(`and(caller_id.eq.${me},callee_id.eq.${peer.id}),and(caller_id.eq.${peer.id},callee_id.eq.${me})`).order('created_at', { ascending: false }).limit(30); setCalls((cl as Row[] | null) ?? []); }
+      if (++tick.current % 5 === 1) { const { data: cl } = await supabase.from('bix_calls' as never).select('id,caller_id,callee_id,kind,status,created_at').or(`and(caller_id.eq.${me},callee_id.eq.${peer.id}),and(caller_id.eq.${peer.id},callee_id.eq.${me})`).order('created_at', { ascending: false }).limit(30); const cut = (() => { try { return localStorage.getItem(`bc-clear-${peer.id}`) ?? ''; } catch { return ''; } })(); setCalls(((cl as Row[] | null) ?? []).filter(c => c.created_at > cut)); }
     };
     if (!me) return;
     void load(); void sync(false);
@@ -429,7 +421,15 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     return () => { clearInterval(t); clearInterval(s); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me, peer.id]);
-  useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [msgs.length]);
+  const firstScroll = useRef(true);
+  useEffect(() => {
+    const go = () => end.current?.scrollIntoView({ block: 'end' });
+    go(); if (!firstScroll.current || msgs.length === 0) return;
+    firstScroll.current = false;
+    // Images/videos finish loading later and push the list; keep pinning to the newest message briefly.
+    const ts = [80, 250, 600, 1200, 2000].map(d => setTimeout(go, d));
+    return () => ts.forEach(clearTimeout);
+  }, [msgs.length, calls.length]); // eslint-disable-line react-hooks/exhaustive-deps
   // Full-screen room that tracks the visible area, so the keyboard never pushes the page up.
   const roomRef = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -502,6 +502,12 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     added(data);
   };
 
+  const clearAll = async () => {
+    if (!confirm(`Bersihkan semua chat dengan @${name}? Teks, gambar, video dan voice note hilang dari HP Anda.`)) return;
+    const ids = msgs.map(m => m.id); setMsgs([]); setCalls([]);
+    for (let i = 0; i < ids.length; i += 8) await Promise.all(ids.slice(i, i + 8).map(id => supabase.rpc('bix_chat_delete' as never, { p_id: id, p_everyone: false } as never)));
+    try { localStorage.setItem(`bc-clear-${peer.id}`, new Date().toISOString()); } catch { /* optional */ }
+  };
   const remove = async (m: Msg, everyone: boolean) => {
     setMenu(null);
     const { data, error } = await supabase.rpc('bix_chat_delete' as never, { p_id: m.id, p_everyone: everyone } as never);
@@ -599,6 +605,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       <BixAvatar userId={peer.id} name={name} online={state.online}/>
       <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small>{peerCard?.status_text && <em className="comm-statusline">{peerCard.status_text}</em>}</span>
       <ActionButtons peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>
+      <button type="button" aria-label="Bersihkan chat" title="Bersihkan chat" onClick={() => void clearAll()}><Trash2 size={17}/></button>
     </header>
     {pinned && <button type="button" className="comm-pinbar" onClick={() => jump(pinned.id)}><b>📌 Disematkan</b><span>{pinned.body}</span></button>}
     <div className="comm-msgs">
