@@ -9,11 +9,11 @@ import { useSignedUrl } from '@/components/BixAvatar';
 import { shrinkImage } from '@/lib/bix-avatar';
 import { readContacts } from '@/lib/bix-contacts';
 
-type Group = { id: string; name: string; about: string; code: string; live_code: string | null; owner_id: string; avatar_path: string | null };
+type Group = { id: string; name: string; about: string; code: string; live_code: string | null; owner_id: string; avatar_path: string | null; admins_only?: boolean };
 type Msg = { id: string; sender_id: string; name: string; body: string; created_at: string };
 type Cand = { id: string; code: string; name: string; src: 'Kontak' | 'Jaringan'; depth?: number };
 type Mem = { id: string; code: string | null; name: string; host: boolean; admin?: boolean };
-const COLS = 'id,name,about,code,live_code,owner_id,avatar_path';
+const COLS = 'id,name,about,code,live_code,owner_id,avatar_path,admins_only';
 const newCode = (n = 6) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
 
 function GroupAvatar({ g, size = 44 }: { g: Group; size?: number }) {
@@ -108,6 +108,7 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
         <p>👑 <b>Host</b> — membuat grup, mengganti foto, menambah/mengeluarkan anggota dan memulai Live Class.</p>
         <p>🛡️ <b>Admin grup</b> — diangkat Host; bisa menambah dan mengeluarkan anggota biasa. Ketuk 🛡️ di samping nama untuk mengangkat/mencopot.</p>
         <p>👤 <b>Anggota</b> — chat, ikut Live Class dan membagikan undangan.</p></div>
+      {host && <GroupSettings g={g} onSaved={onReload} onMsg={setErr}/>}
       {err && <p className="bx-grp-msg">{err}</p>}
       {manage && <Button variant="ghost" type="button" className="bx-grp-btn" style={{ width: '100%', marginBottom: 8 }} onClick={onAdd}><UserPlus size={14}/> Tambah anggota</Button>}
       <ul className="bx-grp-cands">
@@ -119,6 +120,20 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
         </li>)}
       </ul>
   </GroupSheet>;
+}
+
+function GroupSettings({ g, onSaved, onMsg }: { g: Group; onSaved: () => void; onMsg: (t: string) => void }) {
+  const [name, setName] = useState(g.name); const [about, setAbout] = useState(g.about); const [only, setOnly] = useState(!!g.admins_only);
+  const save = async (patch: Partial<Group>) => {
+    const { error } = await supabase.from('bix_groups').update(patch as never).eq('id', g.id);
+    onMsg(error ? 'Gagal menyimpan pengaturan grup.' : 'Pengaturan grup tersimpan.'); if (!error) onSaved();
+  };
+  return <div className="bx-grp-roles"><b>⚙️ Pengaturan grup (Host)</b>
+    <input className="form-input" value={name} maxLength={60} onChange={e => setName(e.target.value)} aria-label="Nama grup"/>
+    <input className="form-input" value={about} maxLength={300} onChange={e => setAbout(e.target.value)} placeholder="Deskripsi / aturan grup" aria-label="Deskripsi grup"/>
+    <Button variant="ghost" type="button" className="bx-grp-btn" disabled={name.trim().length < 2} onClick={() => void save({ name: name.trim(), about: about.trim() })}>Simpan nama & deskripsi</Button>
+    <label className="comm-check" style={{ marginTop: 8 }}><input type="checkbox" checked={only} onChange={e => { setOnly(e.target.checked); void save({ admins_only: e.target.checked }); }}/>Hanya Host & Admin yang boleh kirim pesan</label>
+  </div>;
 }
 
 function AddMembers({ g, inGroup, onClose }: { g: Group; inGroup: Set<string>; onClose: () => void }) {
@@ -233,10 +248,10 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
       </div>)}
       <div ref={end}/>
     </div>
-    <form className="bx-grp-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
-      <input className="form-input" placeholder="Write a lesson or message…" value={text} maxLength={2000} onChange={e => setText(e.target.value)}/>
+    {g.admins_only && !host && !roster.some(m => m.id === me && m.admin) ? <p className="bx-grp-empty">🔒 Hanya Host & Admin yang dapat mengirim pesan di grup ini.</p> : <form className="bx-grp-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
+      <input className="form-input" placeholder="Tulis pesan atau materi…" value={text} maxLength={2000} onChange={e => setText(e.target.value)}/>
       <Button variant="ghost" type="submit" aria-label="Send" disabled={!text.trim()}><Send size={18}/></Button>
-    </form>
+    </form>}
     {showMem && <MembersSheet g={g} me={me} roster={roster} onClose={() => setShowMem(false)} onAdd={() => { setShowMem(false); setAdding(true); }} onReload={() => void loadRoster()} onPhoto={() => file.current?.click()}/>}
     {adding && <AddMembers g={g} inGroup={new Set(roster.map(m => m.id))} onClose={() => setAdding(false)}/>}
   </section>;

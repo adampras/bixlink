@@ -452,6 +452,7 @@ export type Database = {
       bix_groups: {
         Row: {
           about: string
+          admins_only: boolean
           avatar_path: string | null
           code: string
           created_at: string
@@ -462,6 +463,7 @@ export type Database = {
         }
         Insert: {
           about?: string
+          admins_only?: boolean
           avatar_path?: string | null
           code: string
           created_at?: string
@@ -472,6 +474,7 @@ export type Database = {
         }
         Update: {
           about?: string
+          admins_only?: boolean
           avatar_path?: string | null
           code?: string
           created_at?: string

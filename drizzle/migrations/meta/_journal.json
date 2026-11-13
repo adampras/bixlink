@@ -1387,6 +1387,13 @@
       "when": 1794488226994,
       "tag": "0197_stake_tier_bix_bonus",
       "breakpoints": true
+    },
+    {
+      "idx": 198,
+      "version": "7",
+      "when": 1794530510717,
+      "tag": "0198_group_admins_only",
+      "breakpoints": true
     }
   ]
 }

@@ -4,7 +4,7 @@ import { useRouter } from '@tanstack/react-router';
 import type { Room, RemoteTrack } from 'livekit-client';
 /** livekit-client loads only when a call connects, keeping it out of every page's startup bundle. */
 let LK: typeof import('livekit-client') | null = null;
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, X } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Phone, SwitchCamera, Volume2, MessageCircle, VolumeX, X, MonitorUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { syncBixCallTheme } from '@/lib/bix-call-theme';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
@@ -446,6 +446,14 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const nf = !front; setFront(nf);
     await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment', resolution: { width: 1280, height: 720, frameRate: 30 } }).catch(() => {}); try { const m2 = (tr as unknown as { mediaStreamTrack?: MediaStreamTrack })?.mediaStreamTrack; if (m2) m2.contentHint = 'motion'; } catch { /* optional */ } void Promise.resolve().catch(() => {});
   };
+  // Screen share: shows PDFs, gallery photos or any app to the other side. Needs browser support (Android WebView/APK usually lacks it).
+  const [screen, setScreen] = useState(false);
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.mediaDevices?.getDisplayMedia === 'function';
+  const toggleScreen = async () => {
+    const r = roomRef.current; if (!r) return;
+    try { await r.localParticipant.setScreenShareEnabled(!screen, { audio: false, resolution: { width: 1920, height: 1080, frameRate: 15 } } as never); setScreen(!screen); }
+    catch { setScreen(false); }
+  };
   const manualAt = useRef(0);
   const speaker = () => { manualAt.current = Date.now(); void route(!loud); };
   const route = async (n: boolean) => {
@@ -547,6 +555,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         <label><button aria-label={mic ? 'Senyapkan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button><span>Senyapkan</span></label>
         <label><button aria-label="Chat" onClick={openChat}><MessageCircle/></button><span>Chat</span></label>
         <label><button aria-label="Balik kamera" disabled={!cam} className={cam ? '' : 'dim'} onClick={() => void flip()}><SwitchCamera/></button><span>Balik</span></label>
+        {live && link === 'on' && canShare && <label><button aria-label={screen ? 'Hentikan berbagi layar' : 'Bagikan layar'} aria-pressed={screen} className={screen ? 'shield' : ''} onClick={() => void toggleScreen()}><MonitorUp/></button><span>{screen ? 'Stop Layar' : 'Bagi Layar'}</span></label>}
         <label><button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button><span>Akhiri</span></label>
       </div>}
       {(call.offline || done) && <>

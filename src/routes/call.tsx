@@ -385,6 +385,10 @@ function RingSetting() {
     {note && <p className="mt-1 text-center text-[10px] text-muted-foreground">{note}</p>}</>;
 }
 
+function Ticks({ two }: { two: boolean }) {
+  return <svg viewBox="0 0 18 11" width="17" height="11" aria-hidden style={{ display: 'inline-block', marginLeft: 4, verticalAlign: '-1px' }} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 6l3 3 6-7"/>{two && <path d="M7.5 8.6L8.5 9l6-7"/>}</svg>;
+}
 const QUICK = ['Halo! 👋', 'Can you talk now?', 'Sebentar ya', 'Siap 👍', 'Cek BIX PAY 🪙', 'Thank you 🙏'];
 function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; name: string }; tier: Tier | null; onBack: () => void }) {
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -468,15 +472,19 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   };
   const rec = useRef<MediaRecorder | null>(null);
   const [recording, setRecording] = useState(false);
+  const [recSecs, setRecSecs] = useState(0); const recCancel = useRef(false);
+  useEffect(() => { if (!recording) return; const t = setInterval(() => setRecSecs(x => x + 1), 1000); return () => clearInterval(t); }, [recording]);
+  const cancelRec = () => { recCancel.current = true; rec.current?.stop(); };
   const toggleRec = async () => {
     if (rec.current) { rec.current.stop(); return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-      const r = new MediaRecorder(stream); const chunks: Blob[] = []; const t0 = Date.now();
-      r.ondataavailable = e => chunks.push(e.data);
+      const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/aac', 'audio/ogg;codecs=opus'].find(t => typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(t));
+      const r = mime ? new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond: 32000 }) : new MediaRecorder(stream); const chunks: Blob[] = []; const t0 = Date.now(); setRecSecs(0); recCancel.current = false;
+      r.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
       r.onstop = () => { stream.getTracks().forEach(t => t.stop()); rec.current = null; setRecording(false);
-        if (Date.now() - t0 < 700) return; const type = r.mimeType || 'audio/webm'; void upload(new Blob(chunks, { type }), 'voice', type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm'); };
-      r.start(); rec.current = r; setRecording(true); setTimeout(() => { if (rec.current === r) r.stop(); }, 120000);
+        if (recCancel.current || Date.now() - t0 < 700 || !chunks.length) return; const type = r.mimeType || 'audio/webm'; void upload(new Blob(chunks, { type }), 'voice', type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm'); };
+      r.start(250); rec.current = r; setRecording(true); setTimeout(() => { if (rec.current === r) r.stop(); }, 120000);
     } catch { fail('Microphone permission denied'); }
   };
   const [payOpen, setPayOpen] = useState(false);
@@ -608,7 +616,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
           {m.forwarded && !m.deleted_at && <em className="comm-fwd">↪ Diteruskan</em>}
           {m.reply_to && !m.deleted_at && <span className="comm-quote"><b>{q ? (q.sender_id === me ? 'Anda' : `@${name}`) : 'Balasan'}</b>{q?.deleted_at ? 'Pesan dihapus' : q?.body ?? m.reply_body ?? 'Pesan sebelumnya'}</span>}
           {m.deleted_at ? <span>🚫 {mine ? 'Anda menghapus pesan ini' : 'Pesan ini telah dihapus'}</span> : m.kind && m.kind !== 'text' ? <ChatMedia m={m} me={me} onAct={(x, a) => void reqAct(x, a)}/> : m.body}
-          <small>{m.pinned_at && '📌 '}{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && !m.deleted_at && <span className={`comm-tick ${m.read_at ? 'is-read' : m.delivered_at ? 'is-delivered' : 'is-sent'}`} aria-label={m.read_at ? 'Dibaca (centang 2 hijau)' : m.delivered_at ? 'Diterima perangkat' : 'Terkirim, penerima offline'}>{m.read_at || m.delivered_at ? ' ✓✓' : ' ✓'}</span>}</small>
+          <small>{m.pinned_at && '📌 '}{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && !m.deleted_at && <span className={`comm-tick ${m.read_at ? 'is-read' : m.delivered_at ? 'is-delivered' : 'is-sent'}`} aria-label={m.read_at ? 'Dibaca (centang 2 hijau)' : m.delivered_at ? 'Diterima perangkat' : 'Terkirim, penerima offline'}><Ticks two={!!(m.read_at || m.delivered_at)}/></span>}</small>
           {!m.deleted_at && Object.keys(m.reactions ?? {}).length > 0 && <span className="comm-reacts">{Object.entries(Object.values(m.reactions ?? {}).reduce<Record<string, number>>((a, e) => { a[e] = (a[e] ?? 0) + 1; return a; }, {})).map(([e, n]) => <button type="button" key={e} className={m.reactions?.[me] === e ? 'is-mine' : ''} onClick={ev => { ev.stopPropagation(); void react(m, e); }}>{e}{n > 1 && <i>{n}</i>}</button>)}</span>}
           {!m.deleted_at && <button type="button" className="comm-more" aria-label="Opsi pesan" onClick={() => setMenu(m)}>⋯</button>}
         </p>;
@@ -645,7 +653,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       <input ref={fileRef} type="file" accept="image/*,video/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>
       <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>
       <input ref={docRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendFile(f); }}/>
-      {recording ? <span className="comm-rec"><i/>Merekam… ketuk ■ untuk kirim</span> : <input value={text} onChange={e => onType(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked} aria-label="Tulis pesan"/>}
+      {recording ? <span className="comm-rec"><button type="button" aria-label="Batalkan rekaman" onClick={cancelRec}><Trash2 size={15}/></button><i/>{String(Math.floor(recSecs / 60)).padStart(2, '0')}:{String(recSecs % 60).padStart(2, '0')} · ketuk ■ untuk kirim</span> : <input value={text} onChange={e => onType(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked} aria-label="Tulis pesan"/>}
       {text.trim() ? <button type="submit" aria-label="Kirim"><Send size={16}/></button> : <button type="button" aria-label={recording ? 'Stop & kirim' : 'Rekam pesan suara'} className={recording ? 'is-rec' : ''} onClick={() => void toggleRec()} disabled={locked || busy}>{recording ? <Square size={14}/> : <Mic size={16}/>}</button>}
     </form>
   </main>;
@@ -684,6 +692,7 @@ function ContactQr() {
     setMsg(`@${f.name} (${id}) tersimpan di kontak.`);
   };
   return <>
+    <button type="button" className="bc-qr-btn" aria-label="Pindai QR BIX-ID" title="Pindai QR BIX-ID" onClick={() => { setMsg(''); setHit(null); setScan(true); }}><ScanLine size={18}/></button>
     <button type="button" className="bc-qr-btn" aria-label="QR kontak BIX-ID" onClick={() => { setMsg(''); setHit(null); setOpen(true); }}><QrCode size={18}/></button>
     {open && createPortal(<div className="bc-qr-overlay" onClick={() => setOpen(false)}>
       <div role="dialog" aria-label="QR kontak" className="bc-qr-card" onClick={e => e.stopPropagation()}>
