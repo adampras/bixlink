@@ -70,7 +70,7 @@ function FloatGrid({ items, path, onPick }: { items: (typeof HUB_ITEMS)[number][
   const start = useRef<number | null>(null);
   const raf = useRef(0);
   const set = (dy: number) => { cancelAnimationFrame(raf.current); raf.current = requestAnimationFrame(() => { const el = ref.current; if (!el) return; const d = Math.max(-1, Math.min(1, dy / 260)); el.style.setProperty('--fd', String(d)); el.classList.toggle('is-held', dy !== 0); }); };
-  return <div ref={ref} className="flt-grid" onTouchStart={e => { start.current = e.touches[0].clientY; }} onTouchMove={e => { if (start.current != null) set(e.touches[0].clientY - start.current); }} onTouchEnd={() => { start.current = null; set(0); }} onTouchCancel={() => { start.current = null; set(0); }}>
+  return <div ref={ref} className="flt-grid" onTouchStart={e => { start.current = (e.touches[0]?.clientY ?? 0); }} onTouchMove={e => { if (start.current != null) set((e.touches[0]?.clientY ?? 0) - start.current); }} onTouchEnd={() => { start.current = null; set(0); }} onTouchCancel={() => { start.current = null; set(0); }}>
     {items.map((i, n) => { const row = Math.floor(n / 4); const body = <><span className="flt-icon">{ART[i.id] ? <img src={ART[i.id]} alt="" loading="lazy" decoding="async"/> : <LayoutGrid size={22}/>}{BADGES[i.id] && <b>{BADGES[i.id]}</b>}</span><span className="flt-label">{i.label}</span></>;
       const cls = `flt-tile ${path === i.to ? 'is-active' : ''}`; const st = { ['--r' as string]: row, animationDelay: `${n * 30}ms` } as React.CSSProperties;
       return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => onPick(i.id)} className={cls} style={st}>{body}</a> : <Link key={i.id} to={i.to} onClick={() => onPick(i.id)} className={cls} style={st}>{body}</Link>; })}
