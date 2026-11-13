@@ -4644,6 +4644,8 @@ export type Database = {
         Args: { p_user: string }
         Returns: boolean
       }
+      bix_hub_float_access: { Args: never; Returns: Json }
+      bix_hub_float_set: { Args: { p_mode: string }; Returns: Json }
       bix_hub_orbit_access: { Args: never; Returns: Json }
       bix_hub_orbit_mode: { Args: never; Returns: string }
       bix_hub_orbit_set: { Args: { p_mode: string }; Returns: Json }

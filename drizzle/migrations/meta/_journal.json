@@ -1408,6 +1408,13 @@
       "when": 1794572520765,
       "tag": "0200_hub_orbit_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 201,
+      "version": "7",
+      "when": 1794575427672,
+      "tag": "0201_hub_float_switch",
+      "breakpoints": true
     }
   ]
 }

@@ -65,11 +65,24 @@ function OrbitPages({ pages, render }: { pages: { g: string; list: (typeof HUB_I
   </>;
 }
 
+function FloatGrid({ items, path, onPick }: { items: (typeof HUB_ITEMS)[number][]; path: string; onPick: (id: string) => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const start = useRef<number | null>(null);
+  const raf = useRef(0);
+  const set = (dy: number) => { cancelAnimationFrame(raf.current); raf.current = requestAnimationFrame(() => { const el = ref.current; if (!el) return; const d = Math.max(-1, Math.min(1, dy / 260)); el.style.setProperty('--fd', String(d)); el.classList.toggle('is-held', dy !== 0); }); };
+  return <div ref={ref} className="flt-grid" onTouchStart={e => { start.current = e.touches[0].clientY; }} onTouchMove={e => { if (start.current != null) set(e.touches[0].clientY - start.current); }} onTouchEnd={() => { start.current = null; set(0); }} onTouchCancel={() => { start.current = null; set(0); }}>
+    {items.map((i, n) => { const row = Math.floor(n / 4); const body = <><span className="flt-icon">{ART[i.id] ? <img src={ART[i.id]} alt="" loading="lazy" decoding="async"/> : <LayoutGrid size={22}/>}{BADGES[i.id] && <b>{BADGES[i.id]}</b>}</span><span className="flt-label">{i.label}</span></>;
+      const cls = `flt-tile ${path === i.to ? 'is-active' : ''}`; const st = { ['--r' as string]: row, animationDelay: `${n * 30}ms` } as React.CSSProperties;
+      return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => onPick(i.id)} className={cls} style={st}>{body}</a> : <Link key={i.id} to={i.to} onClick={() => onPick(i.id)} className={cls} style={st}>{body}</Link>; })}
+  </div>;
+}
+
 /** Mobile dock HUB (replaces HOME): opens owner-selected shortcuts. */
 export function DockHub({ path, cfg, order, matrix = false }: { path: string; cfg?: Record<string, boolean> | undefined; order?: string[] | undefined; matrix?: boolean }) {
   const [open, setOpen] = useState(false);
   const owner1 = useQuery({ queryKey: ['is-owner1'], staleTime: 300_000, enabled: open, queryFn: async () => Boolean((await supabase.rpc('bix_is_owner1')).data) });
   const orbit = useQuery({ queryKey: ['bix-hub-orbit'], staleTime: 60_000, queryFn: async () => Boolean(((await supabase.rpc('bix_hub_orbit_access' as never)).data as { on?: boolean } | null)?.on) });
+  const float = useQuery({ queryKey: ['bix-hub-float'], staleTime: 60_000, queryFn: async () => Boolean(((await supabase.rpc('bix_hub_float_access' as never)).data as { on?: boolean } | null)?.on) });
   const [csOpen, setCsOpen] = useState(false);
   const [q, setQ] = useState('');
   useEffect(() => { if (!open) setQ(''); }, [open]);
@@ -125,18 +138,19 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
       <LayoutGrid size={24} strokeWidth={on ? 2.4 : 2} className="shrink-0"/><span>HUB</span>
     </button>
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="bottom" ref={sheetRef} onTouchStart={onTStart} onTouchMove={onTMove} onTouchEnd={onTEnd} onTouchCancel={onTEnd} className={`hub-midnight hub-spring hub-lux ${orbit.data ? 'hub-orbit' : ''} max-h-[80vh] overflow-y-auto overscroll-contain rounded-t-3xl pb-8`} style={{ transform: drag ? `translateY(${drag}px)` : undefined, transition: moving ? 'none' : 'transform .55s cubic-bezier(.16,1.18,.3,1), opacity .3s ease', opacity: drag > 0 ? Math.max(0.55, 1 - drag / 1400) : 1 }}>
+      <SheetContent side="bottom" ref={sheetRef} onTouchStart={onTStart} onTouchMove={onTMove} onTouchEnd={onTEnd} onTouchCancel={onTEnd} className={`hub-midnight hub-spring hub-lux ${float.data ? 'hub-float' : orbit.data ? 'hub-orbit' : ''} max-h-[80vh] overflow-y-auto overscroll-contain rounded-t-3xl pb-8`} style={{ transform: drag ? `translateY(${drag}px)` : undefined, transition: moving ? 'none' : 'transform .55s cubic-bezier(.16,1.18,.3,1), opacity .3s ease', opacity: drag > 0 ? Math.max(0.55, 1 - drag / 1400) : 1 }}>
         <div className="touch-none -mx-6 -mt-6 cursor-grab px-6 pt-6 pb-1" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} aria-label="Swipe down to close HUB">
         <div className="hub-grabber" aria-hidden/>
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest" data-text="BIX HUB">BIX HUB</SheetTitle><p className="hub-gate" aria-hidden><i/>GATEWAY ONLINE</p></SheetHeader>
         </div>
         {owner1.data && <section className="hub-group hub-tone-gold mt-3"><button type="button" className="hub-group-head w-full" onClick={() => setCsOpen(v => !v)} aria-expanded={csOpen}><span>CS 1 · CS 2 · CS 3 control</span><em>{csOpen ? 'Close' : 'Open'}</em></button>{csOpen && <div className="mt-2"><SupportCommandCenter/></div>}</section>}
-        {orbit.data && <>
+        {float.data && <FloatGrid items={items} path={path} onPick={pick}/>}
+        {!float.data && orbit.data && <>
           <label className="orb-search"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Search BIXLINK services" aria-label="Search services"/></label>
           {q.trim() ? <section className="orb-group"><h3>Results</h3><div className="orb-grid">{items.filter(i => (i.label + ' ' + i.note).toLowerCase().includes(q.trim().toLowerCase())).map((i, n) => tile(i, n))}</div></section>
             : <OrbitPages pages={HUB_GROUPS.map(g => ({ g, list: items.filter(i => i.group === g) })).filter(x => x.list.length)} render={tile}/>}
         </>}
-        {!orbit.data && <>
+        {!float.data && !orbit.data && <>
         {matrix ? PILLARS.map((p, pi) => { const list = items.filter(i => pillarOf(i.id) === p.id); if (!list.length) return null; const tone = ['emerald', 'gold', 'violet', 'silver'][pi];
           return <section key={p.id} className={`hub-group hub-tone-${tone} mt-3`}>
           <h3 className="hub-group-head"><span>{p.label}</span><em>{p.note}</em></h3>

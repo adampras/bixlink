@@ -50,6 +50,13 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
     if (error) return onMessage(error.message); setOrbit(m); qc.invalidateQueries({ queryKey: ['bix-hub-orbit'] });
     onMessage(m === 'public' ? 'HUB Orbit dibuka untuk publik.' : m === 'scoped' ? 'HUB Orbit hanya Admin 1 + ID terpilih.' : 'HUB Orbit dimatikan.');
   };
+  const [flt, setFlt] = useState<string>('scoped');
+  useEffect(() => { supabase.rpc('bix_hub_float_access' as never).then(({ data }) => { const m = (data as { mode?: string } | null)?.mode; if (m) setFlt(m); }); }, []);
+  const saveFlt = async (m: string) => {
+    setBusy(true); const { error } = await supabase.rpc('bix_hub_float_set' as never, { p_mode: m } as never); setBusy(false);
+    if (error) return onMessage(error.message); setFlt(m); qc.invalidateQueries({ queryKey: ['bix-hub-float'] });
+    onMessage(m === 'public' ? 'HUB Float dibuka untuk publik.' : m === 'scoped' ? 'HUB Float hanya Admin 1 + ID terpilih.' : 'HUB Float dimatikan.');
+  };
   const toggleEco = (id: string) => setCfg(c => ({ ...c, owner2_locked: c.owner2_locked.includes(id) ? c.owner2_locked.filter(x => x !== id) : [...c.owner2_locked, id] }));
   const pill = (on: boolean) => `rounded-full border px-3 py-1.5 text-xs font-bold ${on ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground'}`;
 
@@ -60,6 +67,13 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
         {([['off', 'Tutup'], ['scoped', 'Admin 1 + ID terpilih'], ['public', 'Buka untuk publik']] as const).map(([v, l]) => <button key={v} type="button" disabled={busy} className={pill(orbit === v)} onClick={() => saveOrbit(v)}>{l}</button>)}
       </div>
       <p className="mt-1 text-xs text-muted-foreground">Akun terpilih = daftar ID desain di bawah. Tersimpan langsung.</p>
+    </section>
+    <section>
+      <h3 className="font-bold">HUB Float · ikon 3D melayang satu halaman</h3>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {([['off', 'Tutup'], ['scoped', 'Admin 1 + ID terpilih'], ['public', 'Buka untuk publik']] as const).map(([v, l]) => <button key={v} type="button" disabled={busy} className={pill(flt === v)} onClick={() => saveFlt(v)}>{l}</button>)}
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">Latar kaca putih tipis, tekan-tahan lalu geser untuk efek memudar & terbalik. Jika aktif, menggantikan HUB Orbit.</p>
     </section>
     <section>
       <h3 className="font-bold">Desain baru · siapa yang melihat</h3>
