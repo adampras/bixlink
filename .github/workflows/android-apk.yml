@@ -114,6 +114,10 @@ jobs:
               if (!"call".equals(d.get("type")) || d.get("callId") == null) { super.onMessageReceived(m); return; }
               try { if (Long.parseLong(d.get("expiresAt")) < System.currentTimeMillis()) return; } catch (Exception e) { }
               String id = d.get("callId");
+              // App open on screen: the in-app call screen shows Tolak/Angkat — no native banner, no second ringtone.
+              ActivityManager.RunningAppProcessInfo st = new ActivityManager.RunningAppProcessInfo(); ActivityManager.getMyMemoryState(st);
+              android.app.KeyguardManager km = (android.app.KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+              if (st.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && (km == null || !km.isKeyguardLocked())) return;
               NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
               Uri tone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
               if (Build.VERSION.SDK_INT >= 26) {

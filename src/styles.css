@@ -9013,3 +9013,6 @@ html[data-bc-theme=light] main:has(.bc-head) .comm-h, html[data-bc-theme=light] 
 html[data-bc-theme=light] main:has(.bc-head) .text-muted-foreground, html[data-bc-theme=light] main:has(.bc-head) small { color: #5b5668; }
 html[data-bc-theme=light] main:has(.bc-head) button, html[data-bc-theme=light] main:has(.bc-head) input { color: #17141f; }
 html[data-bc-theme=light] main:has(.bc-head) .is-on { color: #7c3aed !important; border-color: #7c3aed !important; }
+
+/* BIX CALL: small sound-unlock chip at top so Tolak/Angkat stay unobstructed from the first second */
+.bc-tone-chip{position:absolute;z-index:7;top:calc(env(safe-area-inset-top) + 64px);left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800;color:#FFD700;background:rgb(8 6 14 / .8);border:1px solid rgb(255 215 0 / .45)}

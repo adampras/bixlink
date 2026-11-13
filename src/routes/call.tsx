@@ -38,12 +38,13 @@ export const Route = createFileRoute('/call')({
     if (typeof t === 'string' && COMM_TABS.includes(t)) out.tab = t as CommTab;
     if (typeof c === 'string') out.chat = c;
     if (typeof n === 'string') out.n = n;
+    const j = s['join']; if (typeof j === 'string' && /^[A-Z0-9]{6,7}$/i.test(j)) { out.join = j.toUpperCase(); out.tab = 'group'; }
     return out;
   },
   component: CallPage,
 });
 type CommTab = 'chat' | 'group' | 'updates' | 'call' | 'community' | 'setting' | 'newgroup';
-type CallSearch = { tab?: CommTab; chat?: string; n?: string };
+type CallSearch = { tab?: CommTab; chat?: string; n?: string; join?: string };
 
 type Peer = { user_id: string; name: string; whatsapp?: string | null; can_call: boolean; avatar_path?: string | null; status_text?: string | null };
 type Row = { id: string; caller_id: string; callee_id: string; kind: string; status: string; created_at: string };

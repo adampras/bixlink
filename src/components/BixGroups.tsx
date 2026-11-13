@@ -44,6 +44,17 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
     setMsg(''); const { error } = await supabase.rpc('bix_group_join', { p_code: code });
     if (error) { setMsg(error.message); return; } setCode(''); await load();
   };
+  useEffect(() => {
+    const j = new URLSearchParams(window.location.search).get('join')?.toUpperCase();
+    if (!j || !/^[A-Z0-9]{6,7}$/.test(j)) return;
+    window.history.replaceState(null, '', '/call?tab=group');
+    void (async () => {
+      const { error } = await supabase.rpc('bix_group_join', { p_code: j });
+      if (error) { setMsg(error.message); return; }
+      const { data } = await supabase.from('bix_groups').select(COLS).eq('code', j).maybeSingle();
+      await load(); if (data) setOpen(data as Group); else setMsg('Berhasil bergabung ke grup.');
+    })();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   if (open) return <GroupRoom g={open} me={me} fresh={fresh} onBack={() => { setOpen(null); setFresh(false); void load(); }} onChange={load}/>;
   return <section className="bx-grp">
     <div className="bx-grp-card">
@@ -67,6 +78,13 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
 }
 
 /** Body portal keeps roster and picker independent of chat transforms and wallpapers. */
+const inviteLink = (g: Group) => `https://bixlink.com/call?tab=group&join=${g.code}`;
+async function shareGroup(g: Group): Promise<string> {
+  const url = inviteLink(g); const text = `Gabung grup "${g.name}" di BIX CALL BIXLINK.`;
+  try { if (navigator.share) { await navigator.share({ title: g.name, text, url }); return ''; } } catch { return ''; }
+  return (await copyText(`${text} ${url}`)) ? 'Link undangan tersalin — tempel ke chat mana saja.' : 'Gagal menyalin link.';
+}
+
 function GroupSheet({ title, description, onClose, children }: { title: string; description: string; onClose: () => void; children: ReactNode }) {
   return <DialogPrimitive.Root open onOpenChange={open => { if (!open) onClose(); }}>
     <DialogPrimitive.Portal>
@@ -97,17 +115,9 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
   };
   return <GroupSheet title="Anggota grup" description={`${g.name} · ${roster.length} anggota`} onClose={onClose}>
       <div className="bx-grp-info"><GroupAvatar g={g} size={76}/><b>{g.name}</b><small>Kode undangan {g.code}</small>
-        <Button variant="ghost" type="button" className="bx-grp-btn" onClick={async () => {
-          const text = `Gabung grup "${g.name}" di BIX CALL BIXLINK. Kode undangan: ${g.code} — buka ${location.origin}/call?tab=group`;
-          try { if (navigator.share) { await navigator.share({ title: g.name, text }); return; } } catch { return; }
-          if (await copyText(text)) setErr('Undangan tersalin — tempel ke chat mana saja.');
-        }}><Share2 size={14}/> Bagikan undangan</Button>
+        <Button variant="ghost" type="button" className="bx-grp-btn" onClick={async () => { const m = await shareGroup(g); if (m) setErr(m); }}><Share2 size={14}/> Bagikan link undangan</Button>
         {host && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" onClick={onPhoto}><Camera size={14}/> {g.avatar_path ? 'Ganti foto grup' : 'Pasang foto grup'}</Button>}
         {g.about && <p>{g.about}</p>}</div>
-      <div className="bx-grp-roles"><b>Peran di grup</b>
-        <p>👑 <b>Host</b> — membuat grup, mengganti foto, menambah/mengeluarkan anggota dan memulai Live Class.</p>
-        <p>🛡️ <b>Admin grup</b> — diangkat Host; bisa menambah dan mengeluarkan anggota biasa. Ketuk 🛡️ di samping nama untuk mengangkat/mencopot.</p>
-        <p>👤 <b>Anggota</b> — chat, ikut Live Class dan membagikan undangan.</p></div>
       {host && <GroupSettings g={g} onSaved={onReload} onMsg={setErr}/>}
       {err && <p className="bx-grp-msg">{err}</p>}
       {manage && <Button variant="ghost" type="button" className="bx-grp-btn" style={{ width: '100%', marginBottom: 8 }} onClick={onAdd}><UserPlus size={14}/> Tambah anggota</Button>}
@@ -182,7 +192,7 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
   const host = g.owner_id === me; const end = useRef<HTMLDivElement>(null); const file = useRef<HTMLInputElement>(null);
   const [adding, setAdding] = useState(!!fresh && g.owner_id === me);
   const [roster, setRoster] = useState<Mem[]>([]); const [showMem, setShowMem] = useState(false);
-  const [menu, setMenu] = useState<Msg | null>(null);
+  const [menu, setMenu] = useState<Msg | null>(null); const [more, setMore] = useState(false);
   const hideKey = `bx-grp-hidden-${g.id}`;
   const [hidden, setHidden] = useState<string[]>([]);
   useEffect(() => { try { setHidden(JSON.parse(localStorage.getItem(hideKey) ?? '[]')); } catch { setHidden([]); } }, [hideKey]);
@@ -242,12 +252,8 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
       </span>
       <Button variant="ghost" type="button" className="bx-grp-room-title" aria-label="Lihat anggota grup" onClick={() => setShowMem(true)}><b>{g.name}</b><small>{roster.length} anggota · Kode {g.code}</small></Button>
       <nav className="bx-grp-actions" aria-label="Aksi grup">
-        <Button variant="ghost" type="button" className="bx-grp-act" onClick={async () => { if (await copyText(g.code)) { setCopied(true); setTimeout(() => setCopied(false), 1600); } }}>{copied ? <Check size={15}/> : <Copy size={15}/>}<span>{copied ? 'Tersalin' : 'Kode'}</span></Button>
-        {g.live_code ? <Button variant="ghost" type="button" className="bx-grp-act is-live" onClick={() => setLive(g.live_code)}><Radio size={15}/><span>Gabung</span></Button>
-          : host && <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => void startLive()}><Radio size={15}/><span>Live</span></Button>}
-        <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => setShowMem(true)}><Users size={15}/><span>Info</span></Button>
-        {host ? <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => setAdding(true)}><UserPlus size={15}/><span>Tambah</span></Button>
-          : <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => void leave()}><LogOut size={15}/><span>Keluar</span></Button>}
+        {g.live_code && <Button variant="ghost" type="button" className="bx-grp-act is-live" onClick={() => setLive(g.live_code)}><Radio size={15}/><span>Gabung</span></Button>}
+        <Button variant="ghost" type="button" className="bx-grp-act" aria-label="Menu grup" onClick={() => setMore(true)}><span style={{ fontSize: 20, lineHeight: 1 }}>⋯</span></Button>
       </nav>
     </header>
     {g.live_code && <Button variant="ghost" type="button" className="bx-grp-livebar is-on" onClick={() => setLive(g.live_code)}><Radio size={14}/> Live Class berlangsung · Gabung</Button>}
@@ -269,6 +275,18 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
       <div className="bx-grp-roles">
         <Button variant="outline" type="button" onClick={() => delMine(menu)}>🗑 Hapus untuk saya</Button>
         {(menu.sender_id === me || canMod) && !menu.body.startsWith('🚫') && <Button variant="destructive" type="button" onClick={() => void delAll(menu)}>🗑 Hapus untuk semua{menu.sender_id !== me ? ' (Admin)' : ''}</Button>}
+      </div>
+    </GroupSheet>}
+    {more && <GroupSheet title="Menu grup" description={`${g.name} · ${roster.length} anggota`} onClose={() => setMore(false)}>
+      <div className="bx-grp-roles">
+        <Button variant="outline" type="button" onClick={async () => { setMore(false); const m = await shareGroup(g); if (m) setErr(m); }}><Share2 size={14}/> Bagikan link undangan</Button>
+        <Button variant="outline" type="button" onClick={async () => { if (await copyText(g.code)) { setCopied(true); setTimeout(() => setCopied(false), 1600); } }}>{copied ? <Check size={14}/> : <Copy size={14}/>} {copied ? 'Kode tersalin' : `Salin kode ${g.code}`}</Button>
+        <Button variant="outline" type="button" onClick={() => { setMore(false); setShowMem(true); }}><Users size={14}/> Info, anggota & admin{host ? ' · Pengaturan' : ''}</Button>
+        {canMod && <Button variant="outline" type="button" onClick={() => { setMore(false); setAdding(true); }}><UserPlus size={14}/> Tambah anggota</Button>}
+        {host && <Button variant="outline" type="button" onClick={() => { setMore(false); file.current?.click(); }}><Camera size={14}/> {g.avatar_path ? 'Ganti foto grup' : 'Pasang foto grup'}</Button>}
+        {g.live_code ? <Button variant="outline" type="button" onClick={() => { setMore(false); setLive(g.live_code); }}><Radio size={14}/> Ikut Live Class</Button>
+          : host && <Button variant="outline" type="button" onClick={() => { setMore(false); void startLive(); }}><Radio size={14}/> Mulai Live Class</Button>}
+        {!host && <Button variant="destructive" type="button" onClick={() => { setMore(false); void leave(); }}><LogOut size={14}/> Keluar dari grup</Button>}
       </div>
     </GroupSheet>}
     {showMem && <MembersSheet g={g} me={me} roster={roster} onClose={() => setShowMem(false)} onAdd={() => { setShowMem(false); setAdding(true); }} onReload={() => void loadRoster()} onPhoto={() => file.current?.click()}/>}

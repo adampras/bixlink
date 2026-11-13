@@ -313,9 +313,18 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     }, 150);
     return () => clearInterval(t);
   }, [link, ear]);
+  // APK: one ring source only — while the app is visible the in-app screen owns the call, so the native banner/ring is cleared
+  // (it can arrive after the screen opens); when the app goes to the background, the native banner keeps ringing alone.
+  const [visible, setVisible] = useState(() => typeof document === 'undefined' || !document.hidden);
+  useEffect(() => { const v = () => setVisible(!document.hidden); document.addEventListener('visibilitychange', v); return () => document.removeEventListener('visibilitychange', v); }, []);
+  useEffect(() => {
+    if (!ringing || call.role !== 'callee' || !visible) return;
+    clearNativeCallBanner(); const t = setInterval(clearNativeCallBanner, 1500);
+    return () => clearInterval(t);
+  }, [ringing, call.role, visible]);
   // Callee rings at once; caller hears the tuut-tuut ringback while Calling/Ringing.
   // One continuous tone loop: Calling → Ringing must not restart it (that caused overlapping tuuts).
-  const toneOn = ringing && !ringMuted && !(call.role === 'caller' && phase === 'offline');
+  const toneOn = ringing && !ringMuted && !(call.role === 'caller' && phase === 'offline') && !(isApk() && call.role === 'callee' && !visible);
   useEffect(() => {
     if (!toneOn) return;
     const stop = call.role === 'callee' ? startChosenRingtone() : startRingback();
@@ -520,6 +529,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     <div ref={audioBox} aria-hidden="true" style={{ position: 'fixed', width: 1, height: 1, left: 0, bottom: 0, opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}/>
     {audioBlocked && live && <Button type="button" variant="wallet" size="wallet" className="bc-pill is-chat absolute top-18 left-1/2 -translate-x-1/2 z-10 max-w-[calc(100%-32px)] whitespace-normal" onClick={unlockAudio}><Volume2 size={16}/> Ketuk untuk aktifkan suara</Button>}
     {live && link === 'on' && remoteVideo && !cam && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
+    {toneOn && tonesBlocked && <button type="button" className="bc-tone-chip" onClick={() => void unlockCallAudio()}><Volume2 size={13}/> Ketuk untuk bunyikan {call.role === 'callee' ? 'dering' : 'nada'}</button>}
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
       <span>{live && link === 'on' ? `SOVEREIGN ENCRYPTED • 48 kHz ${anyVideo ? 'HD VIDEO' : 'HD VOICE'}` : 'BIX CALL • SOVEREIGN ENCRYPTED'}</span>
@@ -540,7 +550,6 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     {howl && live && <div className="bc-howl" role="status">Echo is automatically reduced</div>}
     {cam && live && <video ref={localV} className={sw ? 'bixcall-remote on bixcall-self-big' : isSplit ? 'bixcall-split-self' : 'bixcall-pip bc-self-glow'} style={sw || isSplit ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})`, transition: 'transform .16s ease-out' }} onPointerDown={sw || isSplit ? undefined : dragPip} onClick={() => { if (sw) setHideUi(v => !v); }} autoPlay playsInline poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" muted/>}
     <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}`}>
-      {toneOn && tonesBlocked && <Button type="button" variant="wallet" size="wallet" className="bc-pill is-chat whitespace-normal" onClick={() => void unlockCallAudio()}><Volume2 size={16}/> Aktifkan suara {call.role === 'callee' ? 'dering' : 'panggilan'}</Button>}
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Sorry, I am busy right now. I will call you back.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
