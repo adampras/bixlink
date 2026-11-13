@@ -410,7 +410,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     // Data/battery saver: low-power devices, Save-Data or cellular links get a 480p/24fps profile.
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean; type?: string; effectiveType?: string } }).connection;
     const saver = document.documentElement.dataset['lowPower'] === '1' || !!conn?.saveData || conn?.type === 'cellular' || /2g|3g/.test(conn?.effectiveType ?? '');
-    const res = saver ? { width: 854, height: 480, frameRate: 24 } : { width: 1280, height: 720, frameRate: 30 };
+    const res = saver ? { width: 854, height: 480, frameRate: 24, aspectRatio: 16 / 9 } : { width: 1280, height: 720, frameRate: 30, aspectRatio: 16 / 9 };
     if (!on) {
       // Fully release the camera so the phone's camera indicator turns off at once.
       const pub = lp.getTrackPublication(LK!.Track.Source.Camera);
@@ -419,9 +419,11 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       setCam(false); return;
     }
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
-      { videoCodec: 'vp8', simulcast: true, degradationPreference: 'maintain-framerate', videoEncoding: { maxBitrate: saver ? 1_500_000 : 4_000_000, maxFramerate: res.frameRate, priority: 'high' } as never,
+      // WA-style: hardware H.264, ~1.3 Mbps cap and 3 simulcast layers so weak signal steps down instead of freezing.
+      { videoCodec: 'h264', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 700_000 : 1_300_000, maxFramerate: res.frameRate, priority: 'high' } as never,
         videoSimulcastLayers: [
-          { width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 30 }, encoding: { maxBitrate: 1_200_000, maxFramerate: 30 } },
+          { width: 320, height: 180, resolution: { width: 320, height: 180, frameRate: 20 }, encoding: { maxBitrate: 180_000, maxFramerate: 20 } },
+          { width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 24 }, encoding: { maxBitrate: 600_000, maxFramerate: 24 } },
         ] as never });
     // 'motion' keeps frames smooth and low-latency instead of stalling to hold detail.
     const mt = lp.getTrackPublication(LK!.Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'motion';
