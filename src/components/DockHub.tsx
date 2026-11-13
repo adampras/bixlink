@@ -86,13 +86,13 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
   const sheetRef = useRef<HTMLDivElement>(null);
   const start = useRef<{ y: number; t: number; base: number; lastY: number; lastT: number } | null>(null);
   const onDown = (e: React.PointerEvent) => { const now = Date.now(); start.current = { y: e.clientY, t: now, base: drag, lastY: e.clientY, lastT: now }; setMoving(true); (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId); };
-  const onMove = (e: React.PointerEvent) => { const s = start.current; if (!s) return; const raw = s.base + e.clientY - s.y; setDrag(raw < 0 ? raw * 0.25 : raw); s.lastY = e.clientY; s.lastT = Date.now(); };
+  const onMove = (e: React.PointerEvent) => { const s = start.current; if (!s) return; const raw = s.base + e.clientY - s.y; setDrag(raw < 0 ? -Math.sqrt(-raw) * 3 : raw); s.lastY = e.clientY; s.lastT = Date.now(); };
   const onUp = (e: React.PointerEvent) => {
     const s0 = start.current; start.current = null; setMoving(false); if (!s0) return;
     const h = sheetRef.current?.offsetHeight ?? 600; const pos = s0.base + e.clientY - s0.y;
     const v = (e.clientY - s0.lastY) / Math.max(1, Date.now() - s0.lastT + 16);
-    if (pos > h * 0.6 || (v > 1.4 && pos > 40)) { try { navigator.vibrate?.(12); } catch { /* unsupported */ } setDrag(h); setTimeout(() => setOpen(false), 220); return; }
-    setDrag(Math.max(0, pos));
+    if (pos > h * 0.3 || (v > 0.9 && pos > 40)) { try { navigator.vibrate?.(12); } catch { /* unsupported */ } setDrag(h); setTimeout(() => setOpen(false), 220); return; }
+    setDrag(0);
   };
   useEffect(() => { if (!open) setDrag(0); }, [open]);
   return <>

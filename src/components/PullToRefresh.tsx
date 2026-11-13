@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 
-const TRIGGER = 80;
+const TRIGGER = 100;
+const DEADZONE = 35;
 
 /** Pull down from the very top of the page to reload the newest published version (APK + PWA). */
 export function PullToRefresh() {
@@ -22,7 +23,11 @@ export function PullToRefresh() {
       if (start.current === null) return;
       const d = e.touches[0]!.clientY - start.current;
       if (d <= 0 || window.scrollY > 0) { dist.current = 0; setPull(0); return; }
-      dist.current = Math.min(130, d * 0.5); setPull(dist.current);
+      if (d < DEADZONE) { dist.current = 0; setPull(0); return; }
+      const x = d - DEADZONE; const prev = dist.current;
+      dist.current = Math.min(140, 160 * (1 - Math.exp(-x / 180)));
+      if (prev < TRIGGER && dist.current >= TRIGGER) { try { navigator.vibrate?.(10); } catch { /* unsupported */ } }
+      setPull(dist.current);
     };
     const up = () => {
       if (start.current === null) return;

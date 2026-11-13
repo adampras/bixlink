@@ -9067,3 +9067,22 @@ html:has(.bixcall-page) .sticky-top-bar{padding-top:0!important;border:0!importa
 .comm-kebab-menu>button{text-align:left;padding:10px 12px;border-radius:10px;font-size:14px}
 .comm-kebab-menu>button.danger{color:#fb7185}
 .comm-kebab-menu>a{padding:10px 12px;font-size:14px}
+
+/* ===== Header flush under status bar + minimalist HUB ===== */
+body { padding-top: 0 !important; }
+.sticky-top-bar { padding-top: calc(env(safe-area-inset-top, 0px) + 4px); }
+.site-header { padding-top: 6px !important; padding-bottom: 6px !important; min-height: 48px; }
+.ex-topbar { padding-top: calc(env(safe-area-inset-top, 0px) + 4px); }
+.hub-midnight { background: color-mix(in oklab, #040507 92%, transparent) !important; backdrop-filter: blur(22px) saturate(140%); border-top: 1px solid rgb(255 215 0 / .14) !important; }
+.hub-midnight .hub-group { padding: 0 !important; border: 0 !important; background: none !important; border-radius: 0 !important; margin-top: .9rem; }
+.hub-midnight .hub-group-head { color: #FFD700; opacity: .85; font-size: 9.5px; margin: 0 .2rem .45rem; }
+.hub-midnight .hub-group-head span::before { background: #FFD700; box-shadow: 0 0 6px #FFD700; width: .3rem; height: .3rem; }
+.hub-midnight .hub-group .hub-tile { background: transparent !important; border: 1px solid rgb(255 255 255 / .06) !important; box-shadow: none !important; padding: .45rem .2rem !important; min-height: 0 !important; height: auto !important; }
+.hub-midnight .hub-group .hub-tile::after { display: none; }
+.hub-midnight .hub-group .hub-tile.is-active { border-color: rgb(255 215 0 / .55) !important; }
+.hub-midnight .hub-group .hub-emblem { width: 2.4rem; height: 2.4rem; border-radius: .85rem; color: #FFD700; background: rgb(255 215 0 / .06); border: 1px solid rgb(255 215 0 / .22); box-shadow: none; }
+.hub-midnight .hub-group .hub-tile .text-\[10px\] { display: none; }
+.hub-midnight .hub-grabber { width: 3rem; height: 5px; margin: -.3rem auto .6rem; background: rgb(255 215 0 / .5); cursor: grab; touch-action: none; }
+.hub-midnight .hub-swipe { grid-auto-columns: calc((100% - 1.2rem) / 4) !important; gap: .4rem !important; }
+.hub-midnight .hub-group .hub-tile.hub-photo { padding: 0 !important; aspect-ratio: 1 / 1 !important; border-radius: 1rem !important; }
+.hub-midnight .hub-photo-note { display: none; }
