@@ -424,7 +424,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     // Data/battery saver: low-power devices, Save-Data or cellular links get a 480p/24fps profile.
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean; type?: string; effectiveType?: string } }).connection;
     const saver = document.documentElement.dataset['lowPower'] === '1' || !!conn?.saveData || /2g|3g/.test(conn?.effectiveType ?? '');
-    const res = saver ? { width: 540, height: 960, frameRate: 24 } : { width: 720, height: 1280, frameRate: 30 };
+    // Ask in the sensor's native landscape order: phones rotate it to portrait themselves; asking 720x1280 forces a centre crop (the 'zoomed-in' face).
+    const res = saver ? { width: 960, height: 540, frameRate: 24 } : { width: 1280, height: 720, frameRate: 30 };
     if (!on) {
       // Fully release the camera so the phone's camera indicator turns off at once.
       const pub = lp.getTrackPublication(LK!.Track.Source.Camera);
@@ -436,8 +437,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       // WA-style: hardware H.264, ~1.3 Mbps cap and 3 simulcast layers so weak signal steps down instead of freezing.
       { videoCodec: 'h264', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 900_000 : 2_200_000, maxFramerate: res.frameRate, priority: 'high' } as never,
         videoSimulcastLayers: [
-          { width: 270, height: 480, resolution: { width: 270, height: 480, frameRate: 20 }, encoding: { maxBitrate: 300_000, maxFramerate: 20 } },
-          { width: 540, height: 960, resolution: { width: 540, height: 960, frameRate: 30 }, encoding: { maxBitrate: 900_000, maxFramerate: 30 } },
+          { width: 480, height: 270, resolution: { width: 480, height: 270, frameRate: 20 }, encoding: { maxBitrate: 300_000, maxFramerate: 20 } },
+          { width: 960, height: 540, resolution: { width: 960, height: 540, frameRate: 30 }, encoding: { maxBitrate: 900_000, maxFramerate: 30 } },
         ] as never });
     // 'motion' keeps frames smooth and low-latency instead of stalling to hold detail.
     const mt = lp.getTrackPublication(LK!.Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
@@ -457,7 +458,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const pub = roomRef.current?.localParticipant.getTrackPublication(LK!.Track.Source.Camera);
     const tr = pub?.track as unknown as { restartTrack?: (o: object) => Promise<void> } | undefined;
     const nf = !front; setFront(nf);
-    await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment', resolution: { width: 720, height: 1280, frameRate: 30 } }).catch(() => {}); try { const m2 = (tr as unknown as { mediaStreamTrack?: MediaStreamTrack })?.mediaStreamTrack; if (m2) m2.contentHint = 'motion'; } catch { /* optional */ } void Promise.resolve().catch(() => {});
+    await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment', resolution: { width: 1280, height: 720, frameRate: 30 } }).catch(() => {}); try { const m2 = (tr as unknown as { mediaStreamTrack?: MediaStreamTrack })?.mediaStreamTrack; if (m2) m2.contentHint = 'motion'; } catch { /* optional */ } void Promise.resolve().catch(() => {});
   };
   // Screen share: shows PDFs, gallery photos or any app to the other side. Needs browser support (Android WebView/APK usually lacks it).
   const [screen, setScreen] = useState(false);

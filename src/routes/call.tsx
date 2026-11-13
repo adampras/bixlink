@@ -61,7 +61,27 @@ function VoiceNote({ url }: { url: string }) {
   const ref = useRef<HTMLAudioElement>(null);
   const [rate, setRate] = useState(1); const [play, setPlay] = useState(false); const [t, setT] = useState(0); const [dur, setDur] = useState(0); const [err, setErr] = useState(false);
   const next = () => { const r = rate === 1 ? 1.5 : rate === 1.5 ? 2 : 1; setRate(r); if (ref.current) ref.current.playbackRate = r; };
-  const toggle = async () => { const a = ref.current; if (!a) return; if (!a.paused) { a.pause(); return; } try { a.muted = false; a.volume = 1; a.playbackRate = rate; await a.play(); setErr(false); } catch { setErr(true); } };
+  const web = useRef<{ ctx: AudioContext; src?: AudioBufferSourceNode | undefined; buf?: AudioBuffer; t0: number; raf?: number } | null>(null);
+  const stopWeb = () => { const w = web.current; if (w?.src) { try { w.src.onended = null; w.src.stop(); } catch { /* done */ } w.src = undefined; } if (w?.raf) cancelAnimationFrame(w.raf); setPlay(false); };
+  // Decode the whole note and play it through Web Audio: works for WebM/Opus notes from Android even when the <audio> element stays silent.
+  const playWeb = async () => {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AC) throw new Error('no-ac');
+    const w = web.current ?? (web.current = { ctx: new AC(), t0: 0 });
+    if (w.ctx.state === 'suspended') await w.ctx.resume();
+    if (!w.buf) { const ab = await (await fetch(url)).arrayBuffer(); if (ab.byteLength < 200) throw new Error('empty'); w.buf = await w.ctx.decodeAudioData(ab); setDur(w.buf.duration); }
+    const src = w.ctx.createBufferSource(); src.buffer = w.buf; src.playbackRate.value = rate;
+    const g = w.ctx.createGain(); g.gain.value = 1.6; src.connect(g).connect(w.ctx.destination);
+    src.onended = () => { stopWeb(); setT(0); }; src.start(); w.src = src; w.t0 = w.ctx.currentTime; setPlay(true); setErr(false);
+    const tick = () => { if (!web.current?.src) return; setT(Math.min(w.buf!.duration, (w.ctx.currentTime - w.t0) * rate)); w.raf = requestAnimationFrame(tick); }; tick();
+  };
+  const toggle = async () => {
+    if (web.current?.src) { stopWeb(); return; }
+    const a = ref.current; if (a && !a.paused) { a.pause(); return; }
+    try { await playWeb(); return; } catch { /* fall back to the element */ }
+    if (!a) return; try { a.muted = false; a.volume = 1; a.playbackRate = rate; await a.play(); setErr(false); } catch { setErr(true); }
+  };
+  useEffect(() => () => { stopWeb(); void web.current?.ctx.close().catch(() => {}); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const mm = (x: number) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`;
   const pct = dur > 0 ? Math.min(100, (t / dur) * 100) : 0;
   return <span className="comm-voice">
@@ -488,13 +508,13 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   const toggleRec = async () => {
     if (rec.current) { rec.current.stop(); return; }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
       const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/aac', 'audio/ogg;codecs=opus'].find(t => typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(t));
-      const r = mime ? new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond: 32000 }) : new MediaRecorder(stream); const chunks: Blob[] = []; const t0 = Date.now(); setRecSecs(0); recCancel.current = false;
+      const r = mime ? new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond: 64000 }) : new MediaRecorder(stream); const chunks: Blob[] = []; const t0 = Date.now(); setRecSecs(0); recCancel.current = false;
       r.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
       r.onstop = () => { stream.getTracks().forEach(t => t.stop()); rec.current = null; setRecording(false);
-        if (recCancel.current || Date.now() - t0 < 700 || !chunks.length) return; const type = (r.mimeType || 'audio/webm').split(';')[0] || 'audio/webm'; void upload(new Blob(chunks, { type }), 'voice', type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm'); };
-      r.start(250); rec.current = r; setRecording(true); setTimeout(() => { if (rec.current === r) r.stop(); }, 120000);
+        if (recCancel.current || Date.now() - t0 < 700 || !chunks.length) return; const total = chunks.reduce((n, c) => n + c.size, 0); if (total < 1500) { fail('Rekaman kosong — mikrofon tidak menangkap suara. Coba lagi.'); return; } const type = (r.mimeType || 'audio/webm').split(';')[0] || 'audio/webm'; void upload(new Blob(chunks, { type }), 'voice', type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm'); };
+      r.start(1000); rec.current = r; setRecording(true); setTimeout(() => { if (rec.current === r) r.stop(); }, 120000);
     } catch { fail('Microphone permission denied'); }
   };
   const [payOpen, setPayOpen] = useState(false);
