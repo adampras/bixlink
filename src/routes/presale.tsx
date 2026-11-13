@@ -10,6 +10,7 @@ import { buyPresaleFlex, getPresaleStatus } from '@/lib/presale.functions';
 import { getPresaleWallets, payPresaleTx } from '@/lib/presale-pay.functions';
 import { QRCodeSVG } from 'qrcode.react';
 import { presaleReleased } from '@/lib/presale';
+import { supabase } from '@/integrations/supabase/client';
 import { PHASE1, bixFor, clampUsd, countdown } from '@/lib/presale-phase';
 import { number } from '@/lib/bixlink';
 import coin from '@/assets/bixcoin-cutout.webp';
@@ -54,6 +55,14 @@ function PresalePage() {
   const balance = Number(s?.balanceUsd ?? 0);
   const canBuy = !!cfg?.enabled && phase === 'live' && !busy;
 
+  const tq = useQuery({ queryKey: ['presale-test', user?.id], enabled: !!user, queryFn: async () => (await supabase.rpc('bix_presale_test_state' as never)).data as { enabled?: boolean; allowed?: boolean } | null });
+  const doTest = async () => {
+    setBusy(true); setErr(''); setMsg('');
+    const { data, error } = await supabase.rpc('bix_presale_test_buy' as never, { p_usd: usd } as never);
+    setBusy(false);
+    if (error) return setErr(error.message);
+    setMsg(`TEST: ${number(Number((data as { bix?: number }).bix ?? 0))} BIX virtual order recorded — no balance moved.`); qc.invalidateQueries({ queryKey: ['presale'] });
+  };
   const doBuy = async () => {
     setBusy(true); setErr(''); setMsg('');
     try { const r = await buy({ data: { usd } }); setMsg(`Success! ${number(Number(r.bix))} BIX locked · ${PHASE1.dailyPct}% released daily.`); setConfirm(false); qc.invalidateQueries({ queryKey: ['presale'] }); }
@@ -86,10 +95,11 @@ function PresalePage() {
           <div className="rounded-2xl bg-background/60 p-3"><dt className="text-[10px] text-muted-foreground">You receive</dt><dd className="numeric font-display text-2xl font-black text-chart-3">{number(bix)} BIX</dd></div>
           <div className="rounded-2xl bg-background/60 p-3"><dt className="text-[10px] text-muted-foreground">Released per day</dt><dd className="numeric font-display text-2xl font-black text-primary">{number(daily, { maximumFractionDigits: 2 })} BIX</dd></div>
         </dl>
+        {tq.data?.allowed && tq.data?.enabled && <button type="button" disabled={busy} onClick={doTest} className="mt-3 w-full rounded-full border border-dashed border-primary py-2 text-xs font-black text-primary">TEST BUY · virtual wallet ${usd}</button>}
         <p className="mt-3 text-[11px] text-muted-foreground">USDT balance: <b className="numeric">${number(balance, { maximumFractionDigits: 2 })}</b></p>
-        {!confirm ? <Button className="mt-4 h-12 w-full rounded-full text-base font-black" disabled={!canBuy || usd < PHASE1.min || usd > PHASE1.max} onClick={() => { setErr(''); setConfirm(true); }}>{phase === 'upcoming' ? 'Not open yet' : phase === 'ended' ? 'Phase 1 ended' : !cfg?.enabled ? 'Presale closed' : `Buy ${number(bix)} BIX`}</Button>
+        {!confirm ? <Button className="mt-4 h-12 w-full rounded-full text-base font-black presale-solid-btn" disabled={!canBuy || usd < PHASE1.min || usd > PHASE1.max} onClick={() => { setErr(''); setConfirm(true); }}>{phase === 'upcoming' ? 'Not open yet' : phase === 'ended' ? 'Phase 1 ended' : !cfg?.enabled ? 'Presale closed' : `Buy ${number(bix)} BIX`}</Button>
           : <div className="mt-4 rounded-2xl border border-chart-3/50 p-3 text-sm"><p>Confirm: pay <b>${usd} USDT</b> for <b>{number(bix)} BIX</b>, locked and released {PHASE1.dailyPct}% per day over {PHASE1.vestingDays} days.</p>
-            <div className="mt-3 flex gap-2"><Button variant="outline" className="flex-1 rounded-full" onClick={() => setConfirm(false)} disabled={busy}>Cancel</Button><Button className="flex-1 rounded-full" onClick={doBuy} disabled={busy}>{busy ? 'Processing…' : 'Confirm'}</Button></div></div>}
+            <div className="mt-3 flex gap-2"><Button variant="outline" className="flex-1 rounded-full" onClick={() => setConfirm(false)} disabled={busy}>Cancel</Button><Button className="flex-1 rounded-full presale-solid-btn" onClick={doBuy} disabled={busy}>{busy ? 'Processing…' : 'Confirm'}</Button></div></div>}
         <div className="mt-5 rounded-2xl border border-chart-3/40 bg-background/50 p-4">
           <h3 className="flex items-center gap-2 text-sm font-black"><Wallet size={16} className="text-chart-3"/> Pay directly with USDT (BEP-20)</h3>
           {wq.isLoading ? <p className="mt-2 text-xs text-muted-foreground">Loading official wallets…</p> : !wallets.length ? <p className="mt-2 text-xs text-muted-foreground">No official presale wallet is active for your network yet.</p> : <>
@@ -100,7 +110,7 @@ function PresalePage() {
               <button type="button" onClick={() => { navigator.clipboard?.writeText(w.address); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="mt-3 flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2 text-left"><span className="min-w-0 flex-1 break-all font-mono text-[11px]">{w.address}</span><Copy size={14} className="shrink-0 text-chart-3"/><span className="text-[10px] font-bold">{copied ? 'Copied' : 'Copy'}</span></button>
               <ol className="mt-3 grid gap-1 text-[11px] text-muted-foreground"><li>1. Send exactly <b className="text-foreground">${usd} USDT</b> on <b className="text-foreground">BNB Smart Chain (BEP-20)</b> to this address.</li><li>2. Paste the transaction hash (TxID) below.</li><li>3. Tap Verify — your BIX is locked and vesting starts.</li></ol>
               <input value={tx} onChange={e => setTx(e.target.value)} placeholder="TxID 0x…" className="numeric mt-3 w-full rounded-xl border border-border bg-background px-3 py-2.5 font-mono text-xs" aria-label="Transaction hash"/>
-              <Button className="mt-3 h-11 w-full rounded-full font-black" disabled={!canBuy || !/^0x[0-9a-fA-F]{64}$/.test(tx.trim())} onClick={doPay}>{busy ? 'Verifying on-chain…' : 'Verify payment & buy BIX'}</Button>
+              <Button className="mt-3 h-11 w-full rounded-full font-black presale-solid-btn" disabled={!canBuy || !/^0x[0-9a-fA-F]{64}$/.test(tx.trim())} onClick={doPay}>{busy ? 'Verifying on-chain…' : 'Verify payment & buy BIX'}</Button>
               <p className="mt-2 text-[10px] text-muted-foreground">Max $1,000 per purchase; any extra is added to your USDT balance. Each TxID can be used once.</p>
             </>}
           </>}

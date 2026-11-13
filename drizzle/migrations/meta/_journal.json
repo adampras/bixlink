@@ -1429,6 +1429,13 @@
       "when": 1794585446694,
       "tag": "0203_design_whitelist_any_network",
       "breakpoints": true
+    },
+    {
+      "idx": 204,
+      "version": "7",
+      "when": 1794586442578,
+      "tag": "0204_presale_virtual_test_and_whitelist_wallets",
+      "breakpoints": true
     }
   ]
 }

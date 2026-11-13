@@ -9189,3 +9189,7 @@ main.presale-lux dd { font-size: 1.35rem; line-height: 1.2; word-break: break-wo
 main.presale-lux li { font-size: 11px; line-height: 1.35; }
 main.presale-lux li b { font-size: 11.5px; }
 main.presale-lux .numeric { font-variant-numeric: tabular-nums; }
+
+/* Presale: one solid action color */
+.presale-lux .presale-solid-btn { background: var(--chart-3); color: var(--background); background-image: none; box-shadow: none; border: 0; }
+.presale-lux .presale-solid-btn:hover:not(:disabled) { filter: brightness(1.08); }

@@ -4828,6 +4828,9 @@ export type Database = {
       bix_presale_paid: { Args: { p_user: string }; Returns: number }
       bix_presale_save: { Args: { p_config: Json }; Returns: Json }
       bix_presale_status: { Args: never; Returns: Json }
+      bix_presale_test_buy: { Args: { p_usd: number }; Returns: Json }
+      bix_presale_test_set: { Args: { p_on: boolean }; Returns: Json }
+      bix_presale_test_state: { Args: never; Returns: Json }
       bix_profile_card: { Args: { p_user: string }; Returns: Json }
       bix_profile_me: { Args: never; Returns: Json }
       bix_profile_set_avatar: { Args: { p_path: string }; Returns: undefined }

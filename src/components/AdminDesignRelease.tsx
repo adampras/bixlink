@@ -57,10 +57,24 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
     if (error) return onMessage(error.message); setFlt(m); qc.invalidateQueries({ queryKey: ['bix-hub-float'] });
     onMessage(m === 'public' ? 'HUB Float dibuka untuk publik.' : m === 'scoped' ? 'HUB Float hanya Admin 1 + ID terpilih.' : 'HUB Float dimatikan.');
   };
+  const [pt, setPt] = useState(false);
+  useEffect(() => { supabase.rpc('bix_presale_test_state' as never).then(({ data }) => setPt(!!(data as { enabled?: boolean } | null)?.enabled)); }, []);
+  const savePt = async (on: boolean) => {
+    setBusy(true); const { error } = await supabase.rpc('bix_presale_test_set' as never, { p_on: on } as never); setBusy(false);
+    if (error) return onMessage(error.message); setPt(on); onMessage(on ? 'Tes beli presale virtual aktif untuk Admin 1 + ID terpilih.' : 'Tes beli presale virtual dimatikan.');
+  };
   const toggleEco = (id: string) => setCfg(c => ({ ...c, owner2_locked: c.owner2_locked.includes(id) ? c.owner2_locked.filter(x => x !== id) : [...c.owner2_locked, id] }));
   const pill = (on: boolean) => `rounded-full border px-3 py-1.5 text-xs font-bold ${on ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground'}`;
 
   return <div className="space-y-5 text-sm">
+    <section>
+      <h3 className="font-bold">Tes beli Presale · wallet virtual</h3>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button type="button" disabled={busy} className={pill(!pt)} onClick={() => savePt(false)}>Tutup</button>
+        <button type="button" disabled={busy} className={pill(pt)} onClick={() => savePt(true)}>Aktif · Admin 1 + ID terpilih</button>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">Pembelian tes ditandai TEST: tidak memotong saldo, tidak masuk pool, bonus, atau klaim BIX. ID terpilih juga melihat wallet Admin 1 saat deposit/presale tanpa mengubah upline, omset, atau bonus.</p>
+    </section>
     <section>
       <h3 className="font-bold">HUB Orbit · ikon lingkaran minimalis</h3>
       <div className="mt-2 flex flex-wrap gap-2">
