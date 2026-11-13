@@ -1,140 +1,98 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import heroLux from '@/assets/presale-hero-lux.jpg';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 import { useMember } from '@/lib/useMember';
-import { buyPresale, getPresaleStatus } from '@/lib/presale.functions';
-import { presaleReleased, presalePrice, stagePhase } from '@/lib/presale';
-import { ProfitSimulator } from '@/components/ProfitSimulator';
-import { PresaleCommission } from '@/components/PresaleCommission';
-import { GenesisCertificate, PresaleStrategies } from '@/components/PresaleStrategies';
-import { SovereignAllocation } from '@/components/SovereignAllocation';
-import { AgencyProgram } from '@/components/AgencyProgram';
-import { WhaleDesk } from '@/components/InstitutionalSuite';
-import { DEFAULT_STRATEGIES, dividendSettled, type PresaleStrategy } from '@/lib/presale-strategy';
+import { buyPresaleFlex, getPresaleStatus } from '@/lib/presale.functions';
+import { presaleReleased } from '@/lib/presale';
+import { PHASE1, bixFor, clampUsd, countdown } from '@/lib/presale-phase';
 import { number } from '@/lib/bixlink';
-import { Eye, Lock, Pickaxe, ShieldCheck, Users, Volume2, VolumeX } from 'lucide-react';
-import { txFeedback } from '@/components/TxFeedback';
-import { NFT_ART, type NftTier } from '@/lib/nft';
-import { VaultFacilityDialog, VIP_PASS_THRESHOLD } from '@/components/VaultFacility';
-import { PresalePurchaseDialog, type PresaleSelection } from '@/components/PresalePurchaseDialog';
-import { strategyQuote } from '@/lib/presale-strategy';
-import { poolAvailability } from '@/lib/marketing';
-import { maxCapLabel } from '@/lib/max-cap';
-import { stkCardFor } from '@/lib/package-cards';
-const valueCard = (usd: number) => ({ ...stkCardFor(usd), name: `GENESIS ${stkCardFor(usd).name}` });
-const presaleArtTier = (usd: number): NftTier => usd >= 30000 ? 'MYTHIC' : usd >= 10000 ? 'LEGENDARY' : usd >= 5000 ? 'EPIC' : usd >= 1000 ? 'RARE' : 'COMMON';
+import { CalendarClock, Coins, Lock, ShieldCheck, Unlock } from 'lucide-react';
 
-export const Route = createFileRoute('/presale')({ head: () => ({ meta: [{ title: 'BIX Presale Staking — BIXLINK' }, { name: 'description', content: 'Exclusive BIX presale staking packages with locked BIX released through mining.' }, { property: 'og:title', content: 'BIX Presale Staking — BIXLINK' }, { property: 'og:description', content: 'Genesis presale with Hybrid, Dividend and Founder strategies plus the 21-slot $100,000 Sovereign allocation.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }, { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:image', content: 'https://bixlink.lovable.app/__l5e/assets-v1/29bee76b-8e1c-4141-8057-8a3048d46598/presale-rocket-dark-poster.jpg' }] }), component: PresalePage });
+export const Route = createFileRoute('/presale')({ head: () => ({ meta: [
+  { title: 'BIX Presale Fase 1 — $0.25 per BIX | BIXLINK' },
+  { name: 'description', content: 'Presale BIX Fase 1: $0.25 per BIX, paket $100–$1.000, vesting 1% per hari selama 100 hari.' },
+  { property: 'og:title', content: 'BIX Presale Fase 1 — BIXLINK' },
+  { property: 'og:description', content: 'Beli BIX di $0.25, terbuka 1% per hari selama 100 hari. Berlaku 2 bulan.' },
+  { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: PresalePage });
 
-const TAB_LABEL = { packages: 'Packages', strategies: 'Strategies', calculator: 'Calculator', portfolio: 'My Portfolio' } as const;
-const GROUPS = [{ name: 'ENTRY', range: '$500 – $5,000', min: 0, max: 7000 }, { name: 'PREMIUM', range: '$7,000 – $30,000', min: 7000, max: 50000 }, { name: 'PRIVATE ALLOCATION', range: '$50,000 – $70,000', min: 50000, max: 100000 }];
+const QUICK = [100, 250, 500, 1000];
 
 function PresalePage() {
-  const { user, data: me } = useMember();
-  const load = useServerFn(getPresaleStatus); const buy = useServerFn(buyPresale);
-  const qc = useQueryClient();
+  const { user } = useMember();
+  const load = useServerFn(getPresaleStatus); const buy = useServerFn(buyPresaleFlex); const qc = useQueryClient();
   const q = useQuery({ queryKey: ['presale', user?.id], queryFn: () => load(), enabled: !!user });
-  const [now, setNow] = useState(() => Date.now()); const [msg, setMsg] = useState(''); const [busy, setBusy] = useState<number | null>(null);
-  const [tab, setTab] = useState<'packages' | 'strategies' | 'calculator' | 'portfolio'>('packages');
-
-  const [selection, setSelection] = useState<PresaleSelection | null>(null);
-  const [purchaseError, setPurchaseError] = useState('');
-  const [receipt, setReceipt] = useState<{ usd: number; bix: number; serial: number; dailyUsd: number } | null>(null);
-  const [nftPreview, setNftPreview] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const [usd, setUsd] = useState(500); const [confirm, setConfirm] = useState(false);
+  const [busy, setBusy] = useState(false); const [msg, setMsg] = useState(''); const [err, setErr] = useState('');
   const s = q.data; const cfg = s?.config;
-  const pool = poolAvailability(cfg?.poolCap ?? 0, s?.poolUsed ?? 0);
+  const stage = cfg?.stages?.[cfg.activeStage ?? 0];
+  const price = stage?.price ?? PHASE1.price;
+  const startsAt = stage?.startsAt ?? PHASE1.startsAt; const endsAt = stage?.endsAt ?? PHASE1.endsAt;
+  const phase = now < Date.parse(startsAt) ? 'upcoming' : now >= Date.parse(endsAt) ? 'ended' : 'live';
+  const cd = countdown(phase === 'upcoming' ? startsAt : endsAt, now);
+  const bix = bixFor(usd, price); const daily = bix * PHASE1.dailyPct / 100;
   const orders = (s?.orders ?? []).filter(o => o.status === 'locked');
-  const locked = orders.reduce((n, o) => n + Number(o.bix_amount), 0) + (s?.sponsorRewards ?? []).filter(r => r.status === 'locked').reduce((n, r) => n + Number(r.bix), 0);
-  const released = orders.reduce((n, o) => n + presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now), 0)
-    + (s?.sponsorRewards ?? []).filter(r => r.status === 'locked').reduce((n, r) => n + presaleReleased(Number(r.bix), r.release_days, r.created_at, now), 0);
-  const onBuy = (usd: number, strategy: 'standard' | PresaleStrategy = 'standard') => {
-    const pkg = cfg?.sovereign?.usd === usd ? cfg.sovereign : cfg?.packages.find(p => p.usd === usd);
-    if (!pkg) return;
-    const quote = strategy === 'standard' ? { bix: pkg.bix, dailyUsd: 0 } : strategyQuote(strategy, usd, pkg.bix, pkg.releaseDays, cfg?.strategies ?? DEFAULT_STRATEGIES);
-    setPurchaseError('');
-    setSelection({ usd, strategy, bix: quote.bix, dailyUsd: quote.dailyUsd, days: pkg.releaseDays, artwork: valueCard(usd)?.url ?? NFT_ART[presaleArtTier(usd)] });
+  const totalBix = orders.reduce((n, o) => n + Number(o.bix_amount), 0);
+  const unlocked = orders.reduce((n, o) => n + presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now), 0);
+  const balance = Number(s?.balanceUsd ?? 0);
+  const canBuy = !!cfg?.enabled && phase === 'live' && !busy;
+
+  const doBuy = async () => {
+    setBusy(true); setErr(''); setMsg('');
+    try { const r = await buy({ data: { usd } }); setMsg(`Berhasil! ${number(Number(r.bix))} BIX terkunci · terbuka ${PHASE1.dailyPct}% per hari.`); setConfirm(false); qc.invalidateQueries({ queryKey: ['presale'] }); }
+    catch (e) { setErr(e instanceof Error ? e.message : 'Pembelian gagal'); } finally { setBusy(false); }
   };
-  const confirmBuy = async () => {
-    if (!selection || busy !== null) return;
-    const { usd, strategy } = selection;
-    setBusy(usd); setMsg('');
-    try { const r = await buy({ data: { usd, strategy: strategy as 'standard' | PresaleStrategy } }); setMsg(`Locked ${number(r.bix)} BIX · Genesis certificate #GEN-${String(r.serial ?? 0).padStart(4, '0')}${r.dailyUsd > 0 ? ` · $${number(r.dailyUsd, { maximumFractionDigits: 2 })}/day USDT` : ''}.`); setReceipt({ usd, bix: Number(r.bix), serial: Number(r.serial ?? 0), dailyUsd: Number(r.dailyUsd ?? 0) }); txFeedback.success('Presale purchase successful', `${number(r.bix)} BIX locked.`); setSelection(null); await Promise.all([qc.invalidateQueries({ queryKey: ['presale'] }), qc.invalidateQueries({ queryKey: ['my-wallet'] }), qc.invalidateQueries({ queryKey: ['my-bixlink'] })]); }
-    catch (e) { setPurchaseError(e instanceof Error ? e.message : 'Purchase failed'); } finally { setBusy(null); }
-  };
-  return <BixShell><main className="mx-auto max-w-7xl px-5 py-6 md:px-8 md:py-10">
-    {(() => {
-      const stages = cfg?.stages ?? [{ price: 0.5 }, { price: 0.65 }, { price: 0.8 }];
-      const ai = cfg?.activeStage ?? 0; const cur = stages[ai]; const ph = stagePhase(cur, now);
-      const target = ph === 'upcoming' ? cur?.startsAt : ph === 'live' ? cur?.endsAt : null;
-      const left = target ? Math.max(0, Date.parse(target) - now) : 0;
-      const cd = [Math.floor(left / 864e5), Math.floor(left / 36e5) % 24, Math.floor(left / 6e4) % 60, Math.floor(left / 1e3) % 60];
-      return <section className="presale-portal presale-hero-min relative mt-1 overflow-hidden rounded-3xl border">
-        <img src={heroLux} alt="" aria-hidden width={1280} height={768} className="presale-hero-art"/>
-        <div className="presale-portal-glow" aria-hidden/>
-        <div className="relative p-4 sm:p-6">
-          <div className="flex items-center justify-between gap-2"><div className="flex items-center gap-2"><span className="presale-live-dot" aria-hidden/><p className="text-[9px] font-bold tracking-[0.3em] text-chart-3">GENESIS · STAGE {ai + 1}/3</p></div>{target ? <span className="presale-hero-chip">{ph === 'upcoming' ? 'Opens in' : 'Closes in'}</span> : ph === 'ended' ? <span className="presale-hero-chip text-destructive">Closed</span> : null}</div>
-          <h1 className="mt-2 font-display text-2xl font-black leading-none text-foreground sm:text-4xl">BIX <span className="presale-gold-text">PRESALE</span></h1>
-          <div className="mt-3 flex items-end gap-2"><span className="numeric font-display text-3xl font-black text-foreground">${number(cur?.price ?? 0.5, { maximumFractionDigits: 4 })}</span><span className="pb-1 text-[10px] text-muted-foreground">per BIX · USDT</span></div>
-          {target ? <div className="mt-3 grid max-w-[15rem] grid-cols-4 gap-1">{cd.map((v, i) => <div key={i} className="presale-cd-cell"><b className="numeric font-display text-base">{String(v).padStart(2, '0')}</b><span className="text-[8px] text-muted-foreground">{['DAYS', 'HRS', 'MIN', 'SEC'][i]}</span></div>)}</div>
-            : ph === 'ended' ? <p className="mt-3 text-[11px] font-bold text-destructive">This stage has closed · next stage opens soon.</p> : null}
-          <div className="mt-4 flex gap-2">
-            <Button size="sm" className="h-9 flex-1 rounded-full" onClick={() => setTab('packages')}>Presale packages</Button>
-            <Button asChild size="sm" variant="outline" className="h-9 flex-1 rounded-full border-chart-3/60 bg-background/40 text-chart-3 backdrop-blur"><Link to="/boost">BOOST APY</Link></Button>
-          </div>
+
+  return <BixShell><main className="mx-auto max-w-2xl px-4 py-6">
+    <section className="relative overflow-hidden rounded-3xl border border-chart-3/40 bg-card/70 p-5 backdrop-blur">
+      <p className="text-[10px] font-bold tracking-[0.3em] text-chart-3">BIX PRESALE · FASE 1</p>
+      <h1 className="mt-1 font-display text-3xl font-black">Beli BIX di harga <span className="text-chart-3">${price.toFixed(2)}</span></h1>
+      <p className="mt-1 text-xs text-muted-foreground">Setara harga buyback developer. Setiap $1 = {number(bixFor(1, price))} BIX.</p>
+      <div className="mt-4 flex items-center gap-3">
+        <span className="rounded-full border border-primary/50 px-2 py-0.5 text-[10px] font-bold text-primary">{phase === 'upcoming' ? 'DIBUKA DALAM' : phase === 'live' ? 'BERAKHIR DALAM' : 'FASE 1 SELESAI'}</span>
+        {phase !== 'ended' && <div className="grid flex-1 grid-cols-4 gap-1.5">{cd.map((v, i) => <div key={i} className="rounded-xl border border-border bg-background/60 py-1 text-center"><b className="numeric block font-display">{String(v).padStart(2, '0')}</b><span className="text-[9px] text-muted-foreground">{['HARI', 'JAM', 'MNT', 'DTK'][i]}</span></div>)}</div>}
+      </div>
+      <p className="mt-2 text-[10px] text-muted-foreground">14 Nov 2026 00:00 WIB – 14 Jan 2027 00:00 WIB</p>
+    </section>
+
+    <ol className="mt-5 grid grid-cols-3 gap-2 text-center text-[11px]">
+      {[[Coins, '1. Pilih nominal', '$100 – $1.000'], [Lock, '2. BIX terkunci', `${number(bixFor(1000, price))} BIX maks`], [Unlock, '3. Terbuka harian', `${PHASE1.dailyPct}% × ${PHASE1.vestingDays} hari`]].map(([I, t, d]: any) => <li key={t} className="rounded-2xl border border-border bg-card/50 p-3"><I size={18} className="mx-auto text-primary"/><b className="mt-1 block">{t}</b><span className="text-muted-foreground">{d}</span></li>)}
+    </ol>
+
+    {!user ? <div className="mt-6 rounded-2xl border border-border p-5 text-center"><p className="text-sm">Masuk untuk ikut presale.</p><Button asChild className="mt-3 rounded-full"><Link to="/auth">Masuk / Daftar</Link></Button></div> : <>
+      <section className="mt-6 rounded-3xl border border-primary/40 bg-card/70 p-5">
+        <h2 className="font-display text-lg font-black">Paket Presale</h2>
+        <div className="mt-3 grid grid-cols-4 gap-2">{QUICK.map(v => <button key={v} type="button" onClick={() => setUsd(v)} className={`rounded-xl border py-2 text-sm font-bold ${usd === v ? 'border-chart-3 bg-chart-3/15 text-chart-3' : 'border-border'}`}>${v}</button>)}</div>
+        <input type="range" min={PHASE1.min} max={PHASE1.max} step={10} value={usd} onChange={e => setUsd(Number(e.target.value))} className="mt-4 w-full accent-[var(--primary)]" aria-label="Nominal USDT"/>
+        <label className="mt-2 flex items-center gap-2 text-xs">Nominal (USDT)<input type="number" min={PHASE1.min} max={PHASE1.max} value={usd} onChange={e => setUsd(Number(e.target.value))} onBlur={() => setUsd(clampUsd(usd))} className="numeric w-28 rounded-lg border border-border bg-background px-2 py-1.5 text-sm"/></label>
+        <dl className="mt-4 grid grid-cols-2 gap-2">
+          <div className="rounded-2xl bg-background/60 p-3"><dt className="text-[10px] text-muted-foreground">Anda menerima</dt><dd className="numeric font-display text-2xl font-black text-chart-3">{number(bix)} BIX</dd></div>
+          <div className="rounded-2xl bg-background/60 p-3"><dt className="text-[10px] text-muted-foreground">Terbuka per hari</dt><dd className="numeric font-display text-2xl font-black text-primary">{number(daily, { maximumFractionDigits: 2 })} BIX</dd></div>
+        </dl>
+        <p className="mt-3 text-[11px] text-muted-foreground">Saldo USDT: <b className="numeric">${number(balance, { maximumFractionDigits: 2 })}</b></p>
+        {!confirm ? <Button className="mt-4 h-12 w-full rounded-full text-base font-black" disabled={!canBuy || usd < PHASE1.min || usd > PHASE1.max} onClick={() => { setErr(''); setConfirm(true); }}>{phase === 'upcoming' ? 'Belum dibuka' : phase === 'ended' ? 'Fase 1 selesai' : !cfg?.enabled ? 'Presale ditutup' : `Beli ${number(bix)} BIX`}</Button>
+          : <div className="mt-4 rounded-2xl border border-chart-3/50 p-3 text-sm"><p>Konfirmasi: bayar <b>${usd} USDT</b> untuk <b>{number(bix)} BIX</b>, terkunci dan terbuka {PHASE1.dailyPct}% per hari selama {PHASE1.vestingDays} hari.</p>
+            <div className="mt-3 flex gap-2"><Button variant="outline" className="flex-1 rounded-full" onClick={() => setConfirm(false)} disabled={busy}>Batal</Button><Button className="flex-1 rounded-full" onClick={doBuy} disabled={busy}>{busy ? 'Memproses…' : 'Konfirmasi'}</Button></div></div>}
+        {err && <p role="alert" className="mt-3 text-sm text-destructive">{err}</p>}
+        {msg && <p role="status" className="mt-3 text-sm text-chart-2">{msg}</p>}
+      </section>
+
+      <section className="mt-6 rounded-3xl border border-border bg-card/60 p-5">
+        <h2 className="font-display text-lg font-black">Portofolio Presale Saya</h2>
+        <div className="mt-3 grid grid-cols-2 gap-2 text-center">
+          <div className="rounded-2xl bg-background/60 p-3"><Lock size={14} className="mx-auto text-muted-foreground"/><b className="numeric block font-display text-xl">{number(totalBix - unlocked, { maximumFractionDigits: 2 })}</b><span className="text-[10px] text-muted-foreground">BIX terkunci</span></div>
+          <div className="rounded-2xl bg-background/60 p-3"><Unlock size={14} className="mx-auto text-chart-2"/><b className="numeric block font-display text-xl text-chart-2">{number(unlocked, { maximumFractionDigits: 2 })}</b><span className="text-[10px] text-muted-foreground">BIX sudah terbuka</span></div>
         </div>
-        <ol className="relative grid grid-cols-3 gap-px border-t border-chart-3/25 bg-chart-3/15">{stages.map((s, i) => { const p = stagePhase(s, now); const state = i === ai ? 'is-active' : i < ai || p === 'ended' ? 'is-done' : ''; return <li key={i} className={`presale-stage-step ${state}`}>
-          <span className="text-[9px] font-bold tracking-[0.2em] text-muted-foreground">STAGE {i + 1}</span>
-          <b className="numeric font-display text-base">${number(s.price, { maximumFractionDigits: 4 })}</b>
-          <span className="text-[9px] text-muted-foreground">{i === ai ? 'Live now' : i > ai && cur ? `+${number((s.price / cur.price - 1) * 100, { maximumFractionDigits: 1 })}%` : 'Completed'}</span>
-        </li>; })}</ol>
-      </section>;
-    })()}
-    <dl className="pro-only mt-4 grid grid-cols-3 gap-2 text-center">
-      {[[number(locked, { maximumFractionDigits: 2 }), 'Locked BIX', 'text-primary'], [number(released, { maximumFractionDigits: 4 }), 'Mined out', 'text-chart-2'], [`${cfg?.sponsorPct ?? 10}%`, 'Sponsor', 'text-chart-3']].map(([v, l, c]) => <div key={l} className="presale-stat-card"><dd className={`numeric font-display text-lg font-bold ${c}`}>{v}</dd><dt className="text-[10px] text-muted-foreground">{l}</dt></div>)}
-    </dl>
-    <p className="mt-3 text-center text-[10px] text-muted-foreground">Stage prices are owner-set ledger references, not market quotes. Projections are not guaranteed.</p>
-    {!user ? <p className="mt-6 text-sm text-muted-foreground">Sign in to view presale packages.</p> : !cfg ? <p className="mt-6 text-sm text-muted-foreground">Loading…</p> : <>
-      {!cfg.enabled && <p className="mt-6 rounded-lg border border-chart-3 p-3 text-sm text-chart-3">Presale is currently closed by the owner.</p>}
-      <section aria-label="Presale pool availability" className="mt-5 border-y border-border py-4"><div className="flex flex-wrap justify-between gap-2 text-xs"><b>Shared presale allocation</b><span className="numeric">{number(pool.remaining)} BIX remaining</span></div><progress className="allocation-progress mt-3" max={100} value={pool.percent}/><p className="mt-2 text-[10px] text-muted-foreground">Recorded pool usage · shared across all packages · not a guaranteed reservation.</p></section>
-      <nav className="presale-tabs mt-6" role="tablist">{(['packages','strategies','calculator','portfolio'] as const).map(t => <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={tab === t ? 'is-active' : ''}>{TAB_LABEL[t]}</button>)}</nav>
-      {tab === 'packages' && <>
-        {GROUPS.map(g => { const list = cfg.packages.filter(p => p.usd >= g.min && p.usd < g.max); if (!list.length) return null; return <section key={g.name} className="mt-6">
-          <div className="flex items-baseline justify-between"><h2 className="font-display text-base font-black tracking-wide">{g.name}</h2><span className="text-[11px] text-muted-foreground">{g.range}</span></div>
-          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">{list.map(p => { return <article key={p.usd} className="presale-lux-card presale-card-uniform">
-            <div className="presale-lux-inner flex h-full flex-col">
-              <div className="flex items-center justify-between gap-2"><span className="truncate text-[10px] font-bold text-chart-3">{p.usd >= VIP_PASS_THRESHOLD ? 'FOUNDER DEED + VIP PASS' : 'FOUNDER DEED'}</span><button type="button" className="nft-preview-chip" onClick={() => setNftPreview(p.usd)}><Eye size={12}/> Deed</button></div>
-              <h3 className="presale-lux-price numeric font-display text-[clamp(1.25rem,5.5vw,1.875rem)] font-black">${number(p.usd)}</h3>
-              <dl className="mt-2 grid grid-cols-2 gap-2 text-xs"><div><dt className="text-muted-foreground">Total BIX</dt><dd className="numeric font-bold text-primary"><Lock size={11} className="inline"/> {number(p.bix)}</dd></div><div><dt className="text-muted-foreground">Release</dt><dd className="numeric font-bold">{p.releaseDays} days</dd></div><div className="col-span-2"><dt className="text-muted-foreground">Earnings limit</dt><dd className="numeric font-bold text-chart-3">{maxCapLabel(p.usd)}</dd></div></dl>
-              <Button className="mt-auto w-full rounded-lg" disabled={!cfg.enabled || busy !== null} onClick={() => onBuy(p.usd)}>{busy === p.usd ? 'Processing…' : 'Buy package'}</Button>
-            </div>
-          </article>; })}</div>
-        </section>; })}
-        {cfg.sovereign && <SovereignAllocation cfg={cfg.sovereign} claimed={Number(s?.sovereignClaimed ?? 0)} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>}
-        <WhaleDesk/>
-      </>}
-      {tab === 'strategies' && <PresaleStrategies packages={cfg.packages} settings={cfg.strategies} open={cfg.enabled} busy={busy !== null} onBuy={onBuy}/>}
-      {tab === 'calculator' && <ProfitSimulator price={presalePrice(cfg.packages)} days={cfg.packages[0]?.releaseDays ?? 180} settings={cfg.strategies ?? DEFAULT_STRATEGIES}/>}
-      {tab === 'portfolio' && <>
-        <PresaleCommission rewards={s?.sponsorRewards ?? []} code={(me as any)?.referral?.code} now={now}/>
-        {Number(s?.dividendEarned ?? 0) > 0 && <p className="mt-3 text-xs text-chart-2">USDT dividends credited so far: <b className="numeric">${number(Number(s?.dividendEarned), { maximumFractionDigits: 2 })}</b></p>}
-        {orders.length === 0 && <p className="mt-6 text-sm text-muted-foreground">No presale positions yet.</p>}
-      </>}
-      <p className="mt-4 text-xs text-muted-foreground">USDT balance: <b className="numeric">${number(Number(s?.balanceUsd ?? 0), { maximumFractionDigits: 2 })}</b> · Pool used {number(Number(s?.poolUsed ?? 0))} / {number(cfg.poolCap)} BIX</p>
-      {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
-      {tab === 'portfolio' && orders.length > 0 && <section className="mt-8"><h2 className="font-display text-lg font-black">My presale positions</h2><div className="mt-3 grid gap-2">{orders.map(o => { const r = presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now); return <div key={o.id} className="rounded-lg border border-border p-3 text-xs"><div className="flex justify-between"><b>${number(Number(o.package_usd))} · {o.strategy ?? 'standard'}</b><span className="numeric">{number(r, { maximumFractionDigits: 4 })} / {number(Number(o.bix_amount))} BIX</span></div><div className="apy-meter mt-2"><i style={{ width: `${Math.min(100, r / Number(o.bix_amount) * 100)}%` }}/></div>{Number(o.dividend_daily_usd ?? 0) > 0 && <p className="mt-1 text-muted-foreground">USDT dividend: ${number(dividendSettled(Number(o.dividend_daily_usd), o.release_days, o.created_at, now), { maximumFractionDigits: 2 })} credited</p>}</div>; })}</div>
-        <h2 className="mt-8 font-display text-lg font-black">My Genesis certificates</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{orders.map(o => <GenesisCertificate key={o.id} usd={Number(o.package_usd)} serial={o.serial} strategy={o.strategy} bix={Number(o.bix_amount)}/>)}</div>
-      </section>}
-      {(s?.sponsorRewards?.length ?? 0) > 0 && <p className="mt-6 text-xs text-muted-foreground"><Users size={13} className="inline"/> Sponsor rewards: {s?.sponsorRewards?.length} referral purchases, released on the same mining schedule.</p>}
+        {orders.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Belum ada pembelian presale.</p> : <ul className="mt-4 grid gap-2">{orders.map(o => { const r = presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now); const pct = Math.min(100, r / Number(o.bix_amount) * 100); const day = Math.min(o.release_days, Math.floor((now - Date.parse(o.created_at)) / 864e5)); return <li key={o.id} className="rounded-2xl border border-border p-3 text-xs">
+          <div className="flex justify-between"><b>${number(Number(o.package_usd))} → {number(Number(o.bix_amount))} BIX</b><span className="text-muted-foreground"><CalendarClock size={11} className="inline"/> Hari {day}/{o.release_days}</span></div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${pct}%` }}/></div>
+          <p className="mt-1 text-muted-foreground">{number(r, { maximumFractionDigits: 2 })} BIX terbuka · {pct.toFixed(1)}%</p></li>; })}</ul>}
+      </section>
     </>}
-    <AgencyProgram userId={user?.id}/>
-    <p className="terminal-disclosure mt-8"><ShieldCheck size={14}/> No guarantee of profit. Presale BIX is an internal ledger allocation, not an on-chain token. Mined-out BIX is shown for tracking and is not spendable until the owner opens settlement. Sponsor bonus goes only to your direct referrer.</p>
-    <PresalePurchaseDialog selection={selection} receipt={receipt} balance={Number(s?.balanceUsd ?? 0)} busy={busy !== null} error={purchaseError} onClose={() => { setSelection(null); setReceipt(null); }} onConfirm={confirmBuy} onPortfolio={() => { setReceipt(null); setSelection(null); setTab('portfolio'); }}/>
-    {nftPreview !== null && <VaultFacilityDialog kind="presale" principal={nftPreview} days={cfg?.packages.find(x => x.usd === nftPreview)?.releaseDays ?? 180} label={`Presale $${number(nftPreview)}`} onClose={() => setNftPreview(null)}/>}
+    <p className="mt-5 flex gap-2 text-[10px] text-muted-foreground"><ShieldCheck size={14} className="shrink-0"/>Harga presale adalah acuan internal BIXLINK, bukan harga pasar. BIX terkunci dan terbuka bertahap; nilai ke depan tidak dijamin.</p>
   </main></BixShell>;
 }

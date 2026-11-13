@@ -10,6 +10,7 @@ import heroObsidian from '@/assets/hero-obsidian-gold.jpg';
 import { usePublicConfig, useMember } from '@/lib/useMember';
 import { boosterMaximum } from '@/lib/booster-apy';
 import { HeroFlux, HeroPresaleRibbon } from '@/components/GrowthSuite';
+import { PresalePhaseBanner } from '@/components/PresalePhaseBanner';
 import { CyberBento, CyberCtas, CyberHud } from '@/components/CyberLanding';
 
 import { HoloReactor } from '@/components/FuturisticCore';
@@ -47,6 +48,7 @@ export function LandingExperience({ packages = fallbackPackages, booster = true,
       </div>
       <div className="lux-ticker" aria-label="BIXLINK protocol highlights"><div className="lux-ticker-track">{[0,1].map(k => <span key={k} aria-hidden={k===1}>{['21.000.000 BIX FIXED SUPPLY','DEFLATIONARY HALVING','NON-CUSTODIAL MODEL','RWA NARRATIVE','SMART CONTRACT READY','COMMUNITY TO DAO'].map(t => <b key={t}>◆ {t}</b>)}</span>)}</div></div>
     </section>
+    <PresalePhaseBanner/>
     {config?.readiness.presaleStageEnabled !== false && <div className="landing-presale-band"><HeroPresaleRibbon/><LiveActivityTicker/></div>}
     <div id="lx-bento" className="lx-anchor"><CyberBento/></div>
     <section id="lx-coin" className="lx-anchor mx-auto max-w-3xl px-5 pt-5 pb-2 text-center md:py-10"><div className="eyebrow justify-center">OFFICIAL BIXCOIN</div><div className="coin-stage coin-stage--vault" aria-label="BIXCOIN official coin"><img src={vaultBg} alt="" aria-hidden className="coin-vault-art"/><div className="coin-embers" aria-hidden>{Array.from({length:14},(_,i)=><i key={i} style={{left:`${6+i*6.5}%`,animationDelay:`${(i*0.53)%7}s`,animationDuration:`${6+(i%4)}s`,['--dx' as string]:`${(i%2?1:-1)*(8+i%5*4)}px`}}/>)}</div><div className="coin-float"><img src={coinCutout} alt="BIXCOIN official gold coin" className="coin-3d" width={260} height={260}/></div><div className="coin-pedestal" aria-hidden><span/></div><div className="coin-caption"><span>21,000,000 BIX · FIXED SUPPLY</span><strong>BIX BOOSTER UP TO {maximum}% · PROJECTION</strong></div></div></section>

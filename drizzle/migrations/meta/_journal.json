@@ -1415,6 +1415,13 @@
       "when": 1794575427672,
       "tag": "0201_hub_float_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 202,
+      "version": "7",
+      "when": 1794577357019,
+      "tag": "0202_presale_flex_phase1",
+      "breakpoints": true
     }
   ]
 }

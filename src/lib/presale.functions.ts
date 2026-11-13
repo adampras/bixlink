@@ -36,3 +36,11 @@ export const savePresale = createServerFn({ method: 'POST' }).middleware([requir
     if (error) throw new Error(error.message);
     return r as unknown as PresaleConfig;
   });
+
+export const buyPresaleFlex = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ usd: z.number().min(100).max(1000) }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: r, error } = await context.supabase.rpc('bix_presale_buy_flex', { p_usd: data.usd });
+    if (error) throw new Error(error.message);
+    return r as unknown as { id: string; bix: number; serial: number };
+  });

@@ -179,3 +179,5 @@
 - [ ] Activate FCM delivery and verify locked-screen calls/background GPS — blocked by declined Firebase connection and external Android host/services plus physical-device tests.
 - [x] Complete BIX CALL audio recovery checks: six regression tests pass; authenticated incoming-call simulation produces ringtone oscillators, stops after decline, and shows centered controls at 360px without runtime errors. Remote playback recovery checks all tracks before hiding retry controls.
 - [ ] Verify actual two-phone/APK call audio — requires physical devices and an authorized second member; browser simulation does not verify remote speech.
+
+- [x] Presale Fase 1 ($0.25, $100–$1.000, vesting 1%/hari 100 hari) + banner landing 2 bulan mulai 14 Nov 2026 00:00 WIB

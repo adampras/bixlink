@@ -4817,6 +4817,7 @@ export type Database = {
         Returns: string
       }
       bix_presale_buy: { Args: { p_usd: number }; Returns: Json }
+      bix_presale_buy_flex: { Args: { p_usd: number }; Returns: Json }
       bix_presale_buy_strategy: {
         Args: { p_strategy: string; p_usd: number }
         Returns: Json
