@@ -9193,3 +9193,10 @@ main.presale-lux .numeric { font-variant-numeric: tabular-nums; }
 /* Presale: one solid action color */
 .presale-lux .presale-solid-btn { background: var(--chart-3); color: var(--background); background-image: none; box-shadow: none; border: 0; }
 .presale-lux .presale-solid-btn:hover:not(:disabled) { filter: brightness(1.08); }
+
+/* Presale HOT pulse across all HUB looks */
+@keyframes hot-pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in oklab,var(--chart-3) 55%,transparent),0 0 12px -4px var(--chart-3)}50%{box-shadow:0 0 0 7px color-mix(in oklab,var(--chart-3) 0%,transparent),0 0 22px 0 var(--chart-3)}}
+@keyframes hot-beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.12)}}
+.is-hot.hub-tile,.is-hot .orb-ring,.is-hot .flt-icon{animation:hot-pulse 1.8s ease-out infinite!important}
+.is-hot .hub-badge,.is-hot .orb-badge,.is-hot .flt-icon>b{animation:hot-beat 1.4s ease-in-out infinite!important;background:linear-gradient(90deg,oklch(.82 .17 75),oklch(.66 .23 35))!important;color:oklch(.15 .02 60)!important;box-shadow:0 0 10px oklch(.7 .2 45)}
+@media (prefers-reduced-motion: reduce){.is-hot.hub-tile,.is-hot .orb-ring,.is-hot .flt-icon,.is-hot .hub-badge,.is-hot .orb-badge,.is-hot .flt-icon>b{animation:none!important}}

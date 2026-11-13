@@ -72,7 +72,7 @@ function FloatGrid({ items, path, onPick }: { items: (typeof HUB_ITEMS)[number][
   const set = (dy: number) => { cancelAnimationFrame(raf.current); raf.current = requestAnimationFrame(() => { const el = ref.current; if (!el) return; const d = Math.max(-1, Math.min(1, dy / 260)); el.style.setProperty('--fd', String(d)); el.classList.toggle('is-held', dy !== 0); }); };
   return <div ref={ref} className="flt-grid" onTouchStart={e => { start.current = (e.touches[0]?.clientY ?? 0); }} onTouchMove={e => { if (start.current != null) set((e.touches[0]?.clientY ?? 0) - start.current); }} onTouchEnd={() => { start.current = null; set(0); }} onTouchCancel={() => { start.current = null; set(0); }}>
     {items.map((i, n) => { const row = Math.floor(n / 4); const body = <><span className="flt-icon">{ART[i.id] ? <img src={ART[i.id]} alt="" loading="lazy" decoding="async"/> : <LayoutGrid size={22}/>}{BADGES[i.id] && <b>{BADGES[i.id]}</b>}</span><span className="flt-label">{i.label}</span></>;
-      const cls = `flt-tile ${path === i.to ? 'is-active' : ''}`; const st = { ['--r' as string]: row, animationDelay: `${n * 30}ms` } as React.CSSProperties;
+      const cls = `flt-tile ${path === i.to ? 'is-active' : ''}${i.id === 'presale' ? ' is-hot' : ''}`; const st = { ['--r' as string]: row, animationDelay: `${n * 30}ms` } as React.CSSProperties;
       return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => onPick(i.id)} className={cls} style={st}>{body}</a> : <Link key={i.id} to={i.to} onClick={() => onPick(i.id)} className={cls} style={st}>{body}</Link>; })}
   </div>;
 }
@@ -100,7 +100,7 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
       const OIcon = ICONS[i.id] ?? LayoutGrid;
       const ob = <><span className="orb-ring" style={{ animationDelay: `${n * 45}ms` }}>{BADGES[i.id] && <b className="orb-badge">{BADGES[i.id]}</b>}<span className="orb-core"><OIcon size={22} strokeWidth={1.6}/></span></span><span className="orb-label">{i.label}</span></>;
       const oc = `orb-tile ${path === i.to ? 'is-active' : ''}`;
-      return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => pick(i.id)} className={oc}>{ob}</a> : <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={oc}>{ob}</Link>;
+      return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => pick(i.id)} className={oc}>{ob}</a> : <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={`${oc}${i.id === 'presale' ? ' is-hot' : ''}`}>{ob}</Link>;
     }
     const Icon = ICONS[i.id] ?? LayoutGrid;
     const cls = `hub-tile hub-press rounded-2xl border px-2 py-3 text-center ${path === i.to ? 'is-active' : ''} ${compact ? 'hub-recent-tile' : ''}`;
@@ -108,10 +108,10 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
     if (art) {
       const pbody = <>{BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<img src={art} alt="" loading="eager" decoding="sync" draggable={false} width={320} height={320}/><span className="hub-photo-text">{ECO_LOGOS[i.id] ? <EcoLogo id={i.id} size={16}/> : <div className="hub-photo-name">{i.label}</div>}<div className="hub-photo-note">{i.note}</div></span></>;
       if (i.id === 'onchain') return <a key={i.id} href={i.to} onClick={() => pick(i.id)} className={`${cls} hub-photo`}>{pbody}</a>;
-      return <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={`${cls} hub-photo`}>{pbody}</Link>;
+      return <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={`${cls} hub-photo${i.id === 'presale' ? ' is-hot' : ''}`}>{pbody}</Link>;
     }
     const body = <>{!compact && BADGES[i.id] && <b className={`hub-badge hub-badge-${(BADGES[i.id] ?? '').toLowerCase()}`}>{BADGES[i.id]}</b>}<span className="hub-emblem" style={{ animationDelay: `${(n % 4) * -0.9}s` }}><Icon size={20} strokeWidth={1.7}/></span><div className="text-xs font-black">{i.label}</div>{!compact && <div className="mt-0.5 text-[10px] text-muted-foreground">{i.note}</div>}</>;
-    return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => pick(i.id)} className={cls}>{body}</a> : <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={cls}>{body}</Link>;
+    return i.id === 'onchain' ? <a key={i.id} href={i.to} onClick={() => pick(i.id)} className={cls}>{body}</a> : <Link key={i.id} to={i.to} onClick={() => pick(i.id)} className={`${cls}${i.id === 'presale' ? ' is-hot' : ''}`}>{body}</Link>;
   };
   // Sheet follows the finger and parks where released; it only sinks once pulled past ~60% of its height (or a hard flick).
   const [drag, setDrag] = useState(0);

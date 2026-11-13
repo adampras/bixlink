@@ -63,6 +63,9 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
     setBusy(true); const { error } = await supabase.rpc('bix_presale_test_set' as never, { p_on: on } as never); setBusy(false);
     if (error) return onMessage(error.message); setPt(on); onMessage(on ? 'Tes beli presale virtual aktif untuk Admin 1 + ID terpilih.' : 'Tes beli presale virtual dimatikan.');
   };
+  const [pw, setPw] = useState<Wl[]>([]); const [pq, setPq] = useState('');
+  useEffect(() => { supabase.rpc('bix_presale_wallet_ids_list' as never).then(({ data }) => setPw((data as Wl[] | null) ?? [])); }, []);
+  const setPid = async (v: string, on: boolean) => { if (!v.trim()) return; setBusy(true); const { data, error } = await supabase.rpc('bix_presale_wallet_ids_set' as never, { p_query: v, p_on: on } as never); setBusy(false); if (error) return onMessage(error.message); setPw((data as Wl[] | null) ?? []); setPq(''); onMessage(on ? 'ID ditambahkan: presale melihat 5 wallet Admin 1.' : 'ID dicabut.'); };
   const toggleEco = (id: string) => setCfg(c => ({ ...c, owner2_locked: c.owner2_locked.includes(id) ? c.owner2_locked.filter(x => x !== id) : [...c.owner2_locked, id] }));
   const pill = (on: boolean) => `rounded-full border px-3 py-1.5 text-xs font-bold ${on ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground'}`;
 
@@ -74,6 +77,12 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
         <button type="button" disabled={busy} className={pill(pt)} onClick={() => savePt(true)}>Aktif · Admin 1 + ID terpilih</button>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">Pembelian tes ditandai TEST: tidak memotong saldo, tidak masuk pool, bonus, atau klaim BIX. ID terpilih juga melihat wallet Admin 1 saat deposit/presale tanpa mengubah upline, omset, atau bonus.</p>
+    </section>
+    <section>
+      <h3 className="font-bold">ID jaringan Admin 2 → Presale 5 wallet</h3>
+      <p className="mt-1 text-xs text-muted-foreground">Deposit biasa tetap ke wallet Admin 2. Hanya di halaman Presale, ID ini + downline melihat 5 wallet developer Admin 1. Upline, omset dan bonus tidak berubah.</p>
+      <div className="mt-2 flex gap-2"><input value={pq} onChange={e => setPq(e.target.value)} placeholder="BIX-ID atau @username" className="w-full rounded-xl border border-border bg-background px-3 py-2"/><Button disabled={busy} onClick={() => setPid(pq, true)}>Tambah</Button></div>
+      <ul className="mt-2 space-y-1">{pw.length ? pw.map(w => <li key={w.user_id} className="flex items-center justify-between rounded-xl border border-border px-3 py-2 text-xs"><span><b>{w.code ?? w.user_id.slice(0, 8)}</b> {w.name ?? ''}</span><button type="button" className="text-destructive" onClick={() => setPid(w.code ?? w.user_id, false)}>Cabut</button></li>) : <li className="text-xs text-muted-foreground">Belum ada ID.</li>}</ul>
     </section>
     <section>
       <h3 className="font-bold">HUB Orbit · ikon lingkaran minimalis</h3>

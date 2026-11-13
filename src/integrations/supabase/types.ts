@@ -1539,6 +1539,21 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_presale_wallet_ids: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bix_profit_claims: {
         Row: {
           bix_amount: number
@@ -4825,12 +4840,18 @@ export type Database = {
       }
       bix_presale_config: { Args: never; Returns: Json }
       bix_presale_dividend: { Args: { p_user: string }; Returns: number }
+      bix_presale_owner1_wallets: { Args: never; Returns: boolean }
       bix_presale_paid: { Args: { p_user: string }; Returns: number }
       bix_presale_save: { Args: { p_config: Json }; Returns: Json }
       bix_presale_status: { Args: never; Returns: Json }
       bix_presale_test_buy: { Args: { p_usd: number }; Returns: Json }
       bix_presale_test_set: { Args: { p_on: boolean }; Returns: Json }
       bix_presale_test_state: { Args: never; Returns: Json }
+      bix_presale_wallet_ids_list: { Args: never; Returns: Json }
+      bix_presale_wallet_ids_set: {
+        Args: { p_on: boolean; p_query: string }
+        Returns: Json
+      }
       bix_profile_card: { Args: { p_user: string }; Returns: Json }
       bix_profile_me: { Args: never; Returns: Json }
       bix_profile_set_avatar: { Args: { p_path: string }; Returns: undefined }

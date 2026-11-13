@@ -15,12 +15,12 @@ type PayWallet = { code: string; address: string };
 const isBep20Usdt = (w: { enabled: boolean; address: string; network: string; asset?: string }) => w.enabled && !!w.address && w.network === 'BEP20' && (!w.asset || w.asset === 'USDT');
 
 /** All BEP-20 USDT wallets this member may pay: Owner 2–5 members use their owner's wallets; everyone else gets every Owner 1 wallet (no sticky collapse). */
-export async function fleetWallets(context: { supabase: any; userId: string }): Promise<PayWallet[]> {
-  const { data: own } = await context.supabase.rpc('bix_my_deposit_wallets');
+export async function fleetWallets(context: { supabase: any; userId: string }, owner1Only = false): Promise<PayWallet[]> {
+  const { data: own } = owner1Only ? { data: null } : await context.supabase.rpc('bix_my_deposit_wallets');
   let list: any[] = Array.isArray(own) && own.length ? own : [];
   if (!list.length) {
     const { data: role } = await context.supabase.from('user_roles').select('role').eq('user_id', context.userId).eq('role', 'reviewer').maybeSingle();
-    if (role) list = await memberWalletsFor(context);
+    if (role && !owner1Only) list = await memberWalletsFor(context);
     else { const { data: row } = await context.supabase.from('app_settings').select('value').eq('key', 'deposit_wallets').maybeSingle(); list = (row?.value as { wallets?: any[] } | null)?.wallets ?? []; }
   }
   const ok = list.filter(isBep20Usdt).filter(w => walletFits(w, 'flex'));

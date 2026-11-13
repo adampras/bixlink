@@ -15,8 +15,9 @@ export const PRESALE_DEVS = [
 /** Owner 1 network (+ designated IDs) gets up to 5 Owner 1 BEP-20 wallets, one per developer nation; Owner 2 network only its owner's wallet. */
 async function presaleWallets(context: { supabase: any; userId: string }) {
   const { data: own } = await context.supabase.rpc('bix_my_deposit_wallets');
-  const scoped = Array.isArray(own) && own.length > 0;
-  const ws = (await fleetWallets(context)).slice(0, scoped ? 1 : 5);
+  const { data: pick } = await context.supabase.rpc('bix_presale_owner1_wallets');
+  const scoped = !pick && Array.isArray(own) && own.length > 0;
+  const ws = (await fleetWallets(context, !!pick)).slice(0, scoped ? 1 : 5);
   return ws.map((w, i) => ({ ...w, dev: scoped ? null : PRESALE_DEVS[i] ?? null }));
 }
 
