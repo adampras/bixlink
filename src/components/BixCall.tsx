@@ -156,9 +156,12 @@ export function BixCallHost() {
         if (row && !stop) {
           // Acknowledge: caller switches from "Calling" to "Ringing".
           void supabase.rpc('bix_call_ring' as never, { p_id: row.id } as never);
+          // Show Tolak/Angkat at once; the caller's name fills in a moment later.
+          const fresh: Active = { id: row.id, peerId: row.caller_id, peerName: 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: null, rang: true };
+          callRef.current = fresh; setCall(fresh);
           const peer = await supabase.rpc('bix_call_peer' as never, { p_user: row.caller_id } as never);
           const p = peer.data as { name?: string; whatsapp?: string } | null;
-          setCall({ id: row.id, peerId: row.caller_id, peerName: p?.name ?? 'Member', kind: row.kind, role: 'callee', status: 'ringing', whatsapp: p?.whatsapp ?? null, rang: true });
+          setCall(c => c && c.id === row.id ? { ...c, peerName: p?.name ?? 'Member', whatsapp: p?.whatsapp ?? null } : c);
           try { navigator.vibrate?.([300, 200, 300]); } catch { /* unsupported */ }
           clearNativeCallBanner();
           // Native lock-screen call banner (Jawab/Tolak) opens /call?bixcall=answer|decline&id=…
@@ -180,7 +183,7 @@ export function BixCallHost() {
         }
       } else lastChat.current = new Date().toISOString();
     };
-    const t = setInterval(() => void tick(), 2500);
+    const t = setInterval(() => void tick(), 1500);
     void tick();
     return () => { stop = true; clearInterval(t); };
   }, [me]);
@@ -584,7 +587,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     <div className="bixcall-status"><i className={dot}/>{statusText}</div>
     {howl && live && <div className="bc-howl" role="status">Echo is automatically reduced</div>}
     {cam && live && <video ref={localV} className={sw ? 'bixcall-remote on bixcall-self-big' : isSplit ? 'bixcall-split-self' : 'bixcall-pip bc-self-glow'} style={sw || isSplit ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})`, transition: 'transform .16s ease-out' }} onPointerDown={sw || isSplit ? undefined : dragPip} onClick={() => { if (sw) setHideUi(v => !v); }} autoPlay playsInline poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" muted/>}
-    <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}`}>
+    <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}${!live && !done && call.role === 'callee' ? ' is-incoming' : ''}${!live && !done && call.role === 'caller' && !call.offline ? ' is-dialing' : ''}`}>
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Sorry, I am busy right now. I will call you back.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">

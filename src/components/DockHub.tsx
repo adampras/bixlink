@@ -51,6 +51,20 @@ function SwipeRow({ children, count }: { children: React.ReactNode; count: numbe
   </>;
 }
 
+/** One UI-style paged launcher: swipe sideways, pages fade and scale as they leave. */
+function OrbitPages({ pages, render }: { pages: { g: string; list: (typeof HUB_ITEMS)[number][] }[]; render: (i: typeof HUB_ITEMS[number], n: number) => React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState(0);
+  const last = useRef(0);
+  const onScroll = () => { const el = ref.current; if (!el) return; const p = el.scrollLeft / Math.max(1, el.clientWidth); setPos(p); const r = Math.round(p); if (r !== last.current) { last.current = r; try { navigator.vibrate?.(6); } catch { /* unsupported */ } } };
+  return <>
+    <div ref={ref} className="orb-pages" onScroll={onScroll}>
+      {pages.map(({ g, list }, pi) => { const d = Math.min(1, Math.abs(pos - pi)); return <section key={g} className="orb-page" style={{ opacity: 1 - d * 0.75, transform: `scale(${1 - d * 0.06})` }}><h3>{g}</h3><div className="orb-grid">{list.map((i, n) => render(i, n))}</div></section>; })}
+    </div>
+    {pages.length > 1 && <div className="orb-dots" aria-hidden>{pages.map((p, i) => <i key={p.g} className={Math.round(pos) === i ? 'on' : ''}/>)}</div>}
+  </>;
+}
+
 /** Mobile dock HUB (replaces HOME): opens owner-selected shortcuts. */
 export function DockHub({ path, cfg, order, matrix = false }: { path: string; cfg?: Record<string, boolean> | undefined; order?: string[] | undefined; matrix?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -119,7 +133,8 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
         {owner1.data && <section className="hub-group hub-tone-gold mt-3"><button type="button" className="hub-group-head w-full" onClick={() => setCsOpen(v => !v)} aria-expanded={csOpen}><span>CS 1 · CS 2 · CS 3 control</span><em>{csOpen ? 'Close' : 'Open'}</em></button>{csOpen && <div className="mt-2"><SupportCommandCenter/></div>}</section>}
         {orbit.data && <>
           <label className="orb-search"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Search BIXLINK services" aria-label="Search services"/></label>
-          {(q.trim() ? [{ g: 'Results', list: items.filter(i => (i.label + ' ' + i.note).toLowerCase().includes(q.trim().toLowerCase())) }] : HUB_GROUPS.map(g => ({ g, list: items.filter(i => i.group === g) }))).map(({ g, list }) => list.length ? <section key={g} className="orb-group"><h3>{g}</h3><div className="orb-grid">{list.map((i, n) => tile(i, n))}</div></section> : null)}
+          {q.trim() ? <section className="orb-group"><h3>Results</h3><div className="orb-grid">{items.filter(i => (i.label + ' ' + i.note).toLowerCase().includes(q.trim().toLowerCase())).map((i, n) => tile(i, n))}</div></section>
+            : <OrbitPages pages={HUB_GROUPS.map(g => ({ g, list: items.filter(i => i.group === g) })).filter(x => x.list.length)} render={tile}/>}
         </>}
         {!orbit.data && <>
         {matrix ? PILLARS.map((p, pi) => { const list = items.filter(i => pillarOf(i.id) === p.id); if (!list.length) return null; const tone = ['emerald', 'gold', 'violet', 'silver'][pi];
