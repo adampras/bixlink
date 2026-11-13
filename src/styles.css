@@ -9170,3 +9170,6 @@ html body .bixcall .bixcall-ctl.is-dialing>.bc-tap{display:flex!important;flex-d
 .covenant-ink { font-family: "Brush Script MT", "Segoe Script", cursive; font-size: 18px; color: #FFD700; font-style: italic; }
 .covenant-seal { width: 92px; height: 92px; border-radius: 9999px; display: grid; place-items: center; align-content: center; gap: 1px; border: 2px dashed rgba(255,215,0,.6); background: radial-gradient(circle, rgba(255,215,0,.18), rgba(4,5,7,.9) 70%); box-shadow: 0 0 0 4px rgba(4,5,7,1), 0 0 0 5px rgba(255,215,0,.4); font-size: 8px; letter-spacing: .2em; color: #E8B64A; }
 .covenant-seal b { font-size: 18px; color: #FFD700; letter-spacing: .1em; }
+.covenant-rule { width: 64px; height: 2px; background: linear-gradient(90deg, transparent, #FFD700, transparent); }
+.presale-coin { width: 76px; height: 76px; flex: none; border-radius: 9999px; object-fit: cover; box-shadow: 0 0 0 1px rgba(255,215,0,.5), 0 0 28px -4px rgba(255,215,0,.55), 0 0 44px -10px rgba(168,85,247,.6); }
+@media (prefers-reduced-motion: no-preference) { .presale-coin { animation: lux-float 6s ease-in-out infinite; } }
