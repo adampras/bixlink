@@ -561,8 +561,9 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       {!live && !done && call.role === 'callee' && <p className="bc-swipe-hint">{call.id === 'sim' ? 'Simulasi uji · ketuk Angkat atau Tolak' : 'Ketuk sekali untuk angkat atau tolak'}</p>}
       {!live && !done && call.role === 'caller' && <>
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
+        {!call.offline && <button type="button" onClick={onEnd} aria-label="Batalkan panggilan" style={{ margin: '18px auto 0', display: 'flex', alignItems: 'center', gap: 10, padding: '16px 34px', borderRadius: 999, background: 'hsl(0 78% 50%)', color: 'hsl(0 0% 100%)', fontWeight: 800, fontSize: 17, letterSpacing: 1, boxShadow: '0 10px 30px hsl(0 78% 40% / .45)' }}><PhoneOff size={22}/> BATALKAN</button>}
       </>}
-      {(live || (!done && !call.offline && call.role === 'caller')) && <div className="bc-ctl4 bc-grid6" onPointerDown={askTilt}>
+      {live && <div className="bc-ctl4 bc-grid6" onPointerDown={askTilt}>
         <label><button aria-label={loud ? 'Speaker active' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={speaker}>{loud ? <Volume2/> : <VolumeX/>}</button><span>{loud ? 'Speaker On' : 'Speaker Off'}</span></label>
         <label><button aria-label={cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} className={cam ? 'shield' : ''} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>Video</span></label>
         <label><button aria-label={mic ? 'Senyapkan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button><span>Senyapkan</span></label>
