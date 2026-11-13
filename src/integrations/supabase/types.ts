@@ -4581,6 +4581,7 @@ export type Database = {
       bix_design_access: { Args: never; Returns: Json }
       bix_design_admin: { Args: never; Returns: Json }
       bix_design_cfg: { Args: never; Returns: Json }
+      bix_design_in_scope: { Args: { p_user: string }; Returns: boolean }
       bix_design_save: {
         Args: { p_locked: Json; p_mode: string; p_owner2_design: boolean }
         Returns: Json

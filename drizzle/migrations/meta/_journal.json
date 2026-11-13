@@ -1422,6 +1422,13 @@
       "when": 1794577357019,
       "tag": "0202_presale_flex_phase1",
       "breakpoints": true
+    },
+    {
+      "idx": 203,
+      "version": "7",
+      "when": 1794585446694,
+      "tag": "0203_design_whitelist_any_network",
+      "breakpoints": true
     }
   ]
 }

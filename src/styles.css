@@ -9173,3 +9173,19 @@ html body .bixcall .bixcall-ctl.is-dialing>.bc-tap{display:flex!important;flex-d
 .covenant-rule { width: 64px; height: 2px; background: linear-gradient(90deg, transparent, #FFD700, transparent); }
 .presale-coin { width: 76px; height: 76px; flex: none; border-radius: 9999px; object-fit: cover; box-shadow: 0 0 0 1px rgba(255,215,0,.5), 0 0 28px -4px rgba(255,215,0,.55), 0 0 44px -10px rgba(168,85,247,.6); }
 @media (prefers-reduced-motion: no-preference) { .presale-coin { animation: lux-float 6s ease-in-out infinite; } }
+
+/* Presale: black glassmorphism + neon list boxes */
+main.presale-lux { --neon-gold: #FFD700; --neon-violet: #C084FC; --neon-cyan: #5EEAD4; background: radial-gradient(120% 60% at 50% 0%, color-mix(in oklab, #A855F7 14%, transparent), transparent 60%), #040507; border-radius: 28px; font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+main.presale-lux section { background: color-mix(in oklab, #000 55%, transparent) !important; backdrop-filter: blur(18px) saturate(140%); border-color: color-mix(in oklab, var(--neon-gold) 35%, transparent) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 18px 40px -22px rgba(168,85,247,.55); }
+main.presale-lux li, main.presale-lux dl > div, main.presale-lux section .grid > div, main.presale-lux section .grid > button { background: rgba(4,5,7,.55) !important; border: 1px solid color-mix(in oklab, var(--neon-violet) 55%, transparent) !important; box-shadow: 0 0 0 1px rgba(255,215,0,.06) inset, 0 0 12px -2px color-mix(in oklab, var(--neon-violet) 55%, transparent); }
+main.presale-lux b, main.presale-lux dd, main.presale-lux h1, main.presale-lux h2, main.presale-lux h3 { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,.12); }
+main.presale-lux .text-chart-3, main.presale-lux dd.text-chart-3 { color: var(--neon-gold) !important; text-shadow: 0 0 12px rgba(255,215,0,.45); }
+main.presale-lux .text-primary, main.presale-lux dd.text-primary { color: var(--neon-violet) !important; text-shadow: 0 0 12px rgba(192,132,252,.5); }
+main.presale-lux .text-chart-2 { color: var(--neon-cyan) !important; text-shadow: 0 0 10px rgba(94,234,212,.45); }
+main.presale-lux .text-muted-foreground { color: rgba(255,255,255,.68) !important; }
+main.presale-lux h1 { font-size: 1.6rem; line-height: 1.15; }
+main.presale-lux h2 { font-size: 1.05rem; letter-spacing: .02em; }
+main.presale-lux dd { font-size: 1.35rem; line-height: 1.2; word-break: break-word; }
+main.presale-lux li { font-size: 11px; line-height: 1.35; }
+main.presale-lux li b { font-size: 11.5px; }
+main.presale-lux .numeric { font-variant-numeric: tabular-nums; }
