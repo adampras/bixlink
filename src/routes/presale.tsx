@@ -7,11 +7,13 @@ import { DeveloperCovenant } from '@/components/DeveloperCovenant';
 import { Button } from '@/components/ui/button';
 import { useMember } from '@/lib/useMember';
 import { buyPresaleFlex, getPresaleStatus } from '@/lib/presale.functions';
+import { getPresaleWallets, payPresaleTx } from '@/lib/presale-pay.functions';
+import { QRCodeSVG } from 'qrcode.react';
 import { presaleReleased } from '@/lib/presale';
 import { PHASE1, bixFor, clampUsd, countdown } from '@/lib/presale-phase';
 import { number } from '@/lib/bixlink';
 import coin from '@/assets/bixcoin-cutout.webp';
-import { CalendarClock, Coins, Lock, ShieldCheck, Unlock } from 'lucide-react';
+import { CalendarClock, Coins, Copy, Lock, ShieldCheck, Unlock, Wallet } from 'lucide-react';
 
 export const Route = createFileRoute('/presale')({ head: () => ({ meta: [
   { title: 'BIX Presale Phase 1 — $0.25 per BIX | BIXLINK' },
@@ -30,6 +32,15 @@ function PresalePage() {
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   const [usd, setUsd] = useState(500); const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false); const [msg, setMsg] = useState(''); const [err, setErr] = useState('');
+  const loadW = useServerFn(getPresaleWallets); const pay = useServerFn(payPresaleTx);
+  const wq = useQuery({ queryKey: ['presale-wallets', user?.id], queryFn: () => loadW(), enabled: !!user });
+  const wallets = wq.data ?? []; const [wi, setWi] = useState(0); const w = wallets[Math.min(wi, Math.max(0, wallets.length - 1))];
+  const [tx, setTx] = useState(''); const [copied, setCopied] = useState(false);
+  const doPay = async () => {
+    if (!w) return; setBusy(true); setErr(''); setMsg('');
+    try { const r = await pay({ data: { walletCode: w.code, txHash: tx.trim() } }); setMsg(`Verified! $${r.usd} → ${number(Number(r.bix))} BIX locked${r.extra > 0 ? ` · $${number(r.extra, { maximumFractionDigits: 2 })} extra added to your USDT balance` : ''}.`); setTx(''); qc.invalidateQueries({ queryKey: ['presale'] }); }
+    catch (e) { setErr(e instanceof Error ? e.message : 'Verification failed'); } finally { setBusy(false); }
+  };
   const s = q.data; const cfg = s?.config;
   const stage = cfg?.stages?.[cfg.activeStage ?? 0];
   const price = stage?.price ?? PHASE1.price;
@@ -65,8 +76,6 @@ function PresalePage() {
       {[[Coins, '1. Choose amount', '$100 – $1,000'], [Lock, '2. BIX locked', `${number(bixFor(1000, price))} BIX max`], [Unlock, '3. Daily release', `${PHASE1.dailyPct}% × ${PHASE1.vestingDays} days`]].map(([I, t, d]: any) => <li key={t} className="rounded-2xl border border-border bg-card/50 p-3"><I size={18} className="mx-auto text-primary"/><b className="mt-1 block">{t}</b><span className="text-muted-foreground">{d}</span></li>)}
     </ol>
 
-    <DeveloperCovenant/>
-
     {!user ? <div className="mt-6 rounded-2xl border border-border p-5 text-center"><p className="text-sm">Sign in to join the presale.</p><Button asChild className="mt-3 rounded-full"><Link to="/auth">Sign in / Register</Link></Button></div> : <>
       <section className="mt-6 rounded-3xl border border-primary/40 bg-card/70 p-5">
         <h2 className="font-display text-lg font-black">Presale Allocation</h2>
@@ -81,6 +90,22 @@ function PresalePage() {
         {!confirm ? <Button className="mt-4 h-12 w-full rounded-full text-base font-black" disabled={!canBuy || usd < PHASE1.min || usd > PHASE1.max} onClick={() => { setErr(''); setConfirm(true); }}>{phase === 'upcoming' ? 'Not open yet' : phase === 'ended' ? 'Phase 1 ended' : !cfg?.enabled ? 'Presale closed' : `Buy ${number(bix)} BIX`}</Button>
           : <div className="mt-4 rounded-2xl border border-chart-3/50 p-3 text-sm"><p>Confirm: pay <b>${usd} USDT</b> for <b>{number(bix)} BIX</b>, locked and released {PHASE1.dailyPct}% per day over {PHASE1.vestingDays} days.</p>
             <div className="mt-3 flex gap-2"><Button variant="outline" className="flex-1 rounded-full" onClick={() => setConfirm(false)} disabled={busy}>Cancel</Button><Button className="flex-1 rounded-full" onClick={doBuy} disabled={busy}>{busy ? 'Processing…' : 'Confirm'}</Button></div></div>}
+        <div className="mt-5 rounded-2xl border border-chart-3/40 bg-background/50 p-4">
+          <h3 className="flex items-center gap-2 text-sm font-black"><Wallet size={16} className="text-chart-3"/> Pay directly with USDT (BEP-20)</h3>
+          {wq.isLoading ? <p className="mt-2 text-xs text-muted-foreground">Loading official wallets…</p> : !wallets.length ? <p className="mt-2 text-xs text-muted-foreground">No official presale wallet is active for your network yet.</p> : <>
+            {wallets.length > 1 && <div className="mt-3 grid grid-cols-5 gap-1.5">{wallets.map((x, i) => <button key={x.code} type="button" onClick={() => setWi(i)} aria-label={x.dev?.country ?? x.code} className={`rounded-xl border py-2 text-xl ${i === wi ? 'border-chart-3 bg-chart-3/15' : 'border-border'}`}>{x.dev?.flag ?? '💼'}</button>)}</div>}
+            {w && <>
+              <p className="mt-3 text-center text-xs font-bold">{w.dev ? `${w.dev.flag} ${w.dev.country} · ${w.dev.role}` : 'Official network wallet'}</p>
+              <div className="mx-auto mt-3 w-fit rounded-2xl bg-[var(--color-foreground,#fff)] p-3"><QRCodeSVG value={w.address} size={150}/></div>
+              <button type="button" onClick={() => { navigator.clipboard?.writeText(w.address); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="mt-3 flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2 text-left"><span className="min-w-0 flex-1 break-all font-mono text-[11px]">{w.address}</span><Copy size={14} className="shrink-0 text-chart-3"/><span className="text-[10px] font-bold">{copied ? 'Copied' : 'Copy'}</span></button>
+              <ol className="mt-3 grid gap-1 text-[11px] text-muted-foreground"><li>1. Send exactly <b className="text-foreground">${usd} USDT</b> on <b className="text-foreground">BNB Smart Chain (BEP-20)</b> to this address.</li><li>2. Paste the transaction hash (TxID) below.</li><li>3. Tap Verify — your BIX is locked and vesting starts.</li></ol>
+              <input value={tx} onChange={e => setTx(e.target.value)} placeholder="TxID 0x…" className="numeric mt-3 w-full rounded-xl border border-border bg-background px-3 py-2.5 font-mono text-xs" aria-label="Transaction hash"/>
+              <Button className="mt-3 h-11 w-full rounded-full font-black" disabled={!canBuy || !/^0x[0-9a-fA-F]{64}$/.test(tx.trim())} onClick={doPay}>{busy ? 'Verifying on-chain…' : 'Verify payment & buy BIX'}</Button>
+              <p className="mt-2 text-[10px] text-muted-foreground">Max $1,000 per purchase; any extra is added to your USDT balance. Each TxID can be used once.</p>
+            </>}
+          </>}
+          <p className="mt-3 text-center text-[10px] text-muted-foreground">— or pay from your USDT balance above —</p>
+        </div>
         {err && <p role="alert" className="mt-3 text-sm text-destructive">{err}</p>}
         {msg && <p role="status" className="mt-3 text-sm text-chart-2">{msg}</p>}
       </section>
@@ -97,6 +122,7 @@ function PresalePage() {
           <p className="mt-1 text-muted-foreground">{number(r, { maximumFractionDigits: 2 })} BIX released · {pct.toFixed(1)}%</p></li>; })}</ul>}
       </section>
     </>}
+    <DeveloperCovenant/>
     <p className="mt-5 flex gap-2 text-[10px] text-muted-foreground"><ShieldCheck size={14} className="shrink-0"/>The presale price is a BIXLINK internal reference, not a market price. BIX is locked and released gradually; future value is not guaranteed.</p>
   </main></BixShell>;
 }

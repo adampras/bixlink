@@ -15,7 +15,7 @@ type PayWallet = { code: string; address: string };
 const isBep20Usdt = (w: { enabled: boolean; address: string; network: string; asset?: string }) => w.enabled && !!w.address && w.network === 'BEP20' && (!w.asset || w.asset === 'USDT');
 
 /** All BEP-20 USDT wallets this member may pay: Owner 2–5 members use their owner's wallets; everyone else gets every Owner 1 wallet (no sticky collapse). */
-async function fleetWallets(context: { supabase: any; userId: string }): Promise<PayWallet[]> {
+export async function fleetWallets(context: { supabase: any; userId: string }): Promise<PayWallet[]> {
   const { data: own } = await context.supabase.rpc('bix_my_deposit_wallets');
   let list: any[] = Array.isArray(own) && own.length ? own : [];
   if (!list.length) {
