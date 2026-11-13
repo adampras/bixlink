@@ -4644,6 +4644,9 @@ export type Database = {
         Args: { p_user: string }
         Returns: boolean
       }
+      bix_hub_orbit_access: { Args: never; Returns: Json }
+      bix_hub_orbit_mode: { Args: never; Returns: string }
+      bix_hub_orbit_set: { Args: { p_mode: string }; Returns: Json }
       bix_in_owner1_network: { Args: never; Returns: boolean }
       bix_is_owner1: { Args: never; Returns: boolean }
       bix_is_owner1_user: { Args: { p_user: string }; Returns: boolean }

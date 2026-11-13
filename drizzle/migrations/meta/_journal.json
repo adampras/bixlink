@@ -1401,6 +1401,13 @@
       "when": 1794549401714,
       "tag": "0199_group_message_delete",
       "breakpoints": true
+    },
+    {
+      "idx": 200,
+      "version": "7",
+      "when": 1794572520765,
+      "tag": "0200_hub_orbit_switch",
+      "breakpoints": true
     }
   ]
 }

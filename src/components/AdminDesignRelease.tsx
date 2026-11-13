@@ -43,10 +43,24 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
     const { data, error } = await supabase.rpc('bix_design_whitelist_set' as never, { p_query: query, p_on: on } as never);
     setBusy(false); if (error) return onMessage(error.message); apply(data); setQ('');
   };
+  const [orbit, setOrbit] = useState<string>('scoped');
+  useEffect(() => { supabase.rpc('bix_hub_orbit_access' as never).then(({ data }) => { const m = (data as { mode?: string } | null)?.mode; if (m) setOrbit(m); }); }, []);
+  const saveOrbit = async (m: string) => {
+    setBusy(true); const { error } = await supabase.rpc('bix_hub_orbit_set' as never, { p_mode: m } as never); setBusy(false);
+    if (error) return onMessage(error.message); setOrbit(m); qc.invalidateQueries({ queryKey: ['bix-hub-orbit'] });
+    onMessage(m === 'public' ? 'HUB Orbit dibuka untuk publik.' : m === 'scoped' ? 'HUB Orbit hanya Admin 1 + ID terpilih.' : 'HUB Orbit dimatikan.');
+  };
   const toggleEco = (id: string) => setCfg(c => ({ ...c, owner2_locked: c.owner2_locked.includes(id) ? c.owner2_locked.filter(x => x !== id) : [...c.owner2_locked, id] }));
   const pill = (on: boolean) => `rounded-full border px-3 py-1.5 text-xs font-bold ${on ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground'}`;
 
   return <div className="space-y-5 text-sm">
+    <section>
+      <h3 className="font-bold">HUB Orbit · ikon lingkaran minimalis</h3>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {([['off', 'Tutup'], ['scoped', 'Admin 1 + ID terpilih'], ['public', 'Buka untuk publik']] as const).map(([v, l]) => <button key={v} type="button" disabled={busy} className={pill(orbit === v)} onClick={() => saveOrbit(v)}>{l}</button>)}
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">Akun terpilih = daftar ID desain di bawah. Tersimpan langsung.</p>
+    </section>
     <section>
       <h3 className="font-bold">Desain baru · siapa yang melihat</h3>
       <div className="mt-2 flex flex-wrap gap-2">
