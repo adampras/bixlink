@@ -9150,3 +9150,23 @@ html body .bixcall .bixcall-ctl.is-dialing>.bc-tap{display:flex!important;flex-d
 .flt-tile.is-active .flt-icon{border-color:#FFD700;box-shadow:0 0 0 1px #FFD700,0 0 16px -2px #A855F7}
 @keyframes flt-in{from{opacity:0;transform:translateY(12px) scale(.92)}}
 @media (prefers-reduced-motion:reduce){.flt-tile{animation:none}.flt-grid.is-held .flt-tile{transform:none;opacity:1}}
+
+/* Presale obsidian glass lux */
+.presale-lux { --lux-gold: #FFD700; --lux-gold-2: #E8B64A; --lux-violet: #A855F7; color: #F4EEDC; }
+.presale-lux section, .presale-lux ol > li { background: linear-gradient(160deg, rgba(20,20,28,.82), rgba(4,5,7,.92)) !important; border: 1px solid rgba(255,215,0,.22) !important; backdrop-filter: blur(18px) saturate(140%); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 18px 40px -20px rgba(0,0,0,.9); }
+.presale-lux .text-chart-3, .presale-lux .text-primary { color: var(--lux-gold) !important; text-shadow: 0 0 18px rgba(255,215,0,.25); }
+.presale-lux .text-chart-2 { color: #D8B4FE !important; }
+.presale-lux .bg-background\/60 { background: rgba(0,0,0,.45) !important; border: 1px solid rgba(255,255,255,.06); }
+.presale-lux .bg-primary { background: linear-gradient(90deg, var(--lux-violet), var(--lux-gold)) !important; }
+.presale-lux button[class*="h-12"] { background: linear-gradient(135deg, #FFE680, var(--lux-gold-2)) !important; color: #120d00 !important; box-shadow: 0 10px 30px -10px rgba(255,215,0,.6); }
+.presale-lux h1, .presale-lux h2 { letter-spacing: .01em; }
+.lux-kicker { font-size: 10px; font-weight: 800; letter-spacing: .3em; color: var(--lux-gold-2, #E8B64A); }
+.lux-label { font-size: 9px; color: rgba(244,238,220,.6); }
+.lux-gold-text { background: linear-gradient(180deg, #FFF3B0, #FFD700 45%, #B8862B); background-clip: text; color: transparent; }
+.lux-tile { border-radius: 1rem; background: rgba(0,0,0,.5); border: 1px solid rgba(255,215,0,.25); }
+.covenant { position: relative; border-radius: 1.75rem; padding: 2px; background: linear-gradient(135deg, #FFF3B0, #B8862B 30%, #FFD700 55%, #7a5a14 80%, #FFE680); box-shadow: 0 0 40px -10px rgba(255,215,0,.45); }
+.covenant-inner { border-radius: calc(1.75rem - 2px); padding: 1.25rem; background: radial-gradient(120% 80% at 50% 0%, rgba(168,85,247,.14), transparent 60%), linear-gradient(170deg, rgba(18,18,26,.92), rgba(4,5,7,.96)); backdrop-filter: blur(20px); }
+.covenant-sign { display: flex; align-items: center; gap: .75rem; padding: .6rem .8rem; border-radius: .9rem; background: rgba(255,255,255,.03); border: 1px solid rgba(255,215,0,.15); }
+.covenant-ink { font-family: "Brush Script MT", "Segoe Script", cursive; font-size: 18px; color: #FFD700; font-style: italic; }
+.covenant-seal { width: 92px; height: 92px; border-radius: 9999px; display: grid; place-items: center; align-content: center; gap: 1px; border: 2px dashed rgba(255,215,0,.6); background: radial-gradient(circle, rgba(255,215,0,.18), rgba(4,5,7,.9) 70%); box-shadow: 0 0 0 4px rgba(4,5,7,1), 0 0 0 5px rgba(255,215,0,.4); font-size: 8px; letter-spacing: .2em; color: #E8B64A; }
+.covenant-seal b { font-size: 18px; color: #FFD700; letter-spacing: .1em; }

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BixShell } from '@/components/BixShell';
+import { DeveloperCovenant } from '@/components/DeveloperCovenant';
 import { Button } from '@/components/ui/button';
 import { useMember } from '@/lib/useMember';
 import { buyPresaleFlex, getPresaleStatus } from '@/lib/presale.functions';
@@ -47,7 +48,7 @@ function PresalePage() {
     catch (e) { setErr(e instanceof Error ? e.message : 'Pembelian gagal'); } finally { setBusy(false); }
   };
 
-  return <BixShell><main className="mx-auto max-w-2xl px-4 py-6">
+  return <BixShell><main className="presale-lux mx-auto max-w-2xl px-4 py-6">
     <section className="relative overflow-hidden rounded-3xl border border-chart-3/40 bg-card/70 p-5 backdrop-blur">
       <p className="text-[10px] font-bold tracking-[0.3em] text-chart-3">BIX PRESALE · FASE 1</p>
       <h1 className="mt-1 font-display text-3xl font-black">Beli BIX di harga <span className="text-chart-3">${price.toFixed(2)}</span></h1>
@@ -62,6 +63,8 @@ function PresalePage() {
     <ol className="mt-5 grid grid-cols-3 gap-2 text-center text-[11px]">
       {[[Coins, '1. Pilih nominal', '$100 – $1.000'], [Lock, '2. BIX terkunci', `${number(bixFor(1000, price))} BIX maks`], [Unlock, '3. Terbuka harian', `${PHASE1.dailyPct}% × ${PHASE1.vestingDays} hari`]].map(([I, t, d]: any) => <li key={t} className="rounded-2xl border border-border bg-card/50 p-3"><I size={18} className="mx-auto text-primary"/><b className="mt-1 block">{t}</b><span className="text-muted-foreground">{d}</span></li>)}
     </ol>
+
+    <DeveloperCovenant/>
 
     {!user ? <div className="mt-6 rounded-2xl border border-border p-5 text-center"><p className="text-sm">Masuk untuk ikut presale.</p><Button asChild className="mt-3 rounded-full"><Link to="/auth">Masuk / Daftar</Link></Button></div> : <>
       <section className="mt-6 rounded-3xl border border-primary/40 bg-card/70 p-5">
