@@ -423,8 +423,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const lp = room.localParticipant;
     // Data/battery saver: low-power devices, Save-Data or cellular links get a 480p/24fps profile.
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean; type?: string; effectiveType?: string } }).connection;
-    const saver = document.documentElement.dataset['lowPower'] === '1' || !!conn?.saveData || conn?.type === 'cellular' || /2g|3g/.test(conn?.effectiveType ?? '');
-    const res = saver ? { width: 854, height: 480, frameRate: 24, aspectRatio: 16 / 9 } : { width: 1280, height: 720, frameRate: 30, aspectRatio: 16 / 9 };
+    const saver = document.documentElement.dataset['lowPower'] === '1' || !!conn?.saveData || /2g|3g/.test(conn?.effectiveType ?? '');
+    const res = saver ? { width: 540, height: 960, frameRate: 24 } : { width: 720, height: 1280, frameRate: 30 };
     if (!on) {
       // Fully release the camera so the phone's camera indicator turns off at once.
       const pub = lp.getTrackPublication(LK!.Track.Source.Camera);
@@ -434,13 +434,13 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     }
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
       // WA-style: hardware H.264, ~1.3 Mbps cap and 3 simulcast layers so weak signal steps down instead of freezing.
-      { videoCodec: 'h264', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 700_000 : 1_300_000, maxFramerate: res.frameRate, priority: 'high' } as never,
+      { videoCodec: 'h264', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: saver ? 900_000 : 2_200_000, maxFramerate: res.frameRate, priority: 'high' } as never,
         videoSimulcastLayers: [
-          { width: 320, height: 180, resolution: { width: 320, height: 180, frameRate: 20 }, encoding: { maxBitrate: 180_000, maxFramerate: 20 } },
-          { width: 640, height: 360, resolution: { width: 640, height: 360, frameRate: 24 }, encoding: { maxBitrate: 600_000, maxFramerate: 24 } },
+          { width: 270, height: 480, resolution: { width: 270, height: 480, frameRate: 20 }, encoding: { maxBitrate: 300_000, maxFramerate: 20 } },
+          { width: 540, height: 960, resolution: { width: 540, height: 960, frameRate: 30 }, encoding: { maxBitrate: 900_000, maxFramerate: 30 } },
         ] as never });
     // 'motion' keeps frames smooth and low-latency instead of stalling to hold detail.
-    const mt = lp.getTrackPublication(LK!.Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'motion';
+    const mt = lp.getTrackPublication(LK!.Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
     setCam(on);
   };
   const toggleCam = async () => {
@@ -457,7 +457,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const pub = roomRef.current?.localParticipant.getTrackPublication(LK!.Track.Source.Camera);
     const tr = pub?.track as unknown as { restartTrack?: (o: object) => Promise<void> } | undefined;
     const nf = !front; setFront(nf);
-    await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment', resolution: { width: 1280, height: 720, frameRate: 30 } }).catch(() => {}); try { const m2 = (tr as unknown as { mediaStreamTrack?: MediaStreamTrack })?.mediaStreamTrack; if (m2) m2.contentHint = 'motion'; } catch { /* optional */ } void Promise.resolve().catch(() => {});
+    await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment', resolution: { width: 720, height: 1280, frameRate: 30 } }).catch(() => {}); try { const m2 = (tr as unknown as { mediaStreamTrack?: MediaStreamTrack })?.mediaStreamTrack; if (m2) m2.contentHint = 'motion'; } catch { /* optional */ } void Promise.resolve().catch(() => {});
   };
   // Screen share: shows PDFs, gallery photos or any app to the other side. Needs browser support (Android WebView/APK usually lacks it).
   const [screen, setScreen] = useState(false);
@@ -496,6 +496,17 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     void D?.requestPermission?.().catch(() => {});
   };
   const [mini, setMini] = useState(false);
+  // Phone Back key never hangs up: it minimises a live call (WA-style) and keeps ringing screens in place.
+  const liveRef = useRef(live); liveRef.current = live;
+  useEffect(() => {
+    const url = window.location.href; window.history.pushState({ bixcall: 1 }, '', url);
+    const onPop = () => { window.history.pushState({ bixcall: 1 }, '', url); if (liveRef.current) setMini(true); };
+    window.addEventListener('popstate', onPop);
+    let off: (() => void) | undefined;
+    const cap = (globalThis as { Capacitor?: { Plugins?: { App?: { addListener?: (e: string, f: () => void) => Promise<{ remove: () => void }> } } } }).Capacitor;
+    void cap?.Plugins?.App?.addListener?.('backButton', () => { if (liveRef.current) setMini(true); }).then(h => { off = () => h.remove(); }).catch(() => {});
+    return () => { window.removeEventListener('popstate', onPop); off?.(); };
+  }, []);
   useEffect(() => { const c = document.documentElement.classList; if (mini) c.add('bc-incall-mini'); else c.remove('bc-incall-mini'); return () => c.remove('bc-incall-mini'); }, [mini]);
   // During a live call the chat opens behind a minimised call — the room stays connected.
   const openChat = () => { if (live) setMini(true); else onClose(); void router.navigate({ to: '/call', search: { chat: call.peerId } as never }); };
@@ -561,7 +572,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       {!live && !done && call.role === 'callee' && <p className="bc-swipe-hint">{call.id === 'sim' ? 'Simulasi uji · ketuk Angkat atau Tolak' : 'Ketuk sekali untuk angkat atau tolak'}</p>}
       {!live && !done && call.role === 'caller' && <>
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
-        {!call.offline && <button type="button" onClick={onEnd} aria-label="Batalkan panggilan" style={{ margin: '18px auto 0', display: 'flex', alignItems: 'center', gap: 10, padding: '16px 34px', borderRadius: 999, background: 'hsl(0 78% 50%)', color: 'hsl(0 0% 100%)', fontWeight: 800, fontSize: 17, letterSpacing: 1, boxShadow: '0 10px 30px hsl(0 78% 40% / .45)' }}><PhoneOff size={22}/> BATALKAN</button>}
+        {!call.offline && <button type="button" className="bc-tap is-end bc-cancel" onClick={onEnd} aria-label="Batalkan panggilan"><i><Phone style={{ transform: 'rotate(135deg)' }}/></i><small>Batalkan</small></button>}
       </>}
       {live && <div className="bc-ctl4 bc-grid6" onPointerDown={askTilt}>
         <label><button aria-label={loud ? 'Speaker active' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={speaker}>{loud ? <Volume2/> : <VolumeX/>}</button><span>{loud ? 'Speaker On' : 'Speaker Off'}</span></label>

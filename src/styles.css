@@ -9016,3 +9016,11 @@ html[data-bc-theme=light] main:has(.bc-head) .is-on { color: #7c3aed !important;
 
 /* BIX CALL: small sound-unlock chip at top so Tolak/Angkat stay unobstructed from the first second */
 .bc-tone-chip{position:absolute;z-index:7;top:calc(env(safe-area-inset-top) + 64px);left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800;color:#FFD700;background:rgb(8 6 14 / .8);border:1px solid rgb(255 215 0 / .45)}
+
+/* BIX CALL: round telecom cancel key + WA-style voice note player */
+html body .bixcall-ctl>.bc-cancel{display:flex!important;flex-direction:column;align-items:center;gap:8px;opacity:1!important;visibility:visible!important}
+.comm-voice{min-width:210px}
+.comm-vplay{width:34px;height:34px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:#FFD700;color:#05040a}
+.comm-vbar{position:relative;flex:1;height:6px;border-radius:999px;background:rgb(255 255 255 / .18);cursor:pointer;overflow:hidden}
+.comm-vbar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#A855F7,#FFD700)}
+.comm-vtime{font-size:10.5px;opacity:.8;white-space:nowrap}

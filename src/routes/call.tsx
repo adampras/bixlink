@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { createPortal } from 'react-dom';
 const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting', 'newgroup'];
 import { useEffect, useRef, useState } from 'react';
-import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X } from 'lucide-react';
+import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X, Play, Pause } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import callGateImg from '@/assets/eco/call.png';
 import { startBixCall } from '@/components/BixCall';
@@ -59,9 +59,18 @@ const fileIcon = (name = '') => { const e = name.split('.').pop()?.toLowerCase()
 const fmtBix = (n?: number) => Number(n ?? 0).toLocaleString('en-US', { maximumFractionDigits: 4 });
 function VoiceNote({ url }: { url: string }) {
   const ref = useRef<HTMLAudioElement>(null);
-  const [rate, setRate] = useState(1);
+  const [rate, setRate] = useState(1); const [play, setPlay] = useState(false); const [t, setT] = useState(0); const [dur, setDur] = useState(0); const [err, setErr] = useState(false);
   const next = () => { const r = rate === 1 ? 1.5 : rate === 1.5 ? 2 : 1; setRate(r); if (ref.current) ref.current.playbackRate = r; };
-  return <span className="comm-voice"><audio ref={ref} src={url} controls preload="none" className="comm-audio" onPlay={e => { e.currentTarget.playbackRate = rate; }}/><button type="button" className="comm-rate" onClick={next} aria-label="Kecepatan putar">{rate}×</button></span>;
+  const toggle = async () => { const a = ref.current; if (!a) return; if (!a.paused) { a.pause(); return; } try { a.muted = false; a.volume = 1; a.playbackRate = rate; await a.play(); setErr(false); } catch { setErr(true); } };
+  const mm = (x: number) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`;
+  const pct = dur > 0 ? Math.min(100, (t / dur) * 100) : 0;
+  return <span className="comm-voice">
+    <audio ref={ref} src={url} preload="metadata" onPlay={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onTimeUpdate={e => { setT(e.currentTarget.currentTime); const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onLoadedMetadata={e => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onError={() => setErr(true)}/>
+    <button type="button" className="comm-vplay" onClick={() => void toggle()} aria-label={play ? 'Jeda' : 'Putar pesan suara'}>{play ? <Pause size={16}/> : <Play size={16}/>}</button>
+    <span className="comm-vbar" onClick={e => { const a = ref.current; if (!a || !dur) return; const r = e.currentTarget.getBoundingClientRect(); a.currentTime = ((e.clientX - r.left) / r.width) * dur; }}><i style={{ width: `${pct}%` }}/></span>
+    <small className="comm-vtime">{err ? 'Gagal' : `${mm(t)}${dur ? ` / ${mm(dur)}` : ''}`}</small>
+    <button type="button" className="comm-rate" onClick={next} aria-label="Kecepatan putar">{rate}×</button>
+  </span>;
 }
 function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'pay' | 'decline' | 'cancel') => void }) {
   const [url, setUrl] = useState(m.media_path ? urlCache.get(m.media_path) ?? '' : '');
@@ -484,7 +493,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       const r = mime ? new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond: 32000 }) : new MediaRecorder(stream); const chunks: Blob[] = []; const t0 = Date.now(); setRecSecs(0); recCancel.current = false;
       r.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
       r.onstop = () => { stream.getTracks().forEach(t => t.stop()); rec.current = null; setRecording(false);
-        if (recCancel.current || Date.now() - t0 < 700 || !chunks.length) return; const type = r.mimeType || 'audio/webm'; void upload(new Blob(chunks, { type }), 'voice', type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm'); };
+        if (recCancel.current || Date.now() - t0 < 700 || !chunks.length) return; const type = (r.mimeType || 'audio/webm').split(';')[0] || 'audio/webm'; void upload(new Blob(chunks, { type }), 'voice', type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm'); };
       r.start(250); rec.current = r; setRecording(true); setTimeout(() => { if (rec.current === r) r.stop(); }, 120000);
     } catch { fail('Microphone permission denied'); }
   };
