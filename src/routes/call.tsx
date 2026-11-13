@@ -62,8 +62,6 @@ function VoiceNote({ url }: { url: string }) {
   const ref = useRef<HTMLAudioElement>(null);
   const [rate, setRate] = useState(1); const [play, setPlay] = useState(false); const [t, setT] = useState(0); const [dur, setDur] = useState(0); const [err, setErr] = useState(false);
   const next = () => { const r = rate === 1 ? 1.5 : rate === 1.5 ? 2 : 1; setRate(r); if (ref.current) ref.current.playbackRate = r; };
-  const web = useRef<{ ctx: AudioContext; src?: AudioBufferSourceNode | undefined; buf?: AudioBuffer; t0: number; raf?: number } | null>(null);
-  const stopWeb = () => { const w = web.current; if (w?.src) { try { w.src.onended = null; w.src.stop(); } catch { /* done */ } w.src = undefined; } if (w?.raf) cancelAnimationFrame(w.raf); setPlay(false); };
   // Play through a typed blob URL: storage may serve notes as octet-stream, which phones refuse to play.
   const blobUrl = useRef<string | null>(null);
   const toggle = async () => {
