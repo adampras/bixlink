@@ -182,6 +182,17 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
   const host = g.owner_id === me; const end = useRef<HTMLDivElement>(null); const file = useRef<HTMLInputElement>(null);
   const [adding, setAdding] = useState(!!fresh && g.owner_id === me);
   const [roster, setRoster] = useState<Mem[]>([]); const [showMem, setShowMem] = useState(false);
+  const [menu, setMenu] = useState<Msg | null>(null);
+  const hideKey = `bx-grp-hidden-${g.id}`;
+  const [hidden, setHidden] = useState<string[]>([]);
+  useEffect(() => { try { setHidden(JSON.parse(localStorage.getItem(hideKey) ?? '[]')); } catch { setHidden([]); } }, [hideKey]);
+  const canMod = host || roster.some(m => m.id === me && m.admin);
+  const delMine = (m: Msg) => { const n = [...hidden, m.id].slice(-500); setHidden(n); try { localStorage.setItem(hideKey, JSON.stringify(n)); } catch { /* optional */ } setMenu(null); };
+  const delAll = async (m: Msg) => {
+    if (!confirm('Hapus pesan ini untuk semua anggota?')) return;
+    const { error } = await supabase.rpc('bix_group_delete_message' as never, { p_id: m.id } as never);
+    setMenu(null); if (error) setErr('Gagal menghapus pesan.'); else void load();
+  };
   const loadRoster = async () => { const { data } = await supabase.rpc('bix_group_roster', { p_group: g.id }); setRoster((data as Mem[] | null) ?? []); };
   useEffect(() => { void loadRoster(); }, [g.id, adding]); // eslint-disable-line react-hooks/exhaustive-deps
   const setPhoto = async (f?: File) => {
@@ -234,6 +245,7 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
         <Button variant="ghost" type="button" className="bx-grp-act" onClick={async () => { if (await copyText(g.code)) { setCopied(true); setTimeout(() => setCopied(false), 1600); } }}>{copied ? <Check size={15}/> : <Copy size={15}/>}<span>{copied ? 'Tersalin' : 'Kode'}</span></Button>
         {g.live_code ? <Button variant="ghost" type="button" className="bx-grp-act is-live" onClick={() => setLive(g.live_code)}><Radio size={15}/><span>Gabung</span></Button>
           : host && <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => void startLive()}><Radio size={15}/><span>Live</span></Button>}
+        <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => setShowMem(true)}><Users size={15}/><span>Info</span></Button>
         {host ? <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => setAdding(true)}><UserPlus size={15}/><span>Tambah</span></Button>
           : <Button variant="ghost" type="button" className="bx-grp-act" onClick={() => void leave()}><LogOut size={15}/><span>Keluar</span></Button>}
       </nav>
@@ -243,8 +255,9 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
     {roster.length > 0 && <Button variant="ghost" type="button" className="bx-grp-rosterbar" onClick={() => setShowMem(true)}><Users size={14}/><span>{roster.slice(0, 3).map(m => '@' + m.name).join(', ')}</span><small>{roster.length > 3 ? `+${roster.length - 3}` : 'Anggota'}</small></Button>}
     <div className="bx-grp-feed bc-chatbox">
       {msgs.length === 0 && <p className="bx-grp-empty">Share the first lesson, tip or link with your group.</p>}
-      {msgs.map(m => <div key={m.id} className={`bx-grp-msg-row${m.sender_id === me ? ' is-me' : ''}`}>
-        {m.sender_id !== me && <i>@{m.name}</i>}<p>{m.body}</p><small>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+      {msgs.filter(m => !hidden.includes(m.id)).map(m => <div key={m.id} className={`bx-grp-msg-row${m.sender_id === me ? ' is-me' : ''}`} onContextMenu={e => { e.preventDefault(); setMenu(m); }}>
+        {m.sender_id !== me && <i>@{m.name}</i>}<p>{m.body}</p>
+        <button type="button" className="comm-more" aria-label="Opsi pesan" onClick={() => setMenu(m)}>⋯</button><small>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
       </div>)}
       <div ref={end}/>
     </div>
@@ -252,6 +265,12 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
       <input className="form-input" placeholder="Tulis pesan atau materi…" value={text} maxLength={2000} onChange={e => setText(e.target.value)}/>
       <Button variant="ghost" type="submit" aria-label="Send" disabled={!text.trim()}><Send size={18}/></Button>
     </form>}
+    {menu && <GroupSheet title="Opsi pesan" description={menu.body.slice(0, 60)} onClose={() => setMenu(null)}>
+      <div className="bx-grp-roles">
+        <Button variant="outline" type="button" onClick={() => delMine(menu)}>🗑 Hapus untuk saya</Button>
+        {(menu.sender_id === me || canMod) && !menu.body.startsWith('🚫') && <Button variant="destructive" type="button" onClick={() => void delAll(menu)}>🗑 Hapus untuk semua{menu.sender_id !== me ? ' (Admin)' : ''}</Button>}
+      </div>
+    </GroupSheet>}
     {showMem && <MembersSheet g={g} me={me} roster={roster} onClose={() => setShowMem(false)} onAdd={() => { setShowMem(false); setAdding(true); }} onReload={() => void loadRoster()} onPhoto={() => file.current?.click()}/>}
     {adding && <AddMembers g={g} inGroup={new Set(roster.map(m => m.id))} onClose={() => setAdding(false)}/>}
   </section>;

@@ -421,6 +421,7 @@ export type Database = {
         Row: {
           body: string
           created_at: string
+          deleted_at: string | null
           group_id: string
           id: string
           sender_id: string
@@ -428,6 +429,7 @@ export type Database = {
         Insert: {
           body: string
           created_at?: string
+          deleted_at?: string | null
           group_id: string
           id?: string
           sender_id: string
@@ -435,6 +437,7 @@ export type Database = {
         Update: {
           body?: string
           created_at?: string
+          deleted_at?: string | null
           group_id?: string
           id?: string
           sender_id?: string
@@ -4607,6 +4610,7 @@ export type Database = {
       }
       bix_group_can_manage: { Args: { p_group: string }; Returns: boolean }
       bix_group_candidates: { Args: never; Returns: Json }
+      bix_group_delete_message: { Args: { p_id: string }; Returns: undefined }
       bix_group_feed: {
         Args: { p_group: string }
         Returns: {
