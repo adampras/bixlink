@@ -122,7 +122,6 @@ function PresalePage() {
                 <Button className="mt-2 h-11 w-full rounded-full font-black presale-solid-btn" disabled={!canBuy || !sent || !txOk} onClick={doPay}>{busy ? 'Verifying on-chain…' : 'Verify payment & lock BIX'}</Button>
                 <p className="mt-2 text-[10px] text-muted-foreground">Max $1,000 per purchase; any extra is added to your USDT balance. Each TxID can be used once.</p></div>
             </div>; })()}
-            </>}
           </>}
           <p className="mt-3 text-center text-[10px] text-muted-foreground">— or pay from your USDT balance above —</p>
         </div>
