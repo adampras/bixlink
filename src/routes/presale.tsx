@@ -37,10 +37,10 @@ function PresalePage() {
   const wq = useQuery({ queryKey: ['presale-wallets', user?.id], queryFn: () => loadW(), enabled: !!user });
   const wallets = wq.data ?? []; const [wi, setWi] = useState(0); const w = wallets[Math.min(wi, Math.max(0, wallets.length - 1))];
   const [receipt, setReceipt] = useState<null | { usd: number; bix: number; serial?: number; via: string; extra?: number; test?: boolean }>(null);
-  const [tx, setTx] = useState(''); const [copied, setCopied] = useState(false);
+  const [tx, setTx] = useState(''); const [sent, setSent] = useState(false); const [copied, setCopied] = useState(false);
   const doPay = async () => {
     if (!w) return; setBusy(true); setErr(''); setMsg(''); setReceipt(null);
-    try { const r = await pay({ data: { walletCode: w.code, txHash: tx.trim() } }); setReceipt({ usd: r.usd, bix: Number(r.bix), serial: (r as any).serial, via: 'On-chain USDT (BEP-20)', extra: r.extra }); setMsg(`Verified! $${r.usd} → ${number(Number(r.bix))} BIX locked${r.extra > 0 ? ` · $${number(r.extra, { maximumFractionDigits: 2 })} extra added to your USDT balance` : ''}.`); setTx(''); qc.invalidateQueries({ queryKey: ['presale'] }); }
+    try { const r = await pay({ data: { walletCode: w.code, txHash: tx.trim() } }); setReceipt({ usd: r.usd, bix: Number(r.bix), serial: (r as any).serial, via: 'On-chain USDT (BEP-20)', extra: r.extra }); setMsg(`Verified! $${r.usd} → ${number(Number(r.bix))} BIX locked${r.extra > 0 ? ` · $${number(r.extra, { maximumFractionDigits: 2 })} extra added to your USDT balance` : ''}.`); setTx(''); setSent(false); qc.invalidateQueries({ queryKey: ['presale'] }); }
     catch (e) { setErr(e instanceof Error ? e.message : 'Verification failed'); } finally { setBusy(false); }
   };
   const s = q.data; const cfg = s?.config;
@@ -104,15 +104,24 @@ function PresalePage() {
         <div className="mt-5 rounded-2xl border border-chart-3/40 bg-background/50 p-4">
           <h3 className="flex items-center gap-2 text-sm font-black"><Wallet size={16} className="text-chart-3"/> Pay directly with USDT (BEP-20)</h3>
           {wq.isLoading ? <p className="mt-2 text-xs text-muted-foreground">Loading official wallets…</p> : !wallets.length ? <p className="mt-2 text-xs text-muted-foreground">No official presale wallet is active for your network yet.</p> : <>
-            {wallets.length > 1 && <div className="mt-3 grid grid-cols-5 gap-1.5">{wallets.map((x, i) => <button key={x.code} type="button" onClick={() => setWi(i)} aria-label={`Official wallet ending ${x.address.slice(-4)}`} className={`numeric rounded-xl border py-2 font-mono text-[10px] font-bold ${i === wi ? 'border-chart-3 bg-chart-3/15 text-chart-3' : 'border-border'}`}>…{x.address.slice(-4)}</button>)}</div>}
-            {w && <>
-              <p className="mt-3 text-center text-xs font-bold">Official BIXLINK wallet · BEP-20</p>
-              <div className="mx-auto mt-3 w-fit rounded-2xl bg-[var(--color-foreground,#fff)] p-3"><QRCodeSVG value={w.address} size={150}/></div>
-              <button type="button" onClick={() => { navigator.clipboard?.writeText(w.address); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="mt-3 flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2 text-left"><span className="min-w-0 flex-1 break-all font-mono text-[11px]">{w.address}</span><Copy size={14} className="shrink-0 text-chart-3"/><span className="text-[10px] font-bold">{copied ? 'Copied' : 'Copy'}</span></button>
-              <ol className="mt-3 grid gap-1 text-[11px] text-muted-foreground"><li>1. Send exactly <b className="text-foreground">${usd} USDT</b> on <b className="text-foreground">BNB Smart Chain (BEP-20)</b> to this address.</li><li>2. Paste the transaction hash (TxID) below.</li><li>3. Tap Verify — your BIX is locked and vesting starts.</li></ol>
-              <input value={tx} onChange={e => setTx(e.target.value)} placeholder="TxID 0x…" className="numeric mt-3 w-full rounded-xl border border-border bg-background px-3 py-2.5 font-mono text-xs" aria-label="Transaction hash"/>
-              <Button className="mt-3 h-11 w-full rounded-full font-black presale-solid-btn" disabled={!canBuy || !/^0x[0-9a-fA-F]{64}$/.test(tx.trim())} onClick={doPay}>{busy ? 'Verifying on-chain…' : 'Verify payment & buy BIX'}</Button>
-              <p className="mt-2 text-[10px] text-muted-foreground">Max $1,000 per purchase; any extra is added to your USDT balance. Each TxID can be used once.</p>
+            {(() => { const txOk = /^0x[0-9a-fA-F]{64}$/.test(tx.trim()); const step = !w ? 1 : !sent ? 2 : 3; const st = (n: number) => n < step ? 'done' : n === step ? 'active' : 'todo';
+              return <div className="mt-3 grid gap-3">
+              <ol className="grid grid-cols-3 gap-1.5 text-center" aria-label="Payment steps">{['Choose wallet', 'Transfer USDT', 'Verify TxID'].map((t, i) => { const v = st(i + 1); return <li key={t} className={`rounded-xl border px-1 py-2 ${v === 'active' ? 'border-chart-3 bg-chart-3/15' : v === 'done' ? 'border-chart-2/60 bg-chart-2/10' : 'border-border opacity-60'}`}><span className={`mx-auto grid h-6 w-6 place-items-center rounded-full text-[11px] font-black ${v === 'done' ? 'bg-chart-2 text-background' : v === 'active' ? 'bg-chart-3 text-background' : 'bg-muted text-muted-foreground'}`}>{v === 'done' ? '✓' : i + 1}</span><b className="mt-1 block text-[10px]">{t}</b><span className="text-[9px] text-muted-foreground">{v === 'done' ? 'Done' : v === 'active' ? 'In progress' : 'Waiting'}</span></li>; })}</ol>
+              <div className="rounded-xl border border-border p-3"><p className="text-[11px] font-black text-chart-3">STEP 1 · Choose an official wallet</p>
+                {wallets.length > 1 && <div className="mt-2 grid grid-cols-5 gap-1.5">{wallets.map((x, i) => <button key={x.code} type="button" onClick={() => { setWi(i); setSent(false); }} aria-label={`Official wallet ending ${x.address.slice(-4)}`} className={`numeric rounded-xl border py-2 font-mono text-[10px] font-bold ${i === wi ? 'border-chart-3 bg-chart-3/15 text-chart-3' : 'border-border'}`}>…{x.address.slice(-4)}</button>)}</div>}
+                {w && <><p className="mt-2 text-center text-[11px] font-bold">Official BIXLINK wallet · BEP-20</p>
+                <div className="mx-auto mt-2 w-fit rounded-2xl bg-[var(--color-foreground,#fff)] p-3"><QRCodeSVG value={w.address} size={140}/></div>
+                <button type="button" onClick={() => { navigator.clipboard?.writeText(w.address); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="mt-2 flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2 text-left"><span className="min-w-0 flex-1 break-all font-mono text-[11px]">{w.address}</span><Copy size={14} className="shrink-0 text-chart-3"/><span className="text-[10px] font-bold">{copied ? 'Copied' : 'Copy'}</span></button></>}
+              </div>
+              <div className={`rounded-xl border p-3 ${step >= 2 ? 'border-border' : 'border-border opacity-50'}`}><p className="text-[11px] font-black text-chart-3">STEP 2 · Transfer USDT</p>
+                <p className="mt-1 text-xs">Send exactly <b className="numeric text-chart-3">${usd} USDT</b> on <b>BNB Smart Chain (BEP-20)</b>. Sending from an exchange? Add the withdrawal fee so the full amount arrives.</p>
+                <Button variant="outline" className="mt-2 h-10 w-full rounded-full text-xs font-black" disabled={!w} onClick={() => setSent(true)}>{sent ? '✓ Transfer sent' : 'I have sent the USDT'}</Button></div>
+              <div className={`rounded-xl border p-3 ${step >= 3 ? 'border-border' : 'border-border opacity-50'}`}><p className="text-[11px] font-black text-chart-3">STEP 3 · Verify TxID</p>
+                <input value={tx} onChange={e => setTx(e.target.value)} disabled={!sent} placeholder="TxID 0x…" className="numeric mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5 font-mono text-xs" aria-label="Transaction hash"/>
+                <p className={`mt-1 text-[10px] ${tx && !txOk ? 'text-destructive' : txOk ? 'text-chart-2' : 'text-muted-foreground'}`}>{tx ? (txOk ? '✓ TxID format looks right' : 'TxID must start with 0x and have 64 characters') : 'Copy the transaction hash from your wallet history.'}</p>
+                <Button className="mt-2 h-11 w-full rounded-full font-black presale-solid-btn" disabled={!canBuy || !sent || !txOk} onClick={doPay}>{busy ? 'Verifying on-chain…' : 'Verify payment & lock BIX'}</Button>
+                <p className="mt-2 text-[10px] text-muted-foreground">Max $1,000 per purchase; any extra is added to your USDT balance. Each TxID can be used once.</p></div>
+            </div>; })()}
             </>}
           </>}
           <p className="mt-3 text-center text-[10px] text-muted-foreground">— or pay from your USDT balance above —</p>
