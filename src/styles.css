@@ -9255,3 +9255,41 @@ html[data-aix="on"] [data-page="wallet"] .wallet-action span { border-radius: 99
 .ex-app[data-aix-ex="on"] .ex-shine { background: linear-gradient(90deg, #2dd4bf, #a78bfa, #FFD700); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .ex-app[data-aix-ex="on"] .aix-globe { background: radial-gradient(120% 80% at 50% 0%, rgba(124,58,237,.25), transparent 60%), rgba(10,15,28,.8); border: 1px solid rgba(45,212,191,.22); }
 .aix-globe__kicker { color: #2dd4bf; }
+
+/* ===== BIX CALL chat — calm WhatsApp-dark palette (chat only; call screens untouched) ===== */
+.comm-room{background:#0b141a;border-radius:0}
+.comm-room-head{background:#1f2c34;border-color:#2a3942;box-shadow:none}
+.comm-msgs>p{background:#202c33;border:0;color:#e9edef;box-shadow:0 1px .5px rgb(0 0 0 / .25)}
+.comm-msgs>p.is-me{background:#005c4b;border:0;color:#e9edef}
+.comm-msgs>p small{color:#8696a0;opacity:1}
+.comm-msgs>p.is-me small{color:#a8c5bf}
+.comm-tick{color:#8696a0;opacity:1}
+.comm-tick.is-read{color:#53bdeb;text-shadow:none}
+.comm-quote,.comm-replybar{border-left-color:#06cf9c;background:rgb(0 0 0 / .22)}
+.comm-quote b,.comm-replybar b{color:#06cf9c}
+.comm-compose{background:#1f2c34;border-color:#2a3942}
+.comm-compose button{background:#00a884;color:#0b141a}
+.comm-compose button.is-rec{background:#ef4444!important;color:#fff}
+.comm-reacts button{background:#1f2c34;border-color:#2a3942}
+.comm-reacts button.is-mine{background:#005c4b;border-color:#06cf9c}
+.comm-sheet{background:#233138;border-color:#2a3942;box-shadow:0 -8px 24px rgb(0 0 0 / .4)}
+.comm-sheet-title{color:#e9edef}
+.comm-reactbar{border-color:#2a3942}
+.comm-pinbar{background:#1f2c34;border-bottom-color:#2a3942}.comm-pinbar b{color:#06cf9c}
+.comm-typing i{background:#8696a0}
+.comm-status.is-typing{color:#06cf9c}.comm-status.is-typing i{background:#06cf9c;box-shadow:none}
+.comm-tabs{border-color:#2a3942;background:#111b21}
+.comm-tabs button.is-on{background:#103529;color:#00a884;box-shadow:none}
+.comm-card{background:#111b21;border-color:#222d34}
+.comm-card::before{display:none}
+.comm-h{color:#8696a0}
+.comm-search,.comm-input{background:#202c33;border-color:#2a3942}
+.comm-search button,.comm-save{background:#00a884;color:#0b141a}
+.comm-ava{background:#2a3942;box-shadow:none;color:#e9edef}
+.comm-badge{background:#00a884;color:#0b141a}
+.comm-actions>button{background:#202c33;border-color:#2a3942;color:#00a884}
+.comm-filecard{background:rgb(0 0 0 / .2);border-color:#2a3942}
+.comm-filecard i{background:#2a3942}
+.comm-rate{background:#2a3942;color:#e9edef;border-color:transparent}
+.comm-vplay{background:#00a884;color:#0b141a}
+.comm-vbar i{background:#06cf9c}

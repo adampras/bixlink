@@ -533,30 +533,38 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   const [recording, setRecording] = useState(false);
   const [recSecs, setRecSecs] = useState(0); const recCancel = useRef(false);
   useEffect(() => { if (!recording) return; const t = setInterval(() => setRecSecs(x => x + 1), 1000); return () => clearInterval(t); }, [recording]);
-  const cancelRec = () => { recCancel.current = true; recStop.current?.(); rec.current?.stop(); };
-  // Voice notes are recorded as plain WAV (PCM): every phone and WebView can play it, and silence is detectable.
+  const cancelRec = () => { recCancel.current = true; recStop.current?.(); };
+  // Voice notes use the phone's hardware MediaRecorder (webm/opus or m4a); a light level meter flags silent recordings.
   const recStop = useRef<(() => void) | null>(null);
   const toggleRec = async () => {
     if (rec.current || recStop.current) { recStop.current?.(); return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
+      setRecSecs(0); recCancel.current = false; const t0 = Date.now(); let peak = 0;
+      // Level meter only (no ScriptProcessor): detects silent recordings caused by blocked mic permission.
       const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const ctx = new AC(); await ctx.resume();
-      const src = ctx.createMediaStreamSource(stream); const proc = ctx.createScriptProcessor(4096, 1, 1); const mute = ctx.createGain(); mute.gain.value = 0;
-      const bufs: Float32Array[] = []; let peak = 0; const t0 = Date.now(); setRecSecs(0); recCancel.current = false;
-      proc.onaudioprocess = e => { const d = new Float32Array(e.inputBuffer.getChannelData(0)); for (let i = 0; i < d.length; i += 16) peak = Math.max(peak, Math.abs(d[i]!)); bufs.push(d); };
-      src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
-      const stop = () => {
-        recStop.current = null; setRecording(false); clearTimeout(cap);
-        try { src.disconnect(); proc.disconnect(); } catch { /* ignore */ }
-        stream.getTracks().forEach(t => t.stop()); const rate = ctx.sampleRate; void ctx.close();
-        if (recCancel.current || Date.now() - t0 < 700 || !bufs.length) return;
-        if (peak < 0.003) { fail('Rekaman tanpa suara — izinkan mikrofon untuk BIXLINK di pengaturan HP, lalu coba lagi.'); return; }
-        void upload(encodeWav(bufs, rate, Math.min(1.8, 0.9 / peak)), 'voice', 'wav');
+      const ctx = AC ? new AC() : null; void ctx?.resume().catch(() => {});
+      const an = ctx?.createAnalyser(); if (ctx && an) { an.fftSize = 512; ctx.createMediaStreamSource(stream).connect(an); }
+      const buf = new Float32Array(512);
+      const meter = setInterval(() => { if (!an) return; an.getFloatTimeDomainData(buf); for (let i = 0; i < buf.length; i += 4) peak = Math.max(peak, Math.abs(buf[i]!)); }, 100);
+      const types = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm'];
+      const mime = typeof MediaRecorder !== 'undefined' ? types.find(t => MediaRecorder.isTypeSupported?.(t)) : undefined;
+      if (typeof MediaRecorder === 'undefined') throw new Error('no-recorder');
+      const mr = new MediaRecorder(stream, mime ? { mimeType: mime, audioBitsPerSecond: 32000 } : undefined);
+      const chunks: Blob[] = [];
+      mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+      mr.onstop = () => {
+        rec.current = null; clearInterval(meter); stream.getTracks().forEach(t => t.stop()); void ctx?.close().catch(() => {});
+        if (recCancel.current || Date.now() - t0 < 700 || !chunks.length) return;
+        if (an && peak < 0.003) { fail('Rekaman tanpa suara — izinkan mikrofon untuk BIXLINK di pengaturan HP, lalu coba lagi.'); return; }
+        const type = mr.mimeType || mime || 'audio/webm';
+        const ext = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm';
+        void upload(new Blob(chunks, { type: type.split(';')[0] ?? type }), 'voice', ext);
       };
+      const stop = () => { recStop.current = null; setRecording(false); clearTimeout(cap); if (mr.state !== 'inactive') mr.stop(); };
       const cap = setTimeout(stop, 120000);
-      recStop.current = stop; setRecording(true);
-    } catch { fail('Izin mikrofon ditolak'); }
+      rec.current = mr; mr.start(250); recStop.current = stop; setRecording(true);
+    } catch { fail('Izin mikrofon ditolak atau perekam tidak didukung'); }
   };
   const [payOpen, setPayOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
