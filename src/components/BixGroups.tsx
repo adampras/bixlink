@@ -242,6 +242,7 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
     if (host && live) { await supabase.from('bix_groups').update({ live_code: null }).eq('id', g.id); }
     setLive(null); await onChange();
   };
+  useEffect(() => { if (live) return; document.documentElement.classList.add('comm-room-open'); return () => document.documentElement.classList.remove('comm-room-open'); }, [live]);
   if (live) return <MeetingStage code={live} me={me} onLeave={() => void leaveLive()}/>;
   return <section className="bx-grp-room is-full">
     <header>

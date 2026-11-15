@@ -9312,3 +9312,29 @@ html[data-aix="on"] [data-page="wallet"] .wallet-action span { border-radius: 99
 .comm-compose button.comm-fab.is-rec{background:#ef4444!important;color:#fff}
 .comm-msgs>p{transition:transform .18s ease-out;touch-action:pan-y}
 .comm-msgs>p.is-swipe-ready{box-shadow:-3px 0 0 #06cf9c}
+
+/* BIX CALL polish: no checkered wallpapers, tidy WA-style group room (call screens untouched) */
+body[data-bc-chat-wall] :is(.comm-msgs,.bx-grp-feed){background-image:none!important;border-radius:0!important}
+.bc-wall-prev{background-image:none!important}
+.bixcall-page .bx-grp-room.is-full{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;gap:0;min-height:0;height:100dvh;background:#0b141a;padding-bottom:env(safe-area-inset-bottom)}
+.bixcall-page .bx-grp-room.is-full>header{display:flex;align-items:center;gap:6px;padding:calc(env(safe-area-inset-top) + 6px) 8px 8px!important;background:#1f2c34;border-bottom:1px solid #2a3942}
+.bx-grp-room header .bx-grp-back{width:40px!important;min-width:40px;height:40px!important;padding:0!important;border:0!important;background:transparent!important;color:#e9edef!important;border-radius:999px!important}
+.bx-grp-room header .bx-grp-back span{display:none}
+.bx-grp-room header .bx-grp-room-av{flex:none;display:grid}
+.bx-grp-room header .bx-grp-room-title{flex:1 1 auto;min-width:0;width:auto!important;height:auto!important;border:0!important;border-radius:8px!important;padding:2px 6px!important;display:grid!important;place-items:start!important;justify-content:start;text-align:left;background:transparent!important}
+.bx-grp-room-title b{display:block;max-width:100%;font-size:15px;color:#e9edef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bx-grp-room-title small{display:block;max-width:100%;font-size:11px;color:#8696a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bx-grp-room header .bx-grp-actions{flex:none;display:flex;gap:4px}
+.bx-grp-room header .bx-grp-act:not(.is-live){min-width:40px;width:40px!important;height:40px!important;padding:0!important;border:0!important;background:transparent!important;color:#e9edef!important;border-radius:999px!important}
+.bx-grp-room .bx-grp-livebar{margin:6px 8px 0;border-radius:10px}
+.bx-grp-room .bx-grp-rosterbar{background:#111b21;border-color:#2a3942;color:#8696a0}
+.bixcall-page .bx-grp-room .bx-grp-feed{flex:1 1 auto;min-height:0;overflow-y:auto;padding:10px 8px;background:#0b141a!important}
+.bx-grp-room .bx-grp-msg-row{position:relative;background:#202c33;border:0;color:#e9edef;padding:6px 30px 6px 10px;border-radius:10px 10px 10px 3px}
+.bx-grp-room .bx-grp-msg-row.is-me{background:#005c4b;border-radius:10px 10px 3px 10px}
+.bx-grp-room .bx-grp-msg-row i{color:#06cf9c}
+.bx-grp-room .bx-grp-msg-row small{color:#8696a0}
+.bx-grp-room .bx-grp-msg-row .comm-more{position:absolute;top:2px;right:4px;width:24px;height:24px;display:grid;place-items:center;color:#8696a0;background:transparent;border:0}
+.bixcall-page .bx-grp-room .bx-grp-compose{position:static;bottom:auto;padding:6px 8px;background:#0b141a;align-items:center}
+.bx-grp-room .bx-grp-compose input{border-radius:999px;background:#202c33;border-color:#2a3942;color:#e9edef}
+.bx-grp-room .bx-grp-compose button{background:#00a884!important;color:#0b141a!important;border-radius:999px}
+.bx-grp-list button{height:auto!important;justify-content:flex-start!important;white-space:normal}
