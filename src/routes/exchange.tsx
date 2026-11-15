@@ -61,7 +61,7 @@ function ExchangePage() {
   const verified = kycStatus === 'approved';
   const maxQ = Math.max(1, ...book.bids.map(b => b[1]), ...book.asks.map(a => a[1]));
 
-  return <div className="ex-app min-h-dvh bg-background text-foreground">
+  return <div className="ex-app min-h-dvh bg-background text-foreground" data-aix-ex={aix ? "on" : undefined}>
     <header className="ex-topbar sticky top-0 z-40 flex items-center gap-2 px-3 py-2">
       <button type="button" onClick={back} aria-label="Kembali" className="ex-icon-btn"><ArrowLeft size={18}/></button>
       <div className="min-w-0 flex-1 leading-tight"><b className="block font-display text-sm font-black tracking-wide">BIXLINK <span className="text-primary">EXCHANGER</span></b>
