@@ -26,7 +26,6 @@ import { getBixPay } from '@/lib/bixlink.functions';
 import { CONTACTS_EVENT, addContact, readContacts, removeContact, parseBixId, type BixContact } from '@/lib/bix-contacts';
 import { ChatThemePicker } from '@/components/ChatThemePicker';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
-import { EcoLogo } from '@/components/EcoLogo';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
 import { getBcTheme, setBcTheme, applyBcTheme } from '@/lib/bix-theme';
 import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
@@ -118,7 +117,7 @@ function VoiceNote({ url }: { url: string }) {
   const bars = useMemo(() => { let h = 0; for (let i = 0; i < url.length; i++) h = (h * 31 + url.charCodeAt(i)) >>> 0; return Array.from({ length: 30 }, () => { h = (h * 1103515245 + 12345) >>> 0; return 22 + (h % 78); }); }, [url.split('?')[0]]); // eslint-disable-line react-hooks/exhaustive-deps
   const seek = (e: React.MouseEvent<HTMLSpanElement>) => { e.stopPropagation(); const a = ref.current; if (!a || !dur) return; const r = e.currentTarget.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * dur; };
   return <span className={`comm-voice${play ? ' is-playing' : ''}`} onPointerDown={stop} onPointerUp={stop} onTouchStart={stop} onClick={stop} onDoubleClick={stop} onContextMenu={stop}>
-    <audio ref={ref} src={src} preload="metadata" playsInline onPlay={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onTimeUpdate={e => { setT(e.currentTarget.currentTime); const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onLoadedMetadata={e => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onError={() => { if (src !== url) setSrc(url); }}/>
+    <audio ref={ref} src={src} preload="metadata" playsInline onPlay={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onTimeUpdate={e => { setT(e.currentTarget.currentTime); const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onLoadedMetadata={e => { const a = e.currentTarget; const d = a.duration; if (Number.isFinite(d)) setDur(d); else { const fix = () => { a.removeEventListener('timeupdate', fix); if (Number.isFinite(a.duration)) setDur(a.duration); a.currentTime = 0; }; a.addEventListener('timeupdate', fix); try { a.currentTime = 1e7; } catch { /* ignore */ } } }} onError={() => { if (src !== url) setSrc(url); }}/>
     <button type="button" className="comm-vplay" onClick={e => { e.stopPropagation(); toggle(); }} aria-label={play ? 'Jeda' : 'Putar pesan suara'}>{play ? <Pause size={18} fill="currentColor"/> : <Play size={18} fill="currentColor"/>}</button>
     <span className="comm-vwave" onClick={seek} role="slider" aria-label="Posisi pesan suara" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}>
       {bars.map((v, i) => <i key={i} className={(i / bars.length) * 100 < pct ? 'is-on' : ''} style={{ height: `${v}%` }}/>)}
@@ -197,7 +196,7 @@ function CallInner() {
 
   return <main className="mx-auto w-full px-3 pt-0 pb-4">
     <div className="bc-head bc-head--wa">
-      <div className="bc-toprow"><EcoLogo id="call" size={22}/><b className="bc-brand">BIX<span>CALL</span><em>{TITLE[view]}</em></b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}<ContactQr/><CommMenu/></div>
+      <div className="bc-toprow"><b className="bc-brand">BIX<span>CALL</span><em>{TITLE[view]}</em></b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}<ContactQr/><CommMenu/></div>
       <div className="bc-head__search"><FindMember bar me={me} tier={tier} onChat={open}/></div>
     </div>
 
@@ -227,7 +226,7 @@ function CommMenu() {
   const [o, setO] = useState(false);
   const go = [['newgroup', 'Grup baru'], ['community', 'Komunitas'], ['starred', 'Berbintang'], ['call', 'Riwayat panggilan'], ['setting', 'Pengaturan']] as const;
   return <span className="comm-kebab"><button type="button" aria-label="Pengaturan BIX CALL" aria-expanded={o} onClick={() => setO(v => !v)}><MoreVertical size={18}/></button>
-    {o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
+    {o && <span className="comm-kebab-bg" aria-hidden onClick={() => setO(false)}/>}{o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }
 
 /** Bare 6-digit numbers are BIX-IDs: 123456 → BIX-123456. */
@@ -297,14 +296,34 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
     const load = async () => { void supabase.rpc('bix_chat_sync' as never, {} as never); void supabase.rpc('bix_chat_delivered' as never); const { data } = await supabase.rpc('bix_chat_threads' as never); setThreads((data as Thread[] | null) ?? []); };
     void load(); const t = setInterval(() => void load(), 6000); return () => clearInterval(t);
   }, []);
+  const [act, setAct] = useState<Thread | null>(null);
+  const holdT = useRef<number | undefined>(undefined);
+  const clearThread = async (t: Thread) => {
+    setAct(null);
+    if (!confirm(`Hapus seluruh percakapan dengan @${t.name}? Riwayat hilang dari HP Anda.`)) return;
+    const { data } = await supabase.from('bix_messages' as never).select('id').or(`and(sender_id.eq.${me},recipient_id.eq.${t.peer}),and(sender_id.eq.${t.peer},recipient_id.eq.${me})`).limit(1000);
+    const ids = ((data as { id: string }[] | null) ?? []).map(x => x.id);
+    for (let i = 0; i < ids.length; i += 8) await Promise.all(ids.slice(i, i + 8).map(id => supabase.rpc('bix_chat_delete' as never, { p_id: id, p_everyone: false } as never)));
+    try { localStorage.setItem(`bc-clear-${t.peer}`, new Date().toISOString()); } catch { /* optional */ }
+    setThreads(l => (l ?? []).filter(x => x.peer !== t.peer));
+  };
   return <>
+    {act && createPortal(<div className="comm-sheet-bg" onClick={() => setAct(null)}><div className="comm-sheet" role="menu" onClick={e => e.stopPropagation()}>
+      <b className="comm-sheet-title">@{act.name}</b>
+      <button type="button" onClick={() => { const a = act; setAct(null); onOpen(a.peer, a.name); }}>💬 Buka chat</button>
+      <button type="button" onClick={() => { const a = act; setAct(null); startBixCall(a.peer, a.name, 'voice'); }}>📞 Panggilan suara</button>
+      <button type="button" onClick={() => { const a = act; setAct(null); startBixCall(a.peer, a.name, 'video'); }}>📹 Panggilan video</button>
+      <button type="button" onClick={() => { addContact({ id: act.peer, name: act.name, code: '' }); setAct(null); }}>👤 Simpan kontak</button>
+      <button type="button" className="danger" onClick={() => void clearThread(act)}>🗑 Hapus seluruh percakapan</button>
+      <button type="button" className="ghost" onClick={() => setAct(null)}>Batal</button>
+    </div></div>, document.body)}
     {tier && !tier.chat && <p className="comm-lock"><Lock size={13}/>{tier.chat_enabled ? `BIX CHAT unlocks with staking from $${tier.min.chat}.` : 'BIX CHAT is currently closed by Admin.'}</p>}
     <StoryBar me={me} myName="Saya"/>
     <section className="comm-card"><h3 className="comm-h">Percakapan</h3>
       {threads === null ? <p className="text-xs text-muted-foreground">Loading…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">No chats yet. Search for members above to start chatting.</p> :
-        <ul className="comm-list">{threads.map(t => <li key={t.peer}><button onClick={() => onOpen(t.peer, t.name)}><BixAvatar userId={t.peer} name={t.name} online={t.online}/>
+        <ul className="comm-list">{threads.map(t => <li key={t.peer} className="comm-thread"><button onClick={() => onOpen(t.peer, t.name)} onPointerDown={() => { holdT.current = window.setTimeout(() => { try { navigator.vibrate?.(12); } catch { /* optional */ } setAct(t); }, 480); }} onPointerUp={() => window.clearTimeout(holdT.current)} onPointerLeave={() => window.clearTimeout(holdT.current)} onContextMenu={e => { e.preventDefault(); setAct(t); }}><BixAvatar userId={t.peer} name={t.name} online={t.online}/>
           <span className="min-w-0 flex-1 text-left"><b className="block truncate text-sm">@{t.name}</b><small className="block truncate text-muted-foreground">{t.mine ? 'You: ' : ''}{t.body}</small></span>
-          <span className="text-right"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></button></li>)}</ul>}
+          <span className="text-right"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></button><button type="button" className="comm-thread-more" aria-label={`Opsi @${t.name}`} onClick={() => setAct(t)}><MoreVertical size={16}/></button></li>)}</ul>}
     </section>
   </>;
 }
@@ -319,6 +338,7 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
   })(); }, [me]);
   const [pad, setPad] = useState(false);
   return <>
+    <FindMember me={me} tier={tier} onChat={onChat}/>
     {pad && <Dialpad me={me} tier={tier} onChat={onChat}/>}
     <button type="button" className={`comm-fab${pad ? ' is-open' : ''}`} aria-label={pad ? 'Close dial pad' : 'Open dial pad'} onClick={() => setPad(v => !v)}>{pad ? <X size={22}/> : <Phone size={22}/>}</button>
     <section className="comm-card"><h3 className="comm-h">Call history</h3>
@@ -326,7 +346,7 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
         <span className={`comm-dir ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.caller_id === me ? '↗' : '↙'}</span>
         <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{h.peer}</b><small className="text-muted-foreground"><em className={`comm-hbadge ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.status === 'missed' ? 'Tak terjawab' : h.status === 'declined' ? 'Rejected' : h.caller_id === me ? 'Leave' : 'Join'}</em> {h.kind === 'video' ? 'Video' : 'Voice'} · {new Date(h.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></span>
         <button type="button" className="bc-redial" aria-label={`Panggil ulang @${h.peer}`} onClick={() => startBixCall(h.peerId, h.peer, h.kind === 'video' ? 'video' : 'voice')}>{h.kind === 'video' ? <Video size={16}/> : <Phone size={16}/>}</button>
-        <ActionButtons peerId={h.peerId} name={h.peer} tier={tier} canCall={h.canCall} onChat={onChat}/></li>)}</ul>}
+        <ActionButtons peerId={h.peerId} name={h.peer} tier={tier} canCall={h.canCall} onChat={onChat}/><SaveContactBtn id={h.peerId} name={h.peer}/></li>)}</ul>}
     </section>
   </>;
 }
@@ -574,7 +594,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       mr.onstop = () => {
         rec.current = null; clearInterval(meter); stream.getTracks().forEach(t => t.stop()); void ctx?.close().catch(() => {});
         if (recCancel.current || Date.now() - t0 < 700 || !chunks.length) return;
-        if (an && peak < 0.003) { fail('Rekaman tanpa suara — izinkan mikrofon untuk BIXLINK di pengaturan HP, lalu coba lagi.'); return; }
+        if (an && peak < 0.003) fail('Suara rekaman sangat pelan — pastikan izin mikrofon BIXLINK aktif.');
         const type = mr.mimeType || mime || 'audio/webm';
         const ext = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm';
         void upload(new Blob(chunks, { type: type.split(';')[0] ?? type }), 'voice', ext);
@@ -711,7 +731,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small>{peerCard?.status_text && <em className="comm-statusline">{peerCard.status_text}</em>}</span>
       <ActionButtons compact peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>
       <span className="comm-kebab"><button type="button" aria-label="Menu chat" aria-expanded={roomMenu} onClick={() => setRoomMenu(v => !v)}><MoreVertical size={19}/></button>
-        {roomMenu && <span className="comm-kebab-menu" role="menu" onClick={() => setRoomMenu(false)}>
+        {roomMenu && <span className="comm-kebab-bg" aria-hidden onClick={() => setRoomMenu(false)}/>}{roomMenu && <span className="comm-kebab-menu" role="menu" onClick={() => setRoomMenu(false)}>
           <button type="button" role="menuitem" onClick={() => setPayOpen(true)}>Kirim BIX</button>
           <button type="button" role="menuitem" onClick={() => setStarOpen(true)}>Pesan berbintang</button>
           <Link to="/pay" role="menuitem">BIX PAY</Link>
