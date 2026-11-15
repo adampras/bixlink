@@ -3,6 +3,7 @@ import { Maximize2, Volume2, X } from 'lucide-react';
 import { useRouter } from '@tanstack/react-router';
 import { bixtokMini, useBixtokMini } from '@/lib/bixtok-mini';
 import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
+import { Button } from '@/components/ui/button';
 
 // The LIVE room is code-split. After an app update the old file URL can vanish,
 // which used to throw and blank the whole screen. Retry, then show a reload card.
@@ -10,8 +11,8 @@ function LiveRoomLoadFailed({ onClose }: { onClose: () => void }) {
   return <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-background p-6 text-center text-foreground">
     <p className="text-sm">LIVE needs a quick refresh to load the latest version.</p>
     <div className="flex gap-2">
-      <button type="button" className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" onClick={() => window.location.reload()}>Reload</button>
-      <button type="button" className="rounded-full border border-border px-4 py-2 text-sm" onClick={onClose}>Close</button>
+      <Button type="button" onClick={() => window.location.reload()}>Reload</Button>
+      <Button type="button" variant="outline" onClick={onClose}>Close</Button>
     </div>
   </div>;
 }
@@ -150,7 +151,7 @@ export function BixtokMiniHost() {
   };
   return <div className={mini ? `bxl-mini${drag.tucked ? ' bxl-tucked' : ''}` : 'bxl-full'} {...(mini ? drag.bind : {})}>
     <div className={mini ? 'bxl-mini-inner' : undefined}>
-      <Suspense fallback={null}>
+      <Suspense fallback={<div role="status" className="flex h-full w-full items-center justify-center bg-background p-6 text-foreground">Loading LIVE…</div>}>
         <BixtokLiveRoom live={room.live} me={room.me} cfg={room.cfg} following={room.following} onFollow={room.onFollow} onGift={room.onGift} onClose={() => bixtokMini.close()} onMinimize={minimize}/>
       </Suspense>
     </div>

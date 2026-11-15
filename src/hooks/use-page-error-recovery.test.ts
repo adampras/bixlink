@@ -12,7 +12,7 @@ import { usePageErrorRecovery } from './use-page-error-recovery';
 afterEach(() => { vi.clearAllMocks(); });
 
 describe('leaf page error recovery', () => {
-  it.each(['HOME', 'Market'])('recovers stale errors even inside the %s leaf boundary', async () => {
+  it.each(['HOME', 'Market', 'shared root'])('recovers stale errors even inside the %s boundary', async () => {
     const error = new TypeError("Cannot read properties of undefined (reading 'component')");
     renderHook(() => usePageErrorRecovery(error, vi.fn()));
     await waitFor(() => expect(mocks.recover).toHaveBeenCalledWith(error));
@@ -24,6 +24,16 @@ describe('leaf page error recovery', () => {
     const { result } = renderHook(() => usePageErrorRecovery(new Error('Feed unavailable'), reset));
     await act(async () => { await result.current(); });
     expect(order).toEqual(['invalidate', 'reset']);
+    expect(reset).toHaveBeenCalledTimes(1);
+  });
+  it('keeps the boundary until asynchronous loader invalidation finishes', async () => {
+    let finish: (() => void) | undefined;
+    mocks.invalidate.mockImplementation(() => new Promise<void>(resolve => { finish = resolve; }));
+    const reset = vi.fn();
+    const { result } = renderHook(() => usePageErrorRecovery(new Error('Feed unavailable'), reset));
+    const pending = result.current();
+    expect(reset).not.toHaveBeenCalled();
+    await act(async () => { finish?.(); await pending; });
     expect(reset).toHaveBeenCalledTimes(1);
   });
 });

@@ -6,7 +6,6 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
-  useRouter,
   useRouterState,
   HeadContent,
   Scripts,
@@ -30,6 +29,8 @@ import { NativeFeel } from "../components/NativeFeel";
 import { ContentGuard } from "../components/ContentGuard";
 import { I18nProvider } from "../lib/i18n";
 import { isStalePageError, recoverStalePage } from '../lib/stale-page-recovery';
+import { usePageErrorRecovery } from '@/hooks/use-page-error-recovery';
+import { Button } from '@/components/ui/button';
 
 function NotFoundComponent() {
   return (
@@ -55,7 +56,7 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
-  const router = useRouter();
+  const retry = usePageErrorRecovery(error, reset);
   const chunk = isStalePageError(error);
   useEffect(() => {
     if (recoverStalePage(error)) return;
@@ -72,16 +73,9 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              if (chunk) { window.location.reload(); return; }
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
+          <Button onClick={() => void retry()}>
             Try again
-          </button>
+          </Button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
