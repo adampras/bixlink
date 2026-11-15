@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, type ErrorComponentProps } from '@tanstack/react-router';
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { RefreshCw, Globe2, Newspaper, Lock } from 'lucide-react';
 import { CryptoIcon } from '@/components/CryptoIcon';
@@ -10,15 +10,20 @@ import { dateTime, money, number } from '@/lib/bixlink';
 import { SponsorSlot } from '@/components/SponsorSlot';
 import { usePublicConfig } from '@/lib/useMember';
 import { HighlightsHub } from '@/components/HighlightsHub';
+import { usePageErrorRecovery } from '@/hooks/use-page-error-recovery';
 
 const marketQuery = queryOptions({ queryKey: ['bix-market-updates'], queryFn: () => getMarketUpdates(), staleTime: 60_000, refetchInterval: 60_000 });
 export const Route = createFileRoute('/market')({
   loader: ({ context }) => context.queryClient.ensureQueryData(marketQuery),
   head: () => ({ meta: [{ title: 'Market & Updates — BIXLINK' }, { name: 'description', content: 'Major crypto prices and official BIXLINK project announcements, with a separate internal BIX reference.' }, { property: 'og:title', content: 'Market & Updates — BIXLINK' }, { property: 'og:description', content: 'Follow major coins and official BIXLINK updates.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
   component: MarketPage,
-  errorComponent: ({ reset }) => <BixShell><main className="mx-auto min-h-[60vh] max-w-5xl px-5 py-12"><h1 className="section-title">MARKET & UPDATES</h1><p className="mt-5 text-muted-foreground">Updates are temporarily unavailable.</p><Button className="mt-5" onClick={reset}><RefreshCw/> Retry</Button></main></BixShell>,
+  errorComponent: MarketError,
   notFoundComponent: () => <BixShell><main className="mx-auto max-w-5xl px-5 py-12">Market page unavailable.</main></BixShell>,
 });
+function MarketError({ error, reset }: ErrorComponentProps) {
+  const retry = usePageErrorRecovery(error, reset);
+  return <BixShell><main className="mx-auto min-h-[60vh] max-w-5xl px-5 py-12"><h1 className="section-title">MARKET & UPDATES</h1><p className="mt-5 text-muted-foreground">Updates are temporarily unavailable.</p><Button className="mt-5" onClick={() => void retry()}><RefreshCw/> Retry</Button></main></BixShell>;
+}
 function MarketPage() {
   const { data, refetch, isFetching } = useSuspenseQuery(marketQuery);
   const { data: cfg } = usePublicConfig();

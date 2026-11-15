@@ -24,7 +24,7 @@
 - Keep the 1,000,000 BIX reserve in an owner-only singleton vault initialized idempotently; never expose it in member balances or allow repeated generation.
 - Gate optional readiness in app settings; enforce identity and announcement access with RLS; always show essential risk disclosures.
 - Hydrate per-request QueryClient through the router for matching SSR/browser market snapshots.
-- Share bounded stale-page recovery between router events and the root React error boundary; caught route-definition failures otherwise bypass global reload handlers and leave the page unusable.
+- Share bounded stale-page recovery across router events, root and leaf error boundaries; leaf retries invalidate loader data before resetting so caught failures cannot strand members.
 - Deposits: one on-chain matcher (polling/cron), one credit per TxID; manual owner recovery re-verifies on-chain and credits the chain amount, Owner 2 scoped to its wallets/downline.
 - Share HOME/landing content and narratives (bundled fallbacks) through landing_content and a private bix-content bucket with published reads and owner-only writes, respecting bucket restrictions.
 - Owner 2 uses scoped RPCs (packages, Market, Referral, WLT-01), each gated by reviewer_permissions in DB and server; clones excluded; everything else stays Owner 1.

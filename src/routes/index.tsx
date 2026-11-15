@@ -1,6 +1,6 @@
 import { Crown, Swords, ShoppingBag } from 'lucide-react';
 import { SentimentGauge } from '@/components/TradingFlair';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, type ErrorComponentProps } from '@tanstack/react-router';
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { ArrowDownToLine, ArrowUpFromLine, ArrowUpRight, Coins, Database, Globe2, RefreshCw, ShieldCheck, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,7 @@ import { LandingTradeStyle } from '@/components/LandingTradeStyle';
 import { EcosystemPortal } from '@/components/EcosystemPortal';
 import { useState } from 'react';
 import { ecosystemDescription, ecosystemHead, ecosystemSchema } from '@/lib/ecosystem-seo';
+import { usePageErrorRecovery } from '@/hooks/use-page-error-recovery';
 
 const homeQuery = queryOptions({ queryKey: ['bix-home-market'], queryFn: () => getHomeMarketData(), staleTime: 60_000, refetchInterval: 60_000 });
 
@@ -44,7 +45,10 @@ export const Route = createFileRoute('/')({
   component: Home,
 });
 
-function HomeError() { return <BixShell><main className="mx-auto max-w-4xl px-5 py-24 text-center"><h1 className="section-title">HOME DATA <span>UNAVAILABLE</span></h1><p className="mt-4 text-muted-foreground">The market feed could not load. Please refresh shortly.</p></main></BixShell>; }
+function HomeError({ error, reset }: ErrorComponentProps) {
+  const retry = usePageErrorRecovery(error, reset);
+  return <BixShell><main className="mx-auto max-w-4xl px-5 py-24 text-center"><h1 className="section-title">HOME DATA <span>UNAVAILABLE</span></h1><p className="mt-4 text-muted-foreground">The market feed could not load. Please refresh shortly.</p><Button className="mt-5" onClick={() => void retry()}><RefreshCw/> Retry</Button></main></BixShell>;
+}
 
 function Home() {
   const { user, ready, data: member } = useMember();
