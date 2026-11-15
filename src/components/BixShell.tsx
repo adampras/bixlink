@@ -26,6 +26,7 @@ import { stakingUpdates } from '@/lib/staking-activity';
 import { DockHub } from '@/components/DockHub';
 import { useMatrix } from '@/lib/dock-hub';
 import { useDesignAccess, lockedEcosystem } from '@/lib/design-release';
+import { useAixAccess } from '@/lib/aix-design';
 
 const NAV = [
   { to: '/', label: 'HOME', icon: Home },
@@ -51,6 +52,8 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     ds['animFloat'] = rd?.animFloat ? 'on' : 'off';
   }, [rd?.animGlow, rd?.animShimmer, rd?.animFloat]);
   const design = useDesignAccess(user?.id);
+  const aix = useAixAccess(user?.id).data?.on === true;
+  useEffect(() => { document.documentElement.dataset['aix'] = aix ? 'on' : 'off'; }, [aix]);
   const stakeClassic = useRouterState({ select: s => s.location.pathname === '/stake' });
   // STAKE uses the classic (Admin 2 network) layout for every network; other pages keep the released design.
   useEffect(() => { document.documentElement.dataset['design'] = design.data?.next_gen && !stakeClassic ? 'v2' : 'classic'; }, [design.data?.next_gen, stakeClassic]);

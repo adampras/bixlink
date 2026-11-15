@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ShieldCheck, Wallet, Lock, Cpu, Fingerprint, Radio, ArrowLeft, Gift, Crown, Landmark, UserRound, LineChart, BookOpen, Repeat } from 'lucide-react';
 import { ExchangeTerminal } from '@/components/ExchangeTerminal';
+import { AixGlobe } from '@/components/AixGlobe';
+import { useAixAccess } from '@/lib/aix-design';
 import { KycCard } from '@/components/KycCard';
 import { AdminKycReview } from '@/components/AdminKycReview';
 import { useMember, usePublicConfig } from '@/lib/useMember';
@@ -47,6 +49,7 @@ function ExchangePage() {
   const t = pair.sym ? ticks[pair.sym] : undefined;
   const chartUrl = useMemo(() => pair.sym ? `https://s.tradingview.com/widgetembed/?symbol=BINANCE%3A${pair.sym}&interval=${tf}&theme=dark&style=1&timezone=Etc%2FUTC&hide_side_toolbar=0&allow_symbol_change=0&studies=%5B%22RSI%40tv-basicstudies%22%2C%22MACD%40tv-basicstudies%22%5D&locale=en` : '', [pair, tf]);
   const router = useRouter();
+  const aix = useAixAccess(user?.id).data?.on === true;
   const [tab, setTab] = useState<'chart' | 'book' | 'trades'>('chart');
   const [idDone, setIdDone] = useState<boolean | null>(null);
   const [kycStatus, setKycStatus] = useState<string | null>(null);
@@ -78,6 +81,7 @@ function ExchangePage() {
         <Link to="/settings" hash="identity" className="ex-btn-ghost justify-center"><Fingerprint size={14}/>Lengkapi data</Link>
       </div>
     </section>
+    {aix && <AixGlobe/>}
     <div className="ex-promos flex snap-x gap-2 overflow-x-auto pb-1">
       <Link to="/trade" className="ex-promo ex-anim is-gold snap-start"><i className="ex-fx ex-fx-orb" aria-hidden/><img src={cMarket} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>Pasar BIX</b><span>Acuan tetap $0.50 / BIX</span></Link>
       <Link to="/settings" hash="identity" className="ex-promo ex-anim snap-start"><i className="ex-fx ex-fx-sheen" aria-hidden/><img src={cKyc} alt="" width={56} height={56} loading="lazy" className="ex-cat-img"/><b>Bonus 20 BIX</b><span>KYC + stake $100 → BIX terbuka</span></Link>

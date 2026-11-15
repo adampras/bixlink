@@ -57,6 +57,13 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
     if (error) return onMessage(error.message); setFlt(m); qc.invalidateQueries({ queryKey: ['bix-hub-float'] });
     onMessage(m === 'public' ? 'HUB Float dibuka untuk publik.' : m === 'scoped' ? 'HUB Float hanya Admin 1 + ID terpilih.' : 'HUB Float dimatikan.');
   };
+  const [aixM, setAixM] = useState<string>('scoped');
+  useEffect(() => { supabase.rpc('bix_aix_access' as never).then(({ data }) => { const m = (data as { mode?: string } | null)?.mode; if (m) setAixM(m); }); }, []);
+  const saveAix = async (m: string) => {
+    setBusy(true); const { error } = await supabase.rpc('bix_aix_set' as never, { p_mode: m } as never); setBusy(false);
+    if (error) return onMessage(error.message); setAixM(m); qc.invalidateQueries({ queryKey: ['bix-aix'] });
+    onMessage(m === 'public' ? 'Desain AIX dibuka untuk publik.' : m === 'scoped' ? 'Desain AIX hanya Admin 1 + ID terpilih.' : 'Desain AIX dimatikan.');
+  };
   const [pt, setPt] = useState(false);
   useEffect(() => { supabase.rpc('bix_presale_test_state' as never).then(({ data }) => setPt(!!(data as { enabled?: boolean } | null)?.enabled)); }, []);
   const savePt = async (on: boolean) => {
@@ -70,6 +77,13 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
   const pill = (on: boolean) => `rounded-full border px-3 py-1.5 text-xs font-bold ${on ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground'}`;
 
   return <div className="space-y-5 text-sm">
+    <section>
+      <h3 className="font-bold">Desain AIX FutureDao · dock kapsul, bola konstelasi, wallet aurora</h3>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {([['off', 'Tutup'], ['scoped', 'Admin 1 + ID terpilih'], ['public', 'Publik']] as const).map(([m, l]) => <button key={m} type="button" disabled={busy} className={pill(aixM === m)} onClick={() => saveAix(m)}>{l}</button>)}
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">Hanya tampilan. Saldo, transaksi dan aturan tidak berubah.</p>
+    </section>
     <section>
       <h3 className="font-bold">Tes beli Presale · wallet virtual</h3>
       <div className="mt-2 flex flex-wrap gap-2">
