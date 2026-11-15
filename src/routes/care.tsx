@@ -1,4 +1,5 @@
 import { GlobalRegions } from '@/components/GlobalRegions';
+import { CareDirectory } from '@/components/CareDirectory';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Wrench, Droplets, Shirt, KeyRound, Store, ClipboardList, Search, Fuel, QrCode, Check, X, Trash2, Phone, MessageCircle, Receipt, Upload } from 'lucide-react';
@@ -72,7 +73,7 @@ function CarePage() {
       <ol className="lux-guide mx-4 mt-3 grid grid-cols-3 gap-2" aria-label="Cara pakai BIXCARE">{([['1', 'Pilih layanan', 'Bengkel, Cuci, Laundry, Rental'], ['2', 'Pilih outlet', 'Lihat harga & jadwal'], ['3', 'Pesan & bayar', 'Pantau status di Pesanan']] as const).map(([n, t, d]) => <li key={n} className="rounded-2xl border border-primary/25 bg-card/80 p-2.5"><span className="grid h-6 w-6 place-items-center rounded-full bg-primary text-[11px] font-black text-primary-foreground">{n}</span><b className="mt-1.5 block text-[11.5px] font-extrabold leading-tight">{t}</b><span className="mt-0.5 block text-[10px] leading-tight text-muted-foreground">{d}</span></li>)}</ol>
       <GlobalRegions service="BIXCARE"/>
       <div className="space-y-4 px-4 pt-2">
-        {tab === 'explore' && <Explore uid={uid} onBooked={() => setTab('orders')} />}
+        {tab === 'explore' && <Explore uid={uid} onBooked={() => setTab('orders')} onPartner={() => { setTab('partner'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
         {tab === 'orders' && (uid ? <MyOrders uid={uid} /> : <SignIn />)}
         {tab === 'partner' && (uid ? <Partner uid={uid} owner1={owner1} /> : <SignIn />)}
       </div>
@@ -92,7 +93,7 @@ function SignIn() {
   return <div className={card}><p className="text-sm">Masuk ke akun BIXLINK untuk melanjutkan.</p><Link to="/auth" className={`${btn} mt-3 inline-block`}>Masuk</Link></div>;
 }
 
-function Explore({ uid, onBooked }: { uid: string | null; onBooked: () => void }) {
+function Explore({ uid, onBooked, onPartner }: { uid: string | null; onBooked: () => void; onPartner: () => void }) {
   const [div, setDiv] = useState<Division | 'all'>('all');
   const [q, setQ] = useState('');
   const [outlets, setOutlets] = useState<Outlet[]>([]);
@@ -119,6 +120,7 @@ function Explore({ uid, onBooked }: { uid: string | null; onBooked: () => void }
           </button>
         ))}
       </div>
+      <CareDirectory onPick={term => setQ(term.split(' ')[0] ?? term)} onRegister={onPartner}/>
       <input className={input} placeholder="Cari outlet atau kota…" value={q} onChange={e => setQ(e.target.value)} />
       {shown.length === 0 && <div className={`${card} text-center text-sm text-muted-foreground`}>Belum ada outlet buka{div !== 'all' ? ` untuk ${divName(div)}` : ''}. Punya usaha? Daftar di tab Mitra.</div>}
       {shown.map(o => (

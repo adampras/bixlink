@@ -7,7 +7,7 @@ export const ECO_LOGOS: Record<string, Eco> = {
   pay: { a: 'BIX', b: 'PAY', tone: '#E5E7EB', path: 'M8.5 8.5a3.5 3.5 0 1 0 0 7c2 0 3.5-2 3.5-3.5S13.5 8.5 15.5 8.5a3.5 3.5 0 1 1 0 7' },
   exchange: { a: 'BIX', b: 'EXCHANGER', tone: '#22C55E', path: 'M6 18V11M10 18V7M14 18v-5M18 18V5M4 19h16' },
   gold: { a: 'BIX', b: 'GOLD', tone: '#FFD700', path: 'M9 4h6l4 4v6l-4 4H9l-4-4V8zM9 10l1.5 1.5L12 9l1.5 2.5L15 10' },
-  care: { a: 'BIX', b: 'CARE', tone: '#34D399', path: 'M10 5h4v5h5v4h-5v5h-4v-5H5v-4h5z' },
+  care: { a: 'BIX', b: 'CARE', tone: '#FFD700', path: 'M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6zM12 8.5l1 2.2 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z' },
   nft: { a: 'BIX', b: 'MALL', tone: '#F9A8D4', path: 'M6 9h12l-1 11H7zM9 9V7a3 3 0 0 1 6 0v2M6 9l6 4 6-4' },
 };
 export function EcoLogo({ id, size = 22, className = '' }: { id: string; size?: number; className?: string }) {

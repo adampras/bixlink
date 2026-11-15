@@ -9209,3 +9209,18 @@ main.presale-lux .numeric { font-variant-numeric: tabular-nums; }
 .presale-lux section { transition: box-shadow .3s ease; }
 .presale-lux section:hover { box-shadow: 0 0 30px -12px rgba(168,85,247,.55); }
 @media (prefers-reduced-motion: no-preference) { .presale-receipt { animation: receipt-in .5s cubic-bezier(.2,.9,.3,1.2); } @keyframes receipt-in { from { opacity: 0; transform: translateY(12px) scale(.96); } to { opacity: 1; transform: none; } } }
+
+/* Sovereign Bento Gateway — prospect-path hero inside HUB */
+.sbg-hero{position:relative;display:flex;flex-direction:column;gap:.35rem;overflow:hidden;border-radius:1.4rem;padding:1.1rem 1.1rem 1rem;min-height:11rem;background:linear-gradient(150deg,color-mix(in oklab,#040507 88%,#A855F7),#040507 60%);border:.5px solid color-mix(in oklab,#FFD700 55%,transparent);box-shadow:inset 0 1px 0 rgb(255 255 255 / .08),0 18px 40px -18px color-mix(in oklab,#A855F7 60%,transparent);color:#f5f1e6;text-decoration:none}
+.sbg-art{position:absolute;right:-12%;top:-10%;width:62%;height:120%;object-fit:cover;opacity:.32;mask-image:linear-gradient(to left,#000 30%,transparent);pointer-events:none}
+.sbg-kicker{display:flex;align-items:center;gap:.4rem;font-size:9.5px;font-weight:800;letter-spacing:.22em;color:#FFD700}
+.sbg-kicker i{width:6px;height:6px;border-radius:50%;background:#FFD700;box-shadow:0 0 8px #FFD700;animation:sbgPulse 1.6s ease-in-out infinite}
+.sbg-title{position:relative;font-size:1.25rem;font-weight:900;letter-spacing:-.01em;line-height:1.15}
+.sbg-line{position:relative;font-size:11.5px;color:rgb(245 241 230 / .72);max-width:80%}
+.sbg-wave{position:relative;display:flex;align-items:center;gap:3px;height:22px}
+.sbg-wave i{width:3px;height:30%;border-radius:2px;background:linear-gradient(#FFD700,#A855F7);animation:sbgWave 1.2s ease-in-out infinite}
+.sbg-cta{position:relative;margin-top:.35rem;align-self:flex-start;display:inline-flex;align-items:center;gap:.35rem;border-radius:999px;padding:.5rem 1rem;background:#FFD700;color:#040507;font-size:12px;font-weight:900}
+@keyframes sbgWave{50%{height:100%}}
+@keyframes sbgPulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.sbg-wave i,.sbg-kicker i{animation:none}}
+.care-pillar{border:.5px solid color-mix(in oklab,var(--primary) 45%,transparent)}

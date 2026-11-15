@@ -1,4 +1,5 @@
 import { ModuleGate } from '@/components/ModuleGate';
+import { saveEntry } from '@/lib/hub-entry';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { VaultStardust } from '@/components/VaultFlourish';
@@ -13,7 +14,7 @@ import { createManualAccount, LOGIN_IDENTIFIER_KEY } from '@/lib/manual-registra
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export const Route = createFileRoute('/register')({
-  validateSearch: (search: Record<string, unknown>): { ref?: string | undefined; target?: string | undefined } => ({ ref: typeof search['ref'] === 'string' ? search['ref'] : undefined, target: typeof search['target'] === 'string' ? search['target'] : undefined }),
+  validateSearch: (search: Record<string, unknown>): { ref?: string | undefined; target?: string | undefined; entry?: string | undefined } => ({ entry: typeof search['entry'] === 'string' ? search['entry'] : undefined, ref: typeof search['ref'] === 'string' ? search['ref'] : undefined, target: typeof search['target'] === 'string' ? search['target'] : undefined }),
   head: () => ({ links: [{ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap' }], meta: [{ title: 'Create a BIXLINK Account' }, { name: 'description', content: 'Create your BIXLINK member account with an optional referral code.' }, { property: 'og:title', content: 'Create a BIXLINK Account' }, { property: 'og:description', content: 'You are invited to BIXLINK — join the Genesis staking ecosystem with your inviter code.' }, { property: 'og:type', content: 'website' }, { property: 'og:image', content: 'https://bixlink.com/__l5e/assets-v1/c62ecff6-c5d1-4235-8e7a-e49c0c2b7039/fox-icon-512.png' }, { name: 'twitter:card', content: 'summary' }, { name: 'twitter:image', content: 'https://bixlink.com/__l5e/assets-v1/c62ecff6-c5d1-4235-8e7a-e49c0c2b7039/fox-icon-512.png' }] }),
   component: () => <ModuleGate module="register"><RegisterPage/></ModuleGate>,
 
@@ -26,7 +27,8 @@ function RegisterPage() {
   const resend = async () => { if (!done || cooldown > 0) return; setResendMsg(''); const { error } = await supabase.auth.resend({ type: 'signup', email: done.email, options: { emailRedirectTo: `${window.location.origin}/auth?verified=1` } }); setResendMsg(error ? error.message : 'A new verification email is on its way. Open only the newest one.'); setCooldown(60); }; const [copied, setCopied] = useState(false);
   const copyAccount = async () => { if (!done) return; try { await navigator.clipboard.writeText(`BIXLINK account\nUsername: ${done.username}\nEmail: ${done.email}\nWhatsApp: ${done.whatsapp}\nSponsor: ${done.referral || '-'}`); setCopied(true); } catch { setCopied(false); } };
   const [country, setCountry] = useState('ID'); const [phone, setPhone] = useState('');
-  const { ref, target } = Route.useSearch();
+  const { ref, target, entry } = Route.useSearch();
+  useEffect(() => { saveEntry(entry); }, [entry]);
   useEffect(() => { if (target === 'presale') window.localStorage.setItem('bixlink-target', 'presale'); }, [target]);
   const [showPassword, setShowPassword] = useState(false); const [confirm, setConfirm] = useState('');
   useEffect(() => { const incoming = ref || window.localStorage.getItem('bixlink-ref') || ''; if (/^BIX-\d{6}$/i.test(incoming)) { const normalized = incoming.toUpperCase(); setReferral(normalized); window.localStorage.setItem('bixlink-ref', normalized); } }, [ref]);

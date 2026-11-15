@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type UIEvent } from 'react';
 import { Link } from '@tanstack/react-router';
-import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, Search, Coins, Wrench, UserRound, Settings2, Bot, CarFront, WalletCards, PhoneCall, type LucideIcon } from 'lucide-react';
+import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, Search, Coins, Wrench, UserRound, Settings2, Bot, CarFront, WalletCards, PhoneCall, ShieldCheck, ArrowRight, type LucideIcon } from 'lucide-react';
 import artGo from '@/assets/hub/v2-bixgo.jpg';
 import artMall from '@/assets/hub/v2-mall.jpg';
 import artCall from '@/assets/hub/v2-call.jpg';
@@ -26,9 +26,10 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SupportCommandCenter } from '@/components/SupportCommandCenter';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { readEntry, GATEWAY, ENTRY_SEEN, type Entry } from '@/lib/hub-entry';
 import { HUB_GROUPS, HUB_ITEMS, PILLARS, hubVisible, hubOrdered, pillarOf } from '@/lib/dock-hub';
 
-const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: CarFront, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards, call: PhoneCall, settings: Settings2, gold: Coins, care: Wrench };
+const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: CarFront, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards, call: PhoneCall, settings: Settings2, gold: Coins, care: ShieldCheck };
 const ART: Record<string, string> = { bixgo: artGo, nft: artMall, call: artCall, bixtok: artTok, gold: artGold, mining: artMining, arena: artArena, care: artCare, trade: artTrade, bixtrade: artBot, presale: artPresale, boost: artBoost, buyback: artBuyback, exchange: artExchange, onchain: artOnchain, pay: artPay, vault: artVault, home: artHome, profile: artProfile, settings: artSettings };
 /** Category look: swipe rows for long groups, fixed grids for short ones. */
 const GROUP_STYLE: Record<string, { tone: string; swipe: boolean }> = {
@@ -84,6 +85,8 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
   const orbit = useQuery({ queryKey: ['bix-hub-orbit'], staleTime: 60_000, queryFn: async () => Boolean(((await supabase.rpc('bix_hub_orbit_access' as never)).data as { on?: boolean } | null)?.on) });
   const float = useQuery({ queryKey: ['bix-hub-float'], staleTime: 60_000, queryFn: async () => Boolean(((await supabase.rpc('bix_hub_float_access' as never)).data as { on?: boolean } | null)?.on) });
   const [csOpen, setCsOpen] = useState(false);
+  const [entry, setEntry] = useState<Entry | undefined>();
+  useEffect(() => { const e = readEntry(); setEntry(e); try { if (e && !localStorage.getItem(ENTRY_SEEN)) { localStorage.setItem(ENTRY_SEEN, '1'); setOpen(true); } } catch { /* blocked */ } }, []);
   const [q, setQ] = useState('');
   useEffect(() => { if (!open) setQ(''); }, [open]);
   const [recent, setRecent] = useState<string[]>([]);
@@ -144,6 +147,14 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest" data-text="BIX HUB">BIX HUB</SheetTitle><p className="hub-gate" aria-hidden><i/>GATEWAY ONLINE</p></SheetHeader>
         </div>
         {owner1.data && <section className="hub-group hub-tone-gold mt-3"><button type="button" className="hub-group-head w-full" onClick={() => setCsOpen(v => !v)} aria-expanded={csOpen}><span>CS 1 · CS 2 · CS 3 control</span><em>{csOpen ? 'Close' : 'Open'}</em></button>{csOpen && <div className="mt-2"><SupportCommandCenter/></div>}</section>}
+        {entry && !q.trim() && (() => { const g = GATEWAY[entry]; const it = items.find(i => i.id === g.id); return <Link to={g.to} onClick={() => pick(g.id)} className="sbg-hero mt-3">
+          {it && ART[g.id] && <img src={ART[g.id]} alt="" className="sbg-art" draggable={false}/>}
+          <span className="sbg-kicker"><i/>{g.kicker}</span>
+          <span className="sbg-title">{g.title}</span>
+          <span className="sbg-wave" aria-hidden>{Array.from({ length: 18 }, (_, k) => <i key={k} style={{ animationDelay: `${k * 70}ms` }}/>)}</span>
+          <span className="sbg-line">{g.line}</span>
+          <span className="sbg-cta">{g.cta}<ArrowRight size={15}/></span>
+        </Link>; })()}
         {float.data && <FloatGrid items={items} path={path} onPick={pick}/>}
         {!float.data && orbit.data && <>
           <label className="orb-search"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Search BIXLINK services" aria-label="Search services"/></label>
