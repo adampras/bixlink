@@ -692,6 +692,14 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   const press = useRef<number | undefined>(undefined);
   const holdStart = (m: Msg) => { if (m.deleted_at) return; press.current = window.setTimeout(() => { try { navigator.vibrate?.(12); } catch { /* optional */ } setMenu(m); }, 420); };
   const holdEnd = () => { window.clearTimeout(press.current); };
+  // Swipe right on a bubble to reply (WhatsApp gesture); vertical scrolling is left alone.
+  const swipe = useRef<{ x: number; y: number; m: Msg; el: HTMLElement; dx: number } | null>(null);
+  const swipeStart = (e: React.PointerEvent<HTMLElement>, m: Msg) => { if (m.deleted_at || locked || e.pointerType === 'mouse') return; swipe.current = { x: e.clientX, y: e.clientY, m, el: e.currentTarget, dx: 0 }; };
+  const swipeMove = (e: React.PointerEvent<HTMLElement>) => { const s0 = swipe.current; if (!s0) return; const dx = e.clientX - s0.x; const dy = Math.abs(e.clientY - s0.y);
+    if (dy > 24 && dx < 24) { s0.el.style.transform = ''; swipe.current = null; return; }
+    if (dx > 8) { holdEnd(); s0.dx = Math.min(dx, 90); s0.el.style.transform = `translateX(${s0.dx}px)`; s0.el.classList.toggle('is-swipe-ready', s0.dx > 60); } };
+  const swipeEnd = (_e: React.PointerEvent<HTMLElement>, cancel = false) => { const s0 = swipe.current; swipe.current = null; if (!s0) return; s0.el.style.transform = ''; s0.el.classList.remove('is-swipe-ready');
+    if (!cancel && s0.dx > 60) { try { navigator.vibrate?.(10); } catch { /* optional */ } setReplyTo(s0.m); } };
   const findMsg = (id?: string | null) => msgs.find(x => x.id === id);
   const pinned = msgs.find(x => x.pinned_at && !x.deleted_at);
   const jump = (id: string) => document.getElementById(`msg-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -726,7 +734,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
         const mine = m.sender_id === me;
         const q = m.reply_to ? findMsg(m.reply_to) : undefined;
         return <p key={m.id} id={`msg-${m.id}`} onDoubleClick={() => { if (!m.deleted_at && !locked) void react(m, '❤️'); }} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
-          onPointerDown={() => holdStart(m)} onPointerUp={holdEnd} onPointerLeave={holdEnd} onContextMenu={e => { e.preventDefault(); if (!m.deleted_at) setMenu(m); }}>
+          onPointerDown={e => { holdStart(m); swipeStart(e, m); }} onPointerMove={swipeMove} onPointerUp={e => { holdEnd(); swipeEnd(e); }} onPointerLeave={holdEnd} onPointerCancel={e => { holdEnd(); swipeEnd(e, true); }} onContextMenu={e => { e.preventDefault(); if (!m.deleted_at) setMenu(m); }}>
           {m.forwarded && !m.deleted_at && <em className="comm-fwd">↪ Diteruskan</em>}
           {m.reply_to && !m.deleted_at && <span className="comm-quote"><b>{q ? (q.sender_id === me ? 'Anda' : `@${name}`) : 'Balasan'}</b>{q?.deleted_at ? 'Pesan dihapus' : q?.body ?? m.reply_body ?? 'Pesan sebelumnya'}</span>}
           {m.deleted_at ? <span>🚫 {mine ? 'Anda menghapus pesan ini' : 'Pesan ini telah dihapus'}</span> : m.kind && m.kind !== 'text' ? <ChatMedia m={m} me={me} onAct={(x, a) => void reqAct(x, a)}/> : m.body}
@@ -771,7 +779,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>
       <input ref={docRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendFile(f); }}/>
       {recording ? <span className="comm-rec"><button type="button" aria-label="Batalkan rekaman" onClick={cancelRec}><Trash2 size={15}/></button><i/>{String(Math.floor(recSecs / 60)).padStart(2, '0')}:{String(recSecs % 60).padStart(2, '0')} · ketuk ■ untuk kirim</span> : <input value={text} onChange={e => onType(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked} aria-label="Tulis pesan"/>}
-      {text.trim() ? <button type="submit" aria-label="Kirim"><Send size={16}/></button> : <button type="button" aria-label={recording ? 'Stop & kirim' : 'Rekam pesan suara'} className={recording ? 'is-rec' : ''} onClick={() => void toggleRec()} disabled={locked || busy}>{recording ? <Square size={14}/> : <Mic size={16}/>}</button>}
+      {text.trim() ? <button type="submit" className="comm-fab" aria-label="Kirim"><Send size={16}/></button> : <button type="button" aria-label={recording ? 'Stop & kirim' : 'Rekam pesan suara'} className={`comm-fab${recording ? ' is-rec' : ''}`} onClick={() => void toggleRec()} disabled={locked || busy}>{recording ? <Square size={14}/> : <Mic size={16}/>}</button>}
     </form>
   </main>;
 }

@@ -9307,3 +9307,8 @@ html[data-aix="on"] [data-page="wallet"] .wallet-action span { border-radius: 99
 .comm-daysep{display:flex;justify-content:center;margin:10px 0 6px;pointer-events:none}
 .comm-daysep span{border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;letter-spacing:.04em;background:#182229;color:#8696a0;box-shadow:0 1px 1px rgb(0 0 0 / .2)}
 .bxt-earn-pill{position:fixed;top:calc(env(safe-area-inset-top) + 104px);left:10px;z-index:30;display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:700;color:#FFD700;background:rgb(4 5 7 / .62);border:1px solid rgb(255 215 0 / .3);backdrop-filter:blur(8px);pointer-events:none}
+/* BIX CALL · WA mic/send button + swipe-to-reply */
+.comm-compose button.comm-fab{width:2.6rem;height:2.6rem;background:#00a884;color:#0b141a;box-shadow:0 1px 3px rgb(0 0 0 / .35)}
+.comm-compose button.comm-fab.is-rec{background:#ef4444!important;color:#fff}
+.comm-msgs>p{transition:transform .18s ease-out;touch-action:pan-y}
+.comm-msgs>p.is-swipe-ready{box-shadow:-3px 0 0 #06cf9c}
