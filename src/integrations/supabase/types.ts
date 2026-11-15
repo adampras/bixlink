@@ -4420,6 +4420,8 @@ export type Database = {
         Returns: Json
       }
       bix_agency_save: { Args: { p_config: Json }; Returns: Json }
+      bix_aix_access: { Args: never; Returns: Json }
+      bix_aix_set: { Args: { p_mode: string }; Returns: Json }
       bix_arena_admin_config: { Args: never; Returns: Json }
       bix_arena_config: { Args: never; Returns: Json }
       bix_arena_save: { Args: { p_config: Json }; Returns: undefined }
