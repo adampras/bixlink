@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { createPortal } from 'react-dom';
 const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting', 'newgroup'];
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X, Play, Pause } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import callGateImg from '@/assets/eco/call.png';
@@ -78,36 +78,54 @@ function encodeWav(bufs: Float32Array[], rate: number, gain: number): Blob {
   for (let i = 0; i < n; i++) { const x = Math.max(-1, Math.min(1, (all[Math.floor(i * step)] ?? 0) * Math.max(1, gain))); v.setInt16(44 + i * 2, x < 0 ? x * 0x8000 : x * 0x7fff, true); }
   return new Blob([buf], { type: 'audio/wav' });
 }
+function dayLabel(iso: string) {
+  const d = new Date(iso); const t = new Date(); const y = new Date(); y.setDate(t.getDate() - 1);
+  if (d.toDateString() === t.toDateString()) return 'HARI INI';
+  if (d.toDateString() === y.toDateString()) return 'KEMARIN';
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: d.getFullYear() === t.getFullYear() ? undefined : 'numeric' }).toUpperCase();
+}
 function VoiceNote({ url }: { url: string }) {
   const ref = useRef<HTMLAudioElement>(null);
   const [rate, setRate] = useState(1); const [play, setPlay] = useState(false); const [t, setT] = useState(0); const [dur, setDur] = useState(0); const [err, setErr] = useState(false);
+  const [src, setSrc] = useState(url);
   const next = () => { const r = rate === 1 ? 1.5 : rate === 1.5 ? 2 : 1; setRate(r); if (ref.current) ref.current.playbackRate = r; };
-  // Play through a typed blob URL: storage may serve notes as octet-stream, which phones refuse to play.
-  const blobUrl = useRef<string | null>(null);
-  const toggle = async () => {
+  // Prefetch into a typed blob URL BEFORE the tap: storage may serve notes as octet-stream (phones refuse),
+  // and awaiting a fetch inside the tap drops the user gesture so mobile browsers block play().
+  useEffect(() => {
+    let blobUrl = ''; let alive = true;
+    void (async () => {
+      try {
+        const b = await (await fetch(url)).blob(); if (!alive || b.size < 200) return;
+        const ext = (url.split('?')[0]!.split('.').pop() ?? '').toLowerCase();
+        const type = ext === 'wav' ? 'audio/wav' : ext === 'm4a' || ext === 'mp4' ? 'audio/mp4' : ext === 'ogg' ? 'audio/ogg' : ext === 'aac' ? 'audio/aac' : 'audio/webm';
+        blobUrl = URL.createObjectURL(new Blob([b], { type: b.type && b.type.startsWith('audio/') ? b.type : type }));
+        if (alive && ref.current?.paused !== false) setSrc(blobUrl);
+      } catch { /* direct URL stays as fallback */ }
+    })();
+    return () => { alive = false; if (blobUrl) URL.revokeObjectURL(blobUrl); };
+  }, [url]);
+  const toggle = () => {
     const a = ref.current; if (!a) return;
     if (!a.paused) { a.pause(); return; }
     void unlockCallAudio();
-    try {
-      if (!blobUrl.current) {
-        const b = await (await fetch(url)).blob(); if (b.size < 200) throw new Error('empty');
-        const ext = url.split('?')[0]!.split('.').pop() ?? '';
-        const type = ext === 'wav' ? 'audio/wav' : ext === 'm4a' || ext === 'mp4' ? 'audio/mp4' : ext === 'ogg' ? 'audio/ogg' : ext === 'aac' ? 'audio/aac' : 'audio/webm';
-        blobUrl.current = URL.createObjectURL(new Blob([b], { type })); a.src = blobUrl.current; a.load();
-      }
-      a.muted = false; a.volume = 1; a.playbackRate = rate; await a.play(); setErr(false);
-    } catch { try { a.src = url; await a.play(); setErr(false); } catch { setErr(true); } }
+    a.muted = false; a.volume = 1; a.playbackRate = rate;
+    // play() is called synchronously inside the tap so the gesture is kept.
+    a.play().then(() => setErr(false)).catch(() => { if (a.src !== url) { a.src = url; a.load(); a.play().then(() => setErr(false)).catch(() => setErr(true)); } else setErr(true); });
   };
-  const stopWeb = () => { if (blobUrl.current) URL.revokeObjectURL(blobUrl.current); };
-  useEffect(() => () => { stopWeb(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const stop = (e: { stopPropagation: () => void }) => e.stopPropagation();
   const mm = (x: number) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`;
   const pct = dur > 0 ? Math.min(100, (t / dur) * 100) : 0;
-  return <span className="comm-voice">
-    <audio ref={ref} src={url} preload="metadata" playsInline onPlay={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onTimeUpdate={e => { setT(e.currentTarget.currentTime); const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onLoadedMetadata={e => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onError={() => setErr(true)}/>
-    <button type="button" className="comm-vplay" onClick={() => void toggle()} aria-label={play ? 'Jeda' : 'Putar pesan suara'}>{play ? <Pause size={16}/> : <Play size={16}/>}</button>
-    <span className="comm-vbar" onClick={e => { const a = ref.current; if (!a || !dur) return; const r = e.currentTarget.getBoundingClientRect(); a.currentTime = ((e.clientX - r.left) / r.width) * dur; }}><i style={{ width: `${pct}%` }}/></span>
-    <small className="comm-vtime">{err ? 'Gagal' : `${mm(t)}${dur ? ` / ${mm(dur)}` : ''}`}</small>
-    <button type="button" className="comm-rate" onClick={next} aria-label="Kecepatan putar">{rate}×</button>
+  const bars = useMemo(() => { let h = 0; for (let i = 0; i < url.length; i++) h = (h * 31 + url.charCodeAt(i)) >>> 0; return Array.from({ length: 30 }, () => { h = (h * 1103515245 + 12345) >>> 0; return 22 + (h % 78); }); }, [url.split('?')[0]]); // eslint-disable-line react-hooks/exhaustive-deps
+  const seek = (e: React.MouseEvent<HTMLSpanElement>) => { e.stopPropagation(); const a = ref.current; if (!a || !dur) return; const r = e.currentTarget.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * dur; };
+  return <span className={`comm-voice${play ? ' is-playing' : ''}`} onPointerDown={stop} onPointerUp={stop} onTouchStart={stop} onClick={stop} onDoubleClick={stop} onContextMenu={stop}>
+    <audio ref={ref} src={src} preload="metadata" playsInline onPlay={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onTimeUpdate={e => { setT(e.currentTarget.currentTime); const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onLoadedMetadata={e => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onError={() => { if (src !== url) setSrc(url); }}/>
+    <button type="button" className="comm-vplay" onClick={e => { e.stopPropagation(); toggle(); }} aria-label={play ? 'Jeda' : 'Putar pesan suara'}>{play ? <Pause size={18} fill="currentColor"/> : <Play size={18} fill="currentColor"/>}</button>
+    <span className="comm-vwave" onClick={seek} role="slider" aria-label="Posisi pesan suara" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}>
+      {bars.map((v, i) => <i key={i} className={(i / bars.length) * 100 < pct ? 'is-on' : ''} style={{ height: `${v}%` }}/>)}
+      <b style={{ left: `${pct}%` }}/>
+    </span>
+    <small className="comm-vtime">{err ? 'Gagal putar · ketuk lagi' : mm(play || t ? t : dur)}</small>
+    <button type="button" className="comm-rate" onClick={e => { e.stopPropagation(); next(); }} aria-label="Kecepatan putar">{rate}×</button>
   </span>;
 }
 function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'pay' | 'decline' | 'cancel') => void }) {
@@ -696,7 +714,9 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     {pinned && <button type="button" className="comm-pinbar" onClick={() => jump(pinned.id)}><b>📌 Disematkan</b><span>{pinned.body}</span></button>}
     <div className="comm-msgs">
       {msgs.length === 0 && <p className="text-center text-xs text-muted-foreground">Mulai percakapan dengan @{name}</p>}
-      {[...msgs.map(m => ({ at: m.created_at, m, c: null as Row | null })), ...calls.map(c => ({ at: c.created_at, m: null as Msg | null, c }))].sort((a, b) => a.at.localeCompare(b.at)).map(({ m, c }) => {
+      {[...msgs.map(m => ({ at: m.created_at, m, c: null as Row | null })), ...calls.map(c => ({ at: c.created_at, m: null as Msg | null, c }))].sort((a, b) => a.at.localeCompare(b.at)).map(({ at, m, c }, i, all) => {
+        const day = dayLabel(at); const sep = i === 0 || dayLabel(all[i - 1]!.at) !== day ? <div key={`day-${at}`} className="comm-daysep"><span>{day}</span></div> : null;
+        const row = (() => {
         if (c) { const out = c.caller_id === me; const missed = ['missed', 'declined', 'cancelled', 'ringing'].includes(c.status); return <div key={`call-${c.id}`} className={`comm-calllog ${missed ? 'is-missed' : ''}`}>
           <span>{c.kind === 'video' ? <Video size={14}/> : <Phone size={14}/>}{missed ? (out ? 'Panggilan tidak dijawab' : 'Panggilan tak terjawab') : out ? 'Panggilan keluar' : 'Panggilan masuk'} · {c.kind === 'video' ? 'Video' : 'Suara'}</span>
           <small>{new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
@@ -714,6 +734,8 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
           {!m.deleted_at && Object.keys(m.reactions ?? {}).length > 0 && <span className="comm-reacts">{Object.entries(Object.values(m.reactions ?? {}).reduce<Record<string, number>>((a, e) => { a[e] = (a[e] ?? 0) + 1; return a; }, {})).map(([e, n]) => <button type="button" key={e} className={m.reactions?.[me] === e ? 'is-mine' : ''} onClick={ev => { ev.stopPropagation(); void react(m, e); }}>{e}{n > 1 && <i>{n}</i>}</button>)}</span>}
           {!m.deleted_at && <button type="button" className="comm-more" aria-label="Opsi pesan" onClick={() => setMenu(m)}>⋯</button>}
         </p>;
+        })();
+        return sep ? [sep, row] : row;
       })}
       {state.typing && <p className="comm-typing" aria-live="polite"><i/><i/><i/></p>}
       <div ref={end}/>

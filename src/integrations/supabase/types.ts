@@ -3758,6 +3758,33 @@ export type Database = {
         }
         Relationships: []
       }
+      bixtok_watch_rewards: {
+        Row: {
+          amount_vbix: number
+          created_at: string
+          id: string
+          promo: boolean
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          amount_vbix?: number
+          created_at?: string
+          id?: string
+          promo?: boolean
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          amount_vbix?: number
+          created_at?: string
+          id?: string
+          promo?: boolean
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: []
+      }
       bixtrade_bonuses: {
         Row: {
           amount_usd: number
@@ -5325,6 +5352,11 @@ export type Database = {
       bixtok_start_official_live: { Args: { p_title: string }; Returns: string }
       bixtok_vip_hosts: { Args: { p_uids: string[] }; Returns: string[] }
       bixtok_visible_to_me: { Args: { p_other: string }; Returns: boolean }
+      bixtok_watch_claim: {
+        Args: { p_seconds: number; p_video: string }
+        Returns: Json
+      }
+      bixtok_watch_status: { Args: never; Returns: Json }
       bixtrade_admin_virtual_deposit: {
         Args: { p_amount: number; p_strategy?: string }
         Returns: Json

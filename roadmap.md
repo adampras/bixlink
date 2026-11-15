@@ -182,3 +182,4 @@
 
 - [x] Presale Fase 1 ($0.25, $100–$1.000, vesting 1%/hari 100 hari) + banner landing 2 bulan mulai 14 Nov 2026 00:00 WIB
 - [x] Sweep stale-route blank screens: root retries now await shared invalidation; LIVE shows loading feedback. Fifty paths show no blank/missing-component error; nine tests and automatic build pass. Gated internal flows, physical APK and old published bundle remain unverified; records/permissions unchanged.
+- [x] Fix BIX CALL voice-note playback (tap opened message menu), WA waveform + date separators; BIXTOK Watch & Earn BIXP (owner toggle, off by default).

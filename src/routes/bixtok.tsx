@@ -186,6 +186,27 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
       if (el && feed) { feed.style.scrollSnapType = 'none'; feed.scrollTop = el.offsetTop; requestAnimationFrame(() => { feed.style.scrollSnapType = ''; }); if (Math.abs(feed.scrollTop - el.offsetTop) < 4 || n > 20) return; }
       if (n++ < 30) t = window.setTimeout(go, 60); };
     go(); return () => clearTimeout(t); }, [resume, videos.length > 0]);
+  // Watch & Earn: BIXP promo points, server-verified per video (daily quota, 15 s gap, own videos excluded).
+  const watch = useQuery({ queryKey: ['bixtok-watch', me], staleTime: 60_000, queryFn: async () => (await supabase.rpc('bixtok_watch_status' as never)).data as { enabled: boolean; today: number; limit: number; normal: number; promo: number } | null });
+  const watchOn = Boolean(watch.data?.enabled);
+  const tried = useRef(new Set<string>());
+  useEffect(() => {
+    if (!watchOn || typeof IntersectionObserver === 'undefined') return undefined;
+    const timers = new Map<Element, number>();
+    const io = new IntersectionObserver(es => es.forEach(en => {
+      const id = (en.target as HTMLElement).dataset['vid']; const v = id ? videos.find(x => x.id === id) : undefined;
+      if (!v || v.creator_id === me || v.id.length !== 36 || tried.current.has(v.id)) return;
+      if (en.isIntersecting && !document.hidden) timers.set(en.target, window.setTimeout(async () => {
+        tried.current.add(v.id);
+        const { data, error } = await supabase.rpc('bixtok_watch_claim' as never, { p_video: v.id, p_seconds: 16 } as never);
+        const r = data as { amount: number; promo: boolean; today: number; limit: number } | null;
+        if (!error && r) { if (r.amount > 0) onNote(`+${Number(r.amount).toFixed(2)} BIXP${r.promo ? ' · konten promo' : ''} · ${r.today}/${r.limit} hari ini`); void qc.invalidateQueries({ queryKey: ['bixtok-watch', me] }); }
+        else if (error && /Daily limit/i.test(error.message)) onNote('Kuota Watch & Earn hari ini sudah penuh');
+      }, 16_000)); else { clearTimeout(timers.get(en.target)); timers.delete(en.target); }
+    }), { threshold: 0.7 });
+    document.querySelectorAll('.bixtok-slide[data-vid]').forEach(el => io.observe(el));
+    return () => { io.disconnect(); timers.forEach(t => clearTimeout(t)); };
+  }, [videos, watchOn, me]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (typeof IntersectionObserver === 'undefined') return undefined;
     const timers = new Map<Element, number>();
@@ -205,7 +226,7 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
     const now = Date.now(); const prev = tapRef.current; tapRef.current = { t: now, id: v.id };
     if (prev.id === v.id && now - prev.t < 320) { const r = e.currentTarget.getBoundingClientRect(); const k = now; setBursts(b => [...b, { k, x: e.clientX - r.left, y: e.clientY - r.top }]); setTimeout(() => setBursts(b => b.filter(x => x.k !== k)), 900); try { navigator.vibrate?.(15); } catch { /* unsupported */ } void like(v); }
   };
-  return <div className="bixtok-feed">{videos.map(v => <section key={v.id} data-vid={v.id} className="bixtok-slide" onPointerUp={e => onTap(e, v)}>
+  return <div className="bixtok-feed">{watchOn && watch.data && <span className="bxt-earn-pill" aria-live="polite"><Coins size={12}/> Watch &amp; Earn · {watch.data.today}/{watch.data.limit}</span>}{videos.map(v => <section key={v.id} data-vid={v.id} className="bixtok-slide" onPointerUp={e => onTap(e, v)}>
     <Media v={v} muted={muted}/>
     {tapRef.current.id === v.id && bursts.map(b => <Heart key={b.k} className="bxt-dbl-heart" style={{ left: b.x, top: b.y }} fill="currentColor" aria-hidden/>)}
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}

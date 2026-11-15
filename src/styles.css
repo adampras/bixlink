@@ -9293,3 +9293,17 @@ html[data-aix="on"] [data-page="wallet"] .wallet-action span { border-radius: 99
 .comm-rate{background:#2a3942;color:#e9edef;border-color:transparent}
 .comm-vplay{background:#00a884;color:#0b141a}
 .comm-vbar i{background:#06cf9c}
+
+/* BIX CALL · WA-style voice note waveform + date separators */
+.comm-voice{display:flex;align-items:center;gap:8px;min-width:228px;padding:2px 0;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.comm-vplay{width:38px;height:38px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:#00a884;color:#0b141a;box-shadow:0 1px 3px rgb(0 0 0 / .35)}
+.comm-vplay:active{transform:scale(.94)}
+.comm-vwave{position:relative;flex:1;height:28px;display:flex;align-items:center;gap:2px;cursor:pointer}
+.comm-vwave i{flex:1;min-width:2px;border-radius:2px;background:rgb(233 237 239 / .32);transition:background .15s}
+.comm-vwave i.is-on{background:#53bdeb}
+.comm-vwave b{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#53bdeb;pointer-events:none}
+.comm-voice .comm-vtime{min-width:34px;font-size:11px;color:#8696a0;font-variant-numeric:tabular-nums}
+.comm-voice .comm-rate{flex-shrink:0;border-radius:999px;padding:2px 7px;font-size:11px;font-weight:700;background:rgb(255 255 255 / .1);color:#e9edef}
+.comm-daysep{display:flex;justify-content:center;margin:10px 0 6px;pointer-events:none}
+.comm-daysep span{border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;letter-spacing:.04em;background:#182229;color:#8696a0;box-shadow:0 1px 1px rgb(0 0 0 / .2)}
+.bxt-earn-pill{position:fixed;top:calc(env(safe-area-inset-top) + 104px);left:10px;z-index:30;display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:700;color:#FFD700;background:rgb(4 5 7 / .62);border:1px solid rgb(255 215 0 / .3);backdrop-filter:blur(8px);pointer-events:none}

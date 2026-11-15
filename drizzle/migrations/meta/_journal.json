@@ -1450,6 +1450,13 @@
       "when": 1794595139348,
       "tag": "0206_presale_real_usdt_only",
       "breakpoints": true
+    },
+    {
+      "idx": 207,
+      "version": "7",
+      "when": 1794759774040,
+      "tag": "0207_bixtok_watch_rewards",
+      "breakpoints": true
     }
   ]
 }
