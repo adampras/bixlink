@@ -2,29 +2,15 @@ import { QueryClient, dehydrate, hydrate } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { AuricSkeleton } from "./components/TechSuite";
+import { recoverStalePage } from './lib/stale-page-recovery';
 
 // After a new deploy, old page chunks disappear; reload once to fetch fresh ones.
 if (typeof window !== "undefined") {
-  // Time-based guard: allow a fresh reload if the last one was >15s ago,
-  // so a stale flag can never leave the page stuck on a blank screen.
-  const reloadOnce = () => {
-    const last = Number(sessionStorage.getItem("bix-chunk-reload") || 0);
-    if (Date.now() - last < 15000) return;
-    sessionStorage.setItem("bix-chunk-reload", String(Date.now()));
-    window.location.reload();
-  };
-  // An old cached app bundle can receive page data from a newer deploy and fail
-  // to find a page definition ("reading 'component'"), leaving a blank screen.
-  const isStaleBundle = (msg: string) =>
-    /dynamically imported module|Importing a module script failed|reading '(component|options)'/.test(msg);
-  window.addEventListener("vite:preloadError", (e) => { e.preventDefault(); reloadOnce(); });
-  window.addEventListener("error", (e) => {
-    if (isStaleBundle(String(e.message ?? e.error?.message ?? ""))) reloadOnce();
+  window.addEventListener('vite:preloadError', (event) => {
+    if (recoverStalePage(new Error('Failed to fetch dynamically imported module'))) event.preventDefault();
   });
-  window.addEventListener("unhandledrejection", (e) => {
-    if (isStaleBundle(String(e.reason?.message ?? ""))) reloadOnce();
-  });
-  window.addEventListener("load", () => setTimeout(() => sessionStorage.removeItem("bix-chunk-reload"), 10000));
+  window.addEventListener('error', (event) => { recoverStalePage(event.error ?? event.message); });
+  window.addEventListener('unhandledrejection', (event) => { recoverStalePage(event.reason); });
 }
 
 export const getRouter = () => {
@@ -45,14 +31,7 @@ export const getRouter = () => {
     defaultPreload: "intent",
     defaultPreloadDelay: 60,
     defaultPreloadStaleTime: 0,
-    defaultOnCatch: (err: unknown) => { const error = err as Error;
-      if (typeof window !== "undefined" && /dynamically imported module|Importing a module script failed|reading '(component|options)'/.test(error?.message ?? "")) {
-        const last = Number(sessionStorage.getItem("bix-chunk-reload") || 0);
-        if (Date.now() - last < 15000) return;
-        sessionStorage.setItem("bix-chunk-reload", String(Date.now()));
-        window.location.reload();
-      }
-    },
+    defaultOnCatch: (error: unknown) => { recoverStalePage(error); },
   });
 
   return router;

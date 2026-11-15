@@ -29,6 +29,7 @@ import { PowerSaver } from "../components/PowerSaver";
 import { NativeFeel } from "../components/NativeFeel";
 import { ContentGuard } from "../components/ContentGuard";
 import { I18nProvider } from "../lib/i18n";
+import { isStalePageError, recoverStalePage } from '../lib/stale-page-recovery';
 
 function NotFoundComponent() {
   return (
@@ -55,19 +56,9 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
-  const chunk = /dynamically imported module|Importing a module script failed/.test(String((error as Error)?.message ?? ""));
+  const chunk = isStalePageError(error);
   useEffect(() => {
-    if (chunk) {
-      // Stale page file after an update: the browser caches the failed import, so only a full reload helps.
-      // Allow up to 3 automatic reloads per minute, then leave the reload button to the member.
-      const now = Date.now();
-      const hits = JSON.parse(sessionStorage.getItem("bix-chunk-reloads") ?? "[]").filter((t: number) => now - t < 60000) as number[];
-      if (hits.length < 3) {
-        sessionStorage.setItem("bix-chunk-reloads", JSON.stringify([...hits, now]));
-        window.location.reload();
-        return;
-      }
-    }
+    if (recoverStalePage(error)) return;
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error, chunk]);
 
