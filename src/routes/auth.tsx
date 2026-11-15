@@ -13,7 +13,7 @@ export const Route = createFileRoute('/auth')({ head: () => ({ meta: [{ title: '
 function Auth() {
   const [mode, setMode] = useState<'signin'|'forgot'>('signin');
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false); const [show, setShow] = useState(false);
-  useEffect(() => { const saved = window.localStorage.getItem('bixlink-login-identifier'); const verified = new URLSearchParams(window.location.search).get('verified') === '1'; if (saved) setEmail(saved); if (verified) setNotice('Email verified. Your account is active — enter your password to sign in.'); else if (saved) setNotice('Enter your password to sign in. New accounts must confirm their email first.'); }, []);
+  useEffect(() => { const saved = window.localStorage.getItem('bixlink-login-identifier'); const verified = new URLSearchParams(window.location.search).get('verified') === '1'; if (saved) setEmail(saved); if (verified) void supabase.auth.getSession().then(({ data }) => { if (data.session) { const t = window.localStorage.getItem('bixlink-target'); window.localStorage.removeItem('bixlink-target'); window.location.replace(t === 'presale' ? '/presale' : '/'); } }); if (verified) setNotice('Email verified. Your account is active — enter your password to sign in.'); else if (saved) setNotice('Enter your password to sign in. New accounts must confirm their email first.'); }, []);
   const navigate = useNavigate();
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setNotice('');

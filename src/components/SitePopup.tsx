@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { Dialog, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ContentImage } from '@/components/ContentImage';
+import { isWelcomeActive, onWelcomeDone } from '@/lib/popup-queue';
 import { popupPlacementForPath, type PopupItem } from '@/lib/landing-content';
 
 const seenKey = (item: PopupItem) => `bix-popup-seen:${item.placement}:${item.title}:${item.image ?? ''}`;
@@ -16,8 +17,11 @@ export function SitePopup({ path, popups, signedIn }: { path: string; popups?: P
     const next = placement ? (popups ?? []).find(p => p.enabled !== false && p.placement === placement) : undefined;
     if (!next) { setItem(null); return; }
     try { if (sessionStorage.getItem(seenKey(next))) return; } catch { /* storage unavailable */ }
-    const timer = window.setTimeout(() => setItem(next), 900);
-    return () => window.clearTimeout(timer);
+    let timer = 0; let off = () => {};
+    // Never stack on top of the first-login welcome: wait until it closes.
+    const show = () => { timer = window.setTimeout(() => { if (isWelcomeActive()) off = onWelcomeDone(show); else setItem(next); }, 900); };
+    show();
+    return () => { off(); window.clearTimeout(timer); };
   }, [path, popups, signedIn]);
   const close = () => { if (item) { try { sessionStorage.setItem(seenKey(item), '1'); } catch { /* ignore */ } } setItem(null); };
   const external = item?.url?.startsWith('https://');
