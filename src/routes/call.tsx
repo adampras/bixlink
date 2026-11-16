@@ -754,13 +754,14 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
         const mine = m.sender_id === me;
         const q = m.reply_to ? findMsg(m.reply_to) : undefined;
         return <p key={m.id} id={`msg-${m.id}`} onDoubleClick={() => { if (!m.deleted_at && !locked) void react(m, '❤️'); }} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
-          onPointerDown={e => { if ((e.target as HTMLElement).closest('.comm-voice')) return; holdStart(m); swipeStart(e, m); }} onPointerMove={swipeMove} onPointerUp={e => { holdEnd(); swipeEnd(e); }} onPointerLeave={holdEnd} onPointerCancel={e => { holdEnd(); swipeEnd(e, true); }} onContextMenu={e => { e.preventDefault(); if ((e.target as HTMLElement).closest('.comm-voice')) return; if (!m.deleted_at) setMenu(m); }}>
+          onPointerDown={e => { if ((e.target as HTMLElement).closest('.comm-voice, .comm-vopt, button, a, audio, video')) return; holdStart(m); swipeStart(e, m); }} onPointerMove={swipeMove} onPointerUp={e => { holdEnd(); swipeEnd(e); }} onPointerLeave={holdEnd} onPointerCancel={e => { holdEnd(); swipeEnd(e, true); }} onContextMenu={e => { e.preventDefault(); if ((e.target as HTMLElement).closest('.comm-voice, .comm-vopt, button')) return; if (!m.deleted_at) setMenu(m); }}>
           {m.forwarded && !m.deleted_at && <em className="comm-fwd">↪ Diteruskan</em>}
           {m.reply_to && !m.deleted_at && <span className="comm-quote"><b>{q ? (q.sender_id === me ? 'Anda' : `@${name}`) : 'Balasan'}</b>{q?.deleted_at ? 'Pesan dihapus' : q?.body ?? m.reply_body ?? 'Pesan sebelumnya'}</span>}
           {m.deleted_at ? <span>🚫 {mine ? 'Anda menghapus pesan ini' : 'Pesan ini telah dihapus'}</span> : m.kind && m.kind !== 'text' ? <ChatMedia m={m} me={me} onAct={(x, a) => void reqAct(x, a)}/> : m.body}
           <small>{m.pinned_at && '📌 '}{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && !m.deleted_at && <span className={`comm-tick ${m.read_at ? 'is-read' : m.delivered_at ? 'is-delivered' : 'is-sent'}`} aria-label={m.read_at ? 'Dibaca (centang 2 hijau)' : m.delivered_at ? 'Diterima perangkat' : 'Terkirim, penerima offline'}><Ticks two={!!(m.read_at || m.delivered_at)}/></span>}</small>
           {!m.deleted_at && Object.keys(m.reactions ?? {}).length > 0 && <span className="comm-reacts">{Object.entries(Object.values(m.reactions ?? {}).reduce<Record<string, number>>((a, e) => { a[e] = (a[e] ?? 0) + 1; return a; }, {})).map(([e, n]) => <button type="button" key={e} className={m.reactions?.[me] === e ? 'is-mine' : ''} onClick={ev => { ev.stopPropagation(); void react(m, e); }}>{e}{n > 1 && <i>{n}</i>}</button>)}</span>}
-          {!m.deleted_at && <button type="button" className="comm-more" aria-label="Opsi pesan" onClick={() => setMenu(m)}>⋯</button>}
+          {!m.deleted_at && m.kind !== 'voice' && <button type="button" className="comm-more" aria-label="Opsi pesan" onClick={() => setMenu(m)}>⋯</button>}
+          {!m.deleted_at && m.kind === 'voice' && <button type="button" className="comm-vopt" aria-label="Opsi pesan suara" onPointerDown={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setMenu(m); }}>⋯</button>}
         </p>;
         })();
         return sep ? [sep, row] : row;

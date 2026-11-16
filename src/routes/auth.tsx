@@ -7,19 +7,20 @@ import { Button } from '@/components/ui/button';
 import { VaultStardust } from '@/components/VaultFlourish';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { WalletSignIn } from '@/components/WalletSignIn';
+import { readEntry } from '@/lib/hub-entry';
 
 export const Route = createFileRoute('/auth')({ head: () => ({ meta: [{ title: 'Member Access — BIXLINK' }, { name: 'description', content: 'Sign in to your BIXLINK member account or request a password reset.' }, { property: 'og:title', content: 'Member Access — BIXLINK' }, { property: 'og:description', content: 'Access your BIXLINK account and member services.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }), component: Auth });
 
 function Auth() {
   const [mode, setMode] = useState<'signin'|'forgot'>('signin');
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false); const [show, setShow] = useState(false);
-  useEffect(() => { const saved = window.localStorage.getItem('bixlink-login-identifier'); const verified = new URLSearchParams(window.location.search).get('verified') === '1'; if (saved) setEmail(saved); if (verified) void supabase.auth.getSession().then(({ data }) => { if (data.session) { const t = window.localStorage.getItem('bixlink-target'); window.localStorage.removeItem('bixlink-target'); if (t !== 'presale') window.localStorage.setItem('bixlink-genesis', '1'); window.location.replace(t === 'presale' ? '/presale' : '/wallet'); } }); if (verified) setNotice('Email verified. Your account is active — enter your password to sign in.'); else if (saved) setNotice('Enter your password to sign in. New accounts must confirm their email first.'); }, []);
+  useEffect(() => { const saved = window.localStorage.getItem('bixlink-login-identifier'); const verified = new URLSearchParams(window.location.search).get('verified') === '1'; if (saved) setEmail(saved); if (verified) void supabase.auth.getSession().then(({ data }) => { if (data.session) { const t = window.localStorage.getItem('bixlink-target'); window.localStorage.removeItem('bixlink-target'); if (t !== 'presale') window.localStorage.setItem('bixlink-genesis', '1'); window.location.replace(t === 'presale' ? '/presale' : readEntry() === 'call' ? '/call' : '/wallet'); } }); if (verified) setNotice('Email verified. Your account is active — enter your password to sign in.'); else if (saved) setNotice('Enter your password to sign in. New accounts must confirm their email first.'); }, []);
   const navigate = useNavigate();
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setNotice('');
     try {
       if (mode === 'forgot') { const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` }); if (error) throw error; setNotice('Check your inbox for a password reset link.'); }
-      else { const r = await signInWithIdentifier({ data: { identifier: email, password } }); if (!r.ok) throw new Error(r.error); const { error } = await supabase.auth.setSession({ access_token: r.access_token, refresh_token: r.refresh_token }); if (error) throw error; const t = window.localStorage.getItem('bixlink-target'); window.localStorage.removeItem('bixlink-target'); navigate({ to: t === 'presale' ? '/presale' : '/' }); }
+      else { const r = await signInWithIdentifier({ data: { identifier: email, password } }); if (!r.ok) throw new Error(r.error); const { error } = await supabase.auth.setSession({ access_token: r.access_token, refresh_token: r.refresh_token }); if (error) throw error; const t = window.localStorage.getItem('bixlink-target'); window.localStorage.removeItem('bixlink-target'); navigate({ to: t === 'presale' ? '/presale' : readEntry() === 'call' ? '/call' : '/' }); }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong.';
       if (/not confirmed/i.test(msg)) {

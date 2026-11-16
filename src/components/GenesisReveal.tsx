@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
+import { onWelcomeDone } from '@/lib/popup-queue';
 
 /** One-time luxury welcome shown the first time a new member lands on Wallet. Presentation only. */
 export function GenesisReveal({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
-    try {
+    // One popup at a time: wait until the Genesis BIXP welcome has been closed.
+    let off = () => {};
+    const check = () => { try {
+      if (!localStorage.getItem('bixlink-member-welcome:' + userId)) { off = onWelcomeDone(check); return; }
       const k = 'bixlink-genesis-seen-' + userId;
       if (localStorage.getItem('bixlink-genesis') === '1' && !localStorage.getItem(k)) { setOpen(true); localStorage.setItem(k, '1'); }
       localStorage.removeItem('bixlink-genesis');
-    } catch { /* optional storage */ }
+    } catch { /* optional storage */ } };
+    check();
+    return () => off();
   }, [userId]);
   if (!open) return null;
   const close = () => setOpen(false);

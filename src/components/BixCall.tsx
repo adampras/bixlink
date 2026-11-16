@@ -573,6 +573,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     {audioBlocked && live && <Button type="button" variant="wallet" size="wallet" className="bc-pill is-chat absolute top-18 left-1/2 -translate-x-1/2 z-10 max-w-[calc(100%-32px)] whitespace-normal" onClick={unlockAudio}><Volume2 size={16}/> Ketuk untuk aktifkan suara</Button>}
     {live && link === 'on' && remoteVideo && !cam && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
     {toneOn && tonesBlocked && <button type="button" className="bc-tone-chip" onClick={() => void unlockCallAudio()}><Volume2 size={13}/> Ketuk untuk bunyikan {call.role === 'callee' ? 'dering' : 'nada'}</button>}
+    <button type="button" className="bc-exit" aria-label={live ? 'Kecilkan panggilan' : done || call.offline ? 'Tutup' : call.role === 'caller' ? 'Batalkan panggilan' : 'Tolak panggilan'} onClick={() => { if (live) setMini(true); else if (done || call.offline) onClose(); else if (call.role === 'caller') onEnd(); else onDecline(); }}>{live ? '⌄' : '✕'}</button>
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
       <span>{live && link === 'on' ? `SOVEREIGN ENCRYPTED • 48 kHz ${anyVideo ? 'HD VIDEO' : 'HD VOICE'}` : 'BIX CALL • SOVEREIGN ENCRYPTED'}</span>
