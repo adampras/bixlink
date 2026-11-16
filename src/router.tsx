@@ -3,6 +3,7 @@ import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { AuricSkeleton } from "./components/TechSuite";
 import { recoverStalePage } from './lib/stale-page-recovery';
+import { PageLoadError } from './components/PageLoadError';
 
 // After a new deploy, old page chunks disappear; reload once to fetch fresh ones.
 if (typeof window !== "undefined") {
@@ -25,6 +26,7 @@ export const getRouter = () => {
     },
     scrollRestoration: true,
     defaultPendingComponent: AuricSkeleton,
+    defaultErrorComponent: PageLoadError,
     defaultPendingMs: 250,
     // Warm the next page (code + loader data) as soon as a nav item is hovered
     // or pressed, so switching menus opens already-loaded content.

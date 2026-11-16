@@ -36,4 +36,18 @@ describe('leaf page error recovery', () => {
     await act(async () => { finish?.(); await pending; });
     expect(reset).toHaveBeenCalledTimes(1);
   });
+  it('refreshes the document rather than resetting a cached failed module', async () => {
+    const reload = vi.fn();
+    vi.stubGlobal('window', { location: { reload } });
+    try {
+      const reset = vi.fn();
+      const { result } = renderHook(() => usePageErrorRecovery(new TypeError("Cannot read properties of undefined (reading 'component')"), reset));
+      await act(async () => { await result.current(); });
+      expect(reload).toHaveBeenCalledTimes(1);
+      expect(mocks.invalidate).not.toHaveBeenCalled();
+      expect(reset).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });
