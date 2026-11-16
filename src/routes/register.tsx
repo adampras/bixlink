@@ -40,6 +40,19 @@ function RegisterPage() {
     event.preventDefault(); setBusy(true); setNotice('');
     try {
       const uname = username.trim().toLowerCase(); const code = referral.trim().toUpperCase();
+      const fast = entry === 'call';
+      if (fast) {
+        if (!/^[a-z0-9_.]{3,24}$/.test(uname)) throw new Error('Username: 3–24 letters, numbers, _ or .');
+        if (code && !/^BIX-\d{6}$/.test(code)) throw new Error('Referral code must use the format BIX-123456.');
+        if (password.length < 8 || /\s/.test(password)) throw new Error('Password: minimal 8 karakter tanpa spasi.');
+        const { data: free } = await supabase.rpc('bix_username_available', { p_username: uname });
+        if (!free) throw new Error('That username is already taken.');
+        if (code) window.localStorage.setItem('bixlink-ref', code); else window.localStorage.removeItem('bixlink-ref');
+        const created = await createManualAccount(() => supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth?verified=1`, data: { full_name: uname, username: uname, fast_track: 'call' } } }), () => supabase.auth.signOut());
+        window.localStorage.setItem(LOGIN_IDENTIFIER_KEY, uname);
+        setDone({ username: uname, email: email.trim(), whatsapp: '-', referral: code, verify: created.confirmationRequired }); setCooldown(60);
+        return;
+      }
       if (fullName.trim().length < 2) throw new Error('Please enter your full name.');
       if (!/^[a-z0-9_.]{3,24}$/.test(uname)) throw new Error('Username: 3–24 letters, numbers, _ or .');
       const whatsapp = toE164(dial.dial, phone);
@@ -59,6 +72,16 @@ function RegisterPage() {
   return <BixShell><main id="member-access" className="auth-vault-page mx-auto flex auth-center auth-fit max-w-md flex-col justify-center px-4 py-3"><VaultStardust/><div className="auth-vault"><Link to="/" className="auth-back" aria-label="Back to HOME">← HOME</Link>
     <div className="flex items-center justify-center gap-2.5"><img src="https://bixlink.com/__l5e/assets-v1/c62ecff6-c5d1-4235-8e7a-e49c0c2b7039/fox-icon-512.png" alt="" className="h-9 w-9 rounded-full border border-chart-3/40"/><div className="text-left"><div className="text-lg font-black leading-none tracking-wide">BIX<span className="text-chart-3">LINK</span></div><div className="mt-1 text-[9px] font-bold tracking-[0.2em] text-muted-foreground">CREATE MEMBER ACCOUNT</div></div></div>
     <nav className="auth-tabs mt-3" aria-label="Account"><Link to="/auth">SIGN IN</Link><Link to="/register" data-active="true">REGISTER</Link></nav>
+    {entry === 'call' ? <form onSubmit={submit} className="mt-4 space-y-2.5" aria-label="Daftar cepat BIX CALL">
+      <div className="rounded-2xl border border-chart-3/40 bg-card/60 px-3 py-2 text-center"><div className="text-[10px] font-black tracking-[0.2em] text-chart-3">BIX CALL · UNDANGAN KOMUNIKASI AMAN</div><div className="mt-0.5 text-[11px] text-muted-foreground">Daftar cepat 15 detik — chat, telepon & video call dengan sponsor Anda.</div></div>
+      <label className={label}>USERNAME<input required pattern="[A-Za-z0-9_.]{3,24}" maxLength={24} autoComplete="username" value={username} onChange={e => setUsername(e.target.value)} className="form-input mt-1.5" placeholder="3–24 huruf atau angka"/></label>
+      <label className={label}>EMAIL<input required type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="form-input mt-1.5" placeholder="you@example.com"/></label>
+      <label className={label}>PASSWORD<div className="relative mt-1.5"><input required minLength={8} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} className="form-input pr-10" placeholder="Minimal 8 karakter"/><Button type="button" variant="ghost" size="icon" className="absolute right-0.5 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(v => !v)}>{showPassword ? <EyeOff/> : <Eye/>}</Button></div></label>
+      <label className={label}><span className="flex justify-between">KODE REFERRAL<span className="text-[9px] opacity-70">OPSIONAL</span></span><input maxLength={10} value={referral} onChange={e => setReferral(e.target.value.toUpperCase())} className="form-input mt-1.5 font-mono tracking-widest" placeholder="BIX-123456"/></label>
+      {notice && <p role="status" className="text-sm text-chart-2">{notice}</p>}
+      <Button type="submit" disabled={busy} className="mt-2 h-12 w-full rounded-full bg-primary text-sm font-black tracking-widest text-primary-foreground hover:bg-primary/90">{busy ? 'Please wait…' : 'Daftar & Masuk BIX CALL'} <ArrowRight/></Button>
+      <p className="text-center text-[10px] text-muted-foreground">Nama lengkap & No. WhatsApp bisa dilengkapi nanti di Profil.</p>
+    </form> :
     <form onSubmit={submit} className="mt-4 space-y-2" aria-label="Create BIXLINK account">
       <label className={label}>FULL NAME<input required minLength={2} maxLength={80} autoComplete="name" value={fullName} onChange={e => setFullName(e.target.value)} className="form-input mt-1.5" placeholder="Your full name"/></label>
       <label className={label}>USERNAME<input required pattern="[A-Za-z0-9_.]{3,24}" maxLength={24} autoComplete="username" value={username} onChange={e => setUsername(e.target.value)} className="form-input mt-1.5" placeholder="3–24 letters or numbers"/></label>
@@ -77,7 +100,7 @@ function RegisterPage() {
       <label className={label}><span className="flex justify-between">REFERRAL CODE<span className="text-[9px] opacity-70">OPTIONAL</span></span><input maxLength={10} value={referral} onChange={e => setReferral(e.target.value.toUpperCase())} className="form-input mt-1.5 font-mono tracking-widest" placeholder="BIX-123456"/></label>
       {notice && <p role="status" className="text-sm text-chart-2">{notice}</p>}
       <Button type="submit" disabled={busy} className="mt-2 h-12 w-full rounded-full bg-primary text-sm font-black tracking-widest text-primary-foreground hover:bg-primary/90">{busy ? 'Please wait…' : 'Create account'} <ArrowRight/></Button>
-    </form>
+    </form>}
     <div className="auth-mini-alt"><WalletSignIn/></div>
     <p className="mt-3 text-center text-xs text-muted-foreground">Already have an account? <Link to="/auth" className="auth-toska-link">Sign in →</Link></p>
   </div></main>

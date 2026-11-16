@@ -81,6 +81,7 @@ function FloatGrid({ items, path, onPick }: { items: (typeof HUB_ITEMS)[number][
 /** Mobile dock HUB (replaces HOME): opens owner-selected shortcuts. */
 export function DockHub({ path, cfg, order, matrix = false }: { path: string; cfg?: Record<string, boolean> | undefined; order?: string[] | undefined; matrix?: boolean }) {
   const [open, setOpen] = useState(false);
+  useEffect(() => { const h = () => setOpen(true); window.addEventListener('bix-hub-open', h); return () => window.removeEventListener('bix-hub-open', h); }, []);
   const owner1 = useQuery({ queryKey: ['is-owner1'], staleTime: 300_000, enabled: open, queryFn: async () => Boolean((await supabase.rpc('bix_is_owner1')).data) });
   const orbit = useQuery({ queryKey: ['bix-hub-orbit'], staleTime: 60_000, queryFn: async () => Boolean(((await supabase.rpc('bix_hub_orbit_access' as never)).data as { on?: boolean } | null)?.on) });
   const float = useQuery({ queryKey: ['bix-hub-float'], staleTime: 60_000, queryFn: async () => Boolean(((await supabase.rpc('bix_hub_float_access' as never)).data as { on?: boolean } | null)?.on) });
