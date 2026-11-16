@@ -9353,3 +9353,14 @@ body[data-bc-chat-wall] :is(.comm-msgs,.bx-grp-feed){background-image:none!impor
 .bx-upd-fabs button{width:56px;height:56px;border-radius:999px;background:#00a884;color:#fff;box-shadow:0 6px 18px rgb(0 0 0 / .45)}
 .bx-upd-fabs .is-pen{width:44px;height:44px;border-radius:999px;background:#202c33;color:#e9edef;border:none}
 .bixcall-page .bc-brand em{max-width:none;overflow:visible}
+
+/* Nav orb snug + deep press */
+.glass-dock .mobile-nav-on::before{width:28px!important;height:28px!important;top:7px!important;left:50%!important;right:auto!important;transform:translateX(-50%);background:radial-gradient(circle,hsl(var(--chart-3)/.26),transparent 72%)!important}
+.glass-dock a,.glass-dock button{transition:transform .32s cubic-bezier(.2,1.6,.4,1),filter .2s}
+.glass-dock a:active,.glass-dock button:active{transform:scale(.86) translateY(1px);filter:drop-shadow(0 1px 0 rgb(0 0 0/.8)) brightness(.85);transition-duration:.06s}
+/* HUB solid icons + elastic full flip */
+.flt-icon{background:#0a0d14;border-color:rgb(255 215 0/.2);backface-visibility:visible}
+.flt-tile{animation:none!important;transition:transform .7s cubic-bezier(.175,.885,.32,1.275)!important}
+.flt-grid{perspective:1200px}
+.flt-grid.is-held .flt-tile{transition:transform .08s linear!important;transform:rotateX(calc(var(--fd)*-180deg))!important;opacity:1!important}
+@media (prefers-reduced-motion:reduce){.flt-grid.is-held .flt-tile{transform:none!important}}

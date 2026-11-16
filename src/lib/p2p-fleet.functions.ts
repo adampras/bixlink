@@ -52,9 +52,9 @@ async function creditOrder(admin: any, order: any, cfg: FleetConfig) {
     return { status: 'rejected' as const, reason: r.reason };
   }
   const usdt = Math.floor(r.amount * 100) / 100;
-  if (usdt < cfg.minUsdt) {
-    await admin.from('bix_fleet_orders').update({ status: 'rejected', usdt, note: `Below minimum ${cfg.minUsdt} USDT` }).eq('id', order.id).eq('status', 'pending');
-    return { status: 'rejected' as const, reason: `Minimum is ${cfg.minUsdt} USDT.` };
+  if (usdt < 1) {
+    await admin.from('bix_fleet_orders').update({ status: 'rejected', usdt, note: `Below minimum 1 USDT` }).eq('id', order.id).eq('status', 'pending');
+    return { status: 'rejected' as const, reason: `Minimum is 1 USDT.` };
   }
   const bix = Math.floor((usdt / Number(order.price)) * 100) / 100;
   // Atomic claim: only one caller flips pending → credited, so BIX is credited once per TxID.

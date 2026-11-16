@@ -14,7 +14,7 @@ export function P2PFleetDesk() {
   const q = useQuery({ queryKey: ['p2p-fleet'], queryFn: () => load(), refetchInterval: () => (document.hidden ? false : 60_000) });
   type DeskMerchant = { name: string; price: number; stockBix: number; fills: number; wallet: { code: string; address: string } | null };
   const [pick, setPick] = useState<DeskMerchant | null>(null);
-  const [usdt, setUsdt] = useState('100'); const [tx, setTx] = useState(''); const [busy, setBusy] = useState(false);
+  const [usdt, setUsdt] = useState(''); const [tx, setTx] = useState(''); const [busy, setBusy] = useState(false);
   const d = q.data;
   if (!d?.enabled) return null;
 
@@ -32,7 +32,7 @@ export function P2PFleetDesk() {
   const copy = (v: string, label: string) => { navigator.clipboard.writeText(v); toast.success(`${label} disalin`); };
   const amt = Number(usdt) || 0;
   const est = pick ? Math.floor(amt / pick.price * 100) / 100 : 0;
-  const okAmt = amt >= d.minUsdt;
+  const okAmt = amt >= 1;
   const okTx = TX_RE.test(tx.trim());
 
   return <section id="official-desk" className="p2p-panel grid gap-3" aria-label="Official Desk">
@@ -67,14 +67,14 @@ export function P2PFleetDesk() {
 
     {pick && pick.wallet && <div className="fixed inset-0 z-[80] grid place-items-end bg-background/90 p-3 sm:place-items-center" onClick={() => setPick(null)}>
       <div role="dialog" aria-modal="true" aria-label={`Beli dari ${pick.name}`} className="grid max-h-[92dvh] w-full max-w-md gap-3 overflow-y-auto rounded-2xl border border-primary/40 bg-card p-4" onClick={e => e.stopPropagation()}>
-        <div className="flex items-start justify-between"><div><b>Beli BIX · {pick.name}</b><p className="text-[11px] text-muted-foreground">Harga ${pick.price.toFixed(4)} / BIX · minimal {d.minUsdt} USDT</p></div><button aria-label="Tutup" onClick={() => setPick(null)}><X size={18} /></button></div>
+        <div className="flex items-start justify-between"><div><b>Beli BIX · {pick.name}</b><p className="text-[11px] text-muted-foreground">Harga ${pick.price.toFixed(4)} / BIX · minimal 1 USDT</p></div><button aria-label="Tutup" onClick={() => setPick(null)}><X size={18} /></button></div>
 
         <label className="text-xs font-semibold">1 · Jumlah USDT yang akan dibayar
           <input inputMode="decimal" value={usdt} onChange={e => setUsdt(e.target.value)} className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-base" />
         </label>
-        <div className="flex gap-2">{[25, 50, 100, 500].map(v => <button key={v} onClick={() => setUsdt(String(v))} className="flex-1 rounded-lg border border-border py-1 text-xs active:scale-95">{v}</button>)}</div>
+        <div className="flex gap-2">{[5, 10, 25, 50, 100].map(v => <button key={v} onClick={() => setUsdt(String(v))} className="flex-1 rounded-lg border border-border py-1 text-xs active:scale-95">{v}</button>)}</div>
         <p className="rounded-lg bg-background p-2 text-sm">Anda menerima ≈ <b className="text-primary">{est.toLocaleString()} BIX</b> <small className="block text-[10px] text-muted-foreground">Jumlah akhir dihitung dari USDT yang benar-benar diterima.</small></p>
-        {!okAmt && <p className="text-xs text-destructive">Minimal {d.minUsdt} USDT.</p>}
+        {!okAmt && <p className="text-xs text-destructive">Minimal 1 USDT.</p>}
 
         <div className="grid gap-2 rounded-xl border border-primary/30 bg-background p-3 text-xs">
           <span className="flex items-center gap-1 font-semibold"><Wallet size={14} />2 · Kirim tepat <b className="text-primary">{amt || 0} USDT</b> ke alamat ini</span>
