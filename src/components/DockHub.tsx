@@ -70,7 +70,7 @@ function FloatGrid({ items, path, onPick }: { items: (typeof HUB_ITEMS)[number][
   const ref = useRef<HTMLDivElement>(null);
   const start = useRef<number | null>(null);
   const raf = useRef(0);
-  const set = (dy: number) => { cancelAnimationFrame(raf.current); raf.current = requestAnimationFrame(() => { const el = ref.current; if (!el) return; const d = Math.max(-1, Math.min(1, dy / 140)); el.style.setProperty('--fd', String(d)); el.classList.toggle('is-held', dy !== 0); }); };
+  const set = (dy: number) => { cancelAnimationFrame(raf.current); raf.current = requestAnimationFrame(() => { const el = ref.current; if (!el) return; const d = Math.max(-1, Math.min(1, dy / 320)); el.style.setProperty('--fd', String(d)); el.classList.toggle('is-held', dy !== 0); }); };
   return <div ref={ref} className="flt-grid" onTouchStart={e => { start.current = (e.touches[0]?.clientY ?? 0); }} onTouchMove={e => { if (start.current != null) set((e.touches[0]?.clientY ?? 0) - start.current); }} onTouchEnd={() => { start.current = null; set(0); }} onTouchCancel={() => { start.current = null; set(0); }}>
     {items.map((i, n) => { const row = Math.floor(n / 4); const body = <><span className="flt-icon">{ART[i.id] ? <img src={ART[i.id]} alt="" loading="eager" decoding="sync" fetchPriority="high" draggable={false}/> : <LayoutGrid size={22}/>}{BADGES[i.id] && <b>{BADGES[i.id]}</b>}</span><span className="flt-label">{i.label}</span></>;
       const cls = `flt-tile ${path === i.to ? 'is-active' : ''}${i.id === 'presale' ? ' is-hot' : ''}`; const st = { ['--r' as string]: row, animationDelay: `${n * 30}ms` } as React.CSSProperties;
@@ -135,7 +135,7 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
   // Full-body pull: when the list is at the top, dragging down anywhere stretches the sheet like a spring.
   const tStart = useRef<{ y: number; t: number; lastY: number; lastT: number; armed: boolean; buzzed: boolean } | null>(null);
   const onTStart = (e: React.TouchEvent) => { const y = e.touches[0]?.clientY ?? 0; const now = Date.now(); tStart.current = { y, t: now, lastY: y, lastT: now, armed: (sheetRef.current?.scrollTop ?? 0) <= 0, buzzed: false }; };
-  const onTMove = (e: React.TouchEvent) => { const s = tStart.current; if (!s || !s.armed) return; const y = e.touches[0]?.clientY ?? 0; const dy = y - s.y; if (dy <= 0 || (sheetRef.current?.scrollTop ?? 0) > 0) { if (drag) setDrag(0); return; } setMoving(true); const damped = 140 * Math.log1p(dy / 140); setDrag(damped); if (!s.buzzed && damped > 110) { s.buzzed = true; try { navigator.vibrate?.(10); } catch { /* unsupported */ } } s.lastY = y; s.lastT = Date.now(); };
+  const onTMove = (e: React.TouchEvent) => { const s = tStart.current; if (!s || !s.armed) return; const y = e.touches[0]?.clientY ?? 0; const dy = y - s.y; if (dy <= 0 || (sheetRef.current?.scrollTop ?? 0) > 0) { if (drag) setDrag(0); return; } setMoving(true); const damped = 140 * Math.log1p(dy / 320); setDrag(damped); if (!s.buzzed && damped > 110) { s.buzzed = true; try { navigator.vibrate?.(10); } catch { /* unsupported */ } } s.lastY = y; s.lastT = Date.now(); };
   const onTEnd = () => { const s = tStart.current; tStart.current = null; if (!s || !s.armed) return; setMoving(false); const v = (s.lastY - s.y) / Math.max(1, s.lastT - s.t); if (drag > 110 || (v > 0.8 && drag > 30)) { try { navigator.vibrate?.(12); } catch { /* unsupported */ } setDrag(sheetRef.current?.offsetHeight ?? 600); setTimeout(() => setOpen(false), 240); return; } setDrag(0); };
   return <>
     <button type="button" onClick={() => { try { navigator.vibrate?.(6); } catch { /* unsupported */ } setOpen(true); }} aria-label="Open BIX HUB" className={`flex min-w-0 flex-col items-center gap-1 px-1 py-2 text-[11.5px] font-extrabold tracking-wide ${on ? 'mobile-nav-on' : 'dock-item'}`}>
@@ -148,7 +148,7 @@ export function DockHub({ path, cfg, order, matrix = false }: { path: string; cf
         <SheetHeader><SheetTitle className="hub-title font-display tracking-widest" data-text="BIX HUB">BIX HUB</SheetTitle><p className="hub-gate" aria-hidden><i/>GATEWAY ONLINE</p></SheetHeader>
         </div>
         {owner1.data && <section className="hub-group hub-tone-gold mt-3"><button type="button" className="hub-group-head w-full" onClick={() => setCsOpen(v => !v)} aria-expanded={csOpen}><span>CS 1 · CS 2 · CS 3 control</span><em>{csOpen ? 'Close' : 'Open'}</em></button>{csOpen && <div className="mt-2"><SupportCommandCenter/></div>}</section>}
-        {entry && !q.trim() && (() => { const g = GATEWAY[entry]; const it = items.find(i => i.id === g.id); return <Link to={g.to} onClick={() => pick(g.id)} className="sbg-hero mt-3">
+        {entry && entry !== 'call' && !q.trim() && (() => { const g = GATEWAY[entry]; const it = items.find(i => i.id === g.id); return <Link to={g.to} onClick={() => pick(g.id)} className="sbg-hero mt-3">
           {it && ART[g.id] && <img src={ART[g.id]} alt="" className="sbg-art" draggable={false}/>}
           <span className="sbg-kicker"><i/>{g.kicker}</span>
           <span className="sbg-title">{g.title}</span>

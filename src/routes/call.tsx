@@ -19,6 +19,7 @@ import { BixAvatar, useBixCard } from '@/components/BixAvatar';
 import { StoryBar } from '@/components/BixStories';
 import { pushNotify } from '@/lib/bix-push';
 import { compressImage } from '@/lib/bix-image';
+import { Grid3x3 } from 'lucide-react';
 import { Camera, MoreVertical, QrCode, ScanLine, UserPlus, Trash2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { QrScanner } from '@/components/QrScanner';
@@ -243,7 +244,7 @@ function CallInner() {
       <div className="bc-head__search"><FindMember bar me={me} tier={tier} onChat={open}/></div>
     </div>
 
-    {view === 'chat' && <><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
+    {view === 'chat' && <><DialFab me={me} tier={tier} onChat={open}/><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
     {view === 'starred' && <StarredList onOpen={open}/>}
     {view === 'group' && <BixGroups me={me}/>}
     {view === 'newgroup' && <BixGroups me={me} createOnly/>}
@@ -309,6 +310,7 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
         <span className="comm-meta">{found.code && <button onClick={() => copy(found.code!)}>{found.code} ⧉</button>}{found.whatsapp && <i>WA connected</i>}{found.via && <small>via {VIA[found.via]}</small>}</span></span>
       {found.user_id === me ? <small>Your account</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
     {found && found.user_id !== me && <SaveContactBtn id={found.user_id} name={found.name} code={found.code}/>}
+    <SaveNumber/>
   </section>;
 }
 
@@ -383,7 +385,7 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
   return <>
     <FindMember me={me} tier={tier} onChat={onChat}/>
     {pad && <Dialpad me={me} tier={tier} onChat={onChat}/>}
-    <button type="button" className={`comm-fab${pad ? ' is-open' : ''}`} aria-label={pad ? 'Close dial pad' : 'Open dial pad'} onClick={() => setPad(v => !v)}>{pad ? <X size={22}/> : <Phone size={22}/>}</button>
+    <button type="button" className={`comm-fab${pad ? ' is-open' : ''}`} aria-label={pad ? 'Close dial pad' : 'Open dial pad'} onClick={() => setPad(v => !v)}>{pad ? <X size={22}/> : <Grid3x3 size={22}/>}</button>
     <section className="comm-card"><h3 className="comm-h">Call history</h3>
       {hist.length === 0 ? <p className="text-xs text-muted-foreground">No calls yet.</p> : <ul className="comm-list">{hist.map(h => <li key={h.id} className="comm-row">
         <span className={`comm-dir ${h.status === 'missed' || h.status === 'declined' ? 'is-miss' : h.caller_id === me ? 'is-out' : 'is-in'}`}>{h.caller_id === me ? '↗' : '↙'}</span>
@@ -416,7 +418,34 @@ function Dialpad({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
     {found && <div className="comm-peer"><BixAvatar userId={found.user_id} name={found.name}/><b className="min-w-0 flex-1 truncate">@{found.name}</b>
       {found.user_id === me ? <small>Your account</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
     {found && found.user_id !== me && <SaveContactBtn id={found.user_id} name={found.name} code={found.code}/>}
+    <SaveNumber/>
   </section>;
+}
+
+function DialFab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: (id: string, name: string) => void }) {
+  const [pad, setPad] = useState(false);
+  return <>{pad && <Dialpad me={me} tier={tier} onChat={onChat}/>}
+    <button type="button" className={`comm-fab${pad ? ' is-open' : ''}`} aria-label={pad ? 'Tutup keypad' : 'Buka keypad angka'} onClick={() => setPad(v => !v)}>{pad ? <X size={22}/> : <Grid3x3 size={22}/>}</button></>;
+}
+
+function SaveNumber() {
+  const [o, setO] = useState(false); const [name, setName] = useState(''); const [num, setNum] = useState(''); const [msg, setMsg] = useState(''); const [busy, setBusy] = useState(false);
+  const save = async () => {
+    const t = num.trim(); if (t.length < 3) { setMsg('Isi nomor BIX-ID atau HP'); return; }
+    setBusy(true); const { data } = await supabase.rpc('bix_call_find' as never, { p_query: normQuery(t) } as never); setBusy(false);
+    const f = data as Found | null;
+    if (!f) { setMsg('Nomor belum terdaftar di BIXLINK'); return; }
+    addContact({ id: f.user_id, name: name.trim() || f.name, code: f.code ?? t }); try { navigator.vibrate?.(15); } catch { /* optional */ }
+    setMsg('✓ Kontak tersimpan'); setName(''); setNum(''); setTimeout(() => { setMsg(''); setO(false); }, 1500);
+  };
+  if (!o) return <button type="button" className="bc-save-contact" style={{ margin: '.75rem auto 0', display: 'block' }} onClick={() => setO(true)}>+ Simpan Nomor BIX / HP</button>;
+  return <div className="comm-savenum" style={{ display: 'grid', gap: '.5rem', marginTop: '.75rem' }}>
+    <input className="comm-dial-num" value={name} onChange={e => setName(e.target.value.slice(0, 40))} placeholder="Nama kontak"/>
+    <input className="comm-dial-num" value={num} onChange={e => setNum(e.target.value.slice(0, 20))} inputMode="tel" placeholder="BIX-ID atau nomor HP/WA"/>
+    <button type="button" className="comm-dial-go" disabled={busy} onClick={() => void save()}>{busy ? 'Menyimpan…' : 'Simpan Kontak'}</button>
+    <button type="button" className="text-xs text-muted-foreground" onClick={() => setO(false)}>Batal</button>
+    {msg && <p className="text-center text-xs">{msg}</p>}
+  </div>;
 }
 
 function TierLadder({ tier }: { tier: Tier | null }) {
