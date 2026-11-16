@@ -138,6 +138,7 @@ function PresalePage() {
           {!!receipt.extra && receipt.extra > 0 && <p className="mt-2 text-center text-[10px] text-chart-2">${number(receipt.extra, { maximumFractionDigits: 2 })} extra was added to your USDT balance.</p>}
           {receipt.test && <p className="mt-2 text-center text-[10px] text-primary">Test only — no balance moved, cannot be claimed as real BIX.</p>}
           <p className="mt-3 text-center text-[10px] text-muted-foreground">Track and claim released BIX in My Presale Portfolio below.</p>
+          {!receipt.test && <a href={`https://wa.me/?text=${encodeURIComponent(`✅ I just joined the BIXLINK Presale!\n\n💰 Paid: $${number(receipt.usd)} USDT\n🪙 Received: ${number(receipt.bix)} BIX at $${price.toFixed(2)}/BIX\n📅 Released ${PHASE1.dailyPct}% per day over ${PHASE1.vestingDays} days${receipt.serial ? `\n🎫 Certificate #${receipt.serial}` : ''}\n\nJoin here 👉 https://bixlink.com/presale\n\n*Future prices are projections, not guarantees.`)}`} target="_blank" rel="noopener noreferrer" className="mt-3 block w-full rounded-full bg-chart-2 py-2 text-center text-xs font-black text-background">Share proof on WhatsApp</a>}
           <button type="button" onClick={() => { setReceipt(null); setMsg(''); }} className="mt-3 w-full rounded-full border border-chart-3/50 py-2 text-xs font-black text-chart-3">Done</button>
         </div>}
       </section>
