@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import foxLogoOnboard from '@/assets/bixlink-logo-gold.webp';
+import { readEntry } from '@/lib/hub-entry';
 import { createPortal } from 'react-dom';
 const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting', 'newgroup'];
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -152,8 +154,49 @@ function CallPage() {
   const { user, ready } = useMember();
   if (ready && !user) return <BixCallGate/>;
   return <BixShell><div className="bixcall-page">
+    {user && <BixCallOnboard userId={user.id}/>}
     <MemberGate ready={ready} signedIn={!!user} title="BIX CALL"><CallInner/></MemberGate>
   </div></BixShell>;
+}
+
+function BixCallOnboard({ userId }: { userId: string }) {
+  const key = `bixcall-onboarded:${userId}`;
+  const [step, setStep] = useState<0 | 1 | 2>(0);
+  const [file, setFile] = useState<File | null>(null); const [preview, setPreview] = useState('');
+  const [status, setStatus] = useState('Ada di BIX CALL'); const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
+  useEffect(() => { try { if (readEntry() === 'call' && !localStorage.getItem(key)) setStep(1); } catch { /* blocked */ } }, [key]);
+  if (!step) return null;
+  const finish = async () => {
+    setBusy(true); setErr('');
+    try {
+      const av = await import('@/lib/bix-avatar');
+      if (file) await av.uploadAvatar(userId, file);
+      if (status.trim()) await av.saveStatus(userId, status.trim());
+      localStorage.setItem(key, '1'); setStep(0);
+    } catch (e) { setErr(e instanceof Error ? e.message : 'Gagal menyimpan, coba lagi.'); } finally { setBusy(false); }
+  };
+  return <div className="bco" role="dialog" aria-label="Selamat datang di BIX CALL"><div className="bco-card">
+    {step === 1 ? <>
+      <img src={foxLogoOnboard} alt="" width={64} height={64} className="mx-auto"/>
+      <h1>Selamat datang di BIX CALL</h1>
+      <p>Saluran komunikasi resmi Anda bersama sponsor dan tim.</p>
+      <div className="bco-li">🔒<span>Chat & panggilan terenkripsi antar member</span></div>
+      <div className="bco-li">📹<span>Panggilan suara & video HD lewat internet</span></div>
+      <div className="bco-li">🎙️<span>Voice note, grup, dan status 24 jam</span></div>
+      <button type="button" className="bco-go" onClick={() => setStep(2)}>Lanjut</button>
+    </> : <>
+      <h1>Info profil</h1>
+      <p>Pasang foto dan status agar teman mudah mengenali Anda.</p>
+      <label className="bco-av">{preview ? <img src={preview} alt="Foto profil"/> : <span style={{ fontSize: 34 }}>📷</span>}
+        <input type="file" accept="image/*" className="sr-only" onChange={e => { const f = e.target.files?.[0]; if (f) { setFile(f); setPreview(URL.createObjectURL(f)); } }}/></label>
+      <small style={{ opacity: .6 }}>Ketuk lingkaran untuk pilih foto</small>
+      <input type="text" maxLength={80} value={status} onChange={e => setStatus(e.target.value)} placeholder="Status / info"/>
+      <div className="bco-chips">{['Ada di BIX CALL', 'Siap kolaborasi', 'Sibuk', 'Hanya panggilan penting'].map(o => <button type="button" key={o} className={status === o ? 'on' : ''} onClick={() => setStatus(o)}>{o}</button>)}</div>
+      {err && <p style={{ color: '#f87171', marginTop: 8 }}>{err}</p>}
+      <button type="button" className="bco-go" disabled={busy} onClick={() => void finish()}>{busy ? 'Menyimpan…' : 'Mulai Chat'}</button>
+      <button type="button" style={{ marginTop: 10, fontSize: 12, opacity: .6 }} onClick={() => { try { localStorage.setItem(key, '1'); } catch { /* blocked */ } setStep(0); }}>Lewati</button>
+    </>}
+  </div></div>;
 }
 
 function BixCallGate() {

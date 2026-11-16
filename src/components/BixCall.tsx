@@ -283,6 +283,23 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const base = 1;
     audioBox.current?.querySelectorAll('audio').forEach(a => { a.muted = false; a.volume = howlRef.current ? base * 0.4 : base; });
   };
+  // Loudspeaker booster: remote voice routed through a Web Audio gain (≈1.9×) so far-away members sound louder on the phone speaker.
+  const boostRef = useRef<{ ctx: AudioContext; gain: GainNode; srcs: Map<MediaStream, MediaStreamAudioSourceNode> } | null>(null);
+  const boostSync = (vol: number): boolean => {
+    try {
+      if (!loudRef.current) { if (boostRef.current) { void boostRef.current.ctx.close().catch(() => {}); boostRef.current = null; } return false; }
+      const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext; if (!AC) return false;
+      if (!boostRef.current) { const ctx = new AC(); const gain = ctx.createGain(); gain.connect(ctx.destination); boostRef.current = { ctx, gain, srcs: new Map() }; }
+      const b = boostRef.current; if (b.ctx.state === 'suspended') void b.ctx.resume().catch(() => {});
+      if (b.ctx.state !== 'running') return false;
+      b.gain.gain.value = 1.9 * vol;
+      const live = new Set<MediaStream>();
+      audioBox.current?.querySelectorAll('audio').forEach(a => { const ms = a.srcObject as MediaStream | null; if (!ms || !ms.getAudioTracks().length) return; live.add(ms); if (!b.srcs.has(ms)) { const n = b.ctx.createMediaStreamSource(ms); n.connect(b.gain); b.srcs.set(ms, n); } });
+      b.srcs.forEach((n, ms) => { if (!live.has(ms)) { n.disconnect(); b.srcs.delete(ms); } });
+      return b.srcs.size > 0;
+    } catch { return false; }
+  };
+  useEffect(() => () => { void boostRef.current?.ctx.close().catch(() => {}); boostRef.current = null; }, []);
   const syncAudioPlayback = () => {
     const tracks = Array.from(audioBox.current?.querySelectorAll('audio') ?? []);
     const blockedTrack = tracks.some(a => a.paused || a.error !== null);
@@ -341,7 +358,8 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
       if (h !== howlRef.current) { howlRef.current = h; setHowl(h); }
       if (micLowRef.current) { micLowRef.current = false; setMicLow(false); }
       setMyLevel(me);
-      audioBox.current?.querySelectorAll('audio').forEach(a => { if (Math.abs(a.volume - vol) > 0.02) a.volume = vol; });
+      const boosted = boostSync(vol);
+      audioBox.current?.querySelectorAll('audio').forEach(a => { const v = boosted ? 0.0001 : vol; if (Math.abs(a.volume - v) > 0.02 || (boosted && a.volume > 0.01)) a.volume = v; });
     }, 150);
     return () => clearInterval(t);
   }, [link, ear]);
@@ -428,7 +446,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
   // Auto-hide controls during video after 5 s of no touch; any tap brings them back.
   useEffect(() => {
     if (!(live && remoteVideo) || hideUi) return;
-    const t = setTimeout(() => setHideUi(true), 5000);
+    const t = setTimeout(() => setHideUi(true), 3000);
     return () => clearTimeout(t);
   }, [live, remoteVideo, hideUi, cam, split, studio]);
   // Real received resolution for the HD badge.
@@ -573,7 +591,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     {audioBlocked && live && <Button type="button" variant="wallet" size="wallet" className="bc-pill is-chat absolute top-18 left-1/2 -translate-x-1/2 z-10 max-w-[calc(100%-32px)] whitespace-normal" onClick={unlockAudio}><Volume2 size={16}/> Ketuk untuk aktifkan suara</Button>}
     {live && link === 'on' && remoteVideo && !cam && <button type="button" className="bc-pill is-chat bc-vid-invite" onClick={() => void toggleCam()}><Video size={16}/> @{call.peerName} menyalakan video · Nyalakan video saya</button>}
     {toneOn && tonesBlocked && <button type="button" className="bc-tone-chip" onClick={() => void unlockCallAudio()}><Volume2 size={13}/> Ketuk untuk bunyikan {call.role === 'callee' ? 'dering' : 'nada'}</button>}
-    <button type="button" className="bc-exit" aria-label={live ? 'Kecilkan panggilan' : done || call.offline ? 'Tutup' : call.role === 'caller' ? 'Batalkan panggilan' : 'Tolak panggilan'} onClick={() => { if (live) setMini(true); else if (done || call.offline) onClose(); else if (call.role === 'caller') onEnd(); else onDecline(); }}>{live ? '⌄' : '✕'}</button>
+    {!showVideo && <button type="button" className="bc-exit" aria-label={live ? 'Kecilkan panggilan' : done || call.offline ? 'Tutup' : call.role === 'caller' ? 'Batalkan panggilan' : 'Tolak panggilan'} onClick={() => { if (live) setMini(true); else if (done || call.offline) onClose(); else if (call.role === 'caller') onEnd(); else onDecline(); }}>{live ? '⌄' : '✕'}</button>}
     <header className="bixcall-head">
       <img src={foxLogo} alt="" className="bixcall-fox"/>
       <span>{live && link === 'on' ? `SOVEREIGN ENCRYPTED • 48 kHz ${anyVideo ? 'HD VIDEO' : 'HD VOICE'}` : 'BIX CALL • SOVEREIGN ENCRYPTED'}</span>
