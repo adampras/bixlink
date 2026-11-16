@@ -3624,6 +3624,33 @@ export type Database = {
         }
         Relationships: []
       }
+      bixtok_post_rewards: {
+        Row: {
+          amount_vbix: number
+          created_at: string
+          id: string
+          promo: boolean
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          amount_vbix?: number
+          created_at?: string
+          id?: string
+          promo?: boolean
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          amount_vbix?: number
+          created_at?: string
+          id?: string
+          promo?: boolean
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: []
+      }
       bixtok_sounds: {
         Row: {
           artist: string
@@ -5296,6 +5323,7 @@ export type Database = {
         Args: { p_a: string; p_b: string; p_live: string; p_minutes: number }
         Returns: Json
       }
+      bixtok_post_reward_claim: { Args: never; Returns: Json }
       bixtok_publish: {
         Args: {
           p_allow_gifts: boolean

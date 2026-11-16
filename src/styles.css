@@ -9385,3 +9385,26 @@ body[data-bc-chat-wall] :is(.comm-msgs,.bx-grp-feed){background-image:none!impor
 @keyframes bxt-ring{to{stroke-dashoffset:0}}
 /* Exchanger terminal numerals */
 [data-aix-ex=on]{font-variant-numeric:tabular-nums}
+
+/* BIX CALL in-app message pop-up */
+.bc-msg-pop{position:fixed;z-index:95;left:50%;top:calc(env(safe-area-inset-top) + .5rem);transform:translateX(-50%);width:min(92vw,26rem);display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;border-radius:1rem;background:#1f2c34;border:1px solid #2a3942;color:#e9edef;text-align:left;box-shadow:0 12px 30px -10px rgb(0 0 0 / .8);animation:bc-pop-in .3s cubic-bezier(.2,.9,.3,1.2)}
+.bc-msg-pop-av{flex:none;display:grid;place-items:center;width:2.2rem;height:2.2rem;border-radius:50%;background:#00a884;color:#fff;font-weight:900}
+.bc-msg-pop-tx{flex:1;min-width:0;display:grid}
+.bc-msg-pop-tx b{font-size:.82rem}
+.bc-msg-pop-tx small{font-size:.75rem;color:#8696a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc-msg-pop em{font-style:normal;font-size:.55rem;font-weight:800;letter-spacing:.08em;color:#06cf9c}
+@keyframes bc-pop-in{from{opacity:0;transform:translate(-50%,-120%)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* HUB: icons appear solid and locked at once (no blur fade / loading shimmer) */
+.hub-midnight .hub-group{animation:none!important;filter:none!important;opacity:1!important}
+.hub-midnight .hub-photo>img,.flt-icon img{animation:none!important;opacity:1!important;filter:none!important}
+.hub-midnight .hub-photo::after{animation:none!important;display:none!important}
+.hub-midnight .hub-tile.hub-photo,.flt-icon{background:#0a0d14!important}
+
+/* BIXTOK clean pass: calmer LIVE overlays and lobby */
+.bixtok-room .bxl-top,.bixtok-room .bxl-cta{display:none!important}
+.bixtok-room .bxl-chip{background:rgb(0 0 0 / .35);border:0;backdrop-filter:blur(6px)}
+.bixtok-room .bixtok-chat p{background:rgb(0 0 0 / .28);border:0}
+.bxt-board{background:transparent!important;border:0!important;box-shadow:none!important;padding-inline:.75rem}
+.bixtok-lobby .bixtok-golive{background:linear-gradient(160deg,rgb(168 85 247 / .08),rgb(4 5 7 / .7))!important;border:1px solid rgb(255 215 0 / .14)!important;box-shadow:none!important;border-radius:1.1rem}
+.bixtok-live-grid button{border:1px solid rgb(255 215 0 / .14)!important;background:linear-gradient(170deg,rgb(168 85 247 / .12),rgb(4 5 7 / .85))!important;box-shadow:none!important}

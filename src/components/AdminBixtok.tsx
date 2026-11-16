@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 
 type Cfg = { challenge_enabled?: boolean; challenge_tag?: string | null; challenge_title?: string | null; challenge_prize?: string | null; challenge_ends_at?: string | null; clips_enabled?: boolean; link_slots: number; max_links: number; enabled: boolean; live_enabled: boolean; gifts_enabled: boolean; live_min_stake_usd: number; live_max_minutes: number; features: Record<string, boolean>; menus: { key: string; label: string; enabled: boolean }[]; stage_max: number; live_cta: boolean; host_gifts: boolean; auto_follow_back: boolean; replay_enabled: boolean; soundboard: boolean; pk_enabled: boolean; showcase_enabled: boolean; pk_bix_weight: number; withdraw_min_bix?: number; owner2_isolation?: boolean; tester_code?: string | null; creator_share_pct?: number; backdrops_enabled?: boolean; live_backdrops?: { id: string; name: string; url?: string; css?: string }[] };
-const FEATURES: [string, string][] = [['upload', 'Member link & camera posting'], ['music', 'Pencarian musik'], ['filters', 'Filter wajah'], ['text', 'Teks bebas geser'], ['likes', 'Like'], ['comments', 'Komentar LIVE'], ['share', 'Share'], ['bixp_gifts', 'Saweran BIXP'], ['bix_gifts', 'Saweran BIXCOIN'], ['watch_rewards', 'Watch & Earn BIXP (0.10 / 0.25 promo, 10 or 50 per day)']];
+const FEATURES: [string, string][] = [['upload', 'Member link & camera posting'], ['music', 'Pencarian musik'], ['filters', 'Filter wajah'], ['text', 'Teks bebas geser'], ['likes', 'Like'], ['comments', 'Komentar LIVE'], ['share', 'Share'], ['bixp_gifts', 'Saweran BIXP'], ['bix_gifts', 'Saweran BIXCOIN'], ['watch_rewards', 'Watch & Earn BIXP (0.10 / 0.25 promo, 10 or 50 per day)'], ['post_rewards', 'Post & Earn BIXP (0.50 / 1.00 promo, 3 or 5 posts per day)']];
 
 export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
   const qc = useQueryClient();
@@ -56,7 +56,7 @@ export function AdminBixtok({ onMessage }: { onMessage: (m: string) => void }) {
         <Toggle on={cfg.backdrops_enabled !== false} label="Camera off mode + LIVE background" onChange={v => set({ backdrops_enabled: v })}/>
         <Toggle on={cfg.pk_enabled !== false} label="PK Battle" onChange={v => set({ pk_enabled: v })}/>
         <Toggle on={cfg.owner2_isolation === true} label="Admin 2 network isolation (content, LIVE & follows separated from Admin 1)" onChange={v => set({ owner2_isolation: v })}/>
-        {FEATURES.map(([k, l]) => <Toggle key={k} on={k === 'watch_rewards' ? cfg.features[k] === true : cfg.features[k] !== false} label={l} onChange={v => set({ features: { ...cfg.features, [k]: v } })}/>)}
+        {FEATURES.map(([k, l]) => <Toggle key={k} on={(k === 'watch_rewards' || k === 'post_rewards') ? cfg.features[k] === true : cfg.features[k] !== false} label={l} onChange={v => set({ features: { ...cfg.features, [k]: v } })}/>)}
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="text-xs text-muted-foreground">LIVE requirement: minimum active total staking (USD)<input className="form-input mt-1" type="number" min={0} step="1" value={cfg.live_min_stake_usd} onChange={e => set({ live_min_stake_usd: Number(e.target.value) })}/></label>

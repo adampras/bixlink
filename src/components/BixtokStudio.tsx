@@ -135,7 +135,9 @@ export function BixtokStudio({ onClose, onDone, slots = 5, maxLinks = 10 }: { us
     const { data, error } = await supabase.rpc('bixtok_publish_links', { p_urls: urls, p_caption: caption, p_filter: filter, p_overlay: overlay, p_text_style: ts as never, p_music_title: music?.title ?? '', p_music_url: music?.url ?? '', p_allow_gifts: gifts });
     setBusy(false);
     if (error) return setErr(error.message);
-    onDone(`${data} post${Number(data) > 1 ? 's' : ''} published to BIXTOK`);
+    const { data: rw } = await supabase.rpc('bixtok_post_reward_claim' as never);
+    const r = rw as { amount?: number } | null;
+    onDone(`${data} post${Number(data) > 1 ? 's' : ''} published to BIXTOK${r?.amount ? ` · +${Number(r.amount).toFixed(2)} BIXP` : ''}`);
   };
 
   const textBtn = <button onClick={() => { if (!overlay) setOverlay('Your text'); setTextOpen(true); }}><Type/><small>Text</small></button>;

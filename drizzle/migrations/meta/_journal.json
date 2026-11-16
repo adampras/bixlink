@@ -1457,6 +1457,13 @@
       "when": 1794759774040,
       "tag": "0207_bixtok_watch_rewards",
       "breakpoints": true
+    },
+    {
+      "idx": 208,
+      "version": "7",
+      "when": 1794790469618,
+      "tag": "0208_bixtok_post_rewards",
+      "breakpoints": true
     }
   ]
 }

@@ -94,6 +94,8 @@ export function BixCallHost() {
   const [err, setErr] = useState('');
   const callRef = useRef<Active | null>(null); callRef.current = call;
   const lastChat = useRef(new Date().toISOString());
+  const [pop, setPop] = useState<{ id: string; from: string; name: string; body: string } | null>(null);
+  useEffect(() => { if (!pop) return; const t = setTimeout(() => setPop(null), 4500); return () => clearTimeout(t); }, [pop?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setMe(data.user?.id ?? null));
@@ -174,14 +176,16 @@ export function BixCallHost() {
         }
       }
       // Chat alerts while the app is in the background
-      if (document.hidden) {
+      {
         const { data: msgs } = await supabase.from('bix_messages' as never).select('id, sender_id, body, created_at').eq('recipient_id', me).is('read_at', null).gt('created_at', lastChat.current).order('created_at', { ascending: true }).limit(5);
         for (const m of (msgs as { id: string; sender_id: string; body: string; created_at: string }[] | null) ?? []) {
           lastChat.current = m.created_at;
           const peer = await supabase.rpc('bix_call_peer' as never, { p_user: m.sender_id } as never);
-          sysNotify(`💬 BIX COMM · @${(peer.data as { name?: string } | null)?.name ?? 'Member'}`, (m.body ?? '').slice(0, 120), `chat-${m.sender_id}`, false, `/call?chat=${m.sender_id}`);
+          const nm = (peer.data as { name?: string } | null)?.name ?? 'Member';
+          if (document.hidden) sysNotify(`💬 BIX COMM · @${nm}`, (m.body ?? '').slice(0, 120), `chat-${m.sender_id}`, false, `/call?chat=${m.sender_id}`);
+          else if (!stop) { setPop({ id: m.id, from: m.sender_id, name: nm, body: (m.body ?? '').trim().slice(0, 90) || 'Pesan baru' }); try { navigator.vibrate?.(30); } catch { /* optional */ } }
         }
-      } else lastChat.current = new Date().toISOString();
+      }
     };
     const t = setInterval(() => void tick(), 1500);
     void tick();
@@ -214,6 +218,7 @@ export function BixCallHost() {
 
   return <>
     {err && <div className="bixcall-toast" role="alert">{err}</div>}
+    {pop && !call && <button type="button" className="bc-msg-pop" role="status" onClick={() => { const f = pop.from; setPop(null); window.location.assign(`/call?chat=${f}`); }}><span className="bc-msg-pop-av">{pop.name.slice(0, 1).toUpperCase()}</span><span className="bc-msg-pop-tx"><b>@{pop.name}</b><small>{pop.body}</small></span><em>BIX CALL</em></button>}
     {call && typeof document !== 'undefined' && createPortal(<CallScreen call={call} onAccept={() => { primeCallAudio(); void unlockCallAudio(); void setStatus('accepted'); }} onDecline={() => void setStatus('declined')} onEnd={() => void setStatus('ended')} onClose={() => setCall(null)}/>, document.body)}
   </>;
 }
