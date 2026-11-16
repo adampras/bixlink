@@ -184,3 +184,4 @@
 - [x] Sweep stale-route blank screens: root retries now await shared invalidation; LIVE shows loading feedback. Fifty paths show no blank/missing-component error; nine tests and automatic build pass. Gated internal flows, physical APK and old published bundle remain unverified; records/permissions unchanged.
 - [x] Fix BIX CALL voice-note playback (tap opened message menu), WA waveform + date separators; BIXTOK Watch & Earn BIXP (owner toggle, off by default).
 - [x] Add eager shared router fallback for Profil dynamic-module failures; blocked-module recovery and signed-in retry verified on phone/desktop, ten regression tests and automatic build pass.
+- [x] Sweep route/LIVE/map/scanner/call loading paths; 49 component endpoints HTTP 200, seven blocked-route fallbacks and signed-in Profile retry verified, offline guard and 12 tests pass. Connected preview inspection timed out; physical APK/published bundle unverified; records and permissions unchanged.

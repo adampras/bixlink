@@ -50,4 +50,16 @@ describe('stale route recovery', () => {
     expect(recoverStalePage(routeError)).toBe(false);
     expect(reload).not.toHaveBeenCalled();
   });
+  it('recognizes the exact reported split Profile module failure', () => {
+    expect(isStalePageError(new TypeError('Failed to fetch dynamically imported module: /src/routes/profile.tsx?tsr-split=component'))).toBe(true);
+  });
+  it('does not discard the current page or spend retries while offline', () => {
+    const reload = browser();
+    Object.assign(window, { navigator: { onLine: false } });
+    expect(recoverStalePage(new TypeError('Failed to fetch dynamically imported module: /src/routes/profile.tsx?tsr-split=component'))).toBe(false);
+    expect(reload).not.toHaveBeenCalled();
+    Object.assign(window, { navigator: { onLine: true } });
+    expect(recoverStalePage(routeError)).toBe(true);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
 });

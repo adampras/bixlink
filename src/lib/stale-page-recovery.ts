@@ -10,6 +10,9 @@ export function isStalePageError(error: unknown): boolean {
 /** Share a bounded reload budget across router, React boundary and preload errors. */
 export function recoverStalePage(error: unknown): boolean {
   if (typeof window === 'undefined' || !isStalePageError(error)) return false;
+  // Reloading while disconnected cannot fetch a module and can discard a working shell.
+  // Leave the visible boundary available until the member retries with a connection.
+  if (window.navigator?.onLine === false) return false;
   try {
     const now = Date.now();
     const stored: unknown = JSON.parse(window.sessionStorage.getItem(RELOAD_KEY) ?? '[]');
