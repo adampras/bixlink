@@ -116,7 +116,7 @@ function VoiceNote({ url }: { url: string }) {
   const pct = dur > 0 ? Math.min(100, (t / dur) * 100) : 0;
   const bars = useMemo(() => { let h = 0; for (let i = 0; i < url.length; i++) h = (h * 31 + url.charCodeAt(i)) >>> 0; return Array.from({ length: 30 }, () => { h = (h * 1103515245 + 12345) >>> 0; return 22 + (h % 78); }); }, [url.split('?')[0]]); // eslint-disable-line react-hooks/exhaustive-deps
   const seek = (e: React.MouseEvent<HTMLSpanElement>) => { e.stopPropagation(); const a = ref.current; if (!a || !dur) return; const r = e.currentTarget.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * dur; };
-  return <span className={`comm-voice${play ? ' is-playing' : ''}`} onPointerDown={stop} onPointerUp={stop} onTouchStart={stop} onClick={stop} onDoubleClick={stop} onContextMenu={stop}>
+  return <span className={`comm-voice${play ? ' is-playing' : ''}`} onPointerDown={stop} onPointerUp={stop} onTouchStart={stop} onClick={stop} onDoubleClick={stop} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}>
     <audio ref={ref} src={src} preload="metadata" playsInline onPlay={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onTimeUpdate={e => { setT(e.currentTarget.currentTime); const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onLoadedMetadata={e => { const a = e.currentTarget; const d = a.duration; if (Number.isFinite(d)) setDur(d); else { const fix = () => { a.removeEventListener('timeupdate', fix); if (Number.isFinite(a.duration)) setDur(a.duration); a.currentTime = 0; }; a.addEventListener('timeupdate', fix); try { a.currentTime = 1e7; } catch { /* ignore */ } } }} onError={() => { if (src !== url) setSrc(url); }}/>
     <button type="button" className="comm-vplay" onClick={e => { e.stopPropagation(); toggle(); }} aria-label={play ? 'Jeda' : 'Putar pesan suara'}>{play ? <Pause size={18} fill="currentColor"/> : <Play size={18} fill="currentColor"/>}</button>
     <span className="comm-vwave" onClick={seek} role="slider" aria-label="Posisi pesan suara" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}>
@@ -166,7 +166,7 @@ function BixCallGate() {
       <h1 className="bcg-title">BIX CALL</h1>
       <p className="bcg-sub">Encrypted voice &amp; HD video — private, crystal-clear, community-powered.</p>
       <div className="bcg-chips"><span><ShieldCheck className="size-3.5"/>Encrypted</span><span><Mic className="size-3.5"/>Studio Voice</span><span><Video className="size-3.5"/>HD Video</span></div>
-      <Link to="/register" className="bcg-cta">Join BIX CALL free</Link>
+      <Link to="/register" search={{ entry: 'call', ref: typeof window !== 'undefined' ? window.localStorage.getItem('bixlink-ref') ?? undefined : undefined }} className="bcg-cta">Daftar cepat 15 detik</Link>
       <Link to="/auth" className="bcg-ghost">Sign in</Link>
       <small className="bcg-note">No deposit needed — just chat and call.</small>
     </section>
@@ -754,7 +754,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
         const mine = m.sender_id === me;
         const q = m.reply_to ? findMsg(m.reply_to) : undefined;
         return <p key={m.id} id={`msg-${m.id}`} onDoubleClick={() => { if (!m.deleted_at && !locked) void react(m, '❤️'); }} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
-          onPointerDown={e => { holdStart(m); swipeStart(e, m); }} onPointerMove={swipeMove} onPointerUp={e => { holdEnd(); swipeEnd(e); }} onPointerLeave={holdEnd} onPointerCancel={e => { holdEnd(); swipeEnd(e, true); }} onContextMenu={e => { e.preventDefault(); if (!m.deleted_at) setMenu(m); }}>
+          onPointerDown={e => { if ((e.target as HTMLElement).closest('.comm-voice')) return; holdStart(m); swipeStart(e, m); }} onPointerMove={swipeMove} onPointerUp={e => { holdEnd(); swipeEnd(e); }} onPointerLeave={holdEnd} onPointerCancel={e => { holdEnd(); swipeEnd(e, true); }} onContextMenu={e => { e.preventDefault(); if ((e.target as HTMLElement).closest('.comm-voice')) return; if (!m.deleted_at) setMenu(m); }}>
           {m.forwarded && !m.deleted_at && <em className="comm-fwd">↪ Diteruskan</em>}
           {m.reply_to && !m.deleted_at && <span className="comm-quote"><b>{q ? (q.sender_id === me ? 'Anda' : `@${name}`) : 'Balasan'}</b>{q?.deleted_at ? 'Pesan dihapus' : q?.body ?? m.reply_body ?? 'Pesan sebelumnya'}</span>}
           {m.deleted_at ? <span>🚫 {mine ? 'Anda menghapus pesan ini' : 'Pesan ini telah dihapus'}</span> : m.kind && m.kind !== 'text' ? <ChatMedia m={m} me={me} onAct={(x, a) => void reqAct(x, a)}/> : m.body}

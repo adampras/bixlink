@@ -183,7 +183,7 @@ export function BixCallHost() {
           const peer = await supabase.rpc('bix_call_peer' as never, { p_user: m.sender_id } as never);
           const nm = (peer.data as { name?: string } | null)?.name ?? 'Member';
           if (document.hidden) sysNotify(`💬 BIX COMM · @${nm}`, (m.body ?? '').slice(0, 120), `chat-${m.sender_id}`, false, `/call?chat=${m.sender_id}`);
-          else if (!stop) { setPop({ id: m.id, from: m.sender_id, name: nm, body: (m.body ?? '').trim().slice(0, 90) || 'Pesan baru' }); try { navigator.vibrate?.(30); } catch { /* optional */ } }
+          // In-app banner removed: alerts only when the phone is locked/app hidden, never doubled over an open chat.
         }
       }
     };
@@ -592,7 +592,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     <div className="bixcall-status"><i className={dot}/>{statusText}</div>
     {howl && live && <div className="bc-howl" role="status">Echo is automatically reduced</div>}
     {cam && live && <video ref={localV} className={sw ? 'bixcall-remote on bixcall-self-big' : isSplit ? 'bixcall-split-self' : 'bixcall-pip bc-self-glow'} style={sw || isSplit ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})`, transition: 'transform .16s ease-out' }} onPointerDown={sw || isSplit ? undefined : dragPip} onClick={() => { if (sw) setHideUi(v => !v); }} autoPlay playsInline poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" muted/>}
-    <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}${!live && !done && call.role === 'callee' ? ' is-incoming' : ''}${!live && !done && call.role === 'caller' && !call.offline ? ' is-dialing' : ''}`}>
+    <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}${!live && !done && call.role === 'callee' ? ' is-incoming' : ''}`}>
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Sorry, I am busy right now. I will call you back.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">
@@ -600,16 +600,16 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         <button type="button" className="bc-tap is-accept" aria-label="Angkat panggilan" onClick={() => { unlockAudio(); onAccept(); }}>{call.kind === 'video' ? <i><Video/></i> : <i><Phone/></i>}<small>ANGKAT</small></button>
       </div>}
       {!live && !done && call.role === 'callee' && <p className="bc-swipe-hint">{call.id === 'sim' ? 'Simulasi uji · ketuk Angkat atau Tolak' : 'Ketuk sekali untuk angkat atau tolak'}</p>}
-      {!live && !done && call.role === 'caller' && <>
+      {!live && !done && call.role === 'caller' && call.offline && <>
         {wa && <a className="wa" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" aria-label="Hubungi via WhatsApp"><MessageCircle/></a>}
         {!call.offline && <button type="button" className="bc-tap is-end bc-cancel" onClick={onEnd} aria-label="Batalkan panggilan"><i><Phone style={{ transform: 'rotate(135deg)' }}/></i><small>Batalkan</small></button>}
       </>}
-      {live && <div className="bc-ctl4 bc-grid6" onPointerDown={askTilt}>
+      {(live || (!done && call.role === 'caller' && !call.offline)) && <div className="bc-ctl4 bc-grid6" onPointerDown={askTilt}>
         <label><button aria-label={loud ? 'Speaker active' : 'Nyalakan loudspeaker'} aria-pressed={loud} className={loud ? 'shield' : ''} onClick={speaker}>{loud ? <Volume2/> : <VolumeX/>}</button><span>{loud ? 'Speaker On' : 'Speaker Off'}</span></label>
-        <label><button aria-label={cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} className={cam ? 'shield' : ''} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>Video</span></label>
+        <label><button aria-label={cam ? 'Matikan video' : 'Nyalakan video'} aria-pressed={cam} disabled={!live} className={cam ? 'shield' : live ? '' : 'dim'} onClick={() => void toggleCam()}>{cam ? <Video/> : <VideoOff/>}</button><span>Video</span></label>
         <label><button aria-label={mic ? 'Senyapkan' : 'Nyalakan mikrofon'} className={mic ? '' : 'off'} onClick={() => void toggleMic()}>{mic ? <Mic/> : <MicOff/>}</button><span>Senyapkan</span></label>
         <label><button aria-label="Chat" onClick={openChat}><MessageCircle/></button><span>Chat</span></label>
-        <label><button aria-label="Balik kamera" disabled={!cam} className={cam ? '' : 'dim'} onClick={() => void flip()}><SwitchCamera/></button><span>Balik</span></label>
+        <label><button aria-label="Balik kamera" disabled={!cam || !live} className={cam && live ? '' : 'dim'} onClick={() => void flip()}><SwitchCamera/></button><span>Balik</span></label>
         {live && link === 'on' && canShare && <label><button aria-label={screen ? 'Hentikan berbagi layar' : 'Bagikan layar'} aria-pressed={screen} className={screen ? 'shield' : ''} onClick={() => void toggleScreen()}><MonitorUp/></button><span>{screen ? 'Stop Layar' : 'Bagi Layar'}</span></label>}
         <label><button className="end" aria-label="Akhiri" onClick={onEnd}><PhoneOff/></button><span>Akhiri</span></label>
       </div>}
