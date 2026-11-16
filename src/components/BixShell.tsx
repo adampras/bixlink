@@ -1,3 +1,4 @@
+import { GenesisReveal } from '@/components/GenesisReveal';
 import { BixZoomButton } from '@/components/BixZoom';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -142,6 +143,7 @@ export function BixShell({ children }: { children: React.ReactNode }) {
     <TxFeedbackHost/>
     <SitePopup path={path} popups={publicConfig?.landingContent.popups} signedIn={!!user}/>
     {user && !path.startsWith('/admin') && <MemberWelcome userId={user.id}/>}
+    {user && path === '/wallet' && <GenesisReveal userId={user.id}/>}
     <footer hidden={path === '/call' || path === '/auth' || path === '/register'} className="border-t border-border py-4"><SocialLinks links={publicConfig?.readiness.socials} signedIn={!!user}/><p className="mx-auto max-w-7xl px-5 text-center text-[10px] text-muted-foreground md:px-8">No guarantee of profit. APY and rewards are projections.</p></footer>
     {user && path === '/call' ? <nav aria-label="BIX CALL" data-no-translate className="glass-dock comm-dock fixed inset-x-3 bottom-3 z-40 mx-auto grid max-w-xl grid-cols-5 rounded-2xl border border-border bg-card/80 backdrop-blur-xl xl:hidden">
       <DockHub path={path} cfg={publicConfig?.isAdmin ? undefined : { ...(publicConfig?.readiness.dockHub ?? {}), ...Object.fromEntries((design.data?.locked ?? []).map(id => [id, false])) }} order={publicConfig?.readiness.dockOrder} matrix={useMatrix(publicConfig?.readiness.dockModel, !!publicConfig?.isAdmin)}/>
