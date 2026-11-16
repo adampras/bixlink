@@ -27,3 +27,5 @@
 - Presale direct pay: /presale shows up to 5 Owner 1 BEP-20 wallets mapped to the 5 developer nations (Owner 2 networks see only their owner's wallet via bix_my_deposit_wallets); payPresaleTx verifies the TxID on-chain, credits it as a deposit (one per TxID), then buys via bix_presale_buy_flex — reuses the deposit ledger, no new money path.
 - Presale virtual test: bix_presale_test_buy writes status 'test' orders (Owner 1 + design whitelist, switch in app_settings presale_test) — never counted in pool, balances, vesting or bonuses. Design-whitelist trees also route deposits to Owner 1 wallets via bix_deposit_owner without touching referral data.
 - AIX look: bix_aix_access/bix_aix_set (mode in bix_design_release.aix; scoped = Owner 1 + design whitelist) sets html[data-aix=on] in BixShell; capsule dock, page rise, wallet aurora CSS and the /exchange AixGlobe are presentation-only.
+- BIXTOK Post & Earn pays BIX via bix_allocations; amounts and daily limits live on bixtok_config columns set by Admin 1 — one server rule.
+- BIX CALL group room renders through a body portal so transformed page ancestors cannot push the composer off screen.

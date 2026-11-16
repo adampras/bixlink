@@ -611,7 +611,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     <div className="bixcall-status"><i className={dot}/>{statusText}</div>
     {howl && live && <div className="bc-howl" role="status">Echo is automatically reduced</div>}
     {cam && live && <video ref={localV} className={sw ? 'bixcall-remote on bixcall-self-big' : isSplit ? 'bixcall-split-self' : 'bixcall-pip bc-self-glow'} style={sw || isSplit ? { transform: `scaleX(${front ? -1 : 1})` } : { transform: `translate(${pip.x}px, ${pip.y}px) scaleX(${front ? -1 : 1})`, transition: 'transform .16s ease-out' }} onPointerDown={sw || isSplit ? undefined : dragPip} onClick={() => { if (sw) setHideUi(v => !v); }} autoPlay playsInline poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" muted/>}
-    <footer className={`bixcall-ctl${call.offline ? ' is-offline' : ''}${!live && !done && call.role === 'callee' ? ' is-incoming' : ''}`}>
+    <footer className={`bixcall-ctl${call.offline || done ? ' is-offline' : ''}${!live && !done && call.role === 'callee' ? ' is-incoming' : ''}`}>
       {!live && !done && call.role === 'callee' && replyOpen && <div className="bc-replies">{['Sorry, I am busy right now. I will call you back.', 'In a meeting, please message me instead.', 'I will call back in 5 minutes.'].map(t => <button type="button" key={t} onClick={() => void quickReply(t)}>{t}</button>)}</div>}
       {!live && !done && call.role === 'callee' && <button type="button" className="bc-reply-btn" onClick={() => setReplyOpen(v => !v)}><MessageCircle size={14}/> Tolak dengan pesan</button>}
       {!live && !done && call.role === 'callee' && <div className="bc-swipe-row">

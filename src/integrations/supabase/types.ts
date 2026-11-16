@@ -3269,6 +3269,10 @@ export type Database = {
           owner2_isolation: boolean
           pk_bix_weight: number
           pk_enabled: boolean
+          post_reward_bix: number
+          post_reward_daily: number
+          post_reward_daily_staker: number
+          post_reward_promo_bix: number
           replay_enabled: boolean
           showcase_enabled: boolean
           soundboard: boolean
@@ -3309,6 +3313,10 @@ export type Database = {
           owner2_isolation?: boolean
           pk_bix_weight?: number
           pk_enabled?: boolean
+          post_reward_bix?: number
+          post_reward_daily?: number
+          post_reward_daily_staker?: number
+          post_reward_promo_bix?: number
           replay_enabled?: boolean
           showcase_enabled?: boolean
           soundboard?: boolean
@@ -3349,6 +3357,10 @@ export type Database = {
           owner2_isolation?: boolean
           pk_bix_weight?: number
           pk_enabled?: boolean
+          post_reward_bix?: number
+          post_reward_daily?: number
+          post_reward_daily_staker?: number
+          post_reward_promo_bix?: number
           replay_enabled?: boolean
           showcase_enabled?: boolean
           soundboard?: boolean
