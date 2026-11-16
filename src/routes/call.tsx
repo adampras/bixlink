@@ -117,7 +117,7 @@ function VoiceNote({ url }: { url: string }) {
   const stop = (e: { stopPropagation: () => void }) => e.stopPropagation();
   const mm = (x: number) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`;
   const pct = dur > 0 ? Math.min(100, (t / dur) * 100) : 0;
-  const bars = useMemo(() => { let h = 0; for (let i = 0; i < url.length; i++) h = (h * 31 + url.charCodeAt(i)) >>> 0; return Array.from({ length: 30 }, () => { h = (h * 1103515245 + 12345) >>> 0; return 22 + (h % 78); }); }, [url.split('?')[0]]); // eslint-disable-line react-hooks/exhaustive-deps
+  const bars = useMemo(() => { let h = 0; for (let i = 0; i < url.length; i++) h = (h * 31 + url.charCodeAt(i)) >>> 0; return Array.from({ length: 24 }, () => { h = (h * 1103515245 + 12345) >>> 0; return 22 + (h % 78); }); }, [url.split('?')[0]]); // eslint-disable-line react-hooks/exhaustive-deps
   const seek = (e: React.MouseEvent<HTMLSpanElement>) => { e.stopPropagation(); const a = ref.current; if (!a || !dur) return; const r = e.currentTarget.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * dur; };
   return <span className={`comm-voice${play ? ' is-playing' : ''}`} onPointerDown={stop} onPointerUp={stop} onTouchStart={stop} onClick={stop} onDoubleClick={stop} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}>
     <audio ref={ref} src={src} preload="metadata" playsInline onPlay={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onTimeUpdate={e => { setT(e.currentTarget.currentTime); const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onLoadedMetadata={e => { const a = e.currentTarget; const d = a.duration; if (Number.isFinite(d)) setDur(d); else { const fix = () => { a.removeEventListener('timeupdate', fix); if (Number.isFinite(a.duration)) setDur(a.duration); a.currentTime = 0; }; a.addEventListener('timeupdate', fix); try { a.currentTime = 1e7; } catch { /* ignore */ } } }} onError={() => { if (src !== url) setSrc(url); }}/>
@@ -310,7 +310,6 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
         <span className="comm-meta">{found.code && <button onClick={() => copy(found.code!)}>{found.code} ⧉</button>}{found.whatsapp && <i>WA connected</i>}{found.via && <small>via {VIA[found.via]}</small>}</span></span>
       {found.user_id === me ? <small>Your account</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
     {found && found.user_id !== me && <SaveContactBtn id={found.user_id} name={found.name} code={found.code}/>}
-    <SaveNumber/>
   </section>;
 }
 
@@ -383,7 +382,6 @@ function CallTab({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
   })(); }, [me]);
   const [pad, setPad] = useState(false);
   return <>
-    <FindMember me={me} tier={tier} onChat={onChat}/>
     {pad && <Dialpad me={me} tier={tier} onChat={onChat}/>}
     <button type="button" className={`comm-fab${pad ? ' is-open' : ''}`} aria-label={pad ? 'Close dial pad' : 'Open dial pad'} onClick={() => setPad(v => !v)}>{pad ? <X size={22}/> : <Grid3x3 size={22}/>}</button>
     <section className="comm-card"><h3 className="comm-h">Call history</h3>

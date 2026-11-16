@@ -9446,3 +9446,17 @@ html body .comm-voice small,html body .comm-voice em{font-size:10.5px;opacity:.7
 .bx-grp-portal .bx-grp-compose{padding-bottom:max(env(safe-area-inset-bottom),8px)!important}
 .bixcall-ctl.is-offline>.bc-offline{width:100%;height:auto;border-radius:16px;margin:0;place-items:initial}
 .bixcall-ctl.is-offline>.bc-pill{white-space:nowrap}
+
+/* Nov 16: P2P fleet rows, group header lock, minimal WA voice note */
+#official-desk .p2p-fleet-row{display:flex!important;height:auto!important;line-height:1.3!important}
+#official-desk .p2p-fleet-row small,#official-desk .p2p-fleet-row b{white-space:normal}
+.bx-grp-portal .bx-grp-room.is-full>header,.bixcall-page .bx-grp-room.is-full>header{position:relative;z-index:30;flex:none;flex-wrap:nowrap!important;background:#1f2c34!important;overflow:hidden}
+.bx-grp-portal .bx-grp-room.is-full .bx-grp-feed{position:relative;z-index:1;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.bx-grp-portal .bx-grp-room.is-full>.bx-grp-compose{position:relative;z-index:30;flex:none}
+html body .comm-voice{gap:6px!important;min-width:180px!important;max-width:230px!important;padding:2px 0!important}
+html body .comm-voice .comm-vplay{width:32px!important;height:32px!important;min-width:32px;background:#00a884!important;color:#0b141a!important;border-radius:50%!important}
+html body .comm-voice .comm-vwave{height:22px;gap:1.5px}
+html body .comm-voice .comm-vwave i{min-width:2px;max-width:3px}
+html body .comm-voice .comm-vwave b{width:9px;height:9px;margin:-4.5px 0 0 -4.5px}
+html body .comm-voice .comm-vtime{min-width:28px;font-size:10.5px}
+html body .comm-voice .comm-rate{padding:1px 5px!important;font-size:10px!important;background:transparent!important;border:1px solid rgb(255 255 255 / .18)}

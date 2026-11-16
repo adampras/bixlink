@@ -13,7 +13,7 @@ export const resolveBixtokLinks = createServerFn({ method: 'POST' })
         const x = new URL(u);
         if (x.protocol !== 'https:' || !SHORT_HOSTS.has(x.hostname)) return;
         if (/\/video\/\d+/.test(x.pathname)) return;
-        const r = await fetch(u, { method: 'HEAD', redirect: 'manual', headers: { 'user-agent': 'Mozilla/5.0' } });
+        const r = await fetch(u, { method: 'HEAD', redirect: 'manual', headers: { 'user-agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(2500) });
         const loc = r.headers.get('location');
         if (loc && /tiktok\.com\/.*\/(video|photo)\/\d+/.test(loc)) out[u] = loc;
       } catch { /* ignore */ }
@@ -27,13 +27,13 @@ export const cleanTiktokVideos = createServerFn({ method: 'POST' })
   .inputValidator((d: { urls: string[] }) => ({ urls: (Array.isArray(d?.urls) ? d.urls : []).filter(u => typeof u === 'string' && /^https:\/\/(www\.)?tiktok\.com\/.+\/video\/\d+/.test(u)).slice(0, 12) }))
   .handler(async ({ data }) => {
     const out: Record<string, string> = {};
-    for (const u of data.urls) {
+    await Promise.allSettled(data.urls.map(async (u) => {
       try {
-        const r = await fetch(`https://www.tikwm.com/api/?hd=1&url=${encodeURIComponent(u)}`, { headers: { 'user-agent': 'Mozilla/5.0' } });
+        const r = await fetch(`https://www.tikwm.com/api/?hd=1&url=${encodeURIComponent(u)}`, { headers: { 'user-agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(3000) });
         const j = await r.json() as { code?: number; data?: { play?: string; hdplay?: string } };
         const play = j?.data?.hdplay || j?.data?.play;
         if (j?.code === 0 && play && /^https:\/\//.test(play)) out[u] = play;
       } catch { /* fallback to embed */ }
-    }
+    }));
     return out;
   });
