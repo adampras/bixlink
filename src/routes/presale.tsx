@@ -85,6 +85,7 @@ function PresalePage() {
     <ol className="mt-5 grid grid-cols-3 gap-2 text-center text-[11px]">
       {[[Coins, '1. Choose amount', '$100 – $1,000'], [Lock, '2. BIX locked', `${number(bixFor(1000, price))} BIX max`], [Unlock, '3. Daily release', `${PHASE1.dailyPct}% × ${PHASE1.vestingDays} days`]].map(([I, t, d]: any) => <li key={t} className="rounded-2xl border border-border bg-card/50 p-3"><I size={18} className="mx-auto text-primary"/><b className="mt-1 block">{t}</b><span className="text-muted-foreground">{d}</span></li>)}
     </ol>
+      <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-bold"><Link to="/pay" className="rounded-full border border-primary/40 py-2 text-center text-primary">BIX PAY</Link><Link to="/p2p" className="rounded-full border border-primary/40 py-2 text-center text-primary">P2P Desk</Link></div>
 
     {!user ? <div className="mt-6 rounded-2xl border border-border p-5 text-center"><p className="text-sm">Sign in to join the presale.</p><Button asChild className="mt-3 rounded-full"><Link to="/auth">Sign in / Register</Link></Button></div> : <>
       <section className="mt-6 rounded-3xl border border-primary/40 bg-card/70 p-5">
