@@ -423,6 +423,7 @@ function calendarUrl(s: { title: string; starts_at: string }): string {
 type GiftTarget = { video?: string; live?: string; recipients?: { id: string; name: string }[] };
 function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; target: GiftTarget; closed: boolean; onClose: () => void; onNote: (m: string) => void }) {
   const qc = useQueryClient(); const [busy, setBusy] = useState<string | null>(null); const [burst, setBurst] = useState<string | null>(null);
+  const combo = useRef<{ id: string; n: number; t: number }>({ id: '', n: 0, t: 0 }); const [comboN, setComboN] = useState(0);
   const recips = target.recipients ?? []; const [to, setTo] = useState<string | null>(recips[0]?.id ?? null);
   const send = async (g: Gift) => {
     setBusy(g.id);
@@ -433,6 +434,7 @@ function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; 
       return onNote(m.includes('yourself') ? 'You cannot gift your own post or LIVE — use a different member account.' : m.includes('Insufficient BIXP') ? `Not enough BIXP for ${g.name} (${g.price} BIXP).` : m.includes('Insufficient BIX') ? `Not enough BIX balance for ${g.name} (${g.price} BIX).` : m.toLowerCase().includes('lock') ? 'Your BIX is still locked and cannot be gifted yet.' : m);
     }
     if (target.live) window.dispatchEvent(new CustomEvent('bixtok:gift-sent', { detail: { live: target.live } }));
+    const now = Date.now(); const c = combo.current; c.n = c.id === g.id && now - c.t < 2500 ? c.n + 1 : 1; c.id = g.id; c.t = now; setComboN(c.n);
     setBurst(g.emoji); setTimeout(() => setBurst(null), 1400);
     onNote(`${g.emoji} ${g.name} sent · ${g.price} ${g.currency}`); qc.invalidateQueries();
   };
@@ -442,7 +444,7 @@ function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; 
     {closed ? <p className="mt-4 text-sm text-muted-foreground">Gifts are closed right now.</p> : <div className="bixtok-gifts">{gifts.map(g => <button key={g.id} disabled={!!busy} onClick={() => send(g)}><span>{g.emoji}</span><b>{g.name}</b><small>{Number(g.price)} {g.currency}</small></button>)}</div>}
     <p className="mt-3 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-center text-[11px] font-semibold text-primary">90% net creator share · fair & direct</p>
     <p className="mt-2 text-[10px] text-muted-foreground">The creator receives the net share set by the platform (default 90%); the rest is a platform fee. BIXP are promotional points; BIX gifts are internal ledger transfers to the creator. Gifts are final and are not investment returns.</p>
-    {burst && <div className="bixtok-burst" aria-hidden>{burst}</div>}
+    {burst && <div className="bixtok-burst" aria-hidden>{burst}{comboN > 1 && <b className="bxt-combo">×{comboN}</b>}</div>}
   </div></div>;
 }
 
