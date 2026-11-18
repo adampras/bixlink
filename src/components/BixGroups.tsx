@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Camera, Copy, Check, GraduationCap, LogOut, Radio, Search, Send, Share2, UserPlus, Users, X } from 'lucide-react';
+import { ArrowLeft, Camera, Copy, Check, GraduationCap, MoreVertical, LogOut, Radio, Search, Send, Share2, UserPlus, Users, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { copyText } from '@/lib/copy-text';
 import { MeetingStage } from '@/components/BixGroupMeeting';
@@ -28,6 +28,7 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
   const [name, setName] = useState(''); const [about, setAbout] = useState('');
   const [code, setCode] = useState(''); const [msg, setMsg] = useState('');
   const [open, setOpen] = useState<Group | null>(null); const [fresh, setFresh] = useState(false);
+  const [tools, setTools] = useState(false); const [act, setAct] = useState<Group | null>(null);
   const load = async () => {
     const { data } = await supabase.from('bix_groups').select(COLS).order('created_at', { ascending: false });
     const list = (data as Group[] | null) ?? []; setGroups(list);
@@ -58,7 +59,8 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   if (open) { const room = <div className="bixcall-page bx-grp-portal"><GroupRoom g={open} me={me} fresh={fresh} onBack={() => { setOpen(null); setFresh(false); void load(); }} onChange={load}/></div>; return typeof document === 'undefined' ? room : createPortal(room, document.body); }
   return <section className="bx-grp">
-    <div className="bx-grp-card">
+    {!createOnly && <div className="bx-grp-top"><b>Grup</b><span className="comm-kebab"><button type="button" aria-label="Menu grup" aria-expanded={tools} onClick={() => setTools(v => !v)}><MoreVertical size={18}/></button></span></div>}
+    {(createOnly || tools) && <div className="bx-grp-card">
       <div className="bx-grp-head"><GraduationCap size={16}/><b>Education Groups</b><small>Chat · Live Class · Host & Admin</small></div>
       <input className="form-input" placeholder="Group name, e.g. Crypto Basics Class" value={name} maxLength={60} onChange={e => setName(e.target.value)}/>
       <input className="form-input" placeholder="Short description (optional)" value={about} maxLength={300} onChange={e => setAbout(e.target.value)}/>
@@ -67,14 +69,21 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
         <input className="form-input" placeholder="Invite code" value={code} onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7))}/>
         <Button variant="ghost" type="button" className="bx-grp-btn is-alt" disabled={code.length < 6} onClick={() => void join()}>Join</Button>
       </div>}
-      {msg && <p className="bx-grp-msg">{msg}</p>}
-    </div>
+    </div>}
+    {msg && <p className="bx-grp-msg">{msg}</p>}
     {createOnly ? <p className="bx-grp-empty">Setelah grup dibuat, pasang foto grup dan tambahkan member dari kontak atau jaringan Anda.</p> : groups.length === 0 ? <p className="bx-grp-empty">No groups yet. Create one or join with an invite code.</p>
-      : <ul className="bx-grp-list">{groups.map(g => <li key={g.id}><Button variant="ghost" type="button" onClick={() => setOpen(g)}>
+      : <ul className="bx-grp-list">{groups.map(g => <li key={g.id} className="bx-grp-li"><Button variant="ghost" type="button" onClick={() => setOpen(g)}>
         <GroupAvatar g={g}/>
         <span className="bx-grp-meta"><b>{g.name}</b><small>{g.about || (g.owner_id === me ? 'You are the host' : 'Education group')}</small></span>
         {g.live_code && <em className="bx-grp-live"><Radio size={12}/> LIVE</em>}
-      </Button></li>)}</ul>}
+      </Button><button type="button" className="bx-grp-more" aria-label={`Opsi ${g.name}`} onClick={() => setAct(g)}><MoreVertical size={16}/></button></li>)}</ul>}
+    {act && createPortal(<div className="comm-sheet-bg" onClick={() => setAct(null)}><div className="comm-sheet" role="menu" onClick={e => e.stopPropagation()}>
+      <b className="comm-sheet-title">{act.name}</b>
+      <button type="button" onClick={() => { const a = act; setAct(null); setOpen(a); }}>💬 Buka grup</button>
+      <button type="button" onClick={() => { const a = act; setAct(null); setOpen(a); }}>ℹ️ Info grup & kelola admin</button>
+      <button type="button" onClick={() => { const a = act; setAct(null); void shareGroup(a).then(setMsg); }}>🔗 Undang via link</button>
+      <button type="button" className="ghost" onClick={() => setAct(null)}>Batal</button>
+    </div></div>, document.body)}
   </section>;
 }
 

@@ -237,11 +237,13 @@ function CallInner() {
   const open = (id: string, name: string) => setChatWith({ id, name });
   const TITLE: Record<CommTab, string> = { chat: 'CHAT', group: 'GROUP', updates: 'UPDATES', call: 'CALLS', community: 'COMMUNITY', setting: 'SETTINGS', newgroup: 'NEW GROUP', starred: 'BERBINTANG' };
   const view: CommTab = tab;
+  const [searchOpen, setSearchOpen] = useState(false);
+  useEffect(() => { const h = () => setSearchOpen(true); window.addEventListener('bix-find', h); return () => window.removeEventListener('bix-find', h); }, []);
 
   return <main className="mx-auto w-full px-3 pt-0 pb-4">
     <div className="bc-head bc-head--wa">
-      <div className="bc-toprow"><b className="bc-brand">BIX<span>CALL</span><em>{TITLE[view]}</em></b>{tier && <span className={`comm-tier is-${tier.tier}`}>{TIER_LABEL[tier.tier]}</span>}<ContactQr/><CommMenu/></div>
-      <div className="bc-head__search"><FindMember bar me={me} tier={tier} onChat={open}/></div>
+      <div className="bc-toprow"><b className="bc-brand">BIX<span>CALL</span><em>{TITLE[view]}</em></b><button type="button" className="bc-qr-btn bc-search-btn" aria-label="Cari member" aria-expanded={searchOpen} onClick={() => setSearchOpen(v => !v)}><Search size={18}/></button><ContactQr/><CommMenu tierLabel={tier ? TIER_LABEL[tier.tier] : ''}/></div>
+      <div className={`bc-head__search${searchOpen ? '' : ' is-collapsed'}`}><FindMember bar me={me} tier={tier} onChat={open}/></div>
     </div>
 
     {view === 'chat' && <><DialFab me={me} tier={tier} onChat={open}/><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
@@ -266,11 +268,12 @@ function AppearanceCard() {
 }
 
 /** Settings shortcut only (themes, ringtone, notifications, privacy) — tab navigation stays in the dock. */
-function CommMenu() {
+function CommMenu({ tierLabel }: { tierLabel?: string | undefined }) {
   const [o, setO] = useState(false);
+  const qr = (k: 'scan' | 'show') => window.dispatchEvent(new CustomEvent('bc-qr', { detail: k }));
   const go = [['newgroup', 'Grup baru'], ['community', 'Komunitas'], ['starred', 'Berbintang'], ['call', 'Riwayat panggilan'], ['setting', 'Pengaturan']] as const;
   return <span className="comm-kebab"><button type="button" aria-label="Pengaturan BIX CALL" aria-expanded={o} onClick={() => setO(v => !v)}><MoreVertical size={18}/></button>
-    {o && <span className="comm-kebab-bg" aria-hidden onClick={() => setO(false)}/>}{o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
+    {o && <span className="comm-kebab-bg" aria-hidden onClick={() => setO(false)}/>}{o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{tierLabel && <span className="comm-kebab-tier">Paket: {tierLabel}</span>}<button type="button" role="menuitem" onClick={() => qr('scan')}>Pindai QR</button><button type="button" role="menuitem" onClick={() => qr('show')}>QR kontak saya</button>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }
 
 /** Bare 6-digit numbers are BIX-IDs: 123456 → BIX-123456. */
@@ -844,6 +847,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     {busy && <p className="comm-busy">Mengirim…</p>}
     {menu && <div className="comm-sheet-bg" onClick={() => setMenu(null)}><div className="comm-sheet" role="menu" onClick={e => e.stopPropagation()}>
       <p className="comm-sheet-preview">{menu.body}</p>
+      <div className="comm-quickacts"><button type="button" disabled={locked} onClick={() => { setReplyTo(menu); setMenu(null); }}>↩<small>Balas</small></button>{(!menu.kind || menu.kind === 'text') && <button type="button" onClick={() => { void navigator.clipboard?.writeText(menu.body); setMenu(null); toastOk('Disalin'); }}>⧉<small>Salin</small></button>}<button type="button" className="danger" onClick={() => void remove(menu, false)}>🗑<small>Hapus</small></button></div>
       <div className="comm-reactbar">{REACTS.map(e => <button type="button" key={e} className={menu.reactions?.[me] === e ? 'is-mine' : ''} onClick={() => void react(menu, e)} aria-label={`Reaksi ${e}`}>{e}</button>)}</div>
       <button type="button" onClick={() => { setReplyTo(menu); setMenu(null); }} disabled={locked}>↩ Balas</button>
       {menu.kind !== 'pay' && menu.kind !== 'request' && menu.kind !== 'file' && <button type="button" onClick={() => { setFwd(menu); setMenu(null); }} disabled={locked}>↪ Teruskan</button>}
@@ -907,9 +911,10 @@ function ContactQr() {
     addContact({ id: f.user_id, name: f.name, code: c }); setHit({ id: f.user_id, name: f.name, code: c }); setScan(false); setOpen(false); window.dispatchEvent(new CustomEvent('bix-find', { detail: c })); try { navigator.vibrate?.(20); } catch { /* optional */ }
     setMsg(`@${f.name} (${id}) tersimpan di kontak.`);
   };
+  useEffect(() => { const h = (e: Event) => { const k = (e as CustomEvent<string>).detail; setMsg(''); setHit(null); if (k === 'scan') setScan(true); else setOpen(true); }; window.addEventListener('bc-qr', h); return () => window.removeEventListener('bc-qr', h); }, []);
   return <>
-    <button type="button" className="bc-qr-btn" aria-label="Pindai QR BIX-ID" title="Pindai QR BIX-ID" onClick={() => { setMsg(''); setHit(null); setScan(true); }}><ScanLine size={18}/></button>
-    <button type="button" className="bc-qr-btn" aria-label="QR kontak BIX-ID" onClick={() => { setMsg(''); setHit(null); setOpen(true); }}><QrCode size={18}/></button>
+    <button type="button" hidden className="bc-qr-btn" aria-label="Pindai QR BIX-ID" title="Pindai QR BIX-ID" onClick={() => { setMsg(''); setHit(null); setScan(true); }}><ScanLine size={18}/></button>
+    <button type="button" hidden className="bc-qr-btn" aria-label="QR kontak BIX-ID" onClick={() => { setMsg(''); setHit(null); setOpen(true); }}><QrCode size={18}/></button>
     {open && createPortal(<div className="bc-qr-overlay" onClick={() => setOpen(false)}>
       <div role="dialog" aria-label="QR kontak" className="bc-qr-card" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between"><b className="font-display text-sm tracking-widest">BIX CALL · QR KONTAK</b><button type="button" aria-label="Close" onClick={() => setOpen(false)}><X size={18}/></button></div>

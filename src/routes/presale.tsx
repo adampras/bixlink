@@ -85,7 +85,6 @@ function PresalePage() {
     <ol className="mt-5 grid grid-cols-3 gap-2 text-center text-[11px]">
       {[[Coins, '1. Choose amount', '$100 – $1,000'], [Lock, '2. BIX locked', `${number(bixFor(1000, price))} BIX max`], [Unlock, '3. Daily release', `${PHASE1.dailyPct}% × ${PHASE1.vestingDays} days`]].map(([I, t, d]: any) => <li key={t} className="rounded-2xl border border-border bg-card/50 p-3"><I size={18} className="mx-auto text-primary"/><b className="mt-1 block">{t}</b><span className="text-muted-foreground">{d}</span></li>)}
     </ol>
-      <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-bold"><Link to="/pay" className="rounded-full border border-primary/40 py-2 text-center text-primary">BIX PAY</Link><Link to="/p2p" className="rounded-full border border-primary/40 py-2 text-center text-primary">P2P Desk</Link></div>
 
     {!user ? <div className="mt-6 rounded-2xl border border-border p-5 text-center"><p className="text-sm">Sign in to join the presale.</p><Button asChild className="mt-3 rounded-full"><Link to="/auth">Sign in / Register</Link></Button></div> : <>
       <section className="mt-6 rounded-3xl border border-primary/40 bg-card/70 p-5">
@@ -126,6 +125,7 @@ function PresalePage() {
           </>}
           <p className="mt-3 text-center text-[10px] text-muted-foreground">— or pay from your USDT balance above —</p>
         </div>
+        <div className="mt-3 flex items-start gap-3 rounded-2xl border border-chart-3/40 bg-chart-3/10 p-3"><Coins size={18} className="mt-0.5 shrink-0 text-chart-3"/><p className="text-[11px]"><b className="block text-chart-3">Bonus Sponsor {Number(cfg?.sponsorPct ?? 10)}% BIX</b><span className="text-muted-foreground">Your direct sponsor receives a BIX bonus from each presale purchase, locked with the same daily release schedule.</span></p></div>
         {err && <p role="alert" className="mt-3 text-sm text-destructive">{err}</p>}
         {msg && !receipt && <p role="status" className="mt-3 text-sm text-chart-2">{msg}</p>}
         {receipt && <div role="status" className="presale-receipt mt-4">
@@ -157,6 +157,7 @@ function PresalePage() {
       </section>
     </>}
     <DeveloperCovenant/>
+    <div className="mt-6 grid grid-cols-2 gap-2 text-xs font-bold"><Link to="/pay" className="rounded-full border border-primary/40 py-2.5 text-center text-primary">BIX PAY</Link><Link to="/p2p" className="rounded-full border border-primary/40 py-2.5 text-center text-primary">P2P Desk</Link></div>
     <p className="mt-5 flex gap-2 text-[10px] text-muted-foreground"><ShieldCheck size={14} className="shrink-0"/>The presale price is a BIXLINK internal reference, not a market price. BIX is locked and released gradually; future value is not guaranteed.</p>
   </main></BixShell>;
 }

@@ -9466,3 +9466,34 @@ html body .comm-voice .comm-rate{padding:1px 5px!important;font-size:10px!import
   .bixtok-feed .bxt-dbl-heart, .bixtok-burst { filter: none !important; }
   .bixtok-feed * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 }
+
+/* ===== Scoped polish 2026-11-18: BIX CALL header/groups/voice/stories, BIXTOK rail/combo ===== */
+.bc-head__search.is-collapsed{display:none}
+.bc-head--wa .bc-search-btn{margin-left:auto}
+.comm-kebab-tier{display:block;padding:8px 14px 6px;font-size:11px;color:#8696a0;border-bottom:1px solid rgb(255 255 255 / .08)}
+.comm-quickacts{display:flex;justify-content:space-around;gap:6px;padding:6px 0 10px;border-bottom:1px solid rgb(255 255 255 / .08);margin-bottom:6px}
+.comm-quickacts button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:64px;padding:6px 8px;border-radius:12px;font-size:18px;background:transparent!important}
+.comm-quickacts button small{font-size:11px;color:#e9edef}
+.comm-quickacts button.danger small{color:#f15c6d}
+html body .comm-voice{min-width:160px!important;max-width:200px!important;gap:5px!important}
+html body .comm-voice .comm-vplay{width:28px!important;height:28px!important;min-width:28px}
+html body .comm-voice .comm-vwave{height:18px}
+html body .comm-voice .comm-vtime{font-size:10px}
+.bx-grp-top{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 8px}
+.bx-grp-top b{font-size:15px}
+.bx-grp-li{display:flex;align-items:center;gap:2px}
+.bx-grp-li>button:first-child{flex:1;min-width:0}
+.bx-grp-more{flex-shrink:0;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;color:#8696a0}
+.bx-grp-more:active{background:rgb(255 255 255 / .08)}
+.bx-stories{padding-block:2px!important}
+.bx-stories .bx-story-ava{width:44px!important;height:44px!important}
+.bx-stories-row{gap:10px!important}
+.bx-stories-row small,.bx-stories-row span{font-size:10px}
+@media (max-width:420px){
+  .bixtok-rail{gap:.7rem!important;right:.45rem!important}
+  .bixtok-rail button svg{width:2.25rem!important;height:2.25rem!important;padding:.5rem!important}
+  .bixtok-rail small{font-size:.6rem}
+  .bixtok-meta{right:3.6rem!important}
+}
+.bixtok-burst{position:fixed!important;left:50%!important;top:40%!important;will-change:transform,opacity;text-align:center;z-index:5}
+.bxt-combo{will-change:transform,opacity}
