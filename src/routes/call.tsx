@@ -2,13 +2,13 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import foxLogoOnboard from '@/assets/bixlink-logo-gold.webp';
 import { readEntry } from '@/lib/hub-entry';
 import { createPortal } from 'react-dom';
-const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting', 'newgroup'];
+const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting', 'newgroup', 'starred'];
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X, Play, Pause } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import callGateImg from '@/assets/eco/call.png';
 import { startBixCall, VQ_KEY, type VideoQuality } from '@/components/BixCall';
-import { unlockCallAudio } from '@/lib/bix-tones';
+import { copyText } from '@/lib/copy-text';
 import { BixGroupMeeting } from '@/components/BixGroupMeeting';
 import { BixGroups } from '@/components/BixGroups';
 import { useMember } from '@/lib/useMember';
@@ -20,7 +20,7 @@ import { StoryBar } from '@/components/BixStories';
 import { pushNotify } from '@/lib/bix-push';
 import { compressImage } from '@/lib/bix-image';
 import { Grid3x3 } from 'lucide-react';
-import { Camera, MoreVertical, QrCode, ScanLine, UserPlus, Trash2 } from 'lucide-react';
+import { Camera, MoreVertical, ScanLine, UserPlus, Trash2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { QrScanner } from '@/components/QrScanner';
 import { useServerFn } from '@tanstack/react-start';
@@ -32,6 +32,7 @@ import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId
 import { ecosystemHead } from '@/lib/ecosystem-seo';
 import { getBcTheme, setBcTheme, applyBcTheme } from '@/lib/bix-theme';
 import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
+import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute('/call')({
   head: () => ecosystemHead('/call', 'BIX CALL — Chat, Panggilan Suara & Video | BIXLINK', 'Kenali BIX CALL untuk chat, panggilan suara, video dan grup antaranggota BIXLINK. Akun diperlukan; akses mengikuti ketentuan layanan.'),
@@ -66,7 +67,11 @@ type Thread = { peer: string; name: string; body: string; at: string; mine: bool
 type Msg = { id: string; sender_id: string; recipient_id: string; body: string; created_at: string; read_at: string | null; delivered_at?: string | null; reactions?: Record<string, string>; pinned_at?: string | null; kind?: string; media_path?: string | null; meta?: { amount?: number; note?: string | null; name?: string; size?: number; mime?: string; status?: string } | null; reply_to?: string | null; reply_body?: string | null; forwarded?: boolean; deleted_at?: string | null; hidden_by?: string[] };
 type PeerState = { online?: boolean; typing?: boolean; last_seen?: string | null };
 const seenText = (s: PeerState) => s.typing ? 'typing…' : s.online ? 'online' : s.last_seen ? `last seen ${new Date(s.last_seen).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}` : 'ENCRYPTED CHAT';
-const urlCache = new Map<string, string>();
+const urlCache = new Map<string, { url: string; expiresAt: number }>();
+const cachedMedia = (path?: string | null) => {
+  const entry = path ? urlCache.get(path) : undefined;
+  return entry && entry.expiresAt > Date.now() ? entry.url : '';
+};
 const REACTS = ['👍', '❤️', '😂', '😮', '🙏', '🔥'];
 const fmtSize = (n = 0) => n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
 const fileIcon = (name = '') => { const e = name.split('.').pop()?.toLowerCase() ?? ''; return e === 'pdf' ? 'PDF' : ['xls', 'xlsx', 'csv'].includes(e) ? 'XLS' : ['doc', 'docx'].includes(e) ? 'DOC' : ['ppt', 'pptx'].includes(e) ? 'PPT' : ['zip', 'rar'].includes(e) ? 'ZIP' : 'FILE'; };
@@ -86,53 +91,77 @@ function dayLabel(iso: string) {
   if (d.toDateString() === y.toDateString()) return 'KEMARIN';
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: d.getFullYear() === t.getFullYear() ? undefined : 'numeric' }).toUpperCase();
 }
-function VoiceNote({ url }: { url: string }) {
+function VoiceNote({ url, refresh }: { url: string; refresh: () => Promise<string> }) {
   const ref = useRef<HTMLAudioElement>(null);
-  const [rate, setRate] = useState(1); const [play, setPlay] = useState(false); const [t, setT] = useState(0); const [dur, setDur] = useState(0); const [err, setErr] = useState(false);
-  const [src, setSrc] = useState(url);
+  const [rate, setRate] = useState(1); const [play, setPlay] = useState(false); const [t, setT] = useState(0); const [dur, setDur] = useState(0); const [status, setStatus] = useState<'idle' | 'retry' | 'loading'>('idle');
   const next = () => { const r = rate === 1 ? 1.5 : rate === 1.5 ? 2 : 1; setRate(r); if (ref.current) ref.current.playbackRate = r; };
-  // Prefetch into a typed blob URL BEFORE the tap: storage may serve notes as octet-stream (phones refuse),
-  // and awaiting a fetch inside the tap drops the user gesture so mobile browsers block play().
+  const blob = useRef('');
   useEffect(() => {
-    let blobUrl = ''; let alive = true;
-    void (async () => {
-      try {
-        const b = await (await fetch(url)).blob(); if (!alive || b.size < 200) return;
-        const ext = (url.split('?')[0]!.split('.').pop() ?? '').toLowerCase();
-        const type = ext === 'wav' ? 'audio/wav' : ext === 'm4a' || ext === 'mp4' ? 'audio/mp4' : ext === 'ogg' ? 'audio/ogg' : ext === 'aac' ? 'audio/aac' : 'audio/webm';
-        blobUrl = URL.createObjectURL(new Blob([b], { type: b.type && b.type.startsWith('audio/') ? b.type : type }));
-        if (alive && ref.current?.paused !== false) setSrc(blobUrl);
-      } catch { /* direct URL stays as fallback */ }
-    })();
-    return () => { alive = false; if (blobUrl) URL.revokeObjectURL(blobUrl); };
-  }, [url]);
+    return () => { if (blob.current) URL.revokeObjectURL(blob.current); };
+  }, []);
   const toggle = () => {
-    const a = ref.current; if (!a) return;
+    const a = ref.current; if (!a || status === 'loading') return;
     if (!a.paused) { a.pause(); return; }
-    void unlockCallAudio();
     a.muted = false; a.volume = 1; a.playbackRate = rate;
-    // play() is called synchronously inside the tap so the gesture is kept.
-    a.play().then(() => setErr(false)).catch(() => { if (a.src !== url) { a.src = url; a.load(); a.play().then(() => setErr(false)).catch(() => setErr(true)); } else setErr(true); });
+    if (!a.src) a.src = url;
+    // Keep the first play in the tap; async recovery may require a second gesture on mobile.
+    setStatus('loading');
+    void a.play().then(() => setStatus('idle')).catch(async (error: unknown) => {
+      if (ref.current !== a) return;
+      if (error instanceof DOMException && error.name === 'NotAllowedError') { setStatus('retry'); return; }
+      try {
+        const fresh = await refresh();
+        const response = await fetch(fresh, { signal: AbortSignal.timeout(12000) });
+        if (!response.ok) throw new Error('Audio unavailable');
+        const file = await response.blob();
+        if (ref.current !== a) return;
+        const ext = new URL(fresh).pathname.split('.').pop()?.toLowerCase();
+        const type = ext === 'wav' ? 'audio/wav' : ext === 'm4a' || ext === 'mp4' ? 'audio/mp4' : ext === 'ogg' ? 'audio/ogg' : ext === 'aac' ? 'audio/aac' : 'audio/webm';
+        if (blob.current) URL.revokeObjectURL(blob.current);
+        blob.current = URL.createObjectURL(new Blob([file], { type: file.type.startsWith('audio/') ? file.type : type }));
+        a.src = blob.current; a.playbackRate = rate;
+        await a.play();
+        if (ref.current === a) setStatus('idle');
+      } catch { if (ref.current === a) setStatus('retry'); }
+    });
   };
   const stop = (e: { stopPropagation: () => void }) => e.stopPropagation();
   const mm = (x: number) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`;
   const pct = dur > 0 ? Math.min(100, (t / dur) * 100) : 0;
-  const bars = useMemo(() => { let h = 0; for (let i = 0; i < url.length; i++) h = (h * 31 + url.charCodeAt(i)) >>> 0; return Array.from({ length: 24 }, () => { h = (h * 1103515245 + 12345) >>> 0; return 22 + (h % 78); }); }, [url.split('?')[0]]); // eslint-disable-line react-hooks/exhaustive-deps
+  const bars = useMemo(() => Array.from({ length: 20 }, (_, i) => 25 + ((i * 19 + i * i * 7) % 70)), []);
   const seek = (e: React.MouseEvent<HTMLSpanElement>) => { e.stopPropagation(); const a = ref.current; if (!a || !dur) return; const r = e.currentTarget.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * dur; };
   return <span className={`comm-voice${play ? ' is-playing' : ''}`} onPointerDown={stop} onPointerUp={stop} onTouchStart={stop} onClick={stop} onDoubleClick={stop} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}>
-    <audio ref={ref} src={src} preload="metadata" playsInline onPlay={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onTimeUpdate={e => { setT(e.currentTarget.currentTime); const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onLoadedMetadata={e => { const a = e.currentTarget; const d = a.duration; if (Number.isFinite(d)) setDur(d); else { const fix = () => { a.removeEventListener('timeupdate', fix); if (Number.isFinite(a.duration)) setDur(a.duration); a.currentTime = 0; }; a.addEventListener('timeupdate', fix); try { a.currentTime = 1e7; } catch { /* ignore */ } } }} onError={() => { if (src !== url) setSrc(url); }}/>
-    <button type="button" className="comm-vplay" onClick={e => { e.stopPropagation(); toggle(); }} aria-label={play ? 'Jeda' : 'Putar pesan suara'}>{play ? <Pause size={18} fill="currentColor"/> : <Play size={18} fill="currentColor"/>}</button>
+    <audio ref={ref} preload="none" playsInline onPlaying={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onDurationChange={e => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onTimeUpdate={e => setT(e.currentTarget.currentTime)} onError={() => setPlay(false)}/>
+    <button type="button" className="comm-vplay" disabled={status === 'loading'} onClick={e => { e.stopPropagation(); toggle(); }} aria-label={play ? 'Jeda' : status === 'retry' ? 'Coba putar pesan suara lagi' : 'Putar pesan suara'}>{play ? <Pause size={15} fill="currentColor"/> : <Play size={15} fill="currentColor"/>}</button>
     <span className="comm-vwave" onClick={seek} role="slider" aria-label="Posisi pesan suara" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}>
       {bars.map((v, i) => <i key={i} className={(i / bars.length) * 100 < pct ? 'is-on' : ''} style={{ height: `${v}%` }}/>)}
       <b style={{ left: `${pct}%` }}/>
     </span>
-    <small className="comm-vtime">{err ? 'Gagal putar · ketuk lagi' : mm(play || t ? t : dur)}</small>
+    <small className="comm-vtime" role="status">{status === 'loading' ? '…' : status === 'retry' ? 'Coba lagi' : mm(play || t ? t : dur)}</small>
     <button type="button" className="comm-rate" onClick={e => { e.stopPropagation(); next(); }} aria-label="Kecepatan putar">{rate}×</button>
   </span>;
 }
 function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'pay' | 'decline' | 'cancel') => void }) {
-  const [url, setUrl] = useState(m.media_path ? urlCache.get(m.media_path) ?? '' : '');
-  useEffect(() => { const p = m.media_path; if (!p || url) return; void supabase.storage.from('bix-chat').createSignedUrl(p, 3600, m.kind === 'file' ? { download: m.meta?.name || true } : undefined).then(({ data }) => { if (data?.signedUrl) { urlCache.set(p, data.signedUrl); setUrl(data.signedUrl); } }); }, [m.media_path, url, m.kind, m.meta?.name]);
+  const path = m.media_path;
+  const [url, setUrl] = useState(() => cachedMedia(path));
+  const [attempt, setAttempt] = useState(0);
+  const [failed, setFailed] = useState(false);
+  const download = m.kind === 'file' ? m.meta?.name || true : undefined;
+  const refresh = useCallback(async () => {
+    if (!path) throw new Error('Lampiran tidak tersedia');
+    const { data, error } = await supabase.storage.from('bix-chat').createSignedUrl(path, 3600, download ? { download } : undefined);
+    if (error || !data?.signedUrl) throw new Error('Lampiran tidak tersedia');
+    urlCache.set(path, { url: data.signedUrl, expiresAt: Date.now() + 3500000 });
+    return data.signedUrl;
+  }, [path, download]);
+  useEffect(() => {
+    if (!path) return;
+    let active = true;
+    const cached = cachedMedia(path);
+    if (cached) setUrl(cached);
+    else void refresh().then(value => { if (active) setUrl(value); }).catch(() => { if (active) setFailed(true); });
+    return () => { active = false; };
+  }, [path, refresh, attempt]);
   if (m.kind === 'pay') return <span className="comm-paycard"><b>🪙 {fmtBix(m.meta?.amount)} BIX</b><small>BIX PAY · terkirim{m.meta?.note ? ` · ${m.meta.note}` : ''}</small></span>;
   if (m.kind === 'request') {
     const st = m.meta?.status ?? 'open'; const mine = m.sender_id === me;
@@ -142,11 +171,11 @@ function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'p
         : <i className="comm-req-st">{st === 'paid' ? '✓ Lunas via BIX PAY' : st === 'declined' ? 'Rejected' : 'Dibatalkan'}</i>}
     </span>;
   }
-  if (!url) return <span className="comm-media-wait">Loading…</span>;
+  if (!url) return failed ? <button type="button" onClick={() => { setFailed(false); setAttempt(n => n + 1); }}>Muat ulang lampiran</button> : <span className="comm-media-wait">Memuat…</span>;
   if (m.kind === 'image') return <a href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Chat photo" className="comm-img" loading="lazy"/></a>;
   if (m.kind === 'file' && (m.meta?.mime ?? '').startsWith('video/')) return <video src={url} controls playsInline preload="metadata" className="comm-img"/>;
   if (m.kind === 'file') return <a className="comm-filecard" href={url} target="_blank" rel="noopener noreferrer"><i>{fileIcon(m.meta?.name)}</i><span><b>{m.meta?.name ?? 'Dokumen'}</b><small>{fmtSize(m.meta?.size)} · Unduh</small></span></a>;
-  return <VoiceNote url={url}/>;
+  return <VoiceNote url={url} refresh={refresh}/>;
 }
 const PERMS = [['all', 'All members'], ['friends', 'Saling follow'], ['network', 'Network team'], ['none', 'Not accepting']] as const;
 const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLER · Voice', video: 'PRO · Video HD', vip: '👑 VIP CALLER' };
