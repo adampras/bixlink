@@ -3,12 +3,11 @@ import foxLogoOnboard from '@/assets/bixlink-logo-gold.webp';
 import { readEntry } from '@/lib/hub-entry';
 import { createPortal } from 'react-dom';
 const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting', 'newgroup', 'starred'];
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X, Play, Pause } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
 import callGateImg from '@/assets/eco/call.png';
 import { startBixCall, VQ_KEY, type VideoQuality } from '@/components/BixCall';
-import { copyText } from '@/lib/copy-text';
 import { BixGroupMeeting } from '@/components/BixGroupMeeting';
 import { BixGroups } from '@/components/BixGroups';
 import { useMember } from '@/lib/useMember';
@@ -20,7 +19,7 @@ import { StoryBar } from '@/components/BixStories';
 import { pushNotify } from '@/lib/bix-push';
 import { compressImage } from '@/lib/bix-image';
 import { Grid3x3 } from 'lucide-react';
-import { Camera, MoreVertical, ScanLine, UserPlus, Trash2 } from 'lucide-react';
+import { Camera, MoreVertical, QrCode, ScanLine, UserPlus, Trash2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { QrScanner } from '@/components/QrScanner';
 import { useServerFn } from '@tanstack/react-start';
@@ -32,7 +31,6 @@ import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId
 import { ecosystemHead } from '@/lib/ecosystem-seo';
 import { getBcTheme, setBcTheme, applyBcTheme } from '@/lib/bix-theme';
 import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
-import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute('/call')({
   head: () => ecosystemHead('/call', 'BIX CALL — Chat, Panggilan Suara & Video | BIXLINK', 'Kenali BIX CALL untuk chat, panggilan suara, video dan grup antaranggota BIXLINK. Akun diperlukan; akses mengikuti ketentuan layanan.'),
@@ -251,6 +249,8 @@ function CallInner() {
   const tab: CommTab = Route.useSearch().tab ?? 'chat';
   const [tier, setTier] = useState<Tier | null>(null);
   const [chatWith, setChatWith] = useState<{ id: string; name: string } | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  useEffect(() => { const h = () => setSearchOpen(true); window.addEventListener('bix-find', h); return () => window.removeEventListener('bix-find', h); }, []);
 
   useEffect(() => { void (async () => {
     const { data: u } = await supabase.auth.getUser(); setMe(u.user?.id ?? '');
@@ -266,8 +266,6 @@ function CallInner() {
   const open = (id: string, name: string) => setChatWith({ id, name });
   const TITLE: Record<CommTab, string> = { chat: 'CHAT', group: 'GROUP', updates: 'UPDATES', call: 'CALLS', community: 'COMMUNITY', setting: 'SETTINGS', newgroup: 'NEW GROUP', starred: 'BERBINTANG' };
   const view: CommTab = tab;
-  const [searchOpen, setSearchOpen] = useState(false);
-  useEffect(() => { const h = () => setSearchOpen(true); window.addEventListener('bix-find', h); return () => window.removeEventListener('bix-find', h); }, []);
 
   return <main className="mx-auto w-full px-3 pt-0 pb-4">
     <div className="bc-head bc-head--wa">
