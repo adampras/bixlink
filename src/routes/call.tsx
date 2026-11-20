@@ -31,6 +31,8 @@ import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId
 import { ecosystemHead } from '@/lib/ecosystem-seo';
 import { getBcTheme, setBcTheme, applyBcTheme } from '@/lib/bix-theme';
 import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
+import { useDesignAccess } from '@/lib/design-release';
+import '@/components/bixcall-lux.css';
 
 export const Route = createFileRoute('/call')({
   head: () => ecosystemHead('/call', 'BIX CALL — Chat, Panggilan Suara & Video | BIXLINK', 'Kenali BIX CALL untuk chat, panggilan suara, video dan grup antaranggota BIXLINK. Akun diperlukan; akses mengikuti ketentuan layanan.'),
@@ -180,6 +182,9 @@ const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLE
 
 function CallPage() {
   const { user, ready } = useMember();
+  const da = useDesignAccess(user?.id).data;
+  const lux = !!(da?.owner1 || da?.next_gen);
+  useEffect(() => { if (!lux) return; document.documentElement.dataset['bcLux'] = '1'; return () => { delete document.documentElement.dataset['bcLux']; }; }, [lux]);
   if (ready && !user) return <BixCallGate/>;
   return <BixShell><div className="bixcall-page">
     {user && <BixCallOnboard userId={user.id}/>}
@@ -838,6 +843,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
           <button type="button" role="menuitem" className="danger" onClick={() => void clearAll()}>Bersihkan chat</button>
         </span>}</span>
     </header>
+    <p className="bcl-e2e"><Lock size={11}/>Pesan pribadi BIX CALL</p>
     {starOpen && <div className="comm-sheet-bg" onClick={() => setStarOpen(false)}><div className="comm-sheet" onClick={e => e.stopPropagation()}><StarredList peer={peer.id} onOpen={() => setStarOpen(false)}/><button type="button" className="ghost" onClick={() => setStarOpen(false)}>Tutup</button></div></div>}
     {pinned && <button type="button" className="comm-pinbar" onClick={() => jump(pinned.id)}><b>📌 Disematkan</b><span>{pinned.body}</span></button>}
     <div className="comm-msgs">

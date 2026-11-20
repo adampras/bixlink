@@ -1,0 +1,114 @@
+/* BIX CALL Sovereign Lux — presentation only, active when html[data-bc-lux] is set for the server-decided design audience. */
+html[data-bc-lux] {
+  --bcl-violet: oklch(0.63 0.25 304);
+  --bcl-violet-deep: oklch(0.32 0.16 300);
+  --bcl-gold: oklch(0.88 0.17 92);
+  --bcl-gold-deep: oklch(0.7 0.14 80);
+  --bcl-ink: oklch(0.11 0.01 290);
+  --bcl-glass: color-mix(in oklab, oklch(0.2 0.015 290) 78%, transparent);
+  --bcl-line: color-mix(in oklab, var(--bcl-gold) 22%, transparent);
+}
+html[data-bc-lux] .bixcall-page {
+  background:
+    radial-gradient(90% 45% at 100% 0%, color-mix(in oklab, var(--bcl-violet) 22%, transparent), transparent 60%),
+    radial-gradient(80% 40% at 0% 100%, color-mix(in oklab, var(--bcl-gold) 8%, transparent), transparent 60%),
+    var(--bcl-ink);
+}
+/* Inbox cards & list */
+html[data-bc-lux] .bixcall-page .comm-card {
+  background: linear-gradient(160deg, var(--bcl-glass), color-mix(in oklab, var(--bcl-ink) 92%, transparent));
+  border: 1px solid var(--bcl-line);
+  border-radius: 20px;
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--bcl-gold) 10%, transparent), 0 12px 30px color-mix(in oklab, var(--bcl-ink) 70%, transparent);
+  backdrop-filter: blur(14px);
+}
+html[data-bc-lux] .bixcall-page .comm-h { color: var(--bcl-gold); letter-spacing: .04em; }
+html[data-bc-lux] .bixcall-page .comm-badge { background: linear-gradient(135deg, var(--bcl-gold), var(--bcl-gold-deep)); color: var(--bcl-ink); }
+html[data-bc-lux] .bixcall-page .comm-peer img,
+html[data-bc-lux] .bixcall-page .comm-room-head img { box-shadow: 0 0 0 2px var(--bcl-gold-deep), 0 0 14px color-mix(in oklab, var(--bcl-violet) 45%, transparent); border-radius: 999px; }
+
+/* Chat room */
+html[data-bc-lux] .comm-room { background: radial-gradient(70% 35% at 100% 0%, color-mix(in oklab, var(--bcl-violet) 16%, transparent), transparent 60%), var(--bcl-ink); }
+html[data-bc-lux] .comm-room-head {
+  background: color-mix(in oklab, var(--bcl-ink) 88%, transparent);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--bcl-line);
+}
+html[data-bc-lux] .comm-room-head > button,
+html[data-bc-lux] .comm-room-head .comm-kebab > button,
+html[data-bc-lux] .comm-room-head svg { color: var(--bcl-gold); }
+html[data-bc-lux] .comm-room-head .comm-status.is-online { color: var(--bcl-gold); }
+html[data-bc-lux] .bcl-e2e {
+  display: flex; justify-content: center; align-items: center; gap: 5px;
+  font-size: 11px; color: color-mix(in oklab, var(--foreground) 55%, transparent); padding: 6px 0 2px;
+}
+html[data-bc-lux] .comm-daysep span {
+  background: var(--bcl-glass); border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+  color: color-mix(in oklab, var(--foreground) 75%, transparent); border-radius: 999px;
+}
+html[data-bc-lux] .comm-msgs > p {
+  background: linear-gradient(160deg, oklch(0.22 0.01 290 / .92), oklch(0.16 0.01 290 / .92));
+  border: 1px solid color-mix(in oklab, var(--foreground) 9%, transparent);
+  color: var(--foreground);
+  border-radius: 20px 20px 20px 6px;
+  box-shadow: 0 6px 18px color-mix(in oklab, var(--bcl-ink) 60%, transparent);
+}
+html[data-bc-lux] .comm-msgs > p.is-me {
+  background: linear-gradient(135deg, var(--bcl-violet), var(--bcl-violet-deep));
+  border-color: color-mix(in oklab, var(--bcl-gold) 35%, transparent);
+  border-radius: 20px 20px 6px 20px;
+  box-shadow: 0 8px 22px color-mix(in oklab, var(--bcl-violet) 30%, transparent);
+}
+html[data-bc-lux] .comm-msgs > p small { color: color-mix(in oklab, var(--foreground) 60%, transparent); }
+html[data-bc-lux] .comm-msgs > p .comm-tick.is-read { color: var(--bcl-gold); }
+html[data-bc-lux] .comm-msgs .comm-vplay {
+  border: 1.5px solid var(--bcl-gold); color: var(--bcl-gold); background: color-mix(in oklab, var(--bcl-ink) 40%, transparent);
+}
+html[data-bc-lux] .comm-msgs .comm-vwave { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--bcl-violet) 70%, transparent)); color: var(--bcl-gold); }
+html[data-bc-lux] .comm-compose {
+  background: color-mix(in oklab, var(--bcl-ink) 90%, transparent);
+  border-top: 1px solid var(--bcl-line);
+  backdrop-filter: blur(16px);
+}
+html[data-bc-lux] .comm-compose .comm-input,
+html[data-bc-lux] .comm-compose textarea,
+html[data-bc-lux] .comm-compose input[type=text] {
+  background: var(--bcl-glass); border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent); border-radius: 999px;
+}
+html[data-bc-lux] .comm-compose .bc-plus { color: var(--bcl-gold); }
+html[data-bc-lux] .comm-compose button[type=submit],
+html[data-bc-lux] .comm-compose .comm-rec {
+  background: radial-gradient(circle at 35% 30%, var(--bcl-gold), var(--bcl-gold-deep));
+  color: var(--bcl-ink); border-radius: 999px;
+  box-shadow: 0 0 18px color-mix(in oklab, var(--bcl-gold) 45%, transparent);
+}
+html[data-bc-lux] .comm-sheet, html[data-bc-lux] .comm-kebab-menu {
+  background: linear-gradient(160deg, oklch(0.2 0.015 290), var(--bcl-ink));
+  border: 1px solid var(--bcl-line);
+}
+
+/* Dialpad */
+html[data-bc-lux] .comm-dial-pad button {
+  background: radial-gradient(circle at 40% 30%, oklch(0.27 0.01 290), oklch(0.14 0.01 290));
+  border: 1px solid var(--bcl-line); border-radius: 999px;
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 10%, transparent);
+}
+html[data-bc-lux] .comm-dial-pad button b { color: var(--foreground); }
+html[data-bc-lux] .comm-dial-pad button small { color: var(--bcl-gold); }
+html[data-bc-lux] .comm-dial-go { background: linear-gradient(135deg, var(--bcl-gold), var(--bcl-gold-deep)); color: var(--bcl-ink); }
+
+/* Call screen (portaled) */
+html[data-bc-lux] .bixcall:not(.is-video) {
+  background:
+    radial-gradient(60% 40% at 50% 30%, color-mix(in oklab, var(--bcl-violet) 35%, transparent), transparent 70%),
+    radial-gradient(120% 60% at 50% 110%, color-mix(in oklab, var(--bcl-gold) 10%, transparent), transparent 60%),
+    var(--bcl-ink);
+}
+html[data-bc-lux] .bixcall .bc-ctl4 button {
+  background: color-mix(in oklab, oklch(0.25 0.01 290) 80%, transparent);
+  border: 1px solid var(--bcl-line);
+  backdrop-filter: blur(12px);
+}
+html[data-bc-lux] .bixcall .bc-wa-top { color: var(--bcl-gold); }
+.bcl-e2e { display: none; }
+html[data-bc-lux] .bcl-e2e { display: flex; }
