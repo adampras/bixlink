@@ -144,3 +144,18 @@ html[data-bc-lux] .bcl-e2e { display: flex; }
 .bcs-actions>*{display:grid;justify-items:center;gap:.3rem;padding:.7rem .2rem;border-radius:.9rem;background:var(--card);border:1px solid var(--border);font-size:.7rem;color:var(--foreground)}
 .bcs-actions svg{color:var(--primary)}
 html[data-bc-lux] .bx-grp-li,html[data-bc-lux] .bx-grp-adm{border-radius:1rem;border:1px solid color-mix(in oklab,var(--primary) 25%,transparent)}
+
+/* Suite navigation + hero (visible only for the lux audience) */
+.bcl-suite,.bcl-hero{display:none}
+html[data-bc-lux] .bcl-suite{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:.5rem 0 .6rem;padding:4px;border-radius:18px;background:var(--bcl-glass);border:1px solid var(--bcl-line);backdrop-filter:blur(14px)}
+html[data-bc-lux] .bcl-suite a{display:grid;place-items:center;gap:2px;padding:7px 2px;border-radius:14px;font-size:10px;letter-spacing:.03em;color:color-mix(in oklab,var(--foreground) 65%,transparent)}
+html[data-bc-lux] .bcl-suite a svg{color:var(--bcl-gold)}
+html[data-bc-lux] .bcl-suite a.is-on{background:linear-gradient(135deg,var(--bcl-violet),var(--bcl-violet-deep));color:var(--foreground);box-shadow:0 6px 18px color-mix(in oklab,var(--bcl-violet) 35%,transparent)}
+html[data-bc-lux] .bcl-hero{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin:0 0 .7rem;padding:1rem;border-radius:22px;border:1px solid var(--bcl-line);background:radial-gradient(80% 120% at 100% 0%,color-mix(in oklab,var(--bcl-violet) 40%,transparent),transparent 65%),linear-gradient(160deg,oklch(0.2 0.02 295),var(--bcl-ink))}
+html[data-bc-lux] .bcl-hero small{display:block;color:var(--bcl-gold);font-size:10px;letter-spacing:.22em}
+html[data-bc-lux] .bcl-hero b{display:block;font-size:1rem;margin:2px 0}
+html[data-bc-lux] .bcl-hero span{display:flex;align-items:center;gap:4px;font-size:10.5px;color:color-mix(in oklab,var(--foreground) 60%,transparent)}
+html[data-bc-lux] .bcl-hero-go{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:8px 12px;border-radius:999px;font-size:11px;font-weight:700;background:linear-gradient(135deg,var(--bcl-gold),var(--bcl-gold-deep));color:var(--bcl-ink)}
+html[data-bc-lux] .bcs-board-hero{background:radial-gradient(80% 120% at 100% 0%,color-mix(in oklab,var(--bcl-violet) 38%,transparent),transparent 65%),var(--bcl-ink);border-color:var(--bcl-line)}
+html[data-bc-lux] .bcs-board-hero svg{color:var(--bcl-gold)}
+html[data-bc-lux] .bcs-ring{box-shadow:0 0 0 2px var(--bcl-gold-deep),0 0 22px color-mix(in oklab,var(--bcl-violet) 55%,transparent)}
