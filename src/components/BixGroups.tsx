@@ -70,12 +70,12 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
         <Button variant="ghost" type="button" className="bx-grp-btn is-alt" disabled={code.length < 6} onClick={() => void join()}>Join</Button>
       </div>}
     </div>}
-    {!createOnly && groups.length > 0 && <div className="bx-grp-hero"><b>Group Command</b><small>{groups.length} grup · {groups.filter(g => g.owner_id === me).length} Anda kelola · {groups.filter(g => g.live_code).length} live</small></div>}
+    {!createOnly && groups.length > 0 && <div className="bx-grp-hero"><b>Group Command</b><div className="bx-grp-hero-stats"><span><b>{groups.length}</b><small>Grup</small></span><span><b>{groups.filter(g => g.owner_id === me).length}</b><small>Anda kelola</small></span><span><b>{groups.filter(g => g.live_code).length}</b><small>Live</small></span></div></div>}
     {msg && <p className="bx-grp-msg">{msg}</p>}
     {createOnly ? <p className="bx-grp-empty">Setelah grup dibuat, pasang foto grup dan tambahkan member dari kontak atau jaringan Anda.</p> : groups.length === 0 ? <p className="bx-grp-empty">No groups yet. Create one or join with an invite code.</p>
       : <ul className="bx-grp-list">{groups.map(g => <li key={g.id} className="bx-grp-li"><Button variant="ghost" type="button" onClick={() => setOpen(g)}>
         <GroupAvatar g={g}/>
-        <span className="bx-grp-meta"><b>{g.name}{g.owner_id === me && <em className="bx-grp-tag">HOST</em>}</b><small>{g.about || (g.owner_id === me ? 'Anda Host grup ini' : 'Grup edukasi')}</small></span>
+        <span className="bx-grp-meta"><span className="bx-grp-name"><b>{g.name}</b>{g.owner_id === me && <em className="bx-grp-tag">HOST</em>}</span><small>{g.about || (g.owner_id === me ? 'Anda Host grup ini' : 'Grup edukasi')}</small></span>
         {g.live_code && <em className="bx-grp-live"><Radio size={12}/> LIVE</em>}
       </Button><button type="button" className="bx-grp-more" aria-label={`Opsi ${g.name}`} onClick={() => setAct(g)}><MoreVertical size={16}/></button></li>)}</ul>}
     {act && createPortal(<div className="comm-sheet-bg" onClick={() => setAct(null)}><div className="comm-sheet" role="menu" onClick={e => e.stopPropagation()}>
