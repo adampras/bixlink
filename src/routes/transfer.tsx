@@ -50,7 +50,7 @@ function TransferPage() {
   </MemberGate></main></BixShell>;
 }
 
-function RealUsdtTransfer({ userId, enabled }: { userId?: string; enabled: boolean }) {
+function RealUsdtTransfer({ userId, enabled }: { userId: string | undefined; enabled: boolean }) {
   const fetchQ = useServerFn(getUsdtTransfers); const check = useServerFn(checkUsdtRecipient); const send = useServerFn(sendUsdtTransfer);
   const q = useQuery({ queryKey: ['usdt-member-transfers', userId], enabled: !!userId, queryFn: () => fetchQ() });
   const [bucket, setBucket] = useState<'deposit' | 'profit'>('deposit');
