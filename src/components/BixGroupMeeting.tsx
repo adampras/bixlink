@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Room, RoomEvent, Track, type RemoteTrack, type Participant } from 'livekit-client';
 import { useServerFn } from '@tanstack/react-start';
-import { Users, Mic, MicOff, Video, VideoOff, PhoneOff, Copy, Check, Hand } from 'lucide-react';
+import { Users, Mic, MicOff, Video, VideoOff, PhoneOff, Copy, Check, Hand, AudioLines, UserPlus, MoreHorizontal, ShieldCheck, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getBixRoomToken } from '@/lib/bix-call.functions';
 import { copyText } from '@/lib/copy-text';
@@ -60,6 +60,9 @@ export function MeetingStage({ code, me, onLeave }: { code: string; me: string; 
   const [err, setErr] = useState(''); const [copied, setCopied] = useState(false);
   const [hands, setHands] = useState<Record<string, boolean>>({});
   const audioBox = useRef<HTMLDivElement>(null);
+  const [lux, setLux] = useState(false); const [t0] = useState(() => Date.now()); const [now, setNow] = useState(() => Date.now());
+  const [more, setMore] = useState(false);
+  useEffect(() => { setLux(document.documentElement.hasAttribute('data-bc-lux')); const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
 
   useEffect(() => {
     let room: Room | null = null; let dead = false;
@@ -88,6 +91,44 @@ export function MeetingStage({ code, me, onLeave }: { code: string; me: string; 
   const hand = () => { const n = !hands[me]; setHands(h => ({ ...h, [me]: n })); send({ hand: n }); };
   const close = async () => { if (info) await supabase.from('bix_call_rooms').update({ status: 'closed' }).eq('id', info.id); onLeave(); };
 
+  if (lux && !err) {
+    const sec = Math.floor((now - t0) / 1000); const dur = [Math.floor(sec / 3600), Math.floor(sec / 60) % 60, sec % 60].map(n => String(n).padStart(2, '0')).join(':');
+    const speaking = people.filter(p => p.isSpeaking);
+    const center = speaking[0] ?? people[0];
+    const ring = people.filter(p => p !== center).slice(0, 6);
+    const audience = people.filter(p => p !== center && !ring.includes(p));
+    const unmuted = people.filter(p => !(p.getTrackPublication(Track.Source.Microphone)?.isMuted ?? true)).length;
+    const queue = people.filter(p => p.isSpeaking || hands[p.identity]);
+    const nm = (p: Participant) => (p.name || 'Member') + (p.identity === me ? ' (Anda)' : '');
+    const copy = async () => { if (await copyText(code)) { setCopied(true); setTimeout(() => setCopied(false), 1800); } };
+    return <section className="bbr">
+      <div ref={audioBox} hidden/>
+      <header className="bbr-top"><button type="button" aria-label="Keluar" onClick={onLeave} className="bbr-ic">⌄</button><div><b>{info?.title ?? 'Menghubungkan…'}</b><small>{people.length} di ruangan</small></div><span className="bbr-live"><i/>Live</span></header>
+      <div className="bbr-orbit" aria-label="Panggung pembicara">
+        <span className="bbr-halo" aria-hidden/>
+        {center && <div className={`bbr-core ${center.isSpeaking ? 'is-speaking' : ''}`}><Tile p={center} hand={!!hands[center.identity]} self={center.identity === me} lux/><b>{nm(center)}</b><small>{center.isSpeaking ? 'Active Speaker' : info?.isHost && center.identity === me ? 'Host' : 'Di panggung'}</small><span className="bbr-wave" aria-hidden>{Array.from({ length: 15 }, (_, i) => <i key={i} style={{ animationDelay: `${(i % 5) * 0.12}s` }}/>)}</span></div>}
+        {ring.map((p, i) => <div key={p.identity} className={`bbr-seat ${p.isSpeaking ? 'is-speaking' : ''}`} style={{ ['--a' as string]: `${(360 / Math.max(ring.length, 1)) * i - 90}deg` }}><Tile p={p} hand={!!hands[p.identity]} self={p.identity === me} lux/><small>{nm(p)}</small></div>)}
+      </div>
+      <div className="bbr-dock">
+        <button type="button" className={hands[me] ? 'is-on' : ''} onClick={hand}><Hand size={18}/><span>Raise</span></button>
+        <button type="button" className={mic ? '' : 'is-off'} onClick={() => void toggleMic()}>{mic ? <Mic size={18}/> : <MicOff size={18}/>}<span>{mic ? 'Mute' : 'Unmute'}</span></button>
+        <button type="button" className={`is-speak ${mic ? 'is-live' : ''}`} onClick={() => void toggleMic()} aria-label="Bicara"><AudioLines size={26}/><span>Speak</span></button>
+        <button type="button" onClick={() => void copy()}>{copied ? <Check size={18}/> : <UserPlus size={18}/>}<span>{copied ? 'Tersalin' : 'Invite'}</span></button>
+        <button type="button" className={more ? 'is-on' : ''} onClick={() => setMore(v => !v)}><MoreHorizontal size={18}/><span>More</span></button>
+      </div>
+      {more && <div className="bbr-more">
+        {info?.video && <button type="button" onClick={() => void toggleCam()}>{cam ? <VideoOff size={16}/> : <Video size={16}/>} {cam ? 'Matikan kamera' : 'Nyalakan kamera'}</button>}
+        {info?.isHost && <button type="button" onClick={() => send({ muteAll: true })}><MicOff size={16}/> Mute semua</button>}
+        <button type="button" onClick={onLeave}><PhoneOff size={16}/> Keluar ruangan</button>
+        {info?.isHost && <button type="button" className="is-danger" onClick={() => void close()}><PhoneOff size={16}/> Tutup ruangan</button>}
+      </div>}
+      <div className="bbr-card"><div className="bbr-card-h"><Crown size={14}/><b>Leader Boardroom</b><span className="bbr-live"><i/>Live</span></div>
+        <dl className="bbr-stats"><div><dt>Members</dt><dd>{people.length}</dd></div><div><dt>Mic aktif</dt><dd>{unmuted}</dd></div><div><dt>Audience</dt><dd>{audience.length}</dd></div><div><dt>Duration</dt><dd>{dur}</dd></div></dl></div>
+      <div className="bbr-card"><div className="bbr-card-h"><b>Speaking Queue</b></div>
+        {queue.length === 0 ? <p className="bbr-empty">Belum ada yang angkat tangan.</p> : <ol className="bbr-queue">{queue.map((p, i) => <li key={p.identity}><em>{i + 1}</em><span className="bbr-av">{(p.name || 'M').slice(0, 1).toUpperCase()}</span><b>{nm(p)}</b><small className={p.isSpeaking ? 'is-speak' : 'is-next'}>{p.isSpeaking ? 'Speaking' : 'Angkat tangan'}</small></li>)}</ol>}</div>
+      <div className="bbr-card bbr-secure"><ShieldCheck size={18}/><div><b>Kode ruangan {code}</b><small>Hanya member dengan kode yang bisa bergabung</small></div><button type="button" onClick={() => void copy()} aria-label="Salin kode">{copied ? <Check size={14}/> : <Copy size={14}/>}</button></div>
+    </section>;
+  }
   if (err) return <section className="comm-group mt-4"><p className="comm-group-msg">{err}</p><button type="button" className="comm-group-btn" onClick={onLeave}>Back</button></section>;
   return <section className="comm-meet mt-4">
     <div ref={audioBox} hidden/>
@@ -105,13 +146,14 @@ export function MeetingStage({ code, me, onLeave }: { code: string; me: string; 
   </section>;
 }
 
-function Tile({ p, hand, self }: { p: Participant; hand: boolean; self: boolean }) {
+function Tile({ p, hand, self, lux }: { p: Participant; hand: boolean; self: boolean; lux?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   const pub = p.getTrackPublication(Track.Source.Camera);
   const track = pub && !pub.isMuted ? pub.track : undefined;
   useEffect(() => { const el = ref.current; if (track && el) { track.attach(el); return () => { track.detach(el); }; } return undefined; }, [track]);
   const muted = p.getTrackPublication(Track.Source.Microphone)?.isMuted ?? true;
   const name = p.name || 'Member';
+  if (lux) return <span className="bbr-face">{track ? <video ref={ref} autoPlay playsInline muted={self}/> : <i>{name.slice(0, 1).toUpperCase()}</i>}{hand && <em className="bbr-hand">✋</em>}{muted && <em className="bbr-mute"><MicOff size={10}/></em>}</span>;
   return <div className={`comm-meet-tile ${p.isSpeaking ? 'is-speaking' : ''}`}>
     {track ? <video ref={ref} autoPlay playsInline muted={self}/> : <i>{name.slice(0, 1).toUpperCase()}</i>}
     <span>{hand && '✋ '}{name}{self ? ' (Anda)' : ''}{muted ? ' 🔇' : ''}</span>
