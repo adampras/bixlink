@@ -1471,6 +1471,13 @@
       "when": 1794812779772,
       "tag": "0209_bixtok_post_reward_bix",
       "breakpoints": true
+    },
+    {
+      "idx": 210,
+      "version": "7",
+      "when": 1795155989240,
+      "tag": "0210_usdt_member_transfers",
+      "breakpoints": true
     }
   ]
 }

@@ -2177,6 +2177,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_usdt_member_transfers: {
+        Row: {
+          amount_usd: number
+          bucket: string
+          created_at: string
+          id: string
+          note: string | null
+          recipient_code: string
+          recipient_id: string
+          sender_code: string
+          sender_id: string
+        }
+        Insert: {
+          amount_usd: number
+          bucket: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          recipient_code: string
+          recipient_id: string
+          sender_code: string
+          sender_id: string
+        }
+        Update: {
+          amount_usd?: number
+          bucket?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          recipient_code?: string
+          recipient_id?: string
+          sender_code?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       bix_usdt_network_bonuses: {
         Row: {
           base_usd: number
@@ -4733,6 +4769,10 @@ export type Database = {
       bix_hub_orbit_access: { Args: never; Returns: Json }
       bix_hub_orbit_mode: { Args: never; Returns: string }
       bix_hub_orbit_set: { Args: { p_mode: string }; Returns: Json }
+      bix_in_leader_line: {
+        Args: { p_leader: string; p_user: string }
+        Returns: boolean
+      }
       bix_in_owner1_network: { Args: never; Returns: boolean }
       bix_is_owner1: { Args: never; Returns: boolean }
       bix_is_owner1_user: { Args: { p_user: string }; Returns: boolean }
@@ -5007,6 +5047,10 @@ export type Database = {
         Args: { p_code: string; p_host: string }
         Returns: boolean
       }
+      bix_same_leader_team: {
+        Args: { p_a: string; p_b: string }
+        Returns: boolean
+      }
       bix_season_close: { Args: { p_season: string }; Returns: number }
       bix_set_stake_compound: {
         Args: { p_on: boolean; p_stake: string }
@@ -5098,6 +5142,7 @@ export type Database = {
         Returns: Json
       }
       bix_surprise_status: { Args: never; Returns: Json }
+      bix_team_leader: { Args: { p_user: string }; Returns: string }
       bix_team_sales_usd: { Args: { p_user: string }; Returns: number }
       bix_team_size: { Args: { p_root: string }; Returns: number }
       bix_unreal_bonus_bix: {
@@ -5110,6 +5155,18 @@ export type Database = {
         Args: { p_days: number; p_lock: number }
         Returns: number
       }
+      bix_usdt_member_delta: { Args: { p_user: string }; Returns: number }
+      bix_usdt_member_send: {
+        Args: {
+          p_amount: number
+          p_bucket: string
+          p_code: string
+          p_note: string
+        }
+        Returns: string
+      }
+      bix_usdt_recipient_check: { Args: { p_code: string }; Returns: Json }
+      bix_usdt_transfer_quota: { Args: { p_user: string }; Returns: Json }
       bix_username_available: { Args: { p_username: string }; Returns: boolean }
       bix_vip_status: { Args: never; Returns: Json }
       bix_vip_tiers: {

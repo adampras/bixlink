@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { getSovereignVirtual, sendSovereignVirtual } from '@/lib/sovereign-account.functions';
+import { getUsdtTransfers, checkUsdtRecipient, sendUsdtTransfer } from '@/lib/usdt-transfer.functions';
 import { useQuery } from '@tanstack/react-query';
 import { BixShell } from '@/components/BixShell';
 import { MemberGate } from '@/components/MemberGate';
@@ -11,7 +12,7 @@ import { useMember, usePublicConfig } from '@/lib/useMember';
 import { dateTime, money } from '@/lib/bixlink';
 import { ArrowDownLeft, ArrowUpRight, Lock, Send } from 'lucide-react';
 
-export const Route = createFileRoute('/transfer')({ head: () => ({ meta: [{ title: 'Transfer — BIXLINK' }, { name: 'description', content: 'Send virtual test USDT to other BIXLINK members.' }, { property: 'og:title', content: 'Transfer — BIXLINK' }, { property: 'og:description', content: 'Virtual USDT member transfers for testing.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: TransferPage });
+export const Route = createFileRoute('/transfer')({ head: () => ({ meta: [{ title: 'Transfer — BIXLINK' }, { name: 'description', content: 'Send USDT to other BIXLINK members: deposit USDT to anyone, staking profit within your leader team.' }, { property: 'og:title', content: 'Transfer — BIXLINK' }, { property: 'og:description', content: 'USDT member transfers inside BIXLINK.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }), component: TransferPage });
 
 function TransferPage() {
   const { user, ready, data: mine } = useMember(); const { data: cfg } = usePublicConfig();
@@ -30,7 +31,9 @@ function TransferPage() {
     finally { setBusy(false); }
   }
   return <BixShell><main className="mx-auto max-w-3xl px-5 py-10 md:px-8"><MemberGate ready={ready} signedIn={!!user} title="TRANSFER">
-    {mine?.isAdmin && <div className="eyebrow">VIRTUAL USDT · TESTING</div>}<h1 className="section-title">TRANSFER <span>USDT</span></h1>
+    <RealUsdtTransfer userId={user?.id} enabled={!!cfg?.usdtTransfer.enabled}/>
+    {q.data?.canSend && <>
+    <div className="mt-12"/>{mine?.isAdmin && <div className="eyebrow">VIRTUAL USDT · TESTING</div>}<h1 className="section-title">TRANSFER <span>USDT</span></h1>
     <div className="hubx-hero mt-5"><span className="hubx-hero__label">VIRTUAL USDT BALANCE</span><div className="hubx-hero__num numeric"><b>{money(q.data?.balance ?? 0)}</b><em>vUSDT</em></div><span className="hubx-chip numeric">{myCode ?? '—'}</span><p className="mt-2 text-[10.5px] text-muted-foreground">Test balance only — separate from your real wallet and cannot be withdrawn.</p></div>
     {!open ? <div className="mt-6 flex items-center gap-3 rounded-[20px] border border-chart-3 bg-chart-3/10 p-5 text-sm font-bold text-chart-3"><Lock size={18}/> {q.isPending ? 'Checking transfer access…' : 'Transfers are currently closed.'}</div> :
     <form onSubmit={send} className="register-panel mt-6 space-y-4">
@@ -42,6 +45,47 @@ function TransferPage() {
     {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
     <h2 className="mt-10 font-display text-2xl font-black">History</h2>
     <div className="mt-4 space-y-2">{(q.data?.list ?? []).map(t => { const out = t.sender_id === user?.id; return <div key={t.id} className="flex items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4 text-xs"><div className="flex items-center gap-3">{out ? <ArrowUpRight className="text-destructive"/> : <ArrowDownLeft className="text-chart-2"/>}<div><b className="text-sm">{out ? `To ${t.recipient_code}` : `From ${t.sender_code}`}</b><div className="text-muted-foreground">{dateTime(t.created_at)}{t.note ? ` · ${t.note}` : ''}</div></div></div><b className={`numeric text-sm ${out ? 'text-destructive' : 'text-chart-2'}`}>{out ? '-' : '+'}{money(Number(t.amount_usd))}</b></div>; })}{!q.data?.list?.length && <p className="text-sm text-muted-foreground">No transfers yet.</p>}</div>
+    </>}
     <Link to="/wallet" className="mt-8 block text-center text-xs text-muted-foreground">← Back to WALLET</Link>
   </MemberGate></main></BixShell>;
+}
+
+function RealUsdtTransfer({ userId, enabled }: { userId?: string; enabled: boolean }) {
+  const fetchQ = useServerFn(getUsdtTransfers); const check = useServerFn(checkUsdtRecipient); const send = useServerFn(sendUsdtTransfer);
+  const q = useQuery({ queryKey: ['usdt-member-transfers', userId], enabled: !!userId, queryFn: () => fetchQ() });
+  const [bucket, setBucket] = useState<'deposit' | 'profit'>('deposit');
+  const [code, setCode] = useState(''); const [amount, setAmount] = useState(''); const [note, setNote] = useState('');
+  const [who, setWho] = useState<{ found: boolean; self?: boolean; name?: string; team?: boolean } | null>(null);
+  const [busy, setBusy] = useState(false); const [msg, setMsg] = useState('');
+  const avail = bucket === 'profit' ? q.data?.profit ?? 0 : q.data?.deposit ?? 0;
+  async function lookup(c: string) { setWho(null); if (!/^BIX-\d{6}$/.test(c)) return; try { setWho(await check({ data: { code: c } })); } catch { setWho(null); } }
+  const blocked = bucket === 'profit' && who?.found && !who.self && !who.team;
+  async function submit(e: React.FormEvent) {
+    e.preventDefault(); if (!enabled || busy || blocked || !(await confirmPin())) return; setBusy(true); setMsg('');
+    try { await send({ data: { code, amount: Number(amount), bucket, note } }); txFeedback.success('Transfer sent', `${money(Number(amount))} USDT to ${code}`); setMsg(`Sent ${money(Number(amount))} USDT to ${code}.`); setAmount(''); setNote(''); await q.refetch(); }
+    catch (err) { const m = err instanceof Error ? err.message : 'Transfer failed'; txFeedback.fail('Transfer failed', m); setMsg(m); }
+    finally { setBusy(false); }
+  }
+  return <section>
+    <h1 className="section-title">TRANSFER <span>USDT</span></h1>
+    <div className="mt-5 grid grid-cols-2 gap-3" role="radiogroup" aria-label="USDT source">
+      {(['deposit', 'profit'] as const).map(b => <button type="button" key={b} role="radio" aria-checked={bucket === b} onClick={() => setBucket(b)} className={`rounded-[20px] border p-4 text-left ${bucket === b ? 'border-primary bg-primary/10' : 'border-border bg-card'}`}>
+        <span className="block text-[10px] font-bold uppercase text-muted-foreground">{b === 'deposit' ? 'Deposit USDT · all members' : 'Staking profit · leader team'}</span>
+        <b className="numeric mt-1 block text-xl">{money(b === 'deposit' ? q.data?.deposit ?? 0 : q.data?.profit ?? 0)}</b>
+      </button>)}
+    </div>
+    <p className="mt-2 text-[11px] text-muted-foreground">Staking profit USDT can only go to your Admin 1-approved leader, their uplines and their whole downline. Deposit USDT can go to any member. Amounts are capped by your real withdrawable USDT ({money(q.data?.real ?? 0)}).</p>
+    {!enabled ? <div className="mt-6 flex items-center gap-3 rounded-[20px] border border-chart-3 bg-chart-3/10 p-5 text-sm font-bold text-chart-3"><Lock size={18}/> USDT transfers are currently closed by Admin 1.</div> :
+    <form onSubmit={submit} className="register-panel mt-6 space-y-4">
+      <label className="block text-xs font-bold text-muted-foreground">RECIPIENT CODE<input required value={code} onChange={e => { const c = e.target.value.toUpperCase(); setCode(c); void lookup(c); }} className="form-input numeric mt-2 uppercase" placeholder="BIX-123456"/></label>
+      {who && (!who.found ? <p className="text-xs text-destructive">Member not found.</p> : who.self ? <p className="text-xs text-destructive">You cannot send to yourself.</p> :
+        <p className={`text-xs font-bold ${who.team ? 'text-chart-2' : 'text-chart-3'}`}>{who.name} · {who.team ? 'Same leader team — profit and deposit USDT allowed' : 'Outside your leader team — only deposit USDT allowed'}</p>)}
+      <label className="block text-xs font-bold text-muted-foreground">AMOUNT (USDT) · available {money(avail)}<input required type="number" min="1" step="0.01" max={avail || undefined} value={amount} onChange={e => setAmount(e.target.value)} className="form-input mt-2"/></label>
+      <label className="block text-xs font-bold text-muted-foreground">NOTE (OPTIONAL)<input maxLength={120} value={note} onChange={e => setNote(e.target.value)} className="form-input mt-2"/></label>
+      <Button disabled={busy || !!blocked || Number(amount) > avail} className="h-12 w-full rounded-full bg-chart-3 font-bold text-background">{busy ? 'Sending…' : 'Send USDT'} <Send/></Button>
+    </form>}
+    {msg && <p role="status" className="mt-4 text-sm text-chart-2">{msg}</p>}
+    <h2 className="mt-8 font-display text-2xl font-black">History</h2>
+    <div className="mt-4 space-y-2">{(q.data?.list ?? []).map(t => { const out = t.sender_id === userId; return <div key={t.id} className="flex items-center justify-between gap-3 rounded-[20px] border border-border bg-card p-4 text-xs"><div className="flex items-center gap-3">{out ? <ArrowUpRight className="text-destructive"/> : <ArrowDownLeft className="text-chart-2"/>}<div><b className="text-sm">{out ? `To ${t.recipient_code}` : `From ${t.sender_code}`}</b><div className="text-muted-foreground">{dateTime(t.created_at)} · {t.bucket === 'profit' ? 'Staking profit' : 'Deposit'}{t.note ? ` · ${t.note}` : ''}</div></div></div><b className={`numeric text-sm ${out ? 'text-destructive' : 'text-chart-2'}`}>{out ? '-' : '+'}{money(Number(t.amount_usd))}</b></div>; })}{!q.data?.list?.length && <p className="text-sm text-muted-foreground">No USDT transfers yet.</p>}</div>
+  </section>;
 }
