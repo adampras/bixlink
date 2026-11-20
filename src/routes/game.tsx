@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { ClientOnly } from '@tanstack/react-router';
+const CyberStrike = lazy(() => import('@/components/game/CyberStrike'));
 import { Crown, Gamepad2, IdCard, Play, ShoppingBag, Swords, Trophy, Zap } from 'lucide-react';
 import heroArt from '@/assets/game/hero.jpg';
 import vsArt from '@/assets/game/vs.jpg';
@@ -18,9 +20,9 @@ export const Route = createFileRoute('/game')({
   component: GamePage,
 });
 
-type Tab = 'hub' | 'pvp' | 'store' | 'fame' | 'runner' | 'passport';
+type Tab = 'strike' | 'hub' | 'pvp' | 'store' | 'fame' | 'runner' | 'passport';
 const TABS: { k: Tab; label: string; icon: typeof Swords }[] = [
-  { k: 'hub', label: 'Arena', icon: Gamepad2 }, { k: 'pvp', label: 'PvP', icon: Swords },
+  { k: 'strike', label: '3D', icon: Crown }, { k: 'hub', label: 'Arena', icon: Gamepad2 }, { k: 'pvp', label: 'PvP', icon: Swords },
   { k: 'runner', label: 'Runner', icon: Zap }, { k: 'store', label: 'Top-Up', icon: ShoppingBag },
   { k: 'fame', label: 'Fame', icon: Trophy }, { k: 'passport', label: 'Passport', icon: IdCard },
 ];
@@ -88,7 +90,7 @@ function Tag({ children }: { children: React.ReactNode }) {
 }
 
 function GamePage() {
-  const [tab, setTab] = useState<Tab>('hub');
+  const [tab, setTab] = useState<Tab>('strike');
   const { best, save } = useBest();
   return <BixShell><div className="bixgame-skin mx-auto max-w-md space-y-4 px-3 pb-28 pt-3">
     <div className="relative overflow-hidden rounded-3xl border border-primary/50 shadow-[0_0_50px_-10px] shadow-accent/60">
@@ -102,9 +104,10 @@ function GamePage() {
         {[['Rekor', String(best)], ['Rank', 'Rookie'], ['Season', '0']].map(([a, b]) => <div key={a} className="rounded-xl border border-primary/20 bg-background/70 py-2 backdrop-blur"><p className="text-muted-foreground">{a}</p><p className="text-sm font-black text-primary">{b}</p></div>)}
       </div></div>
     </div>
-    <div className="grid grid-cols-6 gap-1 rounded-2xl border border-primary/20 bg-card/60 p-1 backdrop-blur">{TABS.map(({ k, label, icon: I }) =>
+    <div className="grid grid-cols-7 gap-1 rounded-2xl border border-primary/20 bg-card/60 p-1 backdrop-blur">{TABS.map(({ k, label, icon: I }) =>
       <button key={k} onClick={() => setTab(k)} className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-semibold transition active:scale-95 ${tab === k ? 'bg-gradient-to-b from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/40' : 'text-muted-foreground'}`}><I className="h-4 w-4" />{label}</button>)}</div>
 
+    {tab === 'strike' && <ClientOnly fallback={<div className="aspect-[3/4] rounded-2xl bg-card" />}><Suspense fallback={<div className="flex aspect-[3/4] items-center justify-center rounded-2xl bg-card text-xs text-muted-foreground">Memuat arena 3D…</div>}><CyberStrike onScore={save} /></Suspense></ClientOnly>}
     {tab === 'hub' && <>
       <Lux className="!p-0"><img src={runnerArt} alt="" className="h-32 w-full object-cover opacity-90" /><div className="p-5 pt-3"><Tag>Featured Event</Tag><h2 className="mt-2 text-xl font-black">Cyber Runner Season 0</h2><p className="mb-4 text-xs text-muted-foreground">Mini-game gratis di browser. Skor tersimpan di perangkat ini.</p>
         <Button className="w-full rounded-xl font-bold" onClick={() => setTab('runner')}><Play className="mr-1 h-4 w-4" />Main sekarang</Button></div></Lux>
