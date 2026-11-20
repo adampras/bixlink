@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import foxLogoOnboard from '@/assets/bixlink-logo-gold.webp';
 import { readEntry } from '@/lib/hub-entry';
 import { createPortal } from 'react-dom';
-const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting', 'newgroup', 'starred'];
+const COMM_TABS: string[] = ['chat', 'group', 'updates', 'call', 'community', 'setting', 'newgroup', 'starred', 'boardroom', 'vault', 'contacts'];
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Search, ShieldCheck, MessageCircle, Phone, Video, Lock, Send, ArrowLeft, Crown, ImagePlus, Mic, Square, Coins, Paperclip, X, Play, Pause } from 'lucide-react';
 import { MemberGate } from '@/components/MemberGate';
@@ -33,6 +33,7 @@ import { getBcTheme, setBcTheme, applyBcTheme } from '@/lib/bix-theme';
 import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
 import { useDesignAccess } from '@/lib/design-release';
 import '@/components/bixcall-lux.css';
+import { BoardroomStage, SecureVault, ContactProfiles } from '@/components/BixCallSuites';
 
 export const Route = createFileRoute('/call')({
   head: () => ecosystemHead('/call', 'BIX CALL — Chat, Panggilan Suara & Video | BIXLINK', 'Kenali BIX CALL untuk chat, panggilan suara, video dan grup antaranggota BIXLINK. Akun diperlukan; akses mengikuti ketentuan layanan.'),
@@ -46,7 +47,7 @@ export const Route = createFileRoute('/call')({
   },
   component: CallPage,
 });
-type CommTab = 'chat' | 'group' | 'updates' | 'call' | 'community' | 'setting' | 'newgroup' | 'starred';
+type CommTab = 'chat' | 'group' | 'updates' | 'call' | 'community' | 'setting' | 'newgroup' | 'starred' | 'boardroom' | 'vault' | 'contacts';
 type Star = { id: string; peer: string; name: string; body: string; at: string };
 const readStars = (): Star[] => { try { return JSON.parse(localStorage.getItem('bc-starred') ?? '[]') as Star[]; } catch { return []; } };
 const writeStars = (l: Star[]) => { try { localStorage.setItem('bc-starred', JSON.stringify(l.slice(0, 300))); } catch { /* optional */ } };
@@ -269,7 +270,7 @@ function CallInner() {
 
   if (chatWith) return <ChatRoom me={me} peer={chatWith} tier={tier} onBack={() => setChatWith(null)}/>;
   const open = (id: string, name: string) => setChatWith({ id, name });
-  const TITLE: Record<CommTab, string> = { chat: 'CHAT', group: 'GROUP', updates: 'UPDATES', call: 'CALLS', community: 'COMMUNITY', setting: 'SETTINGS', newgroup: 'NEW GROUP', starred: 'BERBINTANG' };
+  const TITLE: Record<CommTab, string> = { chat: 'CHAT', group: 'GROUP', updates: 'UPDATES', call: 'CALLS', community: 'COMMUNITY', setting: 'SETTINGS', newgroup: 'NEW GROUP', starred: 'BERBINTANG', boardroom: 'BOARDROOM', vault: 'VAULT', contacts: 'KONTAK' };
   const view: CommTab = tab;
 
   return <main className="mx-auto w-full px-3 pt-0 pb-4">
@@ -280,6 +281,9 @@ function CallInner() {
 
     {view === 'chat' && <><DialFab me={me} tier={tier} onChat={open}/><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
     {view === 'starred' && <StarredList onOpen={open}/>}
+    {view === 'boardroom' && <BoardroomStage><BixGroupMeeting me={me} tier={tier}/></BoardroomStage>}
+    {view === 'vault' && <SecureVault me={me}/>}
+    {view === 'contacts' && <ContactProfiles onChat={open}/>}
     {view === 'group' && <BixGroups me={me}/>}
     {view === 'newgroup' && <BixGroups me={me} createOnly/>}
     {view === 'updates' && <StoryBar me={me} myName="Saya" list/>}
@@ -303,7 +307,7 @@ function AppearanceCard() {
 function CommMenu({ tierLabel }: { tierLabel?: string | undefined }) {
   const [o, setO] = useState(false);
   const qr = (k: 'scan' | 'show') => window.dispatchEvent(new CustomEvent('bc-qr', { detail: k }));
-  const go = [['newgroup', 'Grup baru'], ['community', 'Komunitas'], ['starred', 'Berbintang'], ['call', 'Riwayat panggilan'], ['setting', 'Pengaturan']] as const;
+  const go = [['boardroom', 'Boardroom'], ['vault', 'Secure Vault'], ['contacts', 'Profil kontak'], ['newgroup', 'Grup baru'], ['community', 'Komunitas'], ['starred', 'Berbintang'], ['call', 'Riwayat panggilan'], ['setting', 'Pengaturan']] as const;
   return <span className="comm-kebab"><button type="button" aria-label="Pengaturan BIX CALL" aria-expanded={o} onClick={() => setO(v => !v)}><MoreVertical size={18}/></button>
     {o && <span className="comm-kebab-bg" aria-hidden onClick={() => setO(false)}/>}{o && <span className="comm-kebab-menu" role="menu" onClick={() => setO(false)}>{tierLabel && <span className="comm-kebab-tier">Paket: {tierLabel}</span>}<button type="button" role="menuitem" onClick={() => qr('scan')}>Pindai QR</button><button type="button" role="menuitem" onClick={() => qr('show')}>QR kontak saya</button>{go.map(([t, l]) => <Link key={t} to="/call" search={{ tab: t }} role="menuitem">{l}</Link>)}</span>}</span>;
 }

@@ -112,3 +112,35 @@ html[data-bc-lux] .bixcall .bc-ctl4 button {
 html[data-bc-lux] .bixcall .bc-wa-top { color: var(--bcl-gold); }
 .bcl-e2e { display: none; }
 html[data-bc-lux] .bcl-e2e { display: flex; }
+
+/* Suites: Boardroom, Secure Vault, Contact profile, Group admin */
+.bcs-board,.bcs-vault,.bcs-profile{margin:.6rem 0;display:grid;gap:.7rem}
+.bcs-board-hero{display:flex;gap:.7rem;align-items:center;padding:.85rem 1rem;border-radius:1.1rem;background:linear-gradient(135deg,color-mix(in oklab,var(--primary) 22%,var(--card)),var(--card));border:1px solid color-mix(in oklab,var(--primary) 35%,transparent);color:var(--foreground)}
+.bcs-board-hero svg{color:var(--primary)}
+.bcs-board-hero b{display:block;font-size:.95rem;letter-spacing:.04em}
+.bcs-board-hero small,.bcs-note{color:var(--muted-foreground);font-size:.72rem}
+.bcs-board-podium{display:flex;justify-content:center;gap:1rem;padding:.6rem 0}
+.bcs-ring{display:grid;place-items:center;width:3.4rem;height:3.4rem;border-radius:999px;background:var(--card);border:1.5px solid color-mix(in oklab,var(--primary) 60%,transparent);color:var(--primary);box-shadow:0 0 0 0 color-mix(in oklab,var(--primary) 45%,transparent);animation:bcsPulse 2.4s ease-out infinite}
+.bcs-ring:nth-child(2){animation-delay:.8s}.bcs-ring:nth-child(3){animation-delay:1.6s}
+@keyframes bcsPulse{70%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.bcs-ring{animation:none}}
+.bcs-chips{display:flex;gap:.4rem;overflow-x:auto}
+.bcs-chips button{padding:.35rem .8rem;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--muted-foreground);font-size:.74rem;white-space:nowrap}
+.bcs-chips button.is-on{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.bcs-vault-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+.bcs-vault-grid button,.bcs-contacts button{width:100%;display:grid;gap:.25rem;justify-items:start;text-align:left;padding:.75rem;border-radius:.9rem;background:var(--card);border:1px solid var(--border);color:var(--foreground)}
+.bcs-vault-grid svg{color:var(--primary)}
+.bcs-vault-grid b,.bcs-contacts b{font-size:.8rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bcs-vault-grid small,.bcs-contacts small{font-size:.68rem;color:var(--muted-foreground)}
+.bcs-contacts{display:grid;gap:.45rem}
+.bcs-contacts button{display:flex;align-items:center;gap:.7rem}
+.bcs-contacts span{display:grid;min-width:0}
+.bcs-back{justify-self:start;font-size:.8rem;color:var(--primary)}
+.bcs-profile-card{display:grid;justify-items:center;gap:.35rem;padding:1.4rem 1rem;border-radius:1.3rem;background:radial-gradient(circle at 50% 0,color-mix(in oklab,var(--primary) 30%,var(--card)),var(--card));border:1px solid color-mix(in oklab,var(--primary) 35%,transparent)}
+.bcs-profile-card h2{font-size:1.2rem;font-weight:800;color:var(--foreground)}
+.bcs-profile-card small{color:var(--muted-foreground)}
+.bcs-badge{padding:.2rem .7rem;border-radius:999px;font-size:.66rem;background:color-mix(in oklab,var(--primary) 20%,transparent);color:var(--primary)}
+.bcs-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem}
+.bcs-actions>*{display:grid;justify-items:center;gap:.3rem;padding:.7rem .2rem;border-radius:.9rem;background:var(--card);border:1px solid var(--border);font-size:.7rem;color:var(--foreground)}
+.bcs-actions svg{color:var(--primary)}
+html[data-bc-lux] .bx-grp-li,html[data-bc-lux] .bx-grp-adm{border-radius:1rem;border:1px solid color-mix(in oklab,var(--primary) 25%,transparent)}
