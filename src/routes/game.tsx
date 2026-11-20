@@ -23,12 +23,6 @@ const TABS: { k: Tab; label: string; icon: typeof Swords }[] = [
 ];
 const NOTE = 'Preview — tournaments, top-up and prizes are not active yet. No entry fee is charged and no BIX/USDT is paid from this page.';
 
-function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-2xl border border-primary/25 bg-card/80 p-4 backdrop-blur ${className}`}>{children}</div>;
-}
-function Soon({ title, items }: { title: string; items: string[] }) {
-  return <Card><h3 className="mb-3 text-sm font-bold text-primary">{title}</h3><ul className="space-y-2">{items.map((i) => <li key={i} className="flex items-center justify-between rounded-xl bg-muted/40 px-3 py-2 text-sm"><span>{i}</span><span className="text-[10px] uppercase tracking-wider text-muted-foreground">Soon</span></li>)}</ul></Card>;
-}
 
 function useBest() {
   const [best, setBest] = useState(0);
@@ -74,27 +68,74 @@ function Runner({ onScore }: { onScore: (s: number) => void }) {
   </div>;
 }
 
+const GAMES = [
+  { n: 'Mobile Legends', u: 'Diamonds', c: 'MLBB' }, { n: 'Free Fire', u: 'Diamonds', c: 'FF' },
+  { n: 'PUBG Mobile', u: 'UC', c: 'PUBG' }, { n: 'Genshin Impact', u: 'Crystals', c: 'GI' },
+];
+const EVENTS = ['MLBB Community Cup', 'Free Fire Squad Clash', 'PUBG Mobile Duo Rush'];
+
+function Lux({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return <div className={`relative overflow-hidden rounded-3xl border border-primary/40 bg-gradient-to-br from-card via-background to-accent/20 p-5 shadow-[0_0_40px_-12px] shadow-primary/50 ${className}`}>
+    <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-primary/20 blur-3xl" />
+    <div className="pointer-events-none absolute -bottom-20 -left-10 h-44 w-44 rounded-full bg-accent/25 blur-3xl" />
+    <div className="relative">{children}</div></div>;
+}
+function Tag({ children }: { children: React.ReactNode }) {
+  return <span className="inline-block rounded-full border border-primary/50 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-primary">{children}</span>;
+}
+
 function GamePage() {
   const [tab, setTab] = useState<Tab>('hub');
   const { best, save } = useBest();
   return <BixShell><div className="mx-auto max-w-md space-y-4 px-3 pb-28 pt-3">
-    <Card className="bg-gradient-to-br from-primary/15 to-accent/10 text-center">
-      <Crown className="mx-auto h-7 w-7 text-primary" />
-      <h1 className="mt-1 text-xl font-black tracking-wider">BIXGAME ARENA</h1>
-      <p className="text-xs text-muted-foreground">Sovereign gaming hub BIXLINK</p>
-    </Card>
-    <div className="grid grid-cols-6 gap-1">{TABS.map(({ k, label, icon: I }) =>
-      <button key={k} onClick={() => setTab(k)} className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[10px] transition active:scale-95 ${tab === k ? 'bg-primary text-primary-foreground' : 'bg-muted/40 text-muted-foreground'}`}><I className="h-4 w-4" />{label}</button>)}</div>
+    <Lux className="text-center">
+      <Tag>Sovereign Arena</Tag>
+      <h1 className="mt-2 bg-gradient-to-r from-primary via-foreground to-accent bg-clip-text text-2xl font-black tracking-[0.25em] text-transparent">BIXGAME</h1>
+      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Play · Compete · Rise</p>
+      <div className="mt-3 grid grid-cols-3 gap-2 text-[10px]">
+        {[['Rekor', String(best)], ['Rank', 'Rookie'], ['Season', '0']].map(([a, b]) => <div key={a} className="rounded-xl border border-primary/20 bg-background/60 py-2"><p className="text-muted-foreground">{a}</p><p className="text-sm font-black text-primary">{b}</p></div>)}
+      </div>
+    </Lux>
+    <div className="grid grid-cols-6 gap-1 rounded-2xl border border-primary/20 bg-card/60 p-1 backdrop-blur">{TABS.map(({ k, label, icon: I }) =>
+      <button key={k} onClick={() => setTab(k)} className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-semibold transition active:scale-95 ${tab === k ? 'bg-gradient-to-b from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/40' : 'text-muted-foreground'}`}><I className="h-4 w-4" />{label}</button>)}</div>
+
     {tab === 'hub' && <>
-      <Card><p className="text-[10px] uppercase tracking-widest text-primary">Featured</p><h2 className="text-lg font-bold">Cyber Runner Season 0</h2><p className="mb-3 text-sm text-muted-foreground">Mini-game gratis di browser. Skor tersimpan di perangkat ini.</p><Button className="w-full" onClick={() => setTab('runner')}><Play className="mr-1 h-4 w-4" />Main sekarang</Button></Card>
-      <Soon title="Turnamen mendatang" items={['MLBB Community Cup', 'Free Fire Squad Clash', 'PUBG Mobile Duo Rush']} />
-      <Link to="/arena" className="block"><Card className="text-sm">Misi harian & BIXP ada di <b className="text-primary">Fox Arena →</b></Card></Link>
+      <Lux><Tag>Featured Event</Tag><h2 className="mt-2 text-xl font-black">Cyber Runner Season 0</h2><p className="mb-4 text-xs text-muted-foreground">Mini-game gratis di browser. Skor tersimpan di perangkat ini.</p>
+        <Button className="w-full rounded-xl font-bold" onClick={() => setTab('runner')}><Play className="mr-1 h-4 w-4" />Main sekarang</Button></Lux>
+      <div className="space-y-2"><p className="px-1 text-[10px] font-bold uppercase tracking-widest text-primary">Turnamen mendatang</p>
+        {EVENTS.map((e, i) => <div key={e} className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-card/70 p-3">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/30 to-accent/30 text-sm font-black text-primary">#{i + 1}</div>
+          <div className="flex-1"><p className="text-sm font-bold">{e}</p><div className="mt-1 h-1.5 rounded-full bg-muted"><div className="h-full w-0 rounded-full bg-primary" /></div><p className="mt-1 text-[10px] text-muted-foreground">Pendaftaran belum dibuka</p></div>
+          <Tag>Soon</Tag></div>)}</div>
+      <Link to="/arena" className="block"><div className="rounded-2xl border border-accent/40 bg-accent/10 p-3 text-sm">Misi harian & BIXP ada di <b className="text-primary">Fox Arena →</b></div></Link>
     </>}
-    {tab === 'pvp' && <Card className="text-center"><Swords className="mx-auto h-10 w-10 text-primary" /><h2 className="mt-2 font-bold">PvP Grand Final</h2><p className="text-sm text-muted-foreground">Bracket & matchmaking dibuka setelah aturan turnamen dan anti-cheat siap.</p></Card>}
-    {tab === 'runner' && <Card><h2 className="mb-1 font-bold">Cyber Runner</h2><p className="mb-3 text-xs text-muted-foreground">Ketuk layar untuk lompat. Rekor terbaik: <b className="text-primary">{best}</b></p><Runner onScore={save} /></Card>}
-    {tab === 'store' && <Soon title="Top-Up Store" items={['Mobile Legends — Diamonds', 'Free Fire — Diamonds', 'PUBG Mobile — UC', 'Genshin Impact — Crystals']} />}
-    {tab === 'fame' && <Card className="text-center"><Trophy className="mx-auto h-10 w-10 text-primary" /><h2 className="mt-2 font-bold">Hall of Fame</h2><p className="text-sm text-muted-foreground">Papan peringkat hanya berisi pemain nyata dan tampil setelah musim pertama dimulai.</p></Card>}
-    {tab === 'passport' && <Card><div className="flex items-center gap-3"><IdCard className="h-10 w-10 text-primary" /><div><h2 className="font-bold">Gamer Passport</h2><p className="text-xs text-muted-foreground">Rekor Runner: {best} · Badge: segera hadir</p></div></div></Card>}
+
+    {tab === 'pvp' && <Lux className="text-center"><Tag>Grand Final · Preview</Tag>
+      <div className="mt-4 flex items-center justify-between">
+        {['Player A', 'Player B'].map((p, i) => <div key={p} className={`flex w-[38%] flex-col items-center gap-2 rounded-2xl border p-3 ${i ? 'border-accent/60' : 'border-primary/60'}`}>
+          <div className={`grid h-14 w-14 place-items-center rounded-full ${i ? 'bg-accent/30' : 'bg-primary/30'}`}><Swords className="h-6 w-6" /></div><p className="text-xs font-bold">{p}</p><p className="text-[10px] text-muted-foreground">Menunggu</p></div>)}
+      </div>
+      <p className="-mt-16 mb-12 bg-gradient-to-b from-primary to-accent bg-clip-text text-4xl font-black italic text-transparent">VS</p>
+      <p className="text-xs text-muted-foreground">Bracket & matchmaking dibuka setelah aturan turnamen dan anti-cheat siap.</p></Lux>}
+
+    {tab === 'runner' && <Lux><div className="mb-2 flex items-center justify-between"><h2 className="font-black tracking-wider">CYBER RUNNER</h2><span className="rounded-lg border border-primary/40 px-2 py-0.5 font-mono text-xs text-primary">BEST {best}</span></div>
+      <p className="mb-3 text-xs text-muted-foreground">Ketuk layar untuk lompat.</p><Runner onScore={save} /></Lux>}
+
+    {tab === 'store' && <><div className="grid grid-cols-2 gap-2">{GAMES.map((g) => <div key={g.n} className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-card to-accent/15 p-3">
+      <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/20 text-xs font-black text-primary">{g.c}</div>
+      <p className="mt-2 text-sm font-bold leading-tight">{g.n}</p><p className="text-[10px] text-muted-foreground">{g.u}</p><div className="mt-2"><Tag>Soon</Tag></div></div>)}</div>
+      <p className="px-1 text-[11px] text-muted-foreground">Top-up dibuka setelah kerja sama dengan penyedia resmi siap. Belum ada harga atau pembayaran.</p></>}
+
+    {tab === 'fame' && <Lux className="text-center"><Tag>Hall of Fame</Tag>
+      <div className="mt-5 flex items-end justify-center gap-2">{[{ r: 2, h: 'h-20' }, { r: 1, h: 'h-28' }, { r: 3, h: 'h-14' }].map(({ r, h }) =>
+        <div key={r} className="flex w-1/4 flex-col items-center gap-1"><Crown className={`h-5 w-5 ${r === 1 ? 'text-primary' : 'text-muted-foreground'}`} /><p className="text-[10px] text-muted-foreground">Kosong</p>
+          <div className={`${h} w-full rounded-t-xl border border-primary/40 bg-gradient-to-t from-primary/10 to-primary/40 pt-2 text-lg font-black`}>{r}</div></div>)}</div>
+      <p className="mt-4 text-xs text-muted-foreground">Peringkat hanya berisi pemain nyata dan tampil setelah musim pertama dimulai.</p></Lux>}
+
+    {tab === 'passport' && <Lux><div className="flex items-start justify-between"><div><Tag>Gamer Passport</Tag><h2 className="mt-2 text-lg font-black tracking-wider">BIXGAME ID</h2><p className="text-[11px] text-muted-foreground">Rank: Rookie · Season 0</p></div><IdCard className="h-10 w-10 text-primary" /></div>
+      <div className="mt-4 grid grid-cols-2 gap-2 text-xs"><div className="rounded-xl bg-background/60 p-2"><p className="text-muted-foreground">Rekor Runner</p><p className="font-mono text-lg font-black text-primary">{best}</p></div><div className="rounded-xl bg-background/60 p-2"><p className="text-muted-foreground">Badge</p><p className="font-bold">Segera hadir</p></div></div>
+      <div className="mt-3 flex gap-2">{[0, 1, 2, 3].map((i) => <div key={i} className="grid h-10 flex-1 place-items-center rounded-lg border border-dashed border-primary/30"><Trophy className="h-4 w-4 text-muted-foreground/50" /></div>)}</div></Lux>}
+
     <p className="text-center text-[11px] text-muted-foreground">{NOTE}</p>
   </div></BixShell>;
 }
