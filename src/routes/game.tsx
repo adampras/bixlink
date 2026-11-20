@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import { Crown, Gamepad2, IdCard, Play, ShoppingBag, Swords, Trophy, Zap } from 'lucide-react';
+import heroArt from '@/assets/game/hero.jpg';
+import vsArt from '@/assets/game/vs.jpg';
+import runnerArt from '@/assets/game/runner.jpg';
 import { BixShell } from '@/components/BixShell';
 import { Button } from '@/components/ui/button';
 
@@ -62,7 +65,7 @@ function Runner({ onScore }: { onScore: (s: number) => void }) {
   }, [state, onScore]);
   const tap = () => { if (state === 'run') jump.current(); else { setScore(0); setState('run'); } };
   return <div>
-    <canvas ref={ref} width={360} height={180} onPointerDown={tap} className="w-full touch-none rounded-xl border border-primary/30 bg-background" aria-label="Cyber Runner — tap to jump" />
+    <canvas ref={ref} width={360} height={180} onPointerDown={tap} className="w-full touch-none rounded-xl border border-primary/40 bg-cover bg-center shadow-[0_0_30px_-8px] shadow-primary/60" style={{ backgroundImage: `linear-gradient(color-mix(in oklab, var(--background) 35%, transparent), color-mix(in oklab, var(--background) 35%, transparent)), url(${runnerArt})` }} aria-label="Cyber Runner — tap to jump" />
     <div className="mt-2 flex items-center justify-between text-sm"><span>Score: <b className="text-primary">{score}</b></span>
       {state !== 'run' && <Button size="sm" onClick={tap}><Play className="mr-1 h-4 w-4" />{state === 'over' ? 'Main lagi' : 'Mulai'}</Button>}</div>
   </div>;
@@ -87,21 +90,24 @@ function Tag({ children }: { children: React.ReactNode }) {
 function GamePage() {
   const [tab, setTab] = useState<Tab>('hub');
   const { best, save } = useBest();
-  return <BixShell><div className="mx-auto max-w-md space-y-4 px-3 pb-28 pt-3">
-    <Lux className="text-center">
+  return <BixShell><div className="bixgame-skin mx-auto max-w-md space-y-4 px-3 pb-28 pt-3">
+    <div className="relative overflow-hidden rounded-3xl border border-primary/50 shadow-[0_0_50px_-10px] shadow-accent/60">
+      <img src={heroArt} alt="BIXGAME arena champion" className="h-56 w-full object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 p-4 text-center">
       <Tag>Sovereign Arena</Tag>
-      <h1 className="mt-2 bg-gradient-to-r from-primary via-foreground to-accent bg-clip-text text-2xl font-black tracking-[0.25em] text-transparent">BIXGAME</h1>
+      <h1 className="mt-2 bg-gradient-to-r from-primary via-foreground to-accent bg-clip-text text-3xl font-black tracking-[0.3em] text-transparent drop-shadow-lg">BIXGAME</h1>
       <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Play · Compete · Rise</p>
       <div className="mt-3 grid grid-cols-3 gap-2 text-[10px]">
-        {[['Rekor', String(best)], ['Rank', 'Rookie'], ['Season', '0']].map(([a, b]) => <div key={a} className="rounded-xl border border-primary/20 bg-background/60 py-2"><p className="text-muted-foreground">{a}</p><p className="text-sm font-black text-primary">{b}</p></div>)}
-      </div>
-    </Lux>
+        {[['Rekor', String(best)], ['Rank', 'Rookie'], ['Season', '0']].map(([a, b]) => <div key={a} className="rounded-xl border border-primary/20 bg-background/70 py-2 backdrop-blur"><p className="text-muted-foreground">{a}</p><p className="text-sm font-black text-primary">{b}</p></div>)}
+      </div></div>
+    </div>
     <div className="grid grid-cols-6 gap-1 rounded-2xl border border-primary/20 bg-card/60 p-1 backdrop-blur">{TABS.map(({ k, label, icon: I }) =>
       <button key={k} onClick={() => setTab(k)} className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-semibold transition active:scale-95 ${tab === k ? 'bg-gradient-to-b from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/40' : 'text-muted-foreground'}`}><I className="h-4 w-4" />{label}</button>)}</div>
 
     {tab === 'hub' && <>
-      <Lux><Tag>Featured Event</Tag><h2 className="mt-2 text-xl font-black">Cyber Runner Season 0</h2><p className="mb-4 text-xs text-muted-foreground">Mini-game gratis di browser. Skor tersimpan di perangkat ini.</p>
-        <Button className="w-full rounded-xl font-bold" onClick={() => setTab('runner')}><Play className="mr-1 h-4 w-4" />Main sekarang</Button></Lux>
+      <Lux className="!p-0"><img src={runnerArt} alt="" className="h-32 w-full object-cover opacity-90" /><div className="p-5 pt-3"><Tag>Featured Event</Tag><h2 className="mt-2 text-xl font-black">Cyber Runner Season 0</h2><p className="mb-4 text-xs text-muted-foreground">Mini-game gratis di browser. Skor tersimpan di perangkat ini.</p>
+        <Button className="w-full rounded-xl font-bold" onClick={() => setTab('runner')}><Play className="mr-1 h-4 w-4" />Main sekarang</Button></div></Lux>
       <div className="space-y-2"><p className="px-1 text-[10px] font-bold uppercase tracking-widest text-primary">Turnamen mendatang</p>
         {EVENTS.map((e, i) => <div key={e} className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-card/70 p-3">
           <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/30 to-accent/30 text-sm font-black text-primary">#{i + 1}</div>
@@ -110,13 +116,12 @@ function GamePage() {
       <Link to="/arena" className="block"><div className="rounded-2xl border border-accent/40 bg-accent/10 p-3 text-sm">Misi harian & BIXP ada di <b className="text-primary">Fox Arena →</b></div></Link>
     </>}
 
-    {tab === 'pvp' && <Lux className="text-center"><Tag>Grand Final · Preview</Tag>
-      <div className="mt-4 flex items-center justify-between">
+    {tab === 'pvp' && <Lux className="text-center !p-0"><div className="relative"><img src={vsArt} alt="Grand final duel" className="h-48 w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" /><div className="absolute inset-x-0 top-3"><Tag>Grand Final · Preview</Tag></div><p className="absolute inset-x-0 bottom-2 bg-gradient-to-b from-primary to-accent bg-clip-text text-6xl font-black italic text-transparent drop-shadow-2xl">VS</p></div><div className="p-4">
+      <div className="flex items-center justify-between gap-2">
         {['Player A', 'Player B'].map((p, i) => <div key={p} className={`flex w-[38%] flex-col items-center gap-2 rounded-2xl border p-3 ${i ? 'border-accent/60' : 'border-primary/60'}`}>
           <div className={`grid h-14 w-14 place-items-center rounded-full ${i ? 'bg-accent/30' : 'bg-primary/30'}`}><Swords className="h-6 w-6" /></div><p className="text-xs font-bold">{p}</p><p className="text-[10px] text-muted-foreground">Menunggu</p></div>)}
       </div>
-      <p className="-mt-16 mb-12 bg-gradient-to-b from-primary to-accent bg-clip-text text-4xl font-black italic text-transparent">VS</p>
-      <p className="text-xs text-muted-foreground">Bracket & matchmaking dibuka setelah aturan turnamen dan anti-cheat siap.</p></Lux>}
+      <p className="text-xs text-muted-foreground">Bracket & matchmaking dibuka setelah aturan turnamen dan anti-cheat siap.</p></div></Lux>}
 
     {tab === 'runner' && <Lux><div className="mb-2 flex items-center justify-between"><h2 className="font-black tracking-wider">CYBER RUNNER</h2><span className="rounded-lg border border-primary/40 px-2 py-0.5 font-mono text-xs text-primary">BEST {best}</span></div>
       <p className="mb-3 text-xs text-muted-foreground">Ketuk layar untuk lompat.</p><Runner onScore={save} /></Lux>}

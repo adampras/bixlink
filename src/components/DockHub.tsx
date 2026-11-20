@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type UIEvent } from 'react';
 import { Link } from '@tanstack/react-router';
-import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Clapperboard, HandCoins, Landmark, Store, Send, Search, Coins, Wrench, UserRound, Settings2, Bot, CarFront, WalletCards, PhoneCall, ShieldCheck, ArrowRight, type LucideIcon } from 'lucide-react';
+import { LayoutGrid, Home, CandlestickChart, Rocket, Cpu, ArrowLeftRight, Gem, Swords, Gamepad2, Clapperboard, HandCoins, Landmark, Store, Send, Search, Coins, Wrench, UserRound, Settings2, Bot, CarFront, WalletCards, PhoneCall, ShieldCheck, ArrowRight, type LucideIcon } from 'lucide-react';
 import artGo from '@/assets/hub/v2-bixgo.jpg';
 import artMall from '@/assets/hub/v2-mall.jpg';
 import artCall from '@/assets/hub/v2-call.jpg';
@@ -8,6 +8,7 @@ import artTok from '@/assets/hub/v2-bixtok.jpg';
 import artGold from '@/assets/hub/v2-gold.jpg';
 import artMining from '@/assets/hub/mining.jpg';
 import artArena from '@/assets/hub/arena.jpg';
+import artGame from '@/assets/game/hero.jpg';
 import artCare from '@/assets/hub/v2-care.jpg';
 import artTrade from '@/assets/hub/v2-trade.jpg';
 import artBot from '@/assets/hub/bixtrade.jpg';
@@ -29,8 +30,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { readEntry, GATEWAY, ENTRY_SEEN, type Entry } from '@/lib/hub-entry';
 import { HUB_GROUPS, HUB_ITEMS, PILLARS, hubVisible, hubOrdered, pillarOf } from '@/lib/dock-hub';
 
-const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: CarFront, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards, call: PhoneCall, settings: Settings2, gold: Coins, care: ShieldCheck };
-const ART: Record<string, string> = { bixgo: artGo, nft: artMall, call: artCall, bixtok: artTok, gold: artGold, mining: artMining, arena: artArena, care: artCare, trade: artTrade, bixtrade: artBot, presale: artPresale, boost: artBoost, buyback: artBuyback, exchange: artExchange, onchain: artOnchain, pay: artPay, vault: artVault, home: artHome, profile: artProfile, settings: artSettings };
+const ICONS: Record<string, LucideIcon> = { home: Home, trade: CandlestickChart, bixtrade: Bot, bixgo: CarFront, boost: Rocket, mining: Cpu, exchange: ArrowLeftRight, presale: Gem, arena: Swords, bixtok: Clapperboard, buyback: HandCoins, vault: Landmark, nft: Store, pay: Send, profile: UserRound, onchain: WalletCards, call: PhoneCall, settings: Settings2, gold: Coins, care: ShieldCheck, game: Gamepad2 };
+const ART: Record<string, string> = { bixgo: artGo, nft: artMall, call: artCall, bixtok: artTok, gold: artGold, mining: artMining, arena: artArena, game: artGame, care: artCare, trade: artTrade, bixtrade: artBot, presale: artPresale, boost: artBoost, buyback: artBuyback, exchange: artExchange, onchain: artOnchain, pay: artPay, vault: artVault, home: artHome, profile: artProfile, settings: artSettings };
 /** Category look: swipe rows for long groups, fixed grids for short ones. */
 const GROUP_STYLE: Record<string, { tone: string; swipe: boolean }> = {
   'Trading & Finance': { tone: 'gold', swipe: true },
@@ -39,7 +40,7 @@ const GROUP_STYLE: Record<string, { tone: string; swipe: boolean }> = {
   'Account': { tone: 'silver', swipe: false },
 };
 /** Small decorative labels only; they never imply live status or rewards. */
-const BADGES: Record<string, string> = { bixtok: 'NEW', bixtrade: 'PRO', presale: 'HOT', call: 'NEW' };
+const BADGES: Record<string, string> = { bixtok: 'NEW', bixtrade: 'PRO', presale: 'HOT', call: 'NEW', game: 'NEW' };
 const RECENT_KEY = 'bix-hub-recent';
 
 function SwipeRow({ children, count }: { children: React.ReactNode; count: number }) {

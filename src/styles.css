@@ -9497,3 +9497,6 @@ html body .comm-voice .comm-vtime{font-size:10px}
 }
 .bixtok-burst{position:fixed!important;left:50%!important;top:40%!important;will-change:transform,opacity;text-align:center;z-index:5}
 .bxt-combo{will-change:transform,opacity}
+
+/* BIXGAME page-only palette: gold + neon violet on obsidian (scoped, no global effect). */
+.bixgame-skin { --primary: oklch(0.87 0.18 92); --primary-foreground: oklch(0.15 0.02 280); --accent: oklch(0.63 0.25 304); --accent-foreground: oklch(0.98 0 0); --ring: oklch(0.87 0.18 92); }

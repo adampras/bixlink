@@ -17,6 +17,7 @@ export const HUB_ITEMS = [
   { id: 'care', to: '/care', label: 'BIXCARE', note: 'Bengkel · Cuci · Laundry · Rental', group: 'Ecosystem' },
   { id: 'nft', to: '/nft-marketplace', label: 'BIXMALL', note: 'Luxury Mall · VIP', group: 'Ecosystem' },
   { id: 'mining', to: '/mining', label: 'Mining', note: 'Rig pre-order', group: 'Ecosystem' },
+  { id: 'game', to: '/game', label: 'BIXGAME', note: 'Arena · Runner', group: 'Ecosystem' },
   { id: 'arena', to: '/arena', label: 'Fox Arena', note: 'Missions', group: 'Ecosystem' },
   { id: 'home', to: '/', label: 'Home', note: 'Overview', group: 'Account' },
   { id: 'profile', to: '/profile', label: 'Profile', note: 'Account', group: 'Account' },
@@ -34,7 +35,7 @@ export function hubOrdered<T extends { id: string }>(items: readonly T[], order:
 export const PILLARS = [
   { id: 'daily', label: 'Layanan Harian', note: 'BIXGO · BIXCARE', ids: ['bixgo', 'care', 'nft'] },
   { id: 'finance', label: 'Finansial & Aset', note: 'Pay · Gold · Trade', ids: ['pay', 'gold', 'onchain', 'vault', 'trade', 'bixtrade', 'presale', 'boost', 'buyback', 'exchange', 'mining'] },
-  { id: 'connect', label: 'Koneksi & Media', note: 'Call · Live · Arena', ids: ['call', 'bixtok', 'arena'] },
+  { id: 'connect', label: 'Koneksi & Media', note: 'Call · Live · Arena', ids: ['call', 'bixtok', 'game', 'arena'] },
   { id: 'account', label: 'Akun', note: 'Home · Profile', ids: ['home', 'profile', 'settings'] },
 ] as const;
 export type DockModel = 'classic' | 'owner' | 'all';
