@@ -1,5 +1,5 @@
 import { ModuleGate } from '@/components/ModuleGate';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
@@ -67,6 +67,7 @@ function ArenaPage() {
           <div className="mt-3">{L.slice(3).map(r => <div key={r.rank} className={`flex items-center justify-between border-b border-border py-3 text-sm ${r.is_me ? 'text-chart-3 font-bold' : ''}`}><span className="numeric w-8">#{r.rank}</span><span className="flex-1">{r.member}{r.is_me ? ' (you)' : ''}</span><b className="numeric">{Number(r.points).toFixed(2)}</b></div>)}</div></>; })()}
         <p className="mt-3 text-xs text-muted-foreground">Top 10 at season end are reviewed by the owner for BIX prizes from the Marketing allocation. Nothing pays out automatically.</p></section>}
     </>}
+    <Link to="/game" className="mt-8 block rounded-xl border border-primary/40 p-4 text-center text-sm font-bold text-primary">Buka BIXGAME Arena →</Link>
     <p className="mt-10 rounded-xl border border-border p-4 text-xs leading-5 text-muted-foreground">{DISCLOSURE}</p>
   </main></MemberGate></BixShell>;
 }

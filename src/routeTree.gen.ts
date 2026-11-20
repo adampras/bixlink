@@ -28,6 +28,7 @@ import { Route as ConsortiumVaultRouteImport } from './routes/consortium-vault'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as EcosystemRouteImport } from './routes/ecosystem'
 import { Route as ExchangeRouteImport } from './routes/exchange'
+import { Route as GameRouteImport } from './routes/game'
 import { Route as GoldRouteImport } from './routes/gold'
 import { Route as LeaderControlRouteImport } from './routes/leader-control'
 import { Route as MarketRouteImport } from './routes/market'
@@ -157,6 +158,11 @@ const EcosystemRoute = EcosystemRouteImport.update({
 const ExchangeRoute = ExchangeRouteImport.update({
   id: '/exchange',
   path: '/exchange',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameRoute = GameRouteImport.update({
+  id: '/game',
+  path: '/game',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GoldRoute = GoldRouteImport.update({
@@ -357,6 +363,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/ecosystem': typeof EcosystemRoute
   '/exchange': typeof ExchangeRoute
+  '/game': typeof GameRoute
   '/gold': typeof GoldRoute
   '/leader-control': typeof LeaderControlRoute
   '/market': typeof MarketRoute
@@ -413,6 +420,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/ecosystem': typeof EcosystemRoute
   '/exchange': typeof ExchangeRoute
+  '/game': typeof GameRoute
   '/gold': typeof GoldRoute
   '/leader-control': typeof LeaderControlRoute
   '/market': typeof MarketRoute
@@ -470,6 +478,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/ecosystem': typeof EcosystemRoute
   '/exchange': typeof ExchangeRoute
+  '/game': typeof GameRoute
   '/gold': typeof GoldRoute
   '/leader-control': typeof LeaderControlRoute
   '/market': typeof MarketRoute
@@ -528,6 +537,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/ecosystem'
     | '/exchange'
+    | '/game'
     | '/gold'
     | '/leader-control'
     | '/market'
@@ -584,6 +594,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/ecosystem'
     | '/exchange'
+    | '/game'
     | '/gold'
     | '/leader-control'
     | '/market'
@@ -640,6 +651,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/ecosystem'
     | '/exchange'
+    | '/game'
     | '/gold'
     | '/leader-control'
     | '/market'
@@ -697,6 +709,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   EcosystemRoute: typeof EcosystemRoute
   ExchangeRoute: typeof ExchangeRoute
+  GameRoute: typeof GameRoute
   GoldRoute: typeof GoldRoute
   LeaderControlRoute: typeof LeaderControlRoute
   MarketRoute: typeof MarketRoute
@@ -867,6 +880,13 @@ declare module '@tanstack/react-router' {
       path: '/exchange'
       fullPath: '/exchange'
       preLoaderRoute: typeof ExchangeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game': {
+      id: '/game'
+      path: '/game'
+      fullPath: '/game'
+      preLoaderRoute: typeof GameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gold': {
@@ -1137,6 +1157,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   EcosystemRoute: EcosystemRoute,
   ExchangeRoute: ExchangeRoute,
+  GameRoute: GameRoute,
   GoldRoute: GoldRoute,
   LeaderControlRoute: LeaderControlRoute,
   MarketRoute: MarketRoute,
