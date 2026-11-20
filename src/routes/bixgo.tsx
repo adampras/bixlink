@@ -22,6 +22,8 @@ import { GLOBAL_CITIES, cryptoEquivalent, formatMoney, readCurrency, saveCurrenc
 import { BixgoAccount, BixgoBottomNav, BixgoHome, BixgoInbox, type BixgoView } from '@/components/BixgoHome';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
 import { CityMarquee } from '@/components/CityMarquee';
+import { BixgoLuxHome } from '@/components/BixgoLuxHome';
+import { useDesignAccess } from '@/lib/design-release';
 
 export const Route = createFileRoute('/bixgo')({
   head: () => ecosystemHead('/bixgo', 'BIXGO — Perjalanan, Pengantaran & Jastip | BIXLINK', 'Kenali BIXGO untuk perjalanan motor dan mobil, pengantaran serta Jastip. Lihat estimasi tarif; layanan bergantung pada mitra aktif di kota Anda.'),
@@ -87,6 +89,8 @@ function BixgoPage() {
   useEffect(() => { setCur(readCurrency()); }, []);
   const pickCur = (c: GlobalCurrency) => { setCur(c); saveCurrency(c); };
   const { user } = useMember();
+  const da = useDesignAccess(user?.id).data;
+  const lux = da?.owner1 === true || da?.next_gen === true;
 
   useEffect(() => { void supabase.from('app_settings').select('value').eq('key', 'bixgo').maybeSingle().then(({ data }) => setCfg(readBixgo(data?.value))); }, []);
   useEffect(() => { try { setOrders(JSON.parse(localStorage.getItem(HKEY) || '[]')); } catch { /* ignore */ } }, []);
@@ -138,7 +142,7 @@ function BixgoPage() {
   const go = (v: BixgoView) => { setView(v); if (v === 'activity') setTab('history'); if (v === 'order') setTab('order'); };
   const memberName = user?.email?.split('@')[0] || 'Member BIXLINK';
 
-  return <div className="bixgo-grab fixed inset-0 z-[60] overflow-y-auto"><div className="mx-auto min-h-full max-w-xl pb-[calc(env(safe-area-inset-bottom)+72px)]">
+  return <div className={`bixgo-grab ${lux ? 'bixgo-lux' : ''} fixed inset-0 z-[60] overflow-y-auto`}><div className="mx-auto min-h-full max-w-xl pb-[calc(env(safe-area-inset-bottom)+72px)]">
     {!cfg.enabled && isAdmin && <p className="border-b border-accent/40 bg-accent/20 px-3 py-2 text-[11px]">Admin 1 preview · Under Reconstruction (only visible to you)</p>}
     {sub === 'travel' && <BixgoTravel cur={cur} usdtIdr={cfg.usdtIdr} onBack={() => setSub(null)}/>}
     {sub === 'jastip' && <BixgoJastip city={city} isAdmin={isAdmin} onBack={() => setSub(null)}/>}
@@ -149,6 +153,7 @@ function BixgoPage() {
     {view === 'home' && <><CityMarquee/><ModeGuide mode={mode}/></>}
     {view === 'home' && mode === 'merchant' && <BixgoMerchant city={city} isAdmin={isAdmin}/>}
     {view === 'home' && mode === 'driver' && <BixgoPassport cur={cur} usdtIdr={cfg.usdtIdr} city={city}/>}
+    {view === 'home' && mode === 'rider' && lux && <BixgoLuxHome cfg={cfg} name={memberName} enabled={enabledSet} onPick={pick}/>}
     {view === 'home' && mode === 'rider' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
     {((view === 'home' && mode === 'rider') || view === 'activity') && <BixgoActiveTrip/>}
     {view === 'home' && mode === 'rider' && <BixgoStores/>}

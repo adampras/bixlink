@@ -9500,3 +9500,32 @@ html body .comm-voice .comm-vtime{font-size:10px}
 
 /* BIXGAME page-only palette: gold + neon violet on obsidian (scoped, no global effect). */
 .bixgame-skin { --primary: oklch(0.87 0.18 92); --primary-foreground: oklch(0.15 0.02 280); --accent: oklch(0.63 0.25 304); --accent-foreground: oklch(0.98 0 0); --ring: oklch(0.87 0.18 92); }
+
+/* BIXGO next-gen luxury (design-gated: Owner 1 + whitelisted) */
+.bixgo-grab.bixgo-lux {
+  --background: oklch(0.11 0.012 290); --foreground: oklch(0.96 0.01 90);
+  --card: oklch(0.16 0.02 290); --card-foreground: oklch(0.96 0.01 90);
+  --primary: oklch(0.83 0.15 85); --primary-foreground: oklch(0.16 0.02 80);
+  --muted: oklch(0.2 0.02 290); --muted-foreground: oklch(0.7 0.02 290);
+  --accent: oklch(0.66 0.22 300); --accent-foreground: oklch(0.98 0 0);
+  --border: oklch(0.32 0.04 300 / 0.7); --input: oklch(0.3 0.04 300); --ring: oklch(0.83 0.15 85);
+  --bgl-purple: oklch(0.66 0.24 300); --bgl-gold: oklch(0.83 0.15 85);
+  background: radial-gradient(120% 60% at 50% 0%, oklch(0.18 0.05 295), var(--background) 60%); color: var(--foreground);
+}
+.bixgo-lux .rounded-3xl, .bixgo-lux .rounded-2xl { box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.06); }
+.bixgo-lux [class*="bg-primary"]:not([class*="bg-primary/"]) { background-image: linear-gradient(180deg, oklch(0.9 0.13 90), oklch(0.72 0.14 75)); }
+.bgl-home { background: oklch(0.09 0.015 290); border: 1px solid var(--border); }
+.bgl-street { stroke: oklch(0.32 0.03 290 / 0.55); stroke-width: 1; fill: none; }
+.bgl-light { fill: var(--bgl-gold); opacity: .55; }
+.bgl-route { stroke: var(--bgl-purple); stroke-width: 4; fill: none; stroke-linecap: round; }
+.bgl-glass { background: oklch(0.22 0.04 295 / 0.6); border: 1px solid oklch(0.6 0.12 300 / 0.35); backdrop-filter: blur(14px); }
+.bgl-avatar { background: linear-gradient(135deg, var(--bgl-gold), oklch(0.6 0.13 70)); color: var(--primary-foreground); }
+.bgl-dot { background: var(--bgl-purple); }
+.bgl-purple { color: var(--bgl-purple); }
+.bgl-pin { background: oklch(0.83 0.15 85 / 0.25); box-shadow: 0 0 0 10px oklch(0.83 0.15 85 / 0.12), 0 0 24px var(--bgl-gold); }
+.bgl-pin > span { background: var(--bgl-gold); }
+.bgl-car { filter: drop-shadow(0 0 10px var(--bgl-purple)); animation: bgl-drive 6s ease-in-out infinite alternate; }
+@keyframes bgl-drive { from { transform: translate(0, 0); } to { transform: translate(-24px, -18px); } }
+.bgl-card { background: oklch(0.17 0.025 290); border: 1px solid var(--border); }
+.bgl-card.is-on { border-color: var(--bgl-purple); box-shadow: 0 0 18px -4px var(--bgl-purple); }
+@media (prefers-reduced-motion: reduce) { .bgl-car { animation: none; } }
