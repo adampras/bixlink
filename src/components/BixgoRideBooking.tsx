@@ -1,6 +1,10 @@
+import { Button } from '@/components/ui/button';
+import luxSedan from '@/assets/bixgo/lux-sedan.webp.asset.json';
+import luxSuv from '@/assets/bixgo/lux-suv.webp.asset.json';
+import luxVan from '@/assets/bixgo/lux-van.webp.asset.json';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { ClientOnly } from '@tanstack/react-router';
-import { ArrowLeft, CalendarClock, CheckCircle2, Crosshair, Info, Loader2, MapPin, MoreHorizontal, Search, Store, Users } from 'lucide-react';
+import { ArrowLeft, CalendarClock, CheckCircle2, Crosshair, Info, Loader2, MapPin, MoreHorizontal, Search, Store, Users, Wallet, QrCode, Banknote, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BixgoVehicleIcon, vehicleKind } from '@/components/BixgoVehicleIcon';
 import { BixgoRadar } from '@/components/BixgoRadar';
@@ -28,7 +32,7 @@ const LANDMARKS: Place[] = [
 const PAYS = ['USDT', 'BIX Token', 'Cash', 'QRIS', 'Bank'];
 
 /** Pickup + vehicle selection on a real map with device GPS and real road distance. Booking itself is still a preview: no driver dispatch or payment. */
-export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'USD', city = '' }: { cfg: BixgoSettings; cur?: GlobalCurrency; city?: string; start: 'ride' | 'car'; onBack: () => void; onBooked: (o: { svc: 'ride' | 'car'; from: string; to: string; total: number; pay: string; name: string }) => void }) {
+export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'USD', city = '', lux = false }: { lux?: boolean; cfg: BixgoSettings; cur?: GlobalCurrency; city?: string; start: 'ride' | 'car'; onBack: () => void; onBooked: (o: { svc: 'ride' | 'car'; from: string; to: string; total: number; pay: string; name: string }) => void }) {
   const [stage, setStage] = useState<'pickup' | 'choose' | 'booked'>('pickup');
   const [bid, setBid] = useState<string | null>(null);
   const [active, setActive] = useState<'from' | 'to'>('from');
@@ -106,15 +110,16 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
       <button disabled={!from || !to || busy === 'route'} onClick={() => setStage('choose')} className="mt-4 w-full rounded-full bg-primary py-3.5 text-base font-bold text-primary-foreground disabled:opacity-40">{busy === 'route' ? 'Calculating route…' : 'Continue to select vehicle'}</button>
     </section>}
 
-    {stage === 'choose' && <section className="relative z-[500] -mt-4 rounded-t-3xl bg-background px-3 pt-3">
+    {stage === 'choose' && lux && <div className="bgl-heading"><h2>Select Your Ride</h2><p>Pilih kendaraan · tarif berdasarkan rute Anda</p></div>}
+    {stage === 'choose' && <section className={`relative z-[500] -mt-4 rounded-t-3xl bg-background px-3 pt-3 ${lux ? 'bgl-vehicle-list' : ''}`}>
       <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted"/>
       <p className="mb-2 truncate px-1 text-xs text-muted-foreground">{from?.name} → {to?.name} · {km.toFixed(1)} km</p>
-      {OPTS.filter(o => cfg.services[o.svc].enabled).map(o => { const i = OPTS.indexOf(o); const p = price(o); const vk = vehicleKind(o.name); const on = i === sel; return <button key={o.name} onClick={() => setSel(i)} className={`mb-1 flex w-full items-center gap-3 rounded-xl border px-2.5 py-2 text-left transition ${on ? 'border-primary bg-primary/5' : 'border-transparent'}`}>
-        <span className={`bixgo-veh-tile grid shrink-0 place-items-center rounded-2xl transition-all ${vk === 'black' ? 'is-vip' : ''} h-11 w-14`}><BixgoVehicleIcon kind={vk} className="w-11"/></span>
-        <span className="flex-1"><b className="block text-sm">{o.name}</b><span className="flex items-center gap-1 text-xs text-muted-foreground">±{eta(o)} min • <Users className="h-3 w-3"/>{o.seats}</span></span>
-        <span className="text-right"><b className={`block text-sm ${p.final < p.base ? 'text-primary' : ''}`}>{idr(p.final)}</b>{p.final < p.base && <s className="text-[11px] text-muted-foreground">{idr(p.base)}</s>}{o.tag && <span className="block text-[10px] text-primary">{o.tag}</span>}</span>
-      </button>; })}
-      <div className="mt-2 flex flex-wrap gap-1 text-[10px]">{['Vetted Executive Drivers', 'Real-time GPS Route', 'USDT / BIX Settlement'].map(b => <span key={b} className="rounded-full border border-primary/40 px-2 py-0.5 text-primary">✓ {b}</span>)}</div>
+      {OPTS.filter(o => cfg.services[o.svc].enabled).map(o => { const i = OPTS.indexOf(o); const p = price(o); const vk = vehicleKind(o.name); const on = i === sel; return <Button variant="ghost" key={o.name} aria-pressed={on} onClick={() => setSel(i)} className={`h-auto whitespace-normal ${lux ? 'bgl-vehicle' : ''} mb-1 flex w-full items-center gap-3 rounded-xl border px-2.5 py-2 text-left transition ${on ? 'border-primary bg-primary/5' : 'border-transparent'}`}>
+        <span className={`bixgo-veh-tile grid shrink-0 place-items-center rounded-2xl transition-all ${vk === 'black' ? 'is-vip' : ''} h-11 w-14`}>{lux && o.svc === 'car' ? <img src={(vk === 'executive' ? luxVan : vk === 'black' ? luxSuv : luxSedan).url} alt="Ilustrasi kelas kendaraan" className="bgl-vehicle-photo"/> : <BixgoVehicleIcon kind={vk} className="w-11"/>}</span>
+        <span className="bgl-vehicle-details flex-1"><b className="block text-sm">{o.name}</b><span className="bgl-vehicle-meta flex items-center gap-1 text-xs text-muted-foreground">±{eta(o)} min • <Users className="h-3 w-3"/>{o.seats}</span>{lux && <span className="bgl-vehicle-price">{idr(p.final)}<small>≈ {cryptoEquivalent(p.final, cfg.usdtIdr).usdt} USDT · {cryptoEquivalent(p.final, cfg.usdtIdr).bix} BIX</small></span>}</span>
+        <span className={lux ? "hidden" : "text-right"}><b className={`block text-sm ${p.final < p.base ? 'text-primary' : ''}`}>{idr(p.final)}</b>{p.final < p.base && <s className="text-[11px] text-muted-foreground">{idr(p.base)}</s>}{o.tag && <span className="block text-[10px] text-primary">{o.tag}</span>}</span>
+      </Button>; })}
+      <div className="mt-2 flex flex-wrap gap-1 text-[10px]">{['GPS & rute jalan', 'Tarif estimasi', 'Pembayaran sesuai pilihan'].map(b => <span key={b} className="rounded-full border border-primary/40 px-2 py-0.5 text-primary">✓ {b}</span>)}</div>
       <div className="mt-2 rounded-2xl border border-border p-3 text-[11px] text-muted-foreground">
         <b className="text-foreground">Commission split {cfg.commissionPct}% ({idr(commission)})</b>
         <p>{branch ? `Franchise ${branch.city} ${idr(split.franchise)} · Center ${idr(split.platform)} · Pool ${idr(split.pool)}` : `BIXGO Center ${idr(split.platform)} (no branch)`}</p>
@@ -128,15 +133,16 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
       <button onClick={onBack} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground">Back to Home</button></>}
     </section>}
 
-    {stage === 'choose' && <footer className="fixed inset-x-0 bottom-0 z-[600] mx-auto max-w-xl border-t border-border bg-background px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+18px)]">
-      <div className="flex items-center gap-2 border-b border-border pb-2 text-sm">
+    {stage === 'choose' && <footer className="bgl-booking-footer fixed inset-x-0 bottom-0 z-[600] mx-auto max-w-xl border-t border-border bg-background px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+18px)]">
+      {lux ? <div className="bgl-payment-grid" aria-label="Payment method">{PAYS.map((method, i) => { const I = i < 2 ? Wallet : i === 3 ? QrCode : i === 4 ? CreditCard : Banknote; return <Button key={method} variant={pay === i ? 'default' : 'outline'} aria-pressed={pay === i} onClick={() => setPay(i)} className="gap-1 text-[11px]"><I className="h-4 w-4 shrink-0"/>{method}</Button>; })}</div> : <div className="flex items-center gap-2 border-b border-border pb-2 text-sm">
         <button onClick={() => setPay(p => (p + 1) % PAYS.length)} className="flex flex-1 items-center gap-2 font-bold"><span className="rounded-md bg-foreground px-1.5 text-[10px] text-background">{PAYS[pay]}</span>{PAYS[pay]}{pay === 1 && <span className="text-[10px] text-primary">−{cfg.bixDiscountPct}%</span>}</button>
         <MoreHorizontal className="ml-2 h-5 w-5"/>
-      </div>
+      </div>}
+      {err && <p role="alert" className="mt-2 text-xs text-destructive">{err}</p>}
       <input value={landmark} maxLength={120} onChange={e => setLandmark(e.target.value)} placeholder="Pickup landmark (e.g. in front of the black gate)" className="mt-2 w-full rounded-full border border-border bg-card px-4 py-2 text-xs outline-none"/>
       <div className="mt-2 flex gap-2">
         <button aria-label="Schedule" className="grid h-12 w-14 place-items-center rounded-full bg-card"><CalendarClock className="h-5 w-5"/></button>
-        <button disabled={busy === 'book'} onClick={async () => { const total = Math.round(price(cur).final); setBusy('book'); const { data: u } = await supabase.auth.getUser(); if (u.user) { const { data, error } = await supabase.from('bixgo_bookings').insert({ city, service: cur.svc, vehicle: cur.name, pickup: (from?.name ?? '').slice(0, 200), dropoff: (to?.name ?? '').slice(0, 200), km: +km.toFixed(2), total_idr: total, pay_method: PAYS[pay]!, pickup_note: landmark.trim().slice(0, 120), pickup_lat: from?.lat ?? null, pickup_lng: from?.lng ?? null, dropoff_lat: to?.lat ?? null, dropoff_lng: to?.lng ?? null }).select('id').single(); if (error) { setErr(error.message); setBusy(null); return; } setRef(data.id.slice(0, 8).toUpperCase()); setBid(data.id); } setBusy(null); onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total, pay: PAYS[pay]!, name: cur.name }); setStage('booked'); }} className="flex-1 rounded-full bg-primary py-3 text-base font-bold text-primary-foreground">Book {cur.name}</button>
+        <button disabled={busy === 'book'} onClick={async () => { const total = Math.round(price(cur).final); setBusy('book'); const { data: u } = await supabase.auth.getUser(); if (u.user) { const { data, error } = await supabase.from('bixgo_bookings').insert({ city, service: cur.svc, vehicle: cur.name, pickup: (from?.name ?? '').slice(0, 200), dropoff: (to?.name ?? '').slice(0, 200), km: +km.toFixed(2), total_idr: total, pay_method: PAYS[pay]!, pickup_note: landmark.trim().slice(0, 120), pickup_lat: from?.lat ?? null, pickup_lng: from?.lng ?? null, dropoff_lat: to?.lat ?? null, dropoff_lng: to?.lng ?? null }).select('id').single(); if (error) { setErr(error.message); setBusy(null); return; } setRef(data.id.slice(0, 8).toUpperCase()); setBid(data.id); } setBusy(null); onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total, pay: PAYS[pay]!, name: cur.name }); setStage('booked'); }} className="flex-1 rounded-full bg-primary py-3 text-base font-bold text-primary-foreground">{busy === 'book' ? 'Mengirim…' : lux ? `Confirm Booking · ${cur.name}` : `Book ${cur.name}`}</button>
       </div>
     </footer>}
   </div>;

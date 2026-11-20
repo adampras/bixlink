@@ -1,0 +1,1 @@
+- BIXGO luxury presentation accepts the route's existing server-decided design audience; keep its stylesheet scoped to `.bixgo-lux` and reuse existing trip, merchant and earnings operations so presentation cannot change access or settlement.

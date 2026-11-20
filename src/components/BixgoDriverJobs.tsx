@@ -31,7 +31,7 @@ const nav = (q: string) => `https://www.google.com/maps/dir/?api=1&destination=$
 const BADGE: Record<PayKind, string> = { usdt: 'USDT · Auto hold', bix: 'BIX Token · Auto hold', cash: 'Cash · BIX fee first' };
 
 /** Driver order desk: accept open trips, start, complete. USDT/BIX fares settle 85% to driver; cash trips charge the company fee in BIX on accept. */
-export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean; adj?: number; onRating?: (r: { avg: number | null; n: number }) => void }) {
+export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false }: { lux?: boolean; online: boolean; adj?: number; onRating?: (r: { avg: number | null; n: number }) => void }) {
   const [open, setOpen] = useState<Job[]>([]);
   const [mine, setMine] = useState<Job[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
@@ -106,8 +106,9 @@ export function BixgoDriverJobs({ online, adj = 0, onRating }: { online: boolean
       <h4 className="mb-2 text-xs font-black">Incoming orders</h4>
       {!online && <p className="text-[11px] text-muted-foreground">Go online to receive orders in your city.</p>}
       {online && !open.length && <p className="text-[11px] text-muted-foreground">No open orders right now. This list refreshes every 10 seconds.</p>}
-      <div className="space-y-2">{open.map(j => { const est = Math.round(Number(j.total_idr) * (1 + adj / 100)); return <div key={j.id} className="space-y-2 rounded-2xl border border-border p-3">
+      <div className="space-y-2">{open.map(j => { const est = Math.round(Number(j.total_idr) * (1 + adj / 100)); return <div key={j.id} className={`space-y-2 rounded-2xl border border-border p-3 ${lux ? 'bgl-driver-order' : ''}`}>
         <div className="flex items-center justify-between gap-2"><Pay j={j}/><b className="text-xs tabular-nums">{rp(est)}{adj !== 0 && <span className="ml-1 text-[10px] text-primary">({adj > 0 ? '+' : ''}{adj}%)</span>}</b></div>
+        {lux && <div className="bgl-driver-radar"><small>Incoming order</small><MapPin className="mt-2 h-5 w-5 text-primary"/><strong>{Number(j.km).toFixed(1)}</strong><span>km · jarak perjalanan</span><b>{rp(est)}</b><small>Estimasi tarif · bukan saldo</small></div>}
         <Route j={j}/>
         <Btn id={j.id} onClick={() => void accept(j)}>Accept order</Btn>
       </div>; })}</div>

@@ -14,7 +14,7 @@ type License = { status: string; online: boolean; vehicle_type: string; vehicle_
 const VEHICLES = [['moto', 'BIX Moto'], ['urban', 'BIX Urban'], ['executive', 'BIX Executive'], ['black', 'BIX Black']] as const;
 
 /** Member BIXGO Passport: tier from active staking, own trip stats, and the Driver-Partner license / Driver Mode. */
-export function BixgoPassport({ cur, usdtIdr, city }: { cur: GlobalCurrency; usdtIdr: number; city: string }) {
+export function BixgoPassport({ cur, usdtIdr, city, lux = false }: { lux?: boolean; cur: GlobalCurrency; usdtIdr: number; city: string }) {
   const [uid, setUid] = useState<string | null>(null);
   const [stakeUsd, setStakeUsd] = useState(0);
   const [trips, setTrips] = useState({ n: 0, km: 0 });
@@ -98,7 +98,7 @@ export function BixgoPassport({ cur, usdtIdr, city }: { cur: GlobalCurrency; usd
           <button disabled={busy} onClick={() => void toggle()} className={`flex w-full items-center justify-center gap-2 rounded-full py-3 font-bold ${lic.online ? 'bg-primary text-primary-foreground' : 'border border-primary text-primary'}`}><Power className="h-4 w-4"/>{lic.online ? 'Driver Mode ON — receiving orders' : 'Go online'}</button>
           <BixgoDriverRates key={`${lic.rate_adj_pct}-${lic.accept_cash}-${lic.accept_bix}`} adj={Number(lic.rate_adj_pct ?? 0)} cash={lic.accept_cash ?? true} bix={lic.accept_bix ?? true} onSaved={() => void load()}/>
           <BixgoDriverPay key={`${lic.qris_path}-${lic.bank_account}-${lic.accept_qris}-${lic.accept_bank}`} uid={uid} lic={lic} onSaved={() => void load()}/>
-          <BixgoDriverJobs online={lic.online} adj={Number(lic.rate_adj_pct ?? 0)} onRating={setRating}/>
+          <BixgoDriverJobs lux={lux} online={lic.online} adj={Number(lic.rate_adj_pct ?? 0)} onRating={setRating}/>
         </>}
       </div>}
     </div>

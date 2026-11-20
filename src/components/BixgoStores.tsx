@@ -9,7 +9,7 @@ import { STATUS_LABEL, cartTotal, nextStatuses, rupiah, signPhotos, type Merchan
 const db = supabase as any;
 
 /** Real member stores (approved + open) for BIXFood/BIXMart, menu, cart and cash order. */
-export function BixgoStores() {
+export function BixgoStores({ lux = false }: { lux?: boolean }) {
   const [stores, setStores] = useState<Merchant[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<Merchant | null>(null);
@@ -42,16 +42,17 @@ export function BixgoStores() {
   };
   const cancel = async (id: string) => { const { error } = await db.rpc('bixgo_merchant_order_set', { p_id: id, p_status: 'cancelled' }); if (error) toast.error(error.message); else void load(); };
 
-  if (open) return <section className="px-3 pb-6">
+  if (open) return <section className={`px-3 pb-6 ${lux ? 'bgl-store-menu' : ''}`}>
     <button onClick={() => setOpen(null)} className="flex items-center gap-1 py-3 text-sm font-semibold"><ArrowLeft className="h-5 w-5"/>Kembali</button>
     {open.banner_path && urls[open.banner_path] && <img src={urls[open.banner_path]} alt={open.name} className="aspect-[2/1] w-full rounded-2xl object-cover"/>}
     <h2 className="mt-2 text-lg font-black">{open.name}</h2><p className="text-xs text-muted-foreground">{open.category} · {open.address} · {open.open_time}–{open.close_time}</p>
-    <div className="mt-3 space-y-2">{menu.map(i => <div key={i.id} className={`flex items-center gap-3 rounded-2xl border border-border bg-card p-2.5 ${i.in_stock ? '' : 'opacity-50'}`}>
-      {i.photo_path && urls[i.photo_path] ? <img src={urls[i.photo_path]} alt={i.name} className="h-16 w-16 rounded-xl object-cover"/> : <span className="h-16 w-16 rounded-xl bg-muted"/>}
-      <div className="min-w-0 flex-1"><p className="text-sm font-bold">{i.name}</p><p className="line-clamp-1 text-[11px] text-muted-foreground">{i.description}</p><p className="text-sm font-bold">{rupiah(i.price_idr)}</p></div>
-      {i.in_stock ? <div className="flex items-center gap-2"><button aria-label="Kurangi" onClick={() => setCart(c => ({ ...c, [i.id]: Math.max(0, (c[i.id] ?? 0) - 1) }))}><Minus className="h-4 w-4"/></button><b className="w-4 text-center text-sm">{cart[i.id] ?? 0}</b><button aria-label="Tambah" onClick={() => setCart(c => ({ ...c, [i.id]: (c[i.id] ?? 0) + 1 }))}><Plus className="h-4 w-4 text-primary"/></button></div> : <span className="text-[11px] font-bold">Habis</span>}
+    <div className="mt-3 space-y-2">{menu.map(i => <div key={i.id} className={`${lux ? 'bgl-menu-item' : ''} flex items-center gap-3 rounded-2xl border border-border bg-card p-2.5 ${i.in_stock ? '' : 'opacity-50'}`}>
+      {i.photo_path && urls[i.photo_path] ? <img src={urls[i.photo_path]} alt={i.name} className="h-16 w-16 rounded-xl object-cover"/> : <span className="bgl-menu-placeholder grid h-16 w-16 place-items-center rounded-xl bg-muted"><Store className="h-6 w-6 text-muted-foreground"/></span>}
+      <div className="min-w-0 flex-1"><p className="text-sm font-bold">{i.name}</p><p className="line-clamp-1 text-[11px] text-muted-foreground">{i.description}</p><p className="bgl-menu-price text-sm font-bold">{rupiah(i.price_idr)}</p>
+      {i.in_stock ? <div className="bgl-menu-actions flex items-center gap-2"><Button variant="ghost" size="icon" aria-label="Kurangi" onClick={() => setCart(c => ({ ...c, [i.id]: Math.max(0, (c[i.id] ?? 0) - 1) }))}><Minus className="h-4 w-4"/></Button><b className="w-4 text-center text-sm">{cart[i.id] ?? 0}</b><Button variant="ghost" size="icon" aria-label="Tambah" onClick={() => setCart(c => ({ ...c, [i.id]: (c[i.id] ?? 0) + 1 }))}><Plus className="h-4 w-4 text-primary"/></Button></div> : <span className="text-[11px] font-bold">Habis</span>}</div>
     </div>)}</div>
-    {lines.length > 0 && <div className="sticky bottom-16 mt-3 space-y-2 rounded-2xl border border-primary/40 bg-card p-3 shadow-lg">
+    {lines.length > 0 && <div className="bgl-cart sticky bottom-16 mt-3 space-y-2 rounded-2xl border border-primary/40 bg-card p-3 shadow-lg">
+      {lux && <div className="bgl-cart-summary"><b>Pesanan Anda · {lines.reduce((n, l) => n + l.qty, 0)} item</b><b>{rupiah(cartTotal(lines))}</b></div>}
       <Input placeholder="Alamat antar lengkap" value={addr} onChange={e => setAddr(e.target.value)}/><Input placeholder="Catatan (opsional)" value={note} onChange={e => setNote(e.target.value)}/>
       <Button className="w-full" disabled={busy} onClick={place}>{busy && <Loader2 className="h-4 w-4 animate-spin"/>}Pesan · {rupiah(cartTotal(lines))} · Tunai</Button>
       <p className="text-[10px] text-muted-foreground">Harga final dihitung ulang dari menu toko. Ongkir disepakati dengan toko/driver.</p>
