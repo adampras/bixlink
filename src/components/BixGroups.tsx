@@ -70,11 +70,12 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
         <Button variant="ghost" type="button" className="bx-grp-btn is-alt" disabled={code.length < 6} onClick={() => void join()}>Join</Button>
       </div>}
     </div>}
+    {!createOnly && groups.length > 0 && <div className="bx-grp-hero"><b>Group Command</b><small>{groups.length} grup · {groups.filter(g => g.owner_id === me).length} Anda kelola · {groups.filter(g => g.live_code).length} live</small></div>}
     {msg && <p className="bx-grp-msg">{msg}</p>}
     {createOnly ? <p className="bx-grp-empty">Setelah grup dibuat, pasang foto grup dan tambahkan member dari kontak atau jaringan Anda.</p> : groups.length === 0 ? <p className="bx-grp-empty">No groups yet. Create one or join with an invite code.</p>
       : <ul className="bx-grp-list">{groups.map(g => <li key={g.id} className="bx-grp-li"><Button variant="ghost" type="button" onClick={() => setOpen(g)}>
         <GroupAvatar g={g}/>
-        <span className="bx-grp-meta"><b>{g.name}</b><small>{g.about || (g.owner_id === me ? 'You are the host' : 'Education group')}</small></span>
+        <span className="bx-grp-meta"><b>{g.name}{g.owner_id === me && <em className="bx-grp-tag">HOST</em>}</b><small>{g.about || (g.owner_id === me ? 'Anda Host grup ini' : 'Grup edukasi')}</small></span>
         {g.live_code && <em className="bx-grp-live"><Radio size={12}/> LIVE</em>}
       </Button><button type="button" className="bx-grp-more" aria-label={`Opsi ${g.name}`} onClick={() => setAct(g)}><MoreVertical size={16}/></button></li>)}</ul>}
     {act && createPortal(<div className="comm-sheet-bg" onClick={() => setAct(null)}><div className="comm-sheet" role="menu" onClick={e => e.stopPropagation()}>
@@ -128,6 +129,13 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
         <Button variant="ghost" type="button" className="bx-grp-btn" onClick={async () => { const m = await shareGroup(g); if (m) setErr(m); }}><Share2 size={14}/> Bagikan link undangan</Button>
         {host && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" onClick={onPhoto}><Camera size={14}/> {g.avatar_path ? 'Ganti foto grup' : 'Pasang foto grup'}</Button>}
         {g.about && <p>{g.about}</p>}</div>
+      <div className="bx-grp-cmd" aria-label="Ringkasan admin grup">
+        <span><b>{roster.length}</b><small>Anggota</small></span>
+        <span><b>{roster.filter(m => m.admin && !m.host).length}</b><small>Admin</small></span>
+        <span><b>{roster.filter(m => m.host).length}</b><small>Host</small></span>
+        <span><b>{g.admins_only ? 'Admin' : 'Semua'}</b><small>Boleh kirim</small></span>
+      </div>
+      <p className="bx-grp-cmd-role">{host ? '👑 Anda Host — atur admin, anggota & pengaturan.' : meAdmin ? '🛡️ Anda Admin — tambah & keluarkan anggota.' : '👤 Anda anggota grup ini.'}</p>
       {host && <GroupSettings g={g} onSaved={onReload} onMsg={setErr}/>}
       {err && <p className="bx-grp-msg">{err}</p>}
       {manage && <Button variant="ghost" type="button" className="bx-grp-btn" style={{ width: '100%', marginBottom: 8 }} onClick={onAdd}><UserPlus size={14}/> Tambah anggota</Button>}

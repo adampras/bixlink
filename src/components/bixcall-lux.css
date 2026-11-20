@@ -214,3 +214,14 @@ html[data-bc-lux] .bcs-ring{box-shadow:0 0 0 2px var(--bcl-gold-deep),0 0 22px c
 .bbr-secure button{padding:8px;border-radius:999px;border:1px solid var(--bcl-line)}
 @media (max-width:360px){.bbr-orbit{height:300px}.bbr-seat{transform:translate(-50%,-50%) rotate(var(--a)) translateX(122px) rotate(calc(-1 * var(--a)))}}
 @media (prefers-reduced-motion:reduce){.bbr-live i,.bbr-wave i,.bbr-face{animation:none!important}}
+
+/* Page 3 — Group & Admin command suite */
+.bx-grp-cmd{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin:.6rem 0}
+.bx-grp-cmd span{display:flex;flex-direction:column;align-items:center;padding:.5rem .2rem;border-radius:.8rem;background:color-mix(in oklab,var(--primary) 10%,transparent);border:1px solid color-mix(in oklab,var(--primary) 25%,transparent)}
+.bx-grp-cmd b{font-size:.95rem}.bx-grp-cmd small{font-size:.62rem;opacity:.7}
+.bx-grp-cmd-role{font-size:.75rem;opacity:.8;margin:0 0 .6rem;text-align:center}
+.bx-grp-hero{display:flex;flex-direction:column;padding:.7rem .9rem;margin:.4rem 0 .6rem;border-radius:1rem;border:1px solid color-mix(in oklab,var(--primary) 30%,transparent);background:linear-gradient(135deg,color-mix(in oklab,var(--primary) 16%,transparent),transparent)}
+.bx-grp-hero small{font-size:.7rem;opacity:.75}
+.bx-grp-tag{font-style:normal;font-size:.55rem;margin-left:.35rem;padding:.05rem .35rem;border-radius:.4rem;border:1px solid currentColor;opacity:.8;vertical-align:middle}
+html[data-bc-lux] .bx-grp-hero b,html[data-bc-lux] .bx-grp-cmd b,html[data-bc-lux] .bx-grp-tag{color:var(--bcl-gold)}
+html[data-bc-lux] .bx-grp-cmd span{border-color:color-mix(in oklab,var(--bcl-gold) 30%,transparent)}
