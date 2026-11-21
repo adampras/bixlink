@@ -306,3 +306,14 @@ html[data-bc-lux] .bixcall-page{padding-bottom:96px}
 html[data-bc-lux] .comm-list .comm-thread{margin-bottom:8px;border-radius:22px;background:linear-gradient(160deg,oklch(0.17 0.012 290/.9),oklch(0.12 0.008 290/.9));border:1px solid oklch(1 0 0/.06);box-shadow:0 8px 22px oklch(0 0 0/.35)}
 html[data-bc-lux] .comm-thread img,html[data-bc-lux] .comm-thread .bix-avatar{box-shadow:0 0 0 2px var(--bcl-violet),0 0 14px color-mix(in oklab,var(--bcl-violet) 55%,transparent)!important;border-radius:999px}
 html[data-bc-lux] .comm-thread .comm-badge{background:linear-gradient(135deg,var(--bcl-violet),var(--bcl-violet-deep))!important;color:var(--foreground)!important;box-shadow:0 0 10px color-mix(in oklab,var(--bcl-violet) 70%,transparent)}
+
+/* Dock aligned above phone system buttons + obsidian cover strip + shining HUB cube */
+html[data-bc-lux] .bcl-dock{bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}
+html[data-bc-lux] .bcl-dock::before{content:"";position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom,0px) + 96px);z-index:-1;pointer-events:none;background:linear-gradient(to bottom,transparent,var(--bcl-ink) 38%,var(--bcl-ink))}
+html[data-bc-lux] .bcl-cube{position:relative;overflow:visible}
+html[data-bc-lux] .bcl-cube svg{position:relative;z-index:1}
+html[data-bc-lux] .bcl-cube::before{content:"";position:absolute;inset:6px;border-radius:14px;z-index:2;pointer-events:none;background:linear-gradient(115deg,transparent 35%,oklch(1 0 0/.75) 50%,transparent 65%);background-size:250% 100%;mix-blend-mode:overlay;animation:bclShine 3.2s ease-in-out infinite;-webkit-mask:radial-gradient(circle,#000 60%,transparent 72%);mask:radial-gradient(circle,#000 60%,transparent 72%)}
+@keyframes bclShine{0%,55%{background-position:130% 0}100%{background-position:-130% 0}}
+html[data-bc-lux] .bcl-cube-label{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;letter-spacing:.18em;color:var(--bcl-gold);text-shadow:0 0 8px color-mix(in oklab,var(--bcl-violet) 80%,transparent);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){html[data-bc-lux] .bcl-cube::before{animation:none}}
+html[data-bc-lux] main{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 100px)}
