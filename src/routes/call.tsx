@@ -280,6 +280,7 @@ function CallInner() {
     </div>
 
     <nav className="bcl-suite" aria-label="BIX CALL suite">{([['chat', 'Chats', MessageCircle], ['boardroom', 'Boardroom', Crown], ['group', 'Groups', ShieldCheck], ['vault', 'Vault', Lock], ['contacts', 'Kontak', Phone]] as const).map(([t, l, I]) => <Link key={t} to="/call" search={{ tab: t }} className={view === t ? 'is-on' : ''}><I size={16}/><span>{l}</span></Link>)}</nav>
+    {view === 'chat' && <div className="bcl-msgs-head"><h1>Messages</h1><nav>{([['All', 'chat'], ['DMs', 'chat'], ['Groups', 'group'], ['Channels', 'community'], ['Requests', 'updates']] as const).map(([l, t], i) => <Link key={l} to="/call" search={{ tab: t }} className={i === 0 ? 'is-on' : ''}>{l}</Link>)}</nav></div>}
     {view === 'chat' && <div className="bcl-hero"><div><small>SOVEREIGN CALL</small><b>Private. Secure. Executive.</b><span><Lock size={11}/> Percakapan antar member terlindungi</span></div><Link to="/call" search={{ tab: 'boardroom' }} className="bcl-hero-go"><Crown size={14}/> Boardroom</Link></div>}
     {view === 'chat' && <><DialFab me={me} tier={tier} onChat={open}/><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
     {view === 'starred' && <StarredList onOpen={open}/>}

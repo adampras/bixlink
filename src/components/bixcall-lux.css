@@ -284,3 +284,25 @@ html[data-bc-lux] .comm-voice .comm-vwave i.is-on, html[data-bc-lux] .comm-voice
 .bcs-pass b{font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bcs-pass span{font-size:.68rem;color:var(--muted-foreground)}
 .bcs-pass i{display:grid;grid-template-columns:repeat(4,9px);gap:2px;padding:5px;border-radius:6px;background:var(--background)}
 .bcs-pass em{width:9px;height:9px;border-radius:2px;background:transparent}.bcs-pass em.on{background:var(--accent)}
+
+/* Messages mockup: header, filter tabs, thread cards, capsule dock (lux audience only) */
+.bcl-dock,.bcl-msgs-head{display:none}
+html[data-bc-lux] .comm-dock{display:none!important}
+html[data-bc-lux] .bcl-dock{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:40;margin:0 auto;max-width:36rem;height:64px;align-items:center;justify-content:space-around;border-radius:999px;background:color-mix(in oklab,var(--bcl-ink) 82%,transparent);border:1px solid color-mix(in oklab,var(--bcl-gold) 22%,transparent);backdrop-filter:blur(18px);box-shadow:0 12px 34px oklch(0 0 0/.6),inset 0 1px 0 oklch(1 0 0/.06)}
+html[data-bc-lux] .bcl-dock>a{position:relative;display:grid;place-items:center;width:48px;height:48px;color:color-mix(in oklab,var(--foreground) 55%,transparent)}
+html[data-bc-lux] .bcl-dock>a.is-on{color:var(--bcl-gold)}
+html[data-bc-lux] .bcl-dock>a.is-on::after{content:"";position:absolute;bottom:4px;width:22px;height:3px;border-radius:3px;background:var(--bcl-gold);box-shadow:0 0 10px var(--bcl-gold)}
+html[data-bc-lux] .bcl-cube{margin-top:-30px;display:grid;place-items:center;width:62px;height:62px;filter:drop-shadow(0 0 16px color-mix(in oklab,var(--bcl-violet) 85%,transparent));animation:bclCube 5s ease-in-out infinite}
+@keyframes bclCube{50%{transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){html[data-bc-lux] .bcl-cube{animation:none}}
+html[data-bc-lux] .bcl-msgs-head{display:block;margin:.2rem 0 .7rem}
+html[data-bc-lux] .bcl-msgs-head h1{font-size:2rem;font-weight:800;letter-spacing:-.03em;color:var(--foreground);margin:0 0 .5rem}
+html[data-bc-lux] .bcl-msgs-head nav{display:flex;gap:1.1rem;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid oklch(1 0 0/.06)}
+html[data-bc-lux] .bcl-msgs-head nav a{position:relative;flex-shrink:0;padding:.45rem 0 .6rem;font-size:13px;color:color-mix(in oklab,var(--foreground) 62%,transparent)}
+html[data-bc-lux] .bcl-msgs-head nav a.is-on{color:var(--bcl-gold);font-weight:700}
+html[data-bc-lux] .bcl-msgs-head nav a.is-on::after{content:"";position:absolute;left:-4px;right:-4px;bottom:-1px;height:3px;border-radius:3px;background:var(--bcl-gold);box-shadow:0 0 10px var(--bcl-gold)}
+html[data-bc-lux] .bixcall-page .bcl-hero{display:none}
+html[data-bc-lux] .bixcall-page{padding-bottom:96px}
+html[data-bc-lux] .comm-list .comm-thread{margin-bottom:8px;border-radius:22px;background:linear-gradient(160deg,oklch(0.17 0.012 290/.9),oklch(0.12 0.008 290/.9));border:1px solid oklch(1 0 0/.06);box-shadow:0 8px 22px oklch(0 0 0/.35)}
+html[data-bc-lux] .comm-thread img,html[data-bc-lux] .comm-thread .bix-avatar{box-shadow:0 0 0 2px var(--bcl-violet),0 0 14px color-mix(in oklab,var(--bcl-violet) 55%,transparent)!important;border-radius:999px}
+html[data-bc-lux] .comm-thread .comm-badge{background:linear-gradient(135deg,var(--bcl-violet),var(--bcl-violet-deep))!important;color:var(--foreground)!important;box-shadow:0 0 10px color-mix(in oklab,var(--bcl-violet) 70%,transparent)}
