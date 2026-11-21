@@ -247,3 +247,30 @@ html[data-bc-lux] .bx-grp-cmd span{border-color:color-mix(in oklab,var(--bcl-gol
 .bx-grp-info>b{max-width:100%;overflow-wrap:anywhere}
 .bx-grp-info p{max-width:100%;overflow-wrap:anywhere}
 .bx-grp-cands .bx-grp-meta{display:grid}
+
+/* Chat room · Sovereign Lux final polish (presentation only) */
+html[data-bc-lux] .comm-room, html[data-bc-lux] .comm-room .comm-msgs { background: radial-gradient(80% 40% at 100% 0%, color-mix(in oklab, var(--bcl-violet) 14%, transparent), transparent 65%), var(--bcl-ink) !important; }
+html[data-bc-lux] .comm-room-head { background: color-mix(in oklab, var(--bcl-ink) 86%, transparent) !important; border-bottom: 1px solid color-mix(in oklab, var(--bcl-gold) 22%, transparent) !important; }
+html[data-bc-lux] .comm-room-head .bc-room-calls button { width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; border: 1px solid color-mix(in oklab, var(--bcl-gold) 45%, transparent); background: color-mix(in oklab, var(--bcl-violet) 12%, transparent); }
+html[data-bc-lux] .comm-msgs > p { background: linear-gradient(160deg, oklch(0.21 0.015 290 / .94), oklch(0.15 0.01 290 / .94)) !important; border: 1px solid color-mix(in oklab, var(--bcl-violet) 22%, transparent) !important; border-radius: 18px 18px 18px 4px !important; color: var(--foreground) !important; }
+html[data-bc-lux] .comm-msgs > p.is-me { background: linear-gradient(135deg, var(--bcl-violet), var(--bcl-violet-deep)) !important; border: 1px solid color-mix(in oklab, var(--bcl-gold) 30%, transparent) !important; border-right: 2px solid var(--bcl-gold) !important; border-radius: 18px 18px 4px 18px !important; }
+html[data-bc-lux] .comm-msgs > p small { color: color-mix(in oklab, var(--foreground) 62%, transparent) !important; }
+html[data-bc-lux] .comm-daysep span { backdrop-filter: blur(10px); font-size: 10px; letter-spacing: .1em; padding: 4px 12px; }
+html[data-bc-lux] .bcl-e2e svg { color: var(--bcl-gold); }
+html[data-bc-lux] .comm-room .comm-compose { margin: 0 .5rem .3rem !important; border-radius: 999px !important; border: 1px solid color-mix(in oklab, var(--bcl-gold) 25%, transparent) !important; background: color-mix(in oklab, var(--bcl-ink) 82%, transparent) !important; }
+html[data-bc-lux] .comm-room .comm-compose .bc-plus { color: var(--bcl-gold); }
+html[data-bc-lux] .comm-room .comm-compose button.comm-fab { background: linear-gradient(135deg, var(--bcl-gold), var(--bcl-gold-deep)) !important; color: var(--bcl-ink) !important; }
+html[data-bc-lux] .comm-quick button { border-color: color-mix(in oklab, var(--bcl-gold) 28%, transparent) !important; }
+
+/* Voice note · ultra-slim capsule */
+html body .comm-voice { min-width: 145px !important; max-width: 175px !important; gap: 5px !important; padding: 0 !important; }
+html body .comm-voice .comm-vplay { width: 26px !important; height: 26px !important; min-width: 26px !important; }
+html body .comm-voice .comm-vplay svg { width: 12px; height: 12px; }
+html body .comm-voice .comm-vwave { height: 14px !important; gap: 1.5px !important; }
+html body .comm-voice .comm-vwave i:nth-child(n+17) { display: none; }
+html body .comm-voice .comm-vwave b { width: 8px !important; height: 8px !important; margin: -4px 0 0 -4px !important; }
+html body .comm-voice .comm-vtime { min-width: 24px !important; font-size: 9.5px !important; }
+html body .comm-voice .comm-rate { font-size: 9.5px !important; padding: 0 4px !important; }
+.comm-msgs > p.is-media:has(.comm-voice) { padding: 5px 8px !important; }
+html[data-bc-lux] .comm-voice .comm-vplay { background: linear-gradient(135deg, var(--bcl-gold), var(--bcl-gold-deep)) !important; color: var(--bcl-ink) !important; border: 0 !important; }
+html[data-bc-lux] .comm-voice .comm-vwave i.is-on, html[data-bc-lux] .comm-voice .comm-vwave b { background: var(--bcl-gold) !important; }
