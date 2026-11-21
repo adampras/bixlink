@@ -14,6 +14,7 @@ import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_
 import { CarePartnerStats, RateOrder, ServiceNote, onBreak } from '@/components/BixcareExtras';
 import { startBixCall } from '@/components/BixCall';
 import { CityMarquee } from '@/components/CityMarquee';
+import '@/components/bixcare-lux.css';
 
 function ContactBar({ peer, name, phone }: { peer: string; name: string; phone?: string | undefined }) {
   return <div className="mt-2 flex flex-wrap gap-2">
@@ -111,7 +112,8 @@ function Explore({ uid, onBooked, onPartner }: { uid: string | null; onBooked: (
   if (open) return <OutletDetail outlet={open} uid={uid} onBack={() => setOpen(null)} onBooked={onBooked} />;
   return (
     <>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="care-sec"><b>Pilar layanan</b><span>{outlets.length} outlet aktif</span></div>
+      <div className="care-pillars grid grid-cols-2 gap-3">
         {DIVS.map(d => (
           <button key={d.id} onClick={() => setDiv(div === d.id ? 'all' : d.id)} className={`care-shine group relative overflow-hidden rounded-2xl border text-left ${div === d.id ? 'border-primary ring-2 ring-primary/50' : 'border-border/60'}`}>
             <img src={d.img} alt={d.name} loading="lazy" width={816} height={816} className="aspect-square w-full object-cover transition group-hover:scale-105" />
@@ -121,7 +123,8 @@ function Explore({ uid, onBooked, onPartner }: { uid: string | null; onBooked: (
         ))}
       </div>
       <CareDirectory onPick={term => setQ(term.split(' ')[0] ?? term)} onRegister={onPartner}/>
-      <input className={input} placeholder="Cari outlet atau kota…" value={q} onChange={e => setQ(e.target.value)} />
+       <div className="care-sec"><b>Outlet terdekat</b><span>{shown.length} hasil</span></div>
+      <input className={`${input} care-search`} placeholder="Cari outlet atau kota…" value={q} onChange={e => setQ(e.target.value)} />
       {shown.length === 0 && <div className={`${card} text-center text-sm text-muted-foreground`}>Belum ada outlet buka{div !== 'all' ? ` untuk ${divName(div)}` : ''}. Punya usaha? Daftar di tab Mitra.</div>}
       {shown.map(o => (
         <button key={o.id} onClick={() => setOpen(o)} className={`${card} care-card care-fade flex w-full items-center gap-3 text-left`}>
@@ -163,12 +166,12 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
   return (
     <>
       <button onClick={onBack} className={ghost}>← Semua outlet</button>
-      <div className={card}><p className="text-xs text-primary">{divName(outlet.division)}</p><h2 className="text-xl font-black">{outlet.name}</h2><p className="text-xs text-muted-foreground">{outlet.address}, {outlet.city} · {outlet.open_time}–{outlet.close_time}</p>{outlet.description && <p className="mt-2 text-sm">{outlet.description}</p>}
+      <div className={`${card} care-outlet-head`}><p className="text-xs text-primary">{divName(outlet.division)}</p><h2 className="text-xl font-black">{outlet.name}</h2><p className="text-xs text-muted-foreground">{outlet.address}, {outlet.city} · {outlet.open_time}–{outlet.close_time}</p>{outlet.description && <p className="mt-2 text-sm">{outlet.description}</p>}
         {!outlet.is_open && <p className="mt-2 text-xs font-bold text-destructive">Outlet sedang TUTUP — pemesanan dibuka saat mitra online.</p>}
         {outlet.is_open && resting && <p className="mt-2 text-xs font-bold text-destructive">Mitra istirahat sampai {new Date(outlet.break_until!).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} — buka otomatis setelahnya.</p>}
         {uid && uid !== outlet.owner_id && <ContactBar peer={outlet.owner_id} name={outlet.name} phone={outlet.phone} />}
       </div>
-      <div className={card}>
+      <div className={`${card} care-menu`}>
         <p className="mb-2 text-sm font-bold">Daftar harga resmi</p>
         {services.length === 0 && <p className="text-xs text-muted-foreground">Belum ada layanan.</p>}
         {services.map(s => (
@@ -202,7 +205,7 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
 function Tracker({ o, division }: { o: CareOrder; division?: Division | undefined }) {
   const stages = STAGES[division ?? 'wash'];
   const idx = o.status === 'completed' ? stages.length : stages.indexOf(o.stage);
-  return <div className="mt-2 flex gap-1">{stages.map((s, i) => <div key={s} className="flex-1"><div className={`h-1.5 rounded-full ${i <= idx ? 'bg-primary' : 'bg-muted'}`} /><p className="mt-1 text-[9px] leading-tight text-muted-foreground">{s}</p></div>)}</div>;
+  return <div className="care-track mt-2 flex gap-1">{stages.map((s, i) => <div key={s} className={`flex-1 ${i === idx ? 'is-now' : ''}`}><div className={`h-1.5 rounded-full ${i <= idx ? 'bg-primary' : 'bg-muted'}`} /><p className="mt-1 text-[9px] leading-tight text-muted-foreground">{s}</p></div>)}</div>;
 }
 
 function PayBadge({ o }: { o: CareOrder }) {
@@ -237,8 +240,8 @@ function MyOrders({ uid }: { uid: string }) {
   const cancel = async (id: string) => { await supabase.rpc('bixcare_order_set', { p_id: id, p_status: 'cancelled', p_stage: '' }); void load(); };
   if (!orders.length) return <div className={`${card} text-sm text-muted-foreground`}>Belum ada pesanan.</div>;
   return <>{orders.map(o => { const ot = outlets[o.outlet_id]; return (
-    <div key={o.id} className={card}>
-      <div className="flex justify-between"><p className="font-bold">{ot?.name ?? 'Outlet'}</p><span className="text-xs font-bold text-primary">{CARE_STATUS[o.status]}</span></div>
+    <div key={o.id} className={`${card} care-order`}>
+      <div className="flex items-start justify-between gap-2"><p className="min-w-0 font-bold leading-tight">{ot?.name ?? 'Outlet'}</p><span className={`care-status s-${o.status}`}>{CARE_STATUS[o.status]}</span></div>
       <p className="text-[10px] text-muted-foreground">{careCode(o.id)}</p>
       <p className="text-xs text-muted-foreground">{o.items.map(i => `${i.qty}× ${i.name}`).join(', ')}</p>
       <p className="text-sm font-bold">{rp(o.total_idr)} · {PAY_LABEL[o.pay_method]}{o.pay_method === 'bix' ? ` · ${o.fare_bix} BIX` : o.pay_method === 'usdt' ? ` · ${o.fare_usdt} USDT` : ''}</p>

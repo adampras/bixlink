@@ -1,0 +1,18 @@
+/* BIXCARE presentation polish — scoped to .care-live only. */
+.care-live .care-sec { display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; margin:.25rem .1rem -.35rem; }
+.care-live .care-sec b { font-size:11px; font-weight:900; letter-spacing:.2em; text-transform:uppercase; color:var(--primary); }
+.care-live .care-sec span { font-size:10px; color:var(--muted-foreground); }
+.care-live .care-pillars > button { border-radius:1.1rem; box-shadow:0 10px 26px -18px color-mix(in oklab,var(--primary) 70%,transparent); }
+.care-live .care-pillars > button p { overflow-wrap:anywhere; }
+.care-live .care-search { border-radius:999px; padding-inline:1rem; border-color:color-mix(in oklab,var(--primary) 30%,transparent); background:color-mix(in oklab,var(--card) 80%,transparent); }
+.care-live .care-card p { overflow-wrap:anywhere; }
+.care-live .care-outlet-head { background:linear-gradient(160deg,color-mix(in oklab,var(--primary) 14%,var(--card)),var(--card) 60%); border-color:color-mix(in oklab,var(--primary) 35%,transparent); }
+.care-live .care-menu > div + div { border-top:1px solid color-mix(in oklab,var(--border) 60%,transparent); }
+.care-live .care-order { position:relative; overflow:hidden; }
+.care-live .care-order::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background:linear-gradient(var(--primary),transparent); }
+.care-live .care-status { flex-shrink:0; border-radius:999px; padding:.15rem .55rem; font-size:10px; font-weight:800; border:1px solid color-mix(in oklab,var(--primary) 40%,transparent); color:var(--primary); background:color-mix(in oklab,var(--primary) 10%,transparent); }
+.care-live .care-status.s-completed { color:var(--chart-2); border-color:color-mix(in oklab,var(--chart-2) 45%,transparent); background:color-mix(in oklab,var(--chart-2) 12%,transparent); }
+.care-live .care-status.s-cancelled, .care-live .care-status.s-rejected { color:var(--muted-foreground); border-color:var(--border); background:transparent; }
+.care-live .care-track .is-now > div { box-shadow:0 0 10px color-mix(in oklab,var(--primary) 70%,transparent); }
+.care-live .care-track .is-now p { color:var(--primary); font-weight:800; }
+.care-live .care-dock { backdrop-filter:blur(14px); background:color-mix(in oklab,var(--background) 88%,transparent); }
