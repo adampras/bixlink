@@ -31,6 +31,7 @@ export function SecureVault({ me }: { me: string }) {
   const list = (rows ?? []).filter(r => k === 'all' || r.kind === k || (k === 'voice' && r.kind !== 'image' && r.kind !== 'file'));
   return <section className="bcs-vault">
     <div className="bcs-board-hero"><Lock size={18}/><div><b>Secure Vault</b><small>Lampiran dari percakapan Anda · hanya Anda dan lawan bicara</small></div></div>
+    {rows && <div className="bcs-vstats">{([['image','Foto',ImageIcon],['file','Dokumen',FileText],['voice','Suara',Mic]] as const).map(([v,l,I])=>{const n=rows.filter(r=>v==='voice'?(r.kind!=='image'&&r.kind!=='file'):r.kind===v).length;return <div key={v}><I size={15}/><b>{n}</b><small>{l}</small><i style={{width:`${rows.length?Math.round(n/rows.length*100):0}%`}}/></div>;})}</div>}
     <div className="bcs-chips">{KINDS.map(([v, l]) => <button key={v} type="button" className={k === v ? 'is-on' : ''} onClick={() => setK(v)}>{l}</button>)}</div>
     {rows === null ? <p className="bcs-note">Memuat…</p> : list.length === 0 ? <p className="bcs-note">Belum ada lampiran.</p> :
       <ul className="bcs-vault-grid">{list.map(m => { const I = m.kind === 'image' ? ImageIcon : m.kind === 'file' ? FileText : Mic; return <li key={m.id}><button type="button" onClick={() => void open(m)}>
@@ -47,6 +48,7 @@ export function ContactProfiles({ onChat }: { onChat: (id: string, name: string)
   if (sel) return <section className="bcs-profile">
     <button type="button" className="bcs-back" onClick={() => setSel(null)}>← Kontak</button>
     <div className="bcs-profile-card"><BixAvatar userId={sel.id} name={sel.name}/><h2>@{sel.name}</h2>{sel.code && <small>{sel.code}</small>}<span className="bcs-badge">Kontak BIX CALL</span></div>
+    <div className="bcs-pass"><div><small>BIX PROTOCOL PASS</small><b>@{sel.name}</b><span>ID {sel.code || sel.id.slice(0, 8).toUpperCase()}</span></div><i aria-hidden>{Array.from({ length: 16 }, (_, j) => <em key={j} className={(sel.id.charCodeAt(j % sel.id.length) + j) % 3 ? 'on' : ''}/>)}</i></div>
     <div className="bcs-actions">
       <button type="button" onClick={() => onChat(sel.id, sel.name)}><MessageCircle size={18}/>Chat</button>
       <button type="button" onClick={() => startBixCall(sel.id, sel.name, 'voice')}><Phone size={18}/>Suara</button>

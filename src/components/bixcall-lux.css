@@ -274,3 +274,13 @@ html body .comm-voice .comm-rate { font-size: 9.5px !important; padding: 0 4px !
 .comm-msgs > p.is-media:has(.comm-voice) { padding: 5px 8px !important; }
 html[data-bc-lux] .comm-voice .comm-vplay { background: linear-gradient(135deg, var(--bcl-gold), var(--bcl-gold-deep)) !important; color: var(--bcl-ink) !important; border: 0 !important; }
 html[data-bc-lux] .comm-voice .comm-vwave i.is-on, html[data-bc-lux] .comm-voice .comm-vwave b { background: var(--bcl-gold) !important; }
+
+.bcs-vstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem}
+.bcs-vstats>div{position:relative;overflow:hidden;display:grid;gap:.1rem;padding:.6rem;border-radius:.9rem;background:var(--card);border:1px solid var(--border)}
+.bcs-vstats svg{color:var(--primary)}.bcs-vstats b{font-size:1.05rem}.bcs-vstats small{font-size:.65rem;color:var(--muted-foreground)}
+.bcs-vstats i{position:absolute;left:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+.bcs-pass{display:flex;justify-content:space-between;align-items:center;gap:.8rem;padding:1rem;border-radius:1.1rem;background:linear-gradient(135deg,var(--card),color-mix(in oklab,var(--accent) 18%,var(--card)));border:1px solid color-mix(in oklab,var(--accent) 45%,transparent)}
+.bcs-pass>div{display:grid;min-width:0}.bcs-pass small{font-size:.6rem;letter-spacing:.18em;color:var(--accent)}
+.bcs-pass b{font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bcs-pass span{font-size:.68rem;color:var(--muted-foreground)}
+.bcs-pass i{display:grid;grid-template-columns:repeat(4,9px);gap:2px;padding:5px;border-radius:6px;background:var(--background)}
+.bcs-pass em{width:9px;height:9px;border-radius:2px;background:transparent}.bcs-pass em.on{background:var(--accent)}
