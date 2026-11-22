@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ImageUp, Flashlight, SwitchCamera, RotateCcw } from 'lucide-react';
+import { X, ImageUp, Flashlight, SwitchCamera, RotateCcw, ShieldCheck, Sparkles } from 'lucide-react';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Detector = { detect: (s: unknown) => Promise<{ rawValue: string }[]> };
@@ -9,7 +9,7 @@ const getBD = () => (globalThis as unknown as { BarcodeDetector?: new (o: unknow
 const safeStop = (s: any) => { try { const st = s?.getState?.(); if (st !== undefined && st !== 2 && st !== 3) return; void s?.stop?.()?.catch?.(() => {}); } catch { /* not running */ } };
 
 /** Full-screen QR scanner: native BarcodeDetector on a live camera stream (fast in Android/APK), html5-qrcode fallback, torch + flip + retry. */
-export function QrScanner({ onResult, onClose, title = 'Scan BIX PAY QR', hint = "Point the camera at a member's BIX PAY QR", continuous = false }: { onResult: (v: string) => void; onClose: () => void; title?: string; hint?: string; continuous?: boolean }) {
+export function QrScanner({ onResult, onClose, title = 'Scan BIX PAY QR', hint = "Point the camera at a member's BIX PAY QR", continuous = false, variant, children }: { onResult: (v: string) => void; onClose: () => void; title?: string; hint?: string; continuous?: boolean; variant?: 'identity'; children?: ReactNode }) {
   const box = useRef<HTMLDivElement>(null);
   const lib = useRef<any>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -68,14 +68,17 @@ export function QrScanner({ onResult, onClose, title = 'Scan BIX PAY QR', hint =
   };
 
   if (typeof document === 'undefined') return null;
-  return createPortal(<div className="qr-full" role="dialog" aria-label={title} style={{ maxHeight: 'none', position: 'fixed', inset: 0, zIndex: 2147483000 }}>
+  return createPortal(<div className={variant === 'identity' ? 'qr-full bx-idscan' : 'qr-full'} role="dialog" aria-label={title} style={{ maxHeight: 'none', position: 'fixed', inset: 0, zIndex: 2147483000 }}>
     <div id="bix-scanner" ref={box} className="qr-full__cam"/>
     <div className="qr-full__mask" aria-hidden><div className="qr-full__frame"><i/><i/><i/><i/><span className="qr-full__laser"/></div></div>
-    <div className="qr-full__top"><b className="font-display">{title}</b><button type="button" onClick={onClose} aria-label="Tutup" className="qr-full__x"><X size={20}/></button></div>
+    {variant === 'identity' ? <div className="bx-idscan__top"><ShieldCheck size={22} className="bx-idscan__shield" aria-hidden/><b>{title}</b><button type="button" className={torch ? 'bx-idscan__torch is-on' : 'bx-idscan__torch'} disabled={!canTorch} aria-label="Senter" aria-pressed={torch} onClick={() => void toggleTorch()}><Sparkles size={19}/></button><button type="button" onClick={onClose} aria-label="Tutup" className="bx-idscan__x"><X size={20}/></button></div>
+      : <div className="qr-full__top"><b className="font-display">{title}</b><button type="button" onClick={onClose} aria-label="Tutup" className="qr-full__x"><X size={20}/></button></div>}
+    {variant === 'identity' && <p className="bx-idscan__guide">{err || 'Align QR code within the frame'}</p>}
     <div className="qr-full__bottom">
-      <p className="qr-full__hint">{err || hint}</p>
+      {children}
+      {variant !== 'identity' && <p className="qr-full__hint">{err || hint}</p>}
       <div className="qr-full__tools">
-        {canTorch && <button type="button" className={torch ? 'is-on' : ''} onClick={() => void toggleTorch()}><Flashlight size={15}/> Senter</button>}
+        {canTorch && variant !== 'identity' && <button type="button" className={torch ? 'is-on' : ''} onClick={() => void toggleTorch()}><Flashlight size={15}/> Senter</button>}
         <button type="button" onClick={() => setBack(v => !v)}><SwitchCamera size={15}/> Ganti kamera</button>
         {err && <button type="button" onClick={() => setRun(n => n + 1)}><RotateCcw size={15}/> Coba lagi</button>}
       </div>

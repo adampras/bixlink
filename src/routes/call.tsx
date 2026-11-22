@@ -21,7 +21,7 @@ import { compressImage } from '@/lib/bix-image';
 import { Grid3x3 } from 'lucide-react';
 import { Camera, MoreVertical, QrCode, ScanLine, UserPlus, Trash2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { QrScanner } from '@/components/QrScanner';
+import { BixIdentityScanner } from '@/components/BixIdentityScanner';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery } from '@tanstack/react-query';
 import { getBixPay } from '@/lib/bixlink.functions';
@@ -938,7 +938,7 @@ function ContactQr() {
   const [msg, setMsg] = useState('');
   const [hit, setHit] = useState<{ id: string; name: string; code: string } | null>(null);
   const load = useServerFn(getBixPay);
-  const mine = useQuery({ queryKey: ['bix-pay'], queryFn: () => load(), enabled: open });
+  const mine = useQuery({ queryKey: ['bix-pay'], queryFn: () => load(), enabled: open || scan });
   const code = mine.data?.code ?? '';
   const saveFrom = async (raw: string) => {
     const id = parseBixId(raw);
@@ -968,7 +968,7 @@ function ContactQr() {
           <button type="button" onClick={() => { setOpen(false); startBixCall(hit.id, hit.name, 'voice'); }}><Phone size={14}/> Call</button>
           <Link to="/pay" onClick={() => setOpen(false)}><Coins size={14}/> BIX PAY</Link></div></div>}
       </div></div>, document.body)}
-    {scan && <QrScanner title="Pindai QR BIX-ID" hint={msg || 'Arahkan kamera ke QR BIX-ID member'} continuous onClose={() => setScan(false)} onResult={raw => void saveFrom(raw)}/>}
+    {scan && <BixIdentityScanner code={code} tier="Member" msg={msg} onClose={() => setScan(false)} onResult={raw => void saveFrom(raw)}/>}
   </>;
 }
 
