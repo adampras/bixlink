@@ -32,6 +32,12 @@ const when = (iso: string) => { const d = new Date(iso), t = new Date(); const t
 const badge = (m: VaultMsg) => isPdf(m) ? ['PDF', 'is-pdf'] : /presentation|ppt/i.test(`${m.meta?.mime}${m.meta?.name}`) ? ['PPT', 'is-ppt'] : isAudio(m) ? ['MP3', 'is-mp3'] : isMedia(m) ? ['LOCK', 'is-lock'] : ['DOC', 'is-doc'];
 const VAULT_REF_BYTES = 1024 ** 3; // display reference only, not a storage quota
 
+function VaultThumb({ path, video }: { path: string; video: boolean }) {
+  const [u, setU] = useState<string | null>(null);
+  useEffect(() => { let on = true; void supabase.storage.from('bix-chat').createSignedUrl(path, 600).then(({ data }) => { if (on && data?.signedUrl) setU(data.signedUrl); }); return () => { on = false; }; }, [path]);
+  return <span className="bsv-thumb">{u ? (video ? <video src={u} muted playsInline preload="metadata"/> : <img src={u} alt="" loading="lazy"/>) : <Lock size={16}/>}{video && <i>▶</i>}</span>;
+}
+
 export function SecureVault({ me }: { me: string }) {
   const [rows, setRows] = useState<VaultMsg[] | null>(null);
   const [k, setK] = useState<VTab>('doc');
@@ -55,7 +61,7 @@ export function SecureVault({ me }: { me: string }) {
     <h3 className="bsv-h">Files</h3>
     {rows === null ? <p className="bcs-note">Memuat…</p> : list.length === 0 ? <p className="bcs-note">Belum ada lampiran di kategori ini.</p> :
       <ul className="bsv-files">{list.map(m => { const [bt, bc] = badge(m); return <li key={m.id}>
-        <span className={`bsv-badge ${bc}`}>{bt === 'LOCK' ? <Lock size={16}/> : bt}</span>
+        {isMedia(m) && m.media_path ? <VaultThumb path={m.media_path} video={/video/i.test(m.meta?.mime ?? '')}/> : <span className={`bsv-badge ${bc}`}>{bt === 'LOCK' ? <Lock size={16}/> : bt}</span>}
         <div className="bsv-fmeta"><b>{m.meta?.name ?? (m.kind === 'image' ? 'Foto' : m.kind === 'file' ? 'Dokumen' : 'Voice note')}</b><small>{(m.meta?.mime?.split('/')[1] ?? m.kind).toUpperCase()} · {fmtSize(m.meta?.size)}</small><small>{when(m.created_at)} <i className="bsv-enc"><Lock size={10}/>Private</i></small></div>
         <button type="button" className="bsv-dl" onClick={() => void open(m)}><Download size={14}/>Download</button></li>; })}</ul>}
     <footer className="bsv-foot"><span className="bsv-gauge" style={{ ['--p' as string]: `${pct}%` }}><b>{pct}%</b></span><div><b>Vault Storage</b><small>{fmtSize(used)} dari 1 GB referensi · {all.length} file</small></div><span className="bsv-secure"><ShieldCheck size={18}/>Secure</span></footer>
