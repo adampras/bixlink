@@ -657,3 +657,34 @@ html[data-bc-lux] .comm-room .comm-compose .comm-fab.is-rec { background: oklch(
 .bsv-thumb i{position:absolute;font-style:normal;font-size:.7rem;color:#040507;background:#FFD700;border-radius:50%;width:18px;height:18px;display:grid;place-items:center}
 .bsv-badge{border:1.5px solid rgb(255 215 0/.6)}
 .bsv-dl{background:linear-gradient(135deg,#FFD700,#D4AF37);color:#040507;font-weight:700;border-color:#FFD700;box-shadow:0 0 12px rgb(255 215 0/.35)}
+
+/* Messages Sovereign Lux v2 + contoured dock seated above phone system bar */
+html[data-bc-lux] .bcl-suite{display:flex;gap:6px;background:none;border:0;padding:0;overflow-x:auto;scrollbar-width:none}
+html[data-bc-lux] .bcl-suite a{flex:1 0 auto;min-width:64px;display:flex;justify-content:center;padding:9px 10px;border-radius:14px;font-size:12px;font-weight:700;background:linear-gradient(180deg,oklch(0.2 0.02 300/.7),oklch(0.1 0.01 300/.85));border:1px solid color-mix(in oklab,var(--bcl-gold) 45%,transparent);box-shadow:inset 0 1px 0 oklch(1 0 0/.08)}
+html[data-bc-lux] .bcl-suite a svg{display:none}
+html[data-bc-lux] .bcl-suite a.is-on{background:color-mix(in oklab,var(--bcl-violet) 22%,var(--bcl-ink));border-color:var(--bcl-violet);box-shadow:0 0 16px color-mix(in oklab,var(--bcl-violet) 60%,transparent),inset 0 0 10px color-mix(in oklab,var(--bcl-violet) 35%,transparent)}
+html[data-bc-lux] .bcl-msgs-head h1{font-size:2.5rem;background:linear-gradient(180deg,#fff 0%,#d9dce3 45%,#8d93a0 70%,#f1f2f5 100%);-webkit-background-clip:text;background-clip:text;color:transparent;display:flex;align-items:center;gap:.5rem}
+html[data-bc-lux] .bcl-crown{-webkit-text-fill-color:initial;font-size:1.6rem;filter:drop-shadow(0 0 8px color-mix(in oklab,var(--bcl-gold) 60%,transparent))}
+html[data-bc-lux] .bcl-msgs-head nav{gap:6px;border:0;padding:6px;border-radius:16px;background:oklch(0.12 0.01 300/.6)}
+html[data-bc-lux] .bcl-msgs-head nav a{flex:0 0 auto;padding:6px 12px;border-radius:11px;font-size:12px;border:1px solid color-mix(in oklab,var(--bcl-violet) 35%,transparent);background:oklch(0.16 0.03 300/.7);color:color-mix(in oklab,var(--bcl-gold) 80%,var(--foreground))}
+html[data-bc-lux] .bcl-msgs-head nav a.is-on{border-color:color-mix(in oklab,var(--bcl-gold) 60%,transparent);color:var(--foreground);box-shadow:inset 0 -2px 0 var(--bcl-gold)}
+html[data-bc-lux] .bcl-feed{background:none!important;border:0!important;padding:0!important}
+html[data-bc-lux] .bcl-feed .comm-h{display:flex;align-items:center;gap:6px;margin:.4rem 0 .6rem}
+html[data-bc-lux] .bcl-feed .comm-h svg,html[data-bc-lux] .bcl-feed-k{display:none}
+html[data-bc-lux] .bcl-feed-t{font-size:15px;font-weight:700;color:var(--foreground);letter-spacing:0;text-transform:none}
+.bcl-feed-t,.bcl-feed-tier{display:none}
+html[data-bc-lux] .bcl-feed-t,html[data-bc-lux] .bcl-feed-tier{display:inline}
+html[data-bc-lux] .bcl-feed-card{margin-bottom:12px;padding:14px!important;border-radius:18px!important;background:linear-gradient(160deg,oklch(0.16 0.015 300/.9),#0A0C12)!important;border:1.5px solid color-mix(in oklab,var(--bcl-gold) 70%,transparent)!important;box-shadow:inset 0 0 0 3px #0A0C12,inset 0 0 0 4px color-mix(in oklab,var(--bcl-gold) 25%,transparent),0 10px 26px oklch(0 0 0/.5);user-select:none}
+html[data-bc-lux] .bcl-medal{flex:none;display:grid;place-items:center;padding:3px;border-radius:999px;background:linear-gradient(145deg,#FFE58A,#B8860B 60%,#FFD700);box-shadow:0 0 0 2px #06B6D4,0 0 14px color-mix(in oklab,#06B6D4 60%,transparent)}
+html[data-bc-lux] .bcl-medal>*{width:46px!important;height:46px!important}
+html[data-bc-lux] .bcl-feed-card .comm-meta small{color:color-mix(in oklab,var(--bcl-gold) 85%,var(--foreground))}
+html[data-bc-lux] .bcl-feed-card .comm-actions{background:none!important;border:0!important}
+html[data-bc-lux] .bcl-feed-chat{width:46px!important;height:40px!important;border-radius:12px!important;color:#C084FC!important;background:color-mix(in oklab,var(--bcl-violet) 18%,transparent)!important;border:1.5px solid var(--bcl-violet)!important;box-shadow:0 0 14px color-mix(in oklab,var(--bcl-violet) 55%,transparent)}
+html[data-bc-lux] .bcl-feed-del{display:none!important}
+html[data-bc-lux] .bcl-dock{left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 6px);height:66px;border-radius:30px;border:1.5px solid color-mix(in oklab,var(--bcl-gold) 60%,transparent);background:linear-gradient(180deg,oklch(0.18 0.01 300/.92),oklch(0.07 0.005 300/.97));box-shadow:inset 0 0 0 3px oklch(0.08 0 0/.9),inset 0 0 0 4px color-mix(in oklab,var(--bcl-gold) 22%,transparent),0 14px 30px oklch(0 0 0/.7)}
+html[data-bc-lux] .bcl-dock>a{color:color-mix(in oklab,var(--foreground) 70%,transparent)}
+html[data-bc-lux] .bcl-dock>a.is-on{color:var(--bcl-gold);filter:drop-shadow(0 0 8px var(--bcl-gold))}
+html[data-bc-lux] .bcl-dock>a.is-on::after{display:none}
+html[data-bc-lux] .bcl-dock::before{height:calc(env(safe-area-inset-bottom,0px) + 84px);background:linear-gradient(180deg,transparent,#040507 45%)}
+html[data-bc-lux] .bcl-cube{margin-top:-38px;width:70px;height:70px;border-radius:24px 24px 0 0}
+html[data-bc-lux] main:has(.bc-head){padding-bottom:calc(env(safe-area-inset-bottom,0px) + 104px)!important}

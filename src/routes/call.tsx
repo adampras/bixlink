@@ -279,8 +279,8 @@ function CallInner() {
       <div className={`bc-head__search${searchOpen ? '' : ' is-collapsed'}`}><FindMember bar me={me} tier={tier} onChat={open}/></div>
     </div>
 
-    <nav className="bcl-suite" aria-label="BIX CALL suite">{([['chat', 'Chats', MessageCircle], ['boardroom', 'Boardroom', Crown], ['group', 'Groups', ShieldCheck], ['vault', 'Vault', Lock], ['contacts', 'Kontak', Phone]] as const).map(([t, l, I]) => <Link key={t} to="/call" search={{ tab: t }} className={view === t ? 'is-on' : ''}><I size={16}/><span>{l}</span></Link>)}</nav>
-    {view === 'chat' && <div className="bcl-msgs-head"><h1>Messages</h1><nav>{([['All', 'chat'], ['DMs', 'chat'], ['Groups', 'group'], ['Channels', 'community'], ['Requests', 'updates']] as const).map(([l, t], i) => <Link key={l} to="/call" search={{ tab: t }} className={i === 0 ? 'is-on' : ''}>{l}</Link>)}</nav></div>}
+    <nav className="bcl-suite" aria-label="BIX CALL suite">{([['chat', 'Chats', MessageCircle], ['boardroom', 'Boardroom', Crown], ['group', 'Groups', ShieldCheck], ['vault', 'Vault', Lock], ['contacts', 'Contacts', Phone]] as const).map(([t, l, I]) => <Link key={t} to="/call" search={{ tab: t }} className={view === t ? 'is-on' : ''}><I size={16}/><span>{l}</span></Link>)}</nav>
+    {view === 'chat' && <div className="bcl-msgs-head"><h1>Messages <span className="bcl-crown" aria-hidden>👑</span></h1><nav>{([['All', 'chat'], ['Direct', 'chat'], ['VIP Syndicate', 'group'], ['Channels', 'community'], ['Requests', 'updates']] as const).map(([l, t], i) => <Link key={l} to="/call" search={{ tab: t }} className={i === 0 ? 'is-on' : ''}>{l}</Link>)}</nav></div>}
     {view === 'chat' && <div className="bcl-hero"><div><small>SOVEREIGN CALL</small><b>Private. Secure. Executive.</b><span><Lock size={11}/> Percakapan antar member terlindungi</span></div><Link to="/call" search={{ tab: 'boardroom' }} className="bcl-hero-go"><Crown size={14}/> Boardroom</Link></div>}
     {view === 'chat' && <><DialFab me={me} tier={tier} onChat={open}/><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
     {view === 'starred' && <StarredList onOpen={open}/>}
@@ -987,9 +987,12 @@ function ContactQr() {
 function SavedContacts({ onChat }: { onChat: (id: string, name: string) => void }) {
   const [list, setList] = useState<BixContact[]>([]);
   useEffect(() => { const r = () => setList(readContacts()); r(); window.addEventListener(CONTACTS_EVENT, r); return () => window.removeEventListener(CONTACTS_EVENT, r); }, []);
+  const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
   if (!list.length) return null;
-  return <section className="comm-card"><h3 className="comm-h"><UserPlus size={13} className="mr-1 inline"/>Kontak tersimpan</h3>
-    {list.map(c => <div key={c.id} className="comm-peer"><BixAvatar userId={c.id} name={c.name}/><span className="min-w-0 flex-1"><b className="block truncate">@{c.name}</b><span className="comm-meta"><small className="numeric">{c.code}</small></span></span>
-      <span className="comm-actions"><button aria-label="Chat" onClick={() => onChat(c.id, c.name)}><MessageCircle size={15}/></button><button aria-label="Hapus kontak" onClick={() => removeContact(c.id)}><Trash2 size={14}/></button></span></div>)}
+  const press = (c: BixContact) => { hold.current = setTimeout(() => { if (window.confirm(`Hapus kontak @${c.name}?`)) removeContact(c.id); }, 650); };
+  const release = () => { if (hold.current) clearTimeout(hold.current); hold.current = null; };
+  return <section className="comm-card bcl-feed"><h3 className="comm-h"><UserPlus size={13} className="mr-1 inline"/><span className="bcl-feed-k">Kontak tersimpan</span><span className="bcl-feed-t">Chat &amp; Contact Feed</span></h3>
+    {list.map(c => <div key={c.id} className="comm-peer bcl-feed-card" onPointerDown={() => press(c)} onPointerUp={release} onPointerLeave={release} onContextMenu={e => { e.preventDefault(); if (window.confirm(`Hapus kontak @${c.name}?`)) removeContact(c.id); }}><span className="bcl-medal"><BixAvatar userId={c.id} name={c.name}/></span><span className="min-w-0 flex-1"><b className="block truncate">@{c.name}</b><span className="comm-meta"><small className="numeric">{c.code}</small><small className="bcl-feed-tier"> · Member</small></span></span>
+      <span className="comm-actions"><button aria-label="Chat" className="bcl-feed-chat" onClick={() => onChat(c.id, c.name)}><MessageCircle size={15}/></button><button aria-label="Hapus kontak" className="bcl-feed-del" onClick={() => removeContact(c.id)}><Trash2 size={14}/></button></span></div>)}
   </section>;
 }
