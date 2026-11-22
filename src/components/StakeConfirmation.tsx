@@ -14,7 +14,7 @@ export function StakeConfirmation({ pkg, usdt, bix, reference, close, submit }: 
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [receipt, setReceipt] = useState<{ id: string; status: string } | null>(null);
+  const [receipt, setReceipt] = useState<{ id: string; status: string; at?: number } | null>(null);
   const price = Number(pkg.price_usd);
   const usdtNeed = mode === 'hybrid' ? price * .7 : price;
   const bixNeed = mode === 'hybrid' ? price * .3 / reference : 0;
@@ -25,7 +25,7 @@ export function StakeConfirmation({ pkg, usdt, bix, reference, close, submit }: 
     <DialogTitle className="pr-8 font-display text-2xl">{receipt ? 'Request receipt' : pkg.id}</DialogTitle>
     <DialogDescription>{receipt ? 'Status verified from your recorded staking activity.' : `${pkg.lock_days}-day contract · review before confirming`}</DialogDescription>
     {receipt ? <>
-      <div role="status" className="stake-receipt lux-plaque rounded-2xl py-6 text-center">{receipt.status === 'active' || receipt.status === 'completed' ? <div className="lux-seal"><CheckCircle2 size={32}/></div> : <Clock3 className="mx-auto text-chart-3" size={36}/>}<span className="lux-eyebrow mt-3 block">OFFICIAL STAKING RECEIPT</span><strong className="mt-1 block font-display text-xl uppercase lux-gold-text">{receipt.status}</strong><p className="mt-2 text-muted-foreground">{money(price)} · {pkg.id}</p><p className="mt-3 break-all font-mono text-xs">{receipt.id}</p></div>
+      <div role="status" className="stake-receipt lux-plaque rounded-2xl py-6 text-center">{receipt.status === 'active' || receipt.status === 'completed' ? <div className="lux-seal"><CheckCircle2 size={32}/></div> : <Clock3 className="mx-auto text-chart-3" size={36}/>}<span className="lux-eyebrow mt-3 block">OFFICIAL STAKING RECEIPT</span><strong className="mt-1 block font-display text-xl uppercase lux-gold-text">{receipt.status}</strong><p className="mt-2 text-muted-foreground">{money(price)} · {pkg.id}</p><dl className="mx-auto mt-3 grid max-w-xs gap-1 text-left text-xs">{[['Date & time', new Date(receipt.at ?? Date.now()).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })], ['Payment', mode === 'usdt' ? '100% USDT' : '70% USDT · 30% BIX'], ['Lock period', `${pkg.lock_days} days`], ['Ends (est.)', new Date((receipt.at ?? Date.now()) + pkg.lock_days * 864e5).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })], ['Daily projection', money(price * pkg.apy / 100 / 365)]].map(([k, v]) => <div key={k} className="flex justify-between gap-3 border-b border-border/40 py-1"><dt className="text-muted-foreground">{k}</dt><dd className="numeric font-bold">{v}</dd></div>)}</dl><p className="mt-3 break-all font-mono text-[10px] text-muted-foreground">{receipt.id}</p></div>
       <p className="text-xs leading-5 text-muted-foreground">Your wallet notifications track recorded status changes. Projected yield is not spendable; completion does not trigger an automatic payout.</p>
       <Button asChild><Link to="/wallet"><Wallet size={16}/> Open wallet</Link></Button><Button variant="outline" onClick={close}>View staking history</Button>
     </> : <>
@@ -36,7 +36,7 @@ export function StakeConfirmation({ pkg, usdt, bix, reference, close, submit }: 
       {insufficient && <p role="alert" className="text-xs text-destructive">Insufficient balance for this payment method.</p>}
       <label className="flex items-start gap-3 text-xs leading-5"><input type="checkbox" checked={agree} disabled={busy} onChange={e => setAgree(e.target.checked)} className="mt-1"/>I accept the lock period, estimated yield and early-unstake penalties. At completion, certificate and settlement terms apply; no guaranteed cash return.</label>
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-      <Button disabled={busy || !agree || insufficient} onClick={async () => { if (busy) return; setBusy(true); setError(''); try { if (!(await confirmPin())) return; setReceipt(await submit(mode)); } catch (e) { setError(e instanceof Error ? e.message : 'Request failed. Please retry.'); } finally { setBusy(false); } }}>{busy ? <><Clock3 size={16}/> Pending confirmation…</> : 'Confirm staking request'}</Button>
+      <Button disabled={busy || !agree || insufficient} onClick={async () => { if (busy) return; setBusy(true); setError(''); try { if (!(await confirmPin())) return; { const r = await submit(mode); setReceipt({ ...r, at: Date.now() }); } } catch (e) { setError(e instanceof Error ? e.message : 'Request failed. Please retry.'); } finally { setBusy(false); } }}>{busy ? <><Clock3 size={16}/> Pending confirmation…</> : 'Confirm staking request'}</Button>
       <p className="text-[11px] text-muted-foreground">Non-custodial request. APY is a projection, not a guarantee.</p>
     </>}
   </DialogContent></Dialog>;

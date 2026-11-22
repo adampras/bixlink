@@ -36,11 +36,11 @@ function PresalePage() {
   const loadW = useServerFn(getPresaleWallets); const pay = useServerFn(payPresaleTx);
   const wq = useQuery({ queryKey: ['presale-wallets', user?.id], queryFn: () => loadW(), enabled: !!user });
   const wallets = wq.data ?? []; const [wi, setWi] = useState(0); const w = wallets[Math.min(wi, Math.max(0, wallets.length - 1))];
-  const [receipt, setReceipt] = useState<null | { usd: number; bix: number; serial?: number; via: string; extra?: number; test?: boolean }>(null);
+  const [receipt, setReceipt] = useState<null | { usd: number; bix: number; serial?: number; via: string; extra?: number; test?: boolean; at?: number }>(null);
   const [tx, setTx] = useState(''); const [sent, setSent] = useState(false); const [copied, setCopied] = useState(false);
   const doPay = async () => {
     if (!w) return; setBusy(true); setErr(''); setMsg(''); setReceipt(null);
-    try { const r = await pay({ data: { walletCode: w.code, txHash: tx.trim() } }); setReceipt({ usd: r.usd, bix: Number(r.bix), serial: (r as any).serial, via: 'On-chain USDT (BEP-20)', extra: r.extra }); setMsg(`Verified! $${r.usd} → ${number(Number(r.bix))} BIX locked${r.extra > 0 ? ` · $${number(r.extra, { maximumFractionDigits: 2 })} extra added to your USDT balance` : ''}.`); setTx(''); setSent(false); qc.invalidateQueries({ queryKey: ['presale'] }); }
+    try { const r = await pay({ data: { walletCode: w.code, txHash: tx.trim() } }); setReceipt({ usd: r.usd, bix: Number(r.bix), serial: (r as any).serial, via: 'On-chain USDT (BEP-20)', extra: r.extra, at: Date.now() }); setMsg(`Verified! $${r.usd} → ${number(Number(r.bix))} BIX locked${r.extra > 0 ? ` · $${number(r.extra, { maximumFractionDigits: 2 })} extra added to your USDT balance` : ''}.`); setTx(''); setSent(false); qc.invalidateQueries({ queryKey: ['presale'] }); }
     catch (e) { setErr(e instanceof Error ? e.message : 'Verification failed'); } finally { setBusy(false); }
   };
   const s = q.data; const cfg = s?.config;
@@ -62,11 +62,11 @@ function PresalePage() {
     const { data, error } = await supabase.rpc('bix_presale_test_buy' as never, { p_usd: usd } as never);
     setBusy(false);
     if (error) return setErr(error.message);
-    setReceipt({ usd, bix: Number((data as { bix?: number }).bix ?? 0), via: 'Virtual test wallet', test: true }); setMsg(`TEST: ${number(Number((data as { bix?: number }).bix ?? 0))} BIX virtual order recorded — no balance moved.`); qc.invalidateQueries({ queryKey: ['presale'] });
+    setReceipt({ usd, bix: Number((data as { bix?: number }).bix ?? 0), via: 'Virtual test wallet', test: true, at: Date.now() }); setMsg(`TEST: ${number(Number((data as { bix?: number }).bix ?? 0))} BIX virtual order recorded — no balance moved.`); qc.invalidateQueries({ queryKey: ['presale'] });
   };
   const doBuy = async () => {
     setBusy(true); setErr(''); setMsg(''); setReceipt(null);
-    try { const r = await buy({ data: { usd } }); setReceipt({ usd, bix: Number(r.bix), serial: r.serial, via: 'USDT balance' }); setMsg(`Success! ${number(Number(r.bix))} BIX locked · ${PHASE1.dailyPct}% released daily.`); setConfirm(false); qc.invalidateQueries({ queryKey: ['presale'] }); }
+    try { const r = await buy({ data: { usd } }); setReceipt({ usd, bix: Number(r.bix), serial: r.serial, via: 'USDT balance', at: Date.now() }); setMsg(`Success! ${number(Number(r.bix))} BIX locked · ${PHASE1.dailyPct}% released daily.`); setConfirm(false); qc.invalidateQueries({ queryKey: ['presale'] }); }
     catch (e) { setErr(e instanceof Error ? e.message : 'Purchase failed'); } finally { setBusy(false); }
   };
 
@@ -128,24 +128,25 @@ function PresalePage() {
         <div className="mt-3 flex items-start gap-3 rounded-2xl border border-chart-3/40 bg-chart-3/10 p-3"><Coins size={18} className="mt-0.5 shrink-0 text-chart-3"/><p className="text-[11px]"><b className="block text-chart-3">Bonus Sponsor {Number(cfg?.sponsorPct ?? 10)}% BIX</b><span className="text-muted-foreground">Your direct sponsor receives a BIX bonus from each presale purchase, locked with the same daily release schedule.</span></p></div>
         {err && <p role="alert" className="mt-3 text-sm text-destructive">{err}</p>}
         {msg && !receipt && <p role="status" className="mt-3 text-sm text-chart-2">{msg}</p>}
-        {receipt && <div role="status" className="presale-receipt mt-4">
+        {receipt && <div className="fixed inset-0 z-[80] grid place-items-center bg-background/80 p-4 backdrop-blur-sm" style={{ maxHeight: "100dvh" }} onClick={() => { setReceipt(null); setMsg(""); }}><div role="dialog" aria-modal="true" aria-label="Purchase receipt" onClick={e => e.stopPropagation()} className="presale-receipt w-full max-w-sm overflow-y-auto" style={{ maxHeight: "90dvh" }}>
           <div className="presale-receipt-check" aria-hidden>✓</div>
           <p className="lux-kicker text-center">{receipt.test ? 'TEST PURCHASE RECORDED' : 'PURCHASE SUCCESSFUL'}</p>
           <h3 className="lux-gold-text text-center font-display text-2xl font-black numeric">{number(receipt.bix)} BIX</h3>
           <p className="text-center text-[11px] text-foreground/80">Your BIX is locked in your presale vault and starts releasing tomorrow.</p>
           <dl className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-            {[['Paid', `$${number(receipt.usd)} USDT`], ['Price', `$${price.toFixed(2)} / BIX`], ['Daily release', `${number(receipt.bix * PHASE1.dailyPct / 100, { maximumFractionDigits: 2 })} BIX (${PHASE1.dailyPct}%)`], ['Fully released', new Date(Date.now() + PHASE1.vestingDays * 864e5).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })], ['Payment', receipt.via], ['Certificate', receipt.serial ? `#${receipt.serial}` : '—']].map(([k, v]) => <div key={k} className="presale-receipt-row"><dt>{k}</dt><dd className="numeric">{v}</dd></div>)}
+            {[['Date & time', fmtDT(receipt.at ?? Date.now())], ['Paid', `$${number(receipt.usd)} USDT`], ['Price', `$${price.toFixed(2)} / BIX`], ['Daily release', `${number(receipt.bix * PHASE1.dailyPct / 100, { maximumFractionDigits: 2 })} BIX (${PHASE1.dailyPct}%)`], ['Fully released', new Date(Date.now() + PHASE1.vestingDays * 864e5).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })], ['Payment', receipt.via], ['Certificate', receipt.serial ? `#${receipt.serial}` : '—']].map(([k, v]) => <div key={k} className="presale-receipt-row"><dt>{k}</dt><dd className="numeric">{v}</dd></div>)}
           </dl>
           {!!receipt.extra && receipt.extra > 0 && <p className="mt-2 text-center text-[10px] text-chart-2">${number(receipt.extra, { maximumFractionDigits: 2 })} extra was added to your USDT balance.</p>}
           {receipt.test && <p className="mt-2 text-center text-[10px] text-primary">Test only — no balance moved, cannot be claimed as real BIX.</p>}
           <p className="mt-3 text-center text-[10px] text-muted-foreground">Track and claim released BIX in My Presale Portfolio below.</p>
           {!receipt.test && <a href={`https://wa.me/?text=${encodeURIComponent(`✅ I just joined the BIXLINK Presale!\n\n💰 Paid: $${number(receipt.usd)} USDT\n🪙 Received: ${number(receipt.bix)} BIX at $${price.toFixed(2)}/BIX\n📅 Released ${PHASE1.dailyPct}% per day over ${PHASE1.vestingDays} days${receipt.serial ? `\n🎫 Certificate #${receipt.serial}` : ''}\n\nJoin here 👉 https://bixlink.com/presale\n\n*Future prices are projections, not guarantees.`)}`} target="_blank" rel="noopener noreferrer" className="mt-3 block w-full rounded-full bg-chart-2 py-2 text-center text-xs font-black text-background">Share proof on WhatsApp</a>}
           <button type="button" onClick={() => { setReceipt(null); setMsg(''); }} className="mt-3 w-full rounded-full border border-chart-3/50 py-2 text-xs font-black text-chart-3">Done</button>
-        </div>}
+          <button type="button" onClick={() => { setReceipt(null); setMsg(''); setTimeout(() => document.getElementById('presale-history')?.scrollIntoView({ behavior: 'smooth' }), 50); }} className="mt-2 w-full text-[11px] font-bold text-primary underline">View purchase history</button>
+        </div></div>}
       </section>
 
       <section className="mt-6 rounded-3xl border border-border bg-card/60 p-5">
-        <h2 className="font-display text-lg font-black">My Presale Portfolio</h2>
+        <h2 id="presale-history" className="font-display text-lg font-black">My Presale Portfolio · History</h2>
         <div className="mt-3 grid grid-cols-2 gap-2 text-center">
           <div className="rounded-2xl bg-background/60 p-3"><Lock size={14} className="mx-auto text-muted-foreground"/><b className="numeric block font-display text-xl">{number(totalBix - unlocked, { maximumFractionDigits: 2 })}</b><span className="text-[10px] text-muted-foreground">Locked BIX</span></div>
           <div className="rounded-2xl bg-background/60 p-3"><Unlock size={14} className="mx-auto text-chart-2"/><b className="numeric block font-display text-xl text-chart-2">{number(unlocked, { maximumFractionDigits: 2 })}</b><span className="text-[10px] text-muted-foreground">Released BIX</span></div>
@@ -153,7 +154,7 @@ function PresalePage() {
         {orders.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">No presale purchases yet.</p> : <ul className="mt-4 grid gap-2">{orders.map(o => { const r = presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now); const pct = Math.min(100, r / Number(o.bix_amount) * 100); const day = Math.min(o.release_days, Math.floor((now - Date.parse(o.created_at)) / 864e5)); return <li key={o.id} className="rounded-2xl border border-border p-3 text-xs">
           <div className="flex justify-between"><b>${number(Number(o.package_usd))} → {number(Number(o.bix_amount))} BIX</b><span className="text-muted-foreground"><CalendarClock size={11} className="inline"/> Day {day}/{o.release_days}</span></div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${pct}%` }}/></div>
-          <p className="mt-1 text-muted-foreground">{number(r, { maximumFractionDigits: 2 })} BIX released · {pct.toFixed(1)}%</p></li>; })}</ul>}
+          <p className="mt-1 text-muted-foreground">{number(r, { maximumFractionDigits: 2 })} BIX released · {pct.toFixed(1)}%</p><p className="mt-1 flex justify-between text-[10px] text-muted-foreground"><span>Bought: {fmtDT(Date.parse(o.created_at))}</span><span className="font-bold text-chart-2">LOCKED · VESTING</span></p></li>; })}</ul>}
       </section>
     </>}
     <DeveloperCovenant/>
@@ -161,3 +162,5 @@ function PresalePage() {
     <p className="mt-5 flex gap-2 text-[10px] text-muted-foreground"><ShieldCheck size={14} className="shrink-0"/>The presale price is a BIXLINK internal reference, not a market price. BIX is locked and released gradually; future value is not guaranteed.</p>
   </main></BixShell>;
 }
+
+function fmtDT(t: number) { return new Date(t).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
