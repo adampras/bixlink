@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from '@tanstack/react-router';
-import { FileText, Image as ImageIcon, Mic, Lock, Phone, Video, MessageCircle, Coins, Users, Radio, Folder, Menu, KeyRound, ShieldCheck, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreVertical, Share, Crown, Film, Headphones, Archive, BadgeCheck, FileText, Image as ImageIcon, Mic, Lock, Phone, Video, MessageCircle, Coins, Users, Radio, Folder, Menu, KeyRound, ShieldCheck, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BixAvatar } from '@/components/BixAvatar';
 import { readContacts, CONTACTS_EVENT, type BixContact } from '@/lib/bix-contacts';
@@ -67,21 +67,55 @@ export function ContactProfiles({ onChat }: { onChat: (id: string, name: string)
   const [list, setList] = useState<BixContact[]>([]);
   const [sel, setSel] = useState<BixContact | null>(null);
   useEffect(() => { const r = () => setList(readContacts()); r(); window.addEventListener(CONTACTS_EVENT, r); return () => window.removeEventListener(CONTACTS_EVENT, r); }, []);
-  if (sel) return <section className="bcs-profile">
-    <button type="button" className="bcs-back" onClick={() => setSel(null)}>← Kontak</button>
-    <div className="bcs-profile-card"><BixAvatar userId={sel.id} name={sel.name}/><h2>@{sel.name}</h2>{sel.code && <small>{sel.code}</small>}<span className="bcs-badge">Kontak BIX CALL</span></div>
-    <div className="bcs-pass"><div><small>BIX PROTOCOL PASS</small><b>@{sel.name}</b><span>ID {sel.code || sel.id.slice(0, 8).toUpperCase()}</span></div><i aria-hidden>{Array.from({ length: 16 }, (_, j) => <em key={j} className={(sel.id.charCodeAt(j % sel.id.length) + j) % 3 ? 'on' : ''}/>)}</i></div>
-    <div className="bcs-actions">
-      <button type="button" onClick={() => onChat(sel.id, sel.name)}><MessageCircle size={18}/>Chat</button>
-      <button type="button" onClick={() => startBixCall(sel.id, sel.name, 'voice')}><Phone size={18}/>Suara</button>
-      <button type="button" onClick={() => startBixCall(sel.id, sel.name, 'video')}><Video size={18}/>Video</button>
-      <Link to="/pay"><Coins size={18}/>BIX PAY</Link>
-    </div>
-    <p className="bcs-note">Izin panggilan tetap mengikuti paket dan privasi masing-masing member.</p>
-  </section>;
+  if (sel) return <ContactProfileView c={sel} onBack={() => setSel(null)} onChat={onChat}/>;
   return <section className="bcs-vault">
     <div className="bcs-board-hero"><Users size={18}/><div><b>Profil Kontak</b><small>Kontak yang Anda simpan</small></div></div>
     {list.length === 0 ? <p className="bcs-note">Belum ada kontak. Cari member lalu tekan + Simpan Kontak.</p> :
       <ul className="bcs-contacts">{list.map(c => <li key={c.id}><button type="button" onClick={() => setSel(c)}><BixAvatar userId={c.id} name={c.name}/><span><b>@{c.name}</b><small>{c.code || 'BIX member'}</small></span></button></li>)}</ul>}
+  </section>;
+}
+
+const MCATS = [
+  ['photos', 'Photos', ImageIcon, (m: VaultMsg) => m.kind === 'image' || /image/i.test(m.meta?.mime ?? '')],
+  ['videos', 'Videos', Film, (m: VaultMsg) => /video/i.test(m.meta?.mime ?? '')],
+  ['audio', 'Audio', Headphones, (m: VaultMsg) => isAudio(m) && !/video/i.test(m.meta?.mime ?? '')],
+  ['docs', 'Documents', FileText, (m: VaultMsg) => m.kind === 'file' && !/zip|rar|7z|tar|archive/i.test(`${m.meta?.mime}${m.meta?.name}`) && !/image|video/i.test(m.meta?.mime ?? '')],
+  ['arch', 'Archives', Archive, (m: VaultMsg) => /zip|rar|7z|tar|archive/i.test(`${m.meta?.mime}${m.meta?.name}`)],
+] as const;
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/** Contact profile + Media Vault: counts come from real chat attachments with this contact (RLS-scoped). */
+function ContactProfileView({ c, onBack, onChat }: { c: BixContact; onBack: () => void; onChat: (id: string, name: string) => void }) {
+  const [rows, setRows] = useState<VaultMsg[] | null>(null);
+  const [all, setAll] = useState(false);
+  useEffect(() => { void (async () => {
+    const { data } = await supabase.from('bix_messages' as never).select('id,kind,media_path,meta,created_at,sender_id,recipient_id').not('media_path', 'is', null).is('deleted_at', null).or(`sender_id.eq.${c.id},recipient_id.eq.${c.id}`).order('created_at', { ascending: false }).limit(200);
+    setRows((data as VaultMsg[] | null) ?? []);
+  })(); }, [c.id]);
+  const xs = rows ?? [];
+  const counts = MCATS.map(([, , , f]) => xs.filter(f).length);
+  const folders = counts.filter(n => n > 0).length;
+  const open = async (m: VaultMsg) => { if (!m.media_path) return; const { data } = await supabase.storage.from('bix-chat').createSignedUrl(m.media_path, 600); if (data?.signedUrl) window.open(data.signedUrl, '_blank', 'noopener'); };
+  return <section className="bcp">
+    <header className="bcp-top"><button type="button" aria-label="Kembali" onClick={onBack}><ChevronLeft size={26}/></button><button type="button" aria-label="Opsi"><MoreVertical size={22}/></button></header>
+    <div className="bcp-head">
+      <div className="bcp-avatar"><span className="bcp-ring"/><img src={foxMedal} alt={`Avatar ${c.name}`}/><i className="bcp-coin" aria-hidden/></div>
+      <h2>{c.name} <BadgeCheck size={22} className="bcp-verified" aria-label="Member terdaftar"/></h2>
+      <small>@{c.name.toLowerCase().replace(/\s+/g, '')}.bix{c.code ? ` · ${c.code}` : ''}</small>
+      <span className="bcp-vip"><Crown size={14}/>BIX MEMBER</span>
+    </div>
+    <div className="bcp-actions">
+      <button type="button" onClick={() => startBixCall(c.id, c.name, 'voice')}><span><Phone size={24}/></span>Call</button>
+      <button type="button" onClick={() => onChat(c.id, c.name)}><span><MessageCircle size={24}/></span>Message</button>
+      <button type="button" onClick={() => startBixCall(c.id, c.name, 'video')}><span><Video size={24}/></span>Video</button>
+      <button type="button" onClick={() => onChat(c.id, c.name)}><span><Share size={24}/></span>Share Media</button>
+    </div>
+    <i className="bcp-glow" aria-hidden/>
+    <div className="bcp-mv">
+      <div className="bcp-mv-h"><div><b>Media Vault</b><small>{rows === null ? 'Memuat…' : `${xs.length} Items • ${folders} Folders`}</small></div><button type="button" onClick={() => setAll(v => !v)}>{all ? 'Tutup' : 'View All'} <ChevronRight size={14}/></button></div>
+      <div className="bcp-grid">{MCATS.map(([k, l, I], i) => <div key={k} className={`bcp-tile is-${k}`}><div><I size={18}/><b>{l}</b></div><em>{pad(counts[i] ?? 0)}</em></div>)}</div>
+      {all && (xs.length === 0 ? <p className="bcs-note">Belum ada media dengan kontak ini.</p> :
+        <ul className="bsv-files">{xs.map(m => <li key={m.id}><div className="bsv-fmeta"><b>{m.meta?.name ?? (m.kind === 'image' ? 'Foto' : m.kind === 'file' ? 'Dokumen' : 'Voice note')}</b><small>{fmtSize(m.meta?.size)} · {when(m.created_at)}</small></div><button type="button" className="bsv-dl" onClick={() => void open(m)}><Download size={14}/>Buka</button></li>)}</ul>)}
+    </div>
   </section>;
 }
