@@ -29,3 +29,5 @@
 - AIX look: bix_aix_access/bix_aix_set (mode in bix_design_release.aix; scoped = Owner 1 + design whitelist) sets html[data-aix=on] in BixShell; capsule dock, page rise, wallet aurora CSS and the /exchange AixGlobe are presentation-only.
 - BIXTOK Post & Earn pays BIX via bix_allocations; amounts and daily limits live on bixtok_config columns set by Admin 1 — one server rule.
 - BIX CALL group room renders through a body portal so transformed page ancestors cannot push the composer off screen.
+
+- BIX CALL group governance: invite quota/expiry enforced in bix_group_join, presence via bix_group_touch (last_seen_at), proposals/votes and a record-only treasury book (bix_group_treasury) written only through manager RPCs — treasury never moves wallet balances.

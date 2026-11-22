@@ -393,18 +393,21 @@ export type Database = {
           group_id: string
           is_admin: boolean
           joined_at: string
+          last_seen_at: string | null
           user_id: string
         }
         Insert: {
           group_id: string
           is_admin?: boolean
           joined_at?: string
+          last_seen_at?: string | null
           user_id: string
         }
         Update: {
           group_id?: string
           is_admin?: boolean
           joined_at?: string
+          last_seen_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -452,6 +455,117 @@ export type Database = {
           },
         ]
       }
+      bix_group_proposals: {
+        Row: {
+          author_id: string
+          body: string
+          closed: boolean
+          created_at: string
+          ends_at: string
+          group_id: string
+          id: string
+          title: string
+        }
+        Insert: {
+          author_id: string
+          body?: string
+          closed?: boolean
+          created_at?: string
+          ends_at: string
+          group_id: string
+          id?: string
+          title: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          closed?: boolean
+          created_at?: string
+          ends_at?: string
+          group_id?: string
+          id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_group_proposals_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "bix_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bix_group_treasury: {
+        Row: {
+          amount: number
+          asset: string
+          author_id: string
+          created_at: string
+          direction: string
+          group_id: string
+          id: string
+          note: string
+        }
+        Insert: {
+          amount: number
+          asset: string
+          author_id: string
+          created_at?: string
+          direction: string
+          group_id: string
+          id?: string
+          note?: string
+        }
+        Update: {
+          amount?: number
+          asset?: string
+          author_id?: string
+          created_at?: string
+          direction?: string
+          group_id?: string
+          id?: string
+          note?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_group_treasury_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "bix_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bix_group_votes: {
+        Row: {
+          choice: boolean
+          created_at: string
+          proposal_id: string
+          user_id: string
+        }
+        Insert: {
+          choice: boolean
+          created_at?: string
+          proposal_id: string
+          user_id: string
+        }
+        Update: {
+          choice?: boolean
+          created_at?: string
+          proposal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bix_group_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "bix_group_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bix_groups: {
         Row: {
           about: string
@@ -460,6 +574,9 @@ export type Database = {
           code: string
           created_at: string
           id: string
+          invite_expires_at: string | null
+          invite_limit: number | null
+          invite_uses: number
           live_code: string | null
           name: string
           owner_id: string
@@ -471,6 +588,9 @@ export type Database = {
           code: string
           created_at?: string
           id?: string
+          invite_expires_at?: string | null
+          invite_limit?: number | null
+          invite_uses?: number
           live_code?: string | null
           name: string
           owner_id: string
@@ -482,6 +602,9 @@ export type Database = {
           code?: string
           created_at?: string
           id?: string
+          invite_expires_at?: string | null
+          invite_limit?: number | null
+          invite_uses?: number
           live_code?: string | null
           name?: string
           owner_id?: string
@@ -4741,8 +4864,26 @@ export type Database = {
           sender_id: string
         }[]
       }
+      bix_group_invite_reset: {
+        Args: { p_days: number; p_group: string; p_limit: number }
+        Returns: Json
+      }
       bix_group_is_member: { Args: { _g: string }; Returns: boolean }
       bix_group_join: { Args: { p_code: string }; Returns: string }
+      bix_group_proposal_close: {
+        Args: { p_proposal: string }
+        Returns: undefined
+      }
+      bix_group_proposal_create: {
+        Args: {
+          p_body: string
+          p_days: number
+          p_group: string
+          p_title: string
+        }
+        Returns: string
+      }
+      bix_group_proposals_list: { Args: { p_group: string }; Returns: Json }
       bix_group_remove_member: {
         Args: { p_group: string; p_user: string }
         Returns: undefined
@@ -4754,6 +4895,21 @@ export type Database = {
       }
       bix_group_set_avatar: {
         Args: { p_group: string; p_path: string }
+        Returns: undefined
+      }
+      bix_group_touch: { Args: { p_group: string }; Returns: undefined }
+      bix_group_treasury_add: {
+        Args: {
+          p_amount: number
+          p_asset: string
+          p_direction: string
+          p_group: string
+          p_note: string
+        }
+        Returns: string
+      }
+      bix_group_vote: {
+        Args: { p_proposal: string; p_yes: boolean }
         Returns: undefined
       }
       bix_growth_excluded: { Args: { p_user: string }; Returns: boolean }

@@ -480,3 +480,36 @@ html[data-bc-lux] .bc-sov-end svg{width:24px;height:24px}
 .bx-grp-lux-dock{position:sticky;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);background:#040507;border-top:1px solid rgba(168,85,247,.25);margin:4px -10px 0;padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
 .bx-grp-lux-dock button{display:flex;flex-direction:column;align-items:center;gap:2px;color:#6B7280;background:none;border:0;min-width:0}
 .bx-grp-lux-dock small{font-size:9.5px;color:inherit}.bx-grp-lux-dock .is-on{color:var(--gx-gold)}.bx-grp-lux-dock button:disabled{opacity:.45}
+
+/* Group governance (Proposals / Treasury) */
+.bx-gov{display:flex;flex-direction:column;gap:10px;padding-bottom:8px}
+.bx-gov-form{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid hsl(45 100% 50% / .25);border-radius:14px;background:hsl(240 20% 4% / .9)}
+.bx-gov-form input,.bx-gov-form textarea,.bx-gov-form select{width:100%;min-height:40px;padding:8px 10px;border-radius:10px;border:1px solid hsl(270 90% 65% / .35);background:hsl(240 20% 2%);color:hsl(0 0% 96%);font-size:14px}
+.bx-gov-form textarea{min-height:70px}
+.bx-gov-form label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:hsl(0 0% 70%)}
+.bx-gov-form label select{width:auto}
+.bx-gov-row{display:flex;gap:8px;align-items:center}.bx-gov-row>*{flex:1}
+.bx-gov-ghost{min-height:40px;border-radius:12px;border:1px solid hsl(0 0% 100% / .15);background:transparent;color:hsl(0 0% 80%);font-size:13px}
+.bx-gov-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.bx-gov-list>li:not(.bx-grp-lux-empty){padding:12px;border-radius:14px;border:1px solid hsl(270 90% 65% / .25);background:linear-gradient(160deg,hsl(270 40% 10% / .6),hsl(240 20% 3%));display:flex;flex-direction:column;gap:6px}
+.bx-gov-top{display:flex;align-items:center;gap:8px}.bx-gov-top b{flex:1;font-size:14px;color:hsl(0 0% 96%)}
+.bx-gov-top em,.bx-gov-list em{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.06em;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
+.bx-gov p{margin:0;font-size:12px;color:hsl(0 0% 72%)}
+.bx-gov small{font-size:11px;color:hsl(0 0% 62%)}
+.bx-gov-bar{height:6px;border-radius:99px;background:hsl(0 84% 60% / .35);overflow:hidden}.bx-gov-bar i{display:block;height:100%;background:linear-gradient(90deg,#d4af37,#ffd700)}
+.bx-gov-vote{min-height:36px;border-radius:10px;border:1px solid hsl(160 70% 45% / .5);background:transparent;color:hsl(160 70% 60%);font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.bx-gov-vote.is-no{border-color:hsl(0 84% 60% / .5);color:hsl(0 84% 68%)}
+.bx-gov-vote.is-on{background:currentColor}.bx-gov-vote.is-on,.bx-gov-vote.is-on svg{color:hsl(240 20% 3%)}
+.bx-gov-vote.is-on{background:hsl(160 70% 50%)}.bx-gov-vote.is-no.is-on{background:hsl(0 84% 62%)}
+.bx-gov-bal{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bx-gov-bal>div{padding:12px;border-radius:14px;border:1px solid hsl(45 100% 50% / .3);background:hsl(240 20% 4%);display:flex;flex-direction:column;gap:2px}
+.bx-gov-bal b{font-size:18px;color:#ffd700}
+.bx-gov .is-gold{color:#ffd700}.bx-gov .is-purple{color:#a855f7}.bx-gov .is-cyan{color:#06b6d4}.bx-gov .is-muted{color:hsl(0 0% 60%)}.bx-gov .is-green{color:hsl(160 70% 55%)}.bx-gov .is-red{color:hsl(0 84% 65%)}
+.bx-gov-note{font-style:italic}
+.bx-grp-lux-dot{position:absolute;right:-1px;top:-1px;width:10px;height:10px;border-radius:50%;border:2px solid #040507;background:hsl(0 0% 45%)}
+.bx-grp-lux-dot.is-online{background:hsl(150 80% 50%)}.bx-grp-lux-dot.is-away{background:#f59e0b}
+.bx-grp-lux-inv-ctl{display:flex;gap:6px;margin-top:8px}
+.bx-grp-lux-inv-ctl select{flex:1;min-height:34px;border-radius:10px;border:1px solid hsl(186 94% 43% / .4);background:hsl(240 20% 2%);color:hsl(0 0% 92%);font-size:12px}
+.bx-grp-lux-inv-ctl button{min-height:34px;padding:0 12px;border-radius:10px;border:1px solid #d4af37;background:transparent;color:#ffd700;font-size:12px;font-weight:700}
+
+.bx-grp-lux-st{font-size:10px;color:hsl(0 0% 55%);margin-left:auto}.bx-grp-lux-st.is-online{color:hsl(150 80% 55%)}.bx-grp-lux-st.is-away{color:#f59e0b}

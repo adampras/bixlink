@@ -1492,6 +1492,13 @@
       "when": 1795323109006,
       "tag": "0212_bix_is_owner1_uuid_overload",
       "breakpoints": true
+    },
+    {
+      "idx": 213,
+      "version": "7",
+      "when": 1795367635663,
+      "tag": "0213_group_governance_paths",
+      "breakpoints": true
     }
   ]
 }

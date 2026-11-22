@@ -9,12 +9,15 @@ import { MeetingStage } from '@/components/BixGroupMeeting';
 import { useSignedUrl } from '@/components/BixAvatar';
 import { shrinkImage } from '@/lib/bix-avatar';
 import { readContacts } from '@/lib/bix-contacts';
+import { ProposalsTab, TreasuryTab } from '@/components/BixGroupGov';
 
-type Group = { id: string; name: string; about: string; code: string; live_code: string | null; owner_id: string; avatar_path: string | null; admins_only?: boolean };
+type Group = { id: string; name: string; about: string; code: string; live_code: string | null; owner_id: string; avatar_path: string | null; admins_only?: boolean; invite_limit?: number | null; invite_uses?: number; invite_expires_at?: string | null };
 type Msg = { id: string; sender_id: string; name: string; body: string; created_at: string };
 type Cand = { id: string; code: string; name: string; src: 'Kontak' | 'Jaringan'; depth?: number };
-type Mem = { id: string; code: string | null; name: string; host: boolean; admin?: boolean };
-const COLS = 'id,name,about,code,live_code,owner_id,avatar_path,admins_only';
+type Mem = { id: string; code: string | null; name: string; host: boolean; admin?: boolean; last_seen?: string | null };
+const presence = (iso?: string | null): 'online' | 'away' | 'offline' => { if (!iso) return 'offline'; const m = (Date.now() - new Date(iso).getTime()) / 6e4; return m < 3 ? 'online' : m < 60 ? 'away' : 'offline'; };
+const inactive = (iso?: string | null) => !iso || Date.now() - new Date(iso).getTime() > 7 * 864e5;
+const COLS = 'id,name,about,code,live_code,owner_id,avatar_path,admins_only,invite_limit,invite_uses,invite_expires_at';
 const newCode = (n = 6) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
 
 function GroupAvatar({ g, size = 44 }: { g: Group; size?: number }) {
@@ -115,8 +118,12 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
   const [o1, setO1] = useState(false);
   useEffect(() => { void supabase.rpc('bix_is_owner1').then(({ data }) => setO1(Boolean(data))); }, []);
   const host = g.owner_id === me || o1; const meAdmin = roster.some(m => m.id === me && m.admin); const manage = host || meAdmin; const [err, setErr] = useState('');
-  const [tab, setTab] = useState<'overview' | 'members' | 'settings'>('overview');
-  const [filt, setFilt] = useState<'all' | 'founders' | 'mods' | 'members'>('all');
+  const [tab, setTab] = useState<'overview' | 'members' | 'proposals' | 'treasury' | 'settings'>('overview');
+  const [filt, setFilt] = useState<'all' | 'founders' | 'mods' | 'members' | 'inactive'>('all');
+  const [lim, setLim] = useState('50'); const [days, setDays] = useState('7');
+  const resetInvite = async () => { const { error } = await supabase.rpc('bix_group_invite_reset' as never, { p_group: g.id, p_limit: lim === 'none' ? null : Number(lim), p_days: days === 'none' ? null : Number(days) } as never); if (error) setErr(error.message); else { setErr('Link undangan baru dibuat.'); onReload(); } };
+  const expLeft = (() => { if (!g.invite_expires_at) return 'never'; const ms = new Date(g.invite_expires_at).getTime() - Date.now(); if (ms <= 0) return 'expired'; return `${Math.floor(ms / 864e5)}d ${Math.floor(ms / 36e5) % 24}h`; })();
+  const online = roster.filter(m => presence(m.last_seen) === 'online').length;
   const [rowMenu, setRowMenu] = useState<string | null>(null); const [only, setOnly] = useState(!!g.admins_only); const [copied, setCopied] = useState(false);
   const setAdmin = async (m: Mem, on: boolean) => {
     const { error } = await supabase.rpc('bix_group_set_admin', { p_group: g.id, p_user: m.id, p_on: on });
@@ -133,7 +140,7 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
   };
   const copyLink = async () => { const ok = await copyText(inviteLink(g)); setCopied(ok); setErr(ok ? 'Link undangan tersalin.' : 'Gagal menyalin link.'); setTimeout(() => setCopied(false), 1600); };
   const founders = roster.filter(m => m.host).length; const mods = roster.filter(m => m.admin && !m.host).length;
-  const list = roster.filter(m => filt === 'all' ? true : filt === 'founders' ? m.host : filt === 'mods' ? (m.admin && !m.host) : (!m.admin && !m.host));
+  const list = roster.filter(m => filt === 'all' ? true : filt === 'founders' ? m.host : filt === 'mods' ? (m.admin && !m.host) : filt === 'inactive' ? inactive(m.last_seen) : (!m.admin && !m.host));
   const perms: { icon: ReactNode; t: string; d: string; on: boolean; edit?: boolean }[] = [
     { icon: <Lock size={16}/>, t: 'Member Management', d: 'Add, remove and manage roles', on: manage },
     { icon: <MessageSquare size={16}/>, t: 'Admin-only Messaging', d: 'Only Founder & Moderators can send', on: only, edit: host },
@@ -150,7 +157,7 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
         </header>
         <div className="bx-grp-lux-stats">
           <div><Users size={18} className="is-gold"/><b>{roster.length}</b><small>Members</small><em className="is-green">Total</em></div>
-          <div><ShieldCheck size={18} className="is-gold"/><b>{only ? 'ON' : 'OFF'}</b><small>Admin-only chat</small><em>{only ? 'Locked' : 'Open'}</em></div>
+          <div><ShieldCheck size={18} className="is-gold"/><b>{online}</b><small>Online</small><em className="is-green">Live</em></div>
           <div><Crown size={18} className="is-gold"/><b>{founders}</b><small>Founders</small><em>Active</em></div>
           <div><Hexagon size={18} className="is-purple"/><b>{mods}</b><small>Moderators</small><em>Active</em></div>
         </div>
@@ -163,10 +170,15 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
         <div className="bx-grp-lux-invite">
           <div className="bx-grp-lux-inv-row">
             <span className="bx-grp-lux-inv-hex"><Lock size={18}/></span>
-            <span><b>Cryptographic Invite Link</b><small>Secure • Code {g.code}</small><small>Uses: unlimited · Expires: never</small></span>
+            <span><b>Cryptographic Invite Link</b><small>Secure • Code {g.code}</small><small>Uses: {g.invite_uses ?? 0}/{g.invite_limit ?? '∞'} · Expires: {expLeft}</small></span>
             <button type="button" className="bx-grp-lux-copy" aria-label="Salin link undangan" onClick={() => void copyLink()}>{copied ? <Check size={16}/> : <Copy size={16}/>}</button>
           </div>
           <button type="button" className="bx-grp-lux-wide" onClick={async () => { const m = await shareGroup(g); if (m) setErr(m); }}><Link2 size={15}/> View & Copy Invite Link</button>
+          {manage && <div className="bx-grp-lux-inv-ctl">
+            <select aria-label="Kuota link" value={lim} onChange={e => setLim(e.target.value)}>{['10', '25', '50', '100', '250', '500'].map(v => <option key={v} value={v}>{v} uses</option>)}<option value="none">Unlimited</option></select>
+            <select aria-label="Masa berlaku" value={days} onChange={e => setDays(e.target.value)}>{['1', '7', '30', '90'].map(v => <option key={v} value={v}>{v} hari</option>)}<option value="none">Never</option></select>
+            <button type="button" onClick={() => void resetInvite()}>New link</button>
+          </div>}
         </div>
       </>}
       {tab === 'members' && <>
@@ -176,14 +188,15 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
           <button type="button" className="bx-grp-lux-hex" aria-label="Filter" onClick={() => setFilt(f => f === 'all' ? 'founders' : f === 'founders' ? 'mods' : f === 'mods' ? 'members' : 'all')}><SlidersHorizontal size={16}/></button>
         </header>
         <div className="bx-grp-lux-tabs" role="tablist">
-          {([['all', 'All Members', 'is-cyan'], ['founders', 'Founders', 'is-gold'], ['mods', 'Moderators', 'is-purple'], ['members', 'Members', 'is-muted']] as const).map(([k, l, c]) =>
+          {([['all', 'All Members', 'is-cyan'], ['founders', 'Founders', 'is-gold'], ['mods', 'Moderators', 'is-purple'], ['members', 'Members', 'is-muted'], ['inactive', 'Inactive', 'is-muted']] as const).map(([k, l, c]) =>
             <button key={k} type="button" role="tab" aria-selected={filt === k} className={`${c}${filt === k ? ' is-on' : ''}`} onClick={() => setFilt(k)}>{l}</button>)}
         </div>
         <ul className="bx-grp-lux-list">{list.map(m => { const r = m.host ? 'founder' : m.admin ? 'mod' : 'mem'; return <li key={m.id}>
-          <span className={`bx-grp-lux-av is-${r}`}>{m.name.slice(0, 1).toUpperCase()}{r === 'founder' && <i><Crown size={9}/></i>}{r === 'mod' && <i><Hexagon size={9}/></i>}</span>
+          <span className={`bx-grp-lux-av is-${r}`}>{m.name.slice(0, 1).toUpperCase()}{r === 'founder' && <i><Crown size={9}/></i>}{r === 'mod' && <i><Hexagon size={9}/></i>}<span className={`bx-grp-lux-dot is-${presence(m.last_seen)}`}/></span>
           <span className="bx-grp-lux-info"><b>@{m.name}{m.id === me ? ' (Anda)' : ''}</b><code>{m.code ? `BIX-${m.code}` : 'BIX-ID —'}</code></span>
           {r === 'founder' && <em className="bx-grp-lux-badge is-gold">FOUNDER</em>}
           {r === 'mod' && <em className="bx-grp-lux-badge is-purple">MODERATOR</em>}
+          <small className={`bx-grp-lux-st is-${presence(m.last_seen)}`}>{presence(m.last_seen) === 'online' ? 'Online' : presence(m.last_seen) === 'away' ? 'Away' : 'Offline'}</small>
           {(host || (meAdmin && !m.admin)) && !m.host && m.id !== me && <span className="bx-grp-lux-more">
             <button type="button" aria-label={`Opsi ${m.name}`} onClick={() => setRowMenu(rowMenu === m.id ? null : m.id)}><MoreVertical size={16}/></button>
             {rowMenu === m.id && <span className="bx-grp-lux-pop">
@@ -196,6 +209,8 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
         </ul>
         {manage && <button type="button" className="bx-grp-lux-wide is-sticky" onClick={onAdd}><UserPlus size={15}/> Invite New Member</button>}
       </>}
+      {tab === 'proposals' && <><header className="bx-grp-lux-mhead"><button type="button" className="bx-grp-lux-hex" aria-label="Kembali" onClick={() => setTab('overview')}><ChevronLeft size={18}/></button><b>Proposals</b><span/></header><ProposalsTab group={g.id} manage={manage} onMsg={setErr}/></>}
+      {tab === 'treasury' && <><header className="bx-grp-lux-mhead"><button type="button" className="bx-grp-lux-hex" aria-label="Kembali" onClick={() => setTab('overview')}><ChevronLeft size={18}/></button><b>Treasury</b><span/></header><TreasuryTab group={g.id} manage={manage} onMsg={setErr}/></>}
       {tab === 'settings' && <>
         <header className="bx-grp-lux-mhead"><button type="button" className="bx-grp-lux-hex" aria-label="Kembali" onClick={() => setTab('overview')}><ChevronLeft size={18}/></button><b>Settings</b><span/></header>
         {host ? <>
@@ -207,8 +222,8 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
       <nav className="bx-grp-lux-dock" aria-label="Navigasi admin grup">
         <button type="button" className={tab === 'overview' ? 'is-on' : ''} onClick={() => setTab('overview')}><Home size={17}/><small>Overview</small></button>
         <button type="button" className={tab === 'members' ? 'is-on' : ''} onClick={() => setTab('members')}><Users size={17}/><small>Members</small></button>
-        <button type="button" disabled title="Segera hadir"><FileText size={17}/><small>Proposals</small></button>
-        <button type="button" disabled title="Segera hadir"><Hexagon size={17}/><small>Treasury</small></button>
+        <button type="button" className={tab === 'proposals' ? 'is-on' : ''} onClick={() => setTab('proposals')}><FileText size={17}/><small>Proposals</small></button>
+        <button type="button" className={tab === 'treasury' ? 'is-on' : ''} onClick={() => setTab('treasury')}><Hexagon size={17}/><small>Treasury</small></button>
         <button type="button" className={tab === 'settings' ? 'is-on' : ''} onClick={() => setTab('settings')}><Settings size={17}/><small>Settings</small></button>
       </nav>
     </div>
@@ -307,7 +322,7 @@ function GroupRoom({ g, me, fresh, onBack, onChange }: { g: Group; me: string; f
     if (error) { setErr('Gagal keluar dari grup.'); return; } onBack();
   };
   const load = async () => { const { data } = await supabase.rpc('bix_group_feed', { p_group: g.id }); setMsgs(((data as Msg[] | null) ?? []).slice().reverse()); };
-  useEffect(() => { void load(); const t = setInterval(() => { if (!document.hidden) void load(); }, 5000); return () => clearInterval(t); }, [g.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { void load(); void supabase.rpc('bix_group_touch' as never, { p_group: g.id } as never); let n = 0; const t = setInterval(() => { if (!document.hidden) { void load(); if (++n % 12 === 0) void supabase.rpc('bix_group_touch' as never, { p_group: g.id } as never); } }, 5000); return () => clearInterval(t); }, [g.id]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [msgs.length]);
   const send = async () => {
     const b = text.trim(); if (!b) return; setText('');
