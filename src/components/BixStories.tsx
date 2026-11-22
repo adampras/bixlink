@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Camera, Download, Eye, Plus, Share2, Trash2, Type, Video as VideoIcon, X } from 'lucide-react';
+import { Camera, Download, Eye, MessageCircle, MoreHorizontal, Plus, Share2, Trash2, Type, Video as VideoIcon, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BixAvatar, useSignedUrl } from '@/components/BixAvatar';
 import { invalidateCard, saveStatus } from '@/lib/bix-avatar';
@@ -87,6 +87,7 @@ function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; gr
   const [viewers, setViewers] = useState<{ user_id: string; name: string; avatar_path: string | null; at: string }[] | null>(null);
   const [reply, setReply] = useState('');
   const [note, setNote] = useState('');
+  const [menu, setMenu] = useState(false);
   const s = g?.stories[si];
 
   const next = useCallback(() => {
@@ -133,28 +134,38 @@ function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; gr
     const { error } = await supabase.rpc('bix_chat_send' as never, { p_to: g.user_id, p_body: `💬 Membalas story: ${b}`, p_reply: null } as never);
     setReply(''); setPaused(false); setNote(error ? error.message : 'Balasan terkirim ke chat'); setTimeout(() => setNote(''), 2500);
   };
+  const react = async (e: string) => {
+    const { error } = await supabase.rpc('bix_chat_send' as never, { p_to: g.user_id, p_body: `${e} Reaksi untuk story`, p_reply: null } as never);
+    flash(error ? error.message : `Reaksi ${e} terkirim ke chat`);
+  };
   const hold = { onPointerDown: () => setPaused(true), onPointerUp: () => setPaused(false), onPointerLeave: () => setPaused(false) };
 
-  return <div className="bx-sv" role="dialog" aria-modal="true" aria-label={`Story @${g.name}`}>
+  const ago2 = (iso: string) => { const m = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000)); return m < 60 ? `${m}m ago` : m < 1440 ? `${Math.floor(m / 60)}h ago` : `${Math.floor(m / 1440)}d ago`; };
+  return <div className="bx-sv bx-sv-lux" role="dialog" aria-modal="true" aria-label={`Story @${g.name}`}>
     <div className="bx-sv-bars">{g.stories.map((x, i) => <i key={x.id}><b style={{ width: `${i < si ? 100 : i === si ? prog * 100 : 0}%` }}/></i>)}</div>
     <header className="bx-sv-head">
-      <BixAvatar userId={g.user_id} path={g.avatar_path} name={g.name} className="comm-ava" ring={false}/>
-      <span className="min-w-0 flex-1"><b className="block truncate">{g.mine ? 'Story saya' : `@${g.name}`}</b><small>{ago(s.created_at)}</small></span>
-      {s.kind !== 'text' && s.media_path && <button type="button" aria-label="Simpan story" title="Simpan" onClick={() => void saveMedia()}><Download size={17}/></button>}
-      <button type="button" aria-label="Bagikan story" title="Bagikan" onClick={() => void share()}><Share2 size={17}/></button>
-      {g.mine && <button type="button" aria-label="Delete story" onClick={() => void del()}><Trash2 size={17}/></button>}
-      <button type="button" aria-label="Close" onClick={onClose}><X size={20}/></button>
+      <span className="bx-sv-ava"><BixAvatar userId={g.user_id} path={g.avatar_path} name={g.name} className="comm-ava" ring={false}/></span>
+      <span className="min-w-0 flex-1"><span className="bx-sv-id"><b className="truncate">{g.mine ? 'Story saya' : g.name}</b><em>💎 MEMBER</em></span><small>{ago2(s.created_at)}</small></span>
+      <button type="button" className="bx-sv-more" aria-label="Opsi story" aria-expanded={menu} onClick={() => { setMenu(!menu); setPaused(!menu); }}><MoreHorizontal size={18}/></button>
+      <button type="button" className="bx-sv-x" aria-label="Close" onClick={onClose}><X size={20}/></button>
+      {menu && <div className="bx-sv-menu" role="menu">
+        {s.kind !== 'text' && s.media_path && <button type="button" role="menuitem" onClick={() => { setMenu(false); void saveMedia(); }}><Download size={15}/> Simpan</button>}
+        <button type="button" role="menuitem" onClick={() => { setMenu(false); void share(); }}><Share2 size={15}/> Bagikan</button>
+        {g.mine && <button type="button" role="menuitem" onClick={() => { setMenu(false); void del(); }}><Trash2 size={15}/> Hapus</button>}
+      </div>}
     </header>
     <div className="bx-sv-stage" {...hold}>
       <StoryMedia key={s.id} s={s} onReady={onReady} onEnded={next} paused={paused || !!viewers}/>
       {s.caption && s.kind !== 'text' && <p className="bx-sv-cap">{s.caption}</p>}
       <button type="button" className="bx-sv-tap is-prev" aria-label="Previous" onClick={prev}/>
       <button type="button" className="bx-sv-tap is-next" aria-label="Next" onClick={next}/>
+      <aside className="bx-sv-mission" aria-hidden="true"><small>COMMUNITY MISSION</small><b>BUILD THE FUTURE. TOGETHER.</b><span className="bx-sv-coin"><i>◆</i></span><em>#BIXLINK</em></aside>
+      <span className="bx-sv-crystal" aria-hidden="true"/>
     </div>
     {note && <p className="bx-sv-note" role="status">{note}</p>}
     <footer className="bx-sv-foot">
       {g.mine ? <button type="button" className="bx-sv-views" onClick={() => void openViewers()}><Eye size={15}/> {s.views ?? 0} dilihat</button>
-        : <form onSubmit={e => { e.preventDefault(); void sendReply(); }}><input value={reply} onFocus={() => setPaused(true)} onBlur={() => !reply && setPaused(false)} onChange={e => setReply(e.target.value)} maxLength={300} placeholder={`Balas @${g.name}…`}/><button type="submit" disabled={!reply.trim()}>Send</button></form>}
+        : <form className="bx-sv-bar" onSubmit={e => { e.preventDefault(); void sendReply(); }}><MessageCircle size={16} className="bx-sv-bubble"/><input value={reply} onFocus={() => setPaused(true)} onBlur={() => !reply && setPaused(false)} onChange={e => setReply(e.target.value)} maxLength={300} placeholder="Reply..."/>{reply.trim() ? <button type="submit" className="bx-sv-send">Send</button> : <><span className="bx-sv-div"/>{['💛', '👍', '🔥', '🚀'].map(e => <button key={e} type="button" className="bx-sv-react" aria-label={`Kirim reaksi ${e}`} onClick={() => void react(e)}>{e}</button>)}</>}</form>}
     </footer>
     {viewers && <div className="comm-sheet-bg" onClick={() => { setViewers(null); setPaused(false); }}><div className="comm-sheet" onClick={e => e.stopPropagation()}>
       <p className="comm-sheet-preview"><Eye size={13}/> Dilihat oleh {viewers.length}</p>
