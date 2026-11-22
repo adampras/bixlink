@@ -19,7 +19,7 @@ import { StoryBar } from '@/components/BixStories';
 import { pushNotify } from '@/lib/bix-push';
 import { compressImage } from '@/lib/bix-image';
 import { Grid3x3 } from 'lucide-react';
-import { Camera, MoreVertical, QrCode, ScanLine, UserPlus, Trash2 } from 'lucide-react';
+import { Camera, MoreVertical, QrCode, ScanLine, UserPlus, Trash2, Info } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { BixIdentityScanner } from '@/components/BixIdentityScanner';
 import { useServerFn } from '@tanstack/react-start';
@@ -818,6 +818,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     setMsgs(l => l.map(x => x.id === m.id ? { ...x, pinned_at: on ? now : null } : on ? { ...x, pinned_at: null } : x));
   };
   const [ok, setOk] = useState('');
+  const [quick, setQuick] = useState(false);
   const toastOk = (t: string) => { setOk(t); setTimeout(() => setOk(''), 2500); };
 
   // long-press to open the message menu
@@ -839,8 +840,8 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   return <main ref={roomRef} className="comm-room is-full mx-auto max-w-xl">
     <header className="comm-room-head">
       <button onClick={async () => { await supabase.rpc('bix_chat_read' as never, { p_peer: peer.id } as never); onBack(); }} aria-label="Back"><ArrowLeft size={18}/></button>
-      <BixAvatar userId={peer.id} name={name} online={state.online}/>
-      <span className="min-w-0 flex-1"><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small>{peerCard?.status_text && <em className="comm-statusline">{peerCard.status_text}</em>}</span>
+      <button type="button" className="comm-head-id" aria-label={`Profil @${name}`} onClick={() => setQuick(true)}><BixAvatar userId={peer.id} name={name} online={state.online}/></button>
+      <span className="min-w-0 flex-1 cursor-pointer" role="button" tabIndex={0} onClick={() => setQuick(true)} onKeyDown={e => { if (e.key === 'Enter') setQuick(true); }}><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small>{peerCard?.status_text && <em className="comm-statusline">{peerCard.status_text}</em>}</span>
       <ActionButtons compact peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>
       <span className="comm-kebab"><button type="button" aria-label="Menu chat" aria-expanded={roomMenu} onClick={() => setRoomMenu(v => !v)}><MoreVertical size={19}/></button>
         {roomMenu && <span className="comm-kebab-bg" aria-hidden onClick={() => setRoomMenu(false)}/>}{roomMenu && <span className="comm-kebab-menu" role="menu" onClick={() => setRoomMenu(false)}>
@@ -850,7 +851,18 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
           <button type="button" role="menuitem" className="danger" onClick={() => void clearAll()}>Bersihkan chat</button>
         </span>}</span>
     </header>
-    <p className="bcl-e2e"><Lock size={11}/>Pesan pribadi BIX CALL</p>
+    <p className="bcl-e2e"><Lock size={11}/>Sovereign Encrypted Channel</p>
+    {quick && createPortal(<div className="bcl-qp-bg" onClick={() => setQuick(false)}><div className="bcl-qp" role="dialog" aria-label={`Profil @${name}`} onClick={e => e.stopPropagation()}>
+      <header><b>@{name}</b><small>{seenText(state)}</small><button type="button" aria-label="Tutup" onClick={() => setQuick(false)}><X size={16}/></button></header>
+      <div className="bcl-qp-photo"><BixAvatar userId={peer.id} name={name} online={state.online}/></div>
+      <p className="bcl-qp-about">{peerCard?.status_text || 'Belum ada status.'}</p>
+      <nav>
+        <button type="button" disabled={!canCall || locked} onClick={() => { setQuick(false); startBixCall(peer.id, name, 'voice'); }}><Phone size={18}/><span>Suara</span></button>
+        <button type="button" disabled={!canCall || locked} onClick={() => { setQuick(false); startBixCall(peer.id, name, 'video'); }}><Video size={18}/><span>Video</span></button>
+        <button type="button" onClick={() => setQuick(false)}><MessageCircle size={18}/><span>Chat</span></button>
+        <Link to="/call" search={{ tab: 'contacts' }} onClick={() => { setQuick(false); onBack(); }}><Info size={18}/><span>Detail</span></Link>
+      </nav>
+    </div></div>, document.body)}
     {starOpen && <div className="comm-sheet-bg" onClick={() => setStarOpen(false)}><div className="comm-sheet" onClick={e => e.stopPropagation()}><StarredList peer={peer.id} onOpen={() => setStarOpen(false)}/><button type="button" className="ghost" onClick={() => setStarOpen(false)}>Tutup</button></div></div>}
     {pinned && <button type="button" className="comm-pinbar" onClick={() => jump(pinned.id)}><b>📌 Disematkan</b><span>{pinned.body}</span></button>}
     <div className="comm-msgs">
@@ -903,7 +915,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     {replyTo && <div className="comm-replybar"><span><b>↩ Membalas {replyTo.sender_id === me ? 'diri sendiri' : `@${name}`}</b>{replyTo.body}</span><button type="button" aria-label="Batal balas" onClick={() => setReplyTo(null)}>✕</button></div>}
     {!locked && !recording && !replyTo && <div className="comm-quick">{QUICK.map(q => <button key={q} type="button" onClick={() => onType(text ? `${text} ${q}` : q)}>{q}</button>)}</div>}
     <form className="comm-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
-      <span className="bc-plus-wrap"><button type="button" aria-label="Lampiran" aria-expanded={menuOpen} className="bc-plus" onClick={() => setMenuOpen(v => !v)} disabled={locked}>{menuOpen ? '×' : '+'}</button></span>
+      <span className="bc-plus-wrap"><button type="button" aria-label="Lampiran" aria-expanded={menuOpen} className="bc-plus" onClick={() => setMenuOpen(v => !v)} disabled={locked}>{menuOpen ? '×' : <Paperclip size={17}/>}</button></span>
       {menuOpen && <div className="bc-attach-bg" onClick={() => setMenuOpen(false)}><div className="bc-attach" role="menu" onClick={e => e.stopPropagation()}>
         <button type="button" onClick={() => { setMenuOpen(false); setPayOpen(true); }}><i className="is-gold"><Coins size={20}/></i>Kirim BIX</button>
         <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); fileRef.current?.click(); }}><i className="is-violet"><ImagePlus size={20}/></i>Foto & Video</button>
