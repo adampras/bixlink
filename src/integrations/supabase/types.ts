@@ -4774,7 +4774,9 @@ export type Database = {
         Returns: boolean
       }
       bix_in_owner1_network: { Args: never; Returns: boolean }
-      bix_is_owner1: { Args: never; Returns: boolean }
+      bix_is_owner1:
+        | { Args: never; Returns: boolean }
+        | { Args: { p_user: string }; Returns: boolean }
       bix_is_owner1_user: { Args: { p_user: string }; Returns: boolean }
       bix_is_sponsored_source: {
         Args: { p_member: string; p_stake: string }

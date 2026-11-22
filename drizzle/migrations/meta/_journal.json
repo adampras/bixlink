@@ -1485,6 +1485,13 @@
       "when": 1795322839294,
       "tag": "0211_presale_vusdt_designated",
       "breakpoints": true
+    },
+    {
+      "idx": 212,
+      "version": "7",
+      "when": 1795323109006,
+      "tag": "0212_bix_is_owner1_uuid_overload",
+      "breakpoints": true
     }
   ]
 }
