@@ -556,3 +556,25 @@ html[data-bc-lux] .bc-sov-end svg{width:24px;height:24px}
 .bx-pass__foot div:first-child{border-left:none}
 .bx-pass__foot small{display:block;font-size:8.5px;color:#6b7076}
 .bx-pass__foot b{display:block;font-size:9.5px;color:#06B6D4;overflow-wrap:anywhere}
+
+/* ── Harmonisation pass: consistent header, bubbles, composer, avatars, sheets, dock (presentation only) ── */
+html[data-bc-lux] .comm-room-head{min-height:calc(56px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);border-bottom:1px solid color-mix(in oklab,var(--bcl-gold) 15%,transparent)}
+html[data-bc-lux] .comm-room-head > button,html[data-bc-lux] .comm-room-head .comm-kebab > button{width:36px;height:36px;display:grid;place-items:center;border-radius:999px;background:color-mix(in oklab,var(--bcl-ink) 70%,transparent);border:1px solid color-mix(in oklab,var(--bcl-gold) 18%,transparent)}
+html[data-bc-lux] .comm-msgs > p{max-width:min(78%,22rem);overflow-wrap:anywhere;line-height:1.4}
+html[data-bc-lux] .comm-msgs > p:not(.is-me){background:oklch(0.15 0.01 280 / .96) !important;border:1px solid color-mix(in oklab,var(--bcl-gold) 20%,transparent) !important}
+html[data-bc-lux] .comm-msgs > p.is-me{background:linear-gradient(135deg,oklch(0.3 0.15 295),oklch(0.14 0.05 295)) !important}
+html[data-bc-lux] .comm-msgs .comm-vplay{background:linear-gradient(135deg,var(--bcl-gold),var(--bcl-gold-deep));color:var(--bcl-ink)}
+html[data-bc-lux] .comm-msgs .comm-vwave{color:var(--bcl-violet)}
+html[data-bc-lux] .comm-msgs .comm-vtime,html[data-bc-lux] .comm-msgs .comm-tick{font-size:10px;font-variant-numeric:tabular-nums}
+html[data-bc-lux] .comm-compose{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px);background:linear-gradient(to top,var(--bcl-ink) 70%,transparent)}
+html[data-bc-lux] .comm-compose .comm-input{border-radius:999px;background:oklch(0.15 0.01 280);border:1px solid color-mix(in oklab,var(--bcl-gold) 18%,transparent);max-height:7.5rem}
+html[data-bc-lux] .comm-compose .comm-input::placeholder{color:color-mix(in oklab,var(--bcl-gold) 45%,transparent)}
+html[data-bc-lux] .bixcall-page .comm-peer img,html[data-bc-lux] .comm-room-head img,html[data-bc-lux] .bixcall-page .comm-row img{border-radius:999px;box-shadow:0 0 0 2px var(--bcl-gold),0 0 12px color-mix(in oklab,var(--bcl-violet) 45%,transparent)}
+html[data-bc-lux] .comm-sheet{border-radius:24px 24px 0 0;background:var(--bcl-ink);border-top:1px solid color-mix(in oklab,var(--bcl-gold) 25%,transparent);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 12px);animation:bcl-sheet-up .24s ease-out}
+html[data-bc-lux] .comm-sheet::before{content:"";display:block;width:40px;height:4px;margin:8px auto 10px;border-radius:4px;background:color-mix(in oklab,var(--bcl-gold) 60%,transparent)}
+html[data-bc-lux] .comm-sheet-bg{backdrop-filter:blur(6px)}
+html[data-bc-lux] .comm-room{animation:bcl-slide-in .22s ease-out}
+@keyframes bcl-sheet-up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes bcl-slide-in{from{transform:translateX(18px);opacity:.6}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){html[data-bc-lux] .comm-sheet,html[data-bc-lux] .comm-room{animation:none}}
+html:has(.comm-room) [data-bc-lux] .bcl-dock,html[data-bc-lux]:has(.comm-room) .bcl-dock,html[data-bc-lux]:has(.bixcall-active) .bcl-dock{display:none}
