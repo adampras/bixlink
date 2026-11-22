@@ -1,13 +1,13 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from '@tanstack/react-router';
-import { FileText, Image as ImageIcon, Mic, Lock, Phone, Video, MessageCircle, Coins, Users, Radio } from 'lucide-react';
+import { FileText, Image as ImageIcon, Mic, Lock, Phone, Video, MessageCircle, Coins, Users, Radio, Folder, Menu, KeyRound, ShieldCheck, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BixAvatar } from '@/components/BixAvatar';
 import { readContacts, CONTACTS_EVENT, type BixContact } from '@/lib/bix-contacts';
 import { startBixCall } from '@/components/BixCall';
+import foxMedal from '@/assets/bixlink-fox.webp';
 
 type VaultMsg = { id: string; kind: string; media_path: string | null; meta: { name?: string; size?: number; mime?: string } | null; created_at: string; sender_id: string; recipient_id: string };
-const KINDS = [['all', 'Semua'], ['image', 'Foto'], ['file', 'Dokumen'], ['voice', 'Suara']] as const;
 
 /** Boardroom: presentation wrapper around the existing group-meeting rooms (no new call engine). */
 export function BoardroomStage({ children }: { children: ReactNode }) {
@@ -20,23 +20,45 @@ export function BoardroomStage({ children }: { children: ReactNode }) {
 }
 
 /** Secure Vault: lists media the member already sent/received via chat (RLS limits rows to own conversations). */
+const VTABS = [['doc', 'Documents', Folder], ['audio', 'Audio Recordings', Mic], ['pdf', 'PDF Pitch Decks', FileText], ['media', 'Encrypted Media', Lock]] as const;
+type VTab = typeof VTABS[number][0];
+const isPdf = (m: VaultMsg) => /pdf/i.test(m.meta?.mime ?? '') || /\.pdf$/i.test(m.meta?.name ?? '');
+const isAudio = (m: VaultMsg) => m.kind !== 'image' && m.kind !== 'file' && !/video/i.test(m.meta?.mime ?? '');
+const isMedia = (m: VaultMsg) => m.kind === 'image' || /video|image/i.test(m.meta?.mime ?? '');
+const inTab = (t: VTab, m: VaultMsg) => t === 'doc' ? m.kind === 'file' : t === 'audio' ? isAudio(m) : t === 'pdf' ? isPdf(m) : isMedia(m);
+const fmtSize = (n?: number) => !n ? '—' : n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
+const ago = (iso?: string) => { if (!iso) return 'Belum ada'; const h = (Date.now() - new Date(iso).getTime()) / 36e5; return h < 1 ? 'Updated just now' : h < 24 ? `Updated ${Math.floor(h)}h ago` : `Updated ${Math.floor(h / 24)}d ago`; };
+const when = (iso: string) => { const d = new Date(iso), t = new Date(); const tm = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); const days = Math.floor((new Date(t.toDateString()).getTime() - new Date(d.toDateString()).getTime()) / 864e5); return days === 0 ? `Today, ${tm}` : days === 1 ? `Yesterday, ${tm}` : `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${tm}`; };
+const badge = (m: VaultMsg) => isPdf(m) ? ['PDF', 'is-pdf'] : /presentation|ppt/i.test(`${m.meta?.mime}${m.meta?.name}`) ? ['PPT', 'is-ppt'] : isAudio(m) ? ['MP3', 'is-mp3'] : isMedia(m) ? ['LOCK', 'is-lock'] : ['DOC', 'is-doc'];
+const VAULT_REF_BYTES = 1024 ** 3; // display reference only, not a storage quota
+
 export function SecureVault({ me }: { me: string }) {
   const [rows, setRows] = useState<VaultMsg[] | null>(null);
-  const [k, setK] = useState<string>('all');
+  const [k, setK] = useState<VTab>('doc');
   useEffect(() => { if (!me) return; void (async () => {
     const { data } = await supabase.from('bix_messages' as never).select('id,kind,media_path,meta,created_at,sender_id,recipient_id').not('media_path', 'is', null).is('deleted_at', null).order('created_at', { ascending: false }).limit(120);
     setRows((data as VaultMsg[] | null) ?? []);
   })(); }, [me]);
   const open = async (m: VaultMsg) => { if (!m.media_path) return; const { data } = await supabase.storage.from('bix-chat').createSignedUrl(m.media_path, 600); if (data?.signedUrl) window.open(data.signedUrl, '_blank', 'noopener'); };
-  const list = (rows ?? []).filter(r => k === 'all' || r.kind === k || (k === 'voice' && r.kind !== 'image' && r.kind !== 'file'));
-  return <section className="bcs-vault">
-    <div className="bcs-board-hero"><Lock size={18}/><div><b>Secure Vault</b><small>Lampiran dari percakapan Anda · hanya Anda dan lawan bicara</small></div></div>
-    {rows && <div className="bcs-vstats">{([['image','Foto',ImageIcon],['file','Dokumen',FileText],['voice','Suara',Mic]] as const).map(([v,l,I])=>{const n=rows.filter(r=>v==='voice'?(r.kind!=='image'&&r.kind!=='file'):r.kind===v).length;return <div key={v}><I size={15}/><b>{n}</b><small>{l}</small><i style={{width:`${rows.length?Math.round(n/rows.length*100):0}%`}}/></div>;})}</div>}
-    <div className="bcs-chips">{KINDS.map(([v, l]) => <button key={v} type="button" className={k === v ? 'is-on' : ''} onClick={() => setK(v)}>{l}</button>)}</div>
-    {rows === null ? <p className="bcs-note">Memuat…</p> : list.length === 0 ? <p className="bcs-note">Belum ada lampiran.</p> :
-      <ul className="bcs-vault-grid">{list.map(m => { const I = m.kind === 'image' ? ImageIcon : m.kind === 'file' ? FileText : Mic; return <li key={m.id}><button type="button" onClick={() => void open(m)}>
-        <I size={22}/><b>{m.meta?.name ?? (m.kind === 'image' ? 'Foto' : m.kind === 'file' ? 'Dokumen' : 'Voice note')}</b>
-        <small>{m.sender_id === me ? 'Terkirim' : 'Diterima'} · {new Date(m.created_at).toLocaleDateString([], { day: '2-digit', month: 'short' })}</small></button></li>; })}</ul>}
+  const all = rows ?? [];
+  const list = all.filter(r => inTab(k, r));
+  const folders = ([['Executive Documents', (m: VaultMsg) => m.kind === 'file' && !isPdf(m)], ['Financial Reports', isPdf], ['Legal & Compliance', isMedia]] as const).map(([n, f]) => { const xs = all.filter(f); return { n, c: xs.length, u: xs[0]?.created_at }; });
+  const used = all.reduce((s, m) => s + (m.meta?.size ?? 0), 0);
+  const pct = Math.min(100, Math.round(used / VAULT_REF_BYTES * 100));
+  return <section className="bsv">
+    <header className="bsv-top"><img src={foxMedal} alt="" className="bsv-medal"/><h2>Secure Vault</h2><button type="button" aria-label="Menu" className="bsv-round"><Menu size={18}/></button></header>
+    <div className="bsv-hero" aria-hidden><span className="bsv-ring"/><span className="bsv-circuit"/><span className="bsv-shield"><KeyRound size={34}/></span></div>
+    <div className="bsv-status"><span className="bsv-lockbox"><Lock size={20}/></span><div><small>Vault Status</small><b>Private &amp; Secure</b></div><div className="bsv-status-r"><b>Signed Link</b><small>Akses 10 menit · RLS</small></div><ShieldCheck size={26} className="bsv-cyan"/></div>
+    <div className="bsv-tabs">{VTABS.map(([v, l, I]) => <button key={v} type="button" className={k === v ? 'is-on' : ''} onClick={() => setK(v)}><I size={15}/>{l}</button>)}</div>
+    <h3 className="bsv-h">Folders</h3>
+    <div className="bsv-folders">{folders.map(f => <div key={f.n}><Folder size={22}/><div><b>{f.n}</b><small>{f.c} items</small></div><em>{f.u ? ago(f.u) : 'Kosong'}</em></div>)}</div>
+    <h3 className="bsv-h">Files</h3>
+    {rows === null ? <p className="bcs-note">Memuat…</p> : list.length === 0 ? <p className="bcs-note">Belum ada lampiran di kategori ini.</p> :
+      <ul className="bsv-files">{list.map(m => { const [bt, bc] = badge(m); return <li key={m.id}>
+        <span className={`bsv-badge ${bc}`}>{bt === 'LOCK' ? <Lock size={16}/> : bt}</span>
+        <div className="bsv-fmeta"><b>{m.meta?.name ?? (m.kind === 'image' ? 'Foto' : m.kind === 'file' ? 'Dokumen' : 'Voice note')}</b><small>{(m.meta?.mime?.split('/')[1] ?? m.kind).toUpperCase()} · {fmtSize(m.meta?.size)}</small><small>{when(m.created_at)} <i className="bsv-enc"><Lock size={10}/>Private</i></small></div>
+        <button type="button" className="bsv-dl" onClick={() => void open(m)}><Download size={14}/>Download</button></li>; })}</ul>}
+    <footer className="bsv-foot"><span className="bsv-gauge" style={{ ['--p' as string]: `${pct}%` }}><b>{pct}%</b></span><div><b>Vault Storage</b><small>{fmtSize(used)} dari 1 GB referensi · {all.length} file</small></div><span className="bsv-secure"><ShieldCheck size={18}/>Secure</span></footer>
   </section>;
 }
 
