@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Camera, Copy, Check, GraduationCap, MoreVertical, LogOut, Radio, Search, Send, Share2, UserPlus, Users, X } from 'lucide-react';
+import { ArrowLeft, Camera, Copy, Check, GraduationCap, MoreVertical, LogOut, Radio, Search, Send, Share2, UserPlus, Users, X, Lock, MessageSquare, FileText, Settings, ShieldCheck, Crown, Hexagon, Link2, ChevronLeft, SlidersHorizontal, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { copyText } from '@/lib/copy-text';
 import { MeetingStage } from '@/components/BixGroupMeeting';
@@ -115,6 +115,9 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
   const [o1, setO1] = useState(false);
   useEffect(() => { void supabase.rpc('bix_is_owner1').then(({ data }) => setO1(Boolean(data))); }, []);
   const host = g.owner_id === me || o1; const meAdmin = roster.some(m => m.id === me && m.admin); const manage = host || meAdmin; const [err, setErr] = useState('');
+  const [tab, setTab] = useState<'overview' | 'members' | 'settings'>('overview');
+  const [filt, setFilt] = useState<'all' | 'founders' | 'mods' | 'members'>('all');
+  const [rowMenu, setRowMenu] = useState<string | null>(null); const [only, setOnly] = useState(!!g.admins_only); const [copied, setCopied] = useState(false);
   const setAdmin = async (m: Mem, on: boolean) => {
     const { error } = await supabase.rpc('bix_group_set_admin', { p_group: g.id, p_user: m.id, p_on: on });
     if (error) setErr(error.message); else { setErr(on ? `@${m.name} sekarang Admin grup.` : `@${m.name} bukan admin lagi.`); onReload(); }
@@ -124,29 +127,91 @@ function MembersSheet({ g, me, roster, onClose, onAdd, onReload, onPhoto }: { g:
     const { error } = await supabase.rpc('bix_group_remove_member', { p_group: g.id, p_user: m.id });
     if (error) setErr(error.message); else onReload();
   };
-  return <GroupSheet title="Anggota grup" description={`${g.name} · ${roster.length} anggota`} onClose={onClose}>
-      <div className="bx-grp-info"><GroupAvatar g={g} size={76}/><b>{g.name}</b><small>Kode undangan {g.code}</small>
-        <Button variant="ghost" type="button" className="bx-grp-btn" onClick={async () => { const m = await shareGroup(g); if (m) setErr(m); }}><Share2 size={14}/> Bagikan link undangan</Button>
-        {host && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" onClick={onPhoto}><Camera size={14}/> {g.avatar_path ? 'Ganti foto grup' : 'Pasang foto grup'}</Button>}
-        {g.about && <p>{g.about}</p>}</div>
-      <div className="bx-grp-cmd" aria-label="Ringkasan admin grup">
-        <span><b>{roster.length}</b><small>Anggota</small></span>
-        <span><b>{roster.filter(m => m.admin && !m.host).length}</b><small>Admin</small></span>
-        <span><b>{roster.filter(m => m.host).length}</b><small>Host</small></span>
-        <span><b>{g.admins_only ? 'Admin' : 'Semua'}</b><small>Boleh kirim</small></span>
-      </div>
-      <p className="bx-grp-cmd-role">{host ? '👑 Anda Host — atur admin, anggota & pengaturan.' : meAdmin ? '🛡️ Anda Admin — tambah & keluarkan anggota.' : '👤 Anda anggota grup ini.'}</p>
-      {host && <GroupSettings g={g} onSaved={onReload} onMsg={setErr}/>}
+  const toggleOnly = async (v: boolean) => {
+    setOnly(v); const { error } = await supabase.from('bix_groups').update({ admins_only: v } as never).eq('id', g.id);
+    if (error) { setOnly(!v); setErr('Gagal menyimpan izin.'); } else onReload();
+  };
+  const copyLink = async () => { const ok = await copyText(inviteLink(g)); setCopied(ok); setErr(ok ? 'Link undangan tersalin.' : 'Gagal menyalin link.'); setTimeout(() => setCopied(false), 1600); };
+  const founders = roster.filter(m => m.host).length; const mods = roster.filter(m => m.admin && !m.host).length;
+  const list = roster.filter(m => filt === 'all' ? true : filt === 'founders' ? m.host : filt === 'mods' ? (m.admin && !m.host) : (!m.admin && !m.host));
+  const perms: { icon: ReactNode; t: string; d: string; on: boolean; edit?: boolean }[] = [
+    { icon: <Lock size={16}/>, t: 'Member Management', d: 'Add, remove and manage roles', on: manage },
+    { icon: <MessageSquare size={16}/>, t: 'Admin-only Messaging', d: 'Only Founder & Moderators can send', on: only, edit: host },
+    { icon: <FileText size={16}/>, t: 'Role Assignment', d: 'Promote or demote moderators', on: host },
+    { icon: <Settings size={16}/>, t: 'System Settings', d: 'Configure group settings', on: host },
+  ];
+  return <GroupSheet title="Group Admin" description={`${g.name} · ${roster.length} anggota`} onClose={onClose}>
+    <div className="bx-grp-lux">
+      {tab === 'overview' && <>
+        <header className="bx-grp-lux-head">
+          <span className="bx-grp-lux-emblem"><GroupAvatar g={g} size={54}/><i><ShieldCheck size={11}/></i></span>
+          <div><b>Group Admin</b><small>{g.name}</small></div>
+          <button type="button" className="bx-grp-lux-hex" aria-label="Pengaturan grup" onClick={() => setTab('settings')}><Settings size={18}/></button>
+        </header>
+        <div className="bx-grp-lux-stats">
+          <div><Users size={18} className="is-gold"/><b>{roster.length}</b><small>Members</small><em className="is-green">Total</em></div>
+          <div><ShieldCheck size={18} className="is-gold"/><b>{only ? 'ON' : 'OFF'}</b><small>Admin-only chat</small><em>{only ? 'Locked' : 'Open'}</em></div>
+          <div><Crown size={18} className="is-gold"/><b>{founders}</b><small>Founders</small><em>Active</em></div>
+          <div><Hexagon size={18} className="is-purple"/><b>{mods}</b><small>Moderators</small><em>Active</em></div>
+        </div>
+        <h4 className="bx-grp-lux-h">Group Permissions</h4>
+        <ul className="bx-grp-lux-perms">{perms.map(p => <li key={p.t}>
+          <span className="bx-grp-lux-pi">{p.icon}</span><span><b>{p.t}</b><small>{p.d}</small></span>
+          <button type="button" role="switch" aria-checked={p.on} aria-label={p.t} disabled={!p.edit} className={`bx-grp-lux-sw${p.on ? ' is-on' : ''}`} onClick={() => p.edit && void toggleOnly(!p.on)}><i/></button>
+        </li>)}</ul>
+        <h4 className="bx-grp-lux-h">Invite Link</h4>
+        <div className="bx-grp-lux-invite">
+          <div className="bx-grp-lux-inv-row">
+            <span className="bx-grp-lux-inv-hex"><Lock size={18}/></span>
+            <span><b>Cryptographic Invite Link</b><small>Secure • Code {g.code}</small><small>Uses: unlimited · Expires: never</small></span>
+            <button type="button" className="bx-grp-lux-copy" aria-label="Salin link undangan" onClick={() => void copyLink()}>{copied ? <Check size={16}/> : <Copy size={16}/>}</button>
+          </div>
+          <button type="button" className="bx-grp-lux-wide" onClick={async () => { const m = await shareGroup(g); if (m) setErr(m); }}><Link2 size={15}/> View & Copy Invite Link</button>
+        </div>
+      </>}
+      {tab === 'members' && <>
+        <header className="bx-grp-lux-mhead">
+          <button type="button" className="bx-grp-lux-hex" aria-label="Kembali" onClick={() => setTab('overview')}><ChevronLeft size={18}/></button>
+          <b>Members</b>
+          <button type="button" className="bx-grp-lux-hex" aria-label="Filter" onClick={() => setFilt(f => f === 'all' ? 'founders' : f === 'founders' ? 'mods' : f === 'mods' ? 'members' : 'all')}><SlidersHorizontal size={16}/></button>
+        </header>
+        <div className="bx-grp-lux-tabs" role="tablist">
+          {([['all', 'All Members', 'is-cyan'], ['founders', 'Founders', 'is-gold'], ['mods', 'Moderators', 'is-purple'], ['members', 'Members', 'is-muted']] as const).map(([k, l, c]) =>
+            <button key={k} type="button" role="tab" aria-selected={filt === k} className={`${c}${filt === k ? ' is-on' : ''}`} onClick={() => setFilt(k)}>{l}</button>)}
+        </div>
+        <ul className="bx-grp-lux-list">{list.map(m => { const r = m.host ? 'founder' : m.admin ? 'mod' : 'mem'; return <li key={m.id}>
+          <span className={`bx-grp-lux-av is-${r}`}>{m.name.slice(0, 1).toUpperCase()}{r === 'founder' && <i><Crown size={9}/></i>}{r === 'mod' && <i><Hexagon size={9}/></i>}</span>
+          <span className="bx-grp-lux-info"><b>@{m.name}{m.id === me ? ' (Anda)' : ''}</b><code>{m.code ? `BIX-${m.code}` : 'BIX-ID —'}</code></span>
+          {r === 'founder' && <em className="bx-grp-lux-badge is-gold">FOUNDER</em>}
+          {r === 'mod' && <em className="bx-grp-lux-badge is-purple">MODERATOR</em>}
+          {(host || (meAdmin && !m.admin)) && !m.host && m.id !== me && <span className="bx-grp-lux-more">
+            <button type="button" aria-label={`Opsi ${m.name}`} onClick={() => setRowMenu(rowMenu === m.id ? null : m.id)}><MoreVertical size={16}/></button>
+            {rowMenu === m.id && <span className="bx-grp-lux-pop">
+              {host && <button type="button" onClick={() => { setRowMenu(null); void setAdmin(m, !m.admin); }}>{m.admin ? 'Copot moderator' : 'Jadikan moderator'}</button>}
+              <button type="button" className="is-red" onClick={() => { setRowMenu(null); void remove(m); }}>Keluarkan</button>
+            </span>}
+          </span>}
+        </li>; })}
+          {!list.length && <li className="bx-grp-lux-empty">Tidak ada anggota di filter ini.</li>}
+        </ul>
+        {manage && <button type="button" className="bx-grp-lux-wide is-sticky" onClick={onAdd}><UserPlus size={15}/> Invite New Member</button>}
+      </>}
+      {tab === 'settings' && <>
+        <header className="bx-grp-lux-mhead"><button type="button" className="bx-grp-lux-hex" aria-label="Kembali" onClick={() => setTab('overview')}><ChevronLeft size={18}/></button><b>Settings</b><span/></header>
+        {host ? <>
+          <button type="button" className="bx-grp-lux-wide" onClick={onPhoto}><Camera size={15}/> {g.avatar_path ? 'Ganti foto grup' : 'Pasang foto grup'}</button>
+          <GroupSettings g={g} onSaved={onReload} onMsg={setErr}/>
+        </> : <p className="bx-grp-lux-empty">Hanya Founder yang dapat mengubah pengaturan grup.</p>}
+      </>}
       {err && <p className="bx-grp-msg">{err}</p>}
-      {manage && <Button variant="ghost" type="button" className="bx-grp-btn" style={{ width: '100%', marginBottom: 8 }} onClick={onAdd}><UserPlus size={14}/> Tambah anggota</Button>}
-      <ul className="bx-grp-cands">
-        {roster.map(m => <li key={m.id}>
-          <span className="bx-grp-av" style={{ width: 36, height: 36 }}>{m.name.slice(0, 1).toUpperCase()}</span>
-          <span className="bx-grp-meta"><b>@{m.name}{m.id === me ? ' (Anda)' : ''}</b><small>{m.code ? `BIX-ID ${m.code}` : 'BIX-ID —'}</small><em className="bx-grp-member-role">{m.host ? '👑 Host' : m.admin ? '🛡️ Admin grup' : 'Anggota'}</em></span>
-          {host && !m.host && <Button variant="ghost" type="button" className={`bx-grp-btn${m.admin ? '' : ' is-alt'}`} aria-label={m.admin ? `Copot admin ${m.name}` : `Jadikan ${m.name} admin`} title={m.admin ? 'Copot admin' : 'Jadikan admin'} onClick={() => void setAdmin(m, !m.admin)}>{m.admin ? 'Copot admin' : '🛡️ Jadikan admin'}</Button>}
-          {!m.host && m.id !== me && (host || (meAdmin && !m.admin)) && <Button variant="ghost" type="button" className="bx-grp-btn is-alt" aria-label={`Keluarkan ${m.name}`} onClick={() => void remove(m)}><X size={14}/></Button>}
-        </li>)}
-      </ul>
+      <nav className="bx-grp-lux-dock" aria-label="Navigasi admin grup">
+        <button type="button" className={tab === 'overview' ? 'is-on' : ''} onClick={() => setTab('overview')}><Home size={17}/><small>Overview</small></button>
+        <button type="button" className={tab === 'members' ? 'is-on' : ''} onClick={() => setTab('members')}><Users size={17}/><small>Members</small></button>
+        <button type="button" disabled title="Segera hadir"><FileText size={17}/><small>Proposals</small></button>
+        <button type="button" disabled title="Segera hadir"><Hexagon size={17}/><small>Treasury</small></button>
+        <button type="button" className={tab === 'settings' ? 'is-on' : ''} onClick={() => setTab('settings')}><Settings size={17}/><small>Settings</small></button>
+      </nav>
+    </div>
   </GroupSheet>;
 }
 
