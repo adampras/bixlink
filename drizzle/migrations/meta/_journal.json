@@ -1478,6 +1478,13 @@
       "when": 1795155989240,
       "tag": "0210_usdt_member_transfers",
       "breakpoints": true
+    },
+    {
+      "idx": 211,
+      "version": "7",
+      "when": 1795322839294,
+      "tag": "0211_presale_vusdt_designated",
+      "breakpoints": true
     }
   ]
 }
