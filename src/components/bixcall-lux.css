@@ -393,3 +393,37 @@ html[data-bc-lux] main{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 100
 .bcp-tile.is-docs::before{background:linear-gradient(rgba(6,182,212,.08) 1px,transparent 1px) 0 0/14px 14px,linear-gradient(90deg,rgba(6,182,212,.08) 1px,transparent 1px) 0 0/14px 14px,linear-gradient(135deg,#14181d,#07080a)}
 .bcp-tile.is-arch::before{background:repeating-conic-gradient(from 0deg at 70% 45%,#5c4613 0 8deg,#120e06 8deg 16deg);-webkit-mask:radial-gradient(circle at 70% 45%,#000 34%,transparent 36%);mask:radial-gradient(circle at 70% 45%,#000 34%,transparent 36%)}
 .bcp .bsv-files{margin-top:12px}
+
+/* ===== Sovereign Call active stage (lux only; elements carry [hidden] by default) ===== */
+html[data-bc-lux] .bixcall:has(.bc-sov-dock) .bc-sov-legacy,
+html[data-bc-lux] .bixcall:has(.bc-sov-hud) .bixcall-head,
+html[data-bc-lux] .bixcall:has(.bc-sov-hud) .bixcall-status{display:none!important}
+html[data-bc-lux] .bixcall:has(.bc-sov-hud){background:#040507}
+html[data-bc-lux] .bc-sov-hud[hidden]{display:flex;position:absolute;z-index:6;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;right:12px;align-items:center;justify-content:space-between;gap:6px;pointer-events:none}
+html[data-bc-lux] .bc-sov-badge{position:relative;display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;background:rgb(10 11 16 / .72);backdrop-filter:blur(14px);border:1px solid rgb(255 255 255 / .08);color:#e5e7eb}
+html[data-bc-lux] .bc-sov-badge::before,html[data-bc-lux] .bc-sov-badge::after{content:"";position:absolute;width:10px;height:10px;border-color:#A855F7;border-style:solid;filter:drop-shadow(0 0 4px #A855F7)}
+html[data-bc-lux] .bc-sov-badge::before{top:-2px;left:-2px;border-width:2px 0 0 2px;border-radius:6px 0 0 0}
+html[data-bc-lux] .bc-sov-badge::after{bottom:-2px;right:-2px;border-width:0 2px 2px 0;border-radius:0 0 6px 0}
+html[data-bc-lux] .bc-sov-badge span{display:flex;flex-direction:column;line-height:1.1}
+html[data-bc-lux] .bc-sov-badge b{font-size:10.5px;font-weight:900;letter-spacing:.08em;color:#fff}
+html[data-bc-lux] .bc-sov-badge em{font-style:normal;font-size:9.5px;font-weight:700;color:#FFD700}
+html[data-bc-lux] .bc-sov-badge.is-voice{flex-direction:column;gap:2px;padding:6px 12px}
+html[data-bc-lux] .bc-sov-wave{display:flex!important;flex-direction:row!important;align-items:center;gap:2px;height:14px}
+html[data-bc-lux] .bc-sov-wave i{display:block;width:2.5px;height:14px;border-radius:2px;background:#A855F7;box-shadow:0 0 6px #A855F7;transform-origin:center;transition:transform .12s;animation:bcSovPulse 1.1s ease-in-out infinite}
+html[data-bc-lux] .bc-sov-wave i:nth-child(2n){animation-delay:.25s}
+@keyframes bcSovPulse{50%{opacity:.55}}
+html[data-bc-lux] .bc-sov-timer{display:flex;flex-direction:column;align-items:center;gap:4px}
+html[data-bc-lux] .bc-sov-timer i{width:26px;height:2px;border-radius:2px;background:#FFD700;box-shadow:0 0 8px #F59E0B}
+html[data-bc-lux] .bc-sov-timer b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px;font-weight:800;color:#fff;text-shadow:0 1px 6px rgb(0 0 0 / .8)}
+html[data-bc-lux] .bixcall .bixcall-pip{top:80px;right:16px;border:2px solid #A855F7;border-radius:18px;box-shadow:0 0 18px rgb(168 85 247 / .65)}
+html[data-bc-lux] .bc-sov-flip[hidden]{display:grid;place-items:center;position:absolute;z-index:5;top:calc(80px + min(28vw,120px) * 16 / 9 - 34px);right:22px;width:28px;height:28px;border-radius:50%;background:rgb(0 0 0 / .55);color:#fff;border:1px solid rgb(255 255 255 / .25)}
+html[data-bc-lux] .bc-sov-dock[hidden]{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin:0 16px calc(env(safe-area-inset-bottom,0px) + 24px);padding:14px 16px 10px;border-radius:24px;background:rgb(10 11 16 / .85);backdrop-filter:blur(20px);border:1px solid rgb(168 85 247 / .3);box-shadow:0 0 24px rgb(168 85 247 / .18)}
+html[data-bc-lux] .bc-sov-dock label{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:#d1d5db}
+html[data-bc-lux] .bc-sov-dock label button{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:#040507;color:#fff;border:1px solid rgb(255 255 255 / .2)}
+html[data-bc-lux] .bc-sov-dock label button svg{width:21px;height:21px}
+html[data-bc-lux] .bc-sov-dock label button.is-on{background:#1f1f2b;border-color:rgb(255 255 255 / .45)}
+html[data-bc-lux] .bc-sov-dock label.is-gold span{color:#FFD700}
+html[data-bc-lux] .bc-sov-dock label.is-gold button{border:2px solid #fbbf24;color:#FFD700;box-shadow:0 0 14px rgb(251 191 36 / .6)}
+html[data-bc-lux] .bc-sov-end{align-self:center;flex:0 0 auto;width:86px;height:50px;margin-top:-14px;border-radius:999px;display:grid;place-items:center;color:#fff;background:linear-gradient(90deg,#b91c1c,#dc2626,#e11d48);box-shadow:0 0 18px rgb(239 68 68 / .55)}
+html[data-bc-lux] .bc-sov-end svg{width:24px;height:24px}
+@media (prefers-reduced-motion:reduce){html[data-bc-lux] .bc-sov-wave i{animation:none}}
