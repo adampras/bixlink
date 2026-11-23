@@ -21,7 +21,7 @@ import m6 from '@/assets/bixgo/m6.jpg';
 import m7 from '@/assets/bixgo/m7.jpg';
 import promo from '@/assets/bixgo/promo.jpg';
 
-export type BixgoView = 'home' | 'order' | 'activity' | 'inbox' | 'account';
+export type BixgoView = 'home' | 'order' | 'activity' | 'inbox' | 'account' | 'services';
 
 const TILES: { label: string; img: string; svc?: BixgoService; keywords: string }[] = [
   { label: 'Bike', img: icRide, svc: 'ride', keywords: 'bixride motor ojek ride transport' }, { label: 'Food', img: icFood, svc: 'food', keywords: 'bixfood makanan makan delivery' },

@@ -3,7 +3,7 @@ import { ClientOnly } from '@tanstack/react-router';
 import { getDevicePosition, reverseGeocode } from '@/lib/geo';
 const BixgoLiveMap = lazy(() => import('@/components/BixgoLiveMap'));
 import { Link } from '@tanstack/react-router';
-import { ArrowLeft, Bell, ChevronRight, Hexagon, Home, Search, Settings, Activity } from 'lucide-react';
+import { ArrowLeft, Bell, ChevronRight, Hexagon, Home, Search, Settings, Activity , LayoutGrid } from 'lucide-react';
 import type { BixgoService, BixgoSettings } from '@/lib/bixgo';
 import type { BixgoView } from '@/components/BixgoHome';
 import { bixgoFare } from '@/lib/bixgo';
@@ -39,7 +39,7 @@ export function BixgoLuxHome({ cfg, name, enabled, onPick, onNav, onMode }: { cf
     <div className="relative flex gap-2 px-4 pt-2 text-[10px] font-bold">
       <button onClick={() => onMode('driver')} className="bgx-chip rounded-full px-3 py-1">Mode Driver</button>
       <button onClick={() => onMode('merchant')} className="bgx-chip rounded-full px-3 py-1">Mode Merchant</button>
-      <button onClick={() => setDemo(true)} className="bgx-chip rounded-full px-3 py-1">▶ Demo perjalanan</button>
+      <button onClick={() => onNav('services')} className="bgx-chip rounded-full px-3 py-1">📱 Katalog Layanan</button>
       <button onClick={() => setDemo(true)} className="bgx-chip rounded-full px-3 py-1">▶ Demo perjalanan</button>
     </div>
     <div className="pointer-events-none relative min-h-0 flex-1 [&>button]:pointer-events-auto">
@@ -54,8 +54,9 @@ export function BixgoLuxHome({ cfg, name, enabled, onPick, onNav, onMode }: { cf
       {cards.map(([k, l, img]) => <button key={k} disabled={!enabled.has(k)} onClick={() => tap(k)} aria-pressed={sel === k} className={`bgl-card rounded-2xl px-1 pb-2 pt-2 text-center text-xs font-semibold disabled:opacity-40 ${sel === k ? 'is-on' : ''}`}>{l}<img src={img} alt="" className="mx-auto mt-1 h-12 w-auto object-contain"/></button>)}
     </div>
     <p className="relative py-1 text-center text-[9px] text-muted-foreground">Peta & lokasi jemput riil · harga contoh 1.2 km · ketuk armada terpilih lagi untuk memesan · tarif final saat memesan</p>
-    <nav className="bgx-dock relative grid grid-cols-4 pb-[env(safe-area-inset-bottom)]" aria-label="BIXGO">
+    <nav className="bgx-dock relative grid grid-cols-5 pb-[env(safe-area-inset-bottom)]" aria-label="BIXGO">
       <button className="is-on" aria-current="page"><Home className="h-5 w-5"/>Home</button>
+      <button onClick={() => onNav('services')}><LayoutGrid className="h-5 w-5"/>Layanan</button>
       <button onClick={() => onNav('activity')}><Activity className="h-5 w-5"/>Activity</button>
       <Link to="/wallet"><Hexagon className="h-5 w-5"/>Wallet</Link>
       <button onClick={() => onNav('account')}><Settings className="h-5 w-5"/>Settings</button>
