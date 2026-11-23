@@ -141,6 +141,7 @@ function BixgoPage() {
   const soon = (l: string) => l === 'Pulsa & bills' ? setSub('bills') : l === 'Travel & eSIM' ? setSub('travel') : l === 'Jastip' ? setSub('jastip') : toast(`${l} — coming soon to BIXGO`);
   const pick = (s: BixgoService) => { if (s === 'ride' || s === 'car') { setSub(s); return; } setSvc(s); setTier(0); setCart({}); setStep('form'); setView('order'); setTab('order'); };
   const go = (v: BixgoView) => { setView(v); if (v === 'activity') setTab('history'); if (v === 'order') setTab('order'); };
+  const fullLux = lux && !sub && view === 'home' && mode === 'rider';
   const memberName = user?.email?.split('@')[0] || 'Member BIXLINK';
 
   return <div className={`bixgo-grab ${lux ? 'bixgo-lux' : ''} fixed inset-0 z-[60] overflow-y-auto`}><div className="mx-auto min-h-full max-w-xl pb-[calc(env(safe-area-inset-bottom)+72px)]">
@@ -150,16 +151,16 @@ function BixgoPage() {
     {sub === 'bills' && <BixgoBills onBack={() => setSub(null)}/>}
     {(sub === 'ride' || sub === 'car') && <BixgoRideBooking lux={lux} cfg={cfg} start={sub} cur={cur} city={city} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
     {!sub && <>
-    {view === 'home' && <div className="sticky top-0 z-10 bg-background/90 px-3 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-2 backdrop-blur"><div className="mb-2 flex items-center gap-2"><Link to="/" aria-label="Kembali ke BIXLINK" className="grid h-10 w-10 place-items-center rounded-full border border-primary/40 bg-card active:scale-95"><ArrowLeft className="h-5 w-5"/></Link><div className="min-w-0 flex-1 leading-tight"><b className="block text-base font-black tracking-wide">BIX<span className="text-primary">GO</span></b><span className="block truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Mobilitas · Antar · Belanja</span></div><Link to="/wallet" className="rounded-full border border-border bg-card px-3 py-2 text-[11px] font-bold">Wallet</Link></div><div role="tablist" aria-label="BIXGO mode" className="grid grid-cols-3 rounded-full border border-primary/40 bg-card p-1 text-[11px] font-bold">{([['rider', 'Penumpang'], ['driver', 'Driver'], ['merchant', 'Merchant']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={mode === k} onClick={() => setMode(k)} className={`rounded-full py-2 transition ${mode === k ? 'bg-primary text-primary-foreground shadow-[0_0_18px_-6px_var(--primary)]' : 'text-muted-foreground'}`}>{l}</button>)}</div></div>}
-    {view === 'home' && <><CityMarquee/><ModeGuide mode={mode}/></>}
+    {!fullLux && view === 'home' && <div className="sticky top-0 z-10 bg-background/90 px-3 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-2 backdrop-blur"><div className="mb-2 flex items-center gap-2"><Link to="/" aria-label="Kembali ke BIXLINK" className="grid h-10 w-10 place-items-center rounded-full border border-primary/40 bg-card active:scale-95"><ArrowLeft className="h-5 w-5"/></Link><div className="min-w-0 flex-1 leading-tight"><b className="block text-base font-black tracking-wide">BIX<span className="text-primary">GO</span></b><span className="block truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Mobilitas · Antar · Belanja</span></div><Link to="/wallet" className="rounded-full border border-border bg-card px-3 py-2 text-[11px] font-bold">Wallet</Link></div><div role="tablist" aria-label="BIXGO mode" className="grid grid-cols-3 rounded-full border border-primary/40 bg-card p-1 text-[11px] font-bold">{([['rider', 'Penumpang'], ['driver', 'Driver'], ['merchant', 'Merchant']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={mode === k} onClick={() => setMode(k)} className={`rounded-full py-2 transition ${mode === k ? 'bg-primary text-primary-foreground shadow-[0_0_18px_-6px_var(--primary)]' : 'text-muted-foreground'}`}>{l}</button>)}</div></div>}
+    {!fullLux && view === 'home' && <><CityMarquee/><ModeGuide mode={mode}/></>}
     {view === 'home' && mode === 'merchant' && <BixgoMerchant city={city} isAdmin={isAdmin}/>}
     {view === 'home' && mode === 'driver' && <BixgoPassport lux={lux} cur={cur} usdtIdr={cfg.usdtIdr} city={city}/>}
-    {view === 'home' && mode === 'rider' && lux && <BixgoLuxHome cfg={cfg} name={memberName} enabled={enabledSet} onPick={pick}/>}
-    {view === 'home' && mode === 'rider' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
-    {((view === 'home' && mode === 'rider') || view === 'activity') && <BixgoActiveTrip lux={lux}/>}
-    {view === 'home' && mode === 'rider' && <BixgoStores lux={lux}/>}
-    {view === 'home' && mode === 'rider' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
-    {view === 'home' && <BixgoInvite/>}
+    {fullLux && <BixgoLuxHome cfg={cfg} name={memberName} enabled={enabledSet} onPick={pick} onNav={go} onMode={setMode}/>}
+    {!fullLux && view === 'home' && mode === 'rider' && <BixgoHero cfg={cfg} city={city} cur={cur} isAdmin={isAdmin} onCur={pickCur} onCity={id => { setCity(id); const c = GLOBAL_CITIES.find(x => x.id === id); if (c) pickCur(c.cur); }}/>}
+    {!fullLux && ((view === 'home' && mode === 'rider') || view === 'activity') && <BixgoActiveTrip lux={lux}/>}
+    {!fullLux && view === 'home' && mode === 'rider' && <BixgoStores lux={lux}/>}
+    {!fullLux && view === 'home' && mode === 'rider' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
+    {!fullLux && view === 'home' && <BixgoInvite/>}
     {view === 'inbox' && <BixgoInbox/>}
     {view === 'account' && <><BixgoAccount name={memberName} balance="View balance" onBack={() => go('home')} onSoon={soon}/></>}
     {(view === 'order' || view === 'activity') && <main className="px-4 pb-6 pt-4">
@@ -235,7 +236,7 @@ function BixgoPage() {
     </section></>}
     <p className="mt-4 text-center text-[10px] text-muted-foreground">BIXGO is in preview. Fares are estimates; no booking, payment or dispatch is performed.</p>
     </main>}
-    <BixgoBottomNav view={view} setView={go} inbox={3} onScan={() => setScan(true)}/>
+    {!fullLux && <BixgoBottomNav view={view} setView={go} inbox={3} onScan={() => setScan(true)}/>}
     {scan && <QrScanner title="Scan BIX PAY / Driver QR" hint="Point the camera at a driver's or member's BIX PAY QR" onClose={() => setScan(false)} onResult={raw => { setScan(false); sessionStorage.setItem('bixgo_scan', raw); void navigate({ to: '/pay' }); }}/>}
     </>}
   </div></div>;

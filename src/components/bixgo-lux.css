@@ -52,3 +52,11 @@
 .bixgo-lux .bgl-driver-radar b { font-size:16px; color:var(--bgl-emerald); margin-top:10px; }
 .bixgo-lux .bgl-driver-order>button { width:100%; border-radius:8px; min-height:46px; }
 @media(min-width:600px){.bixgo-lux .bgl-vehicle { min-height:130px; grid-template-columns:38% minmax(0,1fr); }.bixgo-lux .bgl-vehicle .bixgo-veh-tile {height:106px;}.bixgo-lux .bgl-menu-item {grid-template-columns:140px minmax(0,1fr);}.bixgo-lux .bgl-menu-item>img,.bixgo-lux .bgl-menu-item>.bgl-menu-placeholder {width:140px;}}
+/* Full-screen lux home */
+.bixgo-lux .bgx-full { background: radial-gradient(120% 70% at 60% 30%, #15102a 0%, #07060d 60%, #040507 100%); color: #f4f1ff; }
+.bixgo-lux .bgx-icon, .bixgo-lux .bgx-chip { background: rgba(20,16,36,.7); border: 1px solid rgba(168,85,247,.35); backdrop-filter: blur(10px); }
+.bixgo-lux .bgx-chip { color: #d8c7ff; }
+.bixgo-lux .bgx-dock { margin-top: 6px; background: #040507; border-top: 1px solid rgba(168,85,247,.25); box-shadow: 0 -10px 30px -10px rgba(168,85,247,.25); }
+.bixgo-lux .bgx-dock > * { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 0 8px; font-size: 11px; color: #8b86a3; }
+.bixgo-lux .bgx-dock > .is-on { color: #A855F7; font-weight: 700; }
+.bixgo-lux .bgx-dock > .is-on svg { filter: drop-shadow(0 0 8px rgba(168,85,247,.8)); fill: rgba(168,85,247,.35); }
