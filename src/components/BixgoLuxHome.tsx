@@ -11,6 +11,7 @@ import vehCar from '@/assets/bixgo/veh-car.png';
 import vehRide from '@/assets/bixgo/veh-ride.png';
 import icSend from '@/assets/bixgo/ic-send.png';
 import icFood from '@/assets/bixgo/ic-food.png';
+import { BixgoDemoTrip } from '@/components/BixgoDemoTrip';
 
 const KM = 1.2;
 
@@ -18,6 +19,7 @@ const KM = 1.2;
 export function BixgoLuxHome({ cfg, name, enabled, onPick, onNav, onMode }: { cfg: BixgoSettings; name: string; enabled: Set<BixgoService>; onPick: (s: BixgoService) => void; onNav: (v: BixgoView) => void; onMode: (m: 'rider' | 'driver' | 'merchant') => void }) {
   const cards: [BixgoService, string, string][] = [['ride', 'Ride', vehRide], ['car', 'Car', vehCar], ['send', 'Delivery', icSend], ['food', 'Food', icFood]];
   const [sel, setSel] = useState<BixgoService>('ride');
+  const [demo, setDemo] = useState(false);
   const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null);
   const [place, setPlace] = useState('Mendeteksi GPS…');
   useEffect(() => { getDevicePosition().then(p => setPos({ lat: p.lat, lng: p.lng })).catch(() => setPlace('GPS tidak aktif · ketuk peta')); }, []);
@@ -37,6 +39,8 @@ export function BixgoLuxHome({ cfg, name, enabled, onPick, onNav, onMode }: { cf
     <div className="relative flex gap-2 px-4 pt-2 text-[10px] font-bold">
       <button onClick={() => onMode('driver')} className="bgx-chip rounded-full px-3 py-1">Mode Driver</button>
       <button onClick={() => onMode('merchant')} className="bgx-chip rounded-full px-3 py-1">Mode Merchant</button>
+      <button onClick={() => setDemo(true)} className="bgx-chip rounded-full px-3 py-1">▶ Demo perjalanan</button>
+      <button onClick={() => setDemo(true)} className="bgx-chip rounded-full px-3 py-1">▶ Demo perjalanan</button>
     </div>
     <div className="pointer-events-none relative min-h-0 flex-1 [&>button]:pointer-events-auto">
       <button onClick={() => onPick(sel === 'car' ? 'car' : 'ride')} className="bgl-glass absolute left-[42%] top-[14%] flex items-center gap-2 rounded-xl px-3 py-1.5 text-left text-[11px] leading-tight">Pickup location<br/><b className="block max-w-[9rem] truncate">{place}</b><ChevronRight className="h-4 w-4"/></button>
@@ -56,5 +60,6 @@ export function BixgoLuxHome({ cfg, name, enabled, onPick, onNav, onMode }: { cf
       <Link to="/wallet"><Hexagon className="h-5 w-5"/>Wallet</Link>
       <button onClick={() => onNav('account')}><Settings className="h-5 w-5"/>Settings</button>
     </nav>
+    {demo && <BixgoDemoTrip cfg={cfg} onClose={() => setDemo(false)}/>}
   </section>;
 }

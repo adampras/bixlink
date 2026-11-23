@@ -22,7 +22,7 @@ import { BixgoEarnings } from '@/components/BixgoEarnings';
 import { earningsTotals } from '@/lib/bixgo-earnings';
 
 /** Drag-to-confirm control; fires once when the knob reaches the end. Keyboard: Enter/Space. */
-function SlideAccept({ onDone, busy }: { onDone: () => void; busy: boolean }) {
+export function SlideAccept({ onDone, busy }: { onDone: () => void; busy: boolean }) {
   const track = useRef<HTMLDivElement>(null); const [x, setX] = useState(0); const start = useRef<number | null>(null);
   const max = () => (track.current?.clientWidth ?? 300) - 64;
   const end = () => { if (start.current == null) return; start.current = null; if (x >= max() * 0.9) { setX(max()); onDone(); setTimeout(() => setX(0), 800); } else setX(0); };
