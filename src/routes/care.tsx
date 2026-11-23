@@ -13,12 +13,13 @@ import rentImg from '@/assets/bixcare-rent.jpg';
 import salonImg from '@/assets/bixcare-salon.jpg';
 import clinicImg from '@/assets/bixcare-clinic.jpg';
 import cateringImg from '@/assets/bixcare-catering.jpg';
-import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet, uploadCareProof, openCareReceipt, careChime, rateLine, careCode, timeSlots, UNITS, DEFAULT_RATES } from '@/lib/bixcare';
+import { BIX_USD, type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet, uploadCareProof, openCareReceipt, careChime, rateLine, careCode, timeSlots, UNITS, DEFAULT_RATES } from '@/lib/bixcare';
 import { BixcareLuxHome } from '@/components/BixcareLuxHome';
 import { CarePartnerStats, RateOrder, ServiceNote, onBreak } from '@/components/BixcareExtras';
 import { startBixCall } from '@/components/BixCall';
 import { CityMarquee } from '@/components/CityMarquee';
 import '@/components/bixcare-lux.css';
+import { CareStepper, CareInvoice, CareExecStats } from '@/components/BixcareSuite';
 
 function ContactBar({ peer, name, phone }: { peer: string; name: string; phone?: string | undefined }) {
   return <div className="mt-2 flex flex-wrap gap-2">
@@ -176,17 +177,20 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
   return (
     <>
       <button onClick={onBack} className={ghost}>← Semua outlet</button>
+      <div className="bxs-hero"><div className="bxs-shield">{outlet.name.slice(0, 1).toUpperCase()}</div><div className="min-w-0"><h2>{outlet.name} <span aria-label="Terverifikasi">✔</span></h2><p>Mitra Resmi Terverifikasi</p><p className="bxs-rate">{reviews.length ? <>★ {(reviews.reduce((a, r) => a + r.rating, 0) / reviews.length).toFixed(1)} ({reviews.length})</> : 'Belum ada ulasan'} · {divName(outlet.division)}</p></div></div>
+      <div className="grid grid-cols-2 gap-2">{uid && uid !== outlet.owner_id ? <button className="bxs-act" onClick={() => startBixCall(outlet.owner_id, outlet.name, 'voice')}><Phone className="h-5 w-5" /><span><b>BIX CALL</b><small>Panggilan aman</small></span></button> : <span />}<a className="bxs-act" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${outlet.address}, ${outlet.city}`)}`} target="_blank" rel="noreferrer"><Search className="h-5 w-5" /><span><b>GPS Directions</b><small>Navigasi ke outlet</small></span></a></div>
       <div className={`${card} care-outlet-head`}><p className="text-xs text-primary">{divName(outlet.division)}</p><h2 className="text-xl font-black">{outlet.name}</h2><p className="text-xs text-muted-foreground">{outlet.address}, {outlet.city} · {outlet.open_time}–{outlet.close_time}</p>{outlet.description && <p className="mt-2 text-sm">{outlet.description}</p>}
         {!outlet.is_open && <p className="mt-2 text-xs font-bold text-destructive">Outlet sedang TUTUP — pemesanan dibuka saat mitra online.</p>}
         {outlet.is_open && resting && <p className="mt-2 text-xs font-bold text-destructive">Mitra istirahat sampai {new Date(outlet.break_until!).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} — buka otomatis setelahnya.</p>}
         {uid && uid !== outlet.owner_id && <ContactBar peer={outlet.owner_id} name={outlet.name} phone={outlet.phone} />}
       </div>
       <div className={`${card} care-menu`}>
-        <p className="mb-2 text-sm font-bold">Daftar harga resmi</p>
+        <p className="bxs-kick">Official Service Packages</p><p className="mb-2 text-[11px] text-muted-foreground">Harga resmi mitra · anti-getok</p>
         {services.length === 0 && <p className="text-xs text-muted-foreground">Belum ada layanan.</p>}
         {services.map(s => (
           <div key={s.id} className="flex items-center gap-2 py-2">
-            <div className="flex-1"><p className="text-sm font-semibold">{s.name}</p><p className="text-xs text-muted-foreground">{rp(s.price_idr)} / {s.unit} · ±{s.duration_min} mnt</p></div>
+            <div className="flex-1"><p className="text-sm font-semibold">{s.name}</p><p className="text-xs text-muted-foreground">per {s.unit} · ±{s.duration_min} mnt</p></div>
+            <div className="text-right"><p className="text-sm font-bold">{rp(s.price_idr)}</p><p className="text-[11px] font-bold text-primary">{payQuote(s.price_idr).bix.toFixed(2)} BIX</p></div>
             <button className={ghost} onClick={() => setQty(p => ({ ...p, [s.id]: Math.max(0, (p[s.id] ?? 0) - 1) }))}>−</button>
             <span className="w-5 text-center text-sm">{qty[s.id] ?? 0}</span>
             <button className={ghost} onClick={() => setQty(p => ({ ...p, [s.id]: Math.min(20, (p[s.id] ?? 0) + 1) }))}>+</button>
@@ -203,7 +207,7 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
           <p className="text-[11px] text-muted-foreground">{isWalletPay(pay) ? 'Saldo ditahan otomatis saat pesan dan diteruskan ke mitra setelah order Selesai. Batal/ditolak = saldo kembali penuh.' : pay === 'cash' ? 'Bayar tunai langsung ke mitra.' : 'Setelah pesan, buka Pesanan Saya untuk melihat QRIS/rekening mitra, bayar, lalu tekan "Saya sudah bayar".'}</p>
           {total > 0 && <p className="rounded-lg bg-muted/40 px-2 py-1 text-[11px] font-semibold">Kurs: {rateLine(total)} <span className="font-normal text-muted-foreground">(acuan internal)</span></p>}
           {short && <p className="text-xs text-destructive">Saldo tidak cukup untuk metode ini.</p>}
-          <div className="flex items-center justify-between"><span className="text-lg font-black text-primary">{rp(total)}</span><button className={btn} disabled={busy || total <= 0 || short || !outlet.is_open || resting} onClick={book}>Pesan sekarang</button></div>
+          <div className="bxs-checkout"><span><small>Checkout Summary</small><b>{rp(total)}</b> <i>{quote.bix.toFixed(2)} BIX</i></span><button className="bxs-gold" disabled={busy || total <= 0 || short || !outlet.is_open || resting} onClick={book}>Pesan sekarang →</button></div>
           {msg && <p className="text-xs text-destructive">{msg}</p>}
         </div>
       ) : <SignIn />}
@@ -215,7 +219,7 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
 function Tracker({ o, division }: { o: CareOrder; division?: Division | undefined }) {
   const stages = STAGES[division ?? 'wash'] ?? STAGES.wash;
   const idx = o.status === 'completed' ? stages.length : stages.indexOf(o.stage);
-  return <div className="care-track mt-2 flex gap-1">{stages.map((s, i) => <div key={s} className={`flex-1 ${i === idx ? 'is-now' : ''}`}><div className={`h-1.5 rounded-full ${i <= idx ? 'bg-primary' : 'bg-muted'}`} /><p className="mt-1 text-[9px] leading-tight text-muted-foreground">{s}</p></div>)}</div>;
+  return <CareStepper stages={stages} idx={idx} />;
 }
 
 function PayBadge({ o }: { o: CareOrder }) {
@@ -273,8 +277,9 @@ function MyOrders({ uid }: { uid: string }) {
       {err && <p className="text-xs text-destructive">{err}</p>}
       {!['cancelled', 'rejected'].includes(o.status) && <ContactBar peer={o.merchant_id} name={ot?.name ?? 'Mitra'} phone={ot?.phone} />}
       {o.service_note && <div className="mt-2 rounded-lg bg-primary/10 p-2 text-[11px]"><p className="font-bold text-primary">Catatan servis & garansi</p><p>{o.service_note}</p>{o.next_service_at && <p className="font-semibold">Servis berikutnya: {new Date(o.next_service_at).toLocaleDateString('id-ID')}{new Date(o.next_service_at).getTime() - Date.now() < 7 * 864e5 ? ' — segera jadwalkan!' : ''}</p>}</div>}
+      {o.status === 'completed' && <CareInvoice o={o} outletName={ot?.name ?? 'Outlet'} />}
       {o.status === 'completed' && <RateOrder o={o} onDone={load} />}
-      {o.status === 'completed' && <button className={`${btn} mt-2`} onClick={() => openCareReceipt(o, ot)}><Receipt className="mr-1 inline h-3.5 w-3.5" />Unduh / Cetak struk</button>}
+      {o.status === 'completed' && <button className="bxs-gold mt-2 w-full" onClick={() => openCareReceipt(o, ot)}><Receipt className="mr-1 inline h-4 w-4" />Download PDF Receipt</button>}
       {careNext(o.status, 'buyer').includes('cancelled') && <button className={`${ghost} mt-2`} onClick={() => cancel(o.id)}>Batalkan</button>}
     </div>); })}</>;
 }
@@ -334,7 +339,8 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
       {!outlet && gate?.promo_free && <div className="rounded-2xl border border-primary/40 bg-primary/10 p-3 text-xs"><b className="text-primary">Promo Peluncuran:</b> pendaftaran kemitraan gratis tanpa syarat staking. Promo dapat ditutup sewaktu-waktu oleh BIXLINK.</div>}
       <div className={`${card} space-y-1`}>
         <p className="flex items-center gap-2 text-sm font-bold"><Fuel className="h-4 w-4 text-primary" />BIX Gas Tank</p>
-        <p className="text-2xl font-black text-primary">{bal === null ? '…' : bal.toLocaleString('en-US', { maximumFractionDigits: 4 })} BIX</p>
+        <p className="bxs-gas">{bal === null ? '…' : bal.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })} <i>BIX</i></p>
+        {bal !== null && <p className="text-[11px] text-muted-foreground">≈ {(bal * BIX_USD).toLocaleString('en-US', { maximumFractionDigits: 2 })} USDT (acuan internal)</p>}
         <ul className="space-y-1 text-[11px] text-muted-foreground">
           <li>• <b className="text-foreground">Bayar saldo BIX/USDT:</b> uang konsumen ditahan, masuk ke saldo Anda saat order Selesai (sudah dipotong biaya).</li>
           <li>• <b className="text-foreground">QRIS/transfer/tunai:</b> konsumen bayar langsung ke Anda; biaya platform dipotong dalam BIX.</li>
@@ -348,7 +354,8 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
         {outlet?.status === 'rejected' && <p className="text-xs text-destructive">Ditolak: {outlet.review_note} — perbaiki lalu simpan untuk ajukan ulang.</p>}
         <p className="pt-1 text-xs font-bold text-primary">1 · Profil usaha</p>
         <input className={input} placeholder="Nama outlet" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-        <select className={input} value={form.division} onChange={e => setForm({ ...form, division: e.target.value as Division })}>{DIVS.map(d => <option key={d.id} value={d.id}>{d.name} — {d.tag}</option>)}</select>
+        <p className="text-[11px] text-muted-foreground">Business Pillar — pilih kategori utama</p>
+        <div className="bxs-chips">{DIVS.map(d => <button type="button" key={d.id} className={form.division === d.id ? 'is-on' : ''} onClick={() => setForm({ ...form, division: d.id })}><d.Icon className="h-4 w-4" />{d.name.replace('BIX ', '')}</button>)}</div>
         <p className="text-[10px] text-muted-foreground">Biaya platform kategori ini: {Math.round((DEFAULT_RATES[form.division] ?? 0.03) * 100)}% · tahap kerja: {(STAGES[form.division] ?? []).join(' → ')}</p>
         <p className="pt-1 text-xs font-bold text-primary">2 · Lokasi & kontak</p>
         <div className="grid grid-cols-2 gap-2"><input className={input} placeholder="Kota" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} /><input className={input} placeholder="WhatsApp" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
@@ -358,9 +365,9 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
         <div className="grid grid-cols-2 gap-2"><input type="time" className={input} value={form.open_time} onChange={e => setForm({ ...form, open_time: e.target.value })} /><input type="time" className={input} value={form.close_time} onChange={e => setForm({ ...form, close_time: e.target.value })} /></div>
         <p className="pt-2 text-xs font-bold text-primary">4 · Pembayaran yang diterima</p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3"><input className={input} placeholder="Bank (BCA, BRI…)" value={form.bank_name} onChange={e => setForm({ ...form, bank_name: e.target.value })} /><input className={input} placeholder="No. rekening" inputMode="numeric" value={form.bank_account} onChange={e => setForm({ ...form, bank_account: e.target.value.replace(/[^0-9 -]/g, '') })} /><input className={input} placeholder="Atas nama" value={form.bank_holder} onChange={e => setForm({ ...form, bank_holder: e.target.value })} /></div>
-        <div className="flex gap-4 text-xs"><label className="flex items-center gap-1"><input type="checkbox" checked={form.accept_bix} onChange={e => setForm({ ...form, accept_bix: e.target.checked })} />Terima saldo BIX</label><label className="flex items-center gap-1"><input type="checkbox" checked={form.accept_usdt} onChange={e => setForm({ ...form, accept_usdt: e.target.checked })} />Terima saldo USDT</label></div>
+        <div className="bxs-toggles">{(['accept_bix', 'accept_usdt'] as const).map(k => <label key={k}><span>{k === 'accept_bix' ? 'Terima saldo BIX' : 'Terima saldo USDT'}</span><input type="checkbox" role="switch" checked={form[k]} onChange={e => setForm({ ...form, [k]: e.target.checked })} /></label>)}</div>
         <p className="text-[10px] text-muted-foreground">QRIS diunggah di bawah setelah outlet tersimpan. Tunai selalu tersedia.</p>
-        <button className={`${btn} w-full`} onClick={save}>Simpan data outlet</button>
+        <button className="bxs-gold w-full" onClick={save}>{outlet ? 'SIMPAN TOKO' : 'SUBMIT STORE'} →</button>
         {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
       </div>
       {outlet && (
@@ -378,6 +385,7 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
             <div><p className="font-bold">{outlet.is_open ? 'BUKA' : 'TUTUP'}</p><p className="text-[11px] text-muted-foreground">Tampil di radar publik saat BUKA.</p></div>
             <button className={btn} onClick={toggle} disabled={outlet.status !== 'approved'}>{outlet.is_open ? 'Tutup' : 'Buka'}</button>
           </div>
+          <CareExecStats outlet={outlet} balance={bal} onToggle={toggle} />
           <CarePartnerStats outlet={outlet} balance={bal} onBreakChange={load} />
           <ServiceManager outlet={outlet} uid={uid} />
           <IncomingOrders outlet={outlet} onChange={load} />
