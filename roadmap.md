@@ -194,3 +194,4 @@
 - [x] Modernize Boardroom lobby using existing create/join actions; real room list and code/video controls verified. Participant counts remain in connected rooms, not fabricated in lobby.
 - [x] Keep conversation options inside each history card; menu opening and phone 384/430px plus desktop checked, six audio regression tests pass.
 - [ ] Verify Boardroom creation/join in an authorized live session — awaiting a planned real call; no room records or external sessions created for this presentation change.
+- [ ] BIX CALL sticker button (WA-style) for member-created stickers — next design, awaiting go-ahead

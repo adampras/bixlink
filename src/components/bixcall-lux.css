@@ -775,3 +775,9 @@ html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-list button{flex:non
 html[data-bc-lux] .bixcall-page .bx-board-open{display:flex;align-items:center;gap:5px;font-size:10px;font-style:normal;color:var(--bcl-gold)}
 html[data-bc-lux] .bixcall-page .bx-board-open i{width:5px;height:5px;border-radius:50%;background:var(--bcl-gold)}
 @media(prefers-reduced-motion:reduce){html[data-bc-lux] .bixcall-page .bx-board-medal{animation:none}html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check i::after{transition:none}}
+
+/* Clean edges: solid obsidian cover under dock to phone system bar; no faded haze. */
+html[data-bc-lux] .bcl-msgs-head h1{display:none}
+html[data-bc-lux] .bcl-feed-card{box-shadow:none!important}
+html[data-bc-lux] .bcl-dock{left:0;right:0;bottom:0;max-width:none;height:calc(70px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);border-radius:26px 26px 0 0;border:0;border-top:1.5px solid color-mix(in oklab,var(--bcl-gold) 60%,transparent);background:#040507;backdrop-filter:none;box-shadow:none}
+html[data-bc-lux] .bcl-dock::before{display:none}
