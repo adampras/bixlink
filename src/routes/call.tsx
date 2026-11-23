@@ -19,7 +19,7 @@ import { StoryBar } from '@/components/BixStories';
 import { pushNotify } from '@/lib/bix-push';
 import { compressImage } from '@/lib/bix-image';
 import { Grid3x3 } from 'lucide-react';
-import { Camera, MoreVertical, QrCode, ScanLine, UserPlus, Trash2, Info } from 'lucide-react';
+import { Camera, MoreVertical, QrCode, ScanLine, UserPlus, Trash2, Info, MapPin, FileText, Receipt, Images, Smile } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { BixIdentityScanner } from '@/components/BixIdentityScanner';
 import { useServerFn } from '@tanstack/react-start';
@@ -921,19 +921,26 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     {replyTo && <div className="comm-replybar"><span><b>↩ Membalas {replyTo.sender_id === me ? 'diri sendiri' : `@${name}`}</b>{replyTo.body}</span><button type="button" aria-label="Batal balas" onClick={() => setReplyTo(null)}>✕</button></div>}
     {!locked && !recording && !replyTo && <div className="comm-quick">{QUICK.map(q => <button key={q} type="button" onClick={() => onType(text ? `${text} ${q}` : q)}>{q}</button>)}</div>}
     <form className="comm-compose" onSubmit={e => { e.preventDefault(); void send(); }}>
-      <span className="bc-plus-wrap"><button type="button" aria-label="Lampiran" aria-expanded={menuOpen} className="bc-plus" onClick={() => setMenuOpen(v => !v)} disabled={locked}>{menuOpen ? '×' : <Paperclip size={17}/>}</button></span>
-      {menuOpen && <div className="bc-attach-bg" onClick={() => setMenuOpen(false)}><div className="bc-attach" role="menu" onClick={e => e.stopPropagation()}>
-        <button type="button" onClick={() => { setMenuOpen(false); setPayOpen(true); }}><i className="is-gold"><Coins size={20}/></i>Kirim BIX</button>
-        <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); fileRef.current?.click(); }}><i className="is-violet"><ImagePlus size={20}/></i>Foto & Video</button>
-        <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); camRef.current?.click(); }}><i className="is-teal"><Camera size={20}/></i>Kamera</button>
-        <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); docRef.current?.click(); }}><i className="is-blue"><Paperclip size={20}/></i>Dokumen</button>
+      {menuOpen && <div className="bc-attach-bg" onClick={() => setMenuOpen(false)}><div className="bc-attach bc-attach-wa" role="menu" onClick={e => e.stopPropagation()}>
+        <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); fileRef.current?.click(); }}><i className="is-violet"><Images size={22}/></i>Galeri</button>
+        <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); camRef.current?.click(); }}><i className="is-rose"><Camera size={22}/></i>Kamera</button>
+        <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); if (!navigator.geolocation) { toastOk('Lokasi tidak didukung perangkat'); return; } navigator.geolocation.getCurrentPosition(p => onType(`📍 Lokasi saya: https://maps.google.com/?q=${p.coords.latitude.toFixed(6)},${p.coords.longitude.toFixed(6)}`), () => toastOk('Izin lokasi ditolak'), { enableHighAccuracy: true, timeout: 10000 }); }}><i className="is-teal"><MapPin size={22}/></i>Lokasi</button>
+        <button type="button" onClick={() => { setMenuOpen(false); window.dispatchEvent(new CustomEvent('bc-qr', { detail: 'scan' })); }}><i className="is-blue"><ScanLine size={22}/></i>Pindai QR</button>
+        <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); docRef.current?.click(); }}><i className="is-indigo"><FileText size={22}/></i>Dokumen</button>
+        <button type="button" onClick={() => { setMenuOpen(false); setPayMode('send'); setPayOpen(true); }}><i className="is-gold"><Coins size={22}/></i>Kirim BIX</button>
+        <button type="button" onClick={() => { setMenuOpen(false); setPayMode('request'); setPayOpen(true); }}><i className="is-amber"><Receipt size={22}/></i>Minta BIX</button>
+        <button type="button" disabled={busy} onClick={() => { setMenuOpen(false); setStkOpen(true); }}><i className="is-pink"><Smile size={22}/></i>Stiker</button>
       </div></div>}
       <input ref={fileRef} type="file" accept="image/*,video/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>
       <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>
       <input ref={docRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendFile(f); }}/>
-      {!recording && <StickerButton open={stkOpen} disabled={locked || busy} onOpen={() => setStkOpen(v => !v)}/>}
       {stkOpen && <StickerSheet onClose={() => setStkOpen(false)} onSend={b => upload(b, 'image', b.type === 'image/png' ? 'png' : 'webp', peer.id, false, STICKER_BODY)}/>}
-      {recording ? <span className="comm-rec"><button type="button" aria-label="Batalkan rekaman" onClick={cancelRec}><Trash2 size={15}/></button><i/>{String(Math.floor(recSecs / 60)).padStart(2, '0')}:{String(recSecs % 60).padStart(2, '0')} · ketuk ■ untuk kirim</span> : <input value={text} onChange={e => onType(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked} aria-label="Tulis pesan"/>}
+      {recording ? <span className="comm-rec"><button type="button" aria-label="Batalkan rekaman" onClick={cancelRec}><Trash2 size={15}/></button><i/>{String(Math.floor(recSecs / 60)).padStart(2, '0')}:{String(recSecs % 60).padStart(2, '0')} · ketuk ■ untuk kirim</span> : <span className={`bc-wa-pill${text.trim() ? ' is-typing' : ''}`}>
+        <StickerButton open={stkOpen} disabled={locked || busy} onOpen={() => setStkOpen(v => !v)}/>
+        <input value={text} onChange={e => onType(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked} aria-label="Tulis pesan"/>
+        <button type="button" aria-label="Lampiran" aria-expanded={menuOpen} className="bc-plus bc-wa-ico" onClick={() => setMenuOpen(v => !v)} disabled={locked}><Paperclip size={18}/></button>
+        <button type="button" aria-label="Kamera" tabIndex={text.trim() ? -1 : 0} aria-hidden={text.trim() ? true : undefined} className="bc-wa-ico bc-wa-cam" onClick={() => camRef.current?.click()} disabled={locked || busy}><Camera size={18}/></button>
+      </span>}
       {text.trim() ? <button type="submit" className="comm-fab" aria-label="Kirim"><Send size={16}/></button> : <button type="button" aria-label={recording ? 'Stop & kirim' : 'Rekam pesan suara'} className={`comm-fab${recording ? ' is-rec' : ''}`} onClick={() => void toggleRec()} disabled={locked || busy}>{recording ? <Square size={14}/> : <Mic size={16}/>}</button>}
     </form>
   </main>;
