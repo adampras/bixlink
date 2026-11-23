@@ -6,14 +6,16 @@ import { BixAvatar } from '@/components/BixAvatar';
 import { readContacts, CONTACTS_EVENT, type BixContact } from '@/lib/bix-contacts';
 import { startBixCall } from '@/components/BixCall';
 import foxMedal from '@/assets/bixlink-fox.webp';
+import foxHead from '@/assets/fox-head-black.webp';
+import boardBg from '@/assets/boardroom-bg.webp';
 
 type VaultMsg = { id: string; kind: string; media_path: string | null; meta: { name?: string; size?: number; mime?: string } | null; created_at: string; sender_id: string; recipient_id: string };
 
 /** Boardroom: presentation wrapper around the existing group-meeting rooms (no new call engine). */
 export function BoardroomStage({ children }: { children: ReactNode }) {
-  return <section className="bcs-board">
+  return <section className="bcs-board bx-board-bg" style={{ ['--bx-board-img' as string]: `url(${boardBg})` }}>
     <div className="bcs-board-hero"><Crown size={18}/><div><b>Sovereign Boardroom</b><small>Suara · Video · Komunitas</small></div></div>
-    <div className="bcs-board-podium" aria-hidden="true"><span className="bx-board-orbit"/><span className="bcs-ring bx-board-medal"><img src={foxMedal} alt=""/></span><span className="bx-board-audio">{Array.from({ length: 15 }, (_, i) => <i key={i}/>)}</span></div>
+    <div className="bcs-board-podium" aria-hidden="true"><span className="bx-board-orbit"/><span className="bcs-ring bx-board-medal"><img src={foxHead} alt=""/></span><span className="bx-board-audio">{Array.from({ length: 15 }, (_, i) => <i key={i}/>)}</span></div>
     {children}
   </section>;
 }

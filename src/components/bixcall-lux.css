@@ -821,3 +821,18 @@ html[data-bc-lux] .comm-room .comm-compose,.comm-room .comm-compose{background:t
 .bc-attach-wa i.is-indigo{color:#a78bfa}.bc-attach-wa i.is-gold{color:#FFD700}.bc-attach-wa i.is-amber{color:#fbbf24}.bc-attach-wa i.is-pink{color:#f472b6}
 @keyframes bcl-sheet-up{from{transform:translateY(100%)}to{transform:none}}
 @media (prefers-reduced-motion:reduce){.bc-wa-cam,.bc-attach-wa{transition:none!important;animation:none!important}}
+
+/* Boardroom backdrop + labeled dock with emerald HUB (presentation only) */
+html[data-bc-lux] .bixcall-page .bx-board-bg{position:relative;isolation:isolate;padding:0 12px 12px;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,oklch(0.05 0.01 300/.72),oklch(0.04 0.005 300/.9) 55%,#040507),var(--bx-board-img) center top/cover no-repeat}
+html[data-bc-lux] .bixcall-page .bx-board-bg .bcs-board-hero{margin-top:12px;padding:12px 14px;border:1px solid color-mix(in oklab,var(--bcl-gold) 30%,transparent);border-radius:14px;background:oklch(0.06 0.01 300/.62);backdrop-filter:blur(6px)}
+html[data-bc-lux] .bixcall-page .bx-board-bg .bcs-board-podium{border-radius:16px;background:oklch(0.05 0.01 300/.5)}
+html[data-bc-lux] .bixcall-page .bx-board-medal{background:radial-gradient(circle,oklch(0.2 0.02 80),#040507)}
+html[data-bc-lux] .bixcall-page .bx-board-medal img{border-radius:50%}
+html[data-bc-lux] .bcl-dock>a{height:56px;width:58px;display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center}
+html[data-bc-lux] .bcl-dock-lbl{font-size:10px;font-weight:700;line-height:1}
+html[data-bc-lux] .bcl-dock .bcl-gem{width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 0 10px oklch(0.8 0.15 180/.75));animation:bclGem 3.2s ease-in-out infinite}
+@keyframes bclGem{50%{filter:drop-shadow(0 0 18px oklch(0.85 0.17 175/.95)) brightness(1.15);transform:translateY(-2px)}}
+@media (prefers-reduced-motion:reduce){html[data-bc-lux] .bcl-dock .bcl-gem{animation:none}}
+html[data-bc-lux] .bcl-cube{width:72px;height:72px;margin-top:-34px;filter:none}
+html[data-bc-lux] .bcl-cube::before{display:none}
+html[data-bc-lux] .bcl-cube .bcl-cube-label{color:oklch(0.85 0.14 175)}
