@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Camera, RefreshCw, Sparkles, Smile, Sun, Wand2, Timer, Type, X, Check, Gauge, Link2, Plus, Trash2, Music2, Search, Play, Pause, Download, Bold } from 'lucide-react';
+import { Upload, Camera, RefreshCw, Sparkles, Smile, Sun, Wand2, Timer, Type, X, Check, Gauge, Link2, Plus, Trash2, Music2, Search, Play, Pause, Download, Bold } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import bixtokLogo from '@/assets/bixtok-logo.png';
@@ -54,7 +54,7 @@ export function DraggableText({ text, style, onMove, editable }: { text: string;
   return <span ref={ref} onPointerDown={down} className={`studio-overlay${editable ? ' drag' : ''}${drag ? ' dragging' : ''}`} style={textCss(style)}>{text}</span>;
 }
 
-export function BixtokStudio({ onClose, onDone, slots = 5, maxLinks = 10 }: { userId: string; onClose: () => void; onDone: (msg: string) => void; slots?: number; maxLinks?: number }) {
+export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10 }: { userId: string; onClose: () => void; onDone: (msg: string) => void; slots?: number; maxLinks?: number }) {
   const [mode, setMode] = useState<'link' | 'camera'>('link');
   const [links, setLinks] = useState<string[]>(() => Array.from({ length: Math.max(1, slots) }, () => ''));
   const [filter, setFilter] = useState('none');
@@ -127,6 +127,25 @@ export function BixtokStudio({ onClose, onDone, slots = 5, maxLinks = 10 }: { us
     c.toBlob(b => b && setShot({ url: URL.createObjectURL(b), ext: 'jpg' }), 'image/jpeg', 0.92);
   };
 
+  const fileRef = useRef<HTMLInputElement>(null); const [pct, setPct] = useState('');
+  /** Uploads a device file/recording to the member's own media folder, then publishes it via the server RPC. */
+  const postBlob = async (blob: Blob, ext: string) => {
+    const kind = blob.type.startsWith('image/') ? 'photo' : 'video';
+    if (blob.size > 50 * 1024 * 1024) return setErr('File is larger than 50 MB. Trim the video or use a link.');
+    if (!blob.type.startsWith('image/') && !blob.type.startsWith('video/')) return setErr('Choose a video or photo file.');
+    setBusy(true); setErr(''); setPct('Uploading…');
+    const path = `${userId}/post-${Date.now()}.${ext.replace(/[^a-z0-9]/gi, '').toLowerCase() || (kind === 'photo' ? 'jpg' : 'mp4')}`;
+    const up = await supabase.storage.from('bixtok-media').upload(path, blob, { contentType: blob.type, upsert: false });
+    if (up.error) { setBusy(false); setPct(''); return setErr(`Upload failed: ${up.error.message}`); }
+    setPct('Publishing…');
+    const { error } = await supabase.rpc('bixtok_publish', { p_path: path, p_kind: kind, p_caption: caption, p_filter: filter, p_overlay: overlay, p_allow_gifts: gifts });
+    setBusy(false); setPct('');
+    if (error) { await supabase.storage.from('bixtok-media').remove([path]); return setErr(error.message); }
+    const { data: rw } = await supabase.rpc('bixtok_post_reward_claim' as never); const r = rw as { amount?: number } | null;
+    onDone(`Posted to BIXTOK${r?.amount ? ` · +${Number(r.amount).toFixed(2)} BIX` : ''}`);
+  };
+  const onFile = (f: File | undefined) => { if (f) void postBlob(f, f.name.split('.').pop() ?? ''); if (fileRef.current) fileRef.current.value = ''; };
+  const postShot = async () => { if (!shot) return; const b = await (await fetch(shot.url)).blob(); await postBlob(b, shot.ext); };
   const publish = async () => {
     const urls = links.map(l => l.trim()).filter(Boolean);
     if (!urls.length) return setErr('Paste at least one link.');
@@ -162,9 +181,11 @@ export function BixtokStudio({ onClose, onDone, slots = 5, maxLinks = 10 }: { us
       </aside>}
       <div className="studio-bottom">
         {shot ? <div className="studio-shot-actions">
-          <a className="bixtok-cta" href={shot.url} download={`bixtok-${Date.now()}.${shot.ext}`}><Download size={16} className="inline"/> Save to device</a>
+          <button className="bixtok-cta" disabled={busy} onClick={() => void postShot()}><Check size={16} className="inline"/> {busy ? pct || 'Posting…' : 'Post to BIXTOK'}</button>
+          {err && <p className="studio-err">{err}</p>}
+          <a className="studio-ghost" href={shot.url} download={`bixtok-${Date.now()}.${shot.ext}`}><Download size={16} className="inline"/> Save to device</a>
           <button className="studio-ghost" onClick={() => setShot(null)}>Retake</button>
-          <p className="text-[11px] opacity-75">Share it on TikTok, YouTube or any host, then paste the link in <b>Links</b> to post on BIXTOK.</p>
+          <p className="text-[11px] opacity-75">Post it directly, or save it to your device.</p>
         </div> : <>
           <BeautySliders smooth={smooth} glow={glow} bright={bright} set={{ setSmooth, setGlow, setBright }}/>
           <FilterRow value={filter} onPick={setFilter}/>
@@ -178,7 +199,9 @@ export function BixtokStudio({ onClose, onDone, slots = 5, maxLinks = 10 }: { us
       </div>
     </> : <div className="studio-edit">
       <header className="studio-top"><button aria-label="Close" onClick={onClose}><X/></button><b className="flex items-center gap-2"><img src={bixtokLogo} alt="" width={22} height={22}/>New post</b><button aria-label="Camera" onClick={() => setMode('camera')}><Camera/></button></header>
-      <p className="text-xs opacity-75">Paste links from TikTok, YouTube Shorts, Instagram Reels or any https video / photo. Each link becomes one post — no upload, saves your data.</p>
+      <input ref={fileRef} type="file" accept="video/*,image/*" hidden onChange={e => onFile(e.target.files?.[0])}/>
+      <button className="bixtok-cta w-full" disabled={busy} onClick={() => fileRef.current?.click()}><Upload size={16} className="inline"/> {busy && pct ? pct : 'Upload from gallery (video / photo, max 50 MB)'}</button>
+      <p className="text-xs opacity-75">Or paste links from TikTok, YouTube Shorts, Instagram Reels or any https video / photo. Each link becomes one post.</p>
       <div className="studio-links">{links.map((l, i) => <div key={i} className="studio-link-row">
         <span>{i + 1}</span><input className="form-input" inputMode="url" placeholder="https://www.tiktok.com/@user/video/…" value={l} onChange={e => setLinks(ls => ls.map((x, j) => j === i ? e.target.value : x))}/>
         <button aria-label="Remove link" disabled={links.length <= 1} onClick={() => setLinks(ls => ls.filter((_, j) => j !== i))}><Trash2 size={16}/></button>

@@ -18,6 +18,9 @@ import { Button } from '@/components/ui/button';
 import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
 import { copyText } from '@/lib/copy-text';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
+import { useDesignAccess } from '@/lib/design-release';
+import { giftArt } from '@/lib/bixtok-gift-art';
+import '@/components/bixtok-lux.css';
 
 export const Route = createFileRoute('/bixtok')({
   head: () => ecosystemHead('/bixtok', 'BIXTOK — Video Pendek & LIVE Komunitas | BIXLINK', 'BIXTOK menghadirkan video pendek dan siaran langsung komunitas BIXLINK. Menonton, berinteraksi dan menjadi host mengikuti akses anggota.'),
@@ -36,6 +39,8 @@ function BixtokPage() {
   const navigate = useNavigate();
   useEffect(() => { bixtokMini.setFeed(null); }, []);
   const { user, ready } = useMember();
+  const da = useDesignAccess(user?.id).data;
+  const lux = !!(da?.owner1 || da?.next_gen);
   const q = useQuery({ queryKey: ['bixtok', user?.id], enabled: Boolean(user), refetchInterval: 60_000, queryFn: async () => {
     const [c, g, v, l, s, f, o, sc, rm, rc, bp] = await Promise.all([
       supabase.from('bixtok_config').select('*').eq('id', 1).single(),
@@ -126,7 +131,7 @@ function BixtokPage() {
   const chTag = chOpen ? `#${String(ch!.challenge_tag).replace(/^#/, '').toLowerCase()}` : '';
   const top = q.data ? [...q.data.videos.reduce((m, v) => { if (!v.creator_id) return m; const c = m.get(v.creator_id) ?? { name: v.creator_name, likes: 0, posts: 0 }; c.likes += Number(v.likes || 0); c.posts++; m.set(v.creator_id, c); return m; }, new Map<string, { name: string; likes: number; posts: number }>()).values()].sort((a, b) => b.likes - a.likes).slice(0, 5) : [];
 
-  return <MemberGate ready={ready} signedIn={!!user} title="BIXTOK"><main className="bixtok">
+  return <MemberGate ready={ready} signedIn={!!user} title="BIXTOK"><main className={`bixtok${lux ? ' bxt-lux' : ''}`}>
     {q.isError ? <p className="p-8 text-sm text-destructive">Could not load BIXTOK.</p>
      : !q.data ? <div className="bixtok-skeleton"/>
      : !q.data.cfg.enabled && !q.data.bypass ? <div className="grid h-full place-items-center p-8 text-center"><div><Lock className="mx-auto"/><p className="mt-3 text-lg font-bold">BIXTOK is under reconstruction</p><p className="mt-1 text-xs text-muted-foreground">We are upgrading BIXTOK. Please check back soon.</p><Link to="/dashboard" className="mt-4 inline-block text-sm underline">Back</Link></div></div>
@@ -230,15 +235,15 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
     <Media v={v} muted={muted}/>
     {tapRef.current.id === v.id && bursts.map(b => <Heart key={b.k} className="bxt-dbl-heart" style={{ left: b.x, top: b.y }} fill="currentColor" aria-hidden/>)}
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
-    <div className="bixtok-meta"><button type="button" className="bxt-name" onClick={() => setPeek(v)}><b>@{v.creator_name}</b>{v.creator_id && vip.has(v.creator_id) && <VipBadge small/>}</button><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
-    <div className={`bxt-vinyl${muted ? ' still' : ''}`} aria-hidden><span>{v.creator_name.slice(0, 1).toUpperCase()}</span>{!muted && <><i>♪</i><i>♫</i></>}</div>
+    <div className="bixtok-meta"><button type="button" className="bxt-name" onClick={() => setPeek(v)}><span className="bxt-meta-av" aria-hidden>{v.creator_name.slice(0, 1).toUpperCase()}</span><b>@{v.creator_name}</b>{v.creator_id && vip.has(v.creator_id) && <VipBadge small/>}</button><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
+    <div className={`bxt-vinyl${muted ? ' still' : ''}`} aria-hidden><em className="bxt-arm"/><span>{v.creator_name.slice(0, 1).toUpperCase()}</span>{!muted && <><i>♪</i><i>♫</i></>}</div>
     <aside className={`bixtok-rail bxt-rail-shield${railOpen ? '' : ' closed'}`}>
       {railOpen && <>
       {v.creator_id === me && <div className="bxt-follow me"><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><small>You</small></div>}
       {v.creator_id && v.creator_id !== me && liveHosts.has(v.creator_id) && <button aria-label="Watch LIVE" className="bxt-follow bxt-live-ring" onClick={() => onEnterLive?.(liveHosts.get(v.creator_id!)!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>LIVE</em><small>Watch</small></button>}
       {v.creator_id && v.creator_id !== me && !liveHosts.has(v.creator_id) && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
-      {cfg.features['likes'] !== false && <button aria-label="Like" className={liked[v.id] ? 'on' : ''} onClick={() => void like(v)}><Heart/><small>{fmtCount(v.likes + (liked[v.id] ? 1 : 0))}</small></button>}
-      <button aria-label="Comments" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
+      {cfg.features['likes'] !== false && <button aria-label="Like" className={`like${liked[v.id] ? ' on' : ''}`} onClick={() => void like(v)}><Heart/><small>{fmtCount(v.likes + (liked[v.id] ? 1 : 0))}</small></button>}
+      <button aria-label="Comments" className="chat" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
       <button aria-label="Save" className={saved.ids.includes(v.id) ? 'on' : ''} onClick={() => onNote(saved.toggle(v.id) ? (noteInterest(v, 4), 'Saved to your profile') : 'Removed from saved')}><Bookmark/><small>Save</small></button>
       {cfg.features['share'] !== false && <button aria-label="Share" onClick={() => { noteInterest(v, 3); setShare(v); }}><Share2/><small>Share</small></button>}
       <button aria-label="Send gift" className="gift" onClick={() => v.creator_id && v.allow_gifts !== false ? onGift(v.id) : onNote('This post cannot receive gifts.')}><Gift/><small>Gift</small></button>
@@ -320,9 +325,16 @@ function Media({ v, muted }: { v: Video; muted: boolean }) {
       ? <BixtokTikTokPlayer src={embed} title={v.caption || 'BIXTOK post'} muted={muted} className="bixtok-embed" filter={filterCss(v.filter)}/>
       : <iframe src={muted ? embed : embed.replace('mute=1', 'mute=0')} title={v.caption || 'BIXTOK post'} className="bixtok-embed" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen style={{ filter: filterCss(v.filter) }}/>) : <div className="bixtok-embed"/>)
      : v.media_kind === 'photo' ? <img src={v.src} alt={v.caption} className="bixtok-video" style={{ filter: filterCss(v.filter) }}/>
+     : !v.media_path && isPageLink(v.src) ? <div className="bixtok-embed bxt-fallback"><p>This video can only be played on its original site.</p><a href={v.src} target="_blank" rel="noreferrer" className="bixtok-cta">Open video ↗</a></div>
      : <AutoVideo src={v.src} filter={v.filter} muted={muted || !!v.music_url} paused={silent}/>}
     {embed && !v.clean && <a href={v.src} target="_blank" rel="noreferrer" className="bixtok-src">{v.source_kind}</a>}
   </div>;
+}
+
+/** Social page links (not media files) that could not be embedded can only play on their own site. */
+export function isPageLink(u: string): boolean {
+  try { const x = new URL(u); if (/\.(mp4|webm|mov|m4v|m3u8|ogg|jpe?g|png|webp|gif)$/i.test(x.pathname)) return false;
+    return /(^|\.)(tiktok|instagram|facebook|fb|youtube|youtu|x|twitter|threads|snapchat|likee|kwai)\.(com|be|net|watch|video)$/i.test(x.hostname.replace(/^www\.|^m\./, '')) || /^vt\.tiktok|^vm\.tiktok/.test(x.hostname); } catch { return false; }
 }
 
 function AutoVideo({ src, filter, muted, paused = false }: { src: string; filter?: string | null; muted: boolean; paused?: boolean }) {
@@ -333,14 +345,17 @@ function AutoVideo({ src, filter, muted, paused = false }: { src: string; filter
   const [pre, setPre] = useState<'metadata' | 'auto'>('metadata');
   useEffect(() => { const el = ref.current; if (!el) return; const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setPre('auto'); io.disconnect(); } }, { rootMargin: (document.documentElement.dataset['lowPower'] === '1' || (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData) ? '0px' : '60% 0px' }); io.observe(el); return () => io.disconnect(); }, []);
   const mutedRef = useRef(muted); useEffect(() => { mutedRef.current = muted; const el = ref.current; if (el) { el.muted = muted; if (!muted) el.volume = 1; } }, [muted]);
+  const [failed, setFailed] = useState(false); const tries = useRef(0);
   const bar = useRef<HTMLSpanElement>(null); const tapT = useRef(0); const [icon, setIcon] = useState<'play' | 'pause' | null>(null);
   const onClick = (e: React.MouseEvent<HTMLVideoElement>) => { const el = e.currentTarget; clearTimeout(tapT.current); if (e.detail > 1) return;
     tapT.current = window.setTimeout(() => { if (el.paused) { void el.play().catch(() => {}); setIcon('play'); } else { el.pause(); setIcon('pause'); } window.setTimeout(() => setIcon(null), 600); }, 300); };
   return <><video ref={ref} src={src} loop muted={muted} playsInline preload={pre} className="bixtok-video" style={{ filter: filterCss(filter) }} onClick={onClick}
+    onError={e => { const el = e.currentTarget; if (tries.current++ < 1) { el.load(); return; } setFailed(true); }}
     onLoadedMetadata={e => { const t = bixtokMini.getPos(src); const el = e.currentTarget; if (t > 0.5 && (!el.duration || t < el.duration - 0.5)) el.currentTime = t; }}
     onTimeUpdate={e => { const el = e.currentTarget; bixtokMini.savePos(src, el.currentTime); if (bar.current && el.duration) bar.current.style.transform = `scaleX(${el.currentTime / el.duration})`; }}
     onPlay={e => { const me = e.currentTarget; document.querySelectorAll('video').forEach(o => { if (o !== me && !o.closest('.bixtok-room') && !o.closest('.bxl-mini')) { o.pause(); o.muted = true; } }); }}/>
     <span className="bxt-progress" aria-hidden><span ref={bar}/></span>
+    {failed && <div className="bixtok-embed bxt-fallback"><p>Video could not load on this device.</p><button type="button" className="bixtok-cta" onClick={() => { const el = ref.current; tries.current = 0; setFailed(false); if (el) { el.load(); void el.play().catch(() => {}); } }}>Try again</button><a href={src} target="_blank" rel="noreferrer" className="text-xs underline">Open in browser</a></div>}
     {icon && <span className="bxt-playicon" aria-hidden>{icon === 'pause' ? '❚❚' : '▶'}</span>}</>;
 }
 
@@ -425,26 +440,47 @@ function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; 
   const qc = useQueryClient(); const [busy, setBusy] = useState<string | null>(null); const [burst, setBurst] = useState<string | null>(null);
   const combo = useRef<{ id: string; n: number; t: number }>({ id: '', n: 0, t: 0 }); const [comboN, setComboN] = useState(0);
   const recips = target.recipients ?? []; const [to, setTo] = useState<string | null>(recips[0]?.id ?? null);
-  const send = async (g: Gift) => {
-    setBusy(g.id);
+  const [pick, setPick] = useState<string | null>(gifts[0]?.id ?? null);
+  const bal = useQuery({ queryKey: ['bixtok-gift-bal'], queryFn: async () => { const { data: me } = await supabase.auth.getUser(); if (!me.user) return 0;
+    const { data } = await supabase.rpc('bix_asset_balances', { p_user: me.user.id }); return Number((data as { bix_balance: number }[] | null)?.[0]?.bix_balance ?? 0); } });
+  const sendOnce = async (g: Gift): Promise<boolean> => {
     const { error } = await supabase.rpc('bixtok_send_gift_to', { p_gift: g.id, p_live: target.live ?? null, p_video: target.video ?? null, p_to: to } as never);
-    setBusy(null);
     if (error) {
       const m = error.message;
-      return onNote(m.includes('yourself') ? 'You cannot gift your own post or LIVE — use a different member account.' : m.includes('Insufficient BIXP') ? `Not enough BIXP for ${g.name} (${g.price} BIXP).` : m.includes('Insufficient BIX') ? `Not enough BIX balance for ${g.name} (${g.price} BIX).` : m.toLowerCase().includes('lock') ? 'Your BIX is still locked and cannot be gifted yet.' : m);
+      onNote(m.includes('yourself') ? 'You cannot gift your own post or LIVE — use a different member account.' : m.includes('Insufficient BIXP') ? `Not enough BIXP for ${g.name} (${g.price} BIXP).` : m.includes('Insufficient BIX') ? `Not enough BIX balance for ${g.name} (${g.price} BIX).` : m.toLowerCase().includes('lock') ? 'Your BIX is still locked and cannot be gifted yet.' : m);
+      return false;
     }
     if (target.live) window.dispatchEvent(new CustomEvent('bixtok:gift-sent', { detail: { live: target.live } }));
     const now = Date.now(); const c = combo.current; c.n = c.id === g.id && now - c.t < 2500 ? c.n + 1 : 1; c.id = g.id; c.t = now; setComboN(c.n);
-    setBurst(g.emoji); setTimeout(() => setBurst(null), 1400);
-    onNote(`${g.emoji} ${g.name} sent · ${g.price} ${g.currency}`); qc.invalidateQueries();
+    setBurst(giftArt(g, gifts.indexOf(g))); setTimeout(() => setBurst(null), 1400);
+    return true;
   };
-  return <div className="bixtok-sheet-wrap" onClick={onClose}><div className="bixtok-sheet" onClick={e => e.stopPropagation()}>
-    <div className="flex items-center justify-between"><h3 className="font-bold">Send a gift</h3><button aria-label="Close" onClick={onClose}><X size={18}/></button></div>
+  const sel = gifts.find(g => g.id === pick) ?? null;
+  const send = async (times: number) => {
+    if (!sel || busy) return;
+    if (times > 1 && !(await luxConfirm(`Send ${sel.name} ×${times} for ${Number(sel.price) * times} ${sel.currency} in total?`, { title: 'TAP X10', ok: `Send ×${times}`, cancel: 'Cancel' }))) return;
+    setBusy(sel.id); let ok = 0;
+    for (let i = 0; i < times; i++) { if (!(await sendOnce(sel))) break; ok++; if (times > 1) await new Promise(r => setTimeout(r, 180)); }
+    setBusy(null);
+    if (ok) onNote(`${sel.emoji} ${sel.name}${ok > 1 ? ` ×${ok}` : ''} sent · ${Number(sel.price) * ok} ${sel.currency}`);
+    qc.invalidateQueries();
+  };
+  return <div className="bixtok-sheet-wrap" onClick={onClose}><div className="bixtok-sheet bxt-gift" role="dialog" aria-label="Send a gift" onClick={e => e.stopPropagation()}>
+    <div className="bxt-gift-top">
+      <div className="bxt-gift-bal"><span className="bxt-coin">BIX</span><div><b><em>BIX</em> {bal.data === undefined ? '…' : bal.data.toLocaleString(undefined, { maximumFractionDigits: 2 })}</b><Link to="/wallet" className="bxt-recharge">RECHARGE</Link></div><Link to="/wallet" aria-label="Recharge" className="bxt-plus-gold">+</Link></div>
+      <button aria-label="Close" className="bxt-gift-x" onClick={onClose}><X size={18}/></button>
+    </div>
+    <h3 className="bxt-gift-title">SEND <span>A</span> GIFT</h3>
     {recips.length > 1 && <div className="bxl-recips" role="radiogroup" aria-label="Gift to">{recips.map(r => <button key={r.id} role="radio" aria-checked={to === r.id} className={to === r.id ? 'on' : ''} onClick={() => setTo(r.id)}>@{r.name}</button>)}</div>}
-    {closed ? <p className="mt-4 text-sm text-muted-foreground">Gifts are closed right now.</p> : <div className="bixtok-gifts">{gifts.map(g => <button key={g.id} disabled={!!busy} onClick={() => send(g)}><span>{g.emoji}</span><b>{g.name}</b><small>{Number(g.price)} {g.currency}</small></button>)}</div>}
-    <p className="mt-3 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-center text-[11px] font-semibold text-primary">90% net creator share · fair & direct</p>
-    <p className="mt-2 text-[10px] text-muted-foreground">The creator receives the net share set by the platform (default 90%); the rest is a platform fee. BIXP are promotional points; BIX gifts are internal ledger transfers to the creator. Gifts are final and are not investment returns.</p>
-    {burst && <div className="bixtok-burst" aria-hidden>{burst}{comboN > 1 && <b className="bxt-combo">×{comboN}</b>}</div>}
+    {closed ? <p className="mt-4 text-sm text-muted-foreground">Gifts are closed right now.</p> : <>
+      <div className="bxt-gift-grid" role="radiogroup" aria-label="Gifts">{gifts.map((g, i) => <button key={g.id} role="radio" aria-checked={pick === g.id} className={pick === g.id ? 'on' : ''} disabled={!!busy} onClick={() => setPick(g.id)}>
+        <img src={giftArt(g, i)} alt="" width={256} height={256} loading="lazy"/><b>{g.name}</b><small>{Number(g.price)} {g.currency}</small></button>)}</div>
+      <div className="bxt-gift-act">
+        <button className="bxt-send" disabled={!sel || !!busy} onClick={() => void send(1)}>{busy ? 'SENDING…' : 'SEND GIFT'}</button>
+        <button className="bxt-tap10" disabled={!sel || !!busy} onClick={() => void send(10)}><span>TAP<br/>X10</span></button>
+      </div></>}
+    <p className="mt-3 text-center text-[10px] text-muted-foreground">Creator receives the platform net share (default 90%). BIXP are promo points; BIX gifts are internal ledger transfers. Gifts are final and are not investment returns.</p>
+    {burst && <div className="bixtok-burst" aria-hidden><img src={burst} alt="" width={160} height={160}/>{comboN > 1 && <b className="bxt-combo">×{comboN}</b>}</div>}
   </div></div>;
 }
 
