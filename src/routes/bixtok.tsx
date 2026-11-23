@@ -21,6 +21,8 @@ import { ecosystemHead } from '@/lib/ecosystem-seo';
 import { useDesignAccess } from '@/lib/design-release';
 import { giftArt } from '@/lib/bixtok-gift-art';
 import '@/components/bixtok-lux.css';
+import { createPortal } from 'react-dom';
+import { StoryComposer, StoryViewer, useStoryFeed } from '@/components/BixStories';
 
 export const Route = createFileRoute('/bixtok')({
   head: () => ecosystemHead('/bixtok', 'BIXTOK — Video Pendek & LIVE Komunitas | BIXLINK', 'BIXTOK menghadirkan video pendek dan siaran langsung komunitas BIXLINK. Menonton, berinteraksi dan menjadi host mengikuti akses anggota.'),
@@ -126,7 +128,10 @@ function BixtokPage() {
   const rankKey = q.data ? q.data.videos.map(v => v.id).join(',') : '';
   const forYou = useMemo(() => (q.data ? rankForYou(q.data.videos, readAffinity(), following) : []), [rankKey, tab]); // eslint-disable-line react-hooks/exhaustive-deps
   const ranked = tab === 'following' || tab === 'mine' ? baseVids : forYou;
-  const vids = tag ? ranked.filter(v => v.caption.toLowerCase().includes(tag)) : ranked;
+  const [seed, setSeed] = useState(0);
+  const vids0 = tag ? ranked.filter(v => v.caption.toLowerCase().includes(tag)) : ranked;
+  const vids = useMemo(() => { if (!seed) return vids0; const a = [...vids0]; let x = seed * 9301 + 49297; for (let i = a.length - 1; i > 0; i--) { x = (x * 9301 + 49297) % 233280; const j = Math.floor((x / 233280) * (i + 1)); [a[i], a[j]] = [a[j]!, a[i]!]; } return a; }, [vids0, seed]);
+  useEffect(() => { if (!seed) return; requestAnimationFrame(() => { const f = document.querySelector('.bixtok-feed') as HTMLElement | null; if (f) f.scrollTo({ top: 0 }); }); }, [seed]);
   const ch = q.data?.cfg; const chOpen = !!(ch?.challenge_enabled && ch.challenge_tag && (!ch.challenge_ends_at || new Date(ch.challenge_ends_at).getTime() > Date.now()));
   const chTag = chOpen ? `#${String(ch!.challenge_tag).replace(/^#/, '').toLowerCase()}` : '';
   const top = q.data ? [...q.data.videos.reduce((m, v) => { if (!v.creator_id) return m; const c = m.get(v.creator_id) ?? { name: v.creator_name, likes: 0, posts: 0 }; c.likes += Number(v.likes || 0); c.posts++; m.set(v.creator_id, c); return m; }, new Map<string, { name: string; likes: number; posts: number }>()).values()].sort((a, b) => b.likes - a.likes).slice(0, 5) : [];
@@ -153,11 +158,11 @@ function BixtokPage() {
       {section === 'home' && (tab === 'live'
         ? <>{top.length > 0 && <div className="bxt-board" aria-label="Top creators"><b>🏆 Top creators</b>{top.map((c, i) => <span key={c.name + i}><i>{['👑','🥈','🥉','4','5'][i]}</i>@{c.name}<small>{fmtCount(c.likes)} ♥</small></span>)}</div>}<LiveLobby data={q.data} onEnter={setRoom} onNote={setNote}/></>
         : <>{chOpen && tab !== 'mine' && <button type="button" className={`bxt-challenge${tag === chTag ? ' on' : ''}`} onClick={() => setTag(t => (t === chTag ? '' : chTag))}><span>🏆 Weekly challenge</span><b>{ch!.challenge_title || chTag}</b><small>{chTag}{ch!.challenge_prize ? ` · Prize: ${ch!.challenge_prize}` : ''}{ch!.challenge_ends_at ? ` · ends ${new Date(ch!.challenge_ends_at).toLocaleDateString()}` : ''}{tag === chTag ? ' · showing entries' : ' · tap to see entries'}</small></button>}<Feed muted={muted} videos={vids} cfg={q.data.cfg} me={user!.id} following={following} followers={followers} onFollow={toggleFollow} onGift={id => setGiftTarget({ video: id })} onNote={setNote} liveHosts={new Map(q.data.lives.map(l => [l.host_id, l]))} onEnterLive={setRoom}/></>)}
-      {section === 'inbox' && <Inbox followers={followers.size} lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)}/>}
+      {section === 'inbox' && <Inbox followers={followers.size} lives={q.data.lives} mine={q.data.videos.filter(v => v.creator_id === user!.id)} onLive={setRoom} onCreate={() => setStudio(true)} onGo={k => { if (k === 'live') { setSection('home'); setTab('live'); } else setSection('profile'); }}/>}
       {section === 'profile' && <ProfilePage follow={{ following, followers }} me={user!.id} email={user!.email ?? ''} videos={q.data.videos.filter(v => v.creator_id === user!.id)} all={q.data.videos} onCreate={() => setStudio(true)} onBalance={() => setSection('balance')} onOpen={() => { setSection('home'); setTab('mine'); }} onNote={setNote}/>}
       {section === 'balance' && <BalancePage stake={q.data.stake} cfg={q.data.cfg} onBack={() => setSection('profile')} onLive={() => { setSection('home'); setTab('live'); }}/>}
       {!studio && !room && section !== 'balance' && <nav className="bxt-nav" aria-label="BIXTOK">
-        <button className={section === 'home' ? 'on' : ''} onClick={() => setSection('home')}><Home/><small>Home</small></button>
+        <button className={section === 'home' ? 'on' : ''} onClick={() => { if (section === 'home' && tab !== 'live') setSeed(Date.now() % 100000 || 1); else { setSection('home'); if (tab === 'live') setTab('foryou'); } }}><Home/><small>Home</small></button>
         <button className={`bxt-live-tab${section === 'home' && tab === 'live' ? ' on' : ''}`} aria-label="LIVE" onClick={() => { setSection('home'); setTab('live'); }}><span className="bxt-live-ic"><Radio size={16}/><em>LIVE</em></span><small>LIVE{q.data.lives.length > 0 ? ` · ${q.data.lives.length}` : ''}</small></button>
         {q.data.cfg.features['upload'] !== false ? <button className="bxt-plus bxt-plus-logo" aria-label="Create post" onClick={() => setStudio(true)}><img src={bixtokLogo} alt="" width={30} height={30}/><Plus className="bxt-plus-mini"/></button> : <span/>}
         <button className={section === 'inbox' ? 'on' : ''} onClick={() => setSection('inbox')}><MessageSquare/><small>Inbox</small>{q.data.lives.length > 0 && <i className="bxt-badge">{q.data.lives.length}</i>}</button>
@@ -484,7 +489,7 @@ function GiftSheet({ gifts, target, closed, onClose, onNote }: { gifts: Gift[]; 
   </div></div>;
 }
 
-function Inbox({ followers, lives, mine, onLive, onCreate }: { followers: number; lives: Live[]; mine: Video[]; onLive: (l: Live) => void; onCreate: () => void }) {
+function Inbox({ followers, lives, mine, onLive, onCreate, onGo }: { followers: number; lives: Live[]; mine: Video[]; onLive: (l: Live) => void; onCreate: () => void; onGo: (k: 'live' | 'profile') => void }) {
   const likes = mine.reduce((a, v) => a + Number(v.likes || 0), 0);
   return <div className="bxt-page bxt-inbox"><header className="bxt-head"><span/><h1>Inbox <i className="bxt-online"/></h1><span/></header>
     <div className="bxt-stories">
@@ -492,18 +497,20 @@ function Inbox({ followers, lives, mine, onLive, onCreate }: { followers: number
       {lives.map(l => <button key={l.id} onClick={() => onLive(l)}><span className={`bxt-av ring${l.kind === 'official' ? ' official' : ''}`}>{l.host_name.slice(0, 1).toUpperCase()}<em>{l.kind === 'official' ? 'OFFICIAL' : 'LIVE'}</em></span><small>{l.host_name}</small></button>)}
     </div>
     <ul className="bxt-list">
-      <li><span className="bxt-ic pink"><Zap/></span><div><b>Activity & new likes</b><p>{likes ? `${likes} likes across ${mine.length} posts` : 'No activity yet'}</p></div>{likes > 0 && <i className="bxt-count">{Math.min(likes, 99)}</i>}</li>
+      <li><button type="button" className="contents" onClick={() => onGo('profile')}><span className="bxt-ic pink"><Zap/></span><div><b>Activity & new likes</b><p>{likes ? `${likes} likes across ${mine.length} posts` : 'No activity yet'}</p></div>{likes > 0 ? <i className="bxt-count">{Math.min(likes, 99)}</i> : <ChevronRight size={16}/>}</button></li>
       {lives.filter(l => l.kind === 'official').map(l => <li key={l.id}><button type="button" className="contents" onClick={() => onLive(l)}><span className="bxt-ic orange"><Radio/></span><div><b>🔴 OFFICIAL LIVE</b><p>{l.title} · tap to join</p></div><ChevronRight size={16}/></button></li>)}
-      <li><span className="bxt-ic dark"><Bell/></span><div><b>System notifications</b><p>{lives.length ? `${lives.length} LIVE right now` : 'BIXTOK updates appear here'}</p></div></li>
-      <li><span className="bxt-ic matcha"><User/></span><div><b>New followers</b><p>{followers ? `${followers} people follow you` : 'No followers yet'}</p></div></li>
+      <li><button type="button" className="contents" onClick={() => onGo('live')}><span className="bxt-ic dark"><Bell/></span><div><b>System notifications</b><p>{lives.length ? `${lives.length} LIVE right now` : 'BIXTOK updates appear here'}</p></div><ChevronRight size={16}/></button></li>
+      <li><button type="button" className="contents" onClick={() => onGo('profile')}><span className="bxt-ic matcha"><User/></span><div><b>New followers</b><p>{followers ? `${followers} people follow you` : 'No followers yet'}</p></div><ChevronRight size={16}/></button></li>
       <li><Link to="/nft-marketplace" className="contents"><span className="bxt-ic orange"><ShoppingBag/></span><div><b>Shop messages</b><p>Open the BIXLINK marketplace</p></div><ChevronRight size={16}/></Link></li>
-      <li><span className="bxt-ic matcha"><Bot/></span><div><b>FOX AI</b><p>Ask anything about BIXLINK</p></div></li>
+      <li><Link to="/call" className="contents"><span className="bxt-ic matcha"><Bot/></span><div><b>FOX AI & support</b><p>Chat with BIXLINK support in BIX CALL</p></div><ChevronRight size={16}/></Link></li>
     </ul></div>;
 }
 
 function ProfilePage({ follow, me, email, videos, all = [], onCreate, onBalance, onOpen, onNote }: { follow: { following: Set<string>; followers: Set<string> }; me: string; email: string; videos: Video[]; all?: Video[]; onCreate: () => void; onBalance: () => void; onOpen: () => void; onNote: (m: string) => void }) {
   const p = useQuery({ queryKey: ['bixtok-profile', me], queryFn: async () => (await supabase.from('profiles').select('username').eq('user_id', me).maybeSingle()).data });
   const qc = useQueryClient();
+  const story = useStoryFeed(me); const [storyMode, setStoryMode] = useState<null | 'compose' | 'view'>(null);
+  const myStory = (story.groups ?? []).findIndex(g => g.mine);
   const [drawer, setDrawer] = useState(false); const [ptab, setPtab] = useState('grid'); const saved = useSaved(); const savedVids = saved.ids.map(id => all.find(v => v.id === id)).filter((v): v is Video => !!v);
   const name = p.data?.username || email.split('@')[0] || 'member';
   const likes = videos.reduce((a, v) => a + Number(v.likes || 0), 0);
@@ -511,7 +518,10 @@ function ProfilePage({ follow, me, email, videos, all = [], onCreate, onBalance,
   return <div className="bxt-page bxt-page-profile"><header className="bxt-head"><button aria-label="Create" onClick={onCreate}><Sparkles size={20}/></button><span/><button aria-label="Menu" onClick={() => setDrawer(true)}><Menu size={22}/></button></header>
     <section className="bxt-prof"><div><h1>{name}</h1><small>@{name.toLowerCase()}</small>
       <div className="bxt-stats"><p><b>{follow.following.size}</b>Following</p><p><b>{follow.followers.size}</b>Followers</p><p><b>{[...follow.following].filter(x => follow.followers.has(x)).length}</b>Friends</p><p><b>{likes}</b>Likes</p></div></div>
-      <button className="bxt-bigav" onClick={onCreate}>{name.slice(0, 1).toUpperCase()}<em><Plus size={14}/></em></button></section>
+      <button className={`bxt-bigav${myStory >= 0 ? ' has-story' : ''}`} aria-label={myStory >= 0 ? 'View my story' : 'Add daily story'} style={myStory >= 0 ? { boxShadow: '0 0 0 3px hsl(var(--primary))' } : undefined} onClick={() => setStoryMode(myStory >= 0 ? 'view' : 'compose')}>{name.slice(0, 1).toUpperCase()}<em role="button" aria-label="Add story" onClick={e => { e.stopPropagation(); setStoryMode('compose'); }}><Plus size={14}/></em></button></section>
+    <p className="text-center text-[10px] text-muted-foreground">{myStory >= 0 ? 'Tap photo to view story · + to add (24 h)' : 'Tap photo to add a daily story (24 h)'}</p>
+    {storyMode === 'compose' && createPortal(<StoryComposer me={me} onClose={() => setStoryMode(null)} onPosted={() => { setStoryMode(null); void story.reload(); onNote('Story posted · visible 24 hours'); }}/>, document.body)}
+    {storyMode === 'view' && myStory >= 0 && story.groups && createPortal(<StoryViewer me={me} groups={story.groups} start={myStory} onClose={() => { setStoryMode(null); void story.reload(); }} onDeleted={() => void story.reload()}/>, document.body)}
     <p className="bxt-bio">BIXLINK member · Web3 creator</p>
     <Link to="/nft-marketplace" className="bxt-pill"><ShoppingBag size={14}/> Your orders</Link>
     <div className="bxt-ptabs">{[['grid', Grid3x3], ['private', Lock], ['repost', Repeat2], ['saved', Bookmark], ['liked', Heart]].map(([k, I]) => { const Ic = I as typeof Heart; return <button key={k as string} className={ptab === k ? 'on' : ''} onClick={() => setPtab(k as string)} aria-label={k as string}><Ic size={20}/></button>; })}</div>

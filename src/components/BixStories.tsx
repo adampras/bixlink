@@ -76,7 +76,7 @@ function StoryMedia({ s, onReady, onEnded, paused }: { s: Story; onReady: (ms: n
   return <video ref={vref} className="bx-sv-media" src={url} playsInline autoPlay onLoadedMetadata={e => onReady(Math.min(30, e.currentTarget.duration || 15) * 1000)} onEnded={onEnded}/>;
 }
 
-function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; groups: StoryGroup[]; start: number; onClose: () => void; onDeleted: () => void }) {
+export function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; groups: StoryGroup[]; start: number; onClose: () => void; onDeleted: () => void }) {
   const [gi, setGi] = useState(start);
   const g = groups[gi];
   const firstUnseen = (x?: StoryGroup) => Math.max(0, x ? x.stories.findIndex(s => !s.viewed && !x.mine) : 0);
@@ -175,7 +175,7 @@ function StoryViewer({ me, groups, start, onClose, onDeleted }: { me: string; gr
   </div>;
 }
 
-function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: 'text' | 'photo'; onClose: () => void; onPosted: () => void }) {
+export function StoryComposer({ me, start, onClose, onPosted }: { me: string; start?: 'text' | 'photo'; onClose: () => void; onPosted: () => void }) {
   const opened = useRef(false);
   useEffect(() => { if (start === 'photo' && !opened.current) { opened.current = true; mediaRef.current?.click(); } }, [start]);
   const mediaRef = useRef<HTMLInputElement>(null);
