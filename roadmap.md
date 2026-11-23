@@ -187,3 +187,10 @@
 - [x] Sweep route/LIVE/map/scanner/call loading paths; 49 component endpoints HTTP 200, seven blocked-route fallbacks and signed-in Profile retry verified, offline guard and 12 tests pass. Connected preview inspection timed out; physical APK/published bundle unverified; records and permissions unchanged.
 - [x] Continue gated BIXGO reference presentation: premium vehicle imagery, selection/payment cards, trip/receipt framing, merchant menu/cart and driver radar. Signed-in route/vehicle/payment choices checked at 384px and 1280px without overflow or runtime errors; 16 regression tests pass, existing access and transaction operations preserved.
 - [ ] Verify BIXGO new merchant cart, incoming driver radar and completed passenger receipt with real records — blocked by no open food stores, incoming driver orders or recent completed trip in the available account; no orders/payments fabricated. Pixel-identical mockup, slider acceptance and tipping are not implemented.
+
+## BIX CALL focused polish
+- [x] Compact voice notes with integrated time/read receipts; actual audio play/pause verified, 46px bubble and 30px play control.
+- [x] Restore visible group names and grapheme-safe avatars; existing group opening verified.
+- [x] Modernize Boardroom lobby using existing create/join actions; real room list and code/video controls verified. Participant counts remain in connected rooms, not fabricated in lobby.
+- [x] Keep conversation options inside each history card; menu opening and phone 384/430px plus desktop checked, six audio regression tests pass.
+- [ ] Verify Boardroom creation/join in an authorized live session — awaiting a planned real call; no room records or external sessions created for this presentation change.

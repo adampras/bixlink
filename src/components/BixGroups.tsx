@@ -22,7 +22,7 @@ const newCode = (n = 6) => Array.from(crypto.getRandomValues(new Uint8Array(n)),
 
 function GroupAvatar({ g, size = 44 }: { g: Group; size?: number }) {
   const url = useSignedUrl('bix-avatars', g.avatar_path);
-  return <span className="bx-grp-av" style={{ width: size, height: size }}>{url ? <img src={url} alt={`Foto grup ${g.name}`} /> : <b style={{ fontSize: size * 0.4 }}>{(g.name.trim()[0] || 'G').toUpperCase()}</b>}</span>;
+  return <span className="bx-grp-av" style={{ width: size, height: size }}>{url ? <img src={url} alt={`Foto grup ${g.name}`} /> : <b style={{ fontSize: size * 0.4 }}>{(Array.from(new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(g.name.trim()))[0]?.segment || 'G').toUpperCase()}</b>}</span>;
 }
 
 /** GROUP tab: education groups with group chat + a host-started Live Class (voice/video room). */
@@ -76,11 +76,11 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
     {!createOnly && groups.length > 0 && <div className="bx-grp-hero"><b>Group Command</b><div className="bx-grp-hero-stats"><span><b>{groups.length}</b><small>Grup</small></span><span><b>{groups.filter(g => g.owner_id === me).length}</b><small>Anda kelola</small></span><span><b>{groups.filter(g => g.live_code).length}</b><small>Live</small></span></div></div>}
     {msg && <p className="bx-grp-msg">{msg}</p>}
     {createOnly ? <p className="bx-grp-empty">Setelah grup dibuat, pasang foto grup dan tambahkan member dari kontak atau jaringan Anda.</p> : groups.length === 0 ? <p className="bx-grp-empty">No groups yet. Create one or join with an invite code.</p>
-      : <ul className="bx-grp-list">{groups.map(g => <li key={g.id} className="bx-grp-li"><Button variant="ghost" type="button" onClick={() => setOpen(g)}>
+      : <ul className="bx-grp-list">{groups.map(g => <li key={g.id} className="bx-grp-li bx-grp-summary"><Button variant="ghost" type="button" className="bx-grp-summary-open" onClick={() => setOpen(g)}>
         <GroupAvatar g={g}/>
         <span className="bx-grp-meta"><span className="bx-grp-name"><b>{g.name}</b>{g.owner_id === me && <em className="bx-grp-tag">HOST</em>}</span><small>{g.about || (g.owner_id === me ? 'Anda Host grup ini' : 'Grup edukasi')}</small></span>
         {g.live_code && <em className="bx-grp-live"><Radio size={12}/> LIVE</em>}
-      </Button><button type="button" className="bx-grp-more" aria-label={`Opsi ${g.name}`} onClick={() => setAct(g)}><MoreVertical size={16}/></button></li>)}</ul>}
+      </Button><Button variant="ghost" size="icon" type="button" className="bx-grp-more" aria-label={`Opsi ${g.name}`} onClick={() => setAct(g)}><MoreVertical size={16}/></Button></li>)}</ul>}
     {act && createPortal(<div className="comm-sheet-bg" onClick={() => setAct(null)}><div className="comm-sheet" role="menu" onClick={e => e.stopPropagation()}>
       <b className="comm-sheet-title">{act.name}</b>
       <button type="button" onClick={() => { const a = act; setAct(null); setOpen(a); }}>💬 Buka grup</button>

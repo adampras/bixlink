@@ -6,6 +6,10 @@ html[data-bc-lux] {
   --bcl-gold-deep: oklch(0.7 0.14 80);
   --bcl-ink: oklch(0.11 0.01 290);
   --bcl-glass: color-mix(in oklab, oklch(0.2 0.015 290) 78%, transparent);
+  --bcl-platinum: oklch(1 0 0);
+  --bcl-silver: oklch(0.7 0.035 260);
+  --bcl-voice-start: oklch(0.28 0.13 301);
+  --bcl-voice-end: oklch(0.15 0.055 301);
   --bcl-line: color-mix(in oklab, var(--bcl-gold) 22%, transparent);
 }
 html[data-bc-lux] .bixcall-page {
@@ -688,3 +692,86 @@ html[data-bc-lux] .bcl-dock>a.is-on::after{display:none}
 html[data-bc-lux] .bcl-dock::before{height:calc(env(safe-area-inset-bottom,0px) + 84px);background:linear-gradient(180deg,transparent,#040507 45%)}
 html[data-bc-lux] .bcl-cube{margin-top:-38px;width:70px;height:70px;border-radius:24px 24px 0 0}
 html[data-bc-lux] main:has(.bc-head){padding-bottom:calc(env(safe-area-inset-bottom,0px) + 104px)!important}
+
+/* Focused fixes: four BIX CALL surfaces; no shell/dock or transport changes. */
+.comm-vreceipt{display:none}
+.bixcall-page .bx-chat-history,.bixcall-page .bx-grp-summary{display:flex;flex-wrap:nowrap;align-items:center;gap:4px;min-width:0;width:100%;overflow:hidden;border:1px solid var(--border);border-radius:8px;background:var(--card)}
+.bixcall-page .bx-chat-history>.bx-chat-history-open,.bixcall-page .bx-grp-summary>.bx-grp-summary-open{display:flex;flex:1 1 0%;width:auto;min-width:0;height:auto;min-height:72px;gap:10px;padding:10px;border:0;border-radius:0;background:transparent;text-align:left;justify-content:flex-start!important;flex-wrap:nowrap;white-space:normal}
+.bixcall-page .bx-chat-history>.comm-thread-more,.bixcall-page .bx-grp-summary>.bx-grp-more{display:grid;place-items:center;flex:0 0 32px;width:32px;min-width:32px;height:36px!important;min-height:36px;margin-right:6px;padding:0;border:0;background:transparent;border-radius:999px;justify-content:center!important}
+.bixcall-page .bx-chat-history-stamp{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bixcall-page .bx-chat-history-open>.bix-ava,.bixcall-page .bx-chat-history-open>.comm-ava,.bixcall-page .bx-grp-summary-open>.bx-grp-av{flex-shrink:0}
+.bixcall-page .bx-grp-summary .bx-grp-meta{display:flex;flex:1 1 0%;flex-direction:column;gap:4px;min-width:0;color:var(--foreground)}
+.bixcall-page .bx-grp-summary .bx-grp-name{display:flex;align-items:center;gap:6px;min-width:0}
+.bixcall-page .bx-grp-summary .bx-grp-name b{display:block;min-width:0;flex:1;font-size:14px;font-weight:750;line-height:1.4;white-space:normal;overflow-wrap:anywhere;color:var(--foreground)}
+.bixcall-page .bx-grp-summary .bx-grp-tag{flex:none;white-space:nowrap;font-style:normal;font-size:9px;font-weight:800;border-radius:999px;padding:2px 5px;border:1px solid var(--border);color:var(--foreground)}
+.bixcall-page .bx-grp-summary .bx-grp-live{flex:none;font-size:9px;padding:3px 5px;margin:0}
+html[data-bc-lux] .bixcall-page :is(.bx-chat-history,.bx-grp-summary){background:linear-gradient(160deg,var(--bcl-glass),var(--bcl-ink));border-color:var(--bcl-line);box-shadow:inset 0 1px 0 color-mix(in oklab,var(--bcl-gold) 10%,transparent)}
+html[data-bc-lux] .bixcall-page :is(.bx-chat-history-open b,.bx-grp-summary .bx-grp-name b){color:var(--bcl-platinum)}
+html[data-bc-lux] .bixcall-page :is(.bx-chat-history-open small,.bx-grp-summary .bx-grp-meta small){color:var(--bcl-silver)}
+html[data-bc-lux] .bixcall-page :is(.comm-thread-more,.bx-grp-more){color:var(--bcl-gold)}
+html[data-bc-lux] .bixcall-page .bx-grp-summary .bx-grp-tag{color:var(--bcl-gold);border-color:var(--bcl-line);background:color-mix(in oklab,var(--bcl-gold) 8%,transparent)}
+html[data-bc-lux] .bixcall-page .bx-grp-summary .bx-grp-av{border:1px solid var(--bcl-gold-deep);background:var(--bcl-ink);color:var(--bcl-gold);overflow:hidden}
+/* Override legacy !important voice sizes only for the luxury chat room. */
+html[data-bc-lux] body .comm-room .comm-msgs>p.is-voice{width:min(90%,290px);max-width:min(90%,290px);min-height:46px;padding:0 26px 0 7px!important;box-sizing:border-box;border-radius:23px;background:linear-gradient(110deg,var(--bcl-voice-start),var(--bcl-voice-end))!important;border:1px solid color-mix(in oklab,var(--bcl-violet) 45%,transparent)!important;box-shadow:0 0 14px color-mix(in oklab,var(--bcl-violet) 20%,transparent)}
+html[data-bc-lux] body .comm-room .comm-msgs>p.is-voice>.comm-message-time{display:none}
+html[data-bc-lux] body .comm-room .comm-voice{display:flex;align-items:center;min-width:0!important;max-width:none!important;width:100%!important;box-sizing:border-box;min-height:44px;gap:6px!important;padding:0!important;background:transparent;box-shadow:none;border-radius:0}
+html[data-bc-lux] body .comm-room .comm-voice .comm-vplay{flex:0 0 30px;min-width:30px!important;width:30px!important;height:30px!important;min-height:30px!important;background:var(--bcl-gold)!important;color:var(--bcl-ink)!important;border:0}
+html[data-bc-lux] body .comm-room .comm-voice .comm-vwave{min-width:30px;flex:1 1 0%;height:22px;gap:2px;filter:drop-shadow(0 0 3px color-mix(in oklab,var(--bcl-violet) 40%,transparent))}
+html[data-bc-lux] body .comm-room .comm-voice .comm-vwave i{flex:1;min-width:1px;max-width:3px;background:color-mix(in oklab,var(--bcl-violet) 70%,var(--bcl-platinum))}
+html[data-bc-lux] body .comm-room .comm-voice .comm-vwave i.is-on,html[data-bc-lux] body .comm-room .comm-voice .comm-vwave b{background:var(--bcl-gold)}
+html[data-bc-lux] body .comm-room .comm-vmeta{display:flex;flex:none;flex-direction:column;align-items:flex-end;justify-content:center;gap:1px;min-width:46px;font-variant-numeric:tabular-nums;line-height:1.15}
+html[data-bc-lux] body .comm-room .comm-voice .comm-vtime{font-size:10px;min-width:0;color:var(--bcl-platinum);opacity:1;white-space:nowrap}
+html[data-bc-lux] body .comm-room .comm-vreceipt{display:flex;align-items:center;gap:3px;font-size:9px;white-space:nowrap;color:var(--bcl-silver)}
+html[data-bc-lux] body .comm-room .comm-vreceipt .comm-tick{display:inline-flex;color:var(--bcl-silver)}
+html[data-bc-lux] body .comm-room .comm-vreceipt .comm-tick.is-read{color:var(--bcl-gold)}
+html[data-bc-lux] body .comm-room .comm-voice .comm-rate{flex:none;min-width:26px;height:26px!important;min-height:26px!important;padding:0 3px!important;font-size:9px!important;border-color:var(--bcl-line);color:var(--bcl-gold);background:transparent!important}
+html[data-bc-lux] body .comm-room .comm-msgs>p.is-voice>.comm-vopt{position:absolute;right:2px;top:9px;display:grid;place-items:center;width:22px;height:26px;margin:0;padding:0;font-size:16px;color:var(--bcl-gold);opacity:1}
+html[data-bc-lux] body .comm-room .comm-msgs>p.is-voice .comm-quote{margin:7px 0 0;border-radius:8px}
+html[data-bc-lux] body .comm-room .comm-msgs>p.is-voice .comm-fwd{margin:5px 0 0}
+/* Boardroom lobby only; the connected meeting and its controls are unchanged. */
+html[data-bc-lux] .bixcall-page .bcs-board{gap:12px}
+html[data-bc-lux] .bixcall-page .bcs-board-hero{padding:12px 0;margin:0;border:0;border-bottom:1px solid var(--bcl-line);border-radius:0;background:transparent;letter-spacing:0}
+html[data-bc-lux] .bixcall-page .bcs-board-hero b{color:var(--bcl-platinum);font-size:18px;letter-spacing:0}
+html[data-bc-lux] .bixcall-page .bcs-board-hero small{display:block;color:var(--bcl-silver);margin-top:3px}
+html[data-bc-lux] .bixcall-page .bcs-board-podium{position:relative;height:156px;display:grid;place-items:center;padding:0;overflow:hidden}
+html[data-bc-lux] .bixcall-page .bx-board-orbit{position:absolute;width:220px;height:84px;bottom:12px;border:1px solid var(--bcl-line);border-radius:50%;box-shadow:0 0 0 10px color-mix(in oklab,var(--bcl-violet) 8%,transparent),0 0 0 20px color-mix(in oklab,var(--bcl-gold) 4%,transparent)}
+html[data-bc-lux] .bixcall-page .bx-board-medal{position:relative;margin-top:-20px;width:78px;height:78px;padding:8px;border:1px solid var(--bcl-gold);box-shadow:0 0 0 5px var(--bcl-ink),0 0 0 6px var(--bcl-line),0 0 24px color-mix(in oklab,var(--bcl-violet) 35%,transparent)}
+html[data-bc-lux] .bixcall-page .bx-board-medal img{width:100%;height:100%;object-fit:contain}
+html[data-bc-lux] .bixcall-page .bx-board-audio{position:absolute;bottom:26px;display:flex;align-items:center;gap:4px;height:20px}
+html[data-bc-lux] .bixcall-page .bx-board-audio i{display:block;width:3px;height:8px;border-radius:3px;background:var(--bcl-violet)}
+html[data-bc-lux] .bixcall-page .bx-board-audio i:nth-child(3n){height:18px;background:var(--bcl-gold)}
+html[data-bc-lux] .bixcall-page .bx-board-audio i:nth-child(3n + 1){height:13px}
+html[data-bc-lux] .bixcall-page .bx-board-lobby{margin:0;display:grid;gap:12px;min-width:0}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-head{color:var(--bcl-gold);gap:7px;flex-wrap:wrap;letter-spacing:0}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-head small{font-size:11px;color:var(--bcl-silver)}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-form{display:grid;gap:10px;padding:14px;margin:0;border-radius:8px;border:1px solid var(--bcl-line);background:linear-gradient(145deg,var(--bcl-glass),var(--bcl-ink));min-width:0}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-form>label{color:var(--bcl-platinum);font-size:13px;font-weight:700}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .form-input{width:100%;min-width:0;min-height:44px;padding:10px 12px;border-radius:8px;border:1px solid color-mix(in oklab,var(--bcl-violet) 30%,transparent);background:var(--bcl-ink);color:var(--bcl-platinum);font-size:14px;letter-spacing:0}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .form-input:focus-visible{outline:2px solid var(--bcl-violet);outline-offset:2px}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .form-input::placeholder{color:var(--bcl-silver)}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check{position:relative;display:flex;align-items:center;gap:8px;padding:4px 0}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check svg{color:var(--bcl-gold)}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check span{flex:1;min-width:0}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check small{display:block;font-size:10px;color:var(--bcl-silver);font-weight:400;margin-top:2px}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check input{position:absolute;right:0;width:44px;height:28px;opacity:0;z-index:1;cursor:pointer}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check i{display:block;flex:none;width:40px;height:24px;border-radius:999px;background:var(--bcl-ink);border:1px solid var(--bcl-line);padding:3px}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check i::after{content:"";display:block;width:16px;height:16px;border-radius:50%;background:var(--bcl-silver);transition:transform .18s}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check input:checked+i{background:var(--bcl-violet);border-color:var(--bcl-violet)}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check input:checked+i::after{transform:translateX(16px);background:var(--bcl-platinum)}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check input:focus-visible+i{outline:2px solid var(--bcl-gold);outline-offset:3px}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check input:disabled+i{opacity:.4}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-btn{min-height:42px;border-radius:999px;background:linear-gradient(130deg,var(--bcl-gold),var(--bcl-gold-deep));color:var(--bcl-ink);font-size:13px;font-weight:800;letter-spacing:0}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .bx-board-join{grid-template-columns:minmax(0,1fr) auto}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .bx-board-join>label{grid-column:1/-1}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .bx-board-join input{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;letter-spacing:0}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-btn.is-alt{background:var(--bcl-violet-deep);color:var(--bcl-platinum);border:1px solid var(--bcl-violet);box-shadow:0 0 12px color-mix(in oklab,var(--bcl-violet) 20%,transparent)}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-list{display:grid;gap:8px;margin:0}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-list li{display:flex;min-width:0;gap:10px;border-radius:8px;border:1px solid var(--bcl-line);background:var(--bcl-glass);padding:12px}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .bx-board-room-icon{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;background:var(--bcl-ink);border:1px solid var(--bcl-line);color:var(--bcl-gold)}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .bx-board-room-info{min-width:0;flex:1;gap:3px}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .bx-board-room-info b{color:var(--bcl-platinum);font-size:13px;overflow-wrap:anywhere}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .bx-board-room-info small{color:var(--bcl-silver)}
+html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-list button{flex:none;border:1px solid var(--bcl-line);border-radius:999px;color:var(--bcl-gold);background:var(--bcl-ink);font-size:11px}
+html[data-bc-lux] .bixcall-page .bx-board-open{display:flex;align-items:center;gap:5px;font-size:10px;font-style:normal;color:var(--bcl-gold)}
+html[data-bc-lux] .bixcall-page .bx-board-open i{width:5px;height:5px;border-radius:50%;background:var(--bcl-gold)}
+@media(prefers-reduced-motion:reduce){html[data-bc-lux] .bixcall-page .bx-board-medal{animation:none}html[data-bc-lux] .bixcall-page .bx-board-lobby .comm-group-check i::after{transition:none}}

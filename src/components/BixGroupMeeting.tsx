@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getBixRoomToken } from '@/lib/bix-call.functions';
 import { copyText } from '@/lib/copy-text';
 import { openVoiceShield, type VoiceShield } from '@/lib/bix-voice';
+import { Button } from '@/components/ui/button';
 
 type RoomRow = { id: string; title: string; code: string; video: boolean; host_id: string; created_at: string };
 type Tier = { voice?: boolean; video?: boolean } | null;
@@ -32,21 +33,24 @@ export function BixGroupMeeting({ me, tier }: { me: string; tier: Tier }) {
     setTitle(''); await load(); setActive(c);
   };
   if (active) return <MeetingStage code={active} me={me} onLeave={() => { setActive(null); void load(); }}/>;
-  return <section className="comm-group mt-4">
-    <div className="comm-group-head"><Users size={16}/><b>Group Call</b><small>Voice/video meeting with the team</small></div>
-    <div className="comm-group-form">
-      <input className="form-input" placeholder="Room name, e.g. Jakarta Team Meeting" value={title} onChange={e => setTitle(e.target.value)} maxLength={60}/>
-      <label className="comm-group-check"><input type="checkbox" checked={video} disabled={!tier?.video} onChange={e => setVideo(e.target.checked)}/> Video {tier?.video ? '' : '(tier PRO)'}</label>
-      <button type="button" className="comm-group-btn" onClick={() => void create()}>+ Buat room</button>
+  return <section className="comm-group mt-4 bx-board-lobby">
+    <div className="comm-group-head"><Users size={16}/><b>Ruangan Anda</b><small>{rooms.length} room terbuka</small></div>
+    <div className="comm-group-form bx-board-create">
+      <label htmlFor="bx-board-title">Buat ruangan</label>
+      <input id="bx-board-title" className="form-input" placeholder="Nama ruangan" value={title} onChange={e => setTitle(e.target.value)} maxLength={60}/>
+      <label className="comm-group-check"><Video size={16}/><span>Mode Video<small>{tier?.video ? 'Video tersedia' : 'Memerlukan tier PRO'}</small></span><input type="checkbox" role="switch" aria-label="Mode Video" checked={video} disabled={!tier?.video} onChange={e => setVideo(e.target.checked)}/><i aria-hidden="true"/></label>
+      <Button variant="ghost" type="button" className="comm-group-btn" onClick={() => void create()}>+ Buat Room</Button>
     </div>
-    <div className="comm-group-form">
-      <input className="form-input" placeholder="Room code (6 letters)" value={code} onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}/>
-      <button type="button" className="comm-group-btn is-alt" disabled={code.length !== 6} onClick={() => setActive(code)}>Gabung</button>
+    <div className="comm-group-form bx-board-join">
+      <label htmlFor="bx-board-code">Gabung dengan kode</label>
+      <input id="bx-board-code" className="form-input" placeholder="Kode room" autoComplete="off" spellCheck={false} maxLength={6} value={code} onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}/>
+      <Button variant="ghost" type="button" className="comm-group-btn is-alt" disabled={code.length !== 6} onClick={() => setActive(code)}>Gabung</Button>
     </div>
     {msg && <p className="comm-group-msg">{msg}</p>}
     {rooms.length > 0 && <ul className="comm-group-list">{rooms.map(r => <li key={r.id}>
-      <span><b>{r.title}</b><small>{r.video ? '🎥 Video' : '🎙️ Voice'} · {r.code}{r.host_id === me ? ' · Host' : ''}</small></span>
-      <button type="button" onClick={() => setActive(r.code)}>Join</button>
+      <span className="bx-board-room-icon">{r.video ? <Video size={18}/> : <Mic size={18}/>}</span>
+      <span className="bx-board-room-info"><b>{r.title}</b><small>{r.video ? 'Video' : 'Suara'} · {r.code}{r.host_id === me ? ' · Host' : ''}</small><em className="bx-board-open"><i/>Terbuka</em></span>
+      <Button variant="ghost" size="sm" type="button" onClick={() => setActive(r.code)}>Masuk</Button>
     </li>)}</ul>}
   </section>;
 }

@@ -34,6 +34,7 @@ import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
 import { useDesignAccess } from '@/lib/design-release';
 import '@/components/bixcall-lux.css';
 import { BoardroomStage, SecureVault, ContactProfiles } from '@/components/BixCallSuites';
+import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute('/call')({
   head: () => ecosystemHead('/call', 'BIX CALL — Chat, Panggilan Suara & Video | BIXLINK', 'Kenali BIX CALL untuk chat, panggilan suara, video dan grup antaranggota BIXLINK. Akun diperlukan; akses mengikuti ketentuan layanan.'),
@@ -92,7 +93,7 @@ function dayLabel(iso: string) {
   if (d.toDateString() === y.toDateString()) return 'KEMARIN';
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: d.getFullYear() === t.getFullYear() ? undefined : 'numeric' }).toUpperCase();
 }
-function VoiceNote({ url, refresh }: { url: string; refresh: () => Promise<string> }) {
+function VoiceNote({ url, refresh, message, mine }: { url: string; refresh: () => Promise<string>; message: Msg; mine: boolean }) {
   const ref = useRef<HTMLAudioElement>(null);
   const [rate, setRate] = useState(1); const [play, setPlay] = useState(false); const [t, setT] = useState(0); const [dur, setDur] = useState(0); const [status, setStatus] = useState<'idle' | 'retry' | 'loading'>('idle');
   const next = () => { const r = rate === 1 ? 1.5 : rate === 1.5 ? 2 : 1; setRate(r); if (ref.current) ref.current.playbackRate = r; };
@@ -133,13 +134,15 @@ function VoiceNote({ url, refresh }: { url: string; refresh: () => Promise<strin
   const seek = (e: React.MouseEvent<HTMLSpanElement>) => { e.stopPropagation(); const a = ref.current; if (!a || !dur) return; const r = e.currentTarget.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * dur; };
   return <span className={`comm-voice${play ? ' is-playing' : ''}`} onPointerDown={stop} onPointerUp={stop} onTouchStart={stop} onClick={stop} onDoubleClick={stop} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}>
     <audio ref={ref} preload="none" playsInline onPlaying={() => setPlay(true)} onPause={() => setPlay(false)} onEnded={() => { setPlay(false); setT(0); }} onDurationChange={e => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d); }} onTimeUpdate={e => setT(e.currentTarget.currentTime)} onError={() => setPlay(false)}/>
-    <button type="button" className="comm-vplay" disabled={status === 'loading'} onClick={e => { e.stopPropagation(); toggle(); }} aria-label={play ? 'Jeda' : status === 'retry' ? 'Coba putar pesan suara lagi' : 'Putar pesan suara'}>{play ? <Pause size={15} fill="currentColor"/> : <Play size={15} fill="currentColor"/>}</button>
+    <Button variant="ghost" size="icon" type="button" className="comm-vplay" disabled={status === 'loading'} onClick={e => { e.stopPropagation(); toggle(); }} aria-label={play ? 'Jeda' : status === 'retry' ? 'Coba putar pesan suara lagi' : 'Putar pesan suara'}>{play ? <Pause size={15} fill="currentColor"/> : <Play size={15} fill="currentColor"/>}</Button>
     <span className="comm-vwave" onClick={seek} role="slider" aria-label="Posisi pesan suara" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}>
       {bars.map((v, i) => <i key={i} className={(i / bars.length) * 100 < pct ? 'is-on' : ''} style={{ height: `${v}%` }}/>)}
       <b style={{ left: `${pct}%` }}/>
     </span>
-    <small className="comm-vtime" role="status">{status === 'loading' ? '…' : status === 'retry' ? 'Coba lagi' : mm(play || t ? t : dur)}</small>
-    <button type="button" className="comm-rate" onClick={e => { e.stopPropagation(); next(); }} aria-label="Kecepatan putar">{rate}×</button>
+    <span className="comm-vmeta"><small className="comm-vtime" role="status">{status === 'loading' ? '…' : status === 'retry' ? 'Coba lagi' : mm(play || t ? t : dur)}</small>
+      <span className="comm-vreceipt">{message.pinned_at && '📌 '}{new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && <span className={`comm-tick ${message.read_at ? 'is-read' : message.delivered_at ? 'is-delivered' : 'is-sent'}`} aria-label={message.read_at ? 'Dibaca' : message.delivered_at ? 'Diterima perangkat' : 'Terkirim'}><Ticks two={!!(message.read_at || message.delivered_at)}/></span>}</span>
+    </span>
+    <Button variant="ghost" size="sm" type="button" className="comm-rate" onClick={e => { e.stopPropagation(); next(); }} aria-label="Kecepatan putar">{rate}×</Button>
   </span>;
 }
 function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'pay' | 'decline' | 'cancel') => void }) {
@@ -176,7 +179,7 @@ function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'p
   if (m.kind === 'image') return <a href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Chat photo" className="comm-img" loading="lazy"/></a>;
   if (m.kind === 'file' && (m.meta?.mime ?? '').startsWith('video/')) return <video src={url} controls playsInline preload="metadata" className="comm-img"/>;
   if (m.kind === 'file') return <a className="comm-filecard" href={url} target="_blank" rel="noopener noreferrer"><i>{fileIcon(m.meta?.name)}</i><span><b>{m.meta?.name ?? 'Dokumen'}</b><small>{fmtSize(m.meta?.size)} · Unduh</small></span></a>;
-  return <VoiceNote url={url} refresh={refresh}/>;
+  return <VoiceNote url={url} refresh={refresh} message={m} mine={m.sender_id === me}/>;
 }
 const PERMS = [['all', 'All members'], ['friends', 'Saling follow'], ['network', 'Network team'], ['none', 'Not accepting']] as const;
 const TIER_LABEL: Record<string, string> = { free: 'FREE · Chat', voice: 'CALLER · Voice', video: 'PRO · Video HD', vip: '👑 VIP CALLER' };
@@ -407,9 +410,9 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
     <StoryBar me={me} myName="Saya"/>
     <section className="comm-card"><h3 className="comm-h">Percakapan</h3>
       {threads === null ? <p className="text-xs text-muted-foreground">Loading…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">No chats yet. Search for members above to start chatting.</p> :
-        <ul className="comm-list">{threads.map(t => <li key={t.peer} className="comm-thread"><button onClick={() => onOpen(t.peer, t.name)} onPointerDown={() => { holdT.current = window.setTimeout(() => { try { navigator.vibrate?.(12); } catch { /* optional */ } setAct(t); }, 480); }} onPointerUp={() => window.clearTimeout(holdT.current)} onPointerLeave={() => window.clearTimeout(holdT.current)} onContextMenu={e => { e.preventDefault(); setAct(t); }}><BixAvatar userId={t.peer} name={t.name} online={t.online}/>
+        <ul className="comm-list">{threads.map(t => <li key={t.peer} className="comm-thread bx-chat-history"><Button variant="ghost" type="button" className="bx-chat-history-open" onClick={() => onOpen(t.peer, t.name)} onPointerDown={() => { holdT.current = window.setTimeout(() => { try { navigator.vibrate?.(12); } catch { /* optional */ } setAct(t); }, 480); }} onPointerUp={() => window.clearTimeout(holdT.current)} onPointerLeave={() => window.clearTimeout(holdT.current)} onContextMenu={e => { e.preventDefault(); setAct(t); }}><BixAvatar userId={t.peer} name={t.name} online={t.online}/>
           <span className="min-w-0 flex-1 text-left"><b className="block truncate text-sm">@{t.name}</b><small className="block truncate text-muted-foreground">{t.mine ? 'You: ' : ''}{t.body}</small></span>
-          <span className="text-right"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></button><button type="button" className="comm-thread-more" aria-label={`Opsi @${t.name}`} onClick={() => setAct(t)}><MoreVertical size={16}/></button></li>)}</ul>}
+          <span className="bx-chat-history-stamp"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></Button><Button variant="ghost" size="icon" type="button" className="comm-thread-more" aria-label={`Opsi @${t.name}`} onClick={() => setAct(t)}><MoreVertical size={16}/></Button></li>)}</ul>}
     </section>
   </>;
 }
@@ -878,12 +881,12 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
         if (!m) return null;
         const mine = m.sender_id === me;
         const q = m.reply_to ? findMsg(m.reply_to) : undefined;
-        return <p key={m.id} id={`msg-${m.id}`} onDoubleClick={() => { if (!m.deleted_at && !locked) void react(m, '❤️'); }} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
+        return <p key={m.id} id={`msg-${m.id}`} onDoubleClick={() => { if (!m.deleted_at && !locked) void react(m, '❤️'); }} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.kind === 'voice' && !m.deleted_at ? ' is-voice' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
           onPointerDown={e => { if ((e.target as HTMLElement).closest('.comm-voice, .comm-vopt, button, a, audio, video')) return; holdStart(m); swipeStart(e, m); }} onPointerMove={swipeMove} onPointerUp={e => { holdEnd(); swipeEnd(e); }} onPointerLeave={holdEnd} onPointerCancel={e => { holdEnd(); swipeEnd(e, true); }} onContextMenu={e => { e.preventDefault(); if ((e.target as HTMLElement).closest('.comm-voice, .comm-vopt, button')) return; if (!m.deleted_at) setMenu(m); }}>
           {m.forwarded && !m.deleted_at && <em className="comm-fwd">↪ Diteruskan</em>}
           {m.reply_to && !m.deleted_at && <span className="comm-quote"><b>{q ? (q.sender_id === me ? 'Anda' : `@${name}`) : 'Balasan'}</b>{q?.deleted_at ? 'Pesan dihapus' : q?.body ?? m.reply_body ?? 'Pesan sebelumnya'}</span>}
           {m.deleted_at ? <span>🚫 {mine ? 'Anda menghapus pesan ini' : 'Pesan ini telah dihapus'}</span> : m.kind && m.kind !== 'text' ? <ChatMedia m={m} me={me} onAct={(x, a) => void reqAct(x, a)}/> : m.body}
-          <small>{m.pinned_at && '📌 '}{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && !m.deleted_at && <span className={`comm-tick ${m.read_at ? 'is-read' : m.delivered_at ? 'is-delivered' : 'is-sent'}`} aria-label={m.read_at ? 'Dibaca (centang 2 hijau)' : m.delivered_at ? 'Diterima perangkat' : 'Terkirim, penerima offline'}><Ticks two={!!(m.read_at || m.delivered_at)}/></span>}</small>
+          <small className="comm-message-time">{m.pinned_at && '📌 '}{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{mine && !m.deleted_at && <span className={`comm-tick ${m.read_at ? 'is-read' : m.delivered_at ? 'is-delivered' : 'is-sent'}`} aria-label={m.read_at ? 'Dibaca (centang 2 hijau)' : m.delivered_at ? 'Diterima perangkat' : 'Terkirim, penerima offline'}><Ticks two={!!(m.read_at || m.delivered_at)}/></span>}</small>
           {!m.deleted_at && Object.keys(m.reactions ?? {}).length > 0 && <span className="comm-reacts">{Object.entries(Object.values(m.reactions ?? {}).reduce<Record<string, number>>((a, e) => { a[e] = (a[e] ?? 0) + 1; return a; }, {})).map(([e, n]) => <button type="button" key={e} className={m.reactions?.[me] === e ? 'is-mine' : ''} onClick={ev => { ev.stopPropagation(); void react(m, e); }}>{e}{n > 1 && <i>{n}</i>}</button>)}</span>}
           {!m.deleted_at && m.kind !== 'voice' && <button type="button" className="comm-more" aria-label="Opsi pesan" onClick={() => setMenu(m)}>⋯</button>}
           {!m.deleted_at && m.kind === 'voice' && <button type="button" className="comm-vopt" aria-label="Opsi pesan suara" onPointerDown={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setMenu(m); }}>⋯</button>}

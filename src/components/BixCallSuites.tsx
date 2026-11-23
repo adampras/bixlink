@@ -12,9 +12,8 @@ type VaultMsg = { id: string; kind: string; media_path: string | null; meta: { n
 /** Boardroom: presentation wrapper around the existing group-meeting rooms (no new call engine). */
 export function BoardroomStage({ children }: { children: ReactNode }) {
   return <section className="bcs-board">
-    <div className="bcs-board-hero"><Radio size={18}/><div><b>Boardroom</b><small>Ruang suara eksekutif · host, speaker & audiens</small></div></div>
-    <div className="bcs-board-podium" aria-hidden>{[0, 1, 2].map(i => <span key={i} className="bcs-ring"><Mic size={16}/></span>)}</div>
-    <p className="bcs-note">Buat atau masuk ruang dengan kode di bawah. Kontrol mik, speaker dan keluar ada di layar panggilan.</p>
+    <div className="bcs-board-hero"><Crown size={18}/><div><b>Sovereign Boardroom</b><small>Suara · Video · Komunitas</small></div></div>
+    <div className="bcs-board-podium" aria-hidden="true"><span className="bx-board-orbit"/><span className="bcs-ring bx-board-medal"><img src={foxMedal} alt=""/></span><span className="bx-board-audio">{Array.from({ length: 15 }, (_, i) => <i key={i}/>)}</span></div>
     {children}
   </section>;
 }
