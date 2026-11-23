@@ -4,7 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { type Outlet, CARE_STATUS, signCare } from '@/lib/bixcare';
 
-const DIV: Record<string, string> = { auto: 'AutoCare', wash: 'Wash', laundry: 'Laundry', rent: 'Rent' };
+const DIV: Record<string, string> = { auto: 'AutoCare', wash: 'Wash', laundry: 'Laundry', rent: 'Rent', salon: 'Salon', clinic: 'Clinic', catering: 'Catering' };
 const TABS = [['pending', 'Menunggu'], ['approved', 'Akun disetujui'], ['rejected', 'Ditolak'], ['suspended', 'Ditangguhkan']] as const;
 
 function PartnerGateControl({ onMessage }: { onMessage: (m: string) => void }) {

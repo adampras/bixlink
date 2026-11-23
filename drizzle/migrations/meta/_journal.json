@@ -1499,6 +1499,13 @@
       "when": 1795367635663,
       "tag": "0213_group_governance_paths",
       "breakpoints": true
+    },
+    {
+      "idx": 214,
+      "version": "7",
+      "when": 1795440751225,
+      "tag": "0214_bixcare_more_divisions",
+      "breakpoints": true
     }
   ]
 }

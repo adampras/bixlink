@@ -16,11 +16,11 @@ const TILES: Tile[] = [
   { label: 'Auto Garage', div: 'auto', img: autoImg },
   { label: 'Home AC Laundry', div: 'laundry', img: laundryImg },
   { label: 'Car Rental', div: 'rent', img: rentImg },
-  { label: 'Beauty Salon', term: 'salon', img: salonImg },
-  { label: 'Medical Clinic', term: 'klinik', img: clinicImg },
-  { label: 'Professional Catering', term: 'katering', img: cateringImg },
+  { label: 'Beauty Salon', div: 'salon', img: salonImg },
+  { label: 'Medical Clinic', div: 'clinic', img: clinicImg },
+  { label: 'Professional Catering', div: 'catering', img: cateringImg },
 ];
-const SUB: Record<string, string> = { auto: 'Auto Repair & Maintenance', wash: 'Car Wash & Detailing', laundry: 'Home AC & Laundry', rent: 'Luxury & Comfort Rental' };
+const SUB: Record<string, string> = { auto: 'Auto Repair & Maintenance', wash: 'Car Wash & Detailing', laundry: 'Home AC & Laundry', rent: 'Luxury & Comfort Rental', salon: 'Beauty Salon & Spa', clinic: 'Medical Clinic', catering: 'Professional Catering' };
 
 /** Lux BIXCARE home header: real GPS city, real wallet balance, real outlets & ratings only. */
 export function BixcareLuxHome({ uid, outlets, urls, stars, q, setQ, div, setDiv, onOpen, onAll }: {
@@ -61,7 +61,7 @@ export function BixcareLuxHome({ uid, outlets, urls, stars, q, setQ, div, setDiv
           </button>; })}
       </div>
       <div className="bxc-head"><b>Top Rated Merchants</b><button onClick={onAll}>View All</button></div>
-      {top.length === 0 && <p className="bxc-empty">Belum ada merchant terverifikasi di BIXCARE. Daftarkan usaha Anda di tab Mitra.</p>}
+      {top.length === 0 && <p className="bxc-empty">Belum ada merchant terverifikasi di BIXCARE. Daftarkan usaha Anda lewat tombol Gerai.</p>}
       {top.map(o => { const st = stars[o.id]; const open = o.is_open && !onBreak(o);
         return <div key={o.id} className="bxc-m" role="button" tabIndex={0} onClick={() => onOpen(o)} onKeyDown={e => e.key === 'Enter' && onOpen(o)}>
           <div className="bxc-m-img">{o.logo_path && urls[o.logo_path] ? <img src={urls[o.logo_path]} alt="" /> : <Store className="h-8 w-8" />}</div>

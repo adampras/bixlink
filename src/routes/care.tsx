@@ -2,7 +2,7 @@ import { GlobalRegions } from '@/components/GlobalRegions';
 import { CareDirectory } from '@/components/CareDirectory';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Wrench, Droplets, Shirt, KeyRound, Store, ClipboardList, Search, Fuel, QrCode, Check, X, Trash2, Phone, MessageCircle, Receipt, Upload, Home, CalendarDays, Box, User } from 'lucide-react';
+import { ArrowLeft, Wrench, Droplets, Shirt, KeyRound, Scissors, Stethoscope, UtensilsCrossed, Store, ClipboardList, Search, Fuel, QrCode, Check, X, Trash2, Phone, MessageCircle, Receipt, Upload, Home, CalendarDays, Box, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
 import heroImg from '@/assets/bixcare-hero.jpg';
@@ -10,7 +10,10 @@ import autoImg from '@/assets/bixcare-auto.jpg';
 import washImg from '@/assets/bixcare-wash.jpg';
 import laundryImg from '@/assets/bixcare-laundry.jpg';
 import rentImg from '@/assets/bixcare-rent.jpg';
-import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet, uploadCareProof, openCareReceipt, careChime, rateLine, careCode, timeSlots } from '@/lib/bixcare';
+import salonImg from '@/assets/bixcare-salon.jpg';
+import clinicImg from '@/assets/bixcare-clinic.jpg';
+import cateringImg from '@/assets/bixcare-catering.jpg';
+import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet, uploadCareProof, openCareReceipt, careChime, rateLine, careCode, timeSlots, UNITS, DEFAULT_RATES } from '@/lib/bixcare';
 import { BixcareLuxHome } from '@/components/BixcareLuxHome';
 import { CarePartnerStats, RateOrder, ServiceNote, onBreak } from '@/components/BixcareExtras';
 import { startBixCall } from '@/components/BixCall';
@@ -35,6 +38,9 @@ const DIVS: { id: Division; name: string; tag: string; img: string; Icon: typeof
   { id: 'wash', name: 'BIX Wash', tag: 'Cuci & detailing', img: washImg, Icon: Droplets },
   { id: 'laundry', name: 'BIX Laundry', tag: 'Kiloan · dry clean', img: laundryImg, Icon: Shirt },
   { id: 'rent', name: 'BIX Rent', tag: 'Rental motor & mobil', img: rentImg, Icon: KeyRound },
+  { id: 'salon', name: 'BIX Salon', tag: 'Salon, barber & spa', img: salonImg, Icon: Scissors },
+  { id: 'clinic', name: 'BIX Clinic', tag: 'Klinik & praktik kesehatan', img: clinicImg, Icon: Stethoscope },
+  { id: 'catering', name: 'BIX Catering', tag: 'Katering & nasi kotak', img: cateringImg, Icon: UtensilsCrossed },
 ];
 const divName = (d: string) => DIVS.find(x => x.id === d)?.name ?? d;
 const card = 'rounded-2xl border border-primary/15 bg-card/80 p-4 shadow-lg';
@@ -129,7 +135,7 @@ function Explore({ uid, onBooked, onPartner }: { uid: string | null; onBooked: (
       <CareDirectory onPick={term => setQ(term.split(' ')[0] ?? term)} onRegister={onPartner}/>
        <div id="care-all" className="care-sec"><b>Outlet terdekat</b><span>{shown.length} hasil</span></div>
       <input className={`${input} care-search`} placeholder="Cari outlet atau kota…" value={q} onChange={e => setQ(e.target.value)} />
-      {shown.length === 0 && <div className={`${card} text-center text-sm text-muted-foreground`}>Belum ada outlet buka{div !== 'all' ? ` untuk ${divName(div)}` : ''}. Punya usaha? Daftar di tab Mitra.</div>}
+      {shown.length === 0 && <div className={`${card} text-center text-sm text-muted-foreground`}>Belum ada outlet buka{div !== 'all' ? ` untuk ${divName(div)}` : ''}. Punya usaha? Daftar di tombol Gerai.</div>}
       {shown.map(o => (
         <button key={o.id} onClick={() => setOpen(o)} className={`${card} care-card care-fade flex w-full items-center gap-3 text-left`}>
           {o.logo_path && urls[o.logo_path] ? <img src={urls[o.logo_path]} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="grid h-14 w-14 place-items-center rounded-xl bg-primary/15"><Store className="h-6 w-6 text-primary" /></div>}
@@ -207,7 +213,7 @@ function OutletDetail({ outlet, uid, onBack, onBooked }: { outlet: Outlet; uid: 
 }
 
 function Tracker({ o, division }: { o: CareOrder; division?: Division | undefined }) {
-  const stages = STAGES[division ?? 'wash'];
+  const stages = STAGES[division ?? 'wash'] ?? STAGES.wash;
   const idx = o.status === 'completed' ? stages.length : stages.indexOf(o.stage);
   return <div className="care-track mt-2 flex gap-1">{stages.map((s, i) => <div key={s} className={`flex-1 ${i === idx ? 'is-now' : ''}`}><div className={`h-1.5 rounded-full ${i <= idx ? 'bg-primary' : 'bg-muted'}`} /><p className="mt-1 text-[9px] leading-tight text-muted-foreground">{s}</p></div>)}</div>;
 }
@@ -316,7 +322,7 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
       <div className={`${card} space-y-2 text-center`}>
         <Store className="mx-auto h-8 w-8 text-primary" />
         <p className="text-base font-bold">Kemitraan BIXCARE untuk Staker</p>
-        <p className="text-xs text-muted-foreground">Buka outlet bengkel, cuci, laundry atau rental dengan paket staking aktif minimal <b>${Number(gate.min_stake_usd).toLocaleString('en-US')}</b>. Staking aktif Anda saat ini: ${Number(gate.staked_usd).toLocaleString('en-US')}.</p>
+        <p className="text-xs text-muted-foreground">Buka outlet bengkel, cuci, laundry, rental, salon, klinik atau katering dengan paket staking aktif minimal <b>${Number(gate.min_stake_usd).toLocaleString('en-US')}</b>. Staking aktif Anda saat ini: ${Number(gate.staked_usd).toLocaleString('en-US')}.</p>
         <Link to="/stake" className={`${btn} inline-block`}>Buka Akses Kemitraan dengan Staking</Link>
       </div>
     </>
@@ -332,7 +338,7 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
         <ul className="space-y-1 text-[11px] text-muted-foreground">
           <li>• <b className="text-foreground">Bayar saldo BIX/USDT:</b> uang konsumen ditahan, masuk ke saldo Anda saat order Selesai (sudah dipotong biaya).</li>
           <li>• <b className="text-foreground">QRIS/transfer/tunai:</b> konsumen bayar langsung ke Anda; biaya platform dipotong dalam BIX.</li>
-          <li>• <b className="text-foreground">Biaya:</b> AutoCare/Rent 2% · Wash/Laundry 3%.</li>
+          <li>• <b className="text-foreground">Biaya:</b> {DIVS.map(d => `${d.name.replace('BIX ', '')} ${Math.round((DEFAULT_RATES[d.id] ?? 0.03) * 100)}%`).join(' · ')}.</li>
           <li>• <b className="text-foreground">Minimal {MIN_GAS_BIX} BIX</b> agar outlet bisa BUKA.</li>
         </ul>
         <Link to="/wallet" className={`${ghost} mt-2 inline-block`}>Isi ulang BIX</Link>
@@ -340,15 +346,17 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
       <div className={`${card} space-y-2`}>
         <div className="flex items-center justify-between"><p className="font-bold">{outlet ? 'Outlet saya' : 'Daftarkan usaha Anda'}</p>{outlet && <span className="text-xs font-bold text-primary">{CARE_STATUS[outlet.status]}</span>}</div>
         {outlet?.status === 'rejected' && <p className="text-xs text-destructive">Ditolak: {outlet.review_note} — perbaiki lalu simpan untuk ajukan ulang.</p>}
-        <p className="pt-1 text-xs font-bold text-primary">Profil usaha</p>
+        <p className="pt-1 text-xs font-bold text-primary">1 · Profil usaha</p>
         <input className={input} placeholder="Nama outlet" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
         <select className={input} value={form.division} onChange={e => setForm({ ...form, division: e.target.value as Division })}>{DIVS.map(d => <option key={d.id} value={d.id}>{d.name} — {d.tag}</option>)}</select>
+        <p className="text-[10px] text-muted-foreground">Biaya platform kategori ini: {Math.round((DEFAULT_RATES[form.division] ?? 0.03) * 100)}% · tahap kerja: {(STAGES[form.division] ?? []).join(' → ')}</p>
+        <p className="pt-1 text-xs font-bold text-primary">2 · Lokasi & kontak</p>
         <div className="grid grid-cols-2 gap-2"><input className={input} placeholder="Kota" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} /><input className={input} placeholder="WhatsApp" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
         <input className={input} placeholder="Alamat & patokan" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
         <textarea className={input} placeholder="Deskripsi singkat" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-        <p className="pt-1 text-xs font-bold text-primary">Jam buka – tutup</p>
+        <p className="pt-1 text-xs font-bold text-primary">3 · Jam buka – tutup</p>
         <div className="grid grid-cols-2 gap-2"><input type="time" className={input} value={form.open_time} onChange={e => setForm({ ...form, open_time: e.target.value })} /><input type="time" className={input} value={form.close_time} onChange={e => setForm({ ...form, close_time: e.target.value })} /></div>
-        <p className="pt-2 text-xs font-bold text-primary">Pembayaran yang diterima</p>
+        <p className="pt-2 text-xs font-bold text-primary">4 · Pembayaran yang diterima</p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3"><input className={input} placeholder="Bank (BCA, BRI…)" value={form.bank_name} onChange={e => setForm({ ...form, bank_name: e.target.value })} /><input className={input} placeholder="No. rekening" inputMode="numeric" value={form.bank_account} onChange={e => setForm({ ...form, bank_account: e.target.value.replace(/[^0-9 -]/g, '') })} /><input className={input} placeholder="Atas nama" value={form.bank_holder} onChange={e => setForm({ ...form, bank_holder: e.target.value })} /></div>
         <div className="flex gap-4 text-xs"><label className="flex items-center gap-1"><input type="checkbox" checked={form.accept_bix} onChange={e => setForm({ ...form, accept_bix: e.target.checked })} />Terima saldo BIX</label><label className="flex items-center gap-1"><input type="checkbox" checked={form.accept_usdt} onChange={e => setForm({ ...form, accept_usdt: e.target.checked })} />Terima saldo USDT</label></div>
         <p className="text-[10px] text-muted-foreground">QRIS diunggah di bawah setelah outlet tersimpan. Tunai selalu tersedia.</p>
@@ -381,13 +389,13 @@ function Partner({ uid, owner1 }: { uid: string; owner1: boolean }) {
 
 function ServiceManager({ outlet, uid }: { outlet: Outlet; uid: string }) {
   const [list, setList] = useState<Service[]>([]);
-  const [f, setF] = useState({ name: '', unit: 'layanan', price_idr: '', duration_min: '30' });
+  const [f, setF] = useState({ name: '', unit: UNITS[outlet.division]?.[0] ?? 'layanan', price_idr: '', duration_min: '30' });
   const load = useCallback(() => void supabase.from('bixcare_services').select('*').eq('outlet_id', outlet.id).order('created_at').then(({ data }) => setList((data ?? []) as Service[])), [outlet.id]);
   useEffect(() => { load(); }, [load]);
   const add = async () => {
     const price = Number(f.price_idr); if (!f.name.trim() || !(price >= 0)) return;
     await supabase.from('bixcare_services').insert({ outlet_id: outlet.id, owner_id: uid, name: f.name.trim(), unit: f.unit || 'layanan', price_idr: price, duration_min: Number(f.duration_min) || 30 });
-    setF({ name: '', unit: 'layanan', price_idr: '', duration_min: '30' }); load();
+    setF({ name: '', unit: UNITS[outlet.division]?.[0] ?? 'layanan', price_idr: '', duration_min: '30' }); load();
   };
   return (
     <div className={`${card} space-y-2`}>
@@ -409,7 +417,7 @@ function ServiceManager({ outlet, uid }: { outlet: Outlet; uid: string }) {
         <p className="text-xs font-bold text-primary">+ Tambah layanan baru</p>
         <label className="block text-[11px]">Nama jasa<input className={`${input} mt-1`} placeholder="mis. Ganti oli" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} /></label>
         <div className="grid grid-cols-2 gap-2">
-          <label className="block text-[11px]">Satuan<input className={`${input} mt-1`} placeholder="kg / unit / hari" value={f.unit} onChange={e => setF({ ...f, unit: e.target.value })} /></label>
+          <label className="block text-[11px]">Satuan<input className={`${input} mt-1`} placeholder="kg / unit / hari" list="care-units" value={f.unit} onChange={e => setF({ ...f, unit: e.target.value })} /><datalist id="care-units">{(UNITS[outlet.division] ?? []).map(u => <option key={u} value={u} />)}</datalist></label>
           <label className="block text-[11px]">Durasi (menit)<input type="number" className={`${input} mt-1`} value={f.duration_min} onChange={e => setF({ ...f, duration_min: e.target.value })} /></label>
         </div>
         <label className="block text-[11px]">Harga (Rp)<input type="number" inputMode="numeric" className={`${input} mt-1`} placeholder="50000" value={f.price_idr} onChange={e => setF({ ...f, price_idr: e.target.value })} /></label>
@@ -457,7 +465,7 @@ function IncomingOrders({ outlet, onChange }: { outlet: Outlet; onChange: () => 
           {o.note && <p className="text-xs">“{o.note}”</p>}
           <ContactBar peer={o.buyer_id} name="Konsumen BIXCARE" />
           <ServiceNote o={o} onSaved={load} />
-          {['accepted', 'in_progress', 'ready'].includes(o.status) && <div className="mt-2 flex flex-wrap gap-1">{STAGES[outlet.division].map(s => <button key={s} onClick={() => act(o, o.status, s)} className={`rounded-full px-2 py-1 text-[10px] ${o.stage === s ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{s}</button>)}</div>}
+          {['accepted', 'in_progress', 'ready'].includes(o.status) && <div className="mt-2 flex flex-wrap gap-1">{(STAGES[outlet.division] ?? STAGES.wash).map(s => <button key={s} onClick={() => act(o, o.status, s)} className={`rounded-full px-2 py-1 text-[10px] ${o.stage === s ? 'bg-primary text-primary-foreground' : 'border border-border'}`}>{s}</button>)}</div>}
           <div className="mt-2 flex flex-wrap gap-2">{careNext(o.status, 'merchant').map(s => <button key={s} className={s === 'rejected' ? ghost : btn} onClick={() => act(o, s)}>{label[s]}</button>)}</div>
         </div>
       ))}

@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export const CARE_BUCKET = 'bixcare';
-export type Division = 'auto' | 'wash' | 'laundry' | 'rent';
+export type Division = 'auto' | 'wash' | 'laundry' | 'rent' | 'salon' | 'clinic' | 'catering';
 export type Outlet = { id: string; owner_id: string; name: string; division: Division; city: string; address: string; phone: string; description: string; logo_path: string | null; qris_path: string | null; open_time: string; close_time: string; is_open: boolean; status: string; review_note: string; bank_name: string; bank_account: string; bank_holder: string; accept_bix: boolean; accept_usdt: boolean; break_until?: string | null };
 export type Service = { id: string; outlet_id: string; name: string; unit: string; price_idr: number; duration_min: number; available: boolean };
 export type CareOrder = { id: string; outlet_id: string; merchant_id: string; buyer_id: string; items: { id: string; name: string; price: number; qty: number; unit: string }[]; total_idr: number; pay_method: PayMethod; fare_bix: number; fare_usdt: number; merchant_bix: number; merchant_usdt: number; fee_usdt: number; held_at: string | null; paid_at: string | null; pay_ref: string; schedule_at: string | null; note: string; stage: string; status: string; fee_bix: number; created_at: string; completed_at?: string | null; proof_path?: string | null; rating?: number | null; review?: string; rated_at?: string | null; service_note?: string; next_service_at?: string | null };
@@ -11,7 +11,7 @@ export const PAY_LABEL: Record<PayMethod, string> = { bix: 'Saldo BIX', usdt: 'S
 /** In-app wallet methods are held at booking and settled on completion; others are paid straight to the outlet. */
 export const isWalletPay = (m: string) => m === 'bix' || m === 'usdt';
 
-export const DEFAULT_RATES: Record<Division, number> = { auto: 0.02, rent: 0.02, wash: 0.03, laundry: 0.03 };
+export const DEFAULT_RATES: Record<Division, number> = { auto: 0.02, rent: 0.02, wash: 0.03, laundry: 0.03, salon: 0.03, clinic: 0.02, catering: 0.03 };
 export const MIN_GAS_BIX = 20;
 export const IDR_PER_USD = 16000;
 export const BIX_USD = 0.5;
@@ -38,6 +38,15 @@ export const STAGES: Record<Division, string[]> = {
   wash: ['Cuci salju', 'Bersih kolong', 'Pengeringan & semir', 'Siap diambil'],
   laundry: ['Penimbangan', 'Pencucian', 'Setrika uap', 'Packing', 'Siap ambil / diantar'],
   rent: ['Verifikasi KTP/SIM', 'Unit disiapkan', 'Unit diserahkan', 'Unit kembali'],
+  salon: ['Konsultasi', 'Perawatan', 'Styling & finishing', 'Selesai'],
+  clinic: ['Pendaftaran', 'Pemeriksaan', 'Tindakan / resep', 'Selesai'],
+  catering: ['Konfirmasi menu', 'Persiapan & masak', 'Packing & QC', 'Dikirim / disajikan'],
+};
+
+/** Suggested price units per category for the merchant price list. */
+export const UNITS: Record<Division, string[]> = {
+  auto: ['layanan', 'unit', 'jam'], wash: ['unit', 'layanan'], laundry: ['kg', 'pcs', 'layanan'], rent: ['hari', 'jam', 'minggu'],
+  salon: ['orang', 'layanan', 'sesi'], clinic: ['tindakan', 'konsultasi', 'sesi'], catering: ['porsi', 'pax', 'paket'],
 };
 
 /** Allowed next statuses per role — mirrors bixcare_order_set. */
