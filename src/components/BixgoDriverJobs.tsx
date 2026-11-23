@@ -21,6 +21,18 @@ import { BixgoDriverLocation } from '@/components/BixgoDriverLocation';
 import { BixgoEarnings } from '@/components/BixgoEarnings';
 import { earningsTotals } from '@/lib/bixgo-earnings';
 
+/** Drag-to-confirm control; fires once when the knob reaches the end. Keyboard: Enter/Space. */
+function SlideAccept({ onDone, busy }: { onDone: () => void; busy: boolean }) {
+  const track = useRef<HTMLDivElement>(null); const [x, setX] = useState(0); const start = useRef<number | null>(null);
+  const max = () => (track.current?.clientWidth ?? 300) - 64;
+  const end = () => { if (start.current == null) return; start.current = null; if (x >= max() * 0.9) { setX(max()); onDone(); setTimeout(() => setX(0), 800); } else setX(0); };
+  return <div ref={track} className="bgl-slide" role="button" tabIndex={0} aria-label="Slide to accept order" onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDone(); } }}
+    onPointerMove={e => { if (start.current != null) setX(Math.max(0, Math.min(max(), e.clientX - start.current))); }} onPointerUp={end} onPointerCancel={end} onPointerLeave={end}>
+    <span className="bgl-slide-label">{busy ? 'Accepting…' : 'Slide to accept'}</span>
+    <span className="bgl-slide-knob" style={{ transform: `translateX(${x}px)`, transition: start.current == null ? 'transform .25s' : 'none' }} onPointerDown={e => { if (busy) return; (e.target as HTMLElement).setPointerCapture?.(e.pointerId); start.current = e.clientX - x; }}>{busy ? <Loader2 className="h-5 w-5 animate-spin"/> : '»'}</span>
+  </div>;
+}
+
 type Job = { id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; fare_idr?: number; pay_method?: string; status: string; fare_usdt: number; driver_usdt: number; fare_bix?: number; driver_bix?: number; gas_bix?: number; created_at: string; completed_at?: string | null; pickup_note?: string; rating?: number | null; rating_note?: string; owner_usdt?: number; owner_bix?: number };
 const SVC: Record<string, string> = { ride: 'Ride', car: 'Car', food: 'Food', send: 'Send', mart: 'Mart' };
 
@@ -77,8 +89,11 @@ export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false }: { lu
   </div>;
   const amount = (j: Job) => { const k = payKind(j.pay_method); return k === 'bix' ? bixf(j.fare_bix ?? 0) : k === 'cash' ? `${rp(j.fare_idr ?? j.total_idr)} cash` : usdt(j.fare_usdt); };
 
+  const today = new Date().toDateString();
+  const doneToday = done.filter(j => j.completed_at && new Date(j.completed_at).toDateString() === today);
   return <div className="space-y-3">
-    <div className="grid grid-cols-3 gap-2 text-center tabular-nums">
+    {lux && <div className="bgl-drv-head"><div><small>Today's trips</small><b>{String(doneToday.length).padStart(2, '0')}</b><span>Completed</span></div><i aria-hidden/><div><small>Earned today</small><b>{earningsTotals(doneToday).usdt.toFixed(2)}</b><span>USDT</span></div></div>}
+    <div className={`grid grid-cols-3 gap-2 text-center tabular-nums ${lux ? 'hidden' : ''}`}>
       <div className="rounded-xl border border-primary/30 p-2"><b className="block text-sm text-primary">{usdt(earned)}</b><span className="text-[10px] text-muted-foreground">USDT received</span></div>
       <div className="rounded-xl border border-primary/30 p-2"><b className="block text-sm text-primary">{bixf(earnedBix)}</b><span className="text-[10px] text-muted-foreground">BIX received</span></div>
       <div className="rounded-xl border border-border p-2"><b className="block text-sm">{done.length}</b><span className="text-[10px] text-muted-foreground">Completed</span></div>
@@ -108,9 +123,9 @@ export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false }: { lu
       {online && !open.length && <p className="text-[11px] text-muted-foreground">No open orders right now. This list refreshes every 10 seconds.</p>}
       <div className="space-y-2">{open.map(j => { const est = Math.round(Number(j.total_idr) * (1 + adj / 100)); return <div key={j.id} className={`space-y-2 rounded-2xl border border-border p-3 ${lux ? 'bgl-driver-order' : ''}`}>
         <div className="flex items-center justify-between gap-2"><Pay j={j}/><b className="text-xs tabular-nums">{rp(est)}{adj !== 0 && <span className="ml-1 text-[10px] text-primary">({adj > 0 ? '+' : ''}{adj}%)</span>}</b></div>
-        {lux && <div className="bgl-driver-radar"><small>Incoming order</small><MapPin className="mt-2 h-5 w-5 text-primary"/><strong>{Number(j.km).toFixed(1)}</strong><span>km · jarak perjalanan</span><b>{rp(est)}</b><small>Estimasi tarif · bukan saldo</small></div>}
-        <Route j={j}/>
-        <Btn id={j.id} onClick={() => void accept(j)}>Accept order</Btn>
+        {lux && <div className="bgl-driver-radar"><small>Incoming order</small><MapPin className="mt-2 h-5 w-5 text-primary"/><strong>{Number(j.km).toFixed(1)}<em>km</em></strong><span className="tracking-[.4em]">TRIP</span><hr/><small>Payout (est.)</small><b>{payKind(j.pay_method) === 'bix' ? bixf((j.driver_bix ?? 0) * (1 + adj / 100)) : payKind(j.pay_method) === 'cash' ? rp(est) : usdt((j.driver_usdt ?? 0) * (1 + adj / 100))}</b></div>}
+        {lux ? <div className="bgl-route-card"><div className="bgl-route-line"><p><small>Pickup</small>{j.pickup}</p><p><small>Destination</small>{j.dropoff}</p></div><div className="bgl-route-tag"><span>♛</span><b>{SVC[j.service] ?? j.service}</b><small>{j.vehicle}</small></div></div> : <Route j={j}/>}
+        {lux ? <SlideAccept busy={busy === j.id} onDone={() => void accept(j)}/> : <Btn id={j.id} onClick={() => void accept(j)}>Accept order</Btn>}
       </div>; })}</div>
     </div>
     <BixgoEarnings trips={mine}/>

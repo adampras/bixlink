@@ -60,3 +60,39 @@
 .bixgo-lux .bgx-dock > * { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 0 8px; font-size: 11px; color: #8b86a3; }
 .bixgo-lux .bgx-dock > .is-on { color: #A855F7; font-weight: 700; }
 .bixgo-lux .bgx-dock > .is-on svg { filter: drop-shadow(0 0 8px rgba(168,85,247,.8)); fill: rgba(168,85,247,.35); }
+
+.bixgo-lux .bgl-drv-head { position:relative; display:grid; grid-template-columns:1fr 72px 1fr; align-items:center; text-align:center; padding:14px 8px; border:1px solid var(--bgl-metal); border-radius:22px; background:linear-gradient(180deg,#14171a,#08090a); }
+.bixgo-lux .bgl-drv-head small { display:block; color:var(--bgl-emerald); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+.bixgo-lux .bgl-drv-head b { display:block; font-size:28px; font-variant-numeric:tabular-nums; margin:2px 0; }
+.bixgo-lux .bgl-drv-head span { font-size:11px; color:var(--muted-foreground); }
+.bixgo-lux .bgl-drv-head i { width:60px; height:60px; margin:auto; border-radius:50%; border:3px solid #2a2e31; background:conic-gradient(from 30deg,#0b3b2a,#1fae7a,#073020,#2bd391,#0b3b2a); box-shadow:0 0 18px color-mix(in oklab,var(--bgl-emerald) 40%,transparent),inset 0 0 10px #000; clip-path:circle(50%); }
+.bixgo-lux .bgl-driver-radar { width:min(100%,290px); background:radial-gradient(circle,#0b0d0e 52%,#0d4a33 66%,#06140e 70%,#000 73%); border-color:#0e5a3d; box-shadow:0 0 40px color-mix(in oklab,var(--bgl-emerald) 30%,transparent),inset 0 0 30px color-mix(in oklab,var(--bgl-emerald) 25%,transparent); }
+.bixgo-lux .bgl-driver-radar strong em { font-style:normal; font-size:16px; margin-left:4px; font-weight:500; }
+.bixgo-lux .bgl-driver-radar hr { width:55%; border:0; height:1px; margin:8px 0; background:linear-gradient(90deg,transparent,var(--bgl-emerald),transparent); }
+.bixgo-lux .bgl-driver-radar b { font-size:28px; color:var(--foreground); margin-top:2px; }
+.bixgo-lux .bgl-route-card { display:flex; gap:10px; padding:12px; border:1px solid var(--bgl-metal); border-radius:18px; background:#0b0d0e; }
+.bixgo-lux .bgl-route-line { flex:1; min-width:0; position:relative; padding-left:20px; display:grid; gap:10px; }
+.bixgo-lux .bgl-route-line::before { content:""; position:absolute; left:5px; top:6px; bottom:12px; width:2px; background:var(--foreground); opacity:.6; }
+.bixgo-lux .bgl-route-line p { position:relative; font-size:14px; font-weight:600; }
+.bixgo-lux .bgl-route-line p::before { content:""; position:absolute; left:-20px; top:2px; width:12px; height:12px; border-radius:50%; background:var(--bgl-emerald); }
+.bixgo-lux .bgl-route-line p+p::before { background:#000; border:2px solid var(--foreground); }
+.bixgo-lux .bgl-route-line small { display:block; color:var(--bgl-emerald); font-size:10px; text-transform:uppercase; font-weight:700; }
+.bixgo-lux .bgl-route-tag { width:84px; display:grid; place-items:center; text-align:center; border:1px solid var(--bgl-metal); border-radius:12px; padding:6px; }
+.bixgo-lux .bgl-route-tag span { color:var(--bgl-emerald); font-size:20px; } .bixgo-lux .bgl-route-tag b { color:var(--bgl-emerald); font-size:11px; text-transform:uppercase; } .bixgo-lux .bgl-route-tag small { font-size:10px; color:var(--muted-foreground); }
+.bixgo-lux .bgl-slide { position:relative; height:64px; border-radius:999px; border:1px solid var(--bgl-metal); background:#0a0c0d; touch-action:none; user-select:none; overflow:hidden; }
+.bixgo-lux .bgl-slide-label { position:absolute; inset:0; display:grid; place-items:center; padding-left:56px; color:var(--bgl-emerald); font-size:12px; font-weight:700; letter-spacing:.35em; text-transform:uppercase; }
+.bixgo-lux .bgl-slide-knob { position:absolute; left:4px; top:4px; width:56px; height:54px; border-radius:999px; display:grid; place-items:center; font-size:30px; color:#d7f5e7; background:linear-gradient(180deg,#2bb07c,#0f6b47); box-shadow:0 0 16px color-mix(in oklab,var(--bgl-emerald) 50%,transparent); cursor:grab; }
+.bixgo-lux .bgl-done-head { text-align:center; margin:6px 0 10px; }
+.bixgo-lux .bgl-done-seal { margin:0 auto 8px; width:110px; height:110px; display:grid; place-items:center; border-radius:50%; border:4px solid #e7b73a; color:#ffd700; background:radial-gradient(circle,#1a1408,#050505); box-shadow:0 0 30px rgba(255,200,60,.35),inset 0 0 18px rgba(255,200,60,.25); }
+.bixgo-lux .bgl-done-head h2 { font-size:28px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; background:linear-gradient(180deg,#fff1b8,#d9a520 60%,#8a6210); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.bixgo-lux .bgl-done-head p { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted-foreground); }
+.bixgo-lux .bgl-gold-card { border:1px solid rgba(231,183,58,.35); border-radius:18px; padding:16px; background:linear-gradient(180deg,#141210,#0a0a0a); }
+.bixgo-lux .bgl-cap { color:#e7b73a; font-size:11px; font-weight:800; text-transform:uppercase; }
+.bixgo-lux .bgl-gold-card .bgl-receipt-total { color:#ffd700; font-size:34px; }
+.bixgo-lux .bgl-gold-card .bgl-tot { border-top:1px solid var(--border); padding-top:8px; font-weight:700; } .bixgo-lux .bgl-gold-card .bgl-tot dd { color:#ffd700; }
+.bixgo-lux .bgl-hex { width:68px; height:76px; display:grid; place-items:center; font-weight:900; font-size:18px; color:#2a1c02; background:linear-gradient(160deg,#fff0a8,#d9a520 55%,#7a560c); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+.bixgo-lux .bgl-star { filter:drop-shadow(0 2px 4px rgba(255,200,60,.4)); }
+.bixgo-lux .bgl-tip { margin-top:12px; display:flex; align-items:center; gap:10px; padding:10px; border:1px solid rgba(231,183,58,.3); border-radius:18px; background:#0d0c0a; }
+.bixgo-lux .bgl-tip b { display:block; color:#e7b73a; font-size:12px; text-transform:uppercase; } .bixgo-lux .bgl-tip small { font-size:11px; color:var(--muted-foreground); }
+.bixgo-lux .bgl-coin { width:48px; height:48px; flex-shrink:0; display:grid; place-items:center; border-radius:50%; font-weight:900; font-size:13px; color:#3a2804; background:radial-gradient(circle at 35% 30%,#fff0a8,#d9a520 60%,#7a560c); }
+.bixgo-lux .bgl-tip-btn { flex-shrink:0; border:1px solid #e7b73a; color:#ffd700; border-radius:999px; padding:8px 12px; font-size:11px; font-weight:800; text-transform:uppercase; }

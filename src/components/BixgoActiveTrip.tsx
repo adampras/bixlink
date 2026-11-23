@@ -68,7 +68,7 @@ export function BixgoActiveTrip({ lux = false }: { lux?: boolean }) {
       <b className="text-[11px] uppercase tracking-widest text-primary">Active trip · #{trip.id.slice(0, 8).toUpperCase()}</b>
       <span className="text-[11px] text-muted-foreground">{trip.vehicle}</span>
     </div>
-    {lux && <>{trip.status === 'completed' && <div className="bgl-receipt-seal"><CheckCircle2 className="h-14 w-14"/></div>}<h2 className="bgl-trip-title">{LABEL[trip.status] ?? trip.status}</h2></>}
+    {lux && (trip.status === 'completed' ? <div className="bgl-done-head"><div className="bgl-done-seal"><CheckCircle2 className="h-14 w-14"/></div><h2>Ride complete</h2><p>Thank you for riding with us</p></div> : <h2 className="bgl-trip-title">{LABEL[trip.status] ?? trip.status}</h2>)}
     <div className="mt-3 flex items-center gap-3">
       <span className="relative grid h-14 w-14 place-items-center rounded-full bg-primary/15">
         {trip.status === 'pending' ? <><span className="absolute inset-0 animate-ping rounded-full bg-primary/25"/><Radar className="h-7 w-7 text-primary"/></> : trip.status === 'completed' ? <CheckCircle2 className="h-7 w-7 text-primary"/> : <CarFront className="h-7 w-7 text-primary"/>}
@@ -98,15 +98,16 @@ export function BixgoActiveTrip({ lux = false }: { lux?: boolean }) {
       </>}
       {canCancelTrip(trip.status) && <Button variant="outline" disabled={busy} onClick={() => setCancelOpen(true)} className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-destructive/50 py-2.5 text-sm font-bold text-destructive">{busy ? <Loader2 className="h-4 w-4 animate-spin"/> : <X className="h-4 w-4"/>}Cancel trip</Button>}
     </div>
-    {lux && trip.status === 'completed' && <div className="bgl-receipt"><p className="text-[10px] uppercase text-muted-foreground">Total perjalanan tercatat</p><p className="bgl-receipt-total">{amount(receipt.gross, receipt.unit)}</p><dl><div><dt>Jarak perjalanan</dt><dd>{Number(trip.km).toFixed(1)} km</dd></div><div><dt>Metode pembayaran</dt><dd>{trip.pay_method}</dd></div><div><dt>Potongan tercatat</dt><dd>{amount(receipt.fee, receipt.feeUnit)}</dd></div><div><dt>{receipt.kind === 'cash' ? 'Tunai diterima driver' : 'Diterima driver'}</dt><dd>{amount(receipt.net, receipt.unit)}</dd></div></dl><p className="mt-3 text-[10px] text-muted-foreground">Sesuai catatan perjalanan. Tunai dibayar langsung; biaya BIX terpisah.</p></div>}
+    {lux && trip.status === 'completed' && <div className="bgl-receipt bgl-gold-card"><div className="flex items-start justify-between gap-2"><div><p className="bgl-cap">Total paid</p><p className="bgl-receipt-total">{amount(receipt.gross, receipt.unit)}</p></div><span className="bgl-hex" aria-hidden>BIX</span></div><p className="bgl-cap mt-2">Fare breakdown</p><dl><div><dt>Distance</dt><dd>{Number(trip.km).toFixed(1)} km</dd></div><div><dt>Payment method</dt><dd>{trip.pay_method}</dd></div><div className="bgl-tot"><dt>Total fare</dt><dd>{amount(receipt.gross, receipt.unit)}</dd></div></dl><p className="bgl-cap mt-3">Platform commission</p><dl><div><dt>Platform commission</dt><dd>{amount(receipt.fee, receipt.feeUnit)}</dd></div><div><dt>{receipt.kind === 'cash' ? 'Cash to driver' : 'Paid to driver'}</dt><dd>{amount(receipt.net, receipt.unit)}</dd></div></dl><p className="mt-3 text-[10px] text-muted-foreground">Amounts as recorded for this trip.</p></div>}
     {trip.status === 'completed' && trip.driver_user_id && <div className="mt-3 rounded-2xl border border-primary/30 p-3 text-center">
       {trip.rating ? <p className="text-xs font-bold text-primary">Thanks! You rated {'★'.repeat(trip.rating)}</p> : <>
         <p className="text-xs font-bold">Rate {name}</p>
-        <div className="mt-1 flex justify-center gap-1">{[1, 2, 3, 4, 5].map(r => <button key={r} aria-label={`${r} stars`} onClick={() => setStars(r)}><Star className={`h-7 w-7 ${stars >= r ? 'fill-primary text-primary' : 'text-muted-foreground'}`}/></button>)}</div>
+        <div className="mt-1 flex justify-center gap-1">{[1, 2, 3, 4, 5].map(r => <button key={r} aria-label={`${r} stars`} onClick={() => setStars(r)}><Star className={`${lux ? 'bgl-star h-10 w-10' : 'h-7 w-7'} ${stars >= r ? 'fill-primary text-primary' : 'text-muted-foreground'}`}/></button>)}</div>
         <input value={review} maxLength={200} onChange={e => setReview(e.target.value)} placeholder="Short feedback (optional)" className="form-input mt-2 text-xs"/>
         <button disabled={!stars || busy} onClick={() => void rate()} className="mt-2 w-full rounded-full bg-primary py-2 text-xs font-bold text-primary-foreground disabled:opacity-50">Send rating</button>
       </>}
     </div>}
+    {lux && trip.status === 'completed' && trip.driver_user_id && <div className="bgl-tip"><span className="bgl-coin" aria-hidden>BIX</span><div className="min-w-0 flex-1"><b>Leave a tip (optional)</b><small>Show your appreciation</small></div><Link to="/pay" className="bgl-tip-btn">+ Add BIX tip</Link></div>}
     <p className="mt-2 text-[10px] text-muted-foreground">Calls and chats go through BIX CALL — your phone number stays private.</p>
   </section>;
 }
