@@ -11,6 +11,7 @@ import washImg from '@/assets/bixcare-wash.jpg';
 import laundryImg from '@/assets/bixcare-laundry.jpg';
 import rentImg from '@/assets/bixcare-rent.jpg';
 import { type Division, type Outlet, type Service, type CareOrder, STAGES, CARE_STATUS, careNext, gasFeeBix, rp, uploadCareFile, signCare, MIN_GAS_BIX, type PayMethod, PAY_LABEL, isWalletPay, payQuote, walletNet, uploadCareProof, openCareReceipt, careChime, rateLine, careCode, timeSlots } from '@/lib/bixcare';
+import { BixcareLuxHome } from '@/components/BixcareLuxHome';
 import { CarePartnerStats, RateOrder, ServiceNote, onBreak } from '@/components/BixcareExtras';
 import { startBixCall } from '@/components/BixCall';
 import { CityMarquee } from '@/components/CityMarquee';
@@ -112,6 +113,7 @@ function Explore({ uid, onBooked, onPartner }: { uid: string | null; onBooked: (
   if (open) return <OutletDetail outlet={open} uid={uid} onBack={() => setOpen(null)} onBooked={onBooked} />;
   return (
     <>
+      <BixcareLuxHome uid={uid} outlets={outlets} urls={urls} stars={stars} q={q} setQ={setQ} div={div} setDiv={setDiv} onOpen={setOpen} onAll={() => document.getElementById('care-all')?.scrollIntoView({ behavior: 'smooth' })} />
       <div className="care-sec"><b>Pilar layanan</b><span>{outlets.length} outlet aktif</span></div>
       <div className="care-pillars grid grid-cols-2 gap-3">
         {DIVS.map(d => (
@@ -123,7 +125,7 @@ function Explore({ uid, onBooked, onPartner }: { uid: string | null; onBooked: (
         ))}
       </div>
       <CareDirectory onPick={term => setQ(term.split(' ')[0] ?? term)} onRegister={onPartner}/>
-       <div className="care-sec"><b>Outlet terdekat</b><span>{shown.length} hasil</span></div>
+       <div id="care-all" className="care-sec"><b>Outlet terdekat</b><span>{shown.length} hasil</span></div>
       <input className={`${input} care-search`} placeholder="Cari outlet atau kota…" value={q} onChange={e => setQ(e.target.value)} />
       {shown.length === 0 && <div className={`${card} text-center text-sm text-muted-foreground`}>Belum ada outlet buka{div !== 'all' ? ` untuk ${divName(div)}` : ''}. Punya usaha? Daftar di tab Mitra.</div>}
       {shown.map(o => (
