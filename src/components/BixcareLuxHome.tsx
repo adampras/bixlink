@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MapPin, Search, SlidersHorizontal, Bell, Heart, BadgeCheck, Star, Store, Scissors, HeartPulse, ChefHat } from 'lucide-react';
+import { MapPin, Search, SlidersHorizontal, Bell, Heart, BadgeCheck, Star, Store } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getDevicePosition, reverseGeocode } from '@/lib/geo';
 import type { Division, Outlet } from '@/lib/bixcare';
@@ -7,15 +7,18 @@ import { onBreak } from '@/components/BixcareExtras';
 import autoImg from '@/assets/bixcare-auto.jpg';
 import laundryImg from '@/assets/bixcare-laundry.jpg';
 import rentImg from '@/assets/bixcare-rent.jpg';
+import salonImg from '@/assets/bixcare-salon.jpg';
+import clinicImg from '@/assets/bixcare-clinic.jpg';
+import cateringImg from '@/assets/bixcare-catering.jpg';
 
 type Tile = { label: string; div?: Division; term?: string; img?: string; Icon?: typeof Store };
 const TILES: Tile[] = [
   { label: 'Auto Garage', div: 'auto', img: autoImg },
   { label: 'Home AC Laundry', div: 'laundry', img: laundryImg },
   { label: 'Car Rental', div: 'rent', img: rentImg },
-  { label: 'Beauty Salon', term: 'salon', Icon: Scissors },
-  { label: 'Medical Clinic', term: 'klinik', Icon: HeartPulse },
-  { label: 'Professional Catering', term: 'katering', Icon: ChefHat },
+  { label: 'Beauty Salon', term: 'salon', img: salonImg },
+  { label: 'Medical Clinic', term: 'klinik', img: clinicImg },
+  { label: 'Professional Catering', term: 'katering', img: cateringImg },
 ];
 const SUB: Record<string, string> = { auto: 'Auto Repair & Maintenance', wash: 'Car Wash & Detailing', laundry: 'Home AC & Laundry', rent: 'Luxury & Comfort Rental' };
 

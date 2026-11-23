@@ -2,7 +2,7 @@ import { GlobalRegions } from '@/components/GlobalRegions';
 import { CareDirectory } from '@/components/CareDirectory';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Wrench, Droplets, Shirt, KeyRound, Store, ClipboardList, Search, Fuel, QrCode, Check, X, Trash2, Phone, MessageCircle, Receipt, Upload } from 'lucide-react';
+import { ArrowLeft, Wrench, Droplets, Shirt, KeyRound, Store, ClipboardList, Search, Fuel, QrCode, Check, X, Trash2, Phone, MessageCircle, Receipt, Upload, Home, CalendarDays, Box, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
 import heroImg from '@/assets/bixcare-hero.jpg';
@@ -79,13 +79,15 @@ function CarePage() {
         {tab === 'orders' && (uid ? <MyOrders uid={uid} /> : <SignIn />)}
         {tab === 'partner' && (uid ? <Partner uid={uid} owner1={owner1} /> : <SignIn />)}
       </div>
-      <nav aria-label="Menu BIXCARE" className="care-dock fixed inset-x-0 bottom-0 z-30 mx-auto grid max-w-3xl grid-cols-4 border-t border-primary/25 bg-background pb-[env(safe-area-inset-bottom)]">
-        {([['explore', 'Jelajah', Search], ['orders', 'Pesanan', ClipboardList], ['partner', 'Mitra', Store]] as const).map(([k, l, I]) => (
-          <button key={k} onClick={() => { setTab(k); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-current={tab === k ? 'page' : undefined} className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] ${tab === k ? 'font-extrabold text-primary' : 'text-muted-foreground'}`}>
-            {tab === k && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-primary" />}<I className="h-5 w-5" />{l}
-          </button>
-        ))}
-        <Link to="/call" className="flex flex-col items-center gap-0.5 py-2.5 text-[11px] text-muted-foreground"><MessageCircle className="h-5 w-5" />Bantuan</Link>
+      <nav aria-label="Menu BIXCARE" className="care-dock fixed inset-x-0 bottom-0 z-30 mx-auto grid max-w-3xl grid-cols-5 items-end border-t border-primary/25 bg-background pb-[env(safe-area-inset-bottom)]">
+        {([['explore', 'Home', Home], ['orders', 'Bookings', CalendarDays], ['partner', 'Gerai', Box], ['inbox', 'Inbox', MessageCircle], ['profile', 'Profile', User]] as const).map(([k, l, I]) => {
+          const go = () => { if (k === 'inbox') return; if (k === 'profile') return; setTab(k); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+          const cls = `relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] ${tab === k ? 'font-extrabold text-primary' : 'text-muted-foreground'}`;
+          if (k === 'partner') return <button key={k} onClick={go} aria-label="Gerai / Mitra" aria-current={tab === k ? 'page' : undefined} className="flex flex-col items-center pb-2"><span className="-mt-6 grid h-14 w-14 place-items-center rounded-full border-2 border-primary/60 bg-gradient-to-b from-primary to-primary/60 text-primary-foreground shadow-lg"><I className="h-7 w-7" /></span><span className={`text-[10px] ${tab === k ? 'font-extrabold text-primary' : 'text-muted-foreground'}`}>{l}</span></button>;
+          if (k === 'inbox') return <Link key={k} to="/call" className={cls}><I className="h-5 w-5" />{l}</Link>;
+          if (k === 'profile') return <Link key={k} to="/profile" className={cls}><I className="h-5 w-5" />{l}</Link>;
+          return <button key={k} onClick={go} aria-current={tab === k ? 'page' : undefined} className={cls}>{tab === k && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-primary" />}<I className="h-5 w-5" />{l}</button>;
+        })}
       </nav>
     </main>
   );
