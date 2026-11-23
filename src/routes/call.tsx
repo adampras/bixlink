@@ -29,6 +29,7 @@ import { CONTACTS_EVENT, addContact, readContacts, removeContact, parseBixId, ty
 import { ChatThemePicker } from '@/components/ChatThemePicker';
 import { playDtmf, getRingVolume, setRingVolume, RINGTONES, getRingId, setRingId, startChosenRingtone, saveDeviceRingtone, loadDeviceRingtone, clearDeviceRingtone } from '@/lib/bix-tones';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
+import { StickerButton, StickerSheet, STICKER_BODY } from '@/components/BixStickers';
 import { getBcTheme, setBcTheme, applyBcTheme } from '@/lib/bix-theme';
 import { NativeDeviceSettings } from '@/components/NativeDeviceSettings';
 import { useDesignAccess } from '@/lib/design-release';
@@ -176,6 +177,7 @@ function ChatMedia({ m, me, onAct }: { m: Msg; me: string; onAct: (m: Msg, a: 'p
     </span>;
   }
   if (!url) return failed ? <button type="button" onClick={() => { setFailed(false); setAttempt(n => n + 1); }}>Muat ulang lampiran</button> : <span className="comm-media-wait">Memuat…</span>;
+  if (m.kind === 'image' && m.body === STICKER_BODY) return <img src={url} alt="Stiker" className="comm-sticker" loading="lazy"/>;
   if (m.kind === 'image') return <a href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Chat photo" className="comm-img" loading="lazy"/></a>;
   if (m.kind === 'file' && (m.meta?.mime ?? '').startsWith('video/')) return <video src={url} controls playsInline preload="metadata" className="comm-img"/>;
   if (m.kind === 'file') return <a className="comm-filecard" href={url} target="_blank" rel="noopener noreferrer"><i>{fileIcon(m.meta?.name)}</i><span><b>{m.meta?.name ?? 'Dokumen'}</b><small>{fmtSize(m.meta?.size)} · Unduh</small></span></a>;
@@ -669,19 +671,20 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     void supabase.rpc('bix_chat_read' as never, { p_peer: peer.id } as never);
     added(data);
   };
-  const upload = async (blob: Blob, kind: 'image' | 'voice', ext: string, to = peer.id, forwarded = false) => {
+  const upload = async (blob: Blob, kind: 'image' | 'voice', ext: string, to = peer.id, forwarded = false, body = '') => {
     if (blob.size > 10 * 1024 * 1024) { fail('File maksimal 10 MB'); return false; }
     setBusy(true);
     const path = `${me}/${to}/${crypto.randomUUID()}.${ext}`;
     const up = await supabase.storage.from('bix-chat').upload(path, blob, { contentType: blob.type || 'application/octet-stream' });
     if (up.error) { setBusy(false); fail(up.error.message); return false; }
     const r = forwarded ? null : replyTo; if (!forwarded) setReplyTo(null);
-    const { data, error } = await supabase.rpc('bix_chat_send_media' as never, { p_to: to, p_kind: kind, p_path: path, p_body: '', p_reply: r?.id ?? null, p_forwarded: forwarded } as never);
+    const { data, error } = await supabase.rpc('bix_chat_send_media' as never, { p_to: to, p_kind: kind, p_path: path, p_body: body, p_reply: r?.id ?? null, p_forwarded: forwarded } as never);
     setBusy(false);
     if (error) { fail(error.message); return false; }
     if (to === peer.id) added(data); else pushNotify('chat', (data as Msg | null)?.id);
     return true;
   };
+  const [stkOpen, setStkOpen] = useState(false);
   const rec = useRef<MediaRecorder | null>(null);
   const [recording, setRecording] = useState(false);
   const [recSecs, setRecSecs] = useState(0); const recCancel = useRef(false);
@@ -881,7 +884,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
         if (!m) return null;
         const mine = m.sender_id === me;
         const q = m.reply_to ? findMsg(m.reply_to) : undefined;
-        return <p key={m.id} id={`msg-${m.id}`} onDoubleClick={() => { if (!m.deleted_at && !locked) void react(m, '❤️'); }} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.kind === 'voice' && !m.deleted_at ? ' is-voice' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
+        return <p key={m.id} id={`msg-${m.id}`} onDoubleClick={() => { if (!m.deleted_at && !locked) void react(m, '❤️'); }} className={`${mine ? 'is-me' : ''}${m.kind && m.kind !== 'text' ? ' is-media' : ''}${m.kind === 'voice' && !m.deleted_at ? ' is-voice' : ''}${m.kind === 'image' && m.body === STICKER_BODY && !m.deleted_at ? ' is-sticker' : ''}${m.deleted_at ? ' is-deleted' : ''}`}
           onPointerDown={e => { if ((e.target as HTMLElement).closest('.comm-voice, .comm-vopt, button, a, audio, video')) return; holdStart(m); swipeStart(e, m); }} onPointerMove={swipeMove} onPointerUp={e => { holdEnd(); swipeEnd(e); }} onPointerLeave={holdEnd} onPointerCancel={e => { holdEnd(); swipeEnd(e, true); }} onContextMenu={e => { e.preventDefault(); if ((e.target as HTMLElement).closest('.comm-voice, .comm-vopt, button')) return; if (!m.deleted_at) setMenu(m); }}>
           {m.forwarded && !m.deleted_at && <em className="comm-fwd">↪ Diteruskan</em>}
           {m.reply_to && !m.deleted_at && <span className="comm-quote"><b>{q ? (q.sender_id === me ? 'Anda' : `@${name}`) : 'Balasan'}</b>{q?.deleted_at ? 'Pesan dihapus' : q?.body ?? m.reply_body ?? 'Pesan sebelumnya'}</span>}
@@ -928,6 +931,8 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
       <input ref={fileRef} type="file" accept="image/*,video/*" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>
       <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendPicked(f); }}/>
       <input ref={docRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void sendFile(f); }}/>
+      {!recording && <StickerButton open={stkOpen} disabled={locked || busy} onOpen={() => setStkOpen(v => !v)}/>}
+      {stkOpen && <StickerSheet onClose={() => setStkOpen(false)} onSend={b => upload(b, 'image', b.type === 'image/png' ? 'png' : 'webp', peer.id, false, STICKER_BODY)}/>}
       {recording ? <span className="comm-rec"><button type="button" aria-label="Batalkan rekaman" onClick={cancelRec}><Trash2 size={15}/></button><i/>{String(Math.floor(recSecs / 60)).padStart(2, '0')}:{String(recSecs % 60).padStart(2, '0')} · ketuk ■ untuk kirim</span> : <input value={text} onChange={e => onType(e.target.value)} maxLength={1000} placeholder={tier && !tier.chat ? 'Chat terkunci' : 'Tulis pesan…'} disabled={locked} aria-label="Tulis pesan"/>}
       {text.trim() ? <button type="submit" className="comm-fab" aria-label="Kirim"><Send size={16}/></button> : <button type="button" aria-label={recording ? 'Stop & kirim' : 'Rekam pesan suara'} className={`comm-fab${recording ? ' is-rec' : ''}`} onClick={() => void toggleRec()} disabled={locked || busy}>{recording ? <Square size={14}/> : <Mic size={16}/>}</button>}
     </form>
