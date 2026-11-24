@@ -4324,6 +4324,8 @@ export type Database = {
       profiles: {
         Row: {
           avatar_path: string | null
+          bixcall_avatar_path: string | null
+          bixtok_avatar_path: string | null
           call_permission: string
           created_at: string
           full_name: string
@@ -4336,6 +4338,8 @@ export type Database = {
         }
         Insert: {
           avatar_path?: string | null
+          bixcall_avatar_path?: string | null
+          bixtok_avatar_path?: string | null
           call_permission?: string
           created_at?: string
           full_name: string
@@ -4348,6 +4352,8 @@ export type Database = {
         }
         Update: {
           avatar_path?: string | null
+          bixcall_avatar_path?: string | null
+          bixtok_avatar_path?: string | null
           call_permission?: string
           created_at?: string
           full_name?: string
@@ -5120,6 +5126,10 @@ export type Database = {
       }
       bix_profile_card: { Args: { p_user: string }; Returns: Json }
       bix_profile_me: { Args: never; Returns: Json }
+      bix_profile_set_app_avatar: {
+        Args: { p_app: string; p_path: string }
+        Returns: undefined
+      }
       bix_profile_set_avatar: { Args: { p_path: string }; Returns: undefined }
       bix_profile_set_status: { Args: { p_status: string }; Returns: undefined }
       bix_profit_claimed: {
@@ -5498,6 +5508,14 @@ export type Database = {
       bixtok_am_owner1: { Args: never; Returns: boolean }
       bixtok_can_bypass: { Args: never; Returns: boolean }
       bixtok_claim_earnings: { Args: never; Returns: Json }
+      bixtok_creator_search: {
+        Args: { p_q: string }
+        Returns: {
+          name: string
+          posts: number
+          user_id: string
+        }[]
+      }
       bixtok_end_live: { Args: { p_id: string }; Returns: undefined }
       bixtok_is_official: { Args: { p_uid: string }; Returns: boolean }
       bixtok_is_tier_host: { Args: { p_uid: string }; Returns: boolean }

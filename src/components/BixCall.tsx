@@ -15,12 +15,13 @@ import foxLogo from '@/assets/bixlink-logo-gold.webp';
 import { ensureBixPush, pushNotify } from '@/lib/bix-push';
 import { startChosenRingtone, startRingback, playConnected, playEnded, installCallAudioUnlock, unlockCallAudio, isCallAudioReady, CALL_AUDIO_EVENT } from '@/lib/bix-tones';
 import { useBixCard, useSignedUrl } from '@/components/BixAvatar';
+import { appAvatarPath } from '@/lib/bix-avatar';
 import { INCOMING_VIBE, VIBE_EVERY_MS, pickRoute, tiltOf, type Route, type Tilt } from '@/lib/bix-call-route';
 
 /** Large caller/callee photo inside the call ring; falls back to the gold initial. */
 function CallPeerPhoto({ peerId, name }: { peerId: string; name: string }) {
   const card = useBixCard(peerId);
-  const url = useSignedUrl('bix-avatars', card?.avatar_path);
+  const url = useSignedUrl('bix-avatars', appAvatarPath(card, 'bixcall'));
   return <>{url ? <img className="bixcall-av-photo" src={url} alt={`Photo of @${name}`}/> : <b>{name.slice(0, 1).toUpperCase()}</b>}{card?.status_text && <em className="bixcall-av-status">{card.status_text}</em>}</>;
 }
 

@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export type BixCard = { user_id: string; name: string; avatar_path: string | null; status_text: string | null; story: 'new' | 'seen' | null };
+export type BixApp = 'bixtok' | 'bixcall';
+export type BixCard = { user_id: string; name: string; avatar_path: string | null; bixtok_avatar_path?: string | null; bixcall_avatar_path?: string | null; status_text: string | null; story: 'new' | 'seen' | null };
 
 const cards = new Map<string, { at: number; p: Promise<BixCard | null> }>();
 const urls = new Map<string, { at: number; p: Promise<string> }>();
@@ -55,6 +56,30 @@ export async function uploadAvatar(userId: string, file: File, oldPath?: string 
   const up = await supabase.storage.from('bix-avatars').upload(path, blob, { contentType: blob.type, upsert: false });
   if (up.error) throw new Error(up.error.message);
   const { error } = await supabase.rpc('bix_profile_set_avatar' as never, { p_path: path } as never);
+  if (error) { await supabase.storage.from('bix-avatars').remove([path]); throw new Error(error.message); }
+  if (oldPath) void supabase.storage.from('bix-avatars').remove([oldPath]);
+  invalidateCard(userId);
+  return path;
+}
+
+/** App photo (BIXTOK or BIX CALL) — falls back to the main BIXLINK photo when the app photo is not set. */
+export function appAvatarPath(card: BixCard | null | undefined, app?: BixApp): string | null {
+  if (!card) return null;
+  if (app === 'bixtok') return card.bixtok_avatar_path || card.avatar_path;
+  if (app === 'bixcall') return card.bixcall_avatar_path || card.avatar_path;
+  return card.avatar_path;
+}
+
+/** Upload a photo used only inside one app; the main BIXLINK photo stays untouched. */
+export async function uploadAppAvatar(app: BixApp, userId: string, file: File, oldPath?: string | null): Promise<string> {
+  if (!file.type.startsWith('image/')) throw new Error('Select a photo file (JPG, PNG, WebP).');
+  if (file.size > 15 * 1024 * 1024) throw new Error('Maximum photo size is 15 MB.');
+  const blob = await shrinkImage(file);
+  const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+  const path = `${userId}/${app}-${crypto.randomUUID()}.${ext}`;
+  const up = await supabase.storage.from('bix-avatars').upload(path, blob, { contentType: blob.type, upsert: false });
+  if (up.error) throw new Error(up.error.message);
+  const { error } = await supabase.rpc('bix_profile_set_app_avatar' as never, { p_app: app, p_path: path } as never);
   if (error) { await supabase.storage.from('bix-avatars').remove([path]); throw new Error(error.message); }
   if (oldPath) void supabase.storage.from('bix-avatars').remove([oldPath]);
   invalidateCard(userId);

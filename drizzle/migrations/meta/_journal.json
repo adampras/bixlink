@@ -1506,6 +1506,13 @@
       "when": 1795440751225,
       "tag": "0214_bixcare_more_divisions",
       "breakpoints": true
+    },
+    {
+      "idx": 215,
+      "version": "7",
+      "when": 1795564148995,
+      "tag": "0215_app_specific_avatars",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AVATAR_EVENT, loadCard, signedUrl, type BixCard } from '@/lib/bix-avatar';
+import { AVATAR_EVENT, appAvatarPath, loadCard, signedUrl, type BixApp, type BixCard } from '@/lib/bix-avatar';
 
 /** Hook: live member card (photo + status + story state), refreshed when a profile changes. */
 export function useBixCard(userId?: string | null) {
@@ -22,12 +22,12 @@ export function useSignedUrl(bucket: 'bix-avatars' | 'bix-stories', path?: strin
   return url;
 }
 
-type Props = { userId?: string | null | undefined; name: string; path?: string | null | undefined; className?: string | undefined; online?: boolean | undefined; ring?: boolean | undefined; story?: 'new' | 'seen' | null | undefined; onStory?: (() => void) | undefined };
+type Props = { userId?: string | null | undefined; name: string; path?: string | null | undefined; className?: string | undefined; online?: boolean | undefined; ring?: boolean | undefined; story?: 'new' | 'seen' | null | undefined; onStory?: (() => void) | undefined; app?: BixApp | undefined };
 
 /** Member photo with initial fallback; shows a gold story ring when the member has a visible story. */
-export function BixAvatar({ userId, name, path, className = 'comm-ava', online, ring = true, story, onStory }: Props) {
+export function BixAvatar({ userId, name, path, className = 'comm-ava', online, ring = true, story, onStory, app }: Props) {
   const card = useBixCard(path === undefined ? userId : null);
-  const p = path === undefined ? card?.avatar_path : path;
+  const p = path === undefined ? appAvatarPath(card, app) : path;
   const url = useSignedUrl('bix-avatars', p);
   const st = story === undefined ? card?.story ?? null : story;
   const [broken, setBroken] = useState(false);

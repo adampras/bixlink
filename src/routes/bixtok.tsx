@@ -7,6 +7,7 @@ import { Volume2, VolumeX, Home, ShoppingBag, MessageSquare, User, Menu, Wallet,
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Search } from 'lucide-react';
 import { ArrowLeft, Gift, Heart, Lock, MessageCircle, Plus, Radio, Send, Share2, Trash2, X, Star, Users, UserCheck, Compass, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { MemberGate } from '@/components/MemberGate';
@@ -25,7 +26,7 @@ import '@/components/bixtok-lux.css';
 import { createPortal } from 'react-dom';
 import { StoryComposer, StoryViewer, useStoryFeed } from '@/components/BixStories';
 import { BixAvatar } from '@/components/BixAvatar';
-import { loadCard, uploadAvatar, type BixCard } from '@/lib/bix-avatar';
+import { appAvatarPath, loadCard, uploadAppAvatar, type BixCard } from '@/lib/bix-avatar';
 
 export const Route = createFileRoute('/bixtok')({
   head: () => ecosystemHead('/bixtok', 'BIXTOK — Video Pendek & LIVE Komunitas | BIXLINK', 'BIXTOK menghadirkan video pendek dan siaran langsung komunitas BIXLINK. Menonton, berinteraksi dan menjadi host mengikuti akses anggota.'),
@@ -126,6 +127,8 @@ function BixtokPage() {
   const [section, setSection] = useState<'home' | 'inbox' | 'profile' | 'balance'>('home');
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
   const [tag, setTag] = useState('');
+  const [finder, setFinder] = useState(false);
+  const [pick, setPick] = useState<{ id: string; name: string } | null>(null);
   const received = useReceivedGifts(user?.id, Boolean(q.data));
   const baseVids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
   const tags = [...new Set(baseVids.flatMap(v => (v.caption.match(/#[\p{L}\d_]+/gu) ?? []).map(t => t.toLowerCase())))].slice(0, 12);
@@ -133,7 +136,8 @@ function BixtokPage() {
   const forYou = useMemo(() => (q.data ? rankForYou(q.data.videos, readAffinity(), following) : []), [rankKey, tab]); // eslint-disable-line react-hooks/exhaustive-deps
   const ranked = tab === 'following' || tab === 'mine' ? baseVids : forYou;
   const [seed, setSeed] = useState(0);
-  const vids0 = tag ? ranked.filter(v => v.caption.toLowerCase().includes(tag)) : ranked;
+  const vids1 = pick ? ranked.filter(v => v.creator_id === pick.id) : ranked;
+  const vids0 = tag ? vids1.filter(v => v.caption.toLowerCase().includes(tag)) : vids1;
   const vids = useMemo(() => { if (!seed) return vids0; const a = [...vids0]; let x = seed * 9301 + 49297; for (let i = a.length - 1; i > 0; i--) { x = (x * 9301 + 49297) % 233280; const j = Math.floor((x / 233280) * (i + 1)); [a[i], a[j]] = [a[j]!, a[i]!]; } return a; }, [vids0, seed]);
   useEffect(() => { if (!seed) return; requestAnimationFrame(() => { const f = document.querySelector('.bixtok-feed') as HTMLElement | null; if (f) f.scrollTo({ top: 0 }); }); }, [seed]);
   const ch = q.data?.cfg; const chOpen = !!(ch?.challenge_enabled && ch.challenge_tag && (!ch.challenge_ends_at || new Date(ch.challenge_ends_at).getTime() > Date.now()));
@@ -147,6 +151,7 @@ function BixtokPage() {
      : <>
       {section === 'home' && <><header className="bixtok-top">
         <Link to="/dashboard" aria-label="Back" className="bixtok-icon"><ArrowLeft size={20}/></Link>
+        <button type="button" aria-label="Search creators" title="Search creators" className="bixtok-icon" onClick={() => setFinder(true)}><Search size={18}/></button>
         <nav className="bixtok-tabs">{menus.map(m => { const Ic = TAB_ICONS[m.key] ?? Sparkles; return <button key={m.key} className={`${tab === m.key ? 'on' : ''}${m.key === 'live' ? ' is-live' : ''}`} onClick={() => setTab(m.key)}><Ic size={13} strokeWidth={2.4}/>{m.label}</button>; })}<button className={tab === 'mine' ? 'on' : ''} onClick={() => setTab('mine')}><User size={13} strokeWidth={2.4}/>Me</button></nav>
         <Button variant="wallet" size="wallet" aria-label={muted ? "Turn sound on" : "Turn sound off"} title={muted ? "Turn sound on" : "Turn sound off"} aria-pressed={!muted} className="bixtok-icon" onClick={() => {
           const next = !muted;
@@ -175,6 +180,8 @@ function BixtokPage() {
       {studio && <BixtokStudio userId={user!.id} slots={q.data.cfg.link_slots ?? 5} maxLinks={q.data.cfg.max_links ?? 10} onClose={() => setStudio(false)} onDone={m => { setStudio(false); setNote(m); setTab('mine'); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}/>}
       {giftTarget && <GiftSheet gifts={q.data.gifts.filter(g => q.data!.cfg.features[g.currency === 'BIX' ? 'bix_gifts' : 'bixp_gifts'] !== false)} target={giftTarget} closed={!q.data.cfg.gifts_enabled} onClose={() => setGiftTarget(null)} onNote={setNote}/>}
       {user && <BixtokReceivedGifts userId={user.id} rows={received.rows} unread={received.unread} acknowledge={received.acknowledge} activeVideo={section === 'home' && tab !== 'live' ? (currentVid?.id ?? null) : null} balanceOpen={section === 'balance'} blocked={studio || !!room || !!giftTarget} muted={muted} onBalance={() => setSection('balance')}/>}
+      {pick && section === 'home' && <button type="button" className="bxt-pick-chip" onClick={() => setPick(null)}>@{pick.name} ✕</button>}
+      {finder && <CreatorFinder onClose={() => setFinder(false)} onPick={c => { setFinder(false); setSection('home'); setTab('foryou'); setPick(c); if (!q.data?.videos.some(v => v.creator_id === c.id)) setNote(`@${c.name} has no recent videos in this feed yet`); }}/>}
       {note && <div className="bixtok-toast" role="status">{note}</div>}
     </>}
   </main></MemberGate>;
@@ -245,13 +252,13 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
     <Media v={v} muted={muted}/>
     {tapRef.current.id === v.id && bursts.map(b => <Heart key={b.k} className="bxt-dbl-heart" style={{ left: b.x, top: b.y }} fill="currentColor" aria-hidden/>)}
     {v.overlay && <DraggableText text={v.overlay} style={{ ...DEFAULT_TEXT, ...(v.text_style ?? {}) }}/>}
-    <div className="bixtok-meta"><button type="button" className="bxt-name" onClick={() => setPeek(v)}><span className="bxt-meta-av" aria-hidden>{v.creator_name.slice(0, 1).toUpperCase()}</span><b>@{v.creator_name}</b>{v.creator_id && vip.has(v.creator_id) && <VipBadge small/>}</button><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
+    <div className="bixtok-meta"><button type="button" className="bxt-name" onClick={() => setPeek(v)}><BixAvatar app="bixtok" userId={v.creator_id} name={v.creator_name} className={`bxt-meta-av${v.creator_id && liveHosts.has(v.creator_id) ? ' bxt-live-ring' : ''}`} ring={false}/><b>@{v.creator_name}</b>{v.creator_id && vip.has(v.creator_id) && <VipBadge small/>}</button><p>{v.caption}</p>{v.music_title && <small className="bixtok-music">♫ {v.music_title}</small>}</div>
     <div className={`bxt-vinyl${muted ? ' still' : ''}`} aria-hidden><em className="bxt-arm"/><span>{v.creator_name.slice(0, 1).toUpperCase()}</span>{!muted && <><i>♪</i><i>♫</i></>}</div>
     <aside className={`bixtok-rail bxt-rail-shield${railOpen ? '' : ' closed'}`}>
       {railOpen && <>
-      {v.creator_id === me && <div className="bxt-follow me"><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><small>You</small></div>}
-      {v.creator_id && v.creator_id !== me && liveHosts.has(v.creator_id) && <button aria-label="Watch LIVE" className="bxt-follow bxt-live-ring" onClick={() => onEnterLive?.(liveHosts.get(v.creator_id!)!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>LIVE</em><small>Watch</small></button>}
-      {v.creator_id && v.creator_id !== me && !liveHosts.has(v.creator_id) && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><span>{v.creator_name.slice(0, 1).toUpperCase()}</span><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
+      {v.creator_id === me && <div className="bxt-follow me"><BixAvatar app="bixtok" userId={v.creator_id} name={v.creator_name} className="bxt-rail-av" ring={false}/><small>You</small></div>}
+      {v.creator_id && v.creator_id !== me && liveHosts.has(v.creator_id) && <button aria-label="Watch LIVE" className="bxt-follow bxt-live-ring" onClick={() => onEnterLive?.(liveHosts.get(v.creator_id!)!)}><BixAvatar app="bixtok" userId={v.creator_id} name={v.creator_name} className="bxt-rail-av" ring={false}/><em>LIVE</em><small>Watch</small></button>}
+      {v.creator_id && v.creator_id !== me && !liveHosts.has(v.creator_id) && <button aria-label={following.has(v.creator_id) ? 'Unfollow' : 'Follow'} className={`bxt-follow${following.has(v.creator_id) ? ' on' : ''}`} onClick={() => onFollow(v.creator_id!)}><BixAvatar app="bixtok" userId={v.creator_id} name={v.creator_name} className="bxt-rail-av" ring={false}/><em>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? '⇄' : '✓') : '+'}</em><small>{following.has(v.creator_id) ? (followers.has(v.creator_id) ? 'Friends' : 'Following') : 'Follow'}</small></button>}
       {cfg.features['likes'] !== false && <button aria-label="Like" className={`like${liked[v.id] ? ' on' : ''}`} onClick={() => void like(v)}><Heart/><small>{fmtCount(v.likes + (liked[v.id] ? 1 : 0))}</small></button>}
       <button aria-label="Comments" className="chat" onClick={() => setComments(v)}><MessageCircle/><small>Chat</small></button>
       <button aria-label="Save" className={saved.ids.includes(v.id) ? 'on' : ''} onClick={() => onNote(saved.toggle(v.id) ? (noteInterest(v, 4), 'Saved to your profile') : 'Removed from saved')}><Bookmark/><small>Save</small></button>
@@ -264,7 +271,7 @@ function Feed({ muted, videos, cfg, me, following = new Set<string>(), followers
   {share && <ShareSheet video={share} code={ref.data ?? null} onClose={() => setShare(null)} onNote={onNote}/>}
   {peek && <div className="bxt-cmt-wrap" onClick={() => setPeek(null)}><div className="bxt-cmt bxt-peek" role="dialog" aria-label="Creator" onClick={e => e.stopPropagation()}>
     <header><b>Creator</b><button aria-label="Close" onClick={() => setPeek(null)}><X size={18}/></button></header>
-    <div className="bxt-peek-body"><span className={`bxt-peek-av${peek.creator_id && liveHosts.has(peek.creator_id) ? ' live' : ''}`}>{peek.creator_name.slice(0, 1).toUpperCase()}</span><h3>@{peek.creator_name}</h3>{peek.creator_id && vip.has(peek.creator_id) && <VipBadge/>}
+    <div className="bxt-peek-body"><BixAvatar app="bixtok" userId={peek.creator_id} name={peek.creator_name} className={`bxt-peek-av${peek.creator_id && liveHosts.has(peek.creator_id) ? ' live bxt-live-ring' : ''}`} ring={false}/><h3>@{peek.creator_name}</h3>{peek.creator_id && vip.has(peek.creator_id) && <VipBadge/>}
       <p>{videos.filter(x => x.creator_id === peek.creator_id).length} posts · {videos.filter(x => x.creator_id === peek.creator_id).reduce((a, x) => a + Number(x.likes || 0), 0)} likes</p>
       {peek.creator_id && peek.creator_id !== me && <div className="bxt-peek-act">
         {liveHosts.has(peek.creator_id) && <button className="bixtok-cta" onClick={() => { const l = liveHosts.get(peek.creator_id!)!; setPeek(null); onEnterLive?.(l); }}>🔴 Watch LIVE</button>}
@@ -528,7 +535,7 @@ function ProfilePage({ follow, me, email, videos, all = [], onCreate, onBalance,
   return <div className="bxt-page bxt-page-profile"><header className="bxt-head"><button aria-label="Create" onClick={onCreate}><Sparkles size={20}/></button><span/><button aria-label="Menu" onClick={() => setDrawer(true)}><Menu size={22}/></button></header>
     <section className="bxt-prof"><div><h1>{name}</h1><small>@{name.toLowerCase()}</small>
       <div className="bxt-stats"><p><b>{follow.following.size}</b>Following</p><p><b>{follow.followers.size}</b>Followers</p><p><b>{[...follow.following].filter(x => follow.followers.has(x)).length}</b>Friends</p><p><b>{likes}</b>Likes</p></div></div>
-      <div className="bxt-avwrap"><button className={`bxt-bigav${myStory >= 0 ? ' has-story' : ''}`} aria-label={myStory >= 0 ? 'View my story' : 'Add daily story'} style={myStory >= 0 ? { boxShadow: '0 0 0 3px hsl(var(--primary))' } : undefined} onClick={() => setStoryMode(myStory >= 0 ? 'view' : 'compose')}>{card?.avatar_path ? <BixAvatar userId={me} path={card.avatar_path} name={name} className="bxt-bigav-img" ring={false}/> : name.slice(0, 1).toUpperCase()}</button><button type="button" className="bxt-av-plus" aria-label="Upload profile photo" disabled={avBusy} onClick={() => avRef.current?.click()}>{avBusy ? '…' : <Plus size={14}/>}</button><input ref={avRef} type="file" accept="image/*" hidden onChange={async e => { const f = e.target.files?.[0]; e.target.value = ''; if (!f) return; setAvBusy(true); try { await uploadAvatar(me, f, card?.avatar_path); setCard(await loadCard(me, true)); onNote('Profile photo updated'); } catch (er) { onNote(er instanceof Error ? er.message : 'Upload failed'); } finally { setAvBusy(false); } }}/></div></section>
+      <div className="bxt-avwrap"><button className={`bxt-bigav${myStory >= 0 ? ' has-story' : ''}`} aria-label={myStory >= 0 ? 'View my story' : 'Add daily story'} style={myStory >= 0 ? { boxShadow: '0 0 0 3px hsl(var(--primary))' } : undefined} onClick={() => setStoryMode(myStory >= 0 ? 'view' : 'compose')}>{appAvatarPath(card, 'bixtok') ? <BixAvatar userId={me} path={appAvatarPath(card, 'bixtok')} name={name} className="bxt-bigav-img" ring={false}/> : name.slice(0, 1).toUpperCase()}</button><button type="button" className="bxt-av-plus" aria-label="Upload profile photo" disabled={avBusy} onClick={() => avRef.current?.click()}>{avBusy ? '…' : <Plus size={14}/>}</button><input ref={avRef} type="file" accept="image/*" hidden onChange={async e => { const f = e.target.files?.[0]; e.target.value = ''; if (!f) return; setAvBusy(true); try { await uploadAppAvatar('bixtok', me, f, card?.bixtok_avatar_path); setCard(await loadCard(me, true)); onNote('BIXTOK photo updated · your BIXLINK photo stays the same'); } catch (er) { onNote(er instanceof Error ? er.message : 'Upload failed'); } finally { setAvBusy(false); } }}/></div></section>
     <p className="text-center text-[10px] text-muted-foreground">{myStory >= 0 ? 'Tap photo to view story · + to change profile photo' : 'Tap photo to add a daily story · + to change profile photo'}</p>
     {storyMode === 'compose' && createPortal(<StoryComposer me={me} onClose={() => setStoryMode(null)} onPosted={() => { setStoryMode(null); void story.reload(); onNote('Story posted · visible 24 hours'); }}/>, document.body)}
     {storyMode === 'view' && myStory >= 0 && story.groups && createPortal(<StoryViewer me={me} groups={story.groups} start={myStory} onClose={() => { setStoryMode(null); void story.reload(); }} onDeleted={() => void story.reload()}/>, document.body)}
@@ -617,3 +624,23 @@ function CreatorEarnings() {
 }
 
 function fmtCount(n: number) { return n >= 1e6 ? `${(n / 1e6).toFixed(1).replace(/\.0$/, '')}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1).replace(/\.0$/, '')}K` : String(n); }
+
+/** Search creators by @username (server returns only creators with published videos). */
+function CreatorFinder({ onClose, onPick }: { onClose: () => void; onPick: (c: { id: string; name: string }) => void }) {
+  const [text, setText] = useState('');
+  const [rows, setRows] = useState<{ user_id: string; name: string; posts: number }[]>([]);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const t = text.trim().replace(/^@/, ''); if (!t) { setRows([]); return undefined; }
+    let alive = true; setBusy(true);
+    const h = setTimeout(async () => {
+      const { data } = await supabase.rpc('bixtok_creator_search' as never, { p_q: t } as never);
+      if (alive) { setRows((data as { user_id: string; name: string; posts: number }[] | null) ?? []); setBusy(false); }
+    }, 300);
+    return () => { alive = false; clearTimeout(h); };
+  }, [text]);
+  return <div className="bxt-finder" role="dialog" aria-label="Search creators">
+    <header><Search size={18}/><input autoFocus value={text} onChange={e => setText(e.target.value)} placeholder="Search @username" aria-label="Creator username"/><button type="button" aria-label="Close search" onClick={onClose}><X size={18}/></button></header>
+    <ul>{!text.trim() ? <li className="muted">Type a creator username</li> : busy ? <li className="muted">Searching…</li> : !rows.length ? <li className="muted">No creator found</li> : rows.map(r => <li key={r.user_id}><button type="button" onClick={() => onPick({ id: r.user_id, name: r.name })}><BixAvatar app="bixtok" userId={r.user_id} name={r.name} className="bxt-finder-av" ring={false}/><span><b>@{r.name}</b><small>{r.posts} videos</small></span></button></li>)}</ul>
+  </div>;
+}

@@ -209,7 +209,7 @@ function BixCallOnboard({ userId }: { userId: string }) {
     setBusy(true); setErr('');
     try {
       const av = await import('@/lib/bix-avatar');
-      if (file) await av.uploadAvatar(userId, file);
+      if (file) await av.uploadAppAvatar('bixcall', userId, file);
       if (status.trim()) await av.saveStatus(userId, status.trim());
       localStorage.setItem(key, '1'); setStep(0);
     } catch (e) { setErr(e instanceof Error ? e.message : 'Gagal menyimpan, coba lagi.'); } finally { setBusy(false); }
@@ -349,7 +349,7 @@ function FindMember({ me, tier, onChat, bar }: { bar?: boolean; me: string; tier
     {(!bar || q) && <div className="comm-chips"><span>BIX-ID</span><span>@Username</span><span>No. WA</span>
       {recent.map(r => <button key={r} onClick={() => void find(r)}>↺ {r}</button>)}</div>}
     {found === null && <p className="mt-2 text-xs text-muted-foreground">Member not found. WA number can only be tracked if the owner enables the WhatsApp button.</p>}
-    {found && <div className="comm-peer"><BixAvatar userId={found.user_id} name={found.name}/>
+    {found && <div className="comm-peer"><BixAvatar app="bixcall" userId={found.user_id} name={found.name}/>
       <span className="min-w-0 flex-1"><b className="block truncate">@{found.name}</b>{found.status_text && <em className="comm-statusline">{found.status_text}</em>}
         <span className="comm-meta">{found.code && <button onClick={() => copy(found.code!)}>{found.code} ⧉</button>}{found.whatsapp && <i>WA connected</i>}{found.via && <small>via {VIA[found.via]}</small>}</span></span>
       {found.user_id === me ? <small>Your account</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
@@ -410,7 +410,7 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
     <nav className="bc-wa-chips">{(['all', 'unread'] as const).map(k => <button key={k} type="button" className={flt === k ? 'is-on' : ''} onClick={() => setFlt(k)}>{k === 'all' ? 'Semua' : 'Belum dibaca'}</button>)}<Link to="/call" search={{ tab: 'group' }}>Grup</Link></nav>
     <section className="comm-card bc-wa-list">
       {threads === null ? <p className="text-xs text-muted-foreground">Loading…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">No chats yet. Search for members above to start chatting.</p> :
-        <ul className="comm-list">{threads.filter(t => flt === 'all' || t.unread > 0).map(t => <li key={t.peer} className="comm-thread bx-chat-history"><Button variant="ghost" type="button" className="bx-chat-history-open" onClick={() => onOpen(t.peer, t.name)} onPointerDown={() => { holdT.current = window.setTimeout(() => { try { navigator.vibrate?.(12); } catch { /* optional */ } setAct(t); }, 480); }} onPointerUp={() => window.clearTimeout(holdT.current)} onPointerLeave={() => window.clearTimeout(holdT.current)} onContextMenu={e => { e.preventDefault(); setAct(t); }}><BixAvatar userId={t.peer} name={t.name} online={t.online}/>
+        <ul className="comm-list">{threads.filter(t => flt === 'all' || t.unread > 0).map(t => <li key={t.peer} className="comm-thread bx-chat-history"><Button variant="ghost" type="button" className="bx-chat-history-open" onClick={() => onOpen(t.peer, t.name)} onPointerDown={() => { holdT.current = window.setTimeout(() => { try { navigator.vibrate?.(12); } catch { /* optional */ } setAct(t); }, 480); }} onPointerUp={() => window.clearTimeout(holdT.current)} onPointerLeave={() => window.clearTimeout(holdT.current)} onContextMenu={e => { e.preventDefault(); setAct(t); }}><BixAvatar app="bixcall" userId={t.peer} name={t.name} online={t.online}/>
           <span className="min-w-0 flex-1 text-left"><b className="block truncate text-sm">@{t.name}</b><small className="block truncate text-muted-foreground">{t.mine ? 'You: ' : ''}{t.body}</small></span>
           <span className="bx-chat-history-stamp"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></Button><Button variant="ghost" size="icon" type="button" className="comm-thread-more" aria-label={`Opsi @${t.name}`} onClick={() => setAct(t)}><MoreVertical size={16}/></Button></li>)}</ul>}
     </section>
@@ -458,7 +458,7 @@ function Dialpad({ me, tier, onChat }: { me: string; tier: Tier | null; onChat: 
     <div className="comm-dial-pad">{PAD.map(k => <button key={k} type="button" onClick={() => press(k)}><b>{k}</b><small>{SUB[k] ?? ''}</small></button>)}</div>
     <button type="button" className="comm-dial-go" onClick={() => void find()} disabled={busy || num.trim().length < 3}><Phone size={18}/>{busy ? 'Mencari…' : 'Search & call'}</button>
     {found === null && <p className="mt-2 text-center text-xs text-muted-foreground">Member not found.</p>}
-    {found && <div className="comm-peer"><BixAvatar userId={found.user_id} name={found.name}/><b className="min-w-0 flex-1 truncate">@{found.name}</b>
+    {found && <div className="comm-peer"><BixAvatar app="bixcall" userId={found.user_id} name={found.name}/><b className="min-w-0 flex-1 truncate">@{found.name}</b>
       {found.user_id === me ? <small>Your account</small> : <ActionButtons peerId={found.user_id} name={found.name} tier={tier} canCall={found.can_call} onChat={onChat}/>}</div>}
     {found && found.user_id !== me && <SaveContactBtn id={found.user_id} name={found.name} code={found.code}/>}
     <SaveNumber/>
@@ -844,7 +844,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
   return <main ref={roomRef} className="comm-room is-full mx-auto max-w-xl">
     <header className="comm-room-head">
       <button onClick={async () => { await supabase.rpc('bix_chat_read' as never, { p_peer: peer.id } as never); onBack(); }} aria-label="Back"><ArrowLeft size={18}/></button>
-      <button type="button" className="comm-head-id" aria-label={`Profil @${name}`} onClick={() => setQuick(true)}><BixAvatar userId={peer.id} name={name} online={state.online}/></button>
+      <button type="button" className="comm-head-id" aria-label={`Profil @${name}`} onClick={() => setQuick(true)}><BixAvatar app="bixcall" userId={peer.id} name={name} online={state.online}/></button>
       <span className="min-w-0 flex-1 cursor-pointer" role="button" tabIndex={0} onClick={() => setQuick(true)} onKeyDown={e => { if (e.key === 'Enter') setQuick(true); }}><b className="block truncate text-sm">@{name}</b><small className={`comm-status${state.typing ? ' is-typing' : state.online ? ' is-online' : ' is-off'}`}><i/>{seenText(state)}</small>{peerCard?.status_text && <em className="comm-statusline">{peerCard.status_text}</em>}</span>
       <ActionButtons compact peerId={peer.id} name={name} tier={tier} canCall={canCall} onChat={() => {}}/>
       <span className="comm-kebab"><button type="button" aria-label="Menu chat" aria-expanded={roomMenu} onClick={() => setRoomMenu(v => !v)}><MoreVertical size={19}/></button>
@@ -858,7 +858,7 @@ function ChatRoom({ me, peer, tier, onBack }: { me: string; peer: { id: string; 
     <p className="bcl-e2e"><Lock size={11}/>Sovereign Encrypted Channel</p>
     {quick && createPortal(<div className="bcl-qp-bg" onClick={() => setQuick(false)}><div className="bcl-qp" role="dialog" aria-label={`Profil @${name}`} onClick={e => e.stopPropagation()}>
       <header><b>@{name}</b><small>{seenText(state)}</small><button type="button" aria-label="Tutup" onClick={() => setQuick(false)}><X size={16}/></button></header>
-      <div className="bcl-qp-photo"><BixAvatar userId={peer.id} name={name} online={state.online}/></div>
+      <div className="bcl-qp-photo"><BixAvatar app="bixcall" userId={peer.id} name={name} online={state.online}/></div>
       <p className="bcl-qp-about">{peerCard?.status_text || 'Belum ada status.'}</p>
       <nav>
         <button type="button" disabled={!canCall || locked} onClick={() => { setQuick(false); startBixCall(peer.id, name, 'voice'); }}><Phone size={18}/><span>Suara</span></button>
@@ -1005,7 +1005,7 @@ function SavedContacts({ onChat }: { onChat: (id: string, name: string) => void 
   const press = (c: BixContact) => { hold.current = setTimeout(() => { if (window.confirm(`Hapus kontak @${c.name}?`)) removeContact(c.id); }, 650); };
   const release = () => { if (hold.current) clearTimeout(hold.current); hold.current = null; };
   return <section className="comm-card bcl-feed"><h3 className="comm-h"><UserPlus size={13} className="mr-1 inline"/><span className="bcl-feed-k">Kontak tersimpan</span><span className="bcl-feed-t">Chat &amp; Contact Feed</span></h3>
-    {list.map(c => <div key={c.id} className="comm-peer bcl-feed-card" onPointerDown={() => press(c)} onPointerUp={release} onPointerLeave={release} onContextMenu={e => { e.preventDefault(); if (window.confirm(`Hapus kontak @${c.name}?`)) removeContact(c.id); }}><span className="bcl-medal"><BixAvatar userId={c.id} name={c.name}/></span><span className="min-w-0 flex-1"><b className="block truncate">@{c.name}</b><span className="comm-meta"><small className="numeric">{c.code}</small><small className="bcl-feed-tier"> · Member</small></span></span>
+    {list.map(c => <div key={c.id} className="comm-peer bcl-feed-card" onPointerDown={() => press(c)} onPointerUp={release} onPointerLeave={release} onContextMenu={e => { e.preventDefault(); if (window.confirm(`Hapus kontak @${c.name}?`)) removeContact(c.id); }}><span className="bcl-medal"><BixAvatar app="bixcall" userId={c.id} name={c.name}/></span><span className="min-w-0 flex-1"><b className="block truncate">@{c.name}</b><span className="comm-meta"><small className="numeric">{c.code}</small><small className="bcl-feed-tier"> · Member</small></span></span>
       <span className="comm-actions"><button aria-label="Chat" className="bcl-feed-chat" onClick={() => onChat(c.id, c.name)}><MessageCircle size={15}/></button><button aria-label="Hapus kontak" className="bcl-feed-del" onClick={() => removeContact(c.id)}><Trash2 size={14}/></button></span></div>)}
   </section>;
 }

@@ -9578,3 +9578,23 @@ html body .comm-voice .comm-vtime{font-size:10px}
 .studio-face-row i { font-style: normal; display: grid; place-items: center; width: 3.2rem; height: 3.2rem; border-radius: 999px; font-size: 1.5rem; border: 2px solid color-mix(in oklab, var(--foreground) 25%, transparent); background: color-mix(in oklab, var(--background) 55%, transparent); }
 .studio-face-row button.on i { border-color: var(--primary); box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 60%, transparent); }
 .studio-face-row small { font-size: .66rem; }
+
+/* BIXTOK: real creator photos, LIVE ring, creator search */
+.bixtok .bxt-rail-av, .bixtok .bxt-meta-av, .bixtok .bxt-peek-av, .bxt-finder-av { overflow: hidden; display: grid; place-items: center; border-radius: 9999px; }
+.bixtok .bx-ava img, .bxt-finder-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 9999px; display: block; }
+.bixtok .bxt-live-ring > .bxt-rail-av, .bixtok .bxt-meta-av.bxt-live-ring, .bixtok .bxt-peek-av.bxt-live-ring {
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(350 90% 58%), 0 0 14px 3px hsl(280 85% 60% / .75) !important;
+  animation: bxt-live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes bxt-live-pulse { 50% { box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(280 85% 62%), 0 0 20px 6px hsl(350 90% 58% / .7); } }
+@media (prefers-reduced-motion: reduce) { .bixtok .bxt-live-ring > .bxt-rail-av, .bixtok .bxt-live-ring.bxt-meta-av, .bixtok .bxt-live-ring.bxt-peek-av { animation: none; } }
+.bxt-finder { position: fixed; inset: 0; z-index: 80; background: hsl(var(--background) / .97); display: flex; flex-direction: column; max-height: none; }
+.bxt-finder header { display: flex; align-items: center; gap: .5rem; padding: .75rem; border-bottom: 1px solid hsl(var(--border)); }
+.bxt-finder input { flex: 1; min-width: 0; background: hsl(var(--muted)); color: hsl(var(--foreground)); border-radius: 9999px; padding: .55rem .9rem; font-size: 16px; outline: none; }
+.bxt-finder ul { overflow-y: auto; padding: .5rem; }
+.bxt-finder li.muted { padding: 1.5rem; text-align: center; color: hsl(var(--muted-foreground)); font-size: .85rem; }
+.bxt-finder li button { display: flex; width: 100%; align-items: center; gap: .75rem; padding: .6rem; border-radius: .75rem; text-align: left; }
+.bxt-finder li button:hover { background: hsl(var(--muted)); }
+.bxt-finder li span { display: flex; flex-direction: column; } .bxt-finder li small { color: hsl(var(--muted-foreground)); }
+.bxt-finder-av { width: 44px; height: 44px; background: hsl(var(--muted)); flex: none; }
+.bxt-pick-chip { position: fixed; top: 3.6rem; left: 50%; transform: translateX(-50%); z-index: 40; background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-radius: 9999px; padding: .3rem .8rem; font-size: .75rem; font-weight: 700; }
