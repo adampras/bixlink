@@ -33,14 +33,14 @@ const TILES: { label: string; img: string; svc?: BixgoService; keywords: string 
 
 type Card = { img: string; name: string; promo?: string; ad?: boolean; rating?: number; km?: number; kind: 'food' | 'mart'; svc: BixgoService; brand?: boolean };
 const FEED: Card[] = [
-  { img: m1, name: 'NASI GORENG KAMBING PAK ORTE', promo: 'Diskon 30%', ad: true, rating: 4.5, km: 0.6, kind: 'food', svc: 'food' },
-  { img: m2, name: 'AYAM TALIWANG BU DITA - Karang', promo: 'Diskon 50%', ad: true, rating: 4.8, km: 1.9, kind: 'food', svc: 'food' },
-  { img: m3, name: 'Seafood Table - Monjok', promo: 'Diskon total tagihan s.d. 25%', rating: 4.7, km: 2.4, kind: 'food', svc: 'food' },
-  { img: m4, name: 'Tempong Arjuna - Pejanggik', promo: 'Diskon 30%', rating: 4.7, km: 1.0, kind: 'food', svc: 'food' },
-  { img: m6, name: 'BIXMart Hub - Abian Tubuh', promo: 'Diskon 50%', rating: 4.9, km: 1.1, kind: 'mart', svc: 'mart' },
+  { img: m1, name: 'NASI GORENG KAMBING', promo: 'Diskon 30%', ad: true, rating: 4.5, km: 0.6, kind: 'food', svc: 'food' },
+  { img: m2, name: 'AYAM TALIWANG BU DITA', promo: 'Diskon 50%', ad: true, rating: 4.8, km: 1.9, kind: 'food', svc: 'food' },
+  { img: m3, name: 'Seafood Table', promo: 'Diskon total tagihan s.d. 25%', rating: 4.7, km: 2.4, kind: 'food', svc: 'food' },
+  { img: m4, name: 'Tempong Arjuna', promo: 'Diskon 30%', rating: 4.7, km: 1.0, kind: 'food', svc: 'food' },
+  { img: m6, name: 'BIXMart Hub', promo: 'Diskon 50%', rating: 4.9, km: 1.1, kind: 'mart', svc: 'mart' },
   { img: promo, name: 'Promo code: KIRIMBIX', kind: 'food', svc: 'send', brand: true },
-  { img: m5, name: 'AYAM GEPREK JUARA - Cilinaya', promo: 'Diskon 50%', rating: 4.6, km: 0.6, kind: 'food', svc: 'food' },
-  { img: m7, name: 'Fox Burger - Epicentrum', promo: '39% discount for new users', ad: true, rating: 4.6, km: 2.2, kind: 'food', svc: 'food' },
+  { img: m5, name: 'AYAM GEPREK JUARA', promo: 'Diskon 50%', rating: 4.6, km: 0.6, kind: 'food', svc: 'food' },
+  { img: m7, name: 'Fox Burger', promo: '39% discount for new users', ad: true, rating: 4.6, km: 2.2, kind: 'food', svc: 'food' },
 ];
 
 export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<BixgoService>; balance: string; onPick: (s: BixgoService) => void; onSoon: (label: string) => void }) {
