@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Upload, Camera, RefreshCw, Sparkles, Smile, Sun, Wand2, Timer, Type, X, Check, Gauge, Link2, Plus, Trash2, Music2, Search, Play, Pause, Download, Bold } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { FACE_FX, coverCrop, drawFaceFx, loadFaceLandmarker, type FaceFx, type FacePt } from '@/lib/bixtok-face';
+import { coverCrop } from '@/lib/bixtok-face';
 import bixtokLogo from '@/assets/bixtok-logo.png';
 
 export const BIXTOK_FILTERS: { key: string; label: string; css: string; face?: boolean }[] = [
@@ -75,9 +75,6 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
   const [overlay, setOverlay] = useState(''); const [ts, setTs] = useState<TextStyle>(DEFAULT_TEXT); const [textOpen, setTextOpen] = useState(false);
   const [music, setMusic] = useState<{ title: string; url: string } | null>(null); const [musicOpen, setMusicOpen] = useState(false);
   const [gifts, setGifts] = useState(true); const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
-  const [faceFx, setFaceFx] = useState<FaceFx>('none'); const [faceOpen, setFaceOpen] = useState(false); const [faceMsg, setFaceMsg] = useState('');
-  const lmRef = useRef<FacePt[] | null>(null); const fxRef = useRef<FaceFx>('none'); fxRef.current = faceFx; const smRef = useRef(0); smRef.current = smooth;
-  const fxCanvas = useRef<HTMLCanvasElement>(null);
   const hwZoom = useRef<{ min: number; max: number } | null>(null);
   const applyZoom = (z: number) => { setZoom(z); const tr = stream.current?.getVideoTracks()[0]; const hz = hwZoom.current; if (tr && hz) tr.applyConstraints({ advanced: [{ zoom: Math.min(hz.max, Math.max(hz.min, hz.min * z)) }] } as unknown as MediaTrackConstraints).catch(() => {}); };
   const vid = useRef<HTMLVideoElement>(null); const stream = useRef<MediaStream | null>(null); const recorder = useRef<MediaRecorder | null>(null);
@@ -110,30 +107,6 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
     return () => clearInterval(t);
   }, [rec, dur]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (mode !== 'camera' || shot || faceFx === 'none') { lmRef.current = null; return undefined; }
-    let off = false, raf = 0, last = -1;
-    setFaceMsg('Memuat pelacak wajah…');
-    loadFaceLandmarker().then(fl => {
-      if (off) return; setFaceMsg('');
-      const loop = () => {
-        if (off) return; const v = vid.current; const c = fxCanvas.current;
-        if (v && v.videoWidth && v.currentTime !== last) {
-          last = v.currentTime;
-          try { lmRef.current = fl.detectForVideo(v, performance.now()).faceLandmarks[0] ?? null; } catch { /* skip frame */ }
-          if (c) {
-            const W = Math.min(720, c.clientWidth), H = Math.round(W * c.clientHeight / Math.max(1, c.clientWidth));
-            if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
-            const ctx = c.getContext('2d'); if (ctx) { ctx.clearRect(0, 0, W, H); ctx.filter = css; drawFaceFx(ctx, v, lmRef.current, fxRef.current, coverCrop(v.videoWidth, v.videoHeight, W, H), smRef.current); }
-          }
-        }
-        raf = requestAnimationFrame(loop);
-      };
-      loop();
-    }).catch(() => { if (!off) { setFaceMsg('Pelacak wajah tidak tersedia di HP ini.'); setFaceFx('none'); } });
-    return () => { off = true; cancelAnimationFrame(raf); const c = fxCanvas.current; c?.getContext('2d')?.clearRect(0, 0, c.width, c.height); };
-  }, [mode, shot, faceFx, facing]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const drawText = (ctx: CanvasRenderingContext2D, c: HTMLCanvasElement) => {
     if (!overlay) return; const scale = c.width / (vid.current?.clientWidth || 360);
     ctx.filter = 'none'; ctx.font = `${ts.italic ? 'italic ' : ''}${ts.weight} ${Math.round(ts.size * scale)}px ${ts.font}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -146,7 +119,7 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
     const v = vid.current; const s = stream.current; if (!v || !s) return;
     const c = document.createElement('canvas'); const fr = frame9x16(v); c.width = fr.w; c.height = fr.h;
     const ctx = c.getContext('2d')!; let raf = 0;
-    const draw = () => { ctx.filter = css; if (facing === 'user') ctx.setTransform(-1, 0, 0, 1, c.width, 0); ctx.drawImage(v, fr.sx, fr.sy, fr.sw, fr.sh, 0, 0, c.width, c.height); drawFaceFx(ctx, v, lmRef.current, fxRef.current, fr, smRef.current); ctx.setTransform(1, 0, 0, 1, 0, 0); drawText(ctx, c); raf = requestAnimationFrame(draw); };
+    const draw = () => { ctx.filter = css; if (facing === 'user') ctx.setTransform(-1, 0, 0, 1, c.width, 0); ctx.drawImage(v, fr.sx, fr.sy, fr.sw, fr.sh, 0, 0, c.width, c.height); ctx.setTransform(1, 0, 0, 1, 0, 0); drawText(ctx, c); raf = requestAnimationFrame(draw); };
     draw();
     const out = c.captureStream(Math.max(10, Math.round(30 / speed)));
     if (speed === 1) s.getAudioTracks().forEach(t => out.addTrack(t));
@@ -165,7 +138,7 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
   const snap = () => {
     const v = vid.current; if (!v) return;
     const c = document.createElement('canvas'); const fr = frame9x16(v); c.width = fr.w; c.height = fr.h;
-    const ctx = c.getContext('2d')!; ctx.filter = css; if (facing === 'user') ctx.setTransform(-1, 0, 0, 1, c.width, 0); ctx.drawImage(v, fr.sx, fr.sy, fr.sw, fr.sh, 0, 0, c.width, c.height); drawFaceFx(ctx, v, lmRef.current, fxRef.current, fr, smRef.current); ctx.setTransform(1, 0, 0, 1, 0, 0); drawText(ctx, c);
+    const ctx = c.getContext('2d')!; ctx.filter = css; if (facing === 'user') ctx.setTransform(-1, 0, 0, 1, c.width, 0); ctx.drawImage(v, fr.sx, fr.sy, fr.sw, fr.sh, 0, 0, c.width, c.height); ctx.setTransform(1, 0, 0, 1, 0, 0); drawText(ctx, c);
     c.toBlob(b => b && setShot({ url: URL.createObjectURL(b), ext: 'jpg' }), 'image/jpeg', 0.92);
   };
 
@@ -210,8 +183,6 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
       <div className="studio-stage">
         {shot ? (shot.ext === 'jpg' ? <img src={shot.url} alt="Captured"/> : <video src={shot.url} autoPlay loop playsInline controls/>)
           : camErr ? <p className="studio-camerr">{camErr}</p> : <video ref={vid} muted playsInline style={{ filter: css, objectFit: 'cover', transform: (() => { const z = hwZoom.current ? 1 : zoom; return `scale(${facing === 'user' ? -z : z}, ${z})`; })() }}/>}
-        {!shot && !camErr && faceFx !== 'none' && <canvas ref={fxCanvas} className="studio-fx-canvas" aria-hidden style={{ transform: (() => { const z = hwZoom.current ? 1 : zoom; return `scale(${facing === 'user' ? -z : z}, ${z})`; })() }}/>}
-        {faceMsg && <span className="studio-face-msg">{faceMsg}</span>}
         {!shot && overlay && <DraggableText text={overlay} style={ts} editable onMove={(x, y) => setTs(s => ({ ...s, x, y }))}/>}
         {count > 0 && <span className="studio-count">{count}</span>}
         {rec && <span className="studio-rec">● {elapsed}s / {dur}s</span>}
@@ -223,7 +194,6 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
         <button onClick={() => setTimer(t => t === 0 ? 3 : t === 3 ? 10 : 0)}><Timer/><small>{timer ? `${timer}s` : 'Timer'}</small></button>
         {textBtn}
         <button onClick={() => setBeautyOpen(o => !o)} className={beautyOpen ? 'on' : ''}><Sparkles/><small>Beauty</small></button>
-        <button onClick={() => setFaceOpen(o => !o)} className={faceOpen || faceFx !== 'none' ? 'on' : ''}><Smile/><small>Wajah</small></button>
         <button onClick={() => applyZoom(zoom >= 2 ? 1 : zoom + 0.5)}><Search/><small>{zoom}×</small></button></>}
         <button aria-label="Lainnya" onClick={() => setToolsOpen(o => !o)} className="tt-chev">{toolsOpen ? '︿' : '﹀'}</button>
       </aside>}
@@ -236,7 +206,6 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
           <p className="text-[11px] opacity-75">Post it directly, or save it to your device.</p>
         </div> : <>
           {beautyOpen && <BeautySliders smooth={smooth} glow={glow} bright={bright} set={{ setSmooth, setGlow, setBright }}/>}
-          {faceOpen && <div className="tt-fx"><div className="tt-fx-head"><b>Efek Wajah AR</b><button onClick={() => setFaceOpen(false)}><X size={18}/></button></div><div className="studio-face-row">{FACE_FX.map(f => <button key={f.key} className={faceFx === f.key ? 'on' : ''} onClick={() => setFaceFx(f.key)}><i>{f.icon}</i><small>{f.label}</small></button>)}</div></div>}
           {fxOpen && <div className="tt-fx"><div className="tt-fx-head"><b>Efek &amp; Filter</b><button onClick={() => setFxOpen(false)}><X size={18}/></button></div><FilterRow value={filter} onPick={setFilter}/></div>}
           {!rec && <div className="studio-durs tt">{DURATIONS.map(d => <button key={d} className={!photoMode && dur === d ? 'on' : ''} onClick={() => { setPhotoMode(false); setDur(d); }}>{d === 600 ? '10 mnt' : `${d} detik`}</button>)}<button className={photoMode ? 'on' : ''} onClick={() => setPhotoMode(true)}>FOTO</button></div>}
           <div className="studio-shutter tt">
