@@ -196,3 +196,7 @@
 - [ ] Verify Boardroom creation/join in an authorized live session — awaiting a planned real call; no room records or external sessions created for this presentation change.
 - [ ] BIX CALL sticker button (WA-style) for member-created stickers — next design, awaiting go-ahead
 - [x] BIX CALL stickers: composer button, built-in BIX CALL/BIXLINK pack, member upload, instant send
+
+## BIXTOK received gifts
+- [ ] Add content gift celebrations, incoming gift badges and balance notices using recorded net amounts; preserve existing claims and BIX/BIXP separation.
+- [ ] Verify signed-in content/balance notices and phone/desktop fit without moving funds.

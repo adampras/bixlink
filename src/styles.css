@@ -198,6 +198,13 @@ html[data-color-mode="light"] .landing-tokenomics { --token-cyan:oklch(.48 .1 21
 
 :root {
   --radius: 0.625rem;
+  --gift-gold: oklch(.85 .16 88);
+  --gift-silver: oklch(.95 .01 285);
+  --gift-obsidian: oklch(.14 .02 290);
+  --gift-violet: oklch(.68 .23 305);
+  --gift-edge: color-mix(in oklch, var(--gift-gold) 40%, transparent);
+  --gift-glow: 0 0 30px color-mix(in oklch, var(--gift-violet) 30%, transparent);
+  --gift-surface: linear-gradient(155deg, color-mix(in oklch, var(--gift-obsidian) 92%, var(--gift-violet)), var(--gift-obsidian));
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);

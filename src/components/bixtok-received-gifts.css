@@ -1,0 +1,20 @@
+.bxt-received-stage{position:absolute;inset:0;z-index:24;pointer-events:none;display:grid;place-content:center;justify-items:center;gap:12px;background:color-mix(in oklch,var(--gift-obsidian) 35%,transparent);color:var(--gift-silver)}
+.bxt-received-art{position:relative;width:min(180px,45vw);aspect-ratio:1;animation:bxtReceiveFloat 3s ease both}
+.bxt-received-art img{width:100%;height:100%;object-fit:contain;mix-blend-mode:screen;filter:drop-shadow(var(--gift-glow))}
+.bxt-received-art i{position:absolute;color:var(--gift-gold);font-style:normal;animation:bxtReceiveSpark 2.8s ease both}
+.bxt-received-art i:nth-child(2){left:0;top:25%}.bxt-received-art i:nth-child(3){right:5%;top:0;animation-delay:.15s}.bxt-received-art i:nth-child(4){right:0;bottom:10%;animation-delay:.3s}.bxt-received-art i:nth-child(5){left:20%;bottom:0;animation-delay:.45s}
+.bxt-received-caption{max-width:min(340px,calc(100% - 32px));padding:14px 20px;text-align:center;background:var(--gift-surface);border:1px solid var(--gift-edge);border-radius:8px;box-shadow:var(--gift-glow);animation:bxtReceiveCaption .35s ease both;overflow-wrap:anywhere}
+.bxt-received-caption strong,.bxt-received-caption small{display:block}.bxt-received-caption strong{font-size:18px;color:var(--gift-gold);margin-top:6px}.bxt-received-caption small{font-size:11px;margin-top:4px}
+.bxt-received-toast{position:absolute;z-index:55;top:calc(env(safe-area-inset-top,0px) + 60px);left:16px;right:16px;max-width:400px;margin:auto;display:flex;align-items:center;gap:10px;padding:12px;background:var(--gift-surface);color:var(--gift-silver);border:1px solid var(--gift-edge);border-radius:8px;box-shadow:var(--gift-glow)}
+.bxt-received-toast>svg{color:var(--gift-gold);flex:none}.bxt-received-toast>div{min-width:0;flex:1}.bxt-received-toast b,.bxt-received-toast small{display:block;overflow-wrap:anywhere}.bxt-received-toast small{font-size:11px;margin-top:3px}.bxt-received-toast button{color:var(--gift-gold);flex:none}
+.bxt-received-dialog{width:calc(100vw - 32px);max-width:400px;max-height:85dvh!important;overflow-y:auto!important;background:var(--gift-surface)!important;color:var(--gift-silver)!important;border:1px solid var(--gift-edge)!important;box-shadow:var(--gift-glow)!important;padding:24px!important}
+.bxt-received-dialog>img{width:110px;height:110px;object-fit:contain;margin:0 auto;mix-blend-mode:screen}
+.bxt-received-dialog h2{text-align:center;font-size:22px;color:var(--gift-gold)}.bxt-received-dialog p{font-size:12px;text-align:center;color:var(--gift-silver)}
+.bxt-received-totals{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;font-size:23px;font-weight:800;color:var(--gift-gold);font-variant-numeric:tabular-nums}
+.bxt-received-list{max-height:190px;overflow:auto;list-style:none;margin:0;padding:0}.bxt-received-list li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gift-edge);font-size:12px}.bxt-received-list li>div{flex:1;min-width:0;overflow-wrap:anywhere}.bxt-received-list small{display:block;opacity:.8}.bxt-received-list b{flex:none;color:var(--gift-gold)}
+.bxt-received-dialog .bxt-received-done{width:100%;background:var(--gift-gold);color:var(--gift-obsidian)}
+.bxt-gift-inbox{display:flex;align-items:center;gap:12px;width:100%;height:auto;white-space:normal;text-align:left;color:inherit;justify-content:flex-start}.bxt-gift-inbox>div{flex:1;min-width:0}.bxt-gift-inbox p{font-size:12px}.bxt-gift-inbox svg{flex:none}
+@keyframes bxtReceiveFloat{0%{opacity:0;transform:translateY(35px) scale(.6) rotate(-8deg)}20%,75%{opacity:1;transform:translateY(0) scale(1) rotate(0)}100%{opacity:0;transform:translateY(-30px) scale(1.05)}}
+@keyframes bxtReceiveSpark{0%{opacity:0;transform:translateY(20px) scale(.3)}25%,60%{opacity:1;transform:translateY(-15px) scale(1.2)}100%{opacity:0;transform:translateY(-55px) scale(.7)}}
+@keyframes bxtReceiveCaption{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.bxt-received-art,.bxt-received-art i,.bxt-received-caption{animation:none}.bxt-received-art i{display:none}}
