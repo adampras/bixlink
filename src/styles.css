@@ -9598,3 +9598,9 @@ html body .comm-voice .comm-vtime{font-size:10px}
 .bxt-finder li span { display: flex; flex-direction: column; } .bxt-finder li small { color: hsl(var(--muted-foreground)); }
 .bxt-finder-av { width: 44px; height: 44px; background: hsl(var(--muted)); flex: none; }
 .bxt-pick-chip { position: fixed; top: 3.6rem; left: 50%; transform: translateX(-50%); z-index: 40; background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-radius: 9999px; padding: .3rem .8rem; font-size: .75rem; font-weight: 700; }
+
+/* HUB gold hairline frames on every category box and tile (presentation only) */
+.hub-midnight .hub-group{border:1px solid oklch(.84 .15 88 / .55)!important;box-shadow:0 0 0 .5px oklch(.84 .15 88 / .18),inset 0 1px 0 oklch(.9 .14 92 / .22),0 10px 26px -18px oklch(.84 .15 88 / .55)!important}
+.hub-midnight .hub-group .hub-tile,.hub-midnight .hub-group .hub-tile.hub-photo{border:1px solid oklch(.84 .15 88 / .45)!important}
+.hub-midnight .hub-group .hub-tile.is-active{border-color:oklch(.88 .16 92)!important}
+.hub-midnight .hub-group-head{border-bottom:1px solid oklch(.84 .15 88 / .22);padding-bottom:.35rem}
