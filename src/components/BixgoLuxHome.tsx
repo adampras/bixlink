@@ -33,12 +33,11 @@ export function BixgoLuxHome({ cfg, name, enabled, onPick, onNav, onMode }: { cf
     <header className="relative flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top)+0.9rem)]">
       <Link to="/" aria-label="Kembali ke BIXLINK" className="bgx-icon grid h-10 w-10 place-items-center rounded-full"><ArrowLeft className="h-5 w-5"/></Link>
       <button onClick={() => onNav('account')} aria-label="Akun" className="bgl-avatar grid h-11 w-11 place-items-center rounded-full text-sm font-black">{(name || 'B').slice(0, 1).toUpperCase()}</button>
+      <div className="bgx-chip flex rounded-full p-0.5 text-[10px] font-bold"><span className="rounded-full bg-primary px-2.5 py-1 text-primary-foreground">Penumpang</span><button onClick={() => onMode('driver')} className="px-2.5 py-1">Driver</button><button onClick={() => onMode('merchant')} className="px-2.5 py-1">Merchant</button></div>
       <button onClick={() => onNav('inbox')} aria-label="Notifikasi" className="relative"><Bell className="h-6 w-6"/><span className="bgl-dot absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full"/></button>
     </header>
     <button onClick={() => onPick(sel === 'car' ? 'car' : 'ride')} className="bgl-glass relative mx-4 mt-3 flex items-center justify-between rounded-full px-5 py-3.5 text-left text-lg">Where to?<Search className="h-5 w-5"/></button>
     <div className="relative flex gap-2 px-4 pt-2 text-[10px] font-bold">
-      <button onClick={() => onMode('driver')} className="bgx-chip rounded-full px-3 py-1">Mode Driver</button>
-      <button onClick={() => onMode('merchant')} className="bgx-chip rounded-full px-3 py-1">Mode Merchant</button>
       <button onClick={() => onNav('services')} className="bgx-chip rounded-full px-3 py-1">📱 Katalog Layanan</button>
       <button onClick={() => setDemo(true)} className="bgx-chip rounded-full px-3 py-1">▶ Demo perjalanan</button>
     </div>

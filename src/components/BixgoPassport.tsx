@@ -60,17 +60,26 @@ export function BixgoPassport({ cur, usdtIdr, city, lux = false }: { lux?: boole
   if (!uid) return <section className="mx-4 mt-3 rounded-3xl border border-primary/30 bg-card p-4 text-xs text-muted-foreground">Sign in to open your BIXGO Passport and Driver Mode.</section>;
 
   return <section className="mx-4 mt-3 space-y-3">
-    <div className="rounded-3xl border border-primary/40 bg-card p-4 shadow-[0_0_24px_-12px_var(--primary)]">
-      <div className="flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">BIXGO Passport</span><span className="flex items-center gap-1 rounded-full border border-primary/50 px-2 py-0.5 text-[11px] font-bold text-primary"><Crown className="h-3.5 w-3.5"/>{tier.name}</span></div>
-      <div className="mt-3 grid grid-cols-3 gap-2 text-center tabular-nums">
-        <div><b className="block text-lg">{trips.n}</b><span className="text-[10px] text-muted-foreground">Trips</span></div>
-        <div><b className="block text-lg">{trips.km.toFixed(1)}</b><span className="text-[10px] text-muted-foreground">Km travelled</span></div>
-        <div><b className="block text-lg">{tier.rideDiscountPct}%</b><span className="text-[10px] text-muted-foreground">Tier discount</span></div>
+    {lic?.status === 'approved' && !redo && <>
+      <div className="rounded-3xl border border-primary/40 bg-card p-4">
+        <div className="flex items-center justify-between text-[11px]"><span className="font-bold uppercase tracking-[0.2em] text-muted-foreground">Konsol Driver</span><span className="text-muted-foreground">{GLOBAL_CITIES.find(c => c.id === lic.city)?.city ?? lic.city}</span></div>
+        <button disabled={busy} onClick={() => void toggle()} className={`mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black ${lic.online ? 'bg-primary text-primary-foreground shadow-[0_0_24px_-8px_var(--primary)]' : 'border-2 border-primary text-primary'}`}><Power className="h-5 w-5"/>{lic.online ? 'ONLINE — menerima order' : 'OFFLINE — ketuk untuk mulai narik'}</button>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-center tabular-nums">
+          <div className="rounded-xl border border-border p-2"><b className="block text-lg">{earn.n}</b><span className="text-[10px] text-muted-foreground">Trip selesai</span></div>
+          <div className="rounded-xl border border-border p-2"><b className="block truncate text-sm">{money(driverEarning(earn.fare))}</b><span className="text-[10px] text-muted-foreground">Pendapatan</span></div>
+          <div className="rounded-xl border border-border p-2"><b className="block text-lg">{rating.avg != null ? `★ ${rating.avg.toFixed(1)}` : '—'}</b><span className="text-[10px] text-muted-foreground">Rating</span></div>
+        </div>
       </div>
-      <ul className="mt-3 space-y-0.5 text-[11px]">{tier.perks.map(p => <li key={p} className="flex items-center gap-1"><BadgeCheck className="h-3.5 w-3.5 text-primary"/>{p}</li>)}</ul>
-      {next && <p className="mt-2 text-[11px] text-muted-foreground">Stake ${(next.minUsd - stakeUsd).toFixed(0)} more to reach {next.name}.</p>}
-    </div>
-
+      <BixgoDriverJobs lux={lux} online={lic.online} adj={Number(lic.rate_adj_pct ?? 0)} onRating={setRating}/>
+      <details className="rounded-3xl border border-border bg-card p-4 text-xs"><summary className="cursor-pointer text-sm font-black">⚙️ Pengaturan kerja (kesiapan, kota, tarif, pembayaran)</summary>
+        <div className="mt-3 space-y-2">
+          <BixgoDriverReady lic={lic} uid={uid} rating={rating}/>
+          <BixgoCitySwitch city={lic.city} onChange={() => void load()}/>
+          <BixgoDriverRates key={`${lic.rate_adj_pct}-${lic.accept_cash}-${lic.accept_bix}`} adj={Number(lic.rate_adj_pct ?? 0)} cash={lic.accept_cash ?? true} bix={lic.accept_bix ?? true} onSaved={() => void load()}/>
+          <BixgoDriverPay key={`${lic.qris_path}-${lic.bank_account}-${lic.accept_qris}-${lic.accept_bank}`} uid={uid} lic={lic} onSaved={() => void load()}/>
+        </div>
+      </details>
+    </>}
     <div className="rounded-3xl border border-border bg-card p-4 text-xs">
       <h3 className="flex items-center gap-2 text-sm font-black"><ShieldCheck className="h-4 w-4 text-primary"/>Driver-Partner License</h3>
       {false && <p className="mt-2 text-muted-foreground">Available from Pro Navigator (active staking of $100 or more). Licensed drivers keep {DRIVER_SHARE_PCT}% of each completed fare.</p>}
@@ -92,15 +101,19 @@ export function BixgoPassport({ cur, usdtIdr, city, lux = false }: { lux?: boole
         {lic.status === 'suspended' && <p className="rounded-2xl border border-destructive/50 bg-destructive/10 p-3">Your driver license is suspended{lic.operator_note ? `: ${lic.operator_note}` : '.'} Contact the operator to reactivate.</p>}
         {lic.operator_note && lic.status !== 'rejected' && lic.status !== 'suspended' && <p className="text-muted-foreground">Operator: {lic.operator_note}</p>}
         {lic.status === 'pending' && <p className="text-muted-foreground">Your application is waiting for operator review.</p>}
-        {lic.status === 'approved' && <>
-          <BixgoDriverReady lic={lic} uid={uid} rating={rating}/>
-          <BixgoCitySwitch city={lic.city} onChange={() => void load()}/>
-          <button disabled={busy} onClick={() => void toggle()} className={`flex w-full items-center justify-center gap-2 rounded-full py-3 font-bold ${lic.online ? 'bg-primary text-primary-foreground' : 'border border-primary text-primary'}`}><Power className="h-4 w-4"/>{lic.online ? 'Driver Mode ON — receiving orders' : 'Go online'}</button>
-          <BixgoDriverRates key={`${lic.rate_adj_pct}-${lic.accept_cash}-${lic.accept_bix}`} adj={Number(lic.rate_adj_pct ?? 0)} cash={lic.accept_cash ?? true} bix={lic.accept_bix ?? true} onSaved={() => void load()}/>
-          <BixgoDriverPay key={`${lic.qris_path}-${lic.bank_account}-${lic.accept_qris}-${lic.accept_bank}`} uid={uid} lic={lic} onSaved={() => void load()}/>
-          <BixgoDriverJobs lux={lux} online={lic.online} adj={Number(lic.rate_adj_pct ?? 0)} onRating={setRating}/>
-        </>}
+        {lic.status === 'approved' && <p className="text-muted-foreground">Lisensi aktif — konsol kerja ada di atas.</p>}
       </div>}
     </div>
+    <div className="rounded-3xl border border-primary/40 bg-card p-4 shadow-[0_0_24px_-12px_var(--primary)]">
+      <div className="flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">BIXGO Passport</span><span className="flex items-center gap-1 rounded-full border border-primary/50 px-2 py-0.5 text-[11px] font-bold text-primary"><Crown className="h-3.5 w-3.5"/>{tier.name}</span></div>
+      <div className="mt-3 grid grid-cols-3 gap-2 text-center tabular-nums">
+        <div><b className="block text-lg">{trips.n}</b><span className="text-[10px] text-muted-foreground">Trips</span></div>
+        <div><b className="block text-lg">{trips.km.toFixed(1)}</b><span className="text-[10px] text-muted-foreground">Km travelled</span></div>
+        <div><b className="block text-lg">{tier.rideDiscountPct}%</b><span className="text-[10px] text-muted-foreground">Tier discount</span></div>
+      </div>
+      <ul className="mt-3 space-y-0.5 text-[11px]">{tier.perks.map(p => <li key={p} className="flex items-center gap-1"><BadgeCheck className="h-3.5 w-3.5 text-primary"/>{p}</li>)}</ul>
+      {next && <p className="mt-2 text-[11px] text-muted-foreground">Stake ${(next.minUsd - stakeUsd).toFixed(0)} more to reach {next.name}.</p>}
+    </div>
+
   </section>;
 }
