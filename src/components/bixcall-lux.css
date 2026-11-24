@@ -836,3 +836,12 @@ html[data-bc-lux] .bcl-dock .bcl-gem{width:58px;height:58px;object-fit:contain;f
 html[data-bc-lux] .bcl-cube{width:72px;height:72px;margin-top:-34px;filter:none}
 html[data-bc-lux] .bcl-cube::before{display:none}
 html[data-bc-lux] .bcl-cube .bcl-cube-label{color:oklch(0.85 0.14 175)}
+
+/* WA-simple chat list */
+.bc-wa-chips{display:flex;gap:6px;margin:.4rem 0 .5rem;overflow-x:auto;scrollbar-width:none}
+.bc-wa-chips>*{flex:none;padding:5px 13px;border-radius:999px;font-size:12.5px;background:color-mix(in oklab,var(--foreground) 8%,transparent);color:var(--muted-foreground)}
+.bc-wa-chips>.is-on{background:color-mix(in oklab,#10b981 25%,transparent);color:var(--foreground);font-weight:700}
+.bc-wa-list,html[data-bc-lux] .bc-wa-list{background:none!important;border:0!important;padding:0!important;box-shadow:none!important}
+html[data-bc-lux] .bc-wa-list .comm-list .comm-thread{margin:0;border-radius:0;background:none;border:0;border-bottom:1px solid oklch(1 0 0/.06);box-shadow:none}
+html[data-bc-lux] .bc-wa-list .comm-thread img,html[data-bc-lux] .bc-wa-list .comm-thread .bix-avatar{box-shadow:none!important}
+html[data-bc-lux] .bc-wa-list .comm-thread .comm-badge{background:#10b981!important;color:#040507!important;box-shadow:none}

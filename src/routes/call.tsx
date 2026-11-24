@@ -284,10 +284,7 @@ function CallInner() {
       <div className={`bc-head__search${searchOpen ? '' : ' is-collapsed'}`}><FindMember bar me={me} tier={tier} onChat={open}/></div>
     </div>
 
-    <nav className="bcl-suite" aria-label="BIX CALL suite">{([['chat', 'Chats', MessageCircle], ['boardroom', 'Boardroom', Crown], ['group', 'Groups', ShieldCheck], ['vault', 'Vault', Lock], ['contacts', 'Contacts', Phone]] as const).map(([t, l, I]) => <Link key={t} to="/call" search={{ tab: t }} className={view === t ? 'is-on' : ''}><I size={16}/><span>{l}</span></Link>)}</nav>
-    {view === 'chat' && <div className="bcl-msgs-head"><h1>Messages <span className="bcl-crown" aria-hidden>👑</span></h1><nav>{([['All', 'chat'], ['Direct', 'chat'], ['VIP Syndicate', 'group'], ['Channels', 'community'], ['Requests', 'updates']] as const).map(([l, t], i) => <Link key={l} to="/call" search={{ tab: t }} className={i === 0 ? 'is-on' : ''}>{l}</Link>)}</nav></div>}
-    {view === 'chat' && <div className="bcl-hero"><div><small>SOVEREIGN CALL</small><b>Private. Secure. Executive.</b><span><Lock size={11}/> Percakapan antar member terlindungi</span></div><Link to="/call" search={{ tab: 'boardroom' }} className="bcl-hero-go"><Crown size={14}/> Boardroom</Link></div>}
-    {view === 'chat' && <><DialFab me={me} tier={tier} onChat={open}/><SavedContacts onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
+    {view === 'chat' && <><DialFab me={me} tier={tier} onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
     {view === 'starred' && <StarredList onOpen={open}/>}
     {view === 'boardroom' && <BoardroomStage><BixGroupMeeting me={me} tier={tier}/></BoardroomStage>}
     {view === 'vault' && <SecureVault me={me}/>}
@@ -295,7 +292,7 @@ function CallInner() {
     {view === 'group' && <BixGroups me={me}/>}
     {view === 'newgroup' && <BixGroups me={me} createOnly/>}
     {view === 'updates' && <StoryBar me={me} myName="Saya" list/>}
-    {view === 'call' && <><CallTab me={me} tier={tier} onChat={open}/><BixGroupMeeting me={me} tier={tier}/></>}
+    {view === 'call' && <CallTab me={me} tier={tier} onChat={open}/>}
     {view === 'community' && <CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/>}
     {view === 'setting' && <><SetGroup t="🎨 Tampilan & Tema"/><AppearanceCard/><ChatThemePicker/><SetGroup t="🔔 Suara & Dering"/><section className="comm-card"><RingSetting/></section><SetGroup t="📹 Kualitas Video Call"/><VideoQualitySetting/><SetGroup t="🛡️ Perangkat & Izin"/><NotifyCard/><PrivacyTab tier={tier}/><SetGroup t="Paket Anda"/><TierLadder tier={tier}/><h3 className="comm-h mt-5">Community</h3><CommunityTab render={(id, name) => <ActionButtons peerId={id} name={name} tier={tier} canCall onChat={open}/>}/></>}
   </main>;
@@ -388,6 +385,7 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
     void load(); const t = setInterval(() => void load(), 6000); return () => clearInterval(t);
   }, []);
   const [act, setAct] = useState<Thread | null>(null);
+  const [flt, setFlt] = useState<'all' | 'unread'>('all');
   const holdT = useRef<number | undefined>(undefined);
   const clearThread = async (t: Thread) => {
     setAct(null);
@@ -409,10 +407,10 @@ function ChatTab({ me, tier, onOpen }: { me: string; tier: Tier | null; onOpen: 
       <button type="button" className="ghost" onClick={() => setAct(null)}>Batal</button>
     </div></div>, document.body)}
     {tier && !tier.chat && <p className="comm-lock"><Lock size={13}/>{tier.chat_enabled ? `BIX CHAT unlocks with staking from $${tier.min.chat}.` : 'BIX CHAT is currently closed by Admin.'}</p>}
-    <StoryBar me={me} myName="Saya"/>
-    <section className="comm-card"><h3 className="comm-h">Percakapan</h3>
+    <nav className="bc-wa-chips">{(['all', 'unread'] as const).map(k => <button key={k} type="button" className={flt === k ? 'is-on' : ''} onClick={() => setFlt(k)}>{k === 'all' ? 'Semua' : 'Belum dibaca'}</button>)}<Link to="/call" search={{ tab: 'group' }}>Grup</Link></nav>
+    <section className="comm-card bc-wa-list">
       {threads === null ? <p className="text-xs text-muted-foreground">Loading…</p> : threads.length === 0 ? <p className="text-xs text-muted-foreground">No chats yet. Search for members above to start chatting.</p> :
-        <ul className="comm-list">{threads.map(t => <li key={t.peer} className="comm-thread bx-chat-history"><Button variant="ghost" type="button" className="bx-chat-history-open" onClick={() => onOpen(t.peer, t.name)} onPointerDown={() => { holdT.current = window.setTimeout(() => { try { navigator.vibrate?.(12); } catch { /* optional */ } setAct(t); }, 480); }} onPointerUp={() => window.clearTimeout(holdT.current)} onPointerLeave={() => window.clearTimeout(holdT.current)} onContextMenu={e => { e.preventDefault(); setAct(t); }}><BixAvatar userId={t.peer} name={t.name} online={t.online}/>
+        <ul className="comm-list">{threads.filter(t => flt === 'all' || t.unread > 0).map(t => <li key={t.peer} className="comm-thread bx-chat-history"><Button variant="ghost" type="button" className="bx-chat-history-open" onClick={() => onOpen(t.peer, t.name)} onPointerDown={() => { holdT.current = window.setTimeout(() => { try { navigator.vibrate?.(12); } catch { /* optional */ } setAct(t); }, 480); }} onPointerUp={() => window.clearTimeout(holdT.current)} onPointerLeave={() => window.clearTimeout(holdT.current)} onContextMenu={e => { e.preventDefault(); setAct(t); }}><BixAvatar userId={t.peer} name={t.name} online={t.online}/>
           <span className="min-w-0 flex-1 text-left"><b className="block truncate text-sm">@{t.name}</b><small className="block truncate text-muted-foreground">{t.mine ? 'You: ' : ''}{t.body}</small></span>
           <span className="bx-chat-history-stamp"><small className="block text-[10px] text-muted-foreground">{new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>{t.unread > 0 && <i className="comm-badge">{t.unread}</i>}</span></Button><Button variant="ghost" size="icon" type="button" className="comm-thread-more" aria-label={`Opsi @${t.name}`} onClick={() => setAct(t)}><MoreVertical size={16}/></Button></li>)}</ul>}
     </section>

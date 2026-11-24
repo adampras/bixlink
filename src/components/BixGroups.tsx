@@ -73,7 +73,7 @@ export function BixGroups({ me, createOnly }: { me: string; createOnly?: boolean
         <Button variant="ghost" type="button" className="bx-grp-btn is-alt" disabled={code.length < 6} onClick={() => void join()}>Join</Button>
       </div>}
     </div>}
-    {!createOnly && groups.length > 0 && <div className="bx-grp-hero"><b>Group Command</b><div className="bx-grp-hero-stats"><span><b>{groups.length}</b><small>Grup</small></span><span><b>{groups.filter(g => g.owner_id === me).length}</b><small>Anda kelola</small></span><span><b>{groups.filter(g => g.live_code).length}</b><small>Live</small></span></div></div>}
+    {false && <div className="bx-grp-hero"><b>Group Command</b><div className="bx-grp-hero-stats"><span><b>{groups.length}</b><small>Grup</small></span><span><b>{groups.filter(g => g.owner_id === me).length}</b><small>Anda kelola</small></span><span><b>{groups.filter(g => g.live_code).length}</b><small>Live</small></span></div></div>}
     {msg && <p className="bx-grp-msg">{msg}</p>}
     {createOnly ? <p className="bx-grp-empty">Setelah grup dibuat, pasang foto grup dan tambahkan member dari kontak atau jaringan Anda.</p> : groups.length === 0 ? <p className="bx-grp-empty">No groups yet. Create one or join with an invite code.</p>
       : <ul className="bx-grp-list">{groups.map(g => <li key={g.id} className="bx-grp-li bx-grp-summary"><Button variant="ghost" type="button" className="bx-grp-summary-open" onClick={() => setOpen(g)}>
