@@ -9549,3 +9549,25 @@ html body .comm-voice .comm-vtime{font-size:10px}
 .studio-top .studio-music-pill{width:auto;height:2.3rem;padding:0 1rem;white-space:nowrap;max-width:60vw;overflow:hidden;text-overflow:ellipsis}
 .studio-stage video{object-fit:cover}
 .studio-tools button.on{color:var(--primary)}
+
+/* BIXTOK TikTok camera */
+.studio-top.tt{position:absolute;top:0;left:0;right:0;padding:max(.8rem,env(safe-area-inset-top)) .9rem}
+.studio-top.tt>span{width:2.4rem}
+.studio-top.tt .studio-music-pill{width:auto;height:2.4rem;padding:0 1.1rem;font-size:.85rem;background:rgba(0,0,0,.35);backdrop-filter:none;border:0}
+.studio-tools{top:calc(max(.8rem,env(safe-area-inset-top)) + 3.2rem);gap:1.1rem}
+.studio-tools svg{width:26px;height:26px;filter:drop-shadow(0 1px 3px #000)}
+.studio-tools small{font-size:.6rem}
+.tt-chev{font-size:1.1rem;font-weight:900}
+.studio-bottom{padding-bottom:calc(.6rem + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.55) 40%,#000)}
+.studio-durs.tt{gap:.2rem}.studio-durs.tt button{background:transparent;font-size:.82rem;padding:.3rem .8rem;text-shadow:0 1px 3px #000}
+.studio-durs.tt button.on{background:#fff;color:#000;text-shadow:none}
+.studio-shutter.tt{justify-content:space-between;padding:0 1.6rem}
+.studio-shutter.tt .studio-side{width:3.4rem}.studio-shutter.tt svg{width:28px;height:28px}
+.studio-rec-btn{width:4.8rem;height:4.8rem;border:5px solid rgba(255,255,255,.9);box-shadow:inset 0 0 0 3px #000}
+.studio-rec-btn.photo{background:#fff}
+.tt-modes{display:flex;justify-content:center;gap:1.6rem;font-size:.85rem;font-weight:900;letter-spacing:.04em}
+.tt-modes button{opacity:.55}.tt-modes .on{opacity:1}
+.tt-fx{background:rgba(20,20,20,.92);border-radius:1rem;padding:.7rem}
+.tt-fx-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;font-size:.85rem}
+.tt-fx .studio-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem .4rem}
+.tt-fx .studio-filters i{width:3.4rem;height:3.4rem;border-radius:.9rem}

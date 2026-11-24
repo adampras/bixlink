@@ -31,7 +31,7 @@ export function textCss(s?: Partial<TextStyle> | null): React.CSSProperties {
     textShadow: t.shadow ? '0 2px 8px rgba(0,0,0,.75)' : 'none' };
 }
 
-const DURATIONS = [15, 60, 180];
+const DURATIONS = [600, 60, 15];
 const SPEEDS = [0.5, 1, 2];
 const TAGS = ['#BIXLINK', '#BIXCOIN', '#Staking', '#Web3', '#FinancialFreedom'];
 type Sound = { id: string; title: string; artist: string; category: string; audio_url: string; cover?: string | undefined };
@@ -59,7 +59,7 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
   const [links, setLinks] = useState<string[]>(() => Array.from({ length: Math.max(1, slots) }, () => ''));
   const [filter, setFilter] = useState('none');
   const [smooth, setSmooth] = useState(0); const [glow, setGlow] = useState(0); const [bright, setBright] = useState(0);
-  const [facing, setFacing] = useState<'user' | 'environment'>('user'); const [zoom, setZoom] = useState(1); const [beautyOpen, setBeautyOpen] = useState(false);
+  const [facing, setFacing] = useState<'user' | 'environment'>('user'); const [zoom, setZoom] = useState(1); const [beautyOpen, setBeautyOpen] = useState(false); const [fxOpen, setFxOpen] = useState(false); const [photoMode, setPhotoMode] = useState(false); const [toolsOpen, setToolsOpen] = useState(true);
   const [dur, setDur] = useState(15); const [speed, setSpeed] = useState(1); const [timer, setTimer] = useState(0);
   const [count, setCount] = useState(0); const [rec, setRec] = useState(false); const [elapsed, setElapsed] = useState(0);
   const [camErr, setCamErr] = useState(''); const [shot, setShot] = useState<{ url: string; ext: string } | null>(null);
@@ -163,22 +163,24 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
   const musicBtn = <button className="studio-music-pill" onClick={() => setMusicOpen(true)}><Music2 size={14}/>{music ? music.title.slice(0, 22) : 'Add sound'}</button>;
 
   return <div className="bixtok-studio" role="dialog" aria-label="Create post">
+    <input ref={fileRef} type="file" accept="video/*,image/*" hidden onChange={e => onFile(e.target.files?.[0])}/>
     {mode === 'camera' ? <>
       <div className="studio-stage">
         {shot ? (shot.ext === 'jpg' ? <img src={shot.url} alt="Captured"/> : <video src={shot.url} autoPlay loop playsInline controls/>)
           : camErr ? <p className="studio-camerr">{camErr}</p> : <video ref={vid} muted playsInline style={{ filter: css, objectFit: zoom < 1 ? 'contain' : 'cover', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>}
         {!shot && overlay && <DraggableText text={overlay} style={ts} editable onMove={(x, y) => setTs(s => ({ ...s, x, y }))}/>}
         {count > 0 && <span className="studio-count">{count}</span>}
-        {!shot && !camErr && <label className="studio-zoom"><span>{zoom.toFixed(1)}×</span><input type="range" aria-label="Zoom" min={0.5} max={2} step={0.05} value={zoom} onChange={e => setZoom(+e.target.value)}/></label>}
         {rec && <span className="studio-rec">● {elapsed}s / {dur}s</span>}
       </div>
-      <header className="studio-top"><button aria-label="Close" onClick={onClose}><X/></button>{musicBtn}<button aria-label="Links" onClick={() => { setShot(null); setMode('link'); }}><Link2/></button></header>
+      <header className="studio-top tt"><button aria-label="Close" onClick={onClose}><X/></button>{musicBtn}<span/></header>
       {!shot && <aside className="studio-tools">
-        <button onClick={() => setFacing(f => f === 'user' ? 'environment' : 'user')}><RefreshCw/><small>Flip</small></button>
-        <button onClick={() => setSpeed(s => SPEEDS[(SPEEDS.indexOf(s) + 1) % SPEEDS.length]!)}><Gauge/><small>{speed}×</small></button>
+        <button onClick={() => setFacing(f => f === 'user' ? 'environment' : 'user')}><RefreshCw/><small>Balik</small></button>
+        {toolsOpen && <><button onClick={() => setSpeed(s => SPEEDS[(SPEEDS.indexOf(s) + 1) % SPEEDS.length]!)}><Gauge/><small>{speed}×</small></button>
         <button onClick={() => setTimer(t => t === 0 ? 3 : t === 3 ? 10 : 0)}><Timer/><small>{timer ? `${timer}s` : 'Timer'}</small></button>
         {textBtn}
         <button onClick={() => setBeautyOpen(o => !o)} className={beautyOpen ? 'on' : ''}><Sparkles/><small>Beauty</small></button>
+        <button onClick={() => setZoom(z => z >= 2 ? 1 : z + 0.5)}><Search/><small>{zoom}×</small></button></>}
+        <button aria-label="Lainnya" onClick={() => setToolsOpen(o => !o)} className="tt-chev">{toolsOpen ? '︿' : '﹀'}</button>
       </aside>}
       <div className="studio-bottom">
         {shot ? <div className="studio-shot-actions">
@@ -189,18 +191,18 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
           <p className="text-[11px] opacity-75">Post it directly, or save it to your device.</p>
         </div> : <>
           {beautyOpen && <BeautySliders smooth={smooth} glow={glow} bright={bright} set={{ setSmooth, setGlow, setBright }}/>}
-          <FilterRow value={filter} onPick={setFilter}/>
-          <div className="studio-durs">{DURATIONS.map(d => <button key={d} className={dur === d ? 'on' : ''} onClick={() => !rec && setDur(d)}>{d < 60 ? `${d}s` : `${d / 60}m`}</button>)}</div>
-          <div className="studio-shutter">
-            <button className="studio-side" onClick={() => setMode('link')}><Link2/><small>Links</small></button>
-            <button aria-label={rec ? 'Stop recording' : 'Record'} className={`studio-rec-btn ${rec ? 'on' : ''}`} disabled={!!camErr} onClick={shoot}/>
-            <button className="studio-side" disabled={!!camErr || rec} onClick={snap}><Camera/><small>Photo</small></button>
+          {fxOpen && <div className="tt-fx"><div className="tt-fx-head"><b>Efek &amp; Filter</b><button onClick={() => setFxOpen(false)}><X size={18}/></button></div><FilterRow value={filter} onPick={setFilter}/></div>}
+          {!rec && <div className="studio-durs tt">{DURATIONS.map(d => <button key={d} className={!photoMode && dur === d ? 'on' : ''} onClick={() => { setPhotoMode(false); setDur(d); }}>{d === 600 ? '10 mnt' : `${d} detik`}</button>)}<button className={photoMode ? 'on' : ''} onClick={() => setPhotoMode(true)}>FOTO</button></div>}
+          <div className="studio-shutter tt">
+            <button className="studio-side" onClick={() => setFxOpen(o => !o)}><Wand2/><small>Efek</small></button>
+            <button aria-label={photoMode ? 'Take photo' : rec ? 'Stop recording' : 'Record'} className={`studio-rec-btn ${rec ? 'on' : ''} ${photoMode ? 'photo' : ''}`} disabled={!!camErr} onClick={photoMode ? snap : shoot}/>
+            <button className="studio-side" disabled={busy || rec} onClick={() => fileRef.current?.click()}><Upload/><small>{busy && pct ? pct : 'Unggah'}</small></button>
           </div>
+          <div className="tt-modes"><button className="on">KAMERA</button><button onClick={() => setMode('link')}>BUAT</button></div>
         </>}
       </div>
     </> : <div className="studio-edit">
       <header className="studio-top"><button aria-label="Close" onClick={onClose}><X/></button><b className="flex items-center gap-2"><img src={bixtokLogo} alt="" width={22} height={22}/>New post</b><button aria-label="Camera" onClick={() => setMode('camera')}><Camera/></button></header>
-      <input ref={fileRef} type="file" accept="video/*,image/*" hidden onChange={e => onFile(e.target.files?.[0])}/>
       <button className="bixtok-cta w-full" disabled={busy} onClick={() => fileRef.current?.click()}><Upload size={16} className="inline"/> {busy && pct ? pct : 'Upload from gallery (video / photo, max 50 MB)'}</button>
       <p className="text-xs opacity-75">Or paste links from TikTok, YouTube Shorts, Instagram Reels or any https video / photo. Each link becomes one post.</p>
       <div className="studio-links">{links.map((l, i) => <div key={i} className="studio-link-row">
