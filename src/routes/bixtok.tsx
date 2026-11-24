@@ -24,6 +24,8 @@ import { giftArt } from '@/lib/bixtok-gift-art';
 import '@/components/bixtok-lux.css';
 import { createPortal } from 'react-dom';
 import { StoryComposer, StoryViewer, useStoryFeed } from '@/components/BixStories';
+import { BixAvatar } from '@/components/BixAvatar';
+import { loadCard, uploadAvatar, type BixCard } from '@/lib/bix-avatar';
 
 export const Route = createFileRoute('/bixtok')({
   head: () => ecosystemHead('/bixtok', 'BIXTOK — Video Pendek & LIVE Komunitas | BIXLINK', 'BIXTOK menghadirkan video pendek dan siaran langsung komunitas BIXLINK. Menonton, berinteraksi dan menjadi host mengikuti akses anggota.'),
@@ -517,21 +519,27 @@ function ProfilePage({ follow, me, email, videos, all = [], onCreate, onBalance,
   const [drawer, setDrawer] = useState(false); const [ptab, setPtab] = useState('grid'); const saved = useSaved(); const savedVids = saved.ids.map(id => all.find(v => v.id === id)).filter((v): v is Video => !!v);
   const name = p.data?.username || email.split('@')[0] || 'member';
   const likes = videos.reduce((a, v) => a + Number(v.likes || 0), 0);
+  const [card, setCard] = useState<BixCard | null>(null); const [avBusy, setAvBusy] = useState(false); const avRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { void loadCard(me).then(setCard); }, [me]);
+  const bioKey = `bixtok-bio-${me}`; const [bio, setBio] = useState<{ bio: string; hobbies: string[]; link: string }>({ bio: '', hobbies: [], link: '' }); const [bioOpen, setBioOpen] = useState(false);
+  useEffect(() => { try { const v = localStorage.getItem(bioKey); if (v) setBio(JSON.parse(v)); } catch { /* ignore */ } }, [bioKey]);
+  const saveBio = (b: typeof bio) => { setBio(b); try { localStorage.setItem(bioKey, JSON.stringify(b)); } catch { /* ignore */ } };
   const copy = async () => { try { await navigator.clipboard.writeText(`${location.origin}/bixtok`); onNote('Profile link copied'); } catch { /* ignore */ } };
   return <div className="bxt-page bxt-page-profile"><header className="bxt-head"><button aria-label="Create" onClick={onCreate}><Sparkles size={20}/></button><span/><button aria-label="Menu" onClick={() => setDrawer(true)}><Menu size={22}/></button></header>
     <section className="bxt-prof"><div><h1>{name}</h1><small>@{name.toLowerCase()}</small>
       <div className="bxt-stats"><p><b>{follow.following.size}</b>Following</p><p><b>{follow.followers.size}</b>Followers</p><p><b>{[...follow.following].filter(x => follow.followers.has(x)).length}</b>Friends</p><p><b>{likes}</b>Likes</p></div></div>
-      <button className={`bxt-bigav${myStory >= 0 ? ' has-story' : ''}`} aria-label={myStory >= 0 ? 'View my story' : 'Add daily story'} style={myStory >= 0 ? { boxShadow: '0 0 0 3px hsl(var(--primary))' } : undefined} onClick={() => setStoryMode(myStory >= 0 ? 'view' : 'compose')}>{name.slice(0, 1).toUpperCase()}<em role="button" aria-label="Add story" onClick={e => { e.stopPropagation(); setStoryMode('compose'); }}><Plus size={14}/></em></button></section>
-    <p className="text-center text-[10px] text-muted-foreground">{myStory >= 0 ? 'Tap photo to view story · + to add (24 h)' : 'Tap photo to add a daily story (24 h)'}</p>
+      <div className="bxt-avwrap"><button className={`bxt-bigav${myStory >= 0 ? ' has-story' : ''}`} aria-label={myStory >= 0 ? 'View my story' : 'Add daily story'} style={myStory >= 0 ? { boxShadow: '0 0 0 3px hsl(var(--primary))' } : undefined} onClick={() => setStoryMode(myStory >= 0 ? 'view' : 'compose')}>{card?.avatar_path ? <BixAvatar userId={me} path={card.avatar_path} name={name} className="bxt-bigav-img" ring={false}/> : name.slice(0, 1).toUpperCase()}</button><button type="button" className="bxt-av-plus" aria-label="Upload profile photo" disabled={avBusy} onClick={() => avRef.current?.click()}>{avBusy ? '…' : <Plus size={14}/>}</button><input ref={avRef} type="file" accept="image/*" hidden onChange={async e => { const f = e.target.files?.[0]; e.target.value = ''; if (!f) return; setAvBusy(true); try { await uploadAvatar(me, f, card?.avatar_path); setCard(await loadCard(me, true)); onNote('Profile photo updated'); } catch (er) { onNote(er instanceof Error ? er.message : 'Upload failed'); } finally { setAvBusy(false); } }}/></div></section>
+    <p className="text-center text-[10px] text-muted-foreground">{myStory >= 0 ? 'Tap photo to view story · + to change profile photo' : 'Tap photo to add a daily story · + to change profile photo'}</p>
     {storyMode === 'compose' && createPortal(<StoryComposer me={me} onClose={() => setStoryMode(null)} onPosted={() => { setStoryMode(null); void story.reload(); onNote('Story posted · visible 24 hours'); }}/>, document.body)}
     {storyMode === 'view' && myStory >= 0 && story.groups && createPortal(<StoryViewer me={me} groups={story.groups} start={myStory} onClose={() => { setStoryMode(null); void story.reload(); }} onDeleted={() => void story.reload()}/>, document.body)}
-    <p className="bxt-bio">BIXLINK member · Web3 creator</p>
+    <p className="bxt-bio">{bio.bio || 'BIXLINK member · Web3 creator'}</p>{bio.hobbies.length > 0 && <div className="bxt-hobbies">{bio.hobbies.map(h => <span key={h}>#{h}</span>)}</div>}{bio.link && <a className="bxt-bio-link" href={bio.link} target="_blank" rel="noreferrer">🔗 {bio.link.replace(/^https?:\/\//, '')}</a>}
     <Link to="/nft-marketplace" className="bxt-pill"><ShoppingBag size={14}/> Your orders</Link>
     <div className="bxt-ptabs">{[['grid', Grid3x3], ['private', Lock], ['repost', Repeat2], ['saved', Bookmark], ['liked', Heart]].map(([k, I]) => { const Ic = I as typeof Heart; return <button key={k as string} className={ptab === k ? 'on' : ''} onClick={() => setPtab(k as string)} aria-label={k as string}><Ic size={20}/></button>; })}</div>
-    {ptab === 'grid' && videos.length ? <div className="bxt-grid">{videos.map(v => <div key={v.id} className="bxt-grid-item"><button onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={v.src} muted preload="metadata"/>}<small><Eye size={12}/> {v.likes}</small></button><button type="button" className="bxt-grid-del" aria-label="Delete post" onClick={async () => { if (!(await luxConfirm('This post will be removed from your profile and the feed.', { title: 'Delete post?', ok: 'Delete', danger: true }))) return; const { error } = await supabase.from('bixtok_videos').delete().eq('id', v.id); if (error) return onNote('Could not delete post.'); if (v.media_path) await supabase.storage.from('bixtok-media').remove([v.media_path]); qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Post deleted'); }}><Trash2 size={14}/></button></div>)}</div>
-      : ptab === 'saved' && savedVids.length ? <div className="bxt-grid">{savedVids.map(v => <div key={v.id} className="bxt-grid-item"><button onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={v.src} muted preload="metadata"/>}<small><Bookmark size={12}/> {v.likes}</small></button></div>)}</div>
+    {ptab === 'grid' && videos.length ? <div className="bxt-grid">{videos.map(v => <div key={v.id} className="bxt-grid-item"><button onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={`${v.src}#t=0.1`} muted playsInline preload="metadata"/>}<small><Eye size={12}/> {v.likes}</small></button><button type="button" className="bxt-grid-del" aria-label="Delete post" onClick={async () => { if (!(await luxConfirm('This post will be removed from your profile and the feed.', { title: 'Delete post?', ok: 'Delete', danger: true }))) return; const { error } = await supabase.from('bixtok_videos').delete().eq('id', v.id); if (error) return onNote('Could not delete post.'); if (v.media_path) await supabase.storage.from('bixtok-media').remove([v.media_path]); qc.invalidateQueries({ queryKey: ['bixtok'] }); onNote('Post deleted'); }}><Trash2 size={14}/></button></div>)}</div>
+      : ptab === 'saved' && savedVids.length ? <div className="bxt-grid">{savedVids.map(v => <div key={v.id} className="bxt-grid-item"><button onClick={onOpen}>{v.media_kind === 'photo' ? <img src={v.src} alt=""/> : <video src={`${v.src}#t=0.1`} muted playsInline preload="metadata"/>}<small><Bookmark size={12}/> {v.likes}</small></button></div>)}</div>
       : <p className="p-10 text-center text-sm text-muted-foreground">{ptab === 'grid' ? 'No posts yet. Tap + to create.' : 'Nothing here yet.'}</p>}
     {drawer && <div className="bxt-drawer-wrap" onClick={() => setDrawer(false)}><aside className="bxt-drawer" onClick={e => e.stopPropagation()}>
+      <h4>Profile</h4><button onClick={() => { setDrawer(false); setBioOpen(true); }}><User/>Edit bio, hobbies & links<ChevronRight/></button>
       <h4>Assets</h4><button onClick={() => { setDrawer(false); onBalance(); }}><Wallet/>Balance<ChevronRight/></button>
       <h4>Personal tools</h4>
       <Link to="/wallet"><Clock/>Activity center<ChevronRight/></Link>
@@ -541,7 +549,21 @@ function ProfilePage({ follow, me, email, videos, all = [], onCreate, onBalance,
       <Link to="/network" ><Flame/>Promote<ChevronRight/></Link>
       <hr/><Link to="/settings"><Settings/>Settings and privacy<ChevronRight/></Link>
     </aside></div>}
+    {bioOpen && <BioEditor value={bio} onClose={() => setBioOpen(false)} onSave={b => { saveBio(b); setBioOpen(false); onNote('Profile updated'); }}/>}
   </div>;
+}
+
+const HOBBIES = ['Crypto', 'Trading', 'Business', 'Education', 'Vlog', 'Music', 'Dance', 'Comedy', 'Food', 'Travel', 'Fitness', 'Gaming', 'Fashion', 'Beauty', 'Tech', 'Automotive', 'Religion', 'Motivation'];
+function BioEditor({ value, onClose, onSave }: { value: { bio: string; hobbies: string[]; link: string }; onClose: () => void; onSave: (v: { bio: string; hobbies: string[]; link: string }) => void }) {
+  const [v, setV] = useState(value);
+  const tog = (h: string) => setV(x => ({ ...x, hobbies: x.hobbies.includes(h) ? x.hobbies.filter(y => y !== h) : x.hobbies.length >= 6 ? x.hobbies : [...x.hobbies, h] }));
+  return <div className="bxt-drawer-wrap" onClick={onClose}><aside className="bxt-drawer bxt-bioedit" onClick={e => e.stopPropagation()}>
+    <h4>Bio</h4><textarea className="form-input w-full" rows={3} maxLength={160} value={v.bio} onChange={e => setV({ ...v, bio: e.target.value })} placeholder="Tell viewers about yourself…"/><small className="opacity-60">{v.bio.length}/160</small>
+    <h4>Hobbies & interests (max 6)</h4><div className="bxt-hobbies pick">{HOBBIES.map(h => <button type="button" key={h} className={v.hobbies.includes(h) ? 'on' : ''} onClick={() => tog(h)}>#{h}</button>)}</div>
+    <h4>Link</h4><input className="form-input w-full" inputMode="url" value={v.link} onChange={e => setV({ ...v, link: e.target.value })} placeholder="https://…"/>
+    <button className="bixtok-cta mt-3 w-full" onClick={() => onSave({ ...v, link: /^https:\/\//.test(v.link.trim()) ? v.link.trim() : '' })}>Save</button>
+    <p className="mt-2 text-[10px] opacity-60">Bio, hobbies and link are saved on this device.</p>
+  </aside></div>;
 }
 
 function BalancePage({ stake, cfg, onBack, onLive }: { stake: number; cfg: Cfg; onBack: () => void; onLive: () => void }) {

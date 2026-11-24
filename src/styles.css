@@ -9536,3 +9536,16 @@ html body .comm-voice .comm-vtime{font-size:10px}
 .bgl-card { background: oklch(0.17 0.025 290); border: 1px solid var(--border); }
 .bgl-card.is-on { border-color: var(--bgl-purple); box-shadow: 0 0 18px -4px var(--bgl-purple); }
 @media (prefers-reduced-motion: reduce) { .bgl-car { animation: none; } }
+
+/* BIXTOK profile + studio polish */
+.bxt-avwrap{position:relative;flex:none}
+.bxt-bigav{overflow:hidden}.bxt-bigav-img,.bxt-bigav-img img{width:100%;height:100%;border-radius:999px;object-fit:cover}
+.bxt-bigav>em{display:none}
+.bxt-av-plus{position:absolute;right:-2px;bottom:2px;width:1.6rem;height:1.6rem;border-radius:999px;display:grid;place-items:center;background:var(--primary);color:var(--primary-foreground);border:2px solid var(--background)}
+.bxt-hobbies{display:flex;flex-wrap:wrap;gap:.35rem;margin:.3rem 0}.bxt-hobbies span,.bxt-hobbies button{font-size:.7rem;padding:.2rem .6rem;border-radius:999px;border:1px solid var(--border);color:var(--muted-foreground)}
+.bxt-hobbies button.on{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.bxt-bio-link{display:block;font-size:.75rem;color:var(--primary);margin-bottom:.4rem}
+.bxt-bioedit{max-height:90dvh;overflow-y:auto}
+.studio-top .studio-music-pill{width:auto;height:2.3rem;padding:0 1rem;white-space:nowrap;max-width:60vw;overflow:hidden;text-overflow:ellipsis}
+.studio-stage video{object-fit:cover}
+.studio-tools button.on{color:var(--primary)}

@@ -59,7 +59,7 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
   const [links, setLinks] = useState<string[]>(() => Array.from({ length: Math.max(1, slots) }, () => ''));
   const [filter, setFilter] = useState('none');
   const [smooth, setSmooth] = useState(0); const [glow, setGlow] = useState(0); const [bright, setBright] = useState(0);
-  const [facing, setFacing] = useState<'user' | 'environment'>('user'); const [zoom, setZoom] = useState(0.8);
+  const [facing, setFacing] = useState<'user' | 'environment'>('user'); const [zoom, setZoom] = useState(1); const [beautyOpen, setBeautyOpen] = useState(false);
   const [dur, setDur] = useState(15); const [speed, setSpeed] = useState(1); const [timer, setTimer] = useState(0);
   const [count, setCount] = useState(0); const [rec, setRec] = useState(false); const [elapsed, setElapsed] = useState(0);
   const [camErr, setCamErr] = useState(''); const [shot, setShot] = useState<{ url: string; ext: string } | null>(null);
@@ -178,6 +178,7 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
         <button onClick={() => setSpeed(s => SPEEDS[(SPEEDS.indexOf(s) + 1) % SPEEDS.length]!)}><Gauge/><small>{speed}×</small></button>
         <button onClick={() => setTimer(t => t === 0 ? 3 : t === 3 ? 10 : 0)}><Timer/><small>{timer ? `${timer}s` : 'Timer'}</small></button>
         {textBtn}
+        <button onClick={() => setBeautyOpen(o => !o)} className={beautyOpen ? 'on' : ''}><Sparkles/><small>Beauty</small></button>
       </aside>}
       <div className="studio-bottom">
         {shot ? <div className="studio-shot-actions">
@@ -187,7 +188,7 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
           <button className="studio-ghost" onClick={() => setShot(null)}>Retake</button>
           <p className="text-[11px] opacity-75">Post it directly, or save it to your device.</p>
         </div> : <>
-          <BeautySliders smooth={smooth} glow={glow} bright={bright} set={{ setSmooth, setGlow, setBright }}/>
+          {beautyOpen && <BeautySliders smooth={smooth} glow={glow} bright={bright} set={{ setSmooth, setGlow, setBright }}/>}
           <FilterRow value={filter} onPick={setFilter}/>
           <div className="studio-durs">{DURATIONS.map(d => <button key={d} className={dur === d ? 'on' : ''} onClick={() => !rec && setDur(d)}>{d < 60 ? `${d}s` : `${d / 60}m`}</button>)}</div>
           <div className="studio-shutter">
@@ -267,6 +268,7 @@ function MusicSearch({ current, onPick, onClose }: { current: { title: string; u
   return <div className="studio-sheet tall" role="dialog" aria-label="Add sound">
     <div className="studio-sheet-head"><b><Music2 size={16} className="inline"/> Sounds</b><button onClick={onClose}><X/></button></div>
     <form className="bixtok-input" onSubmit={e => { e.preventDefault(); setQ(term.trim()); }}><Search size={16}/><input value={term} onChange={e => setTerm(e.target.value)} placeholder="Search songs online, artists, viral sounds…"/><button>Go</button></form>
+    <div className="studio-fonts">{['Viral TikTok','Pop Indonesia','Dangdut','Lo-fi','Hip Hop','K-Pop','EDM','Motivasi','Romantis','Jazz'].map(t => <button key={t} className={q === t ? 'on' : ''} onClick={() => { setTerm(t); setQ(t); }}>{t}</button>)}</div>
     {q.length <= 1 && <div className="studio-fonts">{cats.map(c => <button key={c} className={cat === c ? 'on' : ''} onClick={() => setCat(c)}>{c}</button>)}</div>}
     {current && <button className="studio-chip on" onClick={() => onPick(null)}>Remove “{current.title}”</button>}
     <div className="studio-sounds">
