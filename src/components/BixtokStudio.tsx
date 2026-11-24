@@ -36,6 +36,13 @@ const SPEEDS = [0.5, 1, 2];
 const TAGS = ['#BIXLINK', '#BIXCOIN', '#Staking', '#Web3', '#FinancialFreedom'];
 type Sound = { id: string; title: string; artist: string; category: string; audio_url: string; cover?: string | undefined };
 
+/** Center-crops any camera frame to portrait 9:16 so recordings match the full-screen preview. */
+function frame9x16(v: HTMLVideoElement) {
+  const vw = v.videoWidth || 720, vh = v.videoHeight || 1280;
+  const sw = Math.min(vw, Math.round(vh * 9 / 16)), sh = Math.min(vh, Math.round(sw * 16 / 9));
+  return { sx: Math.round((vw - sw) / 2), sy: Math.round((vh - sh) / 2), sw, sh, w: sw, h: sh };
+}
+
 export function DraggableText({ text, style, onMove, editable }: { text: string; style: TextStyle; onMove?: (x: number, y: number) => void; editable?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null); const [drag, setDrag] = useState(false);
   const down = (e: React.PointerEvent) => {
@@ -67,6 +74,8 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
   const [overlay, setOverlay] = useState(''); const [ts, setTs] = useState<TextStyle>(DEFAULT_TEXT); const [textOpen, setTextOpen] = useState(false);
   const [music, setMusic] = useState<{ title: string; url: string } | null>(null); const [musicOpen, setMusicOpen] = useState(false);
   const [gifts, setGifts] = useState(true); const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
+  const hwZoom = useRef<{ min: number; max: number } | null>(null);
+  const applyZoom = (z: number) => { setZoom(z); const tr = stream.current?.getVideoTracks()[0]; const hz = hwZoom.current; if (tr && hz) tr.applyConstraints({ advanced: [{ zoom: Math.min(hz.max, Math.max(hz.min, hz.min * z)) }] } as unknown as MediaTrackConstraints).catch(() => {}); };
   const vid = useRef<HTMLVideoElement>(null); const stream = useRef<MediaStream | null>(null); const recorder = useRef<MediaRecorder | null>(null);
 
   const css = (() => { const base = filterCss(filter); const extra = `brightness(${1 + bright / 400 + glow / 600}) saturate(${1 + glow / 500}) contrast(${1 - smooth / 900}) blur(${(smooth / 140).toFixed(2)}px)`; return base === 'none' ? extra : `${base} ${extra}`; })();
@@ -77,9 +86,14 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
     (async () => {
       try {
         stream.current?.getTracks().forEach(t => t.stop());
-        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1080 }, height: { ideal: 1920 } }, audio: true });
+        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } }, audio: true });
         if (off) { s.getTracks().forEach(t => t.stop()); return; }
-        stream.current = s; setCamErr('');
+        stream.current = s; setCamErr(''); setZoom(1);
+        const tr = s.getVideoTracks()[0]; const cap = (tr?.getCapabilities?.() ?? {}) as { zoom?: { min: number; max: number } };
+        hwZoom.current = cap.zoom ?? null;
+        const adv: Record<string, unknown> = { exposureMode: 'continuous', whiteBalanceMode: 'continuous', focusMode: 'continuous' };
+        if (cap.zoom) adv.zoom = cap.zoom.min;
+        tr?.applyConstraints({ advanced: [adv] } as unknown as MediaTrackConstraints).catch(() => {});
         if (vid.current) { vid.current.srcObject = s; vid.current.play().catch(() => {}); }
       } catch { setCamErr('Camera unavailable on this device.'); }
     })();
@@ -102,14 +116,14 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
   };
   const startRec = () => {
     const v = vid.current; const s = stream.current; if (!v || !s) return;
-    const c = document.createElement('canvas'); c.width = v.videoWidth || 720; c.height = v.videoHeight || 1280;
+    const c = document.createElement('canvas'); const fr = frame9x16(v); c.width = fr.w; c.height = fr.h;
     const ctx = c.getContext('2d')!; let raf = 0;
-    const draw = () => { ctx.filter = css; if (facing === 'user') ctx.setTransform(-1, 0, 0, 1, c.width, 0); ctx.drawImage(v, 0, 0, c.width, c.height); ctx.setTransform(1, 0, 0, 1, 0, 0); drawText(ctx, c); raf = requestAnimationFrame(draw); };
+    const draw = () => { ctx.filter = css; if (facing === 'user') ctx.setTransform(-1, 0, 0, 1, c.width, 0); ctx.drawImage(v, fr.sx, fr.sy, fr.sw, fr.sh, 0, 0, c.width, c.height); ctx.setTransform(1, 0, 0, 1, 0, 0); drawText(ctx, c); raf = requestAnimationFrame(draw); };
     draw();
     const out = c.captureStream(Math.max(10, Math.round(30 / speed)));
     if (speed === 1) s.getAudioTracks().forEach(t => out.addTrack(t));
     const mime = ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m)) ?? '';
-    const r = new MediaRecorder(out, mime ? { mimeType: mime } : undefined); const chunks: Blob[] = [];
+    const r = new MediaRecorder(out, mime ? { mimeType: mime, videoBitsPerSecond: 6_000_000 } : undefined); const chunks: Blob[] = [];
     r.ondataavailable = e => e.data.size && chunks.push(e.data);
     r.onstop = () => { cancelAnimationFrame(raf); const type = r.mimeType || 'video/webm'; setShot({ url: URL.createObjectURL(new Blob(chunks, { type })), ext: type.includes('mp4') ? 'mp4' : 'webm' }); };
     recorder.current = r; r.start(500); setElapsed(0); setRec(true);
@@ -122,8 +136,8 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
   };
   const snap = () => {
     const v = vid.current; if (!v) return;
-    const c = document.createElement('canvas'); c.width = v.videoWidth || 720; c.height = v.videoHeight || 1280;
-    const ctx = c.getContext('2d')!; ctx.filter = css; if (facing === 'user') ctx.setTransform(-1, 0, 0, 1, c.width, 0); ctx.drawImage(v, 0, 0, c.width, c.height); ctx.setTransform(1, 0, 0, 1, 0, 0); drawText(ctx, c);
+    const c = document.createElement('canvas'); const fr = frame9x16(v); c.width = fr.w; c.height = fr.h;
+    const ctx = c.getContext('2d')!; ctx.filter = css; if (facing === 'user') ctx.setTransform(-1, 0, 0, 1, c.width, 0); ctx.drawImage(v, fr.sx, fr.sy, fr.sw, fr.sh, 0, 0, c.width, c.height); ctx.setTransform(1, 0, 0, 1, 0, 0); drawText(ctx, c);
     c.toBlob(b => b && setShot({ url: URL.createObjectURL(b), ext: 'jpg' }), 'image/jpeg', 0.92);
   };
 
@@ -167,7 +181,7 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
     {mode === 'camera' ? <>
       <div className="studio-stage">
         {shot ? (shot.ext === 'jpg' ? <img src={shot.url} alt="Captured"/> : <video src={shot.url} autoPlay loop playsInline controls/>)
-          : camErr ? <p className="studio-camerr">{camErr}</p> : <video ref={vid} muted playsInline style={{ filter: css, objectFit: zoom < 1 ? 'contain' : 'cover', transform: `scale(${facing === 'user' ? -zoom : zoom}, ${zoom})` }}/>}
+          : camErr ? <p className="studio-camerr">{camErr}</p> : <video ref={vid} muted playsInline style={{ filter: css, objectFit: 'cover', transform: (() => { const z = hwZoom.current ? 1 : zoom; return `scale(${facing === 'user' ? -z : z}, ${z})`; })() }}/>}
         {!shot && overlay && <DraggableText text={overlay} style={ts} editable onMove={(x, y) => setTs(s => ({ ...s, x, y }))}/>}
         {count > 0 && <span className="studio-count">{count}</span>}
         {rec && <span className="studio-rec">● {elapsed}s / {dur}s</span>}
@@ -179,7 +193,7 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
         <button onClick={() => setTimer(t => t === 0 ? 3 : t === 3 ? 10 : 0)}><Timer/><small>{timer ? `${timer}s` : 'Timer'}</small></button>
         {textBtn}
         <button onClick={() => setBeautyOpen(o => !o)} className={beautyOpen ? 'on' : ''}><Sparkles/><small>Beauty</small></button>
-        <button onClick={() => setZoom(z => z >= 2 ? 1 : z + 0.5)}><Search/><small>{zoom}×</small></button></>}
+        <button onClick={() => applyZoom(zoom >= 2 ? 1 : zoom + 0.5)}><Search/><small>{zoom}×</small></button></>}
         <button aria-label="Lainnya" onClick={() => setToolsOpen(o => !o)} className="tt-chev">{toolsOpen ? '︿' : '﹀'}</button>
       </aside>}
       <div className="studio-bottom">
