@@ -399,7 +399,6 @@ html[data-bc-lux] main{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 100
 .bcp .bsv-files{margin-top:12px}
 
 /* ===== Sovereign Call active stage (lux only; elements carry [hidden] by default) ===== */
-html[data-bc-lux] .bixcall:has(.bc-sov-dock) .bc-sov-legacy,
 html[data-bc-lux] .bixcall:has(.bc-sov-hud) .bixcall-head,
 html[data-bc-lux] .bixcall:has(.bc-sov-hud) .bixcall-status{display:none!important}
 html[data-bc-lux] .bixcall:has(.bc-sov-hud){background:#040507}
@@ -421,7 +420,7 @@ html[data-bc-lux] .bc-sov-timer i{width:26px;height:2px;border-radius:2px;backgr
 html[data-bc-lux] .bc-sov-timer b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px;font-weight:800;color:#fff;text-shadow:0 1px 6px rgb(0 0 0 / .8)}
 html[data-bc-lux] .bixcall .bixcall-pip{top:80px;right:16px;border:2px solid #A855F7;border-radius:18px;box-shadow:0 0 18px rgb(168 85 247 / .65)}
 html[data-bc-lux] .bc-sov-flip[hidden]{display:grid;place-items:center;position:absolute;z-index:5;top:calc(80px + min(28vw,120px) * 16 / 9 - 34px);right:22px;width:28px;height:28px;border-radius:50%;background:rgb(0 0 0 / .55);color:#fff;border:1px solid rgb(255 255 255 / .25)}
-html[data-bc-lux] .bc-sov-dock[hidden]{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin:0 16px calc(env(safe-area-inset-bottom,0px) + 24px);padding:14px 16px 10px;border-radius:24px;background:rgb(10 11 16 / .85);backdrop-filter:blur(20px);border:1px solid rgb(168 85 247 / .3);box-shadow:0 0 24px rgb(168 85 247 / .18)}
+html[data-bc-lux] .bc-sov-dock[hidden]{display:none!important;align-items:flex-start;justify-content:space-between;gap:8px;margin:0 16px calc(env(safe-area-inset-bottom,0px) + 24px);padding:14px 16px 10px;border-radius:24px;background:rgb(10 11 16 / .85);backdrop-filter:blur(20px);border:1px solid rgb(168 85 247 / .3);box-shadow:0 0 24px rgb(168 85 247 / .18)}
 html[data-bc-lux] .bc-sov-dock label{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:#d1d5db}
 html[data-bc-lux] .bc-sov-dock label button{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:#040507;color:#fff;border:1px solid rgb(255 255 255 / .2)}
 html[data-bc-lux] .bc-sov-dock label button svg{width:21px;height:21px}
