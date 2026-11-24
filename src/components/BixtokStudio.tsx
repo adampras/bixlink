@@ -92,7 +92,7 @@ export function BixtokStudio({ userId, onClose, onDone, slots = 5, maxLinks = 10
         const tr = s.getVideoTracks()[0]; const cap = (tr?.getCapabilities?.() ?? {}) as { zoom?: { min: number; max: number } };
         hwZoom.current = cap.zoom ?? null;
         const adv: Record<string, unknown> = { exposureMode: 'continuous', whiteBalanceMode: 'continuous', focusMode: 'continuous' };
-        if (cap.zoom) adv.zoom = cap.zoom.min;
+        if (cap.zoom) adv['zoom'] = cap.zoom.min;
         tr?.applyConstraints({ advanced: [adv] } as unknown as MediaTrackConstraints).catch(() => {});
         if (vid.current) { vid.current.srcObject = s; vid.current.play().catch(() => {}); }
       } catch { setCamErr('Camera unavailable on this device.'); }
