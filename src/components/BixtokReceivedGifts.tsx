@@ -38,7 +38,7 @@ export function useReceivedGifts(userId: string | undefined, enabled: boolean) {
       return rows;
     },
   });
-  const unread = seenState?.user === userId ? unseenGifts(q.data ?? [], seenState.ids) : [];
+  const unread = seenState && seenState.user === userId ? unseenGifts(q.data ?? [], seenState.ids) : [];
   const acknowledge = useCallback((ids: string[]) => {
     if (!userId) return;
     setSeenState(previous => {

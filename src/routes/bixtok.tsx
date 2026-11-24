@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { BixtokTikTokPlayer, BIXTOK_SOUND_EVENT } from '@/components/BixtokTikTokPlayer';
 import { copyText } from '@/lib/copy-text';
 import { ecosystemHead } from '@/lib/ecosystem-seo';
+import { BixtokReceivedGifts, useReceivedGifts } from '@/components/BixtokReceivedGifts';
 import { useDesignAccess } from '@/lib/design-release';
 import { giftArt } from '@/lib/bixtok-gift-art';
 import '@/components/bixtok-lux.css';
@@ -123,6 +124,7 @@ function BixtokPage() {
   const [section, setSection] = useState<'home' | 'inbox' | 'profile' | 'balance'>('home');
   useEffect(() => { if (!note) return undefined; const t = setTimeout(() => setNote(''), 3500); return () => clearTimeout(t); }, [note]);
   const [tag, setTag] = useState('');
+  const received = useReceivedGifts(user?.id, Boolean(q.data));
   const baseVids = q.data ? (tab === 'following' ? q.data.videos.filter(v => v.creator_id && following.has(v.creator_id)) : tab === 'mine' ? q.data.videos.filter(v => v.creator_id === user?.id) : q.data.videos) : [];
   const tags = [...new Set(baseVids.flatMap(v => (v.caption.match(/#[\p{L}\d_]+/gu) ?? []).map(t => t.toLowerCase())))].slice(0, 12);
   const rankKey = q.data ? q.data.videos.map(v => v.id).join(',') : '';
@@ -166,10 +168,11 @@ function BixtokPage() {
         <button className={`bxt-live-tab${section === 'home' && tab === 'live' ? ' on' : ''}`} aria-label="LIVE" onClick={() => { setSection('home'); setTab('live'); }}><span className="bxt-live-ic"><Radio size={16}/><em>LIVE</em></span><small>LIVE{q.data.lives.length > 0 ? ` · ${q.data.lives.length}` : ''}</small></button>
         {q.data.cfg.features['upload'] !== false ? <button className="bxt-plus bxt-plus-logo" aria-label="Create post" onClick={() => setStudio(true)}><img src={bixtokLogo} alt="" width={30} height={30}/><Plus className="bxt-plus-mini"/></button> : <span/>}
         <button className={section === 'inbox' ? 'on' : ''} onClick={() => setSection('inbox')}><MessageSquare/><small>Inbox</small>{q.data.lives.length > 0 && <i className="bxt-badge">{q.data.lives.length}</i>}</button>
-        <button className={section === 'profile' ? 'on' : ''} onClick={() => setSection('profile')}><User/><small>Profile</small></button>
+        <button className={section === 'profile' ? 'on' : ''} onClick={() => setSection('profile')}><User/><small>Profile</small>{received.unread.length > 0 && <i className="bxt-badge">🎁{received.unread.length}</i>}</button>
       </nav>}
       {studio && <BixtokStudio userId={user!.id} slots={q.data.cfg.link_slots ?? 5} maxLinks={q.data.cfg.max_links ?? 10} onClose={() => setStudio(false)} onDone={m => { setStudio(false); setNote(m); setTab('mine'); qc.invalidateQueries({ queryKey: ['bixtok'] }); }}/>}
       {giftTarget && <GiftSheet gifts={q.data.gifts.filter(g => q.data!.cfg.features[g.currency === 'BIX' ? 'bix_gifts' : 'bixp_gifts'] !== false)} target={giftTarget} closed={!q.data.cfg.gifts_enabled} onClose={() => setGiftTarget(null)} onNote={setNote}/>}
+      {user && <BixtokReceivedGifts userId={user.id} rows={received.rows} unread={received.unread} acknowledge={received.acknowledge} activeVideo={section === 'home' && tab !== 'live' ? (currentVid?.id ?? null) : null} balanceOpen={section === 'balance'} blocked={studio || !!room || !!giftTarget} muted={muted} onBalance={() => setSection('balance')}/>}
       {note && <div className="bixtok-toast" role="status">{note}</div>}
     </>}
   </main></MemberGate>;
