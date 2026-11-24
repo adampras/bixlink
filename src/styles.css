@@ -9571,3 +9571,10 @@ html body .comm-voice .comm-vtime{font-size:10px}
 .tt-fx-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;font-size:.85rem}
 .tt-fx .studio-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem .4rem}
 .tt-fx .studio-filters i{width:3.4rem;height:3.4rem;border-radius:.9rem}
+.studio-fx-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.studio-face-msg { position: absolute; top: 4.2rem; left: 50%; translate: -50% 0; padding: .3rem .75rem; border-radius: 999px; font-size: .72rem; background: color-mix(in oklab, var(--background) 70%, transparent); color: var(--foreground); }
+.studio-face-row { display: flex; gap: .6rem; overflow-x: auto; padding: .4rem .2rem; }
+.studio-face-row button { flex: 0 0 auto; display: grid; justify-items: center; gap: .2rem; width: 4.2rem; }
+.studio-face-row i { font-style: normal; display: grid; place-items: center; width: 3.2rem; height: 3.2rem; border-radius: 999px; font-size: 1.5rem; border: 2px solid color-mix(in oklab, var(--foreground) 25%, transparent); background: color-mix(in oklab, var(--background) 55%, transparent); }
+.studio-face-row button.on i { border-color: var(--primary); box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 60%, transparent); }
+.studio-face-row small { font-size: .66rem; }

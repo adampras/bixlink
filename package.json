@@ -24,6 +24,7 @@
     "@lovable.dev/cloud-auth-js": "^1.1.2",
     "@lovable.dev/email-js": "0.4.0",
     "@lovable.dev/webhooks-js": "0.0.3",
+    "@mediapipe/tasks-vision": "^1.2.3",
     "@pushforge/builder": "^2.0.5",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
