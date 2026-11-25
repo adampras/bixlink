@@ -285,16 +285,19 @@ export type Database = {
       }
       bix_deposit_owner1_lock: {
         Row: {
+          active: boolean
           created_at: string
           locked_by: string
           user_id: string
         }
         Insert: {
+          active?: boolean
           created_at?: string
           locked_by: string
           user_id: string
         }
         Update: {
+          active?: boolean
           created_at?: string
           locked_by?: string
           user_id?: string
@@ -4882,6 +4885,10 @@ export type Database = {
       bix_deposit_lock_list: { Args: never; Returns: Json }
       bix_deposit_lock_owner1: {
         Args: { p_code: string; p_lock: boolean }
+        Returns: Json
+      }
+      bix_deposit_lock_switch: {
+        Args: { p_active: boolean; p_code: string }
         Returns: Json
       }
       bix_deposit_owner: { Args: { p_user: string }; Returns: string }

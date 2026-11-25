@@ -174,8 +174,15 @@ export const getOwnerRevenue = createServerFn({ method: 'GET' }).middleware([req
 export const getOwner1DepositLocks = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { data, error } = await context.supabase.rpc('bix_deposit_lock_list');
   if (error) throw new Error(error.message);
-  return (data ?? []) as { code: string | null; username: string | null; created_at: string; team?: number }[];
+  return (data ?? []) as { code: string | null; username: string | null; created_at: string; team?: number; active?: boolean }[];
 });
+export const switchOwner1DepositLock = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .inputValidator((d: { code: string; active: boolean }) => z.object({ code: z.string().trim().min(2).max(60), active: z.boolean() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.rpc('bix_deposit_lock_switch' as never, { p_code: data.code, p_active: data.active } as never);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
 export const setOwner1DepositLock = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((d: { code: string; lock: boolean }) => z.object({ code: z.string().trim().min(2).max(60), lock: z.boolean() }).parse(d))
   .handler(async ({ context, data }) => {

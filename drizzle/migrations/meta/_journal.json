@@ -1548,6 +1548,13 @@
       "when": 1795612553616,
       "tag": "0220_presale_vesting_withdraw",
       "breakpoints": true
+    },
+    {
+      "idx": 221,
+      "version": "7",
+      "when": 1795614571519,
+      "tag": "0221_deposit_lock_switch",
+      "breakpoints": true
     }
   ]
 }
