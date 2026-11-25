@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { validDriverApplication } from '@/lib/bixgo-friendly';
 import { unlockOrderAudio } from '@/lib/bixgo-order-audio';
 import { useBixgoText } from '@/lib/useBixgoText';
+import { BixgoProfilePhoto } from '@/components/BixgoProfilePhoto';
 
 type License = { status: string; online: boolean; vehicle_type: string; vehicle_model: string; plate: string; city: string; operator_note: string; mode: string; rate_adj_pct?: number; accept_cash?: boolean; accept_bix?: boolean; accept_qris?: boolean; accept_bank?: boolean; qris_path?: string | null; bank_name?: string; bank_account?: string; bank_holder?: string };
 const VEHICLES = [['moto', 'BIX Moto'], ['urban', 'BIX Urban'], ['executive', 'BIX Executive'], ['black', 'BIX Black']] as const;
@@ -65,6 +66,7 @@ export function BixgoPassport({ cur, usdtIdr, city, lux = false }: { lux?: boole
   if (!uid) return <section className="mx-4 mt-3 rounded-3xl border border-primary/30 bg-card p-4 text-xs text-muted-foreground">Sign in to open your BIXGO Passport and Driver Mode.</section>;
 
   return <section className="mx-4 mt-3 space-y-3">
+    {uid && <BixgoProfilePhoto userId={uid}/>}
     {lic?.status === 'approved' && !redo && <>
       <div className="rounded-3xl border border-primary/40 bg-card p-4">
         <div className="flex items-center justify-between text-[11px]"><span className="font-bold uppercase tracking-[0.2em] text-muted-foreground">Konsol Driver</span><span className="text-muted-foreground">{GLOBAL_CITIES.find(c => c.id === lic.city)?.city ?? lic.city}</span></div>

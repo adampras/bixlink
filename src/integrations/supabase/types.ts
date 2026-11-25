@@ -4387,6 +4387,7 @@ export type Database = {
         Row: {
           avatar_path: string | null
           bixcall_avatar_path: string | null
+          bixgo_avatar_path: string | null
           bixtok_avatar_path: string | null
           call_permission: string
           created_at: string
@@ -4401,6 +4402,7 @@ export type Database = {
         Insert: {
           avatar_path?: string | null
           bixcall_avatar_path?: string | null
+          bixgo_avatar_path?: string | null
           bixtok_avatar_path?: string | null
           call_permission?: string
           created_at?: string
@@ -4415,6 +4417,7 @@ export type Database = {
         Update: {
           avatar_path?: string | null
           bixcall_avatar_path?: string | null
+          bixgo_avatar_path?: string | null
           bixtok_avatar_path?: string | null
           call_permission?: string
           created_at?: string
@@ -5603,6 +5606,12 @@ export type Database = {
       bixgo_merchant_order_set: {
         Args: { p_id: string; p_status: string }
         Returns: undefined
+      }
+      bixgo_order_alert_targets: {
+        Args: { p_booking: string }
+        Returns: {
+          user_id: string
+        }[]
       }
       bixgo_passenger_cancel: { Args: { p_id: string }; Returns: undefined }
       bixgo_rate_trip: {

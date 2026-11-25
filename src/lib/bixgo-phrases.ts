@@ -1,5 +1,7 @@
 /** BIXGO-only terminology; user-entered values and ledger identifiers are not translated. */
 export const bixgoExtraPhrases: Record<string, string> = {
+  'Change BIXGO photo': 'Ganti foto BIXGO', 'BIXGO profile photo': 'Foto profil BIXGO', 'Shown to passengers. Your BIXLINK photo stays the same.': 'Tampil ke penumpang. Foto BIXLINK Anda tetap.', 'Using your BIXLINK photo. Tap to set a separate BIXGO photo.': 'Memakai foto BIXLINK. Ketuk untuk pasang foto BIXGO tersendiri.', 'BIXGO photo updated': 'Foto BIXGO diperbarui', 'Upload failed': 'Unggah gagal',
+  'Open BIXGO in its own tab or the installed app to get locked-screen alerts.': 'Buka BIXGO di tab sendiri atau aplikasi terpasang agar notifikasi layar terkunci aktif.', 'Notifications are blocked. Allow them in your browser site settings.': 'Notifikasi diblokir. Izinkan di pengaturan situs browser.', 'Background order alerts on': 'Notifikasi order latar belakang aktif',
   'BIX Bike Saver': 'BIX Motor Hemat', 'BIX Car Economy': 'BIX Mobil Hemat', 'BIX Car Executive': 'BIX Mobil Nyaman', 'BIX Car VIP': 'BIX Mobil VIP',
   'Driver console': 'Konsol Driver', 'ONLINE — accepting orders': 'ONLINE — menerima order', 'OFFLINE — tap to start working': 'OFFLINE — ketuk untuk mulai narik',
   'Completed trips': 'Trip selesai', 'Earnings': 'Pendapatan', 'Work settings (readiness, city, fare, payment)': '⚙️ Pengaturan kerja (kesiapan, kota, tarif, pembayaran)',

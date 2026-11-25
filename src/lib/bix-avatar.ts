@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export type BixApp = 'bixtok' | 'bixcall';
-export type BixCard = { user_id: string; name: string; avatar_path: string | null; bixtok_avatar_path?: string | null; bixcall_avatar_path?: string | null; status_text: string | null; story: 'new' | 'seen' | null };
+export type BixApp = 'bixtok' | 'bixcall' | 'bixgo';
+export type BixCard = { user_id: string; name: string; avatar_path: string | null; bixtok_avatar_path?: string | null; bixcall_avatar_path?: string | null; bixgo_avatar_path?: string | null; status_text: string | null; story: 'new' | 'seen' | null };
 
 const cards = new Map<string, { at: number; p: Promise<BixCard | null> }>();
 const urls = new Map<string, { at: number; p: Promise<string> }>();
@@ -67,6 +67,7 @@ export function appAvatarPath(card: BixCard | null | undefined, app?: BixApp): s
   if (!card) return null;
   if (app === 'bixtok') return card.bixtok_avatar_path || card.avatar_path;
   if (app === 'bixcall') return card.bixcall_avatar_path || card.avatar_path;
+  if (app === 'bixgo') return card.bixgo_avatar_path || card.avatar_path;
   return card.avatar_path;
 }
 

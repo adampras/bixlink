@@ -5,12 +5,14 @@ self.addEventListener('push', (event) => {
   let d = {};
   try { d = event.data ? event.data.json() : {}; } catch { d = { title: 'BIX CALL', body: event.data ? event.data.text() : '' }; }
   const ring = d.type === 'call';
-  event.waitUntil(self.registration.showNotification(d.title || 'BIX CALL', {
+  const order = d.type === 'order';
+  event.waitUntil(self.registration.showNotification(d.title || (order ? 'BIXGO' : 'BIX CALL'), {
     body: d.body || '', tag: d.tag || 'bixcall', renotify: true,
     icon: '/favicon.png', badge: '/favicon.png',
-    requireInteraction: ring, vibrate: ring ? [500, 250, 500, 250, 500, 250, 500] : [120, 60, 120],
+    requireInteraction: ring || order, silent: false, timestamp: Date.now(),
+    vibrate: ring ? [800, 300, 800, 300, 800, 300, 800, 300, 800, 300, 800] : order ? [400, 150, 400, 150, 400, 150, 400] : [120, 60, 120],
     data: { url: d.url || '/call' },
-    actions: ring ? [{ action: 'open', title: '📞 Buka panggilan' }] : [{ action: 'open', title: '💬 Balas' }],
+    actions: ring ? [{ action: 'open', title: '📞 Buka panggilan' }] : order ? [{ action: 'open', title: '🛵 Lihat order' }] : [{ action: 'open', title: '💬 Balas' }],
   }));
 });
 self.addEventListener('notificationclick', (event) => {

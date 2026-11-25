@@ -19,7 +19,16 @@ export async function ensureBixPush() {
 }
 
 /** Fire-and-forget closed-app notification to the other member. */
-export function pushNotify(type: 'chat' | 'call', id: string | undefined | null) {
+export function pushNotify(type: 'chat' | 'call' | 'order', id: string | undefined | null) {
   if (!id) return;
   void notifyBixPush({ data: { type, id } }).catch(() => { /* best effort */ });
+}
+
+/** Asks notification permission (from a tap) and registers this device for background alerts. */
+export async function enableBackgroundAlerts(): Promise<'ok' | 'iframe' | 'denied' | 'unsupported'> {
+  if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) return 'unsupported';
+  if (window.self !== window.top) return 'iframe';
+  const perm = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+  if (perm !== 'granted') return 'denied';
+  return (await ensureBixPush()) ? 'ok' : 'unsupported';
 }

@@ -21,8 +21,8 @@ export const savePushSubscription = createServerFn({ method: 'POST' })
 /** Sends a closed-app push to the other participant of a chat message or call the caller just created. */
 export const notifyBixPush = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { type: 'chat' | 'call'; id: string }) => {
-    if (!i || (i.type !== 'chat' && i.type !== 'call') || typeof i.id !== 'string' || !UUID.test(i.id)) throw new Error('Invalid');
+  .inputValidator((i: { type: 'chat' | 'call' | 'order'; id: string }) => {
+    if (!i || (i.type !== 'chat' && i.type !== 'call' && i.type !== 'order') || typeof i.id !== 'string' || !UUID.test(i.id)) throw new Error('Invalid');
     return i;
   })
   .handler(async ({ data, context }) => {
@@ -30,6 +30,30 @@ export const notifyBixPush = createServerFn({ method: 'POST' })
     let callCreated = '';
     let callKind = '';
     let to = ''; let payload: Record<string, string>;
+    if (data.type === 'order') {
+      const { data: b } = await context.supabase.from('bixgo_bookings').select('user_id, status, pickup, vehicle, created_at').eq('id', data.id).maybeSingle();
+      if (!b || b.user_id !== context.userId || b.status !== 'pending' || Date.now() - new Date(b.created_at).getTime() > 120000) return { sent: 0 };
+      const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+      const { data: targets } = await supabaseAdmin.rpc('bixgo_order_alert_targets', { p_booking: data.id });
+      const ids = ((targets ?? []) as { user_id: string }[]).map(t => t.user_id);
+      if (!ids.length) return { sent: 0 };
+      const msg = { type: 'order', title: 'BIXGO · New order nearby', body: `${b.vehicle} · ${String(b.pickup).slice(0, 100)}`, tag: `order-${data.id}`, url: '/bixgo' };
+      const { sendFcmToUser } = await import('./fcm.server');
+      let sent = 0;
+      for (const uid of ids) sent += await sendFcmToUser(supabaseAdmin as never, uid, { ...msg, path: msg.url }, 120);
+      if (!jwk) return { sent };
+      const { data: subs } = await supabaseAdmin.from('bix_push_subscriptions').select('endpoint, p256dh, auth').in('user_id', ids).limit(60);
+      const { buildPushHTTPRequest } = await import('@pushforge/builder');
+      await Promise.all((subs ?? []).map(async s => {
+        try {
+          const req = await buildPushHTTPRequest({ privateJWK: jwk, subscription: { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, message: { payload: msg, adminContact: 'mailto:support@bixlink.com', options: { ttl: 120, urgency: 'high' } } });
+          const r = await fetch(req.endpoint, { method: 'POST', headers: req.headers, body: req.body });
+          if (r.status === 404 || r.status === 410) await supabaseAdmin.from('bix_push_subscriptions').delete().eq('endpoint', s.endpoint);
+          else if (r.ok) sent++;
+        } catch (e) { console.error('push failed', e); }
+      }));
+      return { sent };
+    }
     if (data.type === 'chat') {
       const { data: m } = await context.supabase.from('bix_messages').select('sender_id, recipient_id, body, kind, created_at').eq('id', data.id).maybeSingle();
       if (!m || m.sender_id !== context.userId || Date.now() - new Date(m.created_at).getTime() > 120000) return { sent: 0 };

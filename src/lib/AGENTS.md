@@ -31,7 +31,7 @@
 - BIX CALL group room renders through a body portal so transformed page ancestors cannot push the composer off screen.
 
 - BIX CALL group governance: invite quota/expiry enforced in bix_group_join, presence via bix_group_touch (last_seen_at), proposals/votes and a record-only treasury book (bix_group_treasury) written only through manager RPCs — treasury never moves wallet balances.
-- App photos: profiles.bixtok_avatar_path/bixcall_avatar_path set only via bix_profile_set_app_avatar; appAvatarPath falls back to avatar_path so app photos never overwrite the main BIXLINK identity.
 - BIXGO translations reuse the shared source-aware i18n observer with surface-scoped terminology; never translate service IDs or ledger vehicle/payment values. Kitchen queues group existing statuses and do not imply automatic courier dispatch or expiry.
 - BIXGO fast-track uses bixgo_driver_apply with real verified email and a safety declaration; Owner 1 can disable it and suspended accounts cannot reapply. Self-declared activation is not verified identity or document inspection.
 - BIXGO trip chat uses participant-scoped bixgo_trip_messages and row-locked send RPCs; text stays inside the trip, BIX CALL remains unchanged for voice/video, and order audio has a separate gesture-unlocked context.
+- App photos: profiles.bixtok/bixcall/bixgo_avatar_path set only via bix_profile_set_app_avatar; BIXGO new-order background alerts go via notifyBixPush type 'order' to drivers from server-only bixgo_order_alert_targets (same radius rule as dispatch).

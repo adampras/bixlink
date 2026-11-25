@@ -1534,6 +1534,13 @@
       "when": 1795598864100,
       "tag": "0218_bixgo_fast_track_trip_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 219,
+      "version": "7",
+      "when": 1795602103072,
+      "tag": "0219_bixgo_app_avatar_and_order_alert_targets",
+      "breakpoints": true
     }
   ]
 }

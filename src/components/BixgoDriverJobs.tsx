@@ -1,3 +1,4 @@
+import { enableBackgroundAlerts } from '@/lib/bix-push';
 import { BixgoTripPayee } from '@/components/BixgoDriverPay';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
@@ -128,6 +129,7 @@ export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false, showSu
         if (sound && audioReady) { setSound(false); return; }
         const ready = await unlockOrderAudio(); setAudioReady(ready); setSound(true);
         if (ready) jobChime(); else toast.error(text('Tap again to enable order sound.'));
+        void enableBackgroundAlerts().then(r => { if (r === 'iframe') toast.message(text('Open BIXGO in its own tab or the installed app to get locked-screen alerts.')); else if (r === 'denied') toast.error(text('Notifications are blocked. Allow them in your browser site settings.')); else if (r === 'ok') toast.success(text('Background order alerts on')); });
       }} className="h-auto min-h-9 whitespace-normal text-[11px]">{sound && audioReady ? <Volume2/> : <VolumeX/>}{text(sound && audioReady ? 'Order sound on' : 'Enable order sound')}</Button>}</div>
       {online && sound && !audioReady && <p className="mb-2 text-[10px] text-muted-foreground">{text('Tap to enable sound. Background alerts depend on your phone and browser.')}</p>}
       {!online && <p className="text-[11px] text-muted-foreground">Go online to receive nearby orders across city borders.</p>}
