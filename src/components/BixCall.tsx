@@ -405,7 +405,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         room = new LK.Room({ adaptiveStream: false, dynacast: true, webAudioMix: false, audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }, publishDefaults: { dtx: false, red: true, stopMicTrackOnMute: false } } as never);
         roomRef.current = room;
         room.on(LK!.RoomEvent.TrackSubscribed, (t: RemoteTrack) => {
-          if (t.kind === LK!.Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); setRemoteVideo(true); }
+          if (t.kind === LK!.Track.Kind.Video && remoteV.current) { t.attach(remoteV.current); if (backV.current) t.attach(backV.current); setRemoteVideo(true); }
           if (t.kind === LK!.Track.Kind.Audio) attachAudio(t);
         });
         room.on(LK.RoomEvent.AudioPlaybackStatusChanged, syncAudioPlayback);
@@ -415,7 +415,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
         room.on(LK!.RoomEvent.TrackUnsubscribed, (t: RemoteTrack) => { t.detach().forEach(e => { if (e.tagName === 'AUDIO') e.remove(); }); if (t.kind === LK!.Track.Kind.Video) setRemoteVideo(false); });
         room.on(LK!.RoomEvent.ParticipantDisconnected, () => onEnd());
         // After a network hiccup, re-bind every remote track so neither side goes silent/black.
-        room.on(LK!.RoomEvent.Reconnected, () => { void room?.startAudio().catch(() => {}); room?.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { const tr = pub.track as RemoteTrack | undefined; if (!tr) return; if (tr.kind === LK!.Track.Kind.Audio) attachAudio(tr); else if (remoteV.current) tr.attach(remoteV.current); })); });
+        room.on(LK!.RoomEvent.Reconnected, () => { void room?.startAudio().catch(() => {}); room?.remoteParticipants.forEach(p => p.trackPublications.forEach(pub => { const tr = pub.track as RemoteTrack | undefined; if (!tr) return; if (tr.kind === LK!.Track.Kind.Audio) attachAudio(tr); else if (remoteV.current) { tr.attach(remoteV.current); if (backV.current) tr.attach(backV.current); } })); });
         room.on(LK!.RoomEvent.ConnectionQualityChanged, (q, p) => { if (p.isLocal) setQuality(String(q) as 'excellent' | 'good' | 'poor' | 'unknown'); });
         await room.connect(res.url, res.token);
         void room.startAudio().catch(() => {});
@@ -485,10 +485,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     await lp.setCameraEnabled(on, { facingMode: facing, resolution: res },
       // WA-style: hardware H.264, ~1.3 Mbps cap and 3 simulcast layers so weak signal steps down instead of freezing.
       { videoCodec: 'h264', simulcast: true, degradationPreference: 'balanced', videoEncoding: { maxBitrate: prof.maxBitrate, maxFramerate: res.frameRate, priority: 'high' } as never,
-        videoSimulcastLayers: [
-          { width: 480, height: 270, resolution: { width: 480, height: 270, frameRate: 20 }, encoding: { maxBitrate: 300_000, maxFramerate: 20 } },
-          { width: 960, height: 540, resolution: { width: 960, height: 540, frameRate: 30 }, encoding: { maxBitrate: 900_000, maxFramerate: 30 } },
-        ] as never });
+        videoSimulcastLayers: [new LK!.VideoPreset(480, 270, 300_000, 20), new LK!.VideoPreset(960, 540, 900_000, 30)] });
     // 'motion' keeps frames smooth and low-latency instead of stalling to hold detail.
     const mt = lp.getTrackPublication(LK!.Track.Source.Camera)?.track?.mediaStreamTrack; if (on && mt && 'contentHint' in mt) mt.contentHint = 'detail';
     setCam(on);
@@ -507,7 +504,7 @@ function CallScreen({ call, onAccept, onDecline, onEnd, onClose }: { call: Activ
     const pub = roomRef.current?.localParticipant.getTrackPublication(LK!.Track.Source.Camera);
     const tr = pub?.track as unknown as { restartTrack?: (o: object) => Promise<void> } | undefined;
     const nf = !front; setFront(nf);
-    await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment', resolution: { width: 1280, height: 720, frameRate: 30 } }).catch(() => {}); try { const m2 = (tr as unknown as { mediaStreamTrack?: MediaStreamTrack })?.mediaStreamTrack; if (m2) m2.contentHint = 'motion'; } catch { /* optional */ } void Promise.resolve().catch(() => {});
+    await tr?.restartTrack?.({ facingMode: nf ? 'user' : 'environment', resolution: { width: 1280, height: 720, frameRate: 30 } }).catch(() => {}); try { const m2 = (tr as unknown as { mediaStreamTrack?: MediaStreamTrack })?.mediaStreamTrack; if (m2) m2.contentHint = 'motion'; } catch { /* optional */ } { const lt = roomRef.current?.localParticipant.getTrackPublication(LK!.Track.Source.Camera)?.track; if (lt && localV.current) lt.attach(localV.current); } void Promise.resolve().catch(() => {});
   };
   // Screen share: shows PDFs, gallery photos or any app to the other side. Needs browser support (Android WebView/APK usually lacks it).
   const [screen, setScreen] = useState(false);
