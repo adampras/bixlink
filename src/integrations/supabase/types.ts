@@ -1618,6 +1618,7 @@ export type Database = {
         Row: {
           bix_amount: number
           bonus_bix: number
+          claimed_bix: number
           created_at: string
           dividend_daily_usd: number
           genesis_serial: number
@@ -1633,6 +1634,7 @@ export type Database = {
         Insert: {
           bix_amount: number
           bonus_bix?: number
+          claimed_bix?: number
           created_at?: string
           dividend_daily_usd?: number
           genesis_serial?: number
@@ -1648,6 +1650,7 @@ export type Database = {
         Update: {
           bix_amount?: number
           bonus_bix?: number
+          claimed_bix?: number
           created_at?: string
           dividend_daily_usd?: number
           genesis_serial?: number
@@ -5175,6 +5178,8 @@ export type Database = {
         Args: { p_strategy: string; p_usd: number }
         Returns: Json
       }
+      bix_presale_claim_released: { Args: never; Returns: Json }
+      bix_presale_claimed_total: { Args: never; Returns: number }
       bix_presale_config: { Args: never; Returns: Json }
       bix_presale_dividend: { Args: { p_user: string }; Returns: number }
       bix_presale_owner1_wallets: { Args: never; Returns: boolean }

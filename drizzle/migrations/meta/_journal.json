@@ -1541,6 +1541,13 @@
       "when": 1795602103072,
       "tag": "0219_bixgo_app_avatar_and_order_alert_targets",
       "breakpoints": true
+    },
+    {
+      "idx": 220,
+      "version": "7",
+      "when": 1795612553616,
+      "tag": "0220_presale_vesting_withdraw",
+      "breakpoints": true
     }
   ]
 }

@@ -6,7 +6,7 @@ import { BixShell } from '@/components/BixShell';
 import { DeveloperCovenant } from '@/components/DeveloperCovenant';
 import { Button } from '@/components/ui/button';
 import { useMember } from '@/lib/useMember';
-import { buyPresaleFlex, getPresaleStatus } from '@/lib/presale.functions';
+import { buyPresaleFlex, getPresaleStatus, claimPresaleReleased, getPresaleClaimed } from '@/lib/presale.functions';
 import { getPresaleWallets, payPresaleTx } from '@/lib/presale-pay.functions';
 import { QRCodeSVG } from 'qrcode.react';
 import { presaleReleased } from '@/lib/presale';
@@ -33,6 +33,10 @@ function PresalePage() {
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   const [usd, setUsd] = useState(500); const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false); const [msg, setMsg] = useState(''); const [err, setErr] = useState('');
+  const claimFn = useServerFn(claimPresaleReleased); const loadClaimed = useServerFn(getPresaleClaimed);
+  const cq = useQuery({ queryKey: ['presale-claimed', user?.id], queryFn: () => loadClaimed(), enabled: !!user });
+  const [wdBusy, setWdBusy] = useState(false); const [wdMsg, setWdMsg] = useState('');
+  const doWd = async () => { setWdBusy(true); setWdMsg(''); try { const r = await claimFn(); setWdMsg(`✓ ${number(r.bix, { maximumFractionDigits: 4 })} BIX masuk ke saldo Dompet`); await Promise.all([qc.invalidateQueries({ queryKey: ['presale-claimed'] }), qc.invalidateQueries({ queryKey: ['my-wallet'] }), qc.invalidateQueries({ queryKey: ['member'] })]); } catch (e) { setWdMsg(e instanceof Error ? e.message : 'Gagal menarik BIX'); } finally { setWdBusy(false); } };
   const loadW = useServerFn(getPresaleWallets); const pay = useServerFn(payPresaleTx);
   const wq = useQuery({ queryKey: ['presale-wallets', user?.id], queryFn: () => loadW(), enabled: !!user });
   const wallets = wq.data ?? []; const [wi, setWi] = useState(0); const w = wallets[Math.min(wi, Math.max(0, wallets.length - 1))];
@@ -128,12 +132,12 @@ function PresalePage() {
         <div className="mt-3 flex items-start gap-3 rounded-2xl border border-chart-3/40 bg-chart-3/10 p-3"><Coins size={18} className="mt-0.5 shrink-0 text-chart-3"/><p className="text-[11px]"><b className="block text-chart-3">Bonus Sponsor {Number(cfg?.sponsorPct ?? 10)}% BIX</b><span className="text-muted-foreground">Your direct sponsor receives a BIX bonus from each presale purchase, locked with the same daily release schedule.</span></p></div>
         {err && <p role="alert" className="mt-3 text-sm text-destructive">{err}</p>}
         {msg && !receipt && <p role="status" className="mt-3 text-sm text-chart-2">{msg}</p>}
-        {receipt && <div className="fixed inset-0 z-[80] grid place-items-center bg-background/80 p-4 backdrop-blur-sm" style={{ maxHeight: "100dvh" }} onClick={() => { setReceipt(null); setMsg(""); }}><div role="dialog" aria-modal="true" aria-label="Purchase receipt" onClick={e => e.stopPropagation()} className="presale-receipt w-full max-w-sm overflow-y-auto" style={{ maxHeight: "90dvh" }}>
+        {receipt && <div className="fixed inset-0 z-[80] grid place-items-center bg-background/80 p-4 backdrop-blur-sm" style={{ maxHeight: "100dvh" }} onClick={() => { setReceipt(null); setMsg(""); }}><div role="dialog" aria-modal="true" aria-label="Purchase receipt" onClick={e => e.stopPropagation()} className="presale-receipt presale-receipt--mini w-full max-w-[320px] overflow-y-auto" style={{ maxHeight: "86dvh" }}>
           <div className="presale-receipt-check" aria-hidden>✓</div>
           <p className="lux-kicker text-center">{receipt.test ? 'TEST PURCHASE RECORDED' : 'PURCHASE SUCCESSFUL'}</p>
           <h3 className="lux-gold-text text-center font-display text-2xl font-black numeric">{number(receipt.bix)} BIX</h3>
           <p className="text-center text-[11px] text-foreground/80">Your BIX is locked in your presale vault and starts releasing tomorrow.</p>
-          <dl className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+          <dl className="presale-receipt-list mt-3 text-[11px]">
             {[['Date & time', fmtDT(receipt.at ?? Date.now())], ['Paid', `$${number(receipt.usd)} USDT`], ['Price', `$${price.toFixed(2)} / BIX`], ['Daily release', `${number(receipt.bix * PHASE1.dailyPct / 100, { maximumFractionDigits: 2 })} BIX (${PHASE1.dailyPct}%)`], ['Fully released', new Date(Date.now() + PHASE1.vestingDays * 864e5).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })], ['Payment', receipt.via], ['Certificate', receipt.serial ? `#${receipt.serial}` : '—']].map(([k, v]) => <div key={k} className="presale-receipt-row"><dt>{k}</dt><dd className="numeric">{v}</dd></div>)}
           </dl>
           {!!receipt.extra && receipt.extra > 0 && <p className="mt-2 text-center text-[10px] text-chart-2">${number(receipt.extra, { maximumFractionDigits: 2 })} extra was added to your USDT balance.</p>}
@@ -151,6 +155,13 @@ function PresalePage() {
           <div className="rounded-2xl bg-background/60 p-3"><Lock size={14} className="mx-auto text-muted-foreground"/><b className="numeric block font-display text-xl">{number(totalBix - unlocked, { maximumFractionDigits: 2 })}</b><span className="text-[10px] text-muted-foreground">Locked BIX</span></div>
           <div className="rounded-2xl bg-background/60 p-3"><Unlock size={14} className="mx-auto text-chart-2"/><b className="numeric block font-display text-xl text-chart-2">{number(unlocked, { maximumFractionDigits: 2 })}</b><span className="text-[10px] text-muted-foreground">Released BIX</span></div>
         </div>
+        {(() => { const real = orders.filter(o => o.status === 'locked').reduce((n, o) => n + presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now), 0); const avail = Math.max(0, real - (cq.data ?? 0)); return <div className="mt-3 rounded-2xl border border-chart-2/40 bg-chart-2/10 p-3 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Siap ditarik ke Dompet · rilis 1%/hari</p>
+          <b className="numeric block font-display text-xl text-chart-2">{number(avail, { maximumFractionDigits: 4 })} BIX</b>
+          <Button className="mt-2 h-10 w-full rounded-full font-black" disabled={wdBusy || avail < 0.0001} onClick={doWd}>{wdBusy ? 'Memproses…' : 'WD BIX Vesting ke Dompet'}</Button>
+          {wdMsg && <p role="status" className="mt-2 text-[11px]">{wdMsg}</p>}
+          <p className="mt-1 text-[10px] text-muted-foreground">Sudah ditarik: {number(cq.data ?? 0, { maximumFractionDigits: 4 })} BIX. Pembelian uji tidak bisa ditarik.</p>
+        </div>; })()}
         {orders.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">No presale purchases yet.</p> : <ul className="mt-4 grid gap-2">{orders.map(o => { const r = presaleReleased(Number(o.bix_amount), o.release_days, o.created_at, now); const pct = Math.min(100, r / Number(o.bix_amount) * 100); const day = Math.min(o.release_days, Math.floor((now - Date.parse(o.created_at)) / 864e5)); return <li key={o.id} className="rounded-2xl border border-border p-3 text-xs">
           <div className="flex justify-between"><b>${number(Number(o.package_usd))} → {number(Number(o.bix_amount))} BIX</b><span className="text-muted-foreground"><CalendarClock size={11} className="inline"/> Day {day}/{o.release_days}</span></div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${pct}%` }}/></div>

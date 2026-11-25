@@ -44,3 +44,17 @@ export const buyPresaleFlex = createServerFn({ method: 'POST' }).middleware([req
     if (error) throw new Error(error.message);
     return r as unknown as { id: string; bix: number; serial: number };
   });
+
+export const claimPresaleReleased = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: r, error } = await context.supabase.rpc('bix_presale_claim_released' as never);
+    if (error) throw new Error(error.message);
+    return r as unknown as { bix: number };
+  });
+
+export const getPresaleClaimed = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc('bix_presale_claimed_total' as never);
+    if (error) throw new Error(error.message);
+    return Number(data ?? 0);
+  });

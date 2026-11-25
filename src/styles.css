@@ -9604,3 +9604,22 @@ html body .comm-voice .comm-vtime{font-size:10px}
 .hub-midnight .hub-group .hub-tile,.hub-midnight .hub-group .hub-tile.hub-photo{border:1px solid oklch(.84 .15 88 / .45)!important}
 .hub-midnight .hub-group .hub-tile.is-active{border-color:oklch(.88 .16 92)!important}
 .hub-midnight .hub-group-head{border-bottom:1px solid oklch(.84 .15 88 / .22);padding-bottom:.35rem}
+
+/* Presale receipt — minimal list */
+.presale-receipt--mini { padding: 1rem .9rem .85rem; }
+.presale-receipt--mini .presale-receipt-check { width: 38px; height: 38px; margin: -2rem auto .35rem; font-size: 18px; }
+.presale-receipt--mini h3 { font-size: 1.35rem; }
+.presale-receipt-list { display: grid; gap: 0; border-radius: .8rem; border: 1px solid rgba(168,85,247,.28); overflow: hidden; }
+.presale-receipt-list .presale-receipt-row { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; border: 0; border-radius: 0; padding: .4rem .6rem; background: transparent; border-bottom: 1px solid rgba(255,255,255,.06); }
+.presale-receipt-list .presale-receipt-row:last-child { border-bottom: 0; }
+.presale-receipt-list .presale-receipt-row dd { font-size: 11px; text-align: right; }
+.presale-receipt--mini :is(a, button) { margin-top: .5rem !important; }
+
+/* Main dock — flat full-width rectangle, no ring */
+@media (max-width: 1279px) {
+  html body nav[aria-label="Main"].glass-dock { left: 0 !important; right: 0 !important; inset-inline: 0 !important; bottom: 0 !important; margin: 0 !important; max-width: none !important; width: 100% !important; border-radius: 0 !important; border-width: 1px 0 0 0 !important; border-top: 1px solid rgb(255 215 0 / .22) !important; box-shadow: none !important; padding-bottom: env(safe-area-inset-bottom, 0px) !important; }
+  html body nav[aria-label="Main"].glass-dock::after { display: none !important; }
+}
+nav.glass-dock .dock-wallet, html body nav.glass-dock .dock-wallet { transform: none !important; }
+nav.glass-dock .dock-wallet svg, html[data-chrono="on"] nav.glass-dock .dock-wallet svg { padding: 0 !important; width: 24px !important; height: 24px !important; background: none !important; border: 0 !important; box-shadow: none !important; animation: none !important; color: currentColor !important; }
+nav.glass-dock .mobile-nav-on::before { display: none !important; }
