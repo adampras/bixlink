@@ -1513,6 +1513,20 @@
       "when": 1795564148995,
       "tag": "0215_app_specific_avatars",
       "breakpoints": true
+    },
+    {
+      "idx": 216,
+      "version": "7",
+      "when": 1795596715052,
+      "tag": "0216_bixgo_cross_city_gps_dispatch",
+      "breakpoints": true
+    },
+    {
+      "idx": 217,
+      "version": "7",
+      "when": 1795596891842,
+      "tag": "0217_bixgo_dispatch_reset_on_online_change",
+      "breakpoints": true
     }
   ]
 }

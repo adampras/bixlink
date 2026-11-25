@@ -21,6 +21,7 @@ import { BixgoDriverLocation } from '@/components/BixgoDriverLocation';
 import { BixgoEarnings } from '@/components/BixgoEarnings';
 import { earningsTotals } from '@/lib/bixgo-earnings';
 import { orderCategory } from '@/lib/bixgo-language';
+import { BixgoDispatchGps } from '@/components/BixgoDispatchGps';
 
 /** Drag-to-confirm control; fires once when the knob reaches the end. Keyboard: Enter/Space. */
 export function SlideAccept({ onDone, busy }: { onDone: () => void; busy: boolean }) {
@@ -34,7 +35,7 @@ export function SlideAccept({ onDone, busy }: { onDone: () => void; busy: boolea
   </div>;
 }
 
-type Job = { id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; fare_idr?: number; pay_method?: string; status: string; fare_usdt: number; driver_usdt: number; fare_bix?: number; driver_bix?: number; gas_bix?: number; created_at: string; completed_at?: string | null; pickup_note?: string; rating?: number | null; rating_note?: string; owner_usdt?: number; owner_bix?: number };
+type Job = { id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; fare_idr?: number; pay_method?: string; status: string; fare_usdt: number; driver_usdt: number; fare_bix?: number; driver_bix?: number; gas_bix?: number; created_at: string; completed_at?: string | null; pickup_note?: string; rating?: number | null; rating_note?: string; owner_usdt?: number; owner_bix?: number; pickup_distance_km?: number | null };
 const SVC: Record<string, string> = { ride: 'Ride', car: 'Car', food: 'Food', send: 'Send', mart: 'Mart' };
 
 const usdt = (n: number) => `${Number(n || 0).toFixed(2)} USDT`;
@@ -47,6 +48,8 @@ const BADGE: Record<PayKind, string> = { usdt: 'USDT · Auto hold', bix: 'BIX To
 export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false, showSummary = true }: { lux?: boolean; showSummary?: boolean; online: boolean; adj?: number; onRating?: (r: { avg: number | null; n: number }) => void }) {
   const [open, setOpen] = useState<Job[]>([]);
   const [mine, setMine] = useState<Job[]>([]);
+  const [gpsReady, setGpsReady] = useState(false);
+  const [serverGpsReady, setServerGpsReady] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [pax, setPax] = useState<Record<string, string>>({});
@@ -54,8 +57,9 @@ export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false, showSu
   const primed = useRef(false);
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('bixgo_driver_jobs');
-    if (error) return;
-    const d = data as { open: Job[]; mine: Job[]; rating?: { avg: number | null; n: number } };
+    if (error) { setOpen([]); setServerGpsReady(false); return; }
+    const d = data as { open: Job[]; mine: Job[]; gps_ready?: boolean; rating?: { avg: number | null; n: number } };
+    setServerGpsReady(d.gps_ready === true);
     if (d.rating) onRating?.(d.rating);
     const nextOpen = d.open ?? [];
     const fresh = nextOpen.filter(j => !seen.current.has(j.id));
@@ -122,10 +126,12 @@ export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false, showSu
 
     <div>
       <h4 className="mb-2 text-xs font-black">Incoming orders</h4>
-      {!online && <p className="text-[11px] text-muted-foreground">Go online to receive orders in your city.</p>}
-      {online && !open.length && <p className="text-[11px] text-muted-foreground">No open orders right now. This list refreshes every 10 seconds.</p>}
-      <div className="space-y-2">{open.map(j => { const est = Math.round(Number(j.total_idr) * (1 + adj / 100)); return <div key={j.id} data-order-category={orderCategory(j.service)} className={`bixgo-order-category space-y-2 rounded-lg border border-border p-3 ${lux ? 'bgl-driver-order' : ''}`}>
+      {!online && <p className="text-[11px] text-muted-foreground">Go online to receive nearby orders across city borders.</p>}
+      {online && <BixgoDispatchGps onReady={setGpsReady} onUpdated={() => void load()}/>}
+      {online && gpsReady && serverGpsReady && !open.length && <p className="text-[11px] text-muted-foreground">No open orders right now. This list refreshes every 10 seconds.</p>}
+      <div className="space-y-2">{(online && gpsReady && serverGpsReady ? open : []).map(j => { const est = Math.round(Number(j.total_idr) * (1 + adj / 100)); return <div key={j.id} data-order-category={orderCategory(j.service)} className={`bixgo-order-category space-y-2 rounded-lg border border-border p-3 ${lux ? 'bgl-driver-order' : ''}`}>
         <p className="bixgo-order-label text-xs font-bold">{orderCategory(j.service) === 'people' ? 'People' : orderCategory(j.service) === 'food' ? 'Food pickup' : 'Goods'}</p>
+        {j.pickup_distance_km != null && <p className="text-[11px] text-muted-foreground"><span>Distance to pickup</span> · {Number(j.pickup_distance_km).toFixed(1)} km</p>}
         <div className="flex items-center justify-between gap-2"><Pay j={j}/><b className="text-xs tabular-nums">{rp(est)}{adj !== 0 && <span className="ml-1 text-[10px] text-primary">({adj > 0 ? '+' : ''}{adj}%)</span>}</b></div>
         {lux && <div className="bgl-driver-radar"><small>Incoming order</small><MapPin className="mt-2 h-5 w-5 text-primary"/><strong>{Number(j.km).toFixed(1)}<em>km</em></strong><span className="tracking-[.4em]">TRIP</span><hr/><small>Payout (est.)</small><b>{payKind(j.pay_method) === 'bix' ? bixf((j.driver_bix ?? 0) * (1 + adj / 100)) : payKind(j.pay_method) === 'cash' ? rp(est) : usdt((j.driver_usdt ?? 0) * (1 + adj / 100))}</b></div>}
         {lux ? <div className="bgl-route-card"><div className="bgl-route-line"><p><small>Pickup</small>{j.pickup}</p><p><small>Destination</small>{j.dropoff}</p></div><div className="bgl-route-tag"><span>♛</span><b>{SVC[j.service] ?? j.service}</b><small>{j.vehicle}</small></div></div> : <Route j={j}/>}

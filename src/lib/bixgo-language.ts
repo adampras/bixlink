@@ -7,6 +7,13 @@ export function bixgoLanguage(language: string): BixgoLanguage { return language
 /** Presentation aliases only: service IDs, recorded vehicle names and payments remain canonical. */
 export const BIXGO_PHRASES: Record<string, string> = {
   ...bixgoExtraPhrases,
+  'Go online to receive nearby orders across city borders.': 'Aktifkan online untuk menerima pesanan terdekat lintas kota.',
+  'GPS active · nearby orders across city borders': 'GPS aktif · pesanan terdekat lintas kota',
+  'GPS unavailable. Enable location to find nearby orders.': 'GPS tidak tersedia. Aktifkan lokasi untuk mencari pesanan terdekat.',
+  'GPS is not accurate yet. Retry near an open area.': 'GPS belum akurat. Coba lagi di area terbuka.',
+  'Location update failed. Check connection and retry.': 'Lokasi gagal diperbarui. Periksa koneksi dan coba lagi.',
+  'Location permission denied. Enable location and retry.': 'Izin lokasi ditolak. Aktifkan lokasi dan coba lagi.',
+  'Retry GPS': 'Coba GPS lagi', 'Distance to pickup': 'Jarak ke titik jemput',
   'BIX Bike': 'BIX Motor', 'BIX Car': 'BIX Mobil', 'BIX Delivery': 'BIX Kirim', 'BIX Food': 'BIX Kuliner', 'BIX Mart': 'BIX Belanja', 'BIX Personal Shopper': 'BIX Titip',
   'Rider': 'Penumpang', 'Driver': 'Pengemudi', 'Merchant': 'Mitra Toko',
   'Home': 'Beranda', 'Services': 'Layanan', 'Activity': 'Aktivitas', 'Wallet': 'Dompet', 'Account': 'Akun', 'Notifications': 'Notifikasi', 'Inbox': 'Pesan', 'Settings': 'Pengaturan',

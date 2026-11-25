@@ -3062,6 +3062,30 @@ export type Database = {
         }
         Relationships: []
       }
+      bixgo_dispatch_positions: {
+        Row: {
+          accuracy: number
+          lat: number
+          lng: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy: number
+          lat: number
+          lng: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy?: number
+          lat?: number
+          lng?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bixgo_driver_licenses: {
         Row: {
           accept_bank: boolean
@@ -5433,6 +5457,32 @@ export type Database = {
       bixgo_cancel_trip: {
         Args: { p_id: string; p_note?: string; p_reason: string }
         Returns: Json
+      }
+      bixgo_dispatch_distance: {
+        Args: {
+          p_lat: number
+          p_lng: number
+          p_to_lat: number
+          p_to_lng: number
+        }
+        Returns: number
+      }
+      bixgo_dispatch_location: {
+        Args: { p_accuracy: number; p_lat: number; p_lng: number }
+        Returns: undefined
+      }
+      bixgo_dispatch_matches: {
+        Args: {
+          p_at: string
+          p_city: string
+          p_lat: number
+          p_lng: number
+          p_order_city: string
+          p_pickup_lat: number
+          p_pickup_lng: number
+          p_vehicle: string
+        }
+        Returns: boolean
       }
       bixgo_driver_accept: { Args: { p_id: string }; Returns: Json }
       bixgo_driver_advance: {

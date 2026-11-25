@@ -201,6 +201,11 @@
 - [x] Add content gift celebrations, incoming gift badges and balance notices using recorded net amounts; preserve existing claims and BIX/BIXP separation.
 - [ ] Verify signed-in content/balance notices and phone/desktop fit without moving funds.
 
+## BIXGO cross-city GPS dispatch
+- [x] Match nearby orders across city borders using private fresh driver GPS (motor 5 km, car 8 km), nearest-first listing and shared acceptance guard; preserve payment and store delivery rules.
+- [x] Verify server radius/city/stale/missing-location rules, authenticated phone GPS update and permission-denied/retry flow; 22 regression tests pass, offline restored and test location removed, no order accepted or money moved.
+- [ ] Verify physical two-device cross-city order acceptance — requires an authorized real driver/passenger trip; browser GPS simulation does not verify actual device location or dispatch speed.
+
 ## BIXGO bilingual clarity
 - [x] Synchronize a two-option ID/EN selector across passenger, driver and merchant screens without removing other ecosystem languages; signed-in switch/reload verified.
 - [x] Standardize service names, immediate service entry and payment groups; preserve recorded fares and existing payment rules. Mobile/desktop route, cash selection and unchanged user pickup notes verified without submission.
