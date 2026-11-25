@@ -217,7 +217,8 @@
 - [ ] Verify delivery-photo shortcut through existing BIX CALL photo attachment with an authorized active delivery — no active delivery in available account; no receipt-level photo ledger is added.
 
 ## BIXGO friendly trip access
-- [ ] Add lightweight driver fast-track with verified email, safety declaration, owner override and no free balances; preserve suspended-account guard.
-- [ ] Add participant-only in-trip chat and quick messages without leaving BIXGO; retain BIX CALL voice/video as alternatives.
-- [ ] Improve existing order sound unlocking, navigation precision and pickup clarity without duplicating working features or changing fares/settlement.
-- [ ] Test permissions, onboarding and chat with authenticated accounts; phone/desktop fit and existing regression checks.
+- [x] Add lightweight driver fast-track with verified real email, safety declaration, Owner 1 override and no free balances; fleet stays pending and suspended accounts cannot reapply or go online. This is not document authentication.
+- [x] Add participant-only in-trip text chat, unread badge and quick messages without leaving BIXGO; retain unchanged BIX CALL voice/video as alternatives. Existing photo attachment remains a separate BIX CALL shortcut.
+- [x] Improve existing gesture-unlocked order sound, coordinate-based navigation and pickup clarity without duplicating working features or changing fares/settlement; GPS failure no longer silently selects a landmark.
+- [x] Verified temporary-driver registration, safety checkbox, duplicate/owner-setting restrictions, bidirectional chat UI, idempotent sends, direct-write/anonymous/unassigned/closed-chat rejection, suspended-account guards, ID/EN and opaque portal on phone/desktop. 34 regressions and six SQL assertions passed; all temporary zero-fare trip/chat/license records removed, no balances moved.
+- [ ] Verify actual-phone order sound/vibration and closed/background notification behavior — physical phones and browser/OS support required; no new background-delivery guarantee.

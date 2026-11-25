@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MessageCircle, Send, Phone, Video, Loader2 } from 'lucide-react';
+import './bixgo-trip-chat.css';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { MessageCircle, Send, Phone, Video, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { startBixCall } from '@/components/BixCall';
 import { chatCanSend } from '@/lib/bixgo-friendly';
@@ -59,7 +61,8 @@ export function BixgoTripChat({ tripId, peerId, peerName, status, role }: { trip
   return <>
     <Button variant="outline" className="h-auto min-h-11 flex-1 gap-1.5 whitespace-normal text-xs" onClick={() => setOpen(true)}><MessageCircle className="h-4 w-4"/>{text('Trip chat')}{unread > 0 && <span className="grid min-w-5 place-items-center rounded-full bg-primary px-1 text-primary-foreground">{unread > 99 ? '99+' : unread}</span>}</Button>
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent data-no-translate className="z-[950] flex h-[min(84dvh,700px)] max-h-[84dvh] w-[calc(100%-1.5rem)] flex-col gap-3 overflow-hidden bg-background p-4 text-foreground" aria-label={text('Trip chat')}>
+      <DialogPrimitive.Portal><DialogPrimitive.Overlay className="bixgo-chat-overlay"/><DialogPrimitive.Content data-no-translate className="bixgo-chat-panel" aria-label={text('Trip chat')}>
+        <DialogPrimitive.Close asChild><Button variant="ghost" size="icon" aria-label={text('Close')} className="absolute right-2 top-2"><X/></Button></DialogPrimitive.Close>
         <div className="shrink-0 pr-7"><DialogTitle>{text('Trip chat')}</DialogTitle><DialogDescription className="mt-1 truncate">{peerName} · #{tripId.slice(0, 8).toUpperCase()}</DialogDescription></div>
         <div className="flex shrink-0 gap-2">
           <Button variant="outline" size="sm" onClick={() => startBixCall(peerId, peerName, 'voice')}><Phone/>{text('Call')}</Button>
@@ -75,7 +78,7 @@ export function BixgoTripChat({ tripId, peerId, peerName, status, role }: { trip
           <div className="flex shrink-0 gap-1 overflow-x-auto">{quick.map(q => <Button key={q} variant="outline" size="sm" disabled={busy} onClick={() => void send(text(q))} className="h-auto max-w-48 shrink-0 whitespace-normal text-left text-[11px]">{text(q)}</Button>)}</div>
           <form className="flex shrink-0 items-end gap-2" onSubmit={e => { e.preventDefault(); void send(body); }}><textarea aria-label={text('Message')} rows={2} maxLength={1000} value={body} onChange={e => setBody(e.target.value)} placeholder={text('Write a message…')} className="min-w-0 flex-1 resize-none rounded-lg border border-input bg-background p-2 text-sm outline-none focus:ring-1 focus:ring-ring"/><Button type="submit" size="icon" aria-label={text('Send message')} disabled={busy || !body.trim()} className="h-11 w-11 shrink-0">{busy ? <Loader2 className="animate-spin"/> : <Send/>}</Button></form>
         </> : <p className="text-center text-xs text-muted-foreground">{text('Trip ended · chat is read-only.')}</p>}
-      </DialogContent>
+      </DialogPrimitive.Content></DialogPrimitive.Portal>
     </Dialog>
   </>;
 }

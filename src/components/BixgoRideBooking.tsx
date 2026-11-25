@@ -49,7 +49,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
   const locate = async () => {
     setBusy('gps'); setErr('');
     try { const p = await getDevicePosition(); setFrom(await reverseGeocode(p.lat, p.lng)); setActive('to'); }
-    catch (e) { setErr(e instanceof Error ? e.message : 'GPS gagal'); if (LANDMARKS[0]) { setFrom(f => f ?? LANDMARKS[0]!); setActive('to'); } } finally { setBusy(null); }
+    catch (e) { setErr(e instanceof Error ? e.message : 'GPS gagal'); } finally { setBusy(null); }
   };
   useEffect(() => { void locate(); }, []);
   useEffect(() => {
@@ -71,7 +71,8 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
   const branch = from ? franchiseFor(cfg, from) : null;
   const price = (o: Opt) => { const base = cityFare(cfg, city, bixgoFare(cfg, o.svc, km).idr * o.mult); const disc = pay === 1 ? base * cfg.bixDiscountPct / 100 : 0; return { base, final: base - disc }; };
   const eta = (o: Opt) => route?.min != null ? Math.round(route.min * (o.svc === 'ride' ? 0.85 : 1)) : bixgoFare(cfg, o.svc, km).etaMin;
-  const cur = OPTS[sel]!;
+  const cur = OPTS[sel] ?? OPTS[0];
+  if (!cur) return null;
   const commission = Math.round(price(cur).final * cfg.commissionPct / 100);
   const split = splitCommission(branch, commission);
 
@@ -124,7 +125,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
     </section>}
 
     {stage === 'booked' && <section className={`relative z-[500] text-center ${bid ? 'bixgo-float mx-3 -mt-24 rounded-[28px] p-1.5' : '-mt-4 rounded-t-3xl bg-background px-4 pb-6 pt-5'}`}>
-      {bid ? <BixgoRadar bookingId={bid} summary={{ from: from?.name ?? '', to: to?.name ?? '', fare: idr(price(cur).final), pay: PAYS[pay]!, kind: vehicleKind(cur.name) }} onRetry={() => { setBid(null); setStage('choose'); }} onSwitch={() => { setBid(null); setStage('choose'); }} onClose={onBack}/> : <><CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">{ref ? `Booking request #${ref} sent` : 'Demo booking created'}</h2>
+      {bid ? <BixgoRadar bookingId={bid} summary={{ from: from?.name ?? '', to: to?.name ?? '', fare: idr(price(cur).final), pay: PAYS[pay] ?? 'Cash', kind: vehicleKind(cur.name) }} onRetry={() => { setBid(null); setStage('choose'); }} onSwitch={() => { setBid(null); setStage('choose'); }} onClose={onBack}/> : <><CheckCircle2 className="mx-auto h-12 w-12 text-primary"/><h2 className="mt-2 text-lg font-black">{ref ? `Booking request #${ref} sent` : 'Demo booking created'}</h2>
       <p className="text-sm text-muted-foreground">{cur.name} · {from?.name} → {to?.name}</p><p className="mt-1 text-xl font-black">{idr(price(cur).final)}</p><p className="text-[11px] text-muted-foreground tabular-nums">≈ {cryptoEquivalent(price(cur).final, cfg.usdtIdr).usdt} USDT · {cryptoEquivalent(price(cur).final, cfg.usdtIdr).bix} BIX</p>
       <p className="mt-2 text-[11px] text-muted-foreground">{ref ? (pay === 0 ? 'When a driver accepts, the fare is held from your USDT wallet and settled on completion.' : pay === 1 ? 'When a driver accepts, the BIX fare (with your discount) is held from your BIX balance and settled on completion.' : pay === 2 ? 'Pay the driver in cash. The final fare may differ slightly based on the driver’s own rate.' : pay === 3 ? 'When a driver accepts, their QR appears on your trip screen. Scan it, then tap “I\'ve paid”.' : 'When a driver accepts, their bank account appears on your trip screen. Transfer, then tap “I\'ve paid”.') : 'Sign in to send a real request to the operator. Nothing was charged.'}</p>
       <button onClick={onBack} className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground">Back to Home</button></>}

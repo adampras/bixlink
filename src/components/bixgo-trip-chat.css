@@ -1,0 +1,24 @@
+:root {
+  --bixgo-chat-surface: #111519;
+  --bixgo-chat-log: #090d11;
+  --bixgo-chat-text: #f4f5f6;
+  --bixgo-chat-muted: #b8c0c8;
+  --bixgo-chat-line: #343e48;
+  --bixgo-chat-scrim: #00000099;
+}
+html body .bixgo-chat-overlay { position:fixed!important; inset:0!important; z-index:2147481000!important; background:var(--bixgo-chat-scrim)!important; }
+html body .bixgo-chat-panel[role="dialog"] {
+  position:fixed!important; left:50%!important; top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  z-index:2147481001!important; width:calc(100% - 24px)!important; max-width:480px!important;
+  height:min(84dvh,700px)!important; max-height:84dvh!important;
+  display:flex!important; flex-direction:column!important; gap:12px!important;
+  overflow:hidden!important; padding:16px!important; border-radius:8px!important;
+  background:var(--bixgo-chat-surface)!important; color:var(--bixgo-chat-text)!important;
+  border:1px solid var(--bixgo-chat-line)!important; box-shadow:none!important;
+  letter-spacing:0!important; isolation:isolate;
+}
+html body .bixgo-chat-panel [role="log"] { background:var(--bixgo-chat-log)!important; border-color:var(--bixgo-chat-line)!important; }
+html body .bixgo-chat-panel textarea { background:var(--bixgo-chat-log)!important; color:var(--bixgo-chat-text)!important; border-color:var(--bixgo-chat-line)!important; }
+html body .bixgo-chat-panel .text-muted-foreground { color:var(--bixgo-chat-muted)!important; }
+html body .bixgo-chat-panel button { letter-spacing:0!important; text-transform:none!important; }
