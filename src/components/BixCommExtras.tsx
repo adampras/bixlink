@@ -41,6 +41,21 @@ export function CommunityTab({ render }: { render: (id: string, name: string) =>
   </>;
 }
 
+/** Chat tab prompt: one tap registers this phone for locked-screen call ringing; hidden once granted or in the APK. */
+export function RingPrompt() {
+  const [perm, setPerm] = useState('granted');
+  useEffect(() => {
+    const apk = !!(globalThis as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
+    setPerm(apk || typeof Notification === 'undefined' ? 'granted' : Notification.permission);
+  }, []);
+  if (perm === 'granted') return null;
+  return <section className="comm-card comm-notify">
+    <span className={`comm-notify-ic is-${perm}`}><Bell size={16}/></span>
+    <span className="min-w-0 flex-1"><b className="block text-sm">Aktifkan dering latar belakang</b><small className="text-muted-foreground">{perm === 'denied' ? 'Notifikasi diblokir. Izinkan di pengaturan situs browser.' : perm === 'open-in-new-tab' ? 'Buka BIXLINK di tab sendiri atau aplikasi terpasang.' : 'Agar panggilan tetap berdering saat HP terkunci.'}</small></span>
+    {perm === 'default' && <button type="button" onClick={() => void enableBixNotifications().then(p => setPerm(String(p)))}>Aktifkan</button>}
+  </section>;
+}
+
 /** SETTING tab: notification permission for chats and calls while BIXLINK is in the background. */
 export function NotifyCard() {
   const [perm, setPerm] = useState('default');

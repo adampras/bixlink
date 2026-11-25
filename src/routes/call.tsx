@@ -11,7 +11,7 @@ import { startBixCall, VQ_KEY, type VideoQuality } from '@/components/BixCall';
 import { BixGroupMeeting } from '@/components/BixGroupMeeting';
 import { BixGroups } from '@/components/BixGroups';
 import { useMember } from '@/lib/useMember';
-import { CommunityTab, NotifyCard } from '@/components/BixCommExtras';
+import { CommunityTab, NotifyCard, RingPrompt } from '@/components/BixCommExtras';
 import { supabase } from '@/integrations/supabase/client';
 import { BixShell } from '@/components/BixShell';
 import { BixAvatar, useBixCard } from '@/components/BixAvatar';
@@ -284,7 +284,7 @@ function CallInner() {
       <div className={`bc-head__search${searchOpen ? '' : ' is-collapsed'}`}><FindMember bar me={me} tier={tier} onChat={open}/></div>
     </div>
 
-    {view === 'chat' && <><DialFab me={me} tier={tier} onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
+    {view === 'chat' && <><RingPrompt/><DialFab me={me} tier={tier} onChat={open}/><ChatTab me={me} tier={tier} onOpen={open}/></>}
     {view === 'starred' && <StarredList onOpen={open}/>}
     {view === 'boardroom' && <BoardroomStage><BixGroupMeeting me={me} tier={tier}/></BoardroomStage>}
     {view === 'vault' && <SecureVault me={me}/>}

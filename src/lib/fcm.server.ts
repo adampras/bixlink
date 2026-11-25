@@ -19,7 +19,9 @@ export async function sendFcmToUser(admin: Admin, userId: string, data: Record<s
         // Notification block lets Android show + ring even when the app is fully closed (data-only is silent there).
         // Calls are data-only so the APK's BixCallService draws the WhatsApp-style Jawab/Tolak banner itself.
         body: JSON.stringify({ message: data['type'] === 'call'
-          ? { token, data, android: { priority: 'HIGH', ttl: `${ttlSeconds}s` } }
+          // Calls also carry a ring-channel notification so Android rings on a locked/killed phone even if the native service is asleep.
+          ? { token, data, notification: { title: data['title'] || 'BIX CALL', body: data['body'] || '' },
+              android: { priority: 'HIGH', ttl: `${ttlSeconds}s`, notification: { channel_id: 'bixcall_ring', sound: 'default', default_vibrate_timings: true, notification_priority: 'PRIORITY_MAX', visibility: 'PUBLIC', tag: data['callId'] ? `call-${data['callId']}` : undefined } } }
           : { token, data,
           notification: { title: data['title'] || 'BIX CALL', body: data['body'] || '' },
           android: { priority: 'HIGH', ttl: `${ttlSeconds}s`, notification: {
