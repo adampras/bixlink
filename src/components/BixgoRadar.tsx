@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, MessageCircle, Phone, RefreshCw, SearchX, X } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
+import { BixgoTripChat } from '@/components/BixgoTripChat';
 import { supabase } from '@/integrations/supabase/client';
 import { BixgoVehicleIcon, type VehicleKind } from '@/components/BixgoVehicleIcon';
 import { startBixCall } from '@/components/BixCall';
@@ -30,7 +30,7 @@ export function BixgoRadar({ bookingId, summary, onRetry, onSwitch, onClose }: {
 
   const cancel = async () => { if (bookingId) await supabase.rpc('bixgo_passenger_cancel', { p_id: bookingId }); onClose(); };
   const timeout = !found && !cancelled && sec >= LIMIT;
-  const msg = sec < 20 ? 'Menghubungkan ke driver terdekat…' : sec < 45 ? 'Memperluas jangkauan radar (3–5 km)…' : 'Menunggu konfirmasi driver di sekitar Anda…';
+  const msg = sec < 20 ? 'Menghubungkan ke driver terdekat…' : sec < 45 ? 'Mencari driver terdekat lintas kota…' : 'Menunggu konfirmasi driver di sekitar Anda…';
 
   if (found) return <div className="bixgo-radar-card rounded-3xl p-5 text-center">
     <CheckCircle2 className="mx-auto h-12 w-12 text-primary"/>
@@ -39,7 +39,7 @@ export function BixgoRadar({ bookingId, summary, onRetry, onSwitch, onClose }: {
     <p className="text-xs text-muted-foreground">Driver sedang menuju lokasi jemput Anda</p>
     <div className="mt-4 grid grid-cols-2 gap-2">
       <Button variant="outline" onClick={() => startBixCall(found.driver_user_id, found.driver_name || 'Driver', 'voice')} className="min-h-12 gap-2 whitespace-normal"><Phone className="h-4 w-4"/>Call driver</Button>
-      <Link to="/call" search={{ chat: found.driver_user_id, n: found.driver_name || 'Driver' }} className="flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border bg-card font-bold"><MessageCircle className="h-4 w-4"/>Chat driver</Link>
+      {bookingId && <BixgoTripChat tripId={bookingId} peerId={found.driver_user_id} peerName={found.driver_name || 'Driver'} status={found.status} role="rider"/>}
     </div>
     <button onClick={onClose} className="mt-3 min-h-12 w-full rounded-full bg-primary font-bold text-primary-foreground">Lihat perjalanan</button>
   </div>;

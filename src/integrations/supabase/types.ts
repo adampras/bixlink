@@ -3092,6 +3092,7 @@ export type Database = {
           accept_bix: boolean
           accept_cash: boolean
           accept_qris: boolean
+          approval_method: string
           bank_account: string
           bank_holder: string
           bank_name: string
@@ -3106,6 +3107,7 @@ export type Database = {
           plate: string
           qris_path: string | null
           rate_adj_pct: number
+          safety_declared_at: string | null
           status: string
           updated_at: string
           user_id: string
@@ -3117,6 +3119,7 @@ export type Database = {
           accept_bix?: boolean
           accept_cash?: boolean
           accept_qris?: boolean
+          approval_method?: string
           bank_account?: string
           bank_holder?: string
           bank_name?: string
@@ -3131,6 +3134,7 @@ export type Database = {
           plate?: string
           qris_path?: string | null
           rate_adj_pct?: number
+          safety_declared_at?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -3142,6 +3146,7 @@ export type Database = {
           accept_bix?: boolean
           accept_cash?: boolean
           accept_qris?: boolean
+          approval_method?: string
           bank_account?: string
           bank_holder?: string
           bank_name?: string
@@ -3156,6 +3161,7 @@ export type Database = {
           plate?: string
           qris_path?: string | null
           rate_adj_pct?: number
+          safety_declared_at?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -3383,6 +3389,38 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      bixgo_trip_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          sender_id: string
+          trip_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          sender_id: string
+          trip_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixgo_trip_messages_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "bixgo_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bixtok_comments: {
         Row: {
@@ -5489,6 +5527,29 @@ export type Database = {
         Args: { p_id: string; p_status: string }
         Returns: Json
       }
+      bixgo_driver_application_valid: {
+        Args: {
+          p_model: string
+          p_name: string
+          p_phone: string
+          p_plate: string
+          p_safe: boolean
+        }
+        Returns: boolean
+      }
+      bixgo_driver_apply: {
+        Args: {
+          p_city: string
+          p_full_name: string
+          p_mode: string
+          p_phone: string
+          p_plate: string
+          p_safety: boolean
+          p_vehicle_model: string
+          p_vehicle_type: string
+        }
+        Returns: string
+      }
       bixgo_driver_jobs: { Args: never; Returns: Json }
       bixgo_driver_location: {
         Args: { p_id: string; p_lat: number; p_lng: number }
@@ -5523,6 +5584,8 @@ export type Database = {
         Args: { p_adj: number; p_bix: boolean; p_cash: boolean }
         Returns: undefined
       }
+      bixgo_fast_track_enabled: { Args: never; Returns: boolean }
+      bixgo_fast_track_set: { Args: { p_enabled: boolean }; Returns: boolean }
       bixgo_jastip_cancel: { Args: { _id: string }; Returns: undefined }
       bixgo_jastip_set_status: {
         Args: { _id: string; _status: string }
@@ -5547,6 +5610,11 @@ export type Database = {
         Returns: undefined
       }
       bixgo_ref_stats: { Args: never; Returns: Json }
+      bixgo_trip_chat_access: { Args: { p_trip: string }; Returns: boolean }
+      bixgo_trip_chat_send: {
+        Args: { p_body: string; p_id: string; p_trip: string }
+        Returns: string
+      }
       bixgo_trip_confirm_paid: { Args: { p_id: string }; Returns: undefined }
       bixgo_trip_driver: { Args: { p_id: string }; Returns: Json }
       bixgo_trip_mark_paid: {

@@ -1527,6 +1527,13 @@
       "when": 1795596891842,
       "tag": "0217_bixgo_dispatch_reset_on_online_change",
       "breakpoints": true
+    },
+    {
+      "idx": 218,
+      "version": "7",
+      "when": 1795598864100,
+      "tag": "0218_bixgo_fast_track_trip_chat",
+      "breakpoints": true
     }
   ]
 }

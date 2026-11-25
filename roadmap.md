@@ -202,6 +202,7 @@
 - [ ] Verify signed-in content/balance notices and phone/desktop fit without moving funds.
 
 ## BIXGO cross-city GPS dispatch
+- [x] User reported successful BIXGO field testing on 25 November 2026; earlier physical-trip verification is reported, not independently observed.
 - [x] Match nearby orders across city borders using private fresh driver GPS (motor 5 km, car 8 km), nearest-first listing and shared acceptance guard; preserve payment and store delivery rules.
 - [x] Verify server radius/city/stale/missing-location rules, authenticated phone GPS update and permission-denied/retry flow; 22 regression tests pass, offline restored and test location removed, no order accepted or money moved.
 - [ ] Verify physical two-device cross-city order acceptance — requires an authorized real driver/passenger trip; browser GPS simulation does not verify actual device location or dispatch speed.
@@ -214,3 +215,9 @@
 - [ ] Verify incoming driver cards, merchant kitchen queue actions and completed-trip contact/receipt with authorized real records — available account has no registered store or active/completed trip; no financial orders fabricated. Actual call connection is not verified.
 - [x] Merchant delivery charges remain agreed by store/buyer, confirmed by user; no new automatic dispatch or expiry rule.
 - [ ] Verify delivery-photo shortcut through existing BIX CALL photo attachment with an authorized active delivery — no active delivery in available account; no receipt-level photo ledger is added.
+
+## BIXGO friendly trip access
+- [ ] Add lightweight driver fast-track with verified email, safety declaration, owner override and no free balances; preserve suspended-account guard.
+- [ ] Add participant-only in-trip chat and quick messages without leaving BIXGO; retain BIX CALL voice/video as alternatives.
+- [ ] Improve existing order sound unlocking, navigation precision and pickup clarity without duplicating working features or changing fares/settlement.
+- [ ] Test permissions, onboarding and chat with authenticated accounts; phone/desktop fit and existing regression checks.

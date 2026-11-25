@@ -9,12 +9,19 @@ import { BixgoDriverJobs } from '@/components/BixgoDriverJobs';
 import { BixgoDriverRates } from '@/components/BixgoDriverRates';
 import { BixgoDriverReady } from '@/components/BixgoDriverReady';
 import { BixgoCitySwitch, BixgoInvite } from '@/components/BixgoInvite';
+import { Button } from '@/components/ui/button';
+import { validDriverApplication } from '@/lib/bixgo-friendly';
+import { unlockOrderAudio } from '@/lib/bixgo-order-audio';
+import { useBixgoText } from '@/lib/useBixgoText';
 
 type License = { status: string; online: boolean; vehicle_type: string; vehicle_model: string; plate: string; city: string; operator_note: string; mode: string; rate_adj_pct?: number; accept_cash?: boolean; accept_bix?: boolean; accept_qris?: boolean; accept_bank?: boolean; qris_path?: string | null; bank_name?: string; bank_account?: string; bank_holder?: string };
 const VEHICLES = [['moto', 'BIX Moto'], ['urban', 'BIX Urban'], ['executive', 'BIX Executive'], ['black', 'BIX Black']] as const;
 
 /** Member BIXGO Passport: tier from active staking, own trip stats, and the Driver-Partner license / Driver Mode. */
 export function BixgoPassport({ cur, usdtIdr, city, lux = false }: { lux?: boolean; cur: GlobalCurrency; usdtIdr: number; city: string }) {
+  const text = useBixgoText();
+  const [safe, setSafe] = useState(false);
+  const [fastTrack, setFastTrack] = useState(false);
   const [uid, setUid] = useState<string | null>(null);
   const [stakeUsd, setStakeUsd] = useState(0);
   const [trips, setTrips] = useState({ n: 0, km: 0 });
@@ -39,23 +46,21 @@ export function BixgoPassport({ cur, usdtIdr, city, lux = false }: { lux?: boole
     setLic((l.data as License | null) ?? null);
     setEarn({ n: d.data?.length ?? 0, fare: (d.data ?? []).reduce((a, r) => a + Number(r.total_idr), 0) });
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(); void supabase.rpc('bixgo_fast_track_enabled').then(({ data }) => setFastTrack(data === true)); }, []);
 
   const tier = tierFor(stakeUsd); const next = nextTier(stakeUsd);
   const apply = async () => {
-    if (!form.full_name.trim() || !form.phone.trim() || !form.plate.trim()) { toast.error('Fill name, phone and plate'); return; }
+    if (!validDriverApplication(form, safe)) { toast.error(text('Complete your driver details and safety declaration')); return; }
     setBusy(true);
-    const { error } = await supabase.from('bixgo_driver_licenses').insert({ ...form, city, full_name: form.full_name.trim().slice(0, 80), phone: form.phone.trim().slice(0, 30), plate: form.plate.trim().slice(0, 20), vehicle_model: form.vehicle_model.trim().slice(0, 60) });
-    setBusy(false); if (error) toast.error(error.message); else { toast.success('License application sent for review'); void load(); }
+    try {
+      const { data, error } = await supabase.rpc('bixgo_driver_apply', { p_full_name: form.full_name, p_phone: form.phone, p_vehicle_type: form.vehicle_type, p_vehicle_model: form.vehicle_model, p_plate: form.plate, p_mode: form.mode, p_city: city, p_safety: safe });
+      if (error) toast.error(text(error.message)); else { toast.success(text(data === 'approved' ? 'Registration active. You can go online.' : 'Application submitted for review.')); setRedo(false); setSafe(false); void load(); }
+    } catch { toast.error(text('Registration failed. Please retry.')); }
+    finally { setBusy(false); }
   };
   const [redo, setRedo] = useState(false);
-  const startRedo = () => { if (!lic) return; const l = lic as License & { full_name?: string; phone?: string }; setForm({ full_name: l.full_name ?? '', phone: l.phone ?? '', vehicle_type: l.vehicle_type, vehicle_model: l.vehicle_model, plate: l.plate, mode: l.mode || 'self' }); setRedo(true); };
-  const reapply = async () => {
-    setBusy(true);
-    const { error } = await supabase.rpc('bixgo_driver_reapply', { p_full_name: form.full_name, p_phone: form.phone, p_vehicle_type: form.vehicle_type, p_vehicle_model: form.vehicle_model, p_plate: form.plate, p_mode: form.mode, p_city: city });
-    setBusy(false); if (error) toast.error(error.message); else { toast.success('Application resubmitted for review'); setRedo(false); void load(); }
-  };
-  const toggle = async () => { if (!lic) return; setBusy(true); const { error } = await supabase.rpc('bixgo_driver_set_online', { p_online: !lic.online }); setBusy(false); if (error) toast.error(error.message); else void load(); };
+  const startRedo = () => { if (!lic) return; const l = lic as License & { full_name?: string; phone?: string }; setForm({ full_name: l.full_name ?? '', phone: l.phone ?? '', vehicle_type: l.vehicle_type, vehicle_model: l.vehicle_model, plate: l.plate, mode: l.mode || 'self' }); setSafe(false); setRedo(true); };
+  const toggle = async () => { if (!lic) return; if (!lic.online) void unlockOrderAudio(); setBusy(true); const { error } = await supabase.rpc('bixgo_driver_set_online', { p_online: !lic.online }); setBusy(false); if (error) toast.error(error.message); else void load(); };
 
   if (!uid) return <section className="mx-4 mt-3 rounded-3xl border border-primary/30 bg-card p-4 text-xs text-muted-foreground">Sign in to open your BIXGO Passport and Driver Mode.</section>;
 
@@ -63,7 +68,7 @@ export function BixgoPassport({ cur, usdtIdr, city, lux = false }: { lux?: boole
     {lic?.status === 'approved' && !redo && <>
       <div className="rounded-3xl border border-primary/40 bg-card p-4">
         <div className="flex items-center justify-between text-[11px]"><span className="font-bold uppercase tracking-[0.2em] text-muted-foreground">Konsol Driver</span><span className="text-muted-foreground">{GLOBAL_CITIES.find(c => c.id === lic.city)?.city ?? lic.city}</span></div>
-        <button disabled={busy} onClick={() => void toggle()} className={`mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black ${lic.online ? 'bg-primary text-primary-foreground shadow-[0_0_24px_-8px_var(--primary)]' : 'border-2 border-primary text-primary'}`}><Power className="h-5 w-5"/>{lic.online ? 'ONLINE — menerima order' : 'OFFLINE — ketuk untuk mulai narik'}</button>
+        <Button disabled={busy} onClick={() => void toggle()} className={`mt-3 flex h-auto min-h-14 w-full items-center justify-center gap-2 whitespace-normal rounded-lg py-4 text-base font-black ${lic.online ? 'bg-primary text-primary-foreground' : 'border-2 border-primary bg-card text-primary'}`}><Power className="h-5 w-5"/>{lic.online ? 'ONLINE — menerima order' : 'OFFLINE — ketuk untuk mulai narik'}</Button>
         <div className="mt-3 grid grid-cols-3 gap-2 text-center tabular-nums">
           <div className="rounded-xl border border-border p-2"><b className="block text-lg">{earn.n}</b><span className="text-[10px] text-muted-foreground">Trip selesai</span></div>
           <div className="rounded-xl border border-border p-2"><b className="block truncate text-sm">{money(driverEarning(earn.fare))}</b><span className="text-[10px] text-muted-foreground">Pendapatan</span></div>
@@ -84,11 +89,13 @@ export function BixgoPassport({ cur, usdtIdr, city, lux = false }: { lux?: boole
       <h3 className="flex items-center gap-2 text-sm font-black"><ShieldCheck className="h-4 w-4 text-primary"/>Driver-Partner License</h3>
       {false && <p className="mt-2 text-muted-foreground">Available from Pro Navigator (active staking of $100 or more). Licensed drivers keep {DRIVER_SHARE_PCT}% of each completed fare.</p>}
       {(!lic || redo) && <div className="mt-2 space-y-2">
-        <p className="text-muted-foreground">Drive yourself or register a fleet driver. You keep {DRIVER_SHARE_PCT}% of completed fares; fares are held from the passenger's USDT wallet and settled to you on completion.</p>
+        <p className="text-muted-foreground">{text(fastTrack && form.mode === 'self' ? 'Complete details and verified email: self-driver registration activates automatically.' : 'Your application will be reviewed by the owner.')}</p>
+        <p className="text-muted-foreground">{text('You keep 85% of completed fares. Payment follows the passenger’s selected method; no starter balance is granted.')}</p>
         <div className="grid grid-cols-2 gap-1">{VEHICLES.map(([k, l]) => <button key={k} onClick={() => setForm({ ...form, vehicle_type: k })} className={`flex items-center justify-center gap-1 rounded-xl border py-2 ${form.vehicle_type === k ? 'border-primary bg-primary/15 font-bold' : 'border-border'}`}>{k === 'moto' ? <Bike className="h-4 w-4"/> : <CarFront className="h-4 w-4"/>}{l}</button>)}</div>
         <div className="grid grid-cols-2 gap-1">{([['self', 'I drive'], ['fleet', 'Fleet driver']] as const).map(([k, l]) => <button key={k} onClick={() => setForm({ ...form, mode: k })} className={`rounded-xl border py-2 ${form.mode === k ? 'border-primary bg-primary/15 font-bold' : 'border-border'}`}>{l}</button>)}</div>
         {(['full_name', 'phone', 'vehicle_model', 'plate'] as const).map(k => <input key={k} className="form-input" maxLength={80} placeholder={{ full_name: 'Driver full name', phone: 'Phone / WhatsApp', vehicle_model: 'Vehicle model (e.g. Honda Vario)', plate: 'Plate number' }[k]} value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })}/>)}
-        <button disabled={busy} onClick={() => void (redo ? reapply() : apply())} className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-50">{busy ? <Loader2 className="mx-auto h-4 w-4 animate-spin"/> : redo ? 'Resubmit application' : `Apply in ${GLOBAL_CITIES.find(c => c.id === city)?.city ?? 'my city'}`}</button>
+        <label data-no-translate className="flex items-start gap-2 rounded-lg border border-border p-3 text-xs"><input type="checkbox" checked={safe} onChange={e => setSafe(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0"/><span>{text('I hold a valid driving licence and vehicle registration, the vehicle is safe, and my details are accurate.')}</span></label>
+        <Button disabled={busy || !validDriverApplication(form, safe)} onClick={() => void apply()} className="h-auto min-h-11 w-full whitespace-normal rounded-lg py-3 font-bold">{busy ? <Loader2 className="h-4 w-4 animate-spin"/> : text(redo ? 'Resubmit application' : 'Register as driver')}</Button>
         {redo && <button onClick={() => setRedo(false)} className="w-full rounded-full border border-border py-2 text-muted-foreground">Cancel</button>}
       </div>}
       {lic && !redo && <div className="mt-2 space-y-2">

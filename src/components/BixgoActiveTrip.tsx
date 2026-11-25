@@ -11,12 +11,14 @@ import { getBixgoDriver } from '@/lib/bixgo-trip.functions';
 import { signedUrl } from '@/lib/bix-avatar';
 import { canCancelTrip } from '@/lib/bixgo-trip';
 import { Link } from '@tanstack/react-router';
-import { CarFront, Loader2, MessageCircle, Phone, Radar, X, CheckCircle2, Navigation, Star } from 'lucide-react';
+import { CarFront, Loader2, Phone, Video, Radar, X, CheckCircle2, Navigation, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { startBixCall } from '@/components/BixCall';
+import { BixgoTripChat } from '@/components/BixgoTripChat';
+import { tripNavigation } from '@/lib/bixgo-friendly';
 
-type Trip = { id: string; status: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; pay_method: string | null; driver_name: string; plate: string; driver_user_id: string | null; created_at: string; rating?: number | null; cancel_reason?: string | null; cancel_note?: string | null; cancelled_at?: string | null; pickup_lat?: number | null; pickup_lng?: number | null; driver_lat?: number | null; driver_lng?: number | null; driver_location_at?: string | null; fare_usdt?: number; driver_usdt?: number; fare_bix?: number; driver_bix?: number; fare_idr?: number; gas_bix?: number };
+type Trip = { id: string; status: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; pay_method: string | null; driver_name: string; plate: string; driver_user_id: string | null; created_at: string; rating?: number | null; cancel_reason?: string | null; cancel_note?: string | null; cancelled_at?: string | null; pickup_lat?: number | null; pickup_lng?: number | null; dropoff_lat?: number | null; dropoff_lng?: number | null; driver_lat?: number | null; driver_lng?: number | null; driver_location_at?: string | null; fare_usdt?: number; driver_usdt?: number; fare_bix?: number; driver_bix?: number; fare_idr?: number; gas_bix?: number };
 type Driver = { name: string; vehicle_model: string; plate: string; license_id: string; approved: boolean; avatar_path: string | null; rating: number | null; rating_count: number };
 
 const STEPS = ['pending', 'assigned', 'in_transit', 'completed'] as const;
@@ -45,7 +47,7 @@ export function BixgoActiveTrip({ lux = false, onOpen }: { lux?: boolean; onOpen
   }, [trip?.id, trip?.driver_user_id, fetchDriver]);
   const load = async () => {
     const { data: u } = await supabase.auth.getUser(); if (!u.user) return;
-    const { data } = await supabase.from('bixgo_bookings').select('id,status,vehicle,pickup,dropoff,km,total_idr,pay_method,driver_name,plate,driver_user_id,created_at,completed_at,rating,cancel_reason,cancel_note,cancelled_at,pickup_lat,pickup_lng,driver_lat,driver_lng,driver_location_at,fare_usdt,driver_usdt,fare_bix,driver_bix,fare_idr,gas_bix')
+    const { data } = await supabase.from('bixgo_bookings').select('id,status,vehicle,pickup,dropoff,km,total_idr,pay_method,driver_name,plate,driver_user_id,created_at,completed_at,rating,cancel_reason,cancel_note,cancelled_at,pickup_lat,pickup_lng,dropoff_lat,dropoff_lng,driver_lat,driver_lng,driver_location_at,fare_usdt,driver_usdt,fare_bix,driver_bix,fare_idr,gas_bix')
       .eq('user_id', u.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
     const t = data as (Trip & { completed_at: string | null }) | null;
     const fresh = t && ((t.status === 'cancelled' && t.cancelled_at && Date.now() - Date.parse(t.cancelled_at) < 30 * 60_000) || ['pending', 'assigned', 'in_transit'].includes(t.status) || (t.status === 'completed' && t.completed_at && Date.now() - new Date(t.completed_at).getTime() < 30 * 60_000));
@@ -77,13 +79,13 @@ export function BixgoActiveTrip({ lux = false, onOpen }: { lux?: boolean; onOpen
       </span>
       <div className="min-w-0 flex-1">
         <b className="block text-base">{LABEL[trip.status] ?? trip.status}</b>
-        {trip.driver_user_id ? <span className="block truncate text-xs text-muted-foreground">{name}{trip.plate ? ` · ${trip.plate}` : ''}</span> : <span className="block text-xs text-muted-foreground">{trip.status === 'cancelled' ? 'Request closed · no trip charge' : 'Nearby drivers in your city are being notified'}</span>}
+        {trip.driver_user_id ? <span className="block truncate text-xs text-muted-foreground">{name}{trip.plate ? ` · ${trip.plate}` : ''}</span> : <span className="block text-xs text-muted-foreground">{trip.status === 'cancelled' ? 'Request closed · no trip charge' : 'Searching nearby drivers across city borders'}</span>}
       </div>
       <b className="text-sm tabular-nums">{rp(trip.total_idr)}</b>
     </div>
     {trip.driver_user_id && <div className="bgl-trip-driver mt-3 flex items-center gap-3 border-t border-border pt-3">
       <Button variant="ghost" className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-primary/40 p-0" aria-label="View driver ID" onClick={() => setIdOpen(true)}>{photo ? <img src={photo} alt={driver?.name ?? name} className="h-full w-full object-cover" onError={() => setPhoto('')}/> : <span className="text-xl font-bold text-primary">{name.slice(0, 2).toUpperCase()}</span>}</Button>
-      <div className="min-w-0 text-xs"><b className="block text-sm">{driver?.name ?? name}</b><p>{driver?.vehicle_model || trip.vehicle} · {driver?.plate || trip.plate}</p><p className="text-primary">{driver?.approved ? 'Verified BIXGO partner' : 'Assigned driver'}{driver?.rating != null ? ` · ★ ${driver.rating} (${driver.rating_count})` : ''}</p></div>
+      <div className="min-w-0 text-xs"><b className="block text-sm">{driver?.name ?? name}</b><p>{driver?.vehicle_model || trip.vehicle} · {driver?.plate || trip.plate}</p><p className="text-primary">{driver?.approved ? 'Active BIXGO partner' : 'Assigned driver'}{driver?.rating != null ? ` · ★ ${driver.rating} (${driver.rating_count})` : ''}</p></div>
     </div>}
     {trip.driver_user_id && ['assigned', 'in_transit'].includes(trip.status) && isDirectTransfer(trip.pay_method) && <BixgoTripPayee id={trip.id} role="rider"/>}
     {trip.status === 'cancelled' && <p className="mt-3 text-xs text-muted-foreground">{trip.cancel_reason}{trip.cancel_note ? ` · ${trip.cancel_note}` : ''} · No cancellation fee</p>}
@@ -92,11 +94,12 @@ export function BixgoActiveTrip({ lux = false, onOpen }: { lux?: boolean; onOpen
     <Dialog open={idOpen} onOpenChange={setIdOpen}><DialogContent className="z-[900] bg-background text-foreground"><DialogTitle>BIXGO Driver ID</DialogTitle><DialogDescription>{driver?.approved ? 'Approved partner' : 'Assigned partner'}</DialogDescription>{photo && <img src={photo} alt={name} className="mx-auto h-44 w-44 rounded-lg object-cover"/>}<b className="text-lg">{driver?.name ?? name}</b><p className="text-sm">{driver?.vehicle_model || trip.vehicle} · {trip.plate}</p><p className="break-all text-xs text-muted-foreground">License: {driver?.license_id ?? 'Not available'}</p></DialogContent></Dialog>
     <ol className="mt-3 grid grid-cols-4 gap-1" aria-label="Trip progress">{STEPS.map((s, i) => <li key={s} className={`h-1.5 rounded-full ${i <= idx ? 'bg-primary' : 'bg-muted'}`}/>)}</ol>
     <p className="mt-2 truncate text-xs text-muted-foreground">{trip.pickup} → {trip.dropoff} · {Number(trip.km).toFixed(1)} km · {trip.pay_method}</p>
-    <div className="mt-3 flex gap-2">
+    <div className="mt-3 flex flex-wrap gap-2">
       {trip.driver_user_id && ['assigned', 'in_transit'].includes(trip.status) && <>
         <Button onClick={() => startBixCall(trip.driver_user_id ?? '', name, 'voice')} className="bgl-contact flex flex-1 items-center justify-center gap-1.5 rounded-full bg-primary py-2.5 text-sm font-bold text-primary-foreground"><Phone className="h-4 w-4"/>BIX CALL</Button>
-        <Link to="/call" search={{ chat: trip.driver_user_id, n: name }} className="bgl-contact flex flex-1 items-center justify-center gap-1.5 rounded-full border border-primary/50 py-2.5 text-sm font-bold text-primary"><MessageCircle className="h-4 w-4"/>Chat</Link>
-        <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(trip.dropoff)}`} target="_blank" rel="noopener noreferrer" aria-label="Open route" className="grid w-11 place-items-center rounded-full border border-border"><Navigation className="h-4 w-4"/></a>
+        <BixgoTripChat tripId={trip.id} peerId={trip.driver_user_id} peerName={name} status={trip.status} role="rider"/>
+        <Button size="icon" variant="outline" aria-label="Video call driver" title="Video call driver" onClick={() => startBixCall(trip.driver_user_id ?? '', name, 'video')}><Video/></Button>
+        <Button asChild size="icon" variant="outline"><a href={tripNavigation(trip.dropoff, trip.dropoff_lat, trip.dropoff_lng)} target="_blank" rel="noopener noreferrer" aria-label="Open route"><Navigation className="h-4 w-4"/></a></Button>
       </>}
       {canCancelTrip(trip.status) && <Button variant="outline" disabled={busy} onClick={() => setCancelOpen(true)} className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-destructive/50 py-2.5 text-sm font-bold text-destructive">{busy ? <Loader2 className="h-4 w-4 animate-spin"/> : <X className="h-4 w-4"/>}Cancel trip</Button>}
     </div>
@@ -110,6 +113,6 @@ export function BixgoActiveTrip({ lux = false, onOpen }: { lux?: boolean; onOpen
       </>}
     </div>}
     {lux && trip.status === 'completed' && trip.driver_user_id && <div className="bgl-tip"><span className="bgl-coin" aria-hidden>BIX</span><div className="min-w-0 flex-1"><b>Leave a tip (optional)</b><small>Show your appreciation</small></div><Link to="/pay" className="bgl-tip-btn">+ Add BIX tip</Link></div>}
-    <p className="mt-2 text-[10px] text-muted-foreground">Calls and chats go through BIX CALL — your phone number stays private.</p>
+    <p className="mt-2 text-[10px] text-muted-foreground">Trip chat stays in BIXGO. Voice and video calls use BIX CALL.</p>
   </section>;
 }

@@ -9,7 +9,7 @@ import { BixgoCancelDialog } from '@/components/BixgoCancelDialog';
 import { canCancelTrip } from '@/lib/bixgo-trip';
 
 type Booking = { id: string; user_id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; pay_method: string; status: string; driver_name: string; driver_phone: string; plate: string; operator_note: string; created_at: string; driver_user_id?: string | null; cancel_reason?: string | null; cancel_note?: string | null };
-type License = { id: string; user_id: string; full_name: string; phone: string; city: string; vehicle_type: string; vehicle_model: string; plate: string; mode: string; status: string; online: boolean; operator_note: string; created_at: string };
+type License = { id: string; user_id: string; full_name: string; phone: string; city: string; vehicle_type: string; vehicle_model: string; plate: string; mode: string; status: string; online: boolean; operator_note: string; created_at: string; approval_method?: string };
 const STATUS = ['pending', 'assigned', 'in_transit', 'completed', 'cancelled'] as const;
 const LABEL: Record<string, string> = { pending: 'Waiting', assigned: 'Driver assigned', in_transit: 'In transit', completed: 'Completed', cancelled: 'Cancelled' };
 
@@ -27,7 +27,16 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [lf, setLf] = useState('pending');
   const [lq, setLq] = useState('');
-  const review = async (l: License, st: string) => { const note = (notes[l.id] ?? '').trim().slice(0, 240); if ((st === 'rejected' || st === 'suspended') && !note) { setMsg('Write a reason so the driver knows what to fix.'); return; } const { error } = await supabase.from('bixgo_driver_licenses').update({ status: st, online: st === 'approved' ? l.online : false, operator_note: st === 'approved' ? '' : note, updated_at: new Date().toISOString() }).eq('id', l.id); setMsg(error ? error.message : `${l.full_name} → ${st}`); void loadLic(); };
+  const [fastTrack, setFastTrack] = useState(false);
+  const [savingFastTrack, setSavingFastTrack] = useState(false);
+  useEffect(() => { void supabase.rpc('bixgo_fast_track_enabled').then(({ data }) => setFastTrack(data === true)); }, []);
+  const toggleFastTrack = async () => {
+    setSavingFastTrack(true);
+    try { const { data, error } = await supabase.rpc('bixgo_fast_track_set', { p_enabled: !fastTrack }); if (error) setMsg(error.message); else { setFastTrack(data === true); setMsg('Driver registration setting saved.'); } }
+    catch { setMsg('Could not save. Please retry.'); }
+    finally { setSavingFastTrack(false); }
+  };
+  const review = async (l: License, st: string) => { const note = (notes[l.id] ?? '').trim().slice(0, 240); if ((st === 'rejected' || st === 'suspended') && !note) { setMsg('Write a reason so the driver knows what to fix.'); return; } const { error } = await supabase.from('bixgo_driver_licenses').update({ status: st, online: st === 'approved' ? l.online : false, operator_note: st === 'approved' ? '' : note, ...(st === 'approved' ? { approval_method: 'manual' } : {}), updated_at: new Date().toISOString() }).eq('id', l.id); setMsg(error ? error.message : `${l.full_name} → ${st}`); void loadLic(); };
   const load = async () => { const { data, error } = await supabase.from('bixgo_bookings').select('*').order('created_at', { ascending: false }).limit(300); if (error) setMsg(error.message); else setRows((data ?? []) as Booking[]); };
   useEffect(() => { void loadLic(); void load(); const t = setInterval(() => void load(), 20_000); return () => clearInterval(t); }, []);
   const money = (n: number) => formatMoney(n, 'USD', s.usdtIdr);
@@ -68,13 +77,15 @@ export function AdminBixgoConsole({ s, setS, onSave, busy }: { s: BixgoSettings;
       </div>}
 
       {tab === 'drivers' && <div className="space-y-2">
-        <p className="text-muted-foreground">Driver-Partner license applications (Pro Navigator and above). Approval lets the member go online and be assigned bookings. No license fee is collected here.</p>
+        <Button variant={fastTrack ? 'default' : 'outline'} aria-pressed={fastTrack} disabled={savingFastTrack} onClick={() => void toggleFastTrack()} className="h-auto min-h-11 w-full whitespace-normal">Persetujuan otomatis driver: {fastTrack ? 'AKTIF' : 'NONAKTIF'}</Button>
+        <p className="text-muted-foreground">Email terverifikasi, data lengkap, dan pernyataan SIM/STNK serta kendaraan aman diperlukan. Pendaftaran armada tetap ditinjau; ini bukan pemeriksaan keaslian dokumen. Penangguhan tetap di tangan Owner 1.</p>
         {!lics.length && <p className="rounded-xl border border-border p-3 text-center text-muted-foreground">No applications yet.</p>}
         <div className="grid grid-cols-4 gap-1">{['pending', 'approved', 'rejected', 'suspended'].map(k => <button key={k} onClick={() => setLf(k)} className={`rounded-full border px-1 py-1 capitalize ${lf === k ? 'border-primary bg-primary/15 font-bold text-primary' : 'border-border'}`}>{k} ({lics.filter(l => l.status === k).length})</button>)}</div>
         <input className="form-input" placeholder="Search name, plate or phone" value={lq} onChange={e => setLq(e.target.value)}/>
         {lics.filter(l => l.status === lf && (!lq.trim() || `${l.full_name} ${l.plate} ${l.phone}`.toLowerCase().includes(lq.trim().toLowerCase()))).map(l => <div key={l.id} className="rounded-xl border border-border p-2">
           <div className="flex justify-between"><b>{l.full_name} · {l.vehicle_type}</b><span className="font-bold uppercase text-primary">{l.status}{l.online ? ' · online' : ''}</span></div>
           <p className="text-muted-foreground">{l.vehicle_model} · {l.plate} · {l.phone} · {GLOBAL_CITIES.find(c => c.id === l.city)?.city ?? l.city} · {l.mode === 'fleet' ? 'Fleet driver' : 'Self-driving'}</p>
+          {l.approval_method === 'fast_track' && <p className="text-primary">Aktivasi otomatis · data dan keselamatan dinyatakan driver</p>}
           {l.operator_note && <p className="text-muted-foreground">Note: {l.operator_note}</p>}
           {l.status !== 'rejected' && <input className="form-input mt-1" maxLength={240} placeholder={l.status === 'approved' ? 'Reason for suspension' : 'Reason if rejecting (shown to driver)'} value={notes[l.id] ?? ''} onChange={e => setNotes({ ...notes, [l.id]: e.target.value })}/>}
           <div className="mt-1 flex flex-wrap gap-1">{l.status !== 'approved' && <Button size="sm" onClick={() => review(l, 'approved')}>Approve</Button>}{l.status === 'pending' && <Button size="sm" variant="outline" onClick={() => review(l, 'rejected')}>Reject</Button>}{l.status === 'approved' && <Button size="sm" variant="outline" onClick={() => review(l, 'suspended')}>Suspend</Button>}</div>

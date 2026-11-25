@@ -7,6 +7,17 @@ export function bixgoLanguage(language: string): BixgoLanguage { return language
 /** Presentation aliases only: service IDs, recorded vehicle names and payments remain canonical. */
 export const BIXGO_PHRASES: Record<string, string> = {
   ...bixgoExtraPhrases,
+  'Trip chat': 'Chat perjalanan', 'Call': 'Telepon', 'Video call': 'Panggilan video', 'Message': 'Pesan', 'Send message': 'Kirim pesan', 'Write a message…': 'Tulis pesan…', 'No messages yet.': 'Belum ada pesan.', 'Retry': 'Coba lagi',
+  'I am on my way.': 'Saya sedang menuju lokasi.', 'I have arrived at the pickup point.': 'Saya sudah tiba di titik jemput.', 'Where should I wait?': 'Saya menunggu di mana?', 'I am waiting at the entrance.': 'Saya menunggu di pintu masuk.', 'Please wait a moment.': 'Mohon tunggu sebentar.', 'I am at the pickup point.': 'Saya sudah di titik jemput.',
+  'Trip ended · chat is read-only.': 'Perjalanan selesai · chat hanya dapat dibaca.', 'Trip chat is closed': 'Chat perjalanan sudah ditutup', 'Only assigned trip participants can chat': 'Chat hanya untuk penumpang dan pengemudi perjalanan ini',
+  'Wait a moment before sending another message': 'Tunggu sebentar sebelum mengirim pesan berikutnya', 'Messages unavailable. Retry.': 'Pesan belum tersedia. Coba lagi.', 'Message not sent. Check connection and retry.': 'Pesan belum terkirim. Periksa koneksi dan coba lagi.',
+  'Register as driver': 'Daftar sebagai pengemudi', 'Complete your driver details and safety declaration': 'Lengkapi data pengemudi dan pernyataan keselamatan', 'Verify your real email first': 'Verifikasi email asli Anda terlebih dahulu',
+  'Registration active. You can go online.': 'Pendaftaran aktif. Anda dapat mulai online.', 'Application submitted for review.': 'Pendaftaran dikirim untuk ditinjau.', 'Registration failed. Please retry.': 'Pendaftaran gagal. Silakan coba lagi.',
+  'Complete details and verified email: self-driver registration activates automatically.': 'Data lengkap dan email terverifikasi: pendaftaran pengemudi mandiri aktif otomatis.', 'Your application will be reviewed by the owner.': 'Pendaftaran Anda akan ditinjau oleh pemilik.',
+  'I hold a valid driving licence and vehicle registration, the vehicle is safe, and my details are accurate.': 'Saya memiliki SIM dan STNK yang berlaku, kendaraan aman digunakan, dan data saya benar.',
+  'You keep 85% of completed fares. Payment follows the passenger’s selected method; no starter balance is granted.': 'Anda menerima 85% tarif perjalanan selesai. Pembayaran mengikuti pilihan penumpang; tidak ada saldo awal gratis.',
+  'Order sound on': 'Suara order aktif', 'Enable order sound': 'Aktifkan suara order', 'Tap again to enable order sound.': 'Ketuk lagi untuk mengaktifkan suara order.', 'Tap to enable sound. Background alerts depend on your phone and browser.': 'Ketuk untuk mengaktifkan suara. Notifikasi latar belakang bergantung pada HP dan browser.',
+  'Active BIXGO partner': 'Mitra BIXGO aktif', 'Searching nearby drivers across city borders': 'Mencari pengemudi terdekat lintas kota', 'Trip chat stays in BIXGO. Voice and video calls use BIX CALL.': 'Chat perjalanan tetap di BIXGO. Telepon dan video melalui BIX CALL.',
   'Go online to receive nearby orders across city borders.': 'Aktifkan online untuk menerima pesanan terdekat lintas kota.',
   'GPS active · nearby orders across city borders': 'GPS aktif · pesanan terdekat lintas kota',
   'GPS unavailable. Enable location to find nearby orders.': 'GPS tidak tersedia. Aktifkan lokasi untuk mencari pesanan terdekat.',

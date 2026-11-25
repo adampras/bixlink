@@ -1,17 +1,12 @@
 import { BixgoTripPayee } from '@/components/BixgoDriverPay';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Camera, CheckCircle2, Loader2, MapPin, MessageCircle, Navigation, Phone, Play, X } from 'lucide-react';
+import { Camera, CheckCircle2, Loader2, MapPin, Navigation, Phone, Play, Video, Volume2, VolumeX, X } from 'lucide-react';
 import { startBixCall } from '@/components/BixCall';
-
-/** Three-note radar chime for a new order (Web Audio, no downloads). */
-export function jobChime() {
-  try {
-    const c = new AudioContext();
-    [880, 1175, 1568].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + i * 0.18; o.frequency.value = f; g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.4); });
-    setTimeout(() => void c.close(), 1500);
-  } catch { /* audio unavailable */ }
-}
+import { jobChime, orderAudioReady, unlockOrderAudio } from '@/lib/bixgo-order-audio';
+import { shouldAlertNewOrders, tripNavigation } from '@/lib/bixgo-friendly';
+import { BixgoTripChat } from '@/components/BixgoTripChat';
+import { useBixgoText } from '@/lib/useBixgoText';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { isDirectTransfer, payKind, type PayKind } from '@/lib/bixgo-pay';
@@ -35,17 +30,20 @@ export function SlideAccept({ onDone, busy }: { onDone: () => void; busy: boolea
   </div>;
 }
 
-type Job = { id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; fare_idr?: number; pay_method?: string; status: string; fare_usdt: number; driver_usdt: number; fare_bix?: number; driver_bix?: number; gas_bix?: number; created_at: string; completed_at?: string | null; pickup_note?: string; rating?: number | null; rating_note?: string; owner_usdt?: number; owner_bix?: number; pickup_distance_km?: number | null };
+type Job = { id: string; city: string; service: string; vehicle: string; pickup: string; dropoff: string; km: number; total_idr: number; fare_idr?: number; pay_method?: string; status: string; fare_usdt: number; driver_usdt: number; fare_bix?: number; driver_bix?: number; gas_bix?: number; created_at: string; completed_at?: string | null; pickup_note?: string; rating?: number | null; rating_note?: string; owner_usdt?: number; owner_bix?: number; pickup_distance_km?: number | null; pickup_lat?: number | null; pickup_lng?: number | null; dropoff_lat?: number | null; dropoff_lng?: number | null };
 const SVC: Record<string, string> = { ride: 'Ride', car: 'Car', food: 'Food', send: 'Send', mart: 'Mart' };
 
 const usdt = (n: number) => `${Number(n || 0).toFixed(2)} USDT`;
 const bixf = (n: number) => `${Number(n || 0).toFixed(2)} BIX`;
 const rp = (n: number) => `Rp ${Math.round(n).toLocaleString('id-ID')}`;
-const nav = (q: string) => `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}&travelmode=driving`;
 const BADGE: Record<PayKind, string> = { usdt: 'USDT · Auto hold', bix: 'BIX Token · Auto hold', cash: 'Cash · BIX fee first' };
 
 /** Driver order desk: accept open trips, start, complete. USDT/BIX fares settle 85% to driver; cash trips charge the company fee in BIX on accept. */
 export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false, showSummary = true }: { lux?: boolean; showSummary?: boolean; online: boolean; adj?: number; onRating?: (r: { avg: number | null; n: number }) => void }) {
+  const text = useBixgoText();
+  const [sound, setSound] = useState(true);
+  const [audioReady, setAudioReady] = useState(false);
+  useEffect(() => { setAudioReady(orderAudioReady()); }, [online]);
   const [open, setOpen] = useState<Job[]>([]);
   const [mine, setMine] = useState<Job[]>([]);
   const [gpsReady, setGpsReady] = useState(false);
@@ -63,12 +61,12 @@ export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false, showSu
     if (d.rating) onRating?.(d.rating);
     const nextOpen = d.open ?? [];
     const fresh = nextOpen.filter(j => !seen.current.has(j.id));
-    if (primed.current && fresh.length && online) { jobChime(); navigator.vibrate?.([300, 120, 300, 120, 300]); toast.success(`New order · ${fresh[0]?.pickup}`); }
+    if (shouldAlertNewOrders(primed.current, online, fresh.length)) { if (sound) setAudioReady(jobChime()); navigator.vibrate?.([300, 120, 300, 120, 300]); toast.success(`New order · ${fresh[0]?.pickup}`); }
     nextOpen.forEach(j => seen.current.add(j.id)); primed.current = true;
     setOpen(nextOpen); setMine(d.mine ?? []);
     const act = (d.mine ?? []).filter(j => j.status === 'assigned' || j.status === 'in_transit').map(j => j.id);
     if (act.length) { const { data: rows } = await supabase.from('bixgo_bookings').select('id,user_id').in('id', act); setPax(Object.fromEntries((rows ?? []).map(r => [r.id, r.user_id]))); }
-  }, [online, onRating]);
+  }, [online, onRating, sound]);
   useEffect(() => { void load(); const t = setInterval(() => void load(), 10_000); return () => clearInterval(t); }, [load, online]);
 
   const act = async (id: string, fn: () => PromiseLike<{ error: { message: string } | null }>, ok: string) => {
@@ -111,10 +109,11 @@ export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false, showSu
       <p className="flex items-center justify-between gap-2 text-xs font-bold"><span>{j.status === 'assigned' ? 'Go to pickup' : 'On trip'}</span><Pay j={j}/><span className="tabular-nums text-primary">{amount(j)}</span></p>
       {payKind(j.pay_method) === 'cash' && <p className="text-[10px] text-muted-foreground">Fee paid: {bixf(j.gas_bix ?? 0)}. Collect {rp(j.fare_idr ?? j.total_idr)} cash from the passenger.</p>}
       <Route j={j}/>
-      <a href={nav(j.status === 'assigned' ? j.pickup : j.dropoff)} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1 rounded-full border border-primary py-2 text-xs font-bold text-primary"><Navigation className="h-3.5 w-3.5"/>Voice navigation</a>
+      <Button asChild variant="outline" className="w-full"><a href={j.status === 'assigned' ? tripNavigation(j.pickup, j.pickup_lat, j.pickup_lng) : tripNavigation(j.dropoff, j.dropoff_lat, j.dropoff_lng)} target="_blank" rel="noreferrer"><Navigation className="h-3.5 w-3.5"/>Voice navigation</a></Button>
       {pax[j.id] && <div className="flex gap-2">
-        <button onClick={() => startBixCall(pax[j.id] ?? '', 'Passenger', 'voice')} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary/15 py-2 text-xs font-bold text-primary"><Phone className="h-3.5 w-3.5"/>Call passenger</button>
-        <Link to="/call" search={{ chat: pax[j.id] ?? '', n: 'Passenger' }} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary/15 py-2 text-xs font-bold text-primary"><MessageCircle className="h-3.5 w-3.5"/>Chat</Link>
+        <Button variant="outline" onClick={() => startBixCall(pax[j.id] ?? '', 'Passenger', 'voice')} className="h-auto min-h-11 flex-1 whitespace-normal text-xs"><Phone className="h-3.5 w-3.5"/>Call passenger</Button>
+        <BixgoTripChat tripId={j.id} peerId={pax[j.id] ?? ''} peerName={text('Rider')} status={j.status} role="driver"/>
+        <Button variant="outline" size="icon" title={text('Video call')} aria-label={text('Video call')} onClick={() => startBixCall(pax[j.id] ?? '', 'Passenger', 'video')}><Video/></Button>
       </div>}
       {pax[j.id] && orderCategory(j.service) !== 'people' && <Button asChild variant="outline" className="h-auto min-h-10 w-full gap-2 whitespace-normal text-xs"><Link to="/call" search={{ chat: pax[j.id] ?? '', n: 'Passenger' }}><Camera className="h-4 w-4"/>Delivery photo via Chat</Link></Button>}
       <div className="flex gap-2">
@@ -125,7 +124,12 @@ export function BixgoDriverJobs({ online, adj = 0, onRating, lux = false, showSu
     </div>)}
 
     <div>
-      <h4 className="mb-2 text-xs font-black">Incoming orders</h4>
+      <div className="mb-2 flex items-center justify-between gap-2"><h4 className="text-xs font-black">Incoming orders</h4>{online && <Button variant="outline" size="sm" aria-pressed={sound && audioReady} onClick={async () => {
+        if (sound && audioReady) { setSound(false); return; }
+        const ready = await unlockOrderAudio(); setAudioReady(ready); setSound(true);
+        if (ready) jobChime(); else toast.error(text('Tap again to enable order sound.'));
+      }} className="h-auto min-h-9 whitespace-normal text-[11px]">{sound && audioReady ? <Volume2/> : <VolumeX/>}{text(sound && audioReady ? 'Order sound on' : 'Enable order sound')}</Button>}</div>
+      {online && sound && !audioReady && <p className="mb-2 text-[10px] text-muted-foreground">{text('Tap to enable sound. Background alerts depend on your phone and browser.')}</p>}
       {!online && <p className="text-[11px] text-muted-foreground">Go online to receive nearby orders across city borders.</p>}
       {online && <BixgoDispatchGps onReady={setGpsReady} onUpdated={() => void load()}/>}
       {online && gpsReady && serverGpsReady && !open.length && <p className="text-[11px] text-muted-foreground">No open orders right now. This list refreshes every 10 seconds.</p>}

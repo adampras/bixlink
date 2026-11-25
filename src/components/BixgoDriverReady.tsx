@@ -3,7 +3,8 @@ import { Link } from '@tanstack/react-router';
 import { BadgeCheck, Bell, Fuel, LifeBuoy, MapPin, MonitorSmartphone, Phone, ShieldCheck, Star, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { jobChime } from '@/components/BixgoDriverJobs';
+import { jobChime, orderAudioReady, unlockOrderAudio } from '@/lib/bixgo-order-audio';
+import { Button } from '@/components/ui/button';
 
 export const MIN_GAS_BIX = 5;
 
@@ -21,12 +22,12 @@ export function BixgoDriverReady({ lic, uid, rating }: { lic: Lic; uid: string; 
   useEffect(() => {
     void supabase.rpc('bix_asset_balances', { p_user: uid }).single().then(({ data }) => setBix(Number((data as { bix_balance?: number } | null)?.bix_balance ?? 0)));
     void supabase.from('referral_codes').select('code').eq('user_id', uid).maybeSingle().then(({ data }) => setCode((data as { code?: string } | null)?.code ?? ''));
-    try { localStorage.getItem('bixgo_sound_ok') === '1' && setSound(true); } catch { /* ignore */ }
+    setSound(orderAudioReady());
     navigator.permissions?.query({ name: 'geolocation' as PermissionName }).then(p => setGps(p.state === 'granted' ? 'ok' : p.state === 'denied' ? 'denied' : 'unknown')).catch(() => {});
   }, [uid]);
   useEffect(() => () => { void lock.current?.release(); }, []);
 
-  const testSound = () => { jobChime(); navigator.vibrate?.([300, 120, 300]); setSound(true); try { localStorage.setItem('bixgo_sound_ok', '1'); } catch { /* ignore */ } toast.success('Order alert played — keep your volume up'); };
+  const testSound = async () => { const unlocked = await unlockOrderAudio(); const played = unlocked && jobChime(); navigator.vibrate?.([300, 120, 300]); setSound(played); if (played) toast.success('Order alert played — keep your volume up'); else toast.error('Tap again to enable order sound.'); };
   const askGps = () => navigator.geolocation?.getCurrentPosition(() => { setGps('ok'); toast.success('GPS is on'); }, () => { setGps('denied'); toast.error('Allow location in your browser settings'); });
   const toggleWake = async () => {
     const nav = navigator as Navigator & { wakeLock?: { request: (t: 'screen') => Promise<{ release: () => Promise<void> }> } };
@@ -39,7 +40,7 @@ export function BixgoDriverReady({ lic, uid, rating }: { lic: Lic; uid: string; 
   const checks: { ok: boolean; label: string; hint: string; action?: React.ReactNode; icon: typeof Fuel }[] = [
     { ok: true, icon: ShieldCheck, label: 'License approved', hint: `${lic.vehicle_model} · ${lic.plate}` },
     { ok: gasOk || lic.accept_cash === false, icon: Fuel, label: `BIX gas balance: ${bix === null ? '…' : bix.toFixed(2)} BIX`, hint: gasOk ? 'Enough for cash-order fees' : `Keep at least ${MIN_GAS_BIX} BIX to take cash orders`, action: !gasOk && <Link to="/wallet" className="rounded-full bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground">Top up</Link> },
-    { ok: sound, icon: Bell, label: 'Order alert sound', hint: 'Test the radar chime at full volume', action: <button onClick={testSound} className="rounded-full border border-primary px-3 py-1 text-[10px] font-bold text-primary">Test</button> },
+    { ok: sound, icon: Bell, label: 'Order alert sound', hint: 'Test the radar chime at full volume', action: <Button variant="outline" size="sm" onClick={() => void testSound()} className="text-[10px]">Test</Button> },
     { ok: gps === 'ok', icon: MapPin, label: 'Location (GPS)', hint: gps === 'denied' ? 'Blocked — enable in browser settings' : 'Needed for pickup navigation', action: gps !== 'ok' && <button onClick={askGps} className="rounded-full border border-primary px-3 py-1 text-[10px] font-bold text-primary">Allow</button> },
   ];
   const ready = checks.filter(c => c.ok).length;
@@ -57,7 +58,7 @@ export function BixgoDriverReady({ lic, uid, rating }: { lic: Lic; uid: string; 
         <span className="text-muted-foreground">City</span><b className="text-right capitalize">{lic.city || 'All cities'}</b>
         <span className="text-muted-foreground">Rating</span><b className="flex items-center justify-end gap-1"><Star className="h-3 w-3 fill-primary text-primary"/>{rating.n ? `${Number(rating.avg).toFixed(2)} (${rating.n})` : 'New'}</b>
       </div>
-      <p className="mt-2 text-[9px] text-muted-foreground">Show this card to passengers to confirm you are a verified BIXLINK partner.</p>
+      <p className="mt-2 text-[9px] text-muted-foreground">Active BIXGO partner · registration is not independent document verification.</p>
     </div>
 
     {/* Pre-flight checklist */}
