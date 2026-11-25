@@ -3,9 +3,11 @@ import { CheckCircle2, MessageCircle, Phone, RefreshCw, SearchX, X } from 'lucid
 import { Link } from '@tanstack/react-router';
 import { supabase } from '@/integrations/supabase/client';
 import { BixgoVehicleIcon, type VehicleKind } from '@/components/BixgoVehicleIcon';
+import { startBixCall } from '@/components/BixCall';
+import { Button } from '@/components/ui/button';
 
 const LIMIT = 60;
-type Found = { driver_name: string; driver_phone: string; status: string };
+type Found = { driver_name: string; driver_phone: string; driver_user_id: string; status: string };
 
 /** Live driver search: polls the real booking row. Shows found, or a clear "no driver" state after 60 s. */
 export function BixgoRadar({ bookingId, summary, onRetry, onSwitch, onClose }: { bookingId: string | null; summary?: { from: string; to: string; fare: string; pay: string; kind: VehicleKind }; onRetry: () => void; onSwitch: () => void; onClose: () => void }) {
@@ -36,8 +38,8 @@ export function BixgoRadar({ bookingId, summary, onRetry, onSwitch, onClose }: {
     <p className="text-base font-bold">{found.driver_name || 'Mitra BIXGO'}</p>
     <p className="text-xs text-muted-foreground">Driver sedang menuju lokasi jemput Anda</p>
     <div className="mt-4 grid grid-cols-2 gap-2">
-      <Link to="/call" className="flex min-h-12 items-center justify-center gap-2 rounded-full border border-border bg-card font-bold"><Phone className="h-4 w-4"/>BIX CALL</Link>
-      <Link to="/call" className="flex min-h-12 items-center justify-center gap-2 rounded-full border border-border bg-card font-bold"><MessageCircle className="h-4 w-4"/>Chat</Link>
+      <Button variant="outline" onClick={() => startBixCall(found.driver_user_id, found.driver_name || 'Driver', 'voice')} className="min-h-12 gap-2 whitespace-normal"><Phone className="h-4 w-4"/>Call driver</Button>
+      <Link to="/call" search={{ chat: found.driver_user_id, n: found.driver_name || 'Driver' }} className="flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border bg-card font-bold"><MessageCircle className="h-4 w-4"/>Chat driver</Link>
     </div>
     <button onClick={onClose} className="mt-3 min-h-12 w-full rounded-full bg-primary font-bold text-primary-foreground">Lihat perjalanan</button>
   </div>;

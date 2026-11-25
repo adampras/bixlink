@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { STATUS_LABEL, nextStatuses, rupiah, signPhotos, uploadMerchantPhoto, type Merchant, type MenuItem, type MerchantOrder } from '@/lib/bixgo-merchant';
+import { orderQueue } from '@/lib/bixgo-language';
 
 const db = supabase as any;
-const ACTION: Record<string, string> = { accepted: 'Terima & siapkan', rejected: 'Tolak', ready: 'Siap diambil', completed: 'Selesai' };
+const ACTION: Record<string, string> = { accepted: 'Accept & prepare', rejected: 'Reject', ready: 'Ready for pickup', completed: 'Complete' };
 const blank = { name: '', kind: 'food' as 'food' | 'mart', category: '', city: '', address: '', landmark: '', phone: '', open_time: '08:00', close_time: '21:00' };
 
 /** Member merchant portal: register a store, manage menu photos/prices/stock and process incoming orders. */
@@ -22,6 +23,7 @@ export function BixgoMerchant({ city, isAdmin }: { city: string; isAdmin: boolea
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState({ name: '', description: '', category: 'Menu', price: '', file: null as File | null });
   const [tab, setTab] = useState<'orders' | 'menu' | 'store'>('orders');
+  const [queue, setQueue] = useState<'new' | 'preparing' | 'history'>('new');
 
   const load = async () => {
     const { data: u } = await supabase.auth.getUser(); const id = u.user?.id ?? null; setUid(id); if (!id) return;
@@ -74,10 +76,10 @@ export function BixgoMerchant({ city, isAdmin }: { city: string; isAdmin: boolea
     <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
       {m?.logo_path && urls[m.logo_path] ? <img src={urls[m.logo_path]} alt="" className="h-12 w-12 rounded-xl object-cover"/> : <span className="grid h-12 w-12 place-items-center rounded-xl bg-primary/15 text-primary"><Store className="h-6 w-6"/></span>}
       <div className="min-w-0 flex-1"><p className="truncate font-bold">{m?.name || 'BIXGO Merchant'}</p><p className="text-xs text-muted-foreground">{m ? STATUS_LABEL[m.status] : 'Buka warung atau toko Anda di BIXGO'}</p></div>
-      {m?.status === 'approved' && <label className="flex items-center gap-2 text-xs font-bold">{m.is_open ? 'BUKA' : 'TUTUP'}<Switch checked={m.is_open} onCheckedChange={v => run(async () => chk(await db.from('bixgo_merchants').update({ is_open: v }).eq('id', m.id)))}/></label>}
+      {m?.status === 'approved' && <label className="flex items-center gap-2 text-xs font-bold">{m.is_open ? 'Open' : 'Closed'}<Switch aria-label="Store open" disabled={busy} checked={m.is_open} onCheckedChange={v => run(async () => chk(await db.from('bixgo_merchants').update({ is_open: v }).eq('id', m.id)))}/></label>}
     </div>
     {!m ? <div className="rounded-2xl border border-border bg-card p-3">{storeForm}</div> : <>
-      <div className="grid grid-cols-3 rounded-full border border-border bg-card p-1 text-xs font-bold">{([['orders', `Pesanan (${orders.filter(o => ['pending', 'accepted', 'ready'].includes(o.status)).length})`], ['menu', 'Menu'], ['store', 'Toko']] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`rounded-full py-2 ${tab === k ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>{l}</button>)}</div>
+      <div className="grid grid-cols-3 gap-1 border-b border-border py-1 text-xs font-bold">{([['orders', 'Orders'], ['menu', 'Menu & stock'], ['store', 'Store profile']] as const).map(([k, l]) => <Button key={k} variant={tab === k ? 'default' : 'ghost'} onClick={() => setTab(k)} className="h-auto min-h-10 whitespace-normal px-2 py-2 text-xs" aria-pressed={tab === k}>{l}</Button>)}</div>
       {tab === 'store' && <div className="rounded-2xl border border-border bg-card p-3">{storeForm}</div>}
       {tab === 'menu' && <div className="space-y-2">
         <div className="space-y-2 rounded-2xl border border-border bg-card p-3">
@@ -92,19 +94,21 @@ export function BixgoMerchant({ city, isAdmin }: { city: string; isAdmin: boolea
           {it.photo_path && urls[it.photo_path] ? <img src={urls[it.photo_path]} alt="" className="h-14 w-14 rounded-xl object-cover"/> : <span className="h-14 w-14 rounded-xl bg-muted"/>}
           <div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{it.name}</p><p className="text-[11px] text-muted-foreground">{it.category}</p>
             <Input inputMode="numeric" defaultValue={String(it.price_idr)} onBlur={e => { const v = Number(e.target.value.replace(/\D/g, '')); if (v > 0 && v !== Number(it.price_idr)) void run(async () => chk(await db.from('bixgo_menu_items').update({ price_idr: v }).eq('id', it.id)), 'Harga diperbarui'); }} className="mt-1 h-8 w-32 text-xs"/></div>
-          <div className="flex flex-col items-end gap-1.5"><label className="flex items-center gap-1 text-[10px]">{it.in_stock ? 'Ada' : 'Habis'}<Switch checked={it.in_stock} onCheckedChange={v => run(async () => chk(await db.from('bixgo_menu_items').update({ in_stock: v }).eq('id', it.id)))}/></label>
+          <div className="flex flex-col items-end gap-1.5"><label className="flex items-center gap-1 text-[10px]">{it.in_stock ? 'Available' : 'Out of stock'}<Switch aria-label={`Stock ${it.name}`} checked={it.in_stock} onCheckedChange={v => run(async () => chk(await db.from('bixgo_menu_items').update({ in_stock: v }).eq('id', it.id)))}/></label>
             <button aria-label="Hapus menu" onClick={() => confirm(`Hapus ${it.name}?`) && run(async () => chk(await db.from('bixgo_menu_items').delete().eq('id', it.id)), 'Menu dihapus')}><Trash2 className="h-4 w-4 text-destructive"/></button></div>
         </div>)}
         {!items.length && <p className="text-center text-xs text-muted-foreground">Belum ada menu.</p>}
       </div>}
       {tab === 'orders' && <div className="space-y-2">
-        {orders.map(o => <div key={o.id} className="rounded-2xl border border-border bg-card p-3 text-sm">
+        <div className="grid grid-cols-3 gap-1" role="group" aria-label="Kitchen orders">{([['new', 'New orders'], ['preparing', 'Preparing'], ['history', 'History']] as const).map(([k, label]) => <Button key={k} variant={queue === k ? 'default' : 'outline'} aria-pressed={queue === k} onClick={() => setQueue(k)} className="h-auto min-h-12 flex-col gap-0 whitespace-normal px-1 py-2 text-[11px]"><span>{label}</span><b>{orders.filter(o => orderQueue(o.status) === k).length}</b></Button>)}</div>
+        {orders.filter(o => orderQueue(o.status) === queue).map(o => <div key={o.id} className="rounded-lg border border-border bg-card p-3 text-sm">
           <div className="flex justify-between"><b>#{o.id.slice(0, 6).toUpperCase()}</b><span className="text-xs font-bold text-primary">{STATUS_LABEL[o.status]}</span></div>
           <ul className="mt-1 text-xs">{o.items.map(l => <li key={l.id}>{l.qty}× {l.name} — {rupiah(l.price * l.qty)}</li>)}</ul>
           <p className="mt-1 text-xs text-muted-foreground">{o.address}{o.note && ` · ${o.note}`}</p>
           <p className="mt-1 font-bold">{rupiah(o.subtotal_idr)} · Tunai</p>
           <div className="mt-2 flex gap-2">{nextStatuses(o.status, 'merchant').map(s => <Button key={s} size="sm" variant={s === 'rejected' ? 'outline' : 'default'} disabled={busy} onClick={() => run(async () => chk(await db.rpc('bixgo_merchant_order_set', { p_id: o.id, p_status: s })))}>{ACTION[s]}</Button>)}</div>
         </div>)}
+        {orders.length > 0 && !orders.some(o => orderQueue(o.status) === queue) && <p className="py-6 text-center text-xs text-muted-foreground">No orders in this queue.</p>}
         {!orders.length && <p className="py-6 text-center text-xs text-muted-foreground">{m.status === 'approved' ? (m.is_open ? 'Menunggu pesanan masuk…' : 'Nyalakan BUKA agar toko tampil di BIXFood / BIXMart.') : 'Toko akan tampil setelah disetujui operator.'}</p>}
       </div>}
     </>}

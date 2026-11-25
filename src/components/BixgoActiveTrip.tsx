@@ -24,7 +24,7 @@ const LABEL: Record<string, string> = { pending: 'Searching for a driver…', as
 const rp = (n: number) => `Rp ${Math.round(n).toLocaleString('id-ID')}`;
 
 /** Passenger live trip card: polls own latest booking, shows driver and BIX CALL contact buttons. */
-export function BixgoActiveTrip({ lux = false }: { lux?: boolean }) {
+export function BixgoActiveTrip({ lux = false, onOpen }: { lux?: boolean; onOpen?: () => void }) {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [busy, setBusy] = useState(false);
   const last = useRef('');
@@ -62,6 +62,8 @@ export function BixgoActiveTrip({ lux = false }: { lux?: boolean }) {
   const { pay_method, ...record } = trip;
   const receipt = receiptAmounts({ ...record, ...(pay_method ? { pay_method } : {}) });
   const amount = (n: number | null, unit: string) => n == null ? 'Belum tercatat' : unit === 'IDR' ? rp(n) : `${n.toFixed(2)} ${unit}`;
+
+  if (onOpen) return <Button variant="outline" onClick={onOpen} className="pointer-events-auto mx-3 flex h-auto min-h-16 w-[calc(100%-1.5rem)] items-center justify-between gap-3 rounded-lg bg-card p-3 text-left shadow-lg"><span className="min-w-0"><b className="block text-xs">{LABEL[trip.status] ?? trip.status}</b><span data-no-translate className="block truncate text-[10px] text-muted-foreground">{trip.pickup} → {trip.dropoff}</span></span><b className="shrink-0 text-xs">{rp(trip.total_idr)}</b></Button>;
 
   return <section className={`bixgo-trip mx-3 my-3 rounded-3xl border border-primary/40 bg-card/90 p-4 shadow-lg backdrop-blur ${lux ? 'bgl-trip' : ''}`} aria-label="Active trip">
     <div className="flex items-center justify-between">

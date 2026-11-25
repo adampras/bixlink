@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useMember, usePublicConfig } from '@/lib/useMember';
 import { BIXGO_SERVICES, bixgoFare, readBixgo, type BixgoService, type BixgoSettings } from '@/lib/bixgo';
-import { ArrowLeft, Bike, Car, CheckCircle2, Construction, History, MapPin, Minus, Navigation, Package, Plus, ShoppingBasket, Star, UtensilsCrossed } from 'lucide-react';
+import { ArrowLeft, Bike, Car, CheckCircle2, Construction, History, MapPin, Minus, Navigation, Package, Plus, ShoppingBasket, Star, UtensilsCrossed, Bell, ScanLine } from 'lucide-react';
 import { toast } from 'sonner';
 import { BixgoRideBooking } from '@/components/BixgoRideBooking';
 import { BixgoActiveTrip } from '@/components/BixgoActiveTrip';
@@ -25,6 +25,9 @@ import { ecosystemHead } from '@/lib/ecosystem-seo';
 import { CityMarquee } from '@/components/CityMarquee';
 import { BixgoLuxHome } from '@/components/BixgoLuxHome';
 import { useDesignAccess } from '@/lib/design-release';
+import { BixgoLanguage } from '@/components/BixgoLanguage';
+import { useI18n } from '@/lib/i18n';
+import { bixgoLanguage } from '@/lib/bixgo-language';
 
 export const Route = createFileRoute('/bixgo')({
   head: () => ecosystemHead('/bixgo', 'BIXGO — Perjalanan, Pengantaran & Jastip | BIXLINK', 'Kenali BIXGO untuk perjalanan motor dan mobil, pengantaran serta Jastip. Lihat estimasi tarif; layanan bergantung pada mitra aktif di kota Anda.'),
@@ -64,6 +67,8 @@ type Order = { id: string; at: string; svc: BixgoService; from: string; to: stri
 const HKEY = 'bixgo_demo_orders';
 
 function BixgoPage() {
+  const { language } = useI18n();
+  const [storeKind, setStoreKind] = useState<'food' | 'mart'>('food');
   const [cfg, setCfg] = useState<BixgoSettings | null>(null);
   const isAdmin = usePublicConfig().data?.isAdmin === true;
   const [svc, setSvc] = useState<BixgoService>('ride');
@@ -139,12 +144,13 @@ function BixgoPage() {
 
   const enabledSet = new Set(list.map(s => s.key));
   const soon = (l: string) => l === 'Pulsa & bills' ? setSub('bills') : l === 'Travel & eSIM' ? setSub('travel') : l === 'Jastip' ? setSub('jastip') : toast(`${l} — coming soon to BIXGO`);
-  const pick = (s: BixgoService) => { if (s === 'ride' || s === 'car') { setSub(s); return; } setSvc(s); setTier(0); setCart({}); setStep('form'); setView('order'); setTab('order'); };
+  const pick = (s: BixgoService) => { if (s === 'ride' || s === 'car') { setSub(s); return; } if (s === 'food' || s === 'mart') { setStoreKind(s); setView('stores'); return; } setSvc(s); setTier(0); setCart({}); setStep('form'); setView('order'); setTab('order'); };
   const go = (v: BixgoView) => { setView(v); if (v === 'activity') setTab('history'); if (v === 'order') setTab('order'); };
   const fullLux = lux && !sub && view === 'home' && mode === 'rider';
   const memberName = user?.email?.split('@')[0] || 'Member BIXLINK';
 
-  return <div className={`bixgo-grab ${lux ? 'bixgo-lux' : ''} fixed inset-0 z-[60] overflow-y-auto`}><div className="mx-auto min-h-full max-w-xl pb-[calc(env(safe-area-inset-bottom)+72px)]">
+  return <div data-bixgo-language={bixgoLanguage(language)} className={`bixgo-grab ${lux ? 'bixgo-lux' : ''} fixed inset-0 z-[60] overflow-y-auto`}><div className="mx-auto min-h-full max-w-xl pb-[calc(env(safe-area-inset-bottom)+72px)]">
+    {!fullLux && <div className="sticky top-0 z-[650] flex items-center gap-2 border-b border-border bg-background px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2"><b className="flex-1 text-sm">BIXGO</b><Button variant="ghost" size="icon" title="Scan QR" aria-label="Scan QR" onClick={() => setScan(true)}><ScanLine className="h-4 w-4"/></Button><Button variant="ghost" size="icon" title="Inbox" aria-label="Inbox" onClick={() => { setSub(null); go('inbox'); }}><Bell className="h-4 w-4"/></Button><BixgoLanguage/></div>}
     {!cfg.enabled && isAdmin && <p className="border-b border-accent/40 bg-accent/20 px-3 py-2 text-[11px]">Admin 1 preview · Under Reconstruction (only visible to you)</p>}
     {sub === 'travel' && <BixgoTravel cur={cur} usdtIdr={cfg.usdtIdr} onBack={() => setSub(null)}/>}
     {sub === 'jastip' && <BixgoJastip city={city} isAdmin={isAdmin} onBack={() => setSub(null)}/>}
@@ -152,8 +158,7 @@ function BixgoPage() {
     {(sub === 'ride' || sub === 'car') && <BixgoRideBooking lux={lux} cfg={cfg} start={sub} cur={cur} city={city} onBack={() => setSub(null)} onBooked={o => persist([{ id: 'BG-' + Date.now().toString(36).toUpperCase(), at: new Date().toISOString(), svc: o.svc, from: o.from, to: o.to, total: o.total, pay: o.pay }, ...orders])}/>}
     {!sub && <>
     {!fullLux && view === 'services' && <button onClick={() => go('home')} className="mx-3 mt-[calc(env(safe-area-inset-top)+0.75rem)] rounded-full border border-primary/40 bg-card px-3 py-1.5 text-[11px] font-bold">🗺️ Kembali ke Peta</button>}
-    {!fullLux && (view === 'home' || view === 'services') && <div className="sticky top-0 z-10 bg-background/90 px-3 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-2 backdrop-blur"><div className="mb-2 flex items-center gap-2"><Link to="/" aria-label="Kembali ke BIXLINK" className="grid h-10 w-10 place-items-center rounded-full border border-primary/40 bg-card active:scale-95"><ArrowLeft className="h-5 w-5"/></Link><div className="min-w-0 flex-1 leading-tight"><b className="block text-base font-black tracking-wide">BIX<span className="text-primary">GO</span></b><span className="block truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Mobilitas · Antar · Belanja</span></div><Link to="/wallet" className="rounded-full border border-border bg-card px-3 py-2 text-[11px] font-bold">Wallet</Link></div><div role="tablist" aria-label="BIXGO mode" className="grid grid-cols-3 rounded-full border border-primary/40 bg-card p-1 text-[11px] font-bold">{([['rider', 'Penumpang'], ['driver', 'Driver'], ['merchant', 'Merchant']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={mode === k} onClick={() => setMode(k)} className={`rounded-full py-2 transition ${mode === k ? 'bg-primary text-primary-foreground shadow-[0_0_18px_-6px_var(--primary)]' : 'text-muted-foreground'}`}>{l}</button>)}</div></div>}
-    {!fullLux && (view === 'home' || view === 'services') && <><CityMarquee/><ModeGuide mode={mode}/></>}
+    {!fullLux && (view === 'home' || view === 'services') && <div className="px-3 py-2"><div role="tablist" aria-label="BIXGO mode" className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-card p-1 text-[11px] font-bold">{([['rider', 'Rider'], ['driver', 'Driver'], ['merchant', 'Merchant']] as const).map(([k, l]) => <Button key={k} role="tab" variant={mode === k ? 'default' : 'ghost'} aria-selected={mode === k} onClick={() => setMode(k)} className="h-9 px-1 text-[11px]">{l}</Button>)}</div></div>}
     {view === 'home' && mode === 'merchant' && <BixgoMerchant city={city} isAdmin={isAdmin}/>}
     {view === 'home' && mode === 'driver' && <BixgoPassport lux={lux} cur={cur} usdtIdr={cfg.usdtIdr} city={city}/>}
     {fullLux && <BixgoLuxHome cfg={cfg} name={memberName} enabled={enabledSet} onPick={pick} onNav={go} onMode={setMode}/>}
@@ -163,6 +168,7 @@ function BixgoPage() {
     {!fullLux && (view === 'home' || view === 'services') && mode === 'rider' && <BixgoHome enabled={enabledSet} balance="Open Wallet" onPick={pick} onSoon={soon}/>}
     {!fullLux && (view === 'home' || view === 'services') && <BixgoInvite/>}
     {view === 'inbox' && <BixgoInbox/>}
+    {view === 'stores' && <><Button variant="ghost" className="m-3" onClick={() => go('home')}><ArrowLeft className="h-4 w-4"/>Back to map</Button><BixgoStores lux={lux} kind={storeKind}/></>}
     {view === 'account' && <><BixgoAccount name={memberName} balance="View balance" onBack={() => go('home')} onSoon={soon}/></>}
     {(view === 'order' || view === 'activity') && <main className="px-4 pb-6 pt-4">
     <section className="flex items-center gap-3">
@@ -180,7 +186,7 @@ function BixgoPage() {
         <p className="text-muted-foreground">{new Date(o.at).toLocaleString()} · {o.pay} · {o.id}{o.rating ? ` · ${'★'.repeat(o.rating)}` : ''}</p></div>; })}
       {orders.length > 0 && <Button variant="outline" className="w-full" onClick={() => persist([])}><History className="mr-1 h-4 w-4"/>Clear demo history</Button>}
     </section> : <>
-    <div className="mt-4 grid grid-cols-5 gap-2">{list.map(s => { const I = ICON[s.key]; return <button key={s.key} disabled={step !== 'form'} onClick={() => { setSvc(s.key); setTier(0); setCart({}); }} className={`rounded-2xl border px-1 py-3 text-center transition disabled:opacity-50 ${svc === s.key ? 'border-primary bg-primary/15 shadow-[0_0_18px_-6px_var(--primary)]' : 'border-border bg-card/70'}`}>
+    <div className="mt-4 grid grid-cols-5 gap-2">{list.map(s => { const I = ICON[s.key]; return <button key={s.key} disabled={step !== 'form'} onClick={() => pick(s.key)} className={`rounded-2xl border px-1 py-3 text-center transition disabled:opacity-50 ${svc === s.key ? 'border-primary bg-primary/15 shadow-[0_0_18px_-6px_var(--primary)]' : 'border-border bg-card/70'}`}>
       <I className="mx-auto h-5 w-5 text-primary"/><b className="mt-1 block text-[10px]">{s.name}</b></button>; })}</div>
 
     <section className="mt-4 rounded-3xl border border-border bg-card/80 p-4">
@@ -237,7 +243,7 @@ function BixgoPage() {
     </section></>}
     <p className="mt-4 text-center text-[10px] text-muted-foreground">BIXGO is in preview. Fares are estimates; no booking, payment or dispatch is performed.</p>
     </main>}
-    {!fullLux && <BixgoBottomNav view={view} setView={go} inbox={3} onScan={() => setScan(true)}/>}
+    {!fullLux && <BixgoBottomNav view={view} setView={go}/>}
     {scan && <QrScanner title="Scan BIX PAY / Driver QR" hint="Point the camera at a driver's or member's BIX PAY QR" onClose={() => setScan(false)} onResult={raw => { setScan(false); sessionStorage.setItem('bixgo_scan', raw); void navigate({ to: '/pay' }); }}/>}
     </>}
   </div></div>;

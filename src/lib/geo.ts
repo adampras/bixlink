@@ -12,7 +12,7 @@ export function getDevicePosition(): Promise<{ lat: number; lng: number; accurac
     if (!navigator.geolocation) return rej(new Error('Device does not support GPS'));
     navigator.geolocation.getCurrentPosition(
       p => res({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy }),
-      e => rej(new Error(e.code === 1 ? 'GPS belum aktif — titik jemput diatur ke Mataram. Pilih landmark atau ketuk peta.' : 'GPS belum terdeteksi — pilih landmark atau ketuk peta.')),
+      e => rej(new Error(e.code === 1 ? 'GPS not enabled — select a local landmark or tap the map.' : 'GPS not detected — select a landmark or tap the map.')),
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
   });
 }

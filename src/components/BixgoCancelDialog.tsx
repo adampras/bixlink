@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { cancelBixgoTrip } from '@/lib/bixgo-trip.functions';
 import { DRIVER_CANCEL_REASONS, RIDER_CANCEL_REASONS, validCancelReason } from '@/lib/bixgo-trip';
+import { useI18n } from '@/lib/i18n';
+import { bixgoLanguage } from '@/lib/bixgo-language';
 export function BixgoCancelDialog({ id, role, open, onClose, onDone }: { id: string; role: 'rider' | 'driver'; open: boolean; onClose: () => void; onDone: () => void }) {
+  const { language } = useI18n();
   const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const cancel = useServerFn(cancelBixgoTrip);
-  return <Dialog open={open} onOpenChange={v => !busy && !v && onClose()}><DialogContent className="z-[900] bg-background text-foreground">
+  return <Dialog open={open} onOpenChange={v => !busy && !v && onClose()}><DialogContent data-bixgo-language={bixgoLanguage(language)} className="z-[900] bg-background text-foreground">
     <DialogTitle>Cancel this trip?</DialogTitle>
     <DialogDescription>No cancellation fee before the trip starts. Held fare and prepaid driver BIX fees are released; no trip earnings are paid.</DialogDescription>
     <fieldset className="space-y-2"><legend className="mb-2 text-sm font-semibold">Reason for cancelling</legend>{(role === 'driver' ? DRIVER_CANCEL_REASONS : RIDER_CANCEL_REASONS).map(r => <label key={r} className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3 text-sm"><input type="radio" name="cancel-reason" value={r} checked={reason === r} onChange={() => setReason(r)} disabled={busy}/>{r}</label>)}</fieldset>

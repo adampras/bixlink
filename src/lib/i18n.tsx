@@ -1,4 +1,5 @@
 import generatedPhrases from '@/lib/i18n-phrases.json';
+import { BIXGO_PHRASES, BIXGO_ALIASES, bixgoLanguage } from '@/lib/bixgo-language';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 export const LANGUAGES = [
@@ -194,10 +195,19 @@ const originalText = new WeakMap<Node, string>();
 const renderedText = new WeakMap<Node, string>();
 const originalPlaceholder = new WeakMap<HTMLInputElement | HTMLTextAreaElement, string>();
 const renderedPlaceholder = new WeakMap<HTMLInputElement | HTMLTextAreaElement, string>();
+const bixgoEnglish = Object.fromEntries(Object.entries(BIXGO_PHRASES).map(([en, id]) => [id, en]));
+
+function translateSurface(original: string, language: Language, holder: Element | null) {
+  if (holder?.closest('[data-bixgo-language]')) {
+    const english = BIXGO_ALIASES[original] ?? bixgoEnglish[original] ?? toEnglish[original] ?? original;
+    return bixgoLanguage(language) === 'id' ? BIXGO_PHRASES[english] ?? phrases.id[english] ?? original : english;
+  }
+  const english = toEnglish[original] ?? original;
+  return language === 'en' ? english : phrases[language][english] ?? phrases[language][original] ?? original;
+}
 
 function translateDocument(language: Language) {
   if (typeof document === 'undefined') return;
-  const dictionary = language === 'en' ? null : phrases[language];
   const translateNode = (node: Node) => {
     if (node.nodeType === Node.TEXT_NODE) {
       const text = node.textContent ?? '';
@@ -206,14 +216,14 @@ function translateDocument(language: Language) {
       if (!trimmed || !holder || holder.closest('[data-no-translate]')) return;
       const original = renderedText.get(node) === trimmed ? originalText.get(node) ?? trimmed : trimmed;
       originalText.set(node, original);
-      const english = toEnglish[original] ?? original;
-      const translated = dictionary ? (dictionary[english] ?? dictionary[original] ?? original) : english;
+      const translated = translateSurface(original, language, holder);
       renderedText.set(node, translated);
       if (trimmed !== translated) node.textContent = text.replace(trimmed, translated);
     }
     if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) {
+      if (node.closest('[data-no-translate]')) return;
       const original = renderedPlaceholder.get(node) === node.placeholder ? originalPlaceholder.get(node) ?? node.placeholder : node.placeholder;
-      if (original) { originalPlaceholder.set(node, original); const en = toEnglish[original] ?? original; node.placeholder = dictionary ? (dictionary[en] ?? original) : en; renderedPlaceholder.set(node, node.placeholder); }
+      if (original) { originalPlaceholder.set(node, original); node.placeholder = translateSurface(original, language, node); renderedPlaceholder.set(node, node.placeholder); }
     }
     node.childNodes.forEach(translateNode);
   };

@@ -70,7 +70,7 @@ export function BixgoPassport({ cur, usdtIdr, city, lux = false }: { lux?: boole
           <div className="rounded-xl border border-border p-2"><b className="block text-lg">{rating.avg != null ? `★ ${rating.avg.toFixed(1)}` : '—'}</b><span className="text-[10px] text-muted-foreground">Rating</span></div>
         </div>
       </div>
-      <BixgoDriverJobs lux={lux} online={lic.online} adj={Number(lic.rate_adj_pct ?? 0)} onRating={setRating}/>
+      <BixgoDriverJobs lux={lux} showSummary={false} online={lic.online} adj={Number(lic.rate_adj_pct ?? 0)} onRating={setRating}/>
       <details className="rounded-3xl border border-border bg-card p-4 text-xs"><summary className="cursor-pointer text-sm font-black">⚙️ Pengaturan kerja (kesiapan, kota, tarif, pembayaran)</summary>
         <div className="mt-3 space-y-2">
           <BixgoDriverReady lic={lic} uid={uid} rating={rating}/>

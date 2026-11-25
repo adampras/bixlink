@@ -9,7 +9,7 @@ import { STATUS_LABEL, cartTotal, nextStatuses, rupiah, signPhotos, type Merchan
 const db = supabase as any;
 
 /** Real member stores (approved + open) for BIXFood/BIXMart, menu, cart and cash order. */
-export function BixgoStores({ lux = false }: { lux?: boolean }) {
+export function BixgoStores({ lux = false, kind }: { lux?: boolean; kind?: 'food' | 'mart' }) {
   const [stores, setStores] = useState<Merchant[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<Merchant | null>(null);
@@ -59,12 +59,13 @@ export function BixgoStores({ lux = false }: { lux?: boolean }) {
     </div>}
   </section>;
 
+  const visibleStores = stores.filter(s => !kind || s.kind === kind);
   return <section className="px-3 pt-4">
     {mine.length > 0 && <div className="mb-3 space-y-1.5"><p className="text-sm font-bold">Pesanan saya</p>{mine.map(o => <div key={o.id} className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-xs"><span>#{o.id.slice(0, 6).toUpperCase()} · {rupiah(o.subtotal_idr)}</span><span className="flex items-center gap-2"><b className="text-primary">{STATUS_LABEL[o.status]}</b>{nextStatuses(o.status, 'buyer').length > 0 && <button className="underline" onClick={() => cancel(o.id)}>Batal</button>}</span></div>)}</div>}
-    <p className="mb-2 flex items-center gap-1.5 text-sm font-bold"><Store className="h-4 w-4 text-primary"/>Toko member buka sekarang</p>
-    {stores.length ? <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">{stores.map(s => <button key={s.id} onClick={() => openStore(s)} className="w-40 shrink-0 overflow-hidden rounded-2xl border border-border bg-card text-left">
+    <p className="mb-2 flex items-center gap-1.5 text-sm font-bold"><Store className="h-4 w-4 text-primary"/>{kind === 'food' ? 'BIX Food' : kind === 'mart' ? 'BIX Mart' : 'Member stores open now'}</p>
+    {visibleStores.length ? <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">{visibleStores.map(s => <button key={s.id} onClick={() => openStore(s)} className="w-40 shrink-0 overflow-hidden rounded-2xl border border-border bg-card text-left">
       {(s.banner_path || s.logo_path) && urls[(s.banner_path || s.logo_path)!] ? <img src={urls[(s.banner_path || s.logo_path)!]} alt={s.name} className="aspect-[4/3] w-full object-cover"/> : <span className="grid aspect-[4/3] place-items-center bg-muted"><Store className="h-8 w-8 text-muted-foreground"/></span>}
       <div className="p-2"><p className="truncate text-[13px] font-bold">{s.name}</p><p className="truncate text-[11px] text-muted-foreground">{s.kind === 'food' ? 'BIXFood' : 'BIXMart'} · {s.city}</p></div></button>)}</div>
-      : <p className="rounded-xl border border-dashed border-border p-3 text-center text-xs text-muted-foreground">Belum ada toko member yang buka. Punya usaha? Pilih "Saya Merchant" di atas.</p>}
+      : <p className="rounded-xl border border-dashed border-border p-3 text-center text-xs text-muted-foreground">No open stores in this category yet.</p>}
   </section>;
 }

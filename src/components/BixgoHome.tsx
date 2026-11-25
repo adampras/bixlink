@@ -21,7 +21,7 @@ import m6 from '@/assets/bixgo/m6.jpg';
 import m7 from '@/assets/bixgo/m7.jpg';
 import promo from '@/assets/bixgo/promo.jpg';
 
-export type BixgoView = 'home' | 'order' | 'activity' | 'inbox' | 'account' | 'services';
+export type BixgoView = 'home' | 'order' | 'activity' | 'inbox' | 'account' | 'services' | 'stores';
 
 const TILES: { label: string; img: string; svc?: BixgoService; keywords: string }[] = [
   { label: 'Bike', img: icRide, svc: 'ride', keywords: 'bixride motor ojek ride transport' }, { label: 'Food', img: icFood, svc: 'food', keywords: 'bixfood makanan makan delivery' },
@@ -71,7 +71,7 @@ export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<B
       <Link to="/wallet" className="min-w-[160px] rounded-2xl border border-border bg-card px-3 py-2.5"><p className="text-[11px] text-muted-foreground">Top Up</p><p className="flex items-center justify-between text-sm font-bold">in BIX Wallet<Plus className="ml-2 h-5 w-5 rounded bg-primary p-0.5 text-primary-foreground"/></p></Link>
       <Link to="/pay" className="min-w-[140px] rounded-2xl border border-border bg-card px-3 py-2.5"><p className="text-[11px] text-muted-foreground">Pay now</p><p className="text-sm font-bold">BIX PAY</p></Link>
     </section>
-    <section className="mt-4 grid grid-cols-2 gap-3 px-3 pb-6">
+    <details className="mt-4 px-3 pb-6"><summary className="cursor-pointer py-2 text-xs font-semibold text-muted-foreground">Preview examples</summary><section className="mt-2 grid grid-cols-2 gap-3">
       {feed.map(c => <button key={c.name} onClick={() => enabled.has(c.svc) ? onPick(c.svc) : onSoon(c.name)} className="overflow-hidden rounded-2xl border border-border bg-card text-left shadow-sm active:scale-[0.98] transition">
         <div className="relative aspect-square">
           <img src={c.img} alt={c.name} loading="lazy" width={480} height={480} className="h-full w-full object-cover"/>
@@ -84,13 +84,12 @@ export function BixgoHome({ enabled, balance, onPick, onSoon }: { enabled: Set<B
             : <div className="mt-1.5 flex items-center justify-between text-xs"><span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-accent text-accent"/>{c.rating}</span><span className="flex items-center gap-1 text-muted-foreground">{c.kind === 'mart' ? <ShoppingBasket className="h-3.5 w-3.5"/> : <Utensils className="h-3.5 w-3.5"/>}{c.km}km</span></div>}
         </div>
       </button>)}
-    </section>
-    <p className="px-4 pb-4 text-center text-[10px] text-muted-foreground">Merchant names, photos, and promos are preview examples.</p>
+    </section><p className="pt-2 text-center text-[10px] text-muted-foreground">Merchant names, photos, and promos are preview examples.</p></details>
   </>;
 }
 
 export function BixgoInbox() {
-  const items = [['Promo BIXFood', 'Up to 50% off for selected restaurants today.'], ['BIXRide', 'Your first trip gets a BIX fare discount.'], ['Info BIXGO', 'BIXGO is still in preview — no real payments yet.']];
+  const items = [['Trip updates', 'Check Activity for your recorded trip status.'], ['Store orders', 'Check your store order status in BIX Food or BIX Mart.'], ['Help', 'Contact support through BIX CALL.']];
   return <section className="px-4 py-4"><h2 className="mb-3 text-lg font-bold">Inbox</h2>
     {items.map(([t, b]) => <div key={t} className="mb-2 flex gap-3 rounded-2xl border border-border bg-card p-3"><Bell className="h-5 w-5 shrink-0 text-primary"/><div><p className="text-sm font-semibold">{t}</p><p className="text-xs text-muted-foreground">{b}</p></div></div>)}
   </section>;
@@ -121,13 +120,10 @@ export function BixgoAccount({ name, balance, onBack, onSoon }: { name: string; 
   </section>;
 }
 
-export function BixgoBottomNav({ view, setView, inbox, onScan }: { view: BixgoView; setView: (v: BixgoView) => void; inbox: number; onScan: () => void }) {
-  const tabs: [BixgoView, string, typeof Home][] = [['home', 'Home', Home], ['order', 'Scan', ScanLine], ['activity', 'Aktivitas', ClipboardList], ['inbox', 'Inbox', MessageSquare], ['account', 'Account', User]];
+export function BixgoBottomNav({ view, setView }: { view: BixgoView; setView: (v: BixgoView) => void }) {
+  const tabs: [BixgoView | 'wallet', string, typeof Home][] = [['home', 'Home', Home], ['services', 'Services', Briefcase], ['activity', 'Activity', ClipboardList], ['wallet', 'Wallet', User], ['account', 'Account', User]];
   return <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto grid max-w-xl grid-cols-5 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)]">
-    {tabs.map(([k, l, I]) => <button key={k} onClick={() => k === 'order' ? onScan() : setView(k)} className={`relative flex flex-col items-center gap-0.5 py-2 text-[11px] ${view === k ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
-      <I className={`h-5 w-5 ${view === k ? 'fill-primary/20' : ''}`}/>{l}
-      {k === 'inbox' && inbox > 0 && <span className="absolute right-[22%] top-1 grid h-4 w-4 place-items-center rounded-full text-[9px] font-bold text-primary-foreground" style={{ background: 'var(--bixgo-alert)' }}>{inbox}</span>}
-    </button>)}
+    {tabs.map(([k, l, I]) => k === 'wallet' ? <Button asChild key={k} variant="ghost" className="flex h-auto flex-col gap-0.5 rounded-none px-1 py-2 text-[11px] text-muted-foreground"><Link to="/wallet"><I className="h-5 w-5"/>{l}</Link></Button> : <Button key={k} variant="ghost" onClick={() => setView(k)} aria-current={view === k ? 'page' : undefined} className={`flex h-auto flex-col gap-0.5 rounded-none px-1 py-2 text-[11px] ${view === k ? 'font-bold text-primary' : 'text-muted-foreground'}`}><I className="h-5 w-5"/>{l}</Button>)}
   </nav>;
 }
 

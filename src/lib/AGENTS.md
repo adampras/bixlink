@@ -32,3 +32,4 @@
 
 - BIX CALL group governance: invite quota/expiry enforced in bix_group_join, presence via bix_group_touch (last_seen_at), proposals/votes and a record-only treasury book (bix_group_treasury) written only through manager RPCs — treasury never moves wallet balances.
 - App photos: profiles.bixtok_avatar_path/bixcall_avatar_path set only via bix_profile_set_app_avatar; appAvatarPath falls back to avatar_path so app photos never overwrite the main BIXLINK identity.
+- BIXGO translations reuse the shared source-aware i18n observer with surface-scoped terminology; never translate service IDs or ledger vehicle/payment values. Kitchen queues group existing statuses and do not imply automatic courier dispatch or expiry.

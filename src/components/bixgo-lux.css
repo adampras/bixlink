@@ -96,3 +96,16 @@
 .bixgo-lux .bgl-tip b { display:block; color:#e7b73a; font-size:12px; text-transform:uppercase; } .bixgo-lux .bgl-tip small { font-size:11px; color:var(--muted-foreground); }
 .bixgo-lux .bgl-coin { width:48px; height:48px; flex-shrink:0; display:grid; place-items:center; border-radius:50%; font-weight:900; font-size:13px; color:#3a2804; background:radial-gradient(circle at 35% 30%,#fff0a8,#d9a520 60%,#7a560c); }
 .bixgo-lux .bgl-tip-btn { flex-shrink:0; border:1px solid #e7b73a; color:#ffd700; border-radius:999px; padding:8px 12px; font-size:11px; font-weight:800; text-transform:uppercase; }
+
+/* Shared service accents are presentation-only; text labels remain visible without color. */
+.bixgo-grab {
+  --bixgo-people: oklch(0.68 0.15 160);
+  --bixgo-food: oklch(0.76 0.15 55);
+  --bixgo-goods: oklch(0.73 0.12 235);
+}
+.bixgo-grab .bixgo-order-category { border-left:3px solid var(--bixgo-order-accent); }
+.bixgo-grab [data-order-category=people] { --bixgo-order-accent:var(--bixgo-people); }
+.bixgo-grab [data-order-category=food] { --bixgo-order-accent:var(--bixgo-food); }
+.bixgo-grab [data-order-category=goods] { --bixgo-order-accent:var(--bixgo-goods); }
+.bixgo-grab .bixgo-order-label { color:var(--bixgo-order-accent); }
+.bixgo-lux .bgl-slide-label { letter-spacing:0; line-height:1.25; padding-right:12px; }

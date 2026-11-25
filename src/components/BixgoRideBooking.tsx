@@ -12,6 +12,7 @@ import { formatMoney, cryptoEquivalent, type GlobalCurrency } from '@/lib/bixgo-
 import { landmarksFor } from '@/lib/bixgo-landmarks';
 import { bixgoFare, cityFare, franchiseFor, haversineKm, splitCommission, type BixgoSettings } from '@/lib/bixgo';
 import { getDevicePosition, reverseGeocode, roadRoute, searchPlaces, type Place } from '@/lib/geo';
+import { useBixgoText } from '@/lib/useBixgoText';
 
 const BixgoLiveMap = lazy(() => import('@/components/BixgoLiveMap'));
 type Opt = { name: string; svc: 'ride' | 'car'; mult: number; seats: number; tag?: string };
@@ -27,6 +28,7 @@ const PAYS = ['USDT', 'BIX Token', 'Cash', 'QRIS', 'Bank'];
 
 /** Pickup + vehicle selection on a real map with device GPS and real road distance. Booking itself is still a preview: no driver dispatch or payment. */
 export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'USD', city = '', lux = false }: { lux?: boolean; cfg: BixgoSettings; cur?: GlobalCurrency; city?: string; start: 'ride' | 'car'; onBack: () => void; onBooked: (o: { svc: 'ride' | 'car'; from: string; to: string; total: number; pay: string; name: string }) => void }) {
+  const text = useBixgoText();
   const [stage, setStage] = useState<'pickup' | 'choose' | 'booked'>('pickup');
   const [bid, setBid] = useState<string | null>(null);
   const [active, setActive] = useState<'from' | 'to'>('from');
@@ -40,7 +42,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
   const [route, setRoute] = useState<{ km: number; min: number | null; path: [number, number][] | null; road: boolean } | null>(null);
   const [sel, setSel] = useState(OPTS.findIndex(o => o.svc === start));
   const [pay, setPay] = useState(0);
-  const idr = (n: number) => formatMoney(n, money, cfg.usdtIdr);
+  const idr = (n: number) => `Rp ${Math.round(n).toLocaleString('id-ID')}`;
   const [ref, setRef] = useState('');
   const LANDMARKS: Place[] = landmarksFor(city || 'mataram');
 
@@ -73,7 +75,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
   const commission = Math.round(price(cur).final * cfg.commissionPct / 100);
   const split = splitCommission(branch, commission);
 
-  return <div className="relative min-h-[100dvh] pb-56">
+  return <div className="relative min-h-[100dvh] pb-80">
     <div className={`relative overflow-hidden bg-card ${stage === 'pickup' ? 'h-[55dvh]' : stage === 'booked' ? 'h-[52dvh]' : 'h-[36dvh]'} transition-all`}>
       <ClientOnly fallback={<div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Loading map…</div>}>
         <Suspense fallback={<div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Loading map…</div>}>
@@ -129,15 +131,12 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
     </section>}
 
     {stage === 'choose' && <footer className="bgl-booking-footer fixed inset-x-0 bottom-0 z-[600] mx-auto max-w-xl border-t border-border bg-background px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+18px)]">
-      {lux ? <div className="bgl-payment-grid" aria-label="Payment method">{PAYS.map((method, i) => { const I = i < 2 ? Wallet : i === 3 ? QrCode : i === 4 ? CreditCard : Banknote; return <Button key={method} variant={pay === i ? 'default' : 'outline'} aria-pressed={pay === i} onClick={() => setPay(i)} className="gap-1 text-[11px]"><I className="h-4 w-4 shrink-0"/>{method}</Button>; })}</div> : <div className="flex items-center gap-2 border-b border-border pb-2 text-sm">
-        <button onClick={() => setPay(p => (p + 1) % PAYS.length)} className="flex flex-1 items-center gap-2 font-bold"><span className="rounded-md bg-foreground px-1.5 text-[10px] text-background">{PAYS[pay]}</span>{PAYS[pay]}{pay === 1 && <span className="text-[10px] text-primary">−{cfg.bixDiscountPct}%</span>}</button>
-        <MoreHorizontal className="ml-2 h-5 w-5"/>
-      </div>}
+      <div className="grid grid-cols-3 gap-2" role="group" aria-label="Payment method">{([['Cash', [2]], ['Direct payment', [3, 4]], ['Wallet balance', [0, 1]]] as const).map(([group, ids]) => <div key={group} className="min-w-0"><p className="mb-1 text-[10px] font-bold text-muted-foreground">{group}</p><div className="flex flex-col gap-1">{ids.map(i => { const method = PAYS[i]; const I = i < 2 ? Wallet : i === 3 ? QrCode : i === 4 ? CreditCard : Banknote; return <Button key={i} size="sm" variant={pay === i ? 'default' : 'outline'} aria-pressed={pay === i} onClick={() => setPay(i)} className="h-8 gap-1 px-1 text-[10px]"><I className="h-3.5 w-3.5 shrink-0"/>{method}{i === 1 && cfg.bixDiscountPct > 0 && <small>−{cfg.bixDiscountPct}%</small>}</Button>; })}</div></div>)}</div>
+      <p className="mt-1 text-[9px] leading-tight text-muted-foreground">Cash on arrival. QRIS/bank details appear after the driver accepts. BIX/USDT is held on acceptance and settled on completion.</p>
       {err && <p role="alert" className="mt-2 text-xs text-destructive">{err}</p>}
-      <input value={landmark} maxLength={120} onChange={e => setLandmark(e.target.value)} placeholder="Pickup landmark (e.g. in front of the black gate)" className="mt-2 w-full rounded-full border border-border bg-card px-4 py-2 text-xs outline-none"/>
+      <label className="mt-2 block text-[10px] font-semibold">Pickup notes for driver<input value={landmark} maxLength={120} onChange={e => setLandmark(e.target.value)} placeholder="e.g. West lobby, beside the ATM" className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-xs outline-none"/></label>
       <div className="mt-2 flex gap-2">
-        <button aria-label="Schedule" className="grid h-12 w-14 place-items-center rounded-full bg-card"><CalendarClock className="h-5 w-5"/></button>
-        <button disabled={busy === 'book'} onClick={async () => { const total = Math.round(price(cur).final); setBusy('book'); const { data: u } = await supabase.auth.getUser(); if (u.user) { const { data, error } = await supabase.from('bixgo_bookings').insert({ city, service: cur.svc, vehicle: cur.name, pickup: (from?.name ?? '').slice(0, 200), dropoff: (to?.name ?? '').slice(0, 200), km: +km.toFixed(2), total_idr: total, pay_method: PAYS[pay]!, pickup_note: landmark.trim().slice(0, 120), pickup_lat: from?.lat ?? null, pickup_lng: from?.lng ?? null, dropoff_lat: to?.lat ?? null, dropoff_lng: to?.lng ?? null }).select('id').single(); if (error) { setErr(error.message); setBusy(null); return; } setRef(data.id.slice(0, 8).toUpperCase()); setBid(data.id); } setBusy(null); onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total, pay: PAYS[pay]!, name: cur.name }); setStage('booked'); }} className="flex-1 rounded-full bg-primary py-3 text-base font-bold text-primary-foreground">{busy === 'book' ? 'Mengirim…' : lux ? `Confirm Booking · ${cur.name}` : `Book ${cur.name}`}</button>
+        <Button disabled={busy === 'book'} onClick={async () => { const total = Math.round(price(cur).final); setBusy('book'); const { data: u } = await supabase.auth.getUser(); const method = PAYS[pay]; if (!method) { setBusy(null); return; } if (u.user) { const { data, error } = await supabase.from('bixgo_bookings').insert({ city, service: cur.svc, vehicle: cur.name, pickup: (from?.name ?? '').slice(0, 200), dropoff: (to?.name ?? '').slice(0, 200), km: +km.toFixed(2), total_idr: total, pay_method: method, pickup_note: landmark.trim().slice(0, 120), pickup_lat: from?.lat ?? null, pickup_lng: from?.lng ?? null, dropoff_lat: to?.lat ?? null, dropoff_lng: to?.lng ?? null }).select('id').single(); if (error) { setErr(error.message); setBusy(null); return; } setRef(data.id.slice(0, 8).toUpperCase()); setBid(data.id); } setBusy(null); onBooked({ svc: cur.svc, from: from?.name ?? '', to: to?.name ?? '', total, pay: method, name: cur.name }); setStage('booked'); }} className="h-auto min-h-12 flex-1 whitespace-normal rounded-lg py-3 text-sm font-bold"><span data-no-translate>{busy === 'book' ? text('Sending…') : `${text('Confirm booking')} · ${text(cur.name)}`}</span></Button>
       </div>
     </footer>}
   </div>;

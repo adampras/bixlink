@@ -200,3 +200,12 @@
 ## BIXTOK received gifts
 - [x] Add content gift celebrations, incoming gift badges and balance notices using recorded net amounts; preserve existing claims and BIX/BIXP separation.
 - [ ] Verify signed-in content/balance notices and phone/desktop fit without moving funds.
+
+## BIXGO bilingual clarity
+- [x] Synchronize a two-option ID/EN selector across passenger, driver and merchant screens without removing other ecosystem languages; signed-in switch/reload verified.
+- [x] Standardize service names, immediate service entry and payment groups; preserve recorded fares and existing payment rules. Mobile/desktop route, cash selection and unchanged user pickup notes verified without submission.
+- [x] Expose real Food/Mart stores, categorize driver orders and organize merchant kitchen queues using existing operations; remove duplicate header/guide/stats and hide sample catalog behind disclosure. Twenty-nine regression tests pass.
+- [x] Verify real road path and pickup notes; reuse existing BIX CALL controls and fix radar contacts to target the assigned driver. Phone/desktop no overflow or runtime errors; automatic build passes.
+- [ ] Verify incoming driver cards, merchant kitchen queue actions and completed-trip contact/receipt with authorized real records — available account has no registered store or active/completed trip; no financial orders fabricated. Actual call connection is not verified.
+- [x] Merchant delivery charges remain agreed by store/buyer, confirmed by user; no new automatic dispatch or expiry rule.
+- [ ] Verify delivery-photo shortcut through existing BIX CALL photo attachment with an authorized active delivery — no active delivery in available account; no receipt-level photo ledger is added.
