@@ -42,7 +42,7 @@ export function EcosystemRail({ presale }: { presale: boolean }) {
     { title: 'Genesis Presale', body: presale ? 'Packages open · from $500' : 'Genesis packages · from $500', icon: Crown, tone: 'gold', href: '/presale' as const },
     { title: 'Fox Arena', body: 'Daily missions & BIXP quests', icon: Swords, tone: 'emerald', href: '/arena' },
     { title: 'Marketplace', body: 'NFT certificates & merchandise', icon: ShoppingBag, tone: 'violet', href: '/nft-marketplace' },
-    { title: 'BIX Studio', body: 'Posters, banners & presentations', icon: Palette, tone: 'gold', href: '/studio' },
+    { title: 'BIXZOOM', body: 'Video meeting, share screen & chat', icon: Palette, tone: 'gold', href: '/studio' },
     { title: 'Marketing Media', body: 'Official posters & video', icon: Megaphone, tone: 'cyan', href: '/marketing' },
     { title: 'AI Trading Bot', body: 'Demo simulation · in development', icon: Bot, tone: 'cyan', soon: true },
     { title: 'BIX Virtual Card', body: 'Planned utility card', icon: CreditCard, tone: 'gold', soon: true },
