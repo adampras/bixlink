@@ -1555,6 +1555,13 @@
       "when": 1795614571519,
       "tag": "0221_deposit_lock_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 222,
+      "version": "7",
+      "when": 1795615575241,
+      "tag": "0222_presale_wallet_ids_switch",
+      "breakpoints": true
     }
   ]
 }

@@ -1670,14 +1670,17 @@ export type Database = {
       }
       bix_presale_wallet_ids: {
         Row: {
+          active: boolean
           created_at: string
           user_id: string
         }
         Insert: {
+          active?: boolean
           created_at?: string
           user_id: string
         }
         Update: {
+          active?: boolean
           created_at?: string
           user_id?: string
         }
@@ -5199,6 +5202,10 @@ export type Database = {
       bix_presale_wallet_ids_list: { Args: never; Returns: Json }
       bix_presale_wallet_ids_set: {
         Args: { p_on: boolean; p_query: string }
+        Returns: Json
+      }
+      bix_presale_wallet_ids_switch: {
+        Args: { p_active: boolean; p_user: string }
         Returns: Json
       }
       bix_profile_card: { Args: { p_user: string }; Returns: Json }

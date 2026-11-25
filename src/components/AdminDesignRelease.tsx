@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { HUB_ITEMS } from '@/lib/dock-hub';
 
 type Cfg = { mode: 'off' | 'scoped' | 'public'; chrono?: boolean; card?: string; owner2_design: boolean; owner2_locked: string[] };
-type Wl = { user_id: string; code: string | null; name: string | null };
+type Wl = { user_id: string; code: string | null; name: string | null; active?: boolean };
 const CARD_SKINS = [['quartz', 'White Quartz'], ['obsidian', 'Obsidian Gold'], ['emerald', 'Imperial Emerald'], ['corsa', 'Titanium Corsa'], ['amethyst', 'Royal Amethyst']] as const;
 const ECOS = HUB_ITEMS.filter(i => !['home', 'profile', 'settings'].includes(i.id));
 
@@ -73,6 +73,7 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
   const [pw, setPw] = useState<Wl[]>([]); const [pq, setPq] = useState('');
   useEffect(() => { supabase.rpc('bix_presale_wallet_ids_list' as never).then(({ data }) => setPw((data as Wl[] | null) ?? [])); }, []);
   const setPid = async (v: string, on: boolean) => { if (!v.trim()) return; setBusy(true); const { data, error } = await supabase.rpc('bix_presale_wallet_ids_set' as never, { p_query: v, p_on: on } as never); setBusy(false); if (error) return onMessage(error.message); setPw((data as Wl[] | null) ?? []); setPq(''); onMessage(on ? 'ID ditambahkan: presale melihat 5 wallet Admin 1.' : 'ID dicabut.'); };
+  const flipPid = async (w: Wl, on: boolean) => { setBusy(true); const { data, error } = await supabase.rpc('bix_presale_wallet_ids_switch' as never, { p_user: w.user_id, p_active: on } as never); setBusy(false); if (error) return onMessage(error.message); setPw((data as Wl[] | null) ?? []); onMessage(on ? `${w.code ?? 'ID'}: deposit & presale ke wallet Admin 1.` : `${w.code ?? 'ID'}: kembali ke wallet Admin 2.`); };
   const toggleEco = (id: string) => setCfg(c => ({ ...c, owner2_locked: c.owner2_locked.includes(id) ? c.owner2_locked.filter(x => x !== id) : [...c.owner2_locked, id] }));
   const pill = (on: boolean) => `rounded-full border px-3 py-1.5 text-xs font-bold ${on ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground'}`;
 
@@ -94,9 +95,9 @@ export function AdminDesignRelease({ onMessage }: { onMessage: (m: string) => vo
     </section>
     <section>
       <h3 className="font-bold">ID jaringan Admin 2 → Presale 5 wallet</h3>
-      <p className="mt-1 text-xs text-muted-foreground">Deposit biasa tetap ke wallet Admin 2. Hanya di halaman Presale, ID ini + downline melihat 5 wallet developer Admin 1. Upline, omset dan bonus tidak berubah.</p>
+      <p className="mt-1 text-xs text-muted-foreground">Wallet Admin 1: ID ini + downline melihat wallet deposit Admin 1 dan 5 wallet presale Admin 1. Wallet Admin 2: kembali ke wallet Admin 2. Upline, omset dan bonus tidak berubah.</p>
       <div className="mt-2 flex gap-2"><input value={pq} onChange={e => setPq(e.target.value)} placeholder="BIX-ID atau @username" className="w-full rounded-xl border border-border bg-background px-3 py-2"/><Button disabled={busy} onClick={() => setPid(pq, true)}>Tambah</Button></div>
-      <ul className="mt-2 space-y-1">{pw.length ? pw.map(w => <li key={w.user_id} className="flex items-center justify-between rounded-xl border border-border px-3 py-2 text-xs"><span><b>{w.code ?? w.user_id.slice(0, 8)}</b> {w.name ?? ''}</span><button type="button" className="text-destructive" onClick={() => setPid(w.code ?? w.user_id, false)}>Cabut</button></li>) : <li className="text-xs text-muted-foreground">Belum ada ID.</li>}</ul>
+      <ul className="mt-2 space-y-1">{pw.length ? pw.map(w => <li key={w.user_id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border px-3 py-2 text-xs"><span><b>{w.code ?? w.user_id.slice(0, 8)}</b> {w.name ?? ''}</span><span className="flex items-center gap-1"><button type="button" disabled={busy} className={pill(w.active !== false)} onClick={() => flipPid(w, true)}>Wallet Admin 1</button><button type="button" disabled={busy} className={pill(w.active === false)} onClick={() => flipPid(w, false)}>Wallet Admin 2</button><button type="button" className="ml-1 text-destructive" onClick={() => setPid(w.code ?? w.user_id, false)}>Cabut</button></span></li>) : <li className="text-xs text-muted-foreground">Belum ada ID.</li>}</ul>
     </section>
     <section>
       <h3 className="font-bold">HUB Orbit · ikon lingkaran minimalis</h3>
