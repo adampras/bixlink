@@ -3233,6 +3233,128 @@ export type Database = {
         }
         Relationships: []
       }
+      bixgo_map_claims: {
+        Row: {
+          allocation_id: string
+          amount_bix: number
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          allocation_id: string
+          amount_bix: number
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          allocation_id?: string
+          amount_bix?: number
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bixgo_map_config: {
+        Row: {
+          budget_bix: number
+          daily_limit: number
+          enabled: boolean
+          id: boolean
+          reward_bix: number
+        }
+        Insert: {
+          budget_bix?: number
+          daily_limit?: number
+          enabled?: boolean
+          id?: boolean
+          reward_bix?: number
+        }
+        Update: {
+          budget_bix?: number
+          daily_limit?: number
+          enabled?: boolean
+          id?: boolean
+          reward_bix?: number
+        }
+        Relationships: []
+      }
+      bixgo_map_points: {
+        Row: {
+          allocation_id: string | null
+          category: string
+          claim_id: string | null
+          claimed_at: string | null
+          created_at: string
+          detail: string
+          driver_note: string
+          id: string
+          is_public: boolean
+          lat: number
+          lng: number
+          name: string
+          photo_path: string | null
+          review_note: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reward_bix: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          allocation_id?: string | null
+          category: string
+          claim_id?: string | null
+          claimed_at?: string | null
+          created_at?: string
+          detail?: string
+          driver_note?: string
+          id?: string
+          is_public?: boolean
+          lat: number
+          lng: number
+          name: string
+          photo_path?: string | null
+          review_note?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reward_bix?: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          allocation_id?: string | null
+          category?: string
+          claim_id?: string | null
+          claimed_at?: string | null
+          created_at?: string
+          detail?: string
+          driver_note?: string
+          id?: string
+          is_public?: boolean
+          lat?: number
+          lng?: number
+          name?: string
+          photo_path?: string | null
+          review_note?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reward_bix?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bixgo_map_points_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "bixgo_map_claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bixgo_menu_items: {
         Row: {
           category: string
@@ -5613,6 +5735,48 @@ export type Database = {
         Args: { _id: string; _status: string }
         Returns: undefined
       }
+      bixgo_map_claim: { Args: never; Returns: Json }
+      bixgo_map_pool_used: { Args: never; Returns: number }
+      bixgo_map_review: {
+        Args: { p_action: string; p_id: string; p_note?: string }
+        Returns: Json
+      }
+      bixgo_map_save: {
+        Args: {
+          p_budget: number
+          p_enabled: boolean
+          p_limit: number
+          p_reward: number
+        }
+        Returns: Json
+      }
+      bixgo_map_search: {
+        Args: { p_lat?: number; p_lng?: number; p_query?: string }
+        Returns: {
+          category: string
+          detail: string
+          driver_note: string
+          id: string
+          lat: number
+          lng: number
+          name: string
+        }[]
+      }
+      bixgo_map_settings: { Args: never; Returns: Json }
+      bixgo_map_submit: {
+        Args: {
+          p_category: string
+          p_detail: string
+          p_lat: number
+          p_lng: number
+          p_name: string
+          p_note: string
+          p_photo: string
+          p_public: boolean
+        }
+        Returns: string
+      }
+      bixgo_map_summary: { Args: never; Returns: Json }
       bixgo_merchant_order_place: {
         Args: {
           p_address: string

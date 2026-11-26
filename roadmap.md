@@ -216,6 +216,12 @@
 - [x] Merchant delivery charges remain agreed by store/buyer, confirmed by user; no new automatic dispatch or expiry rule.
 - [ ] Verify delivery-photo shortcut through existing BIX CALL photo attachment with an authorized active delivery — no active delivery in available account; no receipt-level photo ledger is added.
 
+## BIXGO community map
+- [ ] Add reviewed community points, GPS/photo consent, duplicate checks and configurable daily quota.
+- [ ] Add BIXGO reward history, approved balance and atomic one-time transfer to Wallet; preserve existing trip settlements.
+- [ ] Add Owner 1 reward settings, Marketing & Community budget shared with mining and point review; start closed with zero reward.
+- [ ] Integrate approved points in map/address search with driver directions; verify member/admin flow and rule tests.
+
 ## BIXGO friendly trip access
 - [x] Add lightweight driver fast-track with verified real email, safety declaration, Owner 1 override and no free balances; fleet stays pending and suspended accounts cannot reapply or go online. This is not document authentication.
 - [x] Add participant-only in-trip text chat, unread badge and quick messages without leaving BIXGO; retain unchanged BIX CALL voice/video as alternatives. Existing photo attachment remains a separate BIX CALL shortcut.

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Bell, Briefcase, ChevronRight, ClipboardList, Home, MessageSquare, Plus, ScanLine, Search, Star, User, ShoppingBasket, Utensils, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { BixgoCommunityMap } from '@/components/BixgoCommunityMap';
 import type { BixgoService } from '@/lib/bixgo';
 import icRide from '@/assets/bixgo/ic-ride.png';
 import icFood from '@/assets/bixgo/ic-food.png';
@@ -109,6 +110,7 @@ export function BixgoAccount({ name, balance, onBack, onSoon }: { name: string; 
       <div className="min-w-[150px] rounded-2xl border border-border bg-card p-3"><div className="flex justify-between"><span className="inline-block h-8 w-8 rounded-full border-[6px]" style={{ borderColor: 'var(--bixgo-wallet)' }}/><span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold">Utama</span></div><p className="mt-3 font-bold">BIX Wallet</p><p className="text-sm text-muted-foreground">{balance}</p></div>
       <Link to="/pay" className="min-w-[150px] rounded-2xl p-3 text-primary-foreground" style={{ background: 'var(--bixgo-header)' }}><p className="mt-11 font-bold">BIX PAY</p><p className="text-sm opacity-90">Bayar & transfer</p></Link>
     </div>
+    <BixgoCommunityMap/>
     <div className="mt-5 px-4">
       <h3 className="text-xl font-black">Lebih banyak keuntungan</h3>
       <Row label="Tantangan" to="/arena"/>

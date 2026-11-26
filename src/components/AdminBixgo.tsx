@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { AdminFold } from '@/components/AdminNavigation';
 import { AdminFranchise, AdminPpob } from '@/components/AdminBixgoExtras';
 import { AdminBixgoConsole } from '@/components/AdminBixgoConsole';
+import { AdminBixgoMap } from '@/components/AdminBixgoMap';
 
 export function AdminBixgo({ initial, onMessage, onSaved }: { initial?: unknown; onMessage: (m: string) => void; onSaved?: () => void }) {
   const [s, setS] = useState<BixgoSettings>(() => readBixgo(initial));
@@ -29,5 +30,5 @@ export function AdminBixgo({ initial, onMessage, onSaved }: { initial?: unknown;
       <AdminPpob s={s} setS={setS}/>
       <Button className="w-full" disabled={busy} onClick={() => submit(s)}>Save BIXGO</Button>
     </div>
-  </AdminFold></>;
+  </AdminFold><AdminBixgoMap/></>;
 }

@@ -14,6 +14,8 @@ import { landmarksFor } from '@/lib/bixgo-landmarks';
 import { bixgoFare, cityFare, franchiseFor, haversineKm, splitCommission, type BixgoSettings } from '@/lib/bixgo';
 import { getDevicePosition, reverseGeocode, roadRoute, searchPlaces, type Place } from '@/lib/geo';
 import { useBixgoText } from '@/lib/useBixgoText';
+import { searchCommunityPlaces } from '@/lib/bixgo-map-search';
+import type { CommunityPlace } from '@/lib/bixgo-map-search';
 
 const BixgoLiveMap = lazy(() => import('@/components/BixgoLiveMap'));
 type Opt = { name: string; svc: 'ride' | 'car'; mult: number; seats: number; tag?: string };
@@ -36,7 +38,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
   const [from, setFrom] = useState<Place | null>(null);
   const [to, setTo] = useState<Place | null>(null);
   const [q, setQ] = useState('');
-  const [results, setResults] = useState<Place[]>([]);
+  const [results, setResults] = useState<(Place | CommunityPlace)[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState('');
   const [landmark, setLandmark] = useState('');
@@ -62,11 +64,11 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
 
   const search = async () => {
     setBusy('search'); setErr('');
-    try { const r = await searchPlaces(q, from ?? undefined); setResults(r); if (!r.length) setErr('Address not found. Try street name + city.'); }
+    try { const searches = await Promise.allSettled([searchCommunityPlaces(q, from ?? undefined),searchPlaces(q, from ?? undefined)]); const r = searches.flatMap(s=>s.status==='fulfilled'?s.value:[]); setResults(r); if (!r.length) setErr(searches.some(s=>s.status==='rejected')?'Address search unavailable. Retry.':'Address not found. Try street name + city.'); }
     catch (e) { setErr(e instanceof Error ? e.message : 'Search failed'); } finally { setBusy(null); }
   };
-  const choose = (p: Place) => { if (active === 'from') { setFrom(p); setActive('to'); } else setTo(p); setResults([]); setQ(''); };
-  const tapMap = async (p: { lat: number; lng: number }) => { setBusy('rev'); const place = await reverseGeocode(p.lat, p.lng); setBusy(null); if (active === 'from') setFrom(place); else setTo(place); };
+  const choose = (p: Place | CommunityPlace) => { if (active === 'from') { setFrom(p); setLandmark('driverNote' in p ? p.driverNote : ''); setActive('to'); } else setTo(p); setResults([]); setQ(''); };
+  const tapMap = async (p: { lat: number; lng: number; name?: string; detail?: string; driverNote?: string; communityId?: string }) => { if (p.name && p.communityId) { choose({lat:p.lat,lng:p.lng,name:p.name,detail:p.detail??'',driverNote:p.driverNote??'',communityId:p.communityId}); return; } setBusy('rev'); const place = await reverseGeocode(p.lat, p.lng); setBusy(null); if (active === 'from') {setFrom(place);setLandmark('');} else setTo(place); };
 
   const km = route?.km ?? 0;
   const branch = from ? franchiseFor(cfg, from) : null;
@@ -92,7 +94,7 @@ export function BixgoRideBooking({ cfg, start, onBack, onBooked, cur: money = 'U
           <button aria-label="Search">{busy === 'search' ? <Loader2 className="h-4 w-4 animate-spin"/> : <Search className="h-4 w-4 text-muted-foreground"/>}</button>
         </form>}
       </header>
-      {results.length > 0 && <div className="absolute inset-x-3 top-16 z-[500] max-h-60 overflow-y-auto rounded-2xl bg-background shadow-xl">{results.map(r => <button key={`${r.lat},${r.lng}`} onClick={() => choose(r)} className="flex w-full items-start gap-2 border-b border-border px-3 py-2.5 text-left"><MapPin className="mt-0.5 h-4 w-4 text-primary"/><span><b className="block text-sm">{r.name}</b><span className="text-[11px] text-muted-foreground">{r.detail}</span></span></button>)}</div>}
+      {results.length > 0 && <div className="absolute inset-x-3 top-16 z-[500] max-h-60 overflow-y-auto rounded-2xl bg-background shadow-xl">{results.map(r => <Button variant="ghost" key={'communityId' in r ? r.communityId : `${r.lat},${r.lng}`} onClick={() => choose(r)} className="flex h-auto w-full items-start justify-start gap-2 whitespace-normal rounded-none border-b border-border px-3 py-2.5 text-left"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary"/><span className="min-w-0"><b className="block break-words text-sm">{r.name}{'communityId' in r && <small className="ml-2 text-primary" data-no-translate>{text('Community')}</small>}</b><span className="text-[11px] text-muted-foreground">{r.detail}</span>{'driverNote' in r&&<span className="block text-[11px] text-muted-foreground">{r.driverNote}</span>}</span></Button>)}</div>}
       {route && <span className="absolute left-1/2 top-16 z-[400] -translate-x-1/2 rounded-full bg-background/90 px-3 py-1 text-[11px] font-bold shadow">{route.min != null ? `${route.min} min · ` : ''}{km.toFixed(1)} km{route.road ? '' : ' (estimate)'}</span>}
       <button aria-label="My location" onClick={() => void locate()} className="absolute bottom-6 right-3 z-[500] grid h-11 w-11 place-items-center rounded-full bg-background shadow-lg">{busy === 'gps' ? <Loader2 className="h-5 w-5 animate-spin"/> : <Crosshair className="h-5 w-5 text-primary"/>}</button>
     </div>

@@ -1,7 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import L from 'leaflet';
+import { searchCommunityPlaces } from '@/lib/bixgo-map-search';
 
-export type LatLng = { lat: number; lng: number };
+export type LatLng = { lat: number; lng: number; name?: string; detail?: string; driverNote?: string; communityId?: string };
 
 const pin = (color: string) => L.divIcon({ className: '', iconSize: [22, 22], iconAnchor: [11, 11],
   html: `<span style="display:block;width:22px;height:22px;border-radius:50%;background:${color};border:4px solid #fff;box-shadow:0 0 0 3px ${color}55,0 4px 10px #0008"></span>` });
@@ -11,6 +13,9 @@ export default function BixgoLiveMap({ from, to, active, path, onPick }: { from:
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const layer = useRef<L.LayerGroup | null>(null);
+  const communityLayer = useRef<L.LayerGroup | null>(null);
+  const [center,setCenter] = useState<{lat:number;lng:number}|null>(null);
+  const points = useQuery({queryKey:['bixgo-community-nearby',center?.lat,center?.lng],queryFn:()=>searchCommunityPlaces('',center??undefined),enabled:!!center,staleTime:60000,retry:1});
   const pickRef = useRef(onPick); pickRef.current = onPick;
 
   useEffect(() => {
@@ -18,11 +23,16 @@ export default function BixgoLiveMap({ from, to, active, path, onPick }: { from:
     const m = L.map(el.current, { zoomControl: false, attributionControl: true }).setView([-8.5913, 116.1063], 13);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(m);
     layer.current = L.layerGroup().addTo(m);
+    communityLayer.current = L.layerGroup().addTo(m);
+    const syncCenter = () => {const c=m.getCenter();setCenter({lat:Math.round(c.lat*50)/50,lng:Math.round(c.lng*50)/50});};
+    syncCenter();m.on('moveend',syncCenter);
     m.on('click', e => pickRef.current({ lat: e.latlng.lat, lng: e.latlng.lng }));
     map.current = m;
     const ro = new ResizeObserver(() => m.invalidateSize()); ro.observe(el.current);
     return () => { ro.disconnect(); m.remove(); map.current = null; };
   }, []);
+
+  useEffect(()=>{const g=communityLayer.current;if(!g)return;g.clearLayers();for(const p of points.data??[]){const label=document.createElement('span');label.textContent=p.name;L.marker([p.lat,p.lng],{icon:L.divIcon({className:'',html:'<span class="bixgo-community-pin"></span>',iconSize:[18,18],iconAnchor:[9,9]})}).bindTooltip(label).on('click',e=>{L.DomEvent.stopPropagation(e.originalEvent);pickRef.current(p);}).addTo(g);}},[points.data]);
 
   useEffect(() => {
     const m = map.current, g = layer.current; if (!m || !g) return;
