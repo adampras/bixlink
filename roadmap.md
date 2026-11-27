@@ -222,6 +222,9 @@
 - [ ] Add Owner 1 reward settings, Marketing & Community budget shared with mining and point review; start closed with zero reward.
 - [ ] Integrate approved points in map/address search with driver directions; verify member/admin flow and rule tests.
 
+## Sponsored active-bonus access
+- [ ] Add Owner 1 active-bonus-only access for sponsored leader/loan accounts, preserving profit and capital locks; verify source filtering, owner access and switch readback without permanent financial writes.
+
 ## BIXGO friendly trip access
 - [x] Add lightweight driver fast-track with verified real email, safety declaration, Owner 1 override and no free balances; fleet stays pending and suspended accounts cannot reapply or go online. This is not document authentication.
 - [x] Add participant-only in-trip text chat, unread badge and quick messages without leaving BIXGO; retain unchanged BIX CALL voice/video as alternatives. Existing photo attachment remains a separate BIX CALL shortcut.

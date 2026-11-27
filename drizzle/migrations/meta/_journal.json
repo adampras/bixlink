@@ -1583,6 +1583,13 @@
       "when": 1795665913473,
       "tag": "0225_bixgo_map_optional_photo",
       "breakpoints": true
+    },
+    {
+      "idx": 226,
+      "version": "7",
+      "when": 1795750278811,
+      "tag": "0226_leader_active_bonus_only",
+      "breakpoints": true
     }
   ]
 }

@@ -528,7 +528,7 @@ export type BalanceLedger = {
   total_usdt: number; real_deposit_usdt: number; staking_reward_usdt: number; sponsor_capital_usdt: number; vusdt_usdt: number;
   bonus_real_usdt: number; bonus_unreal_usdt: number; bonus_real_bix: number; bonus_unreal_bix: number;
   locked_usdt: number; withdrawable_usdt: number; locked_bix: number; is_leader: boolean; qualified: boolean;
-  exempt: 'owner1' | 'clone' | 'owner_open' | null; owner_access: 'normal' | 'open' | 'closed';
+  exempt: 'owner1' | 'clone' | 'owner_open' | null; owner_access: 'normal' | 'active_bonus' | 'open' | 'closed';
   recent: { at: string; kind: string; level: number; usdt: number; bix: number; member: string; real: boolean }[];
 };
 
@@ -539,7 +539,7 @@ export const getMyBalanceLedger = createServerFn({ method: 'GET' }).middleware([
 });
 
 export const setLeaderAccess = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
-  .inputValidator((data: { userId: string; access: 'normal' | 'open' | 'closed' }) => z.object({ userId: z.string().uuid(), access: z.enum(['normal', 'open', 'closed']) }).strict().parse(data))
+  .inputValidator((data: { userId: string; access: 'normal' | 'active_bonus' | 'open' | 'closed' }) => z.object({ userId: z.string().uuid(), access: z.enum(['normal', 'active_bonus', 'open', 'closed']) }).strict().parse(data))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc('bix_leader_set_access' as never, { p_user: data.userId, p_access: data.access, p_note: 'Owner 1' } as never);
     if (error) throw new Error(error.message);

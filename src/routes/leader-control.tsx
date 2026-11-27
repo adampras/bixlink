@@ -106,6 +106,7 @@ function Roster({ kind }: { kind: 'leader' | 'loan' }) {
 
 const ACCESS = [
   { v: 'normal', label: 'Normal', hint: 'Aturan target berlaku' },
+  { v: 'active_bonus', label: 'Buka Bonus Aktif', hint: 'Bonus real USDT saja; profit bantuan tetap terkunci' },
   { v: 'open', label: 'Open', hint: 'Exempt from all requirements' },
   { v: 'closed', label: 'Close', hint: 'Bekukan WD & transfer' },
 ] as const;
@@ -114,10 +115,10 @@ function AccessSwitch({ userId, value, onDone }: { userId: string; value: string
   const save = useServerFn(setLeaderAccess); const [busy, setBusy] = useState(false);
   return <div className="mt-2 rounded-xl border border-border p-2">
     <div className="text-[10px] font-black tracking-widest text-muted-foreground">SPONSORED ACCOUNT ACCESS · OWNER 1</div>
-    <div className="mt-1.5 grid grid-cols-3 gap-1.5" role="radiogroup" aria-label="Sponsored account access">{ACCESS.map(a => <button key={a.v} type="button" role="radio" aria-checked={value === a.v} disabled={busy}
+    <div className="mt-1.5 grid grid-cols-2 gap-1.5" role="radiogroup" aria-label="Sponsored account access">{ACCESS.map(a => <Button key={a.v} type="button" variant="outline" role="radio" aria-checked={value === a.v} disabled={busy}
       onClick={async () => { if (value === a.v) return; if (a.v !== 'normal' && !confirm(`${a.label} this account? ${a.hint}.`)) return; setBusy(true); try { await save({ data: { userId, access: a.v } }); onDone(`Access changed to ${a.label}.`); } catch (e) { onDone(e instanceof Error ? e.message : 'Failed to change access.'); } finally { setBusy(false); } }}
-      className={`rounded-lg border px-2 py-1.5 text-left text-[11px] font-bold ${value === a.v ? (a.v === 'closed' ? 'border-destructive bg-destructive/15 text-destructive' : a.v === 'open' ? 'border-chart-2 bg-chart-2/15 text-chart-2' : 'border-primary bg-primary/15 text-primary') : 'border-border text-muted-foreground'}`}>
-      {a.label}<span className="block text-[9px] font-medium opacity-80">{a.hint}</span></button>)}</div>
+      className={`h-auto min-w-0 flex-col items-start whitespace-normal rounded-lg border px-2 py-1.5 text-left text-[11px] font-bold ${value === a.v ? (a.v === 'closed' ? 'border-destructive bg-destructive/15 text-destructive' : a.v === 'open' ? 'border-chart-2 bg-chart-2/15 text-chart-2' : 'border-primary bg-primary/15 text-primary') : 'border-border text-muted-foreground'}`}>
+      {a.label}<span className="block text-[9px] font-medium opacity-80">{a.hint}</span></Button>)}</div>
   </div>;
 }
 

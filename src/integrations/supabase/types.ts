@@ -4831,6 +4831,10 @@ export type Database = {
       }
       apply_bix_leader: { Args: never; Returns: undefined }
       assign_bix_referrer: { Args: { p_code: string }; Returns: boolean }
+      bix_active_bonus_real_source: {
+        Args: { p_member: string; p_stake: string }
+        Returns: boolean
+      }
       bix_agency_apply: {
         Args: {
           p_city: string
