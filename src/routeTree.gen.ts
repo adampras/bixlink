@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as ActiveBonusControlRouteImport } from './routes/active-bonus-control'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ArbitrageRouteImport } from './routes/arbitrage'
 import { Route as ArenaRouteImport } from './routes/arena'
@@ -73,6 +74,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActiveBonusControlRoute = ActiveBonusControlRouteImport.update({
+  id: '/active-bonus-control',
+  path: '/active-bonus-control',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -346,6 +352,7 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/active-bonus-control': typeof ActiveBonusControlRoute
   '/admin': typeof AdminRoute
   '/arbitrage': typeof ArbitrageRoute
   '/arena': typeof ArenaRoute
@@ -403,6 +410,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/active-bonus-control': typeof ActiveBonusControlRoute
   '/admin': typeof AdminRoute
   '/arbitrage': typeof ArbitrageRoute
   '/arena': typeof ArenaRoute
@@ -461,6 +469,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/active-bonus-control': typeof ActiveBonusControlRoute
   '/admin': typeof AdminRoute
   '/arbitrage': typeof ArbitrageRoute
   '/arena': typeof ArenaRoute
@@ -520,6 +529,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/active-bonus-control'
     | '/admin'
     | '/arbitrage'
     | '/arena'
@@ -577,6 +587,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/active-bonus-control'
     | '/admin'
     | '/arbitrage'
     | '/arena'
@@ -634,6 +645,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/active-bonus-control'
     | '/admin'
     | '/arbitrage'
     | '/arena'
@@ -692,6 +704,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  ActiveBonusControlRoute: typeof ActiveBonusControlRoute
   AdminRoute: typeof AdminRoute
   ArbitrageRoute: typeof ArbitrageRoute
   ArenaRoute: typeof ArenaRoute
@@ -761,6 +774,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/active-bonus-control': {
+      id: '/active-bonus-control'
+      path: '/active-bonus-control'
+      fullPath: '/active-bonus-control'
+      preLoaderRoute: typeof ActiveBonusControlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1140,6 +1160,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  ActiveBonusControlRoute: ActiveBonusControlRoute,
   AdminRoute: AdminRoute,
   ArbitrageRoute: ArbitrageRoute,
   ArenaRoute: ArenaRoute,

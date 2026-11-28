@@ -34,6 +34,11 @@ function ProfilePage() {
   const walletOnly = isWalletOnlyAccount(user);
   const accountLabel = walletOnly ? user?.app_metadata?.['wallet_address'] : user?.email;
   const reviewer = useReviewerAccess(user?.id);
+  const owner1 = useQuery({ queryKey: ['is-owner1', user?.id], enabled: Boolean(user), queryFn: async () => {
+    const { data: owner, error } = await supabase.rpc('bix_is_owner1' as never);
+    if (error) throw error;
+    return owner === true;
+  } });
   const [openProof, setOpenProof] = useState<string | null>(null);
   const [notice, setNotice] = useState(''); const [code, setCode] = useState('');
   const makeCode = useServerFn(createReferral); const link = useServerFn(assignReferral);
@@ -67,6 +72,7 @@ function ProfilePage() {
     <MemberGate ready={ready} signedIn={!!user} title="PROFILE">
       <ProfilePhotoHeader fallback={headerMark.url}><div className="eyebrow">{walletOnly ? 'WALLET MEMBER' : 'MEMBER ACCOUNT'}</div><h1 className="break-all">{accountLabel}</h1><p>Active since {user && formatDate(user.created_at)}</p>{badges.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{badges.map(({ Icon, label, cls }) => <span key={label} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${cls}`}><Icon size={11}/>{label}</span>)}</div>}</ProfilePhotoHeader>
       {walletOnly && <WalletAccountDetails/>}
+      {owner1.data === true && <section className="profile-actions mt-4"><Button asChild variant="outline"><Link to="/active-bonus-control"><span className="profile-action-icon profile-action-icon--admin"><Crown/></span><span>Kontrol Bonus Aktif <small>Admin 1 · Leader &amp; Loan</small></span><ChevronRight className="profile-action-arrow"/></Link></Button></section>}
       <section className="profile-referral">
         <div className="profile-section-head"><h2>Referral code</h2>{data?.referral?.code && <span><Check size={11}/> Active</span>}</div>
         {data?.referral?.code ? <><div className="profile-code-row"><div className="profile-code"><b>{data.referral.code}</b><Button size="icon" variant="ghost" title="Copy referral code" onClick={copyCode}>{copied === 'code' ? <Check className="text-chart-2"/> : <Copy/>}</Button></div></div>{referralUrl && <div className="mt-2 grid grid-cols-2 gap-2"><Button asChild size="sm" variant="outline" className="rounded-full"><a href={`https://wa.me/?text=${encodeURIComponent(`Join me on BIXLINK: ${referralUrl}`)}`} target="_blank" rel="noopener noreferrer">Share WhatsApp</a></Button><Button asChild size="sm" variant="outline" className="rounded-full"><a href={`https://t.me/share/url?url=${encodeURIComponent(referralUrl)}&text=${encodeURIComponent('Join me on BIXLINK')}`} target="_blank" rel="noopener noreferrer">Share Telegram</a></Button></div>}</> : <Button className="profile-generate" onClick={async () => { try { await makeCode(); await qc.invalidateQueries({ queryKey: ['my-bixlink'] }); } catch { setNotice('Could not create code.'); } }}>Generate referral code</Button>}

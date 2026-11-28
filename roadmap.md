@@ -224,6 +224,7 @@
 
 ## Sponsored active-bonus access
 - [ ] Add Owner 1 active-bonus-only access for sponsored leader/loan accounts, preserving profit and capital locks; verify source filtering, owner access and switch readback without permanent financial writes.
+- [ ] Add a dedicated active-bonus switch page accessible from the top of Owner 1 Profile; verify Andriyan real-source release without relabeling mixed vUSDT stakes.
 
 ## BIXGO friendly trip access
 - [x] Add lightweight driver fast-track with verified real email, safety declaration, Owner 1 override and no free balances; fleet stays pending and suspended accounts cannot reapply or go online. This is not document authentication.
