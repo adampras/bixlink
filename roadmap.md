@@ -223,6 +223,7 @@
 - [ ] Integrate approved points in map/address search with driver directions; verify member/admin flow and rule tests.
 
 ## Sponsored active-bonus access
+- [ ] Fund eligible mixed stakes only from verified available Owner 1 real USDT, preserving source audit and existing capital/profit locks; blocked by unverified source availability: Owner 1 approved deposits 203.70 USDT versus approved withdrawals 610 USDT, while owner-exempt displayed balance includes virtual funds. Do not use the displayed balance or cumulative deposits as spendable backing, relabel existing virtual funding, or release mixed-source bonuses before reconciliation. BIX-128113 remains unchanged.
 - [ ] Add Owner 1 active-bonus-only access for sponsored leader/loan accounts, preserving profit and capital locks; verify source filtering, owner access and switch readback without permanent financial writes.
 - [x] Add dedicated active-bonus switches from the top of Owner 1 Profile; two control tests pass, phone/desktop rendering and authenticated Andriyan switch persistence verified. Andriyan is active_bonus; 26 mixed-source pending rows remain held, BIX-128113 stays funded_vusdt. No virtual funds relabeled or mixed bonuses released.
 
