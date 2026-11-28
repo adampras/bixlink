@@ -45,8 +45,8 @@ export function AdminTurnover({ members }: { members: { id: string; email: strin
   return <section className="rounded-2xl border border-border bg-card p-4">
     <h3 className="font-bold text-primary">Omset real USDT per Owner</h3>
     <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs"><div><b className="block text-base text-chart-2">{usd(q.data.total.deposit)}</b>Total deposit global</div><div><b className="block text-base text-primary">{usd(sub)}</b>Sub-owner network</div><div><b className="block text-base">{usd(q.data.total.withdraw)}</b>Total withdraw</div></div>
-    <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="text-muted-foreground"><tr><th className="p-2">Owner</th><th>Member</th><th>Deposit</th><th>Withdraw</th><th>Net</th></tr></thead>
-      <tbody>{rows.map(r => <tr key={r.userId} className="border-t border-border"><td className="p-2 break-all">{members.find(m => m.id === r.userId)?.email ?? r.code}</td><td>{r.members}</td><td className="text-chart-2">{usd(r.deposit)}</td><td>{usd(r.withdraw)}</td><td>{usd(r.deposit - r.withdraw)}</td></tr>)}
-      <tr className="border-t border-border font-bold"><td className="p-2">Owner 1 / public network</td><td>—</td><td>{usd(q.data.total.deposit - sub)}</td><td>—</td><td>—</td></tr></tbody></table></div>
+    <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="text-muted-foreground"><tr><th className="p-2">Owner</th><th>Member</th><th>Deposit</th><th>Withdraw</th><th>Net</th><th>Staking Admin 2</th><th>Staking → Admin 1</th></tr></thead>
+      <tbody>{rows.map(r => <tr key={r.userId} className="border-t border-border"><td className="p-2 break-all">{members.find(m => m.id === r.userId)?.email ?? r.code}</td><td>{r.members}</td><td className="text-chart-2">{usd(r.deposit)}</td><td>{usd(r.withdraw)}</td><td>{usd(r.deposit - r.withdraw)}</td><td>{usd(r.stake)}</td><td className="text-primary">{usd(r.stakeOwner1)}</td></tr>)}
+      <tr className="border-t border-border font-bold"><td className="p-2">Owner 1 / public network</td><td>—</td><td>{usd(q.data.total.deposit - sub)}</td><td>—</td><td>—</td><td>—</td><td className="text-primary">{usd(rows.reduce((a, r) => a + r.stakeOwner1, 0))}</td></tr></tbody></table></div>
   </section>;
 }

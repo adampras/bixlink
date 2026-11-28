@@ -179,14 +179,17 @@ export const getOwnerTurnover = createServerFn({ method: 'GET' }).middleware([re
     supabaseAdmin.from('wallet_transactions').select('user_id,type,amount_usd,status').in('type', ['deposit', 'withdraw']).eq('status', 'approved').limit(20000),
     supabaseAdmin.from('bix_clone_accounts').select('user_id'),
   ]);
+  const { data: stakes } = await supabaseAdmin.from('stakes').select('user_id,amount_usd,attributed_owner1').eq('status', 'active').limit(20000);
   const cloneSet = new Set((clones.data ?? []).map(c => c.user_id));
+  // Stakes from Admin 2 branches routed to Admin 1 wallets count for Admin 1, never for Admin 2.
+  const stakeSum = (ids: Set<string>) => { let own = 0, toOwner1 = 0; for (const s of stakes ?? []) { if (cloneSet.has(s.user_id) || !ids.has(s.user_id)) continue; if (s.attributed_owner1) toOwner1 += Number(s.amount_usd); else own += Number(s.amount_usd); } return { stake: own, stakeOwner1: toOwner1 }; };
   const kids = new Map<string, string[]>();
   for (const r of refs.data ?? []) if (r.referred_by) kids.set(r.referred_by, [...(kids.get(r.referred_by) ?? []), r.user_id]);
   const sum = (ids: Set<string> | null) => { let dep = 0, wd = 0, n = 0; for (const t of txs.data ?? []) { if (cloneSet.has(t.user_id) || (ids && !ids.has(t.user_id))) continue; if (t.type === 'deposit') { dep += Number(t.amount_usd); n++; } else wd += Number(t.amount_usd); } return { deposit: dep, withdraw: wd, count: n }; };
   const owners = (roles.data ?? []).map(({ user_id }) => {
     const seen = new Set<string>(); const stack = [...(kids.get(user_id) ?? [])];
     while (stack.length) { const id = stack.pop()!; if (seen.has(id)) continue; seen.add(id); stack.push(...(kids.get(id) ?? [])); }
-    return { userId: user_id, code: (refs.data ?? []).find(r => r.user_id === user_id)?.code ?? '—', members: seen.size, ...sum(seen) };
+    return { userId: user_id, code: (refs.data ?? []).find(r => r.user_id === user_id)?.code ?? '—', members: seen.size, ...sum(seen), ...stakeSum(seen) };
   });
   return { total: sum(null), owners };
 });

@@ -4609,6 +4609,7 @@ export type Database = {
           activated_at: string | null
           amount_usd: number
           apy: number
+          attributed_owner1: boolean
           bix_paid: number
           bix_price_usd: number | null
           compound: boolean
@@ -4631,6 +4632,7 @@ export type Database = {
           activated_at?: string | null
           amount_usd: number
           apy: number
+          attributed_owner1?: boolean
           bix_paid?: number
           bix_price_usd?: number | null
           compound?: boolean
@@ -4653,6 +4655,7 @@ export type Database = {
           activated_at?: string | null
           amount_usd?: number
           apy?: number
+          attributed_owner1?: boolean
           bix_paid?: number
           bix_price_usd?: number | null
           compound?: boolean
