@@ -1625,6 +1625,20 @@
       "when": 1795845727538,
       "tag": "0231_require_deposit_evidence_for_stake_reconciliation",
       "breakpoints": true
+    },
+    {
+      "idx": 232,
+      "version": "7",
+      "when": 1795847538873,
+      "tag": "0232_classify_verified_deposit_stakes_without_losing_wallet_debits",
+      "breakpoints": true
+    },
+    {
+      "idx": 233,
+      "version": "7",
+      "when": 1795847633017,
+      "tag": "0233_verify_automatic_real_stake_bonus_release",
+      "breakpoints": true
     }
   ]
 }

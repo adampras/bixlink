@@ -230,6 +230,9 @@
 - [x] Verify Owner 1 active-bonus-only access for sponsored leader/loan accounts through rollback SQL assertions covering owner/source guards, both asset locks, future matching and individual override; assistance profit/capital remain locked.
 - [x] Add dedicated active-bonus switches from the top of Owner 1 Profile; two control tests pass, phone/desktop rendering and authenticated Andriyan switch persistence verified. Andriyan is active_bonus; BIX-128113 stays funded_vusdt. No virtual funds relabeled or mixed bonuses released.
 
+## Verified staking funding automation
+- [x] Recognize verified available deposit funds on new USDT/hybrid stakes without losing wallet debits; rollback tests verify a 100 USDT real stake and automatic USDT/BIX sponsor release, 99.94+1 mixed hold, evidence/debit/reuse guards, and 5000 capital/40 profit locks. Owner 1 phone UI confirms global and Andriyan switches ON; 141 historical stakes and 20 Andriyan mixed pending bonuses unchanged. No test transactions persisted; external WD approval unchanged.
+
 ## BIXGO friendly trip access
 - [x] Add lightweight driver fast-track with verified real email, safety declaration, Owner 1 override and no free balances; fleet stays pending and suspended accounts cannot reapply or go online. This is not document authentication.
 - [x] Add participant-only in-trip text chat, unread badge and quick messages without leaving BIXGO; retain unchanged BIX CALL voice/video as alternatives. Existing photo attachment remains a separate BIX CALL shortcut.

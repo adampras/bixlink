@@ -70,3 +70,4 @@
 - Native foundations are optional dynamic Capacitor adapters in the web app; Android services/builds remain external, FCM sends wait for a linked connector, and GPS reuses the assigned-driver gate so a detected bridge never implies verified locked-screen delivery.
 - BIX CALL shares gesture-based audio unlocking in bix-tones, schedules tones only after resume, cancels pending tones on stop, and retains playback-retry controls until actual playback succeeds; browser autoplay restrictions cannot be bypassed.
 - Use usePageErrorRecovery for route retries and eager PageLoadError as router fallback; local lazy screens show loading/errors to prevent blank screens.
+- Split funding/debits to prevent double credit.

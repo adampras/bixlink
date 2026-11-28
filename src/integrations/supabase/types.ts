@@ -4624,6 +4624,7 @@ export type Database = {
           status: string
           unstaked_at: string | null
           user_id: string
+          wallet_auto_debit: boolean
           wallet_debit_preserved: boolean
         }
         Insert: {
@@ -4645,6 +4646,7 @@ export type Database = {
           status?: string
           unstaked_at?: string | null
           user_id?: string
+          wallet_auto_debit?: boolean
           wallet_debit_preserved?: boolean
         }
         Update: {
@@ -4666,6 +4668,7 @@ export type Database = {
           status?: string
           unstaked_at?: string | null
           user_id?: string
+          wallet_auto_debit?: boolean
           wallet_debit_preserved?: boolean
         }
         Relationships: [
@@ -5576,6 +5579,7 @@ export type Database = {
       bix_usdt_recipient_check: { Args: { p_code: string }; Returns: Json }
       bix_usdt_transfer_quota: { Args: { p_user: string }; Returns: Json }
       bix_username_available: { Args: { p_username: string }; Returns: boolean }
+      bix_verified_stake_funds: { Args: { p_user: string }; Returns: number }
       bix_vip_status: { Args: never; Returns: Json }
       bix_vip_tiers: {
         Args: never

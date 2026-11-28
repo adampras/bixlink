@@ -1,0 +1,41 @@
+-- Run with a privileged test connection. Every fixture and release rolls back.
+DO $$
+DECLARE owner_id uuid; leader_id uuid:=gen_random_uuid(); member_id uuid:=gen_random_uuid(); mixed_id uuid:=gen_random_uuid(); unverified_id uuid:=gen_random_uuid(); package_id text; stake_id uuid; mixed_stake uuid; led jsonb; before_total numeric; bonus_usdt numeric; bonus_bix numeric; denied boolean;
+BEGIN
+ BEGIN
+ SELECT user_id INTO owner_id FROM public.user_roles WHERE public.bix_is_owner1_user(user_id) LIMIT 1;
+ SELECT id INTO package_id FROM public.packages WHERE enabled AND NOT retired AND price_usd=100 LIMIT 1;
+ IF owner_id IS NULL OR package_id IS NULL THEN RAISE EXCEPTION 'Owner and 100 USD package fixtures required'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',owner_id::text,true);
+ UPDATE public.packages SET duration_apys=jsonb_set(COALESCE(duration_apys,'{}'::jsonb),'{30}','365'::jsonb) WHERE id=package_id;
+ INSERT INTO public.bix_leaders(user_id,status,virtual_usd,require_turnover,created_at,support_kind,owner_access) VALUES(leader_id,'approved',5000,true,now()-interval '1 day','loan','normal');
+ INSERT INTO public.referral_codes(user_id,code,referred_by) VALUES(member_id,'TEST-'||member_id::text,leader_id),(mixed_id,'TEST-'||mixed_id::text,leader_id),(unverified_id,'TEST-'||unverified_id::text,leader_id);
+ INSERT INTO public.wallet_transactions(user_id,type,amount_usd,net_usd,status,verified_at,tx_hash) VALUES(member_id,'deposit',100,100,'approved',now(),'0x'||repeat('1',64)),(mixed_id,'deposit',99.94,99.94,'approved',now(),'0x'||repeat('2',64)),(unverified_id,'deposit',100,100,'approved',NULL,NULL);
+ INSERT INTO public.vusdt_transfers(sender_id,recipient_id,sender_code,recipient_code,amount_usd) VALUES(owner_id,mixed_id,'TEST-OWNER','TEST-MIXED',1);
+ INSERT INTO public.wallet_transactions(user_id,type,amount_usd,net_usd,status) VALUES(leader_id,'reward',40,40,'approved');
+ PERFORM public.bix_active_bonus_auto_set(true);
+ PERFORM set_config('request.jwt.claim.sub',member_id::text,true);
+ IF public.bix_verified_stake_funds(member_id)<>100 THEN RAISE EXCEPTION 'FAIL: 100 verified USDT unavailable'; END IF;
+ before_total:=public.bix_wallet_balance_internal(member_id); stake_id:=public.request_bix_duration_stake(package_id,30);
+ IF NOT EXISTS(SELECT 1 FROM public.stakes WHERE id=stake_id AND NOT funded_vusdt AND wallet_auto_debit) THEN RAISE EXCEPTION 'FAIL: deposit staking marked virtual'; END IF;
+ IF before_total-public.bix_wallet_balance_internal(member_id)<>100 THEN RAISE EXCEPTION 'FAIL: real classification lost 100 USDT debit'; END IF;
+ IF public.bix_verified_stake_funds(member_id)<>0 THEN RAISE EXCEPTION 'FAIL: deposit backing reused'; END IF;
+ IF EXISTS(SELECT 1 FROM public.bix_pending_network_bonuses WHERE source_stake_id=stake_id) THEN RAISE EXCEPTION 'FAIL: real sponsor bonus held'; END IF;
+ SELECT sum(usdt_amount),sum(bix_amount) INTO bonus_usdt,bonus_bix FROM public.bix_usdt_network_bonuses WHERE source_stake_id=stake_id AND user_id=leader_id;
+ IF COALESCE(bonus_usdt,0)<=0 OR COALESCE(bonus_bix,0)<=0 THEN RAISE EXCEPTION 'FAIL: real direct bonus not credited'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',leader_id::text,true); led:=public.bix_balance_ledger(leader_id);
+ IF (led->>'withdrawable_usdt')::numeric<>round(bonus_usdt,4) OR (led->>'locked_usdt')::numeric<>5040 THEN RAISE EXCEPTION 'FAIL: bonus or 5000 capital/40 profit lock: %',led; END IF;
+ IF public.bix_locked_bonus_bix(leader_id)<>0 THEN RAISE EXCEPTION 'FAIL: real BIX bonus locked'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',mixed_id::text,true);
+ IF public.bix_verified_stake_funds(mixed_id)<>99.94 THEN RAISE EXCEPTION 'FAIL: mixed deposit capacity'; END IF;
+ mixed_stake:=public.request_bix_duration_stake(package_id,30);
+ IF NOT (SELECT funded_vusdt FROM public.stakes WHERE id=mixed_stake) OR NOT EXISTS(SELECT 1 FROM public.bix_pending_network_bonuses WHERE source_stake_id=mixed_stake) THEN RAISE EXCEPTION 'FAIL: 99.94 plus 1 virtual treated as 100 real'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',unverified_id::text,true);
+ IF public.bix_verified_stake_funds(unverified_id)<>0 THEN RAISE EXCEPTION 'FAIL: approved without evidence accepted'; END IF;
+ denied:=false; BEGIN UPDATE public.stakes SET wallet_auto_debit=false WHERE id=stake_id; EXCEPTION WHEN OTHERS THEN IF SQLERRM NOT LIKE '%immutable%' THEN RAISE; END IF; denied:=true; END;
+ IF NOT denied THEN RAISE EXCEPTION 'FAIL: wallet debit removed'; END IF;
+ RAISE NOTICE 'PASS: verified 100 USDT automatic stake, conserved debit, real USDT/BIX bonus unlocked, 5000 loan/40 profit locked, deposit reuse rejected, mixed 99.94+1 held, unverified deposit excluded, immutable debit';
+ RAISE EXCEPTION USING ERRCODE='ZX002',MESSAGE='Rollback temporary automatic staking fixtures';
+ EXCEPTION WHEN SQLSTATE 'ZX002' THEN NULL;
+ END;
+END $$;
