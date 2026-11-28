@@ -20,7 +20,7 @@ BEGIN
   denied:=false;
   BEGIN
    UPDATE public.stakes SET funded_vusdt=false,wallet_debit_preserved=true,
-    funding_reconciliation=jsonb_build_object('original_funded_vusdt',true,'reviewed_by',owner_id)
+    funding_reconciliation=jsonb_build_object('original_funded_vusdt',true,'reviewed_by',owner_id,'verified_deposit_id','271ab444-4f8c-4469-86bd-fc50bb0df6a0')
     WHERE id=stake_id;
   EXCEPTION WHEN OTHERS THEN
    IF SQLERRM NOT LIKE '%Owner 1 funding review required%' THEN RAISE; END IF;
@@ -29,7 +29,7 @@ BEGIN
   IF NOT denied THEN RAISE EXCEPTION 'FAIL: member changed funding source'; END IF;
   PERFORM set_config('request.jwt.claim.sub',owner_id::text,true);
   UPDATE public.stakes SET funded_vusdt=false,wallet_debit_preserved=true,
-   funding_reconciliation=jsonb_build_object('original_funded_vusdt',true,'reviewed_by',owner_id)
+   funding_reconciliation=jsonb_build_object('original_funded_vusdt',true,'reviewed_by',owner_id,'verified_deposit_id','271ab444-4f8c-4469-86bd-fc50bb0df6a0')
    WHERE id=stake_id AND funded_vusdt;
   IF public.bix_wallet_balance_internal(member_id) IS DISTINCT FROM before_balance OR
      public.bix_vusdt_component(member_id) IS DISTINCT FROM before_component THEN
@@ -39,6 +39,16 @@ BEGIN
   IF public.bix_active_bonus_real_source('b08bf5c3-9008-43ef-83d3-16378e09c536','2223526e-d5f8-4748-a854-cf2882c9b650') THEN
    RAISE EXCEPTION 'FAIL: 99.94 USDT plus virtual subsidy treated as fully real';
   END IF;
+  denied:=false;
+  BEGIN
+   UPDATE public.stakes SET funded_vusdt=false,wallet_debit_preserved=true,
+    funding_reconciliation=jsonb_build_object('original_funded_vusdt',true,'reviewed_by',owner_id,'verified_deposit_id','9d2d1baa-d78d-458f-889f-760b72cb1654')
+    WHERE id='2223526e-d5f8-4748-a854-cf2882c9b650';
+  EXCEPTION WHEN OTHERS THEN
+   IF SQLERRM NOT LIKE '%Verified real deposit backing required%' THEN RAISE; END IF;
+   denied:=true;
+  END;
+  IF NOT denied THEN RAISE EXCEPTION 'FAIL: 99.94 deposit converted into 100 real USDT'; END IF;
   PERFORM public.bix_leader_set_access('98aa8bbf-eea4-4e6b-bb95-b265b6bb3e73','active_bonus');
   led:=public.bix_balance_ledger('98aa8bbf-eea4-4e6b-bb95-b265b6bb3e73');
   IF (led->>'withdrawable_usdt')::numeric IS DISTINCT FROM before_withdrawable+expected_bonus THEN RAISE EXCEPTION 'FAIL: expected only the unreleased 5.06 USDT Nadi bonus: %',led; END IF;

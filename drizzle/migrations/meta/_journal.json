@@ -1618,6 +1618,13 @@
       "when": 1795845479124,
       "tag": "0230_respect_consumed_loan_capital_in_bonus_lock",
       "breakpoints": true
+    },
+    {
+      "idx": 231,
+      "version": "7",
+      "when": 1795845727538,
+      "tag": "0231_require_deposit_evidence_for_stake_reconciliation",
+      "breakpoints": true
     }
   ]
 }
