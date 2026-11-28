@@ -1604,6 +1604,20 @@
       "when": 1795843997829,
       "tag": "0228_verify_global_real_bonus_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 229,
+      "version": "7",
+      "when": 1795845370808,
+      "tag": "0229_preserve_verified_stake_wallet_debits",
+      "breakpoints": true
+    },
+    {
+      "idx": 230,
+      "version": "7",
+      "when": 1795845479124,
+      "tag": "0230_respect_consumed_loan_capital_in_bonus_lock",
+      "breakpoints": true
     }
   ]
 }

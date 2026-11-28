@@ -4614,6 +4614,7 @@ export type Database = {
           compound: boolean
           created_at: string
           funded_vusdt: boolean
+          funding_reconciliation: Json | null
           id: string
           lock_days: number
           package_id: string
@@ -4623,6 +4624,7 @@ export type Database = {
           status: string
           unstaked_at: string | null
           user_id: string
+          wallet_debit_preserved: boolean
         }
         Insert: {
           activated_at?: string | null
@@ -4633,6 +4635,7 @@ export type Database = {
           compound?: boolean
           created_at?: string
           funded_vusdt?: boolean
+          funding_reconciliation?: Json | null
           id?: string
           lock_days: number
           package_id: string
@@ -4642,6 +4645,7 @@ export type Database = {
           status?: string
           unstaked_at?: string | null
           user_id?: string
+          wallet_debit_preserved?: boolean
         }
         Update: {
           activated_at?: string | null
@@ -4652,6 +4656,7 @@ export type Database = {
           compound?: boolean
           created_at?: string
           funded_vusdt?: boolean
+          funding_reconciliation?: Json | null
           id?: string
           lock_days?: number
           package_id?: string
@@ -4661,6 +4666,7 @@ export type Database = {
           status?: string
           unstaked_at?: string | null
           user_id?: string
+          wallet_debit_preserved?: boolean
         }
         Relationships: [
           {
