@@ -29,6 +29,27 @@ export type Database = {
         }
         Relationships: []
       }
+      bix_active_bonus_control: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          enabled: boolean
+          singleton: boolean
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          enabled?: boolean
+          singleton?: boolean
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          enabled?: boolean
+          singleton?: boolean
+        }
+        Relationships: []
+      }
       bix_agency_applications: {
         Row: {
           city: string | null
@@ -4831,6 +4852,9 @@ export type Database = {
       }
       apply_bix_leader: { Args: never; Returns: undefined }
       assign_bix_referrer: { Args: { p_code: string }; Returns: boolean }
+      bix_active_bonus_access: { Args: { p_user: string }; Returns: boolean }
+      bix_active_bonus_auto_admin: { Args: never; Returns: Json }
+      bix_active_bonus_auto_set: { Args: { p_enabled: boolean }; Returns: Json }
       bix_active_bonus_real_source: {
         Args: { p_member: string; p_stake: string }
         Returns: boolean

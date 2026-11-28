@@ -35,3 +35,4 @@
 - BIXGO fast-track uses bixgo_driver_apply with real verified email and a safety declaration; Owner 1 can disable it and suspended accounts cannot reapply. Self-declared activation is not verified identity or document inspection.
 - BIXGO trip chat uses participant-scoped bixgo_trip_messages and row-locked send RPCs; text stays inside the trip, BIX CALL remains unchanged for voice/video, and order audio has a separate gesture-unlocked context.
 - App photos: profiles.bixtok/bixcall/bixgo_avatar_path set only via bix_profile_set_app_avatar; BIXGO new-order background alerts go via notifyBixPush type 'order' to drivers from server-only bixgo_order_alert_targets (same radius rule as dispatch).
+- Active-bonus automation uses one Owner-1-only singleton and shared DB eligibility across pending release, future credits and both asset locks; it never changes stake funding, assistance profit or external WD approval.

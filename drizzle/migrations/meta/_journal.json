@@ -1590,6 +1590,20 @@
       "when": 1795750278811,
       "tag": "0226_leader_active_bonus_only",
       "breakpoints": true
+    },
+    {
+      "idx": 227,
+      "version": "7",
+      "when": 1795843750726,
+      "tag": "0227_global_real_active_bonus_switch",
+      "breakpoints": true
+    },
+    {
+      "idx": 228,
+      "version": "7",
+      "when": 1795843997829,
+      "tag": "0228_verify_global_real_bonus_guards",
+      "breakpoints": true
     }
   ]
 }

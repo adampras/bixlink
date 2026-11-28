@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useMember } from '@/lib/useMember';
 import { getAdminLeaders, setLeaderAccess } from '@/lib/bixlink.functions';
 import { activeBonusAccess } from '@/lib/leader-bonus-control';
+import { getActiveBonusAuto, setActiveBonusAuto } from '@/lib/active-bonus-auto.functions';
 
 export const Route = createFileRoute('/active-bonus-control')({
   head: () => ({ meta: [
@@ -44,13 +45,32 @@ function Page() {
 function Controls() {
   const load = useServerFn(getAdminLeaders);
   const save = useServerFn(setLeaderAccess);
+  const loadAuto = useServerFn(getActiveBonusAuto);
+  const saveAuto = useServerFn(setActiveBonusAuto);
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ['owner-leaders'], queryFn: () => load() });
+  const auto = useQuery({ queryKey: ['owner-active-bonus-auto'], queryFn: () => loadAuto() });
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
   const [failure, setFailure] = useState('');
   const rows = (q.data?.leaders ?? []).filter(l => `${l.username} ${l.full_name} ${l.user_id}`.toLowerCase().includes(search.replace(/^@/, '').trim().toLowerCase()));
+  const toggleAuto = async (enabled: boolean) => {
+    if (!window.confirm(enabled ? 'Buka otomatis bonus aktif staking USDT riil untuk semua leader dan loan yang disetujui? Akun Closed, modal/profit bantuan dan bonus campuran tetap terkunci. Pembayaran WD tetap ditinjau.' : 'Matikan pembukaan bonus riil otomatis? Saklar per akun tetap berlaku.')) return;
+    setBusy('auto'); setNotice(''); setFailure('');
+    try {
+      const saved = await saveAuto({ data: { enabled } });
+      const readback = await auto.refetch();
+      if (readback.error || readback.data?.enabled !== enabled) throw new Error('Saklar belum dapat dikonfirmasi. Muat ulang sebelum mencoba kembali.');
+      await Promise.all([
+        q.refetch(),
+        qc.invalidateQueries({ queryKey: ['my-balance-ledger'] }),
+        qc.invalidateQueries({ queryKey: ['my-bixlink'] }),
+      ]);
+      setNotice(enabled ? `Bonus riil otomatis dibuka; ${saved.released ?? 0} bonus tertunda dilepas. Pembayaran WD tetap ditinjau.` : 'Bonus otomatis dimatikan; saklar per akun tetap berlaku.');
+    } catch (e) { setFailure(e instanceof Error ? e.message : 'Gagal menyimpan saklar otomatis.'); }
+    finally { setBusy(null); }
+  };
   const toggle = async (id: string, name: string, enabled: boolean) => {
     if (!window.confirm(enabled ? `Buka bonus aktif ${name} dari staking riil saja? Modal, profit bantuan dan bonus dari staking campuran vUSDT tetap mengikuti kunci yang berlaku.` : `Kembalikan bonus ${name} ke aturan target?`)) return;
     setBusy(id); setNotice(''); setFailure('');
@@ -69,6 +89,12 @@ function Controls() {
     finally { setBusy(null); }
   };
   return <>
+    <section className="border-y border-border py-4" aria-labelledby="auto-bonus-title">
+      <div className="flex items-center justify-between gap-4"><h2 id="auto-bonus-title" className="font-bold">Approve WD Bonus Aktif</h2><Switch aria-label="Approve WD Bonus Aktif semua leader" checked={auto.data?.enabled ?? false} disabled={busy !== null || auto.isPending || Boolean(auto.error)} onCheckedChange={enabled => void toggleAuto(enabled)}/></div>
+      <p role="status" className="mt-2 text-sm text-primary">{auto.isPending ? 'Memuat saklar…' : auto.data?.enabled ? 'ON · Bonus staking riil otomatis terbuka' : 'OFF · Mengikuti saklar per akun'}</p>
+      <p className="mt-2 text-sm text-muted-foreground">Semua leader/loan disetujui · hanya bonus staking USDT riil. Modal/profit bantuan, bonus campuran dan akun Closed tetap mengikuti kunci lama. Pembayaran WD tetap ditinjau.</p>
+      {auto.error && <p role="alert" className="mt-2 text-sm text-destructive">Saklar otomatis belum dapat dimuat.</p>}
+    </section>
     <div className="flex items-start gap-3 border-y border-border py-4 text-sm text-muted-foreground"><LockKeyhole className="shrink-0 text-primary" size={20}/><p>Bonus aktif bersumber staking riil dapat dibuka. Modal dan profit bantuan tetap mengikuti target. Staking campuran vUSDT tidak diubah menjadi staking riil.</p></div>
     <div className="flex gap-2"><Input aria-label="Cari leader atau loan" placeholder="Cari username / nama…" value={search} onChange={e => setSearch(e.target.value)}/><Button variant="outline" size="icon" title="Muat ulang" disabled={q.isFetching || busy !== null} onClick={() => void q.refetch()}><RefreshCw size={16}/></Button></div>
     {notice && <p role="status" className="text-sm text-chart-2">{notice}</p>}
@@ -82,7 +108,7 @@ function Controls() {
       return <article key={l.user_id} className="rounded-lg border border-border bg-card p-4">
         <div className="min-w-0"><h2 className="flex items-center gap-2 break-all font-bold"><Crown size={16} className="shrink-0 text-primary"/>{name}</h2><p className="mt-1 text-xs text-muted-foreground">{l.support_kind === 'loan' || l.loan_package_id ? 'Loan' : 'Leader bersponsor'} · {l.status}</p></div>
         <div className="mt-4 flex items-center gap-3"><Switch aria-label={`Buka bonus aktif ${name}`} checked={access === 'active_bonus'} disabled={busy !== null || l.status !== 'approved' || special} onCheckedChange={enabled => void toggle(l.user_id, name, enabled)}/><span className="text-sm">Buka bonus aktif</span></div>
-        <p className="mt-3 text-sm text-muted-foreground">{access === 'active_bonus' ? 'Bonus aktif riil: terbuka' : special ? `Akses khusus: ${access}` : 'Bonus aktif: aturan target'}</p>
+        <p className="mt-3 text-sm text-muted-foreground">{special ? `Akses khusus: ${access}` : l.status === 'approved' && auto.data?.enabled ? 'Bonus aktif riil: otomatis terbuka' : access === 'active_bonus' ? 'Bonus aktif riil: terbuka' : 'Bonus aktif: aturan target'}</p>
         {special && <Button asChild variant="link" size="sm"><Link to="/leader-control">Kelola akses khusus</Link></Button>}
       </article>;
     })}</div>
