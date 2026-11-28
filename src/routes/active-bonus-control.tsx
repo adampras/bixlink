@@ -80,7 +80,8 @@ function Controls() {
       const special = access === 'open' || access === 'closed';
       const name = l.username ? `@${l.username}` : l.full_name || l.user_id;
       return <article key={l.user_id} className="rounded-lg border border-border bg-card p-4">
-        <div className="flex items-start justify-between gap-4"><div className="min-w-0"><h2 className="flex items-center gap-2 break-all font-bold"><Crown size={16} className="shrink-0 text-primary"/>{name}</h2><p className="mt-1 text-xs text-muted-foreground">{l.support_kind === 'loan' || l.loan_package_id ? 'Loan' : 'Leader bersponsor'} · {l.status}</p></div><Switch aria-label={`Buka bonus aktif ${name}`} checked={access === 'active_bonus'} disabled={busy !== null || l.status !== 'approved' || special} onCheckedChange={enabled => void toggle(l.user_id, name, enabled)}/></div>
+        <div className="min-w-0"><h2 className="flex items-center gap-2 break-all font-bold"><Crown size={16} className="shrink-0 text-primary"/>{name}</h2><p className="mt-1 text-xs text-muted-foreground">{l.support_kind === 'loan' || l.loan_package_id ? 'Loan' : 'Leader bersponsor'} · {l.status}</p></div>
+        <div className="mt-4 flex items-center gap-3"><Switch aria-label={`Buka bonus aktif ${name}`} checked={access === 'active_bonus'} disabled={busy !== null || l.status !== 'approved' || special} onCheckedChange={enabled => void toggle(l.user_id, name, enabled)}/><span className="text-sm">Buka bonus aktif</span></div>
         <p className="mt-3 text-sm text-muted-foreground">{access === 'active_bonus' ? 'Bonus aktif riil: terbuka' : special ? `Akses khusus: ${access}` : 'Bonus aktif: aturan target'}</p>
         {special && <Button asChild variant="link" size="sm"><Link to="/leader-control">Kelola akses khusus</Link></Button>}
       </article>;
